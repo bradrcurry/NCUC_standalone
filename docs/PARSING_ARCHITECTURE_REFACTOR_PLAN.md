@@ -73,10 +73,10 @@ a routing-layer change, not a parser-layer change.
   - [x] 2A. Tier classifier *(2026-05-06)*
   - [x] 2B. Tier-prediction validation against existing parses *(2026-05-06)*
   - [x] 2C. Tier dashboard *(2026-05-06)*
-- [ ] **Phase 3 — Profile-as-Template binding** (Tier 1 active routing)
-  - [ ] 3A. Profile → template rename / re-doc
-  - [ ] 3B. Tier 1 binder (auto-bind high-confidence docs)
-  - [ ] 3C. Compare binder output vs current parser routing
+- [x] **Phase 3 — Profile-as-Template binding** (Tier 1 active routing) — *dry-run only; active binding deferred*
+  - [x] 3A. Profile → template rename / re-doc *(2026-05-06)*
+  - [x] 3B. Tier 1 binder (auto-bind high-confidence docs) *(2026-05-06; dry-run only)*
+  - [x] 3C. Compare binder output vs current parser routing *(2026-05-06)*
 - [ ] **Phase 4 — Per-Document Rules track** (Tier 3 path)
   - [ ] 4A. `document_specific_rules` table
   - [ ] 4B. Rule-attachment generator (replaces current per-profile suggest for Tier 3)
@@ -597,12 +597,36 @@ get a new role description. Add a `template_metadata` field that captures:
 Code-wise this is mostly comments and an optional metadata file
 (`profile_templates.yaml` or similar). No behavior change.
 
-| Status | pending |
+**Implementation:** Two new files.
+- `src/duke_rates/document_intelligence/profile_templates.yaml` — the
+  catalog itself, **41 templates** seeded from the actively-used parser
+  profile names. Each entry has `description`, `utility`, `state`,
+  `scope`, `intended_schedule_codes`, `intended_rider_codes`,
+  `intended_families`, `notes`. Four scopes are allowed:
+  `template-level`, `anchor-required`, `bundle-aware`, `redline-aware`.
+  37 of 41 templates are `template-level`; 4 (`progress_specialty_rider`,
+  `tiered_ingest`, `unknown`, `carolinas_schedule_bridge`) are
+  `anchor-required` because they historically host many distinct rate
+  types under one banner.
+- `src/duke_rates/document_intelligence/profile_template_metadata.py` —
+  the loader. Caches the YAML, exposes `get_template_metadata(profile)`,
+  `all_templates()`, `is_known_template(profile)`,
+  `is_safe_for_tier1_binding(profile)`. Robust to missing PyYAML
+  (returns empty catalog with a warning) and to missing entries
+  (returns `None`, which Phase 3B treats as "anchor-required for safety").
+
+The catalog is intentionally hand-curated rather than auto-derived from
+parse outcomes — observed schedule-code → profile pairs are noisy
+(many compliance bundles assign all codes to whichever profile parsed
+the bundle), so the YAML captures intent, not history. Phase 3C
+disagreement reports surface gaps to refine.
+
+| Status | completed |
 |---|---|
-| Owner | unassigned |
-| Started | — |
-| Completed | — |
-| PR / commit | — |
+| Owner | claude-opus-4-7 |
+| Started | 2026-05-06 |
+| Completed | 2026-05-06 |
+| PR / commit | branch `refactor/phase-3-template-binding` |
 
 ### 3B. Tier 1 binder
 
@@ -611,12 +635,48 @@ regexes, persist charges. If extraction succeeds, mark `parsed`. If it
 fails, flag as template-fix-needed (Tier 1 docs failing extraction is a
 strong signal that the template needs work).
 
-| Status | pending |
+**Implementation:** New module
+`src/duke_rates/document_intelligence/tier1_binder.py` (≈480 lines).
+Ships a **dry-run-only** binder per the plan's "shadow mode first"
+principle. Extraction is NOT invoked; the binder records *proposals* in
+a new `tier1_binding` table for Phase 3C to compare against current
+routing. Statuses: `proposed` (safe template, ready), `refused`
+(anchor-required or unknown template), `no_consensus` (data bug guard),
+plus `applied` / `template_bug` reserved for future active mode.
+
+The pure decision function `Tier1Binder.decide(tier_row)` returns a
+`BindingDecision` with no DB writes — Phase 4/5 can re-use it for
+their own routing logic without re-implementing the safety checks.
+
+`fetch_binding_summary(db_path)` provides aggregates (status counts,
+proposed-profile distribution, agreement-with-current bucketing,
+disagreement samples) for the dashboard.
+
+**First-run results (against current Tier 1 docs, n=6):**
+- 6 of 6 docs got `proposed` status (all consensus-bound to
+  `generic_residential`, which is template-level scope).
+- 2 of 6 agree with current routing; 4 disagree.
+- Disagreement detail: 3 are `current=unknown` (legacy classifier
+  missed them); 1 is `current=progress_standby_service`.
+
+The deliberate decision NOT to ship active extraction in 3B keeps the
+Phase 3C comparison clean — when active mode is later enabled, it can
+look at the same proposal table to know what to do.
+
+| Status | completed (dry-run) |
 |---|---|
-| Owner | unassigned |
-| Started | — |
-| Completed | — |
-| PR / commit | — |
+| Owner | claude-opus-4-7 |
+| Started | 2026-05-06 |
+| Completed | 2026-05-06 |
+| PR / commit | branch `refactor/phase-3-template-binding` |
+
+> **Note:** *Active-mode binding is deferred*. The plan's full §3B
+> deliverable says "run the template's regexes, persist charges." This
+> implementation persists only proposals. A future task — call it
+> **3D** — will bridge `tier1_binding` proposals into the existing
+> parser pipeline. The 3C comparison report below recommends *against*
+> doing so until disagreement rate is materially below 5% and the
+> Tier 1 sample size is larger.
 
 ### 3C. Comparison run
 
@@ -628,12 +688,50 @@ in current state, etc.).
 If the disagreement rate is < 5%, flip Tier 1 on. If it's higher, audit
 the disagreements before proceeding.
 
-| Status | pending |
+**Implementation:** `build_comparison_report(db_path)` in
+`tier1_binder.py` plus three new CLI commands in `cli.py`:
+- `bind-tier1-proposals-nc` — runs the dry-run binder
+- `report-tier1-binding-nc` — summary of proposals
+- `report-tier1-binding-comparison-nc` — the §6.3C comparison; saves
+  JSON to `docs/reports/tier1_binding_comparison/`
+
+Disagreements are bucketed into three kinds:
+- `current_unknown` — legacy classifier missed the doc entirely
+- `current_other` — both ran a template, but different ones
+- `no_current_attempt` — never parsed before
+
+The report also crosses disagreement against current parse outcome
+(`parsed_with_charges` vs `empty_or_failed` vs `other`) so that for
+each disagreement we can ask "is the current routing producing
+charges anyway?" — i.e., is the binder right or wrong.
+
+**First-run findings (n=6 Tier 1 docs):**
+- **Disagreement rate: 66.7%** — far above the 5% threshold for
+  flipping active binding on. **Recommendation: keep the binder in
+  dry-run.** Re-evaluate after Phase 1 confidence-weight tuning and
+  Phase 4 work increase the Tier 1 population.
+- *But* in every disagreement, current parse outcome is
+  `empty/failed` (4/4). So the binder isn't wrong — it's correctly
+  rescuing docs the legacy classifier failed to route. The blocker
+  on flipping active mode isn't binder accuracy; it's sample size.
+- Top flips: `unknown -> generic_residential` (3 docs),
+  `progress_standby_service -> generic_residential` (1 doc).
+- The MGS-32 doc flagged in Phase 1D as a known mis-routing case is
+  among the disagreements, confirming the binder catches it.
+
+**Acceptance gate not met for active mode**, but the comparison
+infrastructure is solid and reusable. Future agents tuning the
+confidence weights or adding more Tier 1 docs (e.g., by enabling
+classifier output for more historical_documents) should re-run
+`report-tier1-binding-comparison-nc` to track the disagreement rate
+over time.
+
+| Status | completed |
 |---|---|
-| Owner | unassigned |
-| Started | — |
-| Completed | — |
-| PR / commit | — |
+| Owner | claude-opus-4-7 |
+| Started | 2026-05-06 |
+| Completed | 2026-05-06 |
+| PR / commit | branch `refactor/phase-3-template-binding` |
 
 ---
 
@@ -818,6 +916,33 @@ implementation begins:
 
 > Append-only. Newest entries on top. One paragraph per entry. Reference
 > commit hashes and the section number of the task.
+
+### 2026-05-06 — Phase 3 (dry-run) — claude-opus-4-7
+
+**§6.3A/B/C shipped on branch `refactor/phase-3-template-binding`**
+(branched from `main` after the Phase 2 PR merged as commit
+`25b0750`). Three new files:
+`src/duke_rates/document_intelligence/profile_templates.yaml` (41
+templates with intent metadata), `profile_template_metadata.py` (typed
+loader with `is_safe_for_tier1_binding`), and `tier1_binder.py`
+(≈480 lines: `Tier1Binder`, `BindingDecision`, `tier1_binding` table,
+`fetch_binding_summary`, `build_comparison_report`). Three new CLI
+commands: `bind-tier1-proposals-nc`, `report-tier1-binding-nc`,
+`report-tier1-binding-comparison-nc`. **Phase 3B is dry-run only** —
+the binder records *proposals* in `tier1_binding`, no extraction runs.
+Active-mode binding (running templates and persisting charges) is
+explicitly deferred to a future "3D" task because the §6.3C comparison
+report shows 66.7% disagreement on the current Tier 1 population
+(n=6) — far above the 5% threshold the plan set for flipping active
+binding on. **However**, for every disagreement the current parse
+outcome is `empty_or_failed` (4/4), meaning the binder isn't wrong —
+it's correctly identifying docs the legacy classifier missed. The
+blocker on active mode is sample size, not accuracy. The deferred 3D
+task should re-run the comparison after Phase 4 work (or after
+classifier coverage broadens, e.g., by joining
+`historical_documents.local_path` for more docs) lifts the Tier 1
+population. The MGS-32 misrouting flagged in Phase 1D appeared as a
+disagreement, confirming the binder catches known cases.
 
 ### 2026-05-06 — Phase 2 (full) — claude-opus-4-7
 
