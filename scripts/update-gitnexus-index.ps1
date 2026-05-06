@@ -134,7 +134,8 @@ $Mirrors = @(
             "src/duke_rates/document_intelligence/parse_improvement_loop.py",
             "src/duke_rates/document_intelligence/regex_shadow_test.py",
             "src/duke_rates/document_intelligence/regex_validation.py",
-            "src/duke_rates/document_intelligence/regex_suggestions.py"
+            "src/duke_rates/document_intelligence/regex_suggestions.py",
+            "src/duke_rates/cli_commands/parse_refactor.py"
         )
     },
     @{
