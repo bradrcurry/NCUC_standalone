@@ -146,14 +146,54 @@ Your task is to diagnose WHY a deterministic regex parser failed to extract char
 ## OCR / text quality:
 {text_quality}
 
+## Failure type definitions (pick the SINGLE best fit):
+- **regex_gap**           — the document text is clean and the rate values are
+                            clearly present, but no current parser regex
+                            matches the way they're written. Fixable by adding
+                            a new regex pattern.
+- **normalization_gap**   — rate values are present but in a non-canonical form
+                            the parser doesn't normalize: e.g. "10.5¢" vs
+                            "$0.105", thousands-separator commas, mixed units
+                            within the same line. Fixable by adding a textual
+                            normalization rule BEFORE regex matching.
+- **ocr_noise**           — the rate values exist in the source PDF but OCR
+                            mangled them: ligatures (fi → "ﬁ"), zero/letter
+                            confusion (0 vs O, 1 vs l), trailing-space
+                            artifacts, broken-up tokens. Distinct from
+                            normalization_gap because the underlying issue is
+                            the OCR pass, not the parser.
+- **table_layout**        — rates ARE in the document but inside a table whose
+                            structure the parser can't traverse (multi-row
+                            headers, merged cells, multi-column splits).
+- **missing_effective_date** — parser could not determine which date version
+                            of the tariff this is.
+- **wrong_profile**       — the parser used the wrong rule set for this doc;
+                            another profile would have extracted these rates.
+- **wrong_family**        — the tariff family classification is wrong (e.g.
+                            this is RES-28 but was filed under SGS).
+- **bundled_document**    — the file contains multiple tariffs in one PDF and
+                            the parser only saw one section.
+- **redline_or_proposed** — this is a markup/redline copy or a proposed (not
+                            approved) tariff — should not have been parsed.
+- **no_rate_table**       — there genuinely are no charges in this document
+                            (cover sheet, certificate of service, etc.).
+- **partial_span**        — parser extracted a partial span but missed lines.
+- **unknown**             — the evidence is insufficient to choose any of the
+                            above with confidence.
+
 ## Instructions:
 1. Identify the SINGLE most likely root cause for the parse failure.
-2. Choose failure_type ONLY from this list: {allowed_failure_types}
+2. Choose failure_type ONLY from the definitions above.
 3. Choose recommended_action ONLY from this list: {allowed_actions}
 4. Provide 1-3 pieces of evidence — quote source text where possible.
-5. Return "unknown" if the evidence is insufficient.
-6. Do NOT invent labels or actions outside the allowed lists.
-7. Confidence must be 0.0-1.0. Use 0.0 when you have no signal.
+5. **When you see OCR artifacts (ligatures, character substitutions, broken
+   spacing) in the document text, prefer `ocr_noise` over `regex_gap`.**
+6. **When rates are clearly present but in a non-canonical form (cents
+   notation, unusual unit strings), prefer `normalization_gap` over
+   `regex_gap`.**
+7. Return "unknown" if the evidence is insufficient.
+8. Do NOT invent labels or actions outside the allowed lists.
+9. Confidence must be 0.0-1.0. Use 0.0 when you have no signal.
 
 Respond with a single JSON object matching the required schema. No other text."""
 

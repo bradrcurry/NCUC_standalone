@@ -60,10 +60,10 @@ a routing-layer change, not a parser-layer change.
 > leverage and should be done first regardless of how aggressively we pursue
 > Layers 2 & 3.
 
-- [ ] **Phase 0 — Quick wins from prior session** (carryover, not refactor)
-  - [ ] 0A. Deadline-cutoff fix in overnight wrapper
-  - [ ] 0B. Anti-greedy suggest prompt with profile-specific anchors
-  - [ ] 0C. Investigate why normalization suggestions are always 0
+- [x] **Phase 0 — Quick wins from prior session** (carryover, not refactor)
+  - [x] 0A. Deadline-cutoff fix in overnight wrapper *(2026-05-06)*
+  - [x] 0B. Anti-greedy suggest prompt with profile-specific anchors *(2026-05-06)*
+  - [x] 0C. Investigate why normalization suggestions are always 0 *(2026-05-06)*
 - [ ] **Phase 1 — Document Identity Layer** (foundation, zero behavior change)
   - [ ] 1A. `document_identity` table + DDL
   - [ ] 1B. Aggregator that populates from existing tables
@@ -118,12 +118,19 @@ and `validate`/`shadow_test` don't run. Result: late iterations leave
 
 **GitNexus before editing:** run `gitnexus_impact({target: "ParseImprovementLoop.run", direction: "upstream"})`.
 
-| Status | pending |
+**Implemented as Option B** (per-stage minimum runtime budget). Added
+`STAGE_MIN_BUDGET_SECONDS` mapping in `parse_improvement_loop.py` and a
+budget guard before each stage. When remaining wall-clock is below the
+stage's minimum, the stage is skipped with stat
+`skipped_insufficient_budget=1` and the loop continues — so deterministic
+stages still run when the LLM-bound ones can't fit.
+
+| Status | completed |
 |---|---|
-| Owner | unassigned |
-| Started | — |
-| Completed | — |
-| PR / commit | — |
+| Owner | claude-opus-4-7 |
+| Started | 2026-05-06 |
+| Completed | 2026-05-06 |
+| PR / commit | branch `refactor/parsing-architecture` |
 
 ### 0B. Anti-greedy suggest prompt
 
@@ -155,12 +162,36 @@ the failure mode at suggest time rather than at validate time.
 
 **GitNexus before editing:** run `gitnexus_impact({target: "RegexSuggestionGenerator.generate_suggestion", direction: "upstream"})`.
 
-| Status | pending |
+**Implementation:**
+- `regex_suggestions.py`: added `fetch_document_anchors()`,
+  `render_anchors_for_prompt()`, `regex_contains_anchor()` module-level
+  helpers. Prompt template gained a `## DOCUMENT-SPECIFIC ANCHORS (REQUIRED)`
+  section with concrete worked example. `generate_suggestion()` now passes
+  the anchor block into the prompt.
+- `regex_validation.py`: added Phase 1b in `validate_suggestion()` —
+  `_check_regex_has_anchor()` looks up `source_pdf` via
+  `diagnosis_id → parse_attempt_id`, fetches the anchors, and rejects
+  before the corpus sweep if the regex contains zero anchors. New status
+  `rejected_no_anchor` added to `ALLOWED_VALIDATION_STATUSES`.
+- Smoke-tested on 50 fingerprinted docs: anchor extraction returned
+  high-specificity codes (e.g. RES-17, RES-19) and distinctive titles
+  (e.g. "RIDER NMB", "NET METERING BRIDGE") cleanly. Suggestion 153 (a
+  prior `rejected_false_positive`) now gets caught at validation time
+  with a clear reason: "regex contains no document-specific anchor
+  (available: titles=['RIDER NMB', 'NET METERING BRIDGE'])".
+
+**Acceptance test follow-up:** the published acceptance criterion was that
+auto-rejection rate drops from ~72% to under 40%. We won't have that
+number until the next overnight run produces fresh suggestions under the
+new prompt. The early-exit `rejected_no_anchor` path will surface the new
+distribution.
+
+| Status | completed |
 |---|---|
-| Owner | unassigned |
-| Started | — |
-| Completed | — |
-| PR / commit | — |
+| Owner | claude-opus-4-7 |
+| Started | 2026-05-06 |
+| Completed | 2026-05-06 |
+| PR / commit | branch `refactor/parsing-architecture` |
 
 ### 0C. Investigate empty normalization suggestions
 
@@ -183,12 +214,45 @@ filtered out somewhere.
 - Either a documented decision to retire the type, OR ≥ 5% of new suggestions
   emit `suggestion_type = 'normalization_rule'`.
 
-| Status | pending |
+**Investigation findings:** The empty-normalization issue is **upstream of
+the suggest prompt.** Database audit:
+
+- Of 153 existing suggestions: 140 `regex_candidate`, 13 `parser_profile_hint`,
+  0 `normalization_rule`.
+- Of all diagnoses with failure_type in `('regex_gap', 'normalization_gap',
+  'ocr_noise')` (the trio that feeds the suggest stage): 194 `regex_gap`,
+  0 `normalization_gap`, 0 `ocr_noise`.
+
+The suggest LLM correctly never emits normalization rules because every
+diagnosis it sees is labeled `regex_gap`. The issue is the **diagnose
+prompt** — it lists failure types as a flat enum without definitions,
+giving the model no basis to choose `normalization_gap` or `ocr_noise`
+over the more obvious-sounding `regex_gap`.
+
+**Fix shipped:** Rewrote `_DIAGNOSIS_SYSTEM_PROMPT` in
+`parse_diagnosis.py` to include explicit definitions for every failure
+type, with rules for the OCR/normalization disambiguation:
+
+> *When you see OCR artifacts (ligatures, character substitutions, broken
+> spacing), prefer `ocr_noise` over `regex_gap`.*
+> *When rates are clearly present but in non-canonical form (cents
+> notation, unusual unit strings), prefer `normalization_gap` over
+> `regex_gap`.*
+
+**Effect:** The next overnight diagnose pass should produce some
+`normalization_gap` and `ocr_noise` rows, which the suggest stage can
+then act on. We won't have the 5%-of-suggestions metric until a fresh
+diagnose+suggest cycle runs against the rediagnose-unknown pool.
+
+**Decision:** keep the `normalization_rule` suggestion_type. Did NOT
+retire it.
+
+| Status | completed |
 |---|---|
-| Owner | unassigned |
-| Started | — |
-| Completed | — |
-| PR / commit | — |
+| Owner | claude-opus-4-7 |
+| Started | 2026-05-06 |
+| Completed | 2026-05-06 |
+| PR / commit | branch `refactor/parsing-architecture` |
 
 ---
 

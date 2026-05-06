@@ -41,6 +41,23 @@ VALID_TASK_KINDS = frozenset({
     "shadow_test", "profile_consensus", "extract",
 })
 
+# Per-stage minimum runtime budget in seconds. When the wall-clock budget
+# remaining is below a stage's minimum, the stage is skipped (with a stat
+# entry "skipped_insufficient_budget") so the loop doesn't burn the whole
+# remaining budget on one expensive stage and leave deterministic ones
+# unable to run. Tuned for typical Ollama call latency (20–60s per call).
+STAGE_MIN_BUDGET_SECONDS: dict[str, int] = {
+    # LLM-bound stages need enough time for a typical batch (limit × ~30s).
+    "diagnose":          90,   # one diagnose call is ~30s; allow at least 3
+    "suggest":           90,
+    "extract":           90,
+    # Deterministic stages are fast.
+    "validate":          15,
+    "revalidate":        15,
+    "shadow_test":       30,   # corpus sweep can take seconds per suggestion
+    "profile_consensus": 15,
+}
+
 # ---------------------------------------------------------------------------
 # Report schema
 # ---------------------------------------------------------------------------
@@ -233,6 +250,26 @@ class ParseImprovementLoop:
             if consecutive_failures >= max_consecutive_failures:
                 report.stop_reason = "max_consecutive_failures"
                 break
+
+            # Per-stage budget guard (Phase 0A). When the remaining wall-clock
+            # budget is below this stage's minimum, skip the stage and let
+            # deterministic stages run instead of burning the tail on one
+            # expensive LLM batch.
+            stage_min = STAGE_MIN_BUDGET_SECONDS.get(task, 0)
+            if stage_min > 0 and wall_deadline != float("inf"):
+                remaining_seconds = wall_deadline - time.monotonic()
+                if remaining_seconds < stage_min:
+                    report.task_stats[task] = {
+                        "ok": 0, "skip": 0, "fail": 0,
+                        "skipped_insufficient_budget": 1,
+                        "remaining_seconds": int(remaining_seconds),
+                        "stage_min_seconds": stage_min,
+                    }
+                    logger.info(
+                        "Skipping task %s: %.0fs remaining, %ds minimum required",
+                        task, remaining_seconds, stage_min,
+                    )
+                    continue
 
             remaining = max_documents - total_processed if max_documents > 0 else limit
             task_limit = min(remaining, limit) if max_documents > 0 else limit

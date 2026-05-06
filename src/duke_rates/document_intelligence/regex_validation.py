@@ -34,6 +34,7 @@ ALLOWED_VALIDATION_STATUSES: tuple[str, ...] = (
     "accepted_synthetic",       # passed LLM test cases at threshold; no real-doc evidence
     "rejected_false_positive",
     "rejected_no_gain",
+    "rejected_no_anchor",       # Phase 0B: regex lacks doc-specific anchor → too broad
     "rejected_invalid_regex",
     "needs_human_review",
 )
@@ -218,6 +219,22 @@ class RegexValidationHarness:
             self._persist_result(result, suggestion_id, suggestion_row)
             self._update_suggestion_status(suggestion_id, result.status)
             return result
+
+        # Phase 1b (Phase 0B): anchor specificity check.
+        # A regex without any document-specific anchor (schedule code, rider
+        # code, or distinctive title fragment) is by construction broad and
+        # very likely to false-positive on unrelated documents in the corpus.
+        # Reject early to save the corpus-sweep cost.
+        if candidate_regex:
+            anchor_ok, anchor_note = self._check_regex_has_anchor(
+                candidate_regex, suggestion_row
+            )
+            if not anchor_ok:
+                result.status = "rejected_no_anchor"
+                result.notes += f" | Rejected: {anchor_note}"
+                self._persist_result(result, suggestion_id, suggestion_row)
+                self._update_suggestion_status(suggestion_id, result.status)
+                return result
 
         # Phase 2: Test against same-profile successful documents (regression)
         success_docs = self._get_docs_by_profile(target_profile, status="parsed", limit=5)
@@ -501,6 +518,66 @@ class RegexValidationHarness:
                         text = text.replace(parts[0].strip(), parts[1].strip())
                     break
         return text
+
+    def _check_regex_has_anchor(
+        self, candidate_regex: str, suggestion_row: dict[str, Any]
+    ) -> tuple[bool, str]:
+        """Phase 0B anchor check.
+
+        Look up the document's anchor bundle (schedule codes, rider codes,
+        titles) and verify the regex contains at least one. Returns
+        ``(True, "")`` if it does or if no anchors are available (we can't
+        enforce what we don't have); ``(False, reason)`` if anchors exist
+        but the regex doesn't reference any.
+        """
+        # Lazy import so regex_validation has no hard dep on regex_suggestions.
+        try:
+            from duke_rates.document_intelligence.regex_suggestions import (
+                fetch_document_anchors,
+                regex_contains_anchor,
+            )
+        except ImportError:
+            return True, ""
+
+        # Look up source_pdf via diagnosis -> parse_attempt
+        diagnosis_id = suggestion_row.get("diagnosis_id")
+        if not diagnosis_id:
+            return True, ""
+        try:
+            conn = sqlite3.connect(str(self._db_path))
+            row = conn.execute(
+                """
+                SELECT pal.source_pdf
+                FROM llm_parse_diagnostics ld
+                JOIN parse_attempt_logs pal ON pal.id = ld.parse_attempt_id
+                WHERE ld.id = ?
+                LIMIT 1
+                """,
+                (diagnosis_id,),
+            ).fetchone()
+            conn.close()
+        except Exception:
+            return True, ""
+        if not row or not row[0]:
+            return True, ""
+
+        anchors = fetch_document_anchors(self._db_path, row[0])
+        if not any(anchors.values()):
+            # No anchors available — can't enforce; let it through.
+            return True, ""
+        if regex_contains_anchor(candidate_regex, anchors):
+            return True, ""
+        # Anchor data exists, regex doesn't reference any of it.
+        anchor_summary = []
+        if anchors.get("schedule_codes"):
+            anchor_summary.append(f"codes={anchors['schedule_codes'][:3]}")
+        if anchors.get("titles"):
+            anchor_summary.append(f"titles={[t[:40] for t in anchors['titles'][:2]]}")
+        return (
+            False,
+            f"regex contains no document-specific anchor "
+            f"(available: {'; '.join(anchor_summary) or '(none)'})",
+        )
 
     def _validate_test_cases(
         self,
