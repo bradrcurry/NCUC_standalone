@@ -12,6 +12,7 @@ directly edits parser code.
 from __future__ import annotations
 
 import json
+import re
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
@@ -20,6 +21,20 @@ from typing import Any
 from pydantic import BaseModel, Field, model_validator
 
 from duke_rates.document_intelligence.ollama_orchestrator import OllamaOrchestrator
+
+# High-specificity schedule/rider code pattern. Used to filter the noisy
+# fingerprinter output (which captures English words like "IS", "MAY")
+# down to real codes like RES-28, MGS-32, SGS76, LGS-3.
+HIGH_SPECIFICITY_CODE_RE = re.compile(r"^[A-Z]{2,5}-?\d{1,3}[A-Z]?$")
+
+# Title fragments that show up across many profiles and shouldn't be used
+# as anchors. Mirrors profile_consensus.TITLE_BLOCKLIST.
+ANCHOR_TITLE_BLOCKLIST = {
+    "AVAILABILITY", "CERTIFICATE OF SERVICE", "(NORTH CAROLINA ONLY)",
+    "ASSOCIATE GENERAL COUNSEL", "DEPUTY GENERAL COUNSEL", "F I L ED",
+    "FILED", "DEFINITIONS", "MAILING ADDRESS:", "APPLICABILITY",
+    "ENERGY.", "DUKE ENERGY", "DUKE ENERGY CAROLINAS",
+}
 
 # ---------------------------------------------------------------------------
 # Allowed enumerations
@@ -157,6 +172,13 @@ deterministic parser extract charges from tariff documents that it currently fai
 - Current regex pattern names in profile: {current_patterns}
 - Expected output schema: {expected_schema}
 
+## DOCUMENT-SPECIFIC ANCHORS (REQUIRED):
+The candidate regex MUST include at least one of these anchors so it does NOT
+match unrelated documents in the corpus. A regex without an anchor will be
+rejected automatically as too generic.
+
+{document_anchors}
+
 ## Text the current parser MISSED:
 ```
 {missed_text}
@@ -169,14 +191,151 @@ deterministic parser extract charges from tariff documents that it currently fai
 1. Choose suggestion_type ONLY from: {allowed_types}
 2. Risk level ONLY from: {allowed_risks}
 3. If suggesting a regex, provide candidate_regex that captures the missed value(s).
+   The regex MUST contain at least one of the document-specific anchors above
+   (a schedule code, rider code, or distinctive title fragment). A regex like
+   `\\$\\d+\\.\\d+\\s*/kWh` is too generic — it must be scoped, e.g.
+   `Schedule\\s+RES-28[\\s\\S]*?\\$(\\d+\\.\\d+)\\s*/kWh`.
 4. If the issue is text normalization (OCR artifacts, symbol noise), provide candidate_normalization instead.
-5. Include 2-5 positive_test_cases (lines that SHOULD match) and 2-5 negative_test_cases (lines that should NOT match).
+5. Include 2-5 positive_test_cases (lines that SHOULD match) and 2-5 negative_test_cases
+   (lines that should NOT match). Negative cases SHOULD include a line from a
+   different schedule (e.g. if anchor is RES-28, include a SGS or LGS line).
 6. Quote the missed_text exactly from the document excerpt.
 7. Expected_unit should be the physical or billing unit (kWh, $/kWh, $/month, etc.) or empty if unknown.
 8. Include confidence from 0.0 to 1.0 based on how specific, evidence-backed, and testable the suggestion is.
 9. Return an EMPTY candidate_regex if you cannot construct a plausible pattern — do not invent regexes.
 
 Respond with a single JSON object matching the required schema. No other text."""
+
+
+# ---------------------------------------------------------------------------
+# Document-anchor extraction (Phase 0B)
+# ---------------------------------------------------------------------------
+
+
+def fetch_document_anchors(
+    db_path: Path | str, source_pdf: str, *, max_titles: int = 4
+) -> dict[str, list[str]]:
+    """Pull high-specificity anchors for one document from the fingerprinter.
+
+    Returns a dict with keys ``schedule_codes``, ``rider_codes``,
+    ``leaf_numbers``, ``titles``. Only high-specificity items are returned
+    (real schedule codes, distinctive titles) — generic English words and
+    boilerplate are filtered out.
+
+    The result is suitable both for prompt injection (via
+    :func:`render_anchors_for_prompt`) and for post-validation checks (via
+    :func:`regex_contains_anchor`).
+    """
+    anchors: dict[str, list[str]] = {
+        "schedule_codes": [],
+        "rider_codes": [],
+        "leaf_numbers": [],
+        "titles": [],
+    }
+    if not source_pdf:
+        return anchors
+
+    conn = sqlite3.connect(str(db_path))
+    try:
+        row = conn.execute(
+            """
+            SELECT schedule_codes_json, rider_codes_json,
+                   leaf_numbers_json, title_candidates_json
+            FROM document_fingerprints_v2
+            WHERE source_pdf = ?
+            LIMIT 1
+            """,
+            (source_pdf,),
+        ).fetchone()
+    finally:
+        conn.close()
+    if not row:
+        return anchors
+
+    def _load(j: Any) -> list[str]:
+        try:
+            data = json.loads(j or "[]")
+        except (json.JSONDecodeError, TypeError):
+            return []
+        return [s for s in data if isinstance(s, str)]
+
+    for c in _load(row[0]):
+        if HIGH_SPECIFICITY_CODE_RE.match(c):
+            anchors["schedule_codes"].append(c)
+    for c in _load(row[1]):
+        if HIGH_SPECIFICITY_CODE_RE.match(c):
+            anchors["rider_codes"].append(c)
+    for c in _load(row[2]):
+        if c.strip():
+            anchors["leaf_numbers"].append(c.strip())
+    for t in _load(row[3])[:max_titles * 4]:
+        t_norm = t.upper().strip()
+        if not t_norm or t_norm in ANCHOR_TITLE_BLOCKLIST:
+            continue
+        if 8 <= len(t_norm) <= 80:
+            anchors["titles"].append(t_norm)
+            if len(anchors["titles"]) >= max_titles:
+                break
+
+    # Deduplicate while preserving order
+    for key, vals in anchors.items():
+        seen: set[str] = set()
+        deduped: list[str] = []
+        for v in vals:
+            if v not in seen:
+                seen.add(v)
+                deduped.append(v)
+        anchors[key] = deduped
+    return anchors
+
+
+def render_anchors_for_prompt(anchors: dict[str, list[str]]) -> str:
+    """Render an anchor dict as a bulleted prompt block.
+
+    Returns ``"(no document-specific anchors available — fall back to the
+    profile name; expect this regex to be stricter to compensate)"`` when
+    the doc has no usable anchors.
+    """
+    parts: list[str] = []
+    if anchors.get("schedule_codes"):
+        parts.append("- Schedule codes: " + ", ".join(anchors["schedule_codes"]))
+    if anchors.get("rider_codes"):
+        parts.append("- Rider codes: " + ", ".join(anchors["rider_codes"]))
+    if anchors.get("leaf_numbers"):
+        parts.append("- Leaf numbers: " + ", ".join(anchors["leaf_numbers"]))
+    if anchors.get("titles"):
+        parts.append("- Distinctive title fragments:")
+        for t in anchors["titles"]:
+            parts.append(f"    * {t!r}")
+    if not parts:
+        return (
+            "(no document-specific anchors available — fall back to the\n"
+            "profile name; expect this regex to be stricter to compensate)"
+        )
+    return "\n".join(parts)
+
+
+def regex_contains_anchor(regex_pattern: str, anchors: dict[str, list[str]]) -> bool:
+    """Return True if the regex string contains any anchor from the bundle.
+
+    Used by the validation harness to reject low-specificity regexes before
+    running the corpus check.
+    """
+    if not regex_pattern:
+        return False
+    pattern_upper = regex_pattern.upper()
+    for key in ("schedule_codes", "rider_codes", "leaf_numbers"):
+        for code in anchors.get(key, []):
+            # Codes may appear as RES-28 or RES\-28 in regex; check both.
+            if code in regex_pattern or code.replace("-", r"\-") in regex_pattern:
+                return True
+    for title in anchors.get("titles", []):
+        # Titles are case-insensitive; check 12+ char substring presence.
+        for window in (title[:20], title[-20:], title):
+            window = window.strip()
+            if len(window) >= 8 and window in pattern_upper:
+                return True
+    return False
 
 
 # ---------------------------------------------------------------------------
@@ -414,6 +573,13 @@ class RegexSuggestionGenerator:
         successful_examples = self.get_successful_examples(parser_profile)
         expected_schema = self.get_expected_schema(parser_profile)
         target_field = parse_meta.get("target_field", "") or ""
+        # Phase 0B: pull document-specific anchors from the fingerprinter so
+        # the LLM is required to scope its regex to this doc, not the whole
+        # profile. Without this, ~72% of suggestions get auto-rejected as
+        # broad false positives.
+        source_pdf = diagnosis_row.get("source_pdf") or ""
+        anchors = fetch_document_anchors(self._db_path, source_pdf)
+        document_anchors = render_anchors_for_prompt(anchors)
 
         prompt = _SUGGESTION_SYSTEM_PROMPT.format(
             failure_type=failure_type,
@@ -421,6 +587,7 @@ class RegexSuggestionGenerator:
             target_profile=parser_profile,
             current_patterns=current_patterns,
             expected_schema=expected_schema,
+            document_anchors=document_anchors,
             missed_text=missed_text[:1500] if missed_text else "(no text available)",
             successful_examples=successful_examples,
             allowed_types=", ".join(ALLOWED_SUGGESTION_TYPES),

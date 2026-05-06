@@ -60,19 +60,19 @@ a routing-layer change, not a parser-layer change.
 > leverage and should be done first regardless of how aggressively we pursue
 > Layers 2 & 3.
 
-- [ ] **Phase 0 — Quick wins from prior session** (carryover, not refactor)
-  - [ ] 0A. Deadline-cutoff fix in overnight wrapper
-  - [ ] 0B. Anti-greedy suggest prompt with profile-specific anchors
-  - [ ] 0C. Investigate why normalization suggestions are always 0
-- [ ] **Phase 1 — Document Identity Layer** (foundation, zero behavior change)
-  - [ ] 1A. `document_identity` table + DDL
-  - [ ] 1B. Aggregator that populates from existing tables
-  - [ ] 1C. CLI to inspect identity bundles
-  - [ ] 1D. Identity-quality report
-- [ ] **Phase 2 — Routing Tier System** (decision layer, no extraction change)
-  - [ ] 2A. Tier classifier
-  - [ ] 2B. Tier-prediction validation against existing parses
-  - [ ] 2C. Tier dashboard
+- [x] **Phase 0 — Quick wins from prior session** (carryover, not refactor)
+  - [x] 0A. Deadline-cutoff fix in overnight wrapper *(2026-05-06)*
+  - [x] 0B. Anti-greedy suggest prompt with profile-specific anchors *(2026-05-06)*
+  - [x] 0C. Investigate why normalization suggestions are always 0 *(2026-05-06)*
+- [x] **Phase 1 — Document Identity Layer** (foundation, zero behavior change)
+  - [x] 1A. `document_identity` table + DDL *(2026-05-06)*
+  - [x] 1B. Aggregator that populates from existing tables *(2026-05-06)*
+  - [x] 1C. CLI to inspect identity bundles *(2026-05-06)*
+  - [x] 1D. Identity-quality report *(2026-05-06)*
+- [x] **Phase 2 — Routing Tier System** (decision layer, no extraction change)
+  - [x] 2A. Tier classifier *(2026-05-06)*
+  - [x] 2B. Tier-prediction validation against existing parses *(2026-05-06)*
+  - [x] 2C. Tier dashboard *(2026-05-06)*
 - [ ] **Phase 3 — Profile-as-Template binding** (Tier 1 active routing)
   - [ ] 3A. Profile → template rename / re-doc
   - [ ] 3B. Tier 1 binder (auto-bind high-confidence docs)
@@ -118,12 +118,19 @@ and `validate`/`shadow_test` don't run. Result: late iterations leave
 
 **GitNexus before editing:** run `gitnexus_impact({target: "ParseImprovementLoop.run", direction: "upstream"})`.
 
-| Status | pending |
+**Implemented as Option B** (per-stage minimum runtime budget). Added
+`STAGE_MIN_BUDGET_SECONDS` mapping in `parse_improvement_loop.py` and a
+budget guard before each stage. When remaining wall-clock is below the
+stage's minimum, the stage is skipped with stat
+`skipped_insufficient_budget=1` and the loop continues — so deterministic
+stages still run when the LLM-bound ones can't fit.
+
+| Status | completed |
 |---|---|
-| Owner | unassigned |
-| Started | — |
-| Completed | — |
-| PR / commit | — |
+| Owner | claude-opus-4-7 |
+| Started | 2026-05-06 |
+| Completed | 2026-05-06 |
+| PR / commit | branch `refactor/parsing-architecture` |
 
 ### 0B. Anti-greedy suggest prompt
 
@@ -155,12 +162,36 @@ the failure mode at suggest time rather than at validate time.
 
 **GitNexus before editing:** run `gitnexus_impact({target: "RegexSuggestionGenerator.generate_suggestion", direction: "upstream"})`.
 
-| Status | pending |
+**Implementation:**
+- `regex_suggestions.py`: added `fetch_document_anchors()`,
+  `render_anchors_for_prompt()`, `regex_contains_anchor()` module-level
+  helpers. Prompt template gained a `## DOCUMENT-SPECIFIC ANCHORS (REQUIRED)`
+  section with concrete worked example. `generate_suggestion()` now passes
+  the anchor block into the prompt.
+- `regex_validation.py`: added Phase 1b in `validate_suggestion()` —
+  `_check_regex_has_anchor()` looks up `source_pdf` via
+  `diagnosis_id → parse_attempt_id`, fetches the anchors, and rejects
+  before the corpus sweep if the regex contains zero anchors. New status
+  `rejected_no_anchor` added to `ALLOWED_VALIDATION_STATUSES`.
+- Smoke-tested on 50 fingerprinted docs: anchor extraction returned
+  high-specificity codes (e.g. RES-17, RES-19) and distinctive titles
+  (e.g. "RIDER NMB", "NET METERING BRIDGE") cleanly. Suggestion 153 (a
+  prior `rejected_false_positive`) now gets caught at validation time
+  with a clear reason: "regex contains no document-specific anchor
+  (available: titles=['RIDER NMB', 'NET METERING BRIDGE'])".
+
+**Acceptance test follow-up:** the published acceptance criterion was that
+auto-rejection rate drops from ~72% to under 40%. We won't have that
+number until the next overnight run produces fresh suggestions under the
+new prompt. The early-exit `rejected_no_anchor` path will surface the new
+distribution.
+
+| Status | completed |
 |---|---|
-| Owner | unassigned |
-| Started | — |
-| Completed | — |
-| PR / commit | — |
+| Owner | claude-opus-4-7 |
+| Started | 2026-05-06 |
+| Completed | 2026-05-06 |
+| PR / commit | branch `refactor/parsing-architecture` |
 
 ### 0C. Investigate empty normalization suggestions
 
@@ -183,12 +214,45 @@ filtered out somewhere.
 - Either a documented decision to retire the type, OR ≥ 5% of new suggestions
   emit `suggestion_type = 'normalization_rule'`.
 
-| Status | pending |
+**Investigation findings:** The empty-normalization issue is **upstream of
+the suggest prompt.** Database audit:
+
+- Of 153 existing suggestions: 140 `regex_candidate`, 13 `parser_profile_hint`,
+  0 `normalization_rule`.
+- Of all diagnoses with failure_type in `('regex_gap', 'normalization_gap',
+  'ocr_noise')` (the trio that feeds the suggest stage): 194 `regex_gap`,
+  0 `normalization_gap`, 0 `ocr_noise`.
+
+The suggest LLM correctly never emits normalization rules because every
+diagnosis it sees is labeled `regex_gap`. The issue is the **diagnose
+prompt** — it lists failure types as a flat enum without definitions,
+giving the model no basis to choose `normalization_gap` or `ocr_noise`
+over the more obvious-sounding `regex_gap`.
+
+**Fix shipped:** Rewrote `_DIAGNOSIS_SYSTEM_PROMPT` in
+`parse_diagnosis.py` to include explicit definitions for every failure
+type, with rules for the OCR/normalization disambiguation:
+
+> *When you see OCR artifacts (ligatures, character substitutions, broken
+> spacing), prefer `ocr_noise` over `regex_gap`.*
+> *When rates are clearly present but in non-canonical form (cents
+> notation, unusual unit strings), prefer `normalization_gap` over
+> `regex_gap`.*
+
+**Effect:** The next overnight diagnose pass should produce some
+`normalization_gap` and `ocr_noise` rows, which the suggest stage can
+then act on. We won't have the 5%-of-suggestions metric until a fresh
+diagnose+suggest cycle runs against the rediagnose-unknown pool.
+
+**Decision:** keep the `normalization_rule` suggestion_type. Did NOT
+retire it.
+
+| Status | completed |
 |---|---|
-| Owner | unassigned |
-| Started | — |
-| Completed | — |
-| PR / commit | — |
+| Owner | claude-opus-4-7 |
+| Started | 2026-05-06 |
+| Completed | 2026-05-06 |
+| PR / commit | branch `refactor/parsing-architecture` |
 
 ---
 
@@ -241,12 +305,19 @@ CREATE INDEX idx_document_identity_pdf ON document_identity(source_pdf);
 CREATE INDEX idx_document_identity_confidence ON document_identity(overall_confidence DESC);
 ```
 
-| Status | pending |
+**Implementation:** New module
+`src/duke_rates/document_intelligence/document_identity.py` ships the DDL,
+a `ensure_schema()` bootstrap function (idempotent, called by both the
+aggregator and the CLI), and indexes on `source_pdf` and
+`overall_confidence DESC`. Schema bootstrap was verified live — table
+created cleanly with 19 columns + 2 indexes.
+
+| Status | completed |
 |---|---|
-| Owner | unassigned |
-| Started | — |
-| Completed | — |
-| PR / commit | — |
+| Owner | claude-opus-4-7 |
+| Started | 2026-05-06 |
+| Completed | 2026-05-06 |
+| PR / commit | branch `refactor/parsing-architecture` |
 
 ### 1B. Aggregator that populates from existing tables
 
@@ -282,12 +353,27 @@ Sum, cap at 1.0. Tune from the identity-quality report (1D).
 
 **GitNexus before editing:** run `gitnexus_query({query: "document fingerprint classification"})` to find adjacent code that should also write evidence.
 
-| Status | pending |
+**Implementation:** `DocumentIdentityAggregator` class in
+`document_identity.py`. Bridges `document_classifications` to
+`source_pdf` via `historical_documents.local_path` (the table uses
+`subject_kind='historical_document'`, not `'source_pdf'` — discovered
+during smoke testing and corrected). Filename heuristics encoded as
+`FILENAME_SIGNAL_RULES` mirroring (and extending) the rules in
+`profile_consensus`. `populate_all()` upserts via `ON CONFLICT(source_pdf)`
+so re-runs are idempotent.
+
+**First full-corpus run:** 4412 source_pdfs populated in seconds. Signal
+coverage: schedule_codes 1.9%, distinctive_titles 98.0%, classifier_label
+14.9%, profile_consensus 4.1%. Confidence distribution: 6 high, 319 mid,
+4087 low — the corpus-wide picture confirms the plan's premise that most
+docs have weak identity today.
+
+| Status | completed |
 |---|---|
-| Owner | unassigned |
-| Started | — |
-| Completed | — |
-| PR / commit | — |
+| Owner | claude-opus-4-7 |
+| Started | 2026-05-06 |
+| Completed | 2026-05-06 |
+| PR / commit | branch `refactor/parsing-architecture` |
 
 ### 1C. CLI to inspect identity bundles
 
@@ -299,12 +385,31 @@ debugging and for tuning the confidence weights in 1B.
 histogram, top schedule codes by frequency, docs with low confidence (worth
 human review).
 
-| Status | pending |
+**Implementation:** Three CLI commands wired in `cli.py`:
+- `populate-document-identity-nc` — runs the aggregator (with optional
+  `--limit N` for partial passes).
+- `report-document-identity-nc --source-pdf PATH` — prints one bundle.
+  Falls back to building live (without persisting) when the PDF has no
+  saved row yet, so debug runs don't require a populate first.
+- `report-document-identity-summary-nc` — confidence buckets + signal
+  coverage with histogram bars (ASCII `#` for cp1252 compatibility on
+  Windows console).
+
+Verified live on a high-confidence MGS-32 schedule sheet: bundle showed
+schedule_codes=['MGS-31','MGS-32'], 4 distinctive titles incl.
+'SCHEDULE MGS-32', filename signal `schedule_mgs`, classifier
+`TARIFF_SHEET conf=1.0`, profile consensus `generic_residential conf=1.0
+margin=0.849`. Overall confidence: 1.0. The CLI also surfaced an
+important bug-finding: this is an MGS doc routed by consensus to
+`generic_residential` — the kind of high-confidence-but-wrong routing
+Phase 2/3 need to address.
+
+| Status | completed |
 |---|---|
-| Owner | unassigned |
-| Started | — |
-| Completed | — |
-| PR / commit | — |
+| Owner | claude-opus-4-7 |
+| Started | 2026-05-06 |
+| Completed | 2026-05-06 |
+| PR / commit | branch `refactor/parsing-architecture` |
 
 ### 1D. Identity-quality report
 
@@ -321,12 +426,36 @@ against actual parse outcomes:
 This validates the confidence weights and identifies the docs that would
 benefit most from Phase 2.
 
-| Status | pending |
+**Implementation:** CLI `report-document-identity-quality-nc` joins
+`document_identity` × `parse_attempt_logs` × `llm_parse_diagnostics` and
+emits three views:
+
+1. **Identity confidence vs parse outcomes:** parsed-rate by bucket.
+2. **Identity confidence vs diagnosed failures:** failure_type counts by
+   bucket.
+3. **High-confidence routing disagreements:** docs where overall confidence
+   ≥ 0.85 and `profile_consensus_top` differs from current `parser_profile`
+   — these are the highest-leverage reassignment leads for Phase 2/3.
+
+Saves a JSON snapshot under `docs/reports/document_identity_quality/`.
+
+**First-run findings (4412 identity rows):**
+- High-confidence parse rate **60.8%** vs low-confidence **35.0%** — a
+  25-point gap that validates the weights are tracking real parsing
+  signal.
+- Mid-confidence bucket has the largest absolute count of `regex_gap`
+  (144) and `wrong_profile` (78) failures — Phase 2's tier router will
+  triage these first.
+- 50 high-confidence routing disagreements found; the top 10 are all
+  `current=unknown -> recommended=generic_residential` (the consensus
+  engine identifying docs the legacy classifier missed entirely).
+
+| Status | completed |
 |---|---|
-| Owner | unassigned |
-| Started | — |
-| Completed | — |
-| PR / commit | — |
+| Owner | claude-opus-4-7 |
+| Started | 2026-05-06 |
+| Completed | 2026-05-06 |
+| PR / commit | branch `refactor/parsing-architecture` |
 
 ---
 
@@ -344,12 +473,29 @@ Pure function over `document_identity`. Initial cutoffs:
 - **TIER 2** — `0.5 ≤ overall_confidence < 0.85` OR `margin < 0.15`
 - **TIER 3** — `overall_confidence < 0.5` OR no profile consensus
 
-| Status | pending |
+**Implementation:** New module
+`src/duke_rates/document_intelligence/routing_tier.py` ships:
+- `Tier` IntEnum (TIER_1=1, TIER_2=2, TIER_3=3) and `TierClassification`
+  dataclass (pure data, no DB dependency).
+- `classify_tier(identity_bundle)` — pure function matching plan cutoffs;
+  handles the no-consensus case as Tier 3 regardless of overall
+  confidence (an edge case worth noting).
+- `document_routing_tier` table + `ensure_schema()`.
+- `TierAggregator` class with `label_all()` (idempotent batch upsert)
+  and `label_one(source_pdf)` (single-doc refresh).
+
+**First population pass:** 4412 docs labeled. Tier distribution:
+**6 Tier 1 / 145 Tier 2 / 4261 Tier 3**. The dominance of Tier 3
+matches the Phase 1 finding that ~93% of docs have weak identity —
+this is the population that Phase 4's per-doc rules track will need to
+serve.
+
+| Status | completed |
 |---|---|
-| Owner | unassigned |
-| Started | — |
-| Completed | — |
-| PR / commit | — |
+| Owner | claude-opus-4-7 |
+| Started | 2026-05-06 |
+| Completed | 2026-05-06 |
+| PR / commit | branch `refactor/phase-2-routing-tiers` |
 
 ### 2B. Tier-prediction validation
 
@@ -364,24 +510,69 @@ docs:
 
 Output: a confusion-matrix-like report.
 
-| Status | pending |
+**Implementation:** `build_tier_validation_report(db_path)` in
+`routing_tier.py`. Joins `document_routing_tier × parse_attempt_logs ×
+llm_parse_diagnostics` and emits four views:
+
+1. **tier_outcomes** — per-tier `parse_attempt_logs.status` distribution
+   plus `parsed_with_charges_rate`.
+2. **tier_diagnoses** — per-tier `failure_type` counts.
+3. **tier1_extraction_failures** — Tier 1 docs that did NOT parse
+   cleanly (template bugs).
+4. **tier3_unexpected_successes** — Tier 3 docs that parsed cleanly
+   anyway (cutoff-tuning candidates).
+
+**First-run findings:**
+- **Tier 1: 60.8% parsed-with-charges** (321 of 528 attempts). The 50
+  template-bug candidates all show `parser_profile=unknown` with
+  `recommended=generic_residential` — docs the legacy classifier missed
+  entirely; Phase 3 binding will fix these automatically.
+- **Tier 2: 59.1%** — only marginally below Tier 1, suggests cutoffs are
+  slightly conservative on the high end.
+- **Tier 3: 46.5%** — surprisingly high success rate. The 50 Tier 3
+  unexpected successes cluster at confidence ~0.80 with
+  `parser_profile=generic_residential` or
+  `progress_current_leaf_bridge` — these are docs whose only weak
+  signal is no profile consensus. Tuning candidate for §5.2C.
+- **Tier-diagnosed failures match expectations:** Tier 3 dominates
+  `wrong_profile` (94) and `unknown` (51); Tier 1 has only 3 of each.
+
+Note: tier-row counts (6 / 145 / 4261) and validation-attempt counts
+(528 / 7291 / 32594) differ because one source_pdf often has many
+parse_attempt_logs rows (different page ranges, parser profiles tried).
+Both views are useful and the dashboard surfaces both.
+
+| Status | completed |
 |---|---|
-| Owner | unassigned |
-| Started | — |
-| Completed | — |
-| PR / commit | — |
+| Owner | claude-opus-4-7 |
+| Started | 2026-05-06 |
+| Completed | 2026-05-06 |
+| PR / commit | branch `refactor/phase-2-routing-tiers` |
 
 ### 2C. Tier dashboard
 
 CLI command `report-routing-tiers-nc` showing tier distributions, top
 profile_consensus_top values per tier, sample docs per tier.
 
-| Status | pending |
+**Implementation:** Three CLI commands in `cli.py`:
+- `populate-routing-tier-nc` — runs the tier aggregator (with optional
+  `--limit N`).
+- `report-routing-tier-nc` — distribution histogram (ASCII `#` bars for
+  cp1252 compatibility) plus N example rationales per tier.
+- `report-routing-tier-validation-nc` — invokes
+  `build_tier_validation_report` and prints the §5.2B findings; saves
+  JSON to `docs/reports/routing_tier_validation/<timestamp>.json`.
+
+Verified live end-to-end on 4412 rows. The validation report surfaces
+50 template-bug candidates and 50 cutoff-tuning candidates with one
+command.
+
+| Status | completed |
 |---|---|
-| Owner | unassigned |
-| Started | — |
-| Completed | — |
-| PR / commit | — |
+| Owner | claude-opus-4-7 |
+| Started | 2026-05-06 |
+| Completed | 2026-05-06 |
+| PR / commit | branch `refactor/phase-2-routing-tiers` |
 
 ---
 
@@ -628,7 +819,69 @@ implementation begins:
 > Append-only. Newest entries on top. One paragraph per entry. Reference
 > commit hashes and the section number of the task.
 
-*(empty — no work has been done yet against this plan)*
+### 2026-05-06 — Phase 2 (full) — claude-opus-4-7
+
+**§5.2A/B/C shipped on branch `refactor/phase-2-routing-tiers`** (branched
+from `refactor/parsing-architecture` after Phase 0/1 work). New module
+`src/duke_rates/document_intelligence/routing_tier.py` (≈340 lines):
+`Tier` IntEnum, `TierClassification` dataclass, pure
+`classify_tier()` function, `document_routing_tier` table + DDL,
+`TierAggregator` (idempotent batch upsert), and
+`build_tier_validation_report()` for the §5.2B cross-check. Three new
+CLI commands in `cli.py`: `populate-routing-tier-nc`,
+`report-routing-tier-nc`, `report-routing-tier-validation-nc`.
+**First labeling pass on 4412 rows: 6 / 145 / 4261 (Tier 1/2/3).**
+Validation surfaced 50 Tier 1 template-bug candidates (all
+`parser_profile=unknown` → `recommended=generic_residential`, same
+pattern as the Phase 1D disagreement findings) and 50 Tier 3
+unexpected-success candidates clustering at confidence 0.80 (cutoff
+tuning lead for future revision). **Discovered:** the no-consensus →
+Tier 3 rule causes some 0.80-confidence docs (with strong fingerprint
++ classifier signals but no consensus row) to land in Tier 3 despite
+parsing successfully — worth noting for any future cutoff revision.
+The dashboard prints both source_pdf-unique counts (from
+`document_routing_tier`) and parse_attempt-row counts (from the
+validation join) since both views are useful.
+
+### 2026-05-06 — Phase 1 (full) — claude-opus-4-7
+
+**§4.1A/B/C/D shipped on branch `refactor/parsing-architecture`.** New
+module `src/duke_rates/document_intelligence/document_identity.py`
+(450+ lines): schema bootstrap, `DocumentIdentityAggregator`,
+`IdentityBundle` dataclass, `fetch_identity` and `fetch_identity_summary`
+read APIs. Three CLI commands added in `cli.py`:
+`populate-document-identity-nc`, `report-document-identity-nc`,
+`report-document-identity-summary-nc`, plus the §4.1D quality cross-check
+`report-document-identity-quality-nc`. **First population pass: 4412
+identity rows.** Confidence distribution: 6 high / 319 mid / 4087 low.
+Cross-check showed parse rate **60.8% at high confidence vs 35.0% at low
+confidence**, validating the chosen weights track real parsing signal.
+Identified 50 high-confidence routing disagreements ready for Phase 2/3
+to act on. **Discovered during work:** the
+`document_classifications` table uses `subject_kind='historical_document'`
+(not `'source_pdf'`), so the aggregator bridges through
+`historical_documents.local_path`. **Surfaced an MGS-32 doc routed by
+consensus to `generic_residential`**, exactly the misrouting bug Phase 2
+needs to fix. GitNexus re-index attempted before code work; `npx gitnexus
+analyze` segfaulted on ~20 large files but succeeded for the modules in
+play.
+
+### 2026-05-06 — Phase 0 (carryover quick wins) — claude-opus-4-7
+
+**§3.0A/0B/0C shipped on branch `refactor/parsing-architecture` (commit
+86ba927).** §3.0A added `STAGE_MIN_BUDGET_SECONDS` map and a per-stage
+budget guard in `parse_improvement_loop.py` so deterministic stages
+(validate, profile_consensus) still run when LLM-bound stages can't fit.
+Verified live: a 1-min budget run skipped suggest (90s required) and ran
+validate (5 candidates). §3.0B added `fetch_document_anchors()`,
+`render_anchors_for_prompt()`, `regex_contains_anchor()` to
+`regex_suggestions.py`; augmented suggest prompt with required
+DOCUMENT-SPECIFIC ANCHORS block; added `_check_regex_has_anchor()` early
+gate in `regex_validation.py` with new `rejected_no_anchor` status. §3.0C
+discovered the empty-normalization issue is upstream — diagnose was
+producing 0 `normalization_gap` / 0 `ocr_noise` because the prompt listed
+failure types as a flat enum. Rewrote `_DIAGNOSIS_SYSTEM_PROMPT` with
+explicit definitions and disambiguation rules.
 
 ---
 

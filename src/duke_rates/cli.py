@@ -10256,6 +10256,469 @@ def report_profile_recommendations_nc(
         )
 
 
+# ---------------------------------------------------------------------------
+# Phase 1 — document_identity layer
+# Plan ref: docs/PARSING_ARCHITECTURE_REFACTOR_PLAN.md §4
+# ---------------------------------------------------------------------------
+
+
+@app.command("populate-document-identity-nc")
+def populate_document_identity_nc(
+    limit: int = typer.Option(
+        0, "--limit", help="Process at most N source_pdfs (0 = unlimited)."
+    ),
+) -> None:
+    """Aggregate evidence from existing tables into ``document_identity``.
+
+    Reads from ``document_fingerprints_v2``, ``document_classifications``,
+    and ``parser_profile_recommendations``, applies filename heuristics,
+    scores overall identity confidence, and upserts one row per source_pdf.
+
+    This is the Phase 1 foundation pass for the parsing-architecture
+    refactor. It does NOT change extraction behavior — it produces the
+    identity bundles that future routing layers consume.
+    """
+    from duke_rates.document_intelligence.document_identity import (
+        DocumentIdentityAggregator,
+    )
+
+    settings, _ = _bootstrap()
+    agg = DocumentIdentityAggregator(settings.database_path)
+    n = agg.populate_all(limit=limit if limit > 0 else None)
+    typer.echo(f"document_identity: populated/refreshed {n} rows")
+
+
+@app.command("report-document-identity-nc")
+def report_document_identity_nc(
+    source_pdf: str = typer.Option(
+        ..., "--source-pdf", help="Path of the source PDF to inspect."
+    ),
+    as_json: bool = typer.Option(False, "--json", help="Emit raw bundle as JSON."),
+) -> None:
+    """Print the persisted identity bundle for one document.
+
+    Use this to debug routing decisions and to tune the confidence weights.
+    """
+    import json as _json
+
+    from duke_rates.document_intelligence.document_identity import (
+        DocumentIdentityAggregator, fetch_identity,
+    )
+
+    settings, _ = _bootstrap()
+    bundle = fetch_identity(settings.database_path, source_pdf)
+    if not bundle:
+        # Allow inspection even when not yet persisted — build live.
+        agg = DocumentIdentityAggregator(settings.database_path)
+        live = agg.build_bundle(source_pdf)
+        bundle = {
+            "source_pdf": live.source_pdf,
+            "schedule_codes_strong_json": _json.dumps(live.schedule_codes_strong),
+            "rider_codes_strong_json": _json.dumps(live.rider_codes_strong),
+            "leaf_numbers_json": _json.dumps(live.leaf_numbers),
+            "detected_titles_json": _json.dumps(live.detected_titles),
+            "filename_signals_json": _json.dumps(live.filename_signals),
+            "classifier_label": live.classifier_label,
+            "classifier_confidence": live.classifier_confidence,
+            "profile_consensus_top": live.profile_consensus_top,
+            "profile_consensus_confidence": live.profile_consensus_confidence,
+            "profile_consensus_margin": live.profile_consensus_margin,
+            "overall_confidence": live.overall_confidence,
+            "evidence_log_json": _json.dumps(live.evidence_log, default=str),
+            "_persisted": False,
+        }
+
+    if as_json:
+        typer.echo(_json.dumps(bundle, indent=2, default=str))
+        return
+
+    typer.echo(f"\n=== Document Identity Bundle ===")
+    typer.echo(f"PDF: {bundle['source_pdf']}")
+    if not bundle.get("_persisted", True):
+        typer.echo("(not yet persisted — built live; run populate-document-identity-nc to save)")
+    typer.echo(f"\nOverall confidence: {bundle['overall_confidence']:.3f}")
+    typer.echo()
+    typer.echo("Strong schedule codes:")
+    typer.echo(f"  {_json.loads(bundle['schedule_codes_strong_json'] or '[]')}")
+    typer.echo("Strong rider codes:")
+    typer.echo(f"  {_json.loads(bundle['rider_codes_strong_json'] or '[]')}")
+    typer.echo("Leaf numbers:")
+    typer.echo(f"  {_json.loads(bundle['leaf_numbers_json'] or '[]')}")
+    titles = _json.loads(bundle['detected_titles_json'] or '[]')
+    typer.echo(f"Distinctive titles ({len(titles)}):")
+    for t in titles[:8]:
+        typer.echo(f"  - {t}")
+    typer.echo("Filename signals:")
+    typer.echo(f"  {_json.loads(bundle['filename_signals_json'] or '[]')}")
+    typer.echo()
+    typer.echo(f"Classifier: {bundle.get('classifier_label')} (conf={bundle.get('classifier_confidence')})")
+    typer.echo(f"Profile consensus: {bundle.get('profile_consensus_top')} "
+               f"(conf={bundle.get('profile_consensus_confidence')}, "
+               f"margin={bundle.get('profile_consensus_margin')})")
+    typer.echo()
+    typer.echo("Evidence log:")
+    for entry in _json.loads(bundle['evidence_log_json'] or '[]'):
+        typer.echo(f"  - {entry}")
+
+
+@app.command("report-document-identity-summary-nc")
+def report_document_identity_summary_nc(
+    as_json: bool = typer.Option(False, "--json", help="Emit summary as JSON."),
+) -> None:
+    """Print confidence distribution and signal coverage across all identity bundles.
+
+    Used by the Phase 1D quality assessment.
+    """
+    import json as _json
+
+    from duke_rates.document_intelligence.document_identity import (
+        fetch_identity_summary,
+    )
+
+    settings, _ = _bootstrap()
+    summary = fetch_identity_summary(settings.database_path)
+
+    if as_json:
+        typer.echo(_json.dumps(summary, indent=2))
+        return
+
+    typer.echo(f"\n=== Document Identity Summary ===")
+    typer.echo(f"Total identity rows: {summary['total']}")
+    typer.echo()
+    typer.echo("Confidence distribution:")
+    for bucket, cnt in summary["confidence_buckets"].items():
+        bar = "#" * int(cnt / max(1, summary["total"]) * 40)
+        typer.echo(f"  {bucket:<15} {cnt:>5}  {bar}")
+    typer.echo()
+    typer.echo("Signal coverage:")
+    for sig, cnt in summary["coverage"].items():
+        pct = (cnt / max(1, summary["total"])) * 100
+        typer.echo(f"  {sig:<32} {cnt:>5}  ({pct:.1f}%)")
+
+
+@app.command("report-document-identity-quality-nc")
+def report_document_identity_quality_nc(
+    write_report: bool = typer.Option(
+        True,
+        "--write-report/--no-write-report",
+        help="Write JSON to docs/reports/document_identity_quality/<timestamp>.json.",
+    ),
+) -> None:
+    """Cross-check identity confidence against actual parse outcomes (Phase 1D).
+
+    Validates the weights chosen in document_identity.py by comparing:
+      - High-confidence docs vs parse_attempt success rate
+      - Low-confidence docs vs wrong_profile/unknown diagnoses
+      - High-confidence docs where the profile_consensus disagrees with the
+        currently-assigned parser_profile (highest-value reassignment leads)
+
+    Writes a JSON report and prints a console summary.
+    """
+    import json as _json
+    from datetime import datetime as _dt, timezone as _tz
+    from pathlib import Path as _Path
+
+    from duke_rates.db.sqlite import connect
+
+    settings, _ = _bootstrap()
+    conn = connect(settings.database_path)
+    try:
+        # Bucket -> (parsed_with_charges, total)
+        outcome_rows = conn.execute(
+            """
+            SELECT
+                CASE
+                    WHEN di.overall_confidence >= 0.85 THEN 'high (>=0.85)'
+                    WHEN di.overall_confidence >= 0.5  THEN 'mid (0.5-0.85)'
+                    ELSE 'low (<0.5)'
+                END AS bucket,
+                pal.status,
+                COUNT(*) AS cnt
+            FROM document_identity di
+            LEFT JOIN parse_attempt_logs pal ON pal.source_pdf = di.source_pdf
+            GROUP BY 1, 2
+            """
+        ).fetchall()
+        # Bucket -> failure_type counts (via diagnoses)
+        diag_rows = conn.execute(
+            """
+            SELECT
+                CASE
+                    WHEN di.overall_confidence >= 0.85 THEN 'high (>=0.85)'
+                    WHEN di.overall_confidence >= 0.5  THEN 'mid (0.5-0.85)'
+                    ELSE 'low (<0.5)'
+                END AS bucket,
+                ld.failure_type,
+                COUNT(*) AS cnt
+            FROM document_identity di
+            JOIN parse_attempt_logs pal ON pal.source_pdf = di.source_pdf
+            JOIN llm_parse_diagnostics ld ON ld.parse_attempt_id = pal.id
+            GROUP BY 1, 2
+            """
+        ).fetchall()
+        # High-confidence routing disagreements (highest-value reassignment)
+        disagreement_rows = conn.execute(
+            """
+            SELECT di.source_pdf,
+                   di.overall_confidence,
+                   di.profile_consensus_top,
+                   pal.parser_profile AS current_profile
+            FROM document_identity di
+            JOIN parse_attempt_logs pal ON pal.source_pdf = di.source_pdf
+            WHERE di.overall_confidence >= 0.85
+              AND di.profile_consensus_top IS NOT NULL
+              AND di.profile_consensus_top != COALESCE(pal.parser_profile, '')
+            ORDER BY di.overall_confidence DESC
+            LIMIT 50
+            """
+        ).fetchall()
+    finally:
+        conn.close()
+
+    # Group outcomes by bucket
+    outcomes: dict[str, dict[str, int]] = {}
+    for r in outcome_rows:
+        outcomes.setdefault(r["bucket"], {})[r["status"] or "no_attempt"] = r["cnt"]
+    diagnoses: dict[str, dict[str, int]] = {}
+    for r in diag_rows:
+        diagnoses.setdefault(r["bucket"], {})[r["failure_type"]] = r["cnt"]
+    disagreements = [dict(r) for r in disagreement_rows]
+
+    payload = {
+        "generated_at": _dt.now(_tz.utc).isoformat(),
+        "outcomes_by_bucket": outcomes,
+        "diagnoses_by_bucket": diagnoses,
+        "high_confidence_routing_disagreements": disagreements,
+        "high_confidence_disagreement_count": len(disagreements),
+    }
+
+    if write_report:
+        report_dir = _Path("docs/reports/document_identity_quality")
+        report_dir.mkdir(parents=True, exist_ok=True)
+        ts = _dt.now(_tz.utc).strftime("%Y%m%dT%H%M%SZ")
+        path = report_dir / f"{ts}.json"
+        path.write_text(_json.dumps(payload, indent=2, default=str), encoding="utf-8")
+        typer.echo(f"Report written: {path}")
+
+    typer.echo("\n=== Identity Confidence vs Parse Outcomes ===")
+    for bucket in ("high (>=0.85)", "mid (0.5-0.85)", "low (<0.5)"):
+        statuses = outcomes.get(bucket, {})
+        total = sum(statuses.values())
+        parsed = statuses.get("parsed", 0)
+        rate = (parsed / total * 100) if total else 0.0
+        typer.echo(f"  {bucket:<18} total={total:>5} parsed={parsed:>5} ({rate:.1f}%)")
+
+    typer.echo("\n=== Identity Confidence vs Diagnosed Failures ===")
+    for bucket in ("high (>=0.85)", "mid (0.5-0.85)", "low (<0.5)"):
+        d = diagnoses.get(bucket, {})
+        if not d:
+            typer.echo(f"  {bucket}: (no diagnosed failures)")
+            continue
+        top = sorted(d.items(), key=lambda kv: kv[1], reverse=True)
+        snip = ", ".join(f"{k}={v}" for k, v in top[:5])
+        typer.echo(f"  {bucket:<18} {snip}")
+
+    typer.echo(f"\n=== High-Confidence Routing Disagreements: {len(disagreements)} ===")
+    for d in disagreements[:10]:
+        typer.echo(
+            f"  conf={d['overall_confidence']:.2f} "
+            f"current={d['current_profile']!r:<35} "
+            f"recommended={d['profile_consensus_top']!r}"
+        )
+
+
+# ---------------------------------------------------------------------------
+# Phase 2 — routing tier system
+# Plan ref: docs/PARSING_ARCHITECTURE_REFACTOR_PLAN.md §5
+# ---------------------------------------------------------------------------
+
+
+@app.command("populate-routing-tier-nc")
+def populate_routing_tier_nc(
+    limit: int = typer.Option(
+        0, "--limit", help="Process at most N identity rows (0 = unlimited)."
+    ),
+) -> None:
+    """Label every ``document_identity`` row with a routing tier.
+
+    Tier labels are informational only in Phase 2 — they do not change
+    extraction. Phase 3/4 consume them to make routing decisions.
+    """
+    from duke_rates.document_intelligence.routing_tier import TierAggregator
+
+    settings, _ = _bootstrap()
+    agg = TierAggregator(settings.database_path)
+    n = agg.label_all(limit=limit if limit > 0 else None)
+    typer.echo(f"document_routing_tier: labeled/refreshed {n} rows")
+
+
+@app.command("report-routing-tier-nc")
+def report_routing_tier_nc(
+    sample_per_tier: int = typer.Option(
+        5, "--sample-per-tier", help="Show N example rationales per tier."
+    ),
+    as_json: bool = typer.Option(False, "--json", help="Emit summary as JSON."),
+) -> None:
+    """Show tier distribution and a few example rationales per tier.
+
+    Use this to eyeball tier assignments before committing to Phase 3
+    binding. The sample rationales surface borderline cases that may
+    inform threshold tuning.
+    """
+    import json as _json
+    import sqlite3 as _sql
+
+    from duke_rates.document_intelligence.routing_tier import (
+        fetch_tier_distribution,
+    )
+
+    settings, _ = _bootstrap()
+    dist = fetch_tier_distribution(settings.database_path)
+    total = sum(dist.values())
+
+    samples: dict[int, list[dict[str, Any]]] = {}
+    conn = _sql.connect(settings.database_path)
+    conn.row_factory = _sql.Row
+    try:
+        for tier in (1, 2, 3):
+            rows = conn.execute(
+                """
+                SELECT source_pdf, overall_confidence, profile_consensus_top,
+                       profile_consensus_margin, rationale
+                FROM document_routing_tier
+                WHERE tier = ?
+                ORDER BY overall_confidence DESC
+                LIMIT ?
+                """,
+                (tier, sample_per_tier),
+            ).fetchall()
+            samples[tier] = [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+    payload = {"distribution": dist, "total": total, "samples": samples}
+    if as_json:
+        typer.echo(_json.dumps(payload, indent=2, default=str))
+        return
+
+    typer.echo(f"\n=== Routing Tier Distribution ===")
+    typer.echo(f"Total docs labeled: {total}")
+    for tier in (1, 2, 3):
+        cnt = dist.get(tier, 0)
+        pct = (cnt / total * 100) if total else 0.0
+        bar = "#" * int(cnt / max(1, total) * 40)
+        typer.echo(f"  TIER_{tier}: {cnt:>5}  ({pct:5.1f}%)  {bar}")
+    typer.echo()
+    for tier in (1, 2, 3):
+        typer.echo(f"--- TIER_{tier} samples ---")
+        if not samples[tier]:
+            typer.echo("  (no rows)")
+            continue
+        for s in samples[tier]:
+            typer.echo(
+                f"  conf={s['overall_confidence']:.2f} "
+                f"top={(s['profile_consensus_top'] or '?'):<30} "
+                f"margin={s['profile_consensus_margin']}"
+            )
+            typer.echo(f"    {s['rationale']}")
+
+
+@app.command("report-routing-tier-validation-nc")
+def report_routing_tier_validation_nc(
+    write_report: bool = typer.Option(
+        True,
+        "--write-report/--no-write-report",
+        help="Write JSON to docs/reports/routing_tier_validation/<timestamp>.json.",
+    ),
+    as_json: bool = typer.Option(False, "--json", help="Emit full report as JSON."),
+) -> None:
+    """Cross-check tier predictions against actual parse outcomes (Phase 2B).
+
+    Per the plan §5.2B:
+      - Tier 1 docs SHOULD mostly parse cleanly. If they don't, the
+        underlying parser template needs work.
+      - Tier 3 docs SHOULD mostly diagnose as wrong_profile/unknown. If a
+        Tier 3 doc parses successfully, the cutoffs may be too strict.
+
+    The output surfaces the highest-leverage template-bug and
+    cutoff-tuning candidates.
+    """
+    import json as _json
+    from datetime import datetime as _dt, timezone as _tz
+    from pathlib import Path as _Path
+
+    from duke_rates.document_intelligence.routing_tier import (
+        build_tier_validation_report,
+    )
+
+    settings, _ = _bootstrap()
+    report = build_tier_validation_report(settings.database_path)
+    report["generated_at"] = _dt.now(_tz.utc).isoformat()
+
+    if write_report:
+        report_dir = _Path("docs/reports/routing_tier_validation")
+        report_dir.mkdir(parents=True, exist_ok=True)
+        ts = _dt.now(_tz.utc).strftime("%Y%m%dT%H%M%SZ")
+        path = report_dir / f"{ts}.json"
+        path.write_text(_json.dumps(report, indent=2, default=str), encoding="utf-8")
+        typer.echo(f"Report written: {path}")
+
+    if as_json:
+        typer.echo(_json.dumps(report, indent=2, default=str))
+        return
+
+    s = report["summary"]
+    typer.echo(f"\n=== Routing Tier Validation ===")
+    typer.echo(
+        f"Tier 1: {s['tier1_count']:>6} attempts  parsed-with-charges {s['tier1_parsed_rate']:>5.1%}  "
+        f"template_bugs={s['tier1_extraction_failure_count']}"
+    )
+    typer.echo(
+        f"Tier 2: {s['tier2_count']:>6} attempts"
+    )
+    typer.echo(
+        f"Tier 3: {s['tier3_count']:>6} attempts  parsed-with-charges {s['tier3_parsed_rate']:>5.1%}  "
+        f"unexpected_successes={s['tier3_unexpected_success_count']}"
+    )
+
+    typer.echo("\n--- Per-Tier Status Distribution (top 4) ---")
+    for tier, bucket in sorted(report["tier_outcomes"].items()):
+        top = sorted(bucket["by_status"].items(), key=lambda kv: -kv[1])[:4]
+        snip = ", ".join(f"{k}={v}" for k, v in top)
+        typer.echo(f"  TIER_{tier}: {snip}")
+
+    typer.echo("\n--- Per-Tier Diagnosed Failure Types ---")
+    for tier, fts in sorted(report["tier_diagnoses"].items()):
+        if not fts:
+            typer.echo(f"  TIER_{tier}: (none)")
+            continue
+        top = sorted(fts.items(), key=lambda kv: -kv[1])[:5]
+        snip = ", ".join(f"{k}={v}" for k, v in top)
+        typer.echo(f"  TIER_{tier}: {snip}")
+
+    typer.echo(
+        f"\n--- Tier 1 extraction failures (template bugs): "
+        f"{s['tier1_extraction_failure_count']} ---"
+    )
+    for r in report["tier1_extraction_failures"][:8]:
+        typer.echo(
+            f"  status={r.get('status', '?'):<10} "
+            f"profile={(r.get('parser_profile') or '?'):<28} "
+            f"recommended={(r.get('profile_consensus_top') or '?')}"
+        )
+
+    typer.echo(
+        f"\n--- Tier 3 unexpected successes (cutoff candidates): "
+        f"{s['tier3_unexpected_success_count']} ---"
+    )
+    for r in report["tier3_unexpected_successes"][:8]:
+        typer.echo(
+            f"  conf={r.get('overall_confidence', 0):.2f} "
+            f"profile={(r.get('parser_profile') or '?'):<28} "
+            f"charges={r.get('charge_count', 0)}"
+        )
+
+
 @app.command("report-document-fingerprint-clusters-nc")
 def report_document_fingerprint_clusters_nc(
     limit: int = typer.Option(40, "--limit", help="Max clusters to show."),
