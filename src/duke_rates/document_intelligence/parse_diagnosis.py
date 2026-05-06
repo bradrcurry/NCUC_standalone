@@ -190,12 +190,29 @@ class ParseFailureDiagnoser:
         role: str = "parse_failure_triage",
         hard_role: str = "hard_parse_diagnosis",
         max_text_chars: int = 2000,
+        self_consistency_votes: int = 1,
+        self_consistency_zone: tuple[float, float] = (0.5, 0.85),
     ) -> None:
+        """
+        Parameters
+        ----------
+        self_consistency_votes : int
+            Total number of triage calls to make per diagnosis (1 = no voting).
+            When > 1, the diagnoser keeps the majority ``failure_type`` if
+            agreement >= ceil(N/2); otherwise it falls back to the hard role
+            even if the first call's confidence is high.
+        self_consistency_zone : (float, float)
+            Confidence range that triggers extra votes. Below the lower bound
+            the existing hard-role escalation handles it; above the upper bound
+            the result is trusted without re-voting.
+        """
         self._orch = orchestrator
         self._db_path = db_path
         self._role = role
         self._hard_role = hard_role
         self._max_text_chars = max_text_chars
+        self._sc_votes = max(1, int(self_consistency_votes))
+        self._sc_zone = self_consistency_zone
 
     # ------------------------------------------------------------------
     # Public API
@@ -604,6 +621,74 @@ class ParseFailureDiagnoser:
             prompt=prompt,
             parse_attempt_id=parse_attempt_id,
         )
+
+        # Self-consistency — only when enabled AND the first call's confidence
+        # falls in the uncertain zone. Below the zone the hard escalation will
+        # fire; above it, a single trusted call is enough.
+        zone_low, zone_high = self._sc_zone
+        if (
+            self._sc_votes > 1
+            and zone_low <= result.confidence < zone_high
+            and result.failure_type != "unknown"
+        ):
+            extra_results = [
+                self._call_and_validate(
+                    role=self._role,
+                    prompt=prompt,
+                    parse_attempt_id=parse_attempt_id,
+                )
+                for _ in range(self._sc_votes - 1)
+            ]
+            all_results = [result, *extra_results]
+            ft_counts: dict[str, int] = {}
+            for r in all_results:
+                ft_counts[r.failure_type] = ft_counts.get(r.failure_type, 0) + 1
+            top_ft, top_count = max(ft_counts.items(), key=lambda kv: kv[1])
+            quorum = (self._sc_votes // 2) + 1  # majority threshold
+            if top_count >= quorum and top_ft == result.failure_type:
+                # Keep the original result, average confidence across agreers.
+                agreers = [r for r in all_results if r.failure_type == top_ft]
+                avg_conf = sum(r.confidence for r in agreers) / len(agreers)
+                result.confidence = round(avg_conf, 3)
+                result.notes = (
+                    f"[self-consistency: {top_count}/{self._sc_votes} agree on {top_ft}] "
+                    + result.notes
+                )
+            elif top_count >= quorum and top_ft != result.failure_type:
+                # The majority disagreed with the first call — adopt the majority view.
+                winner = next(r for r in all_results if r.failure_type == top_ft)
+                winner.notes = (
+                    f"[self-consistency overturned first call: {top_count}/{self._sc_votes} agree on {top_ft}] "
+                    + winner.notes
+                )
+                result = winner
+            else:
+                # No majority — escalate to hard role even though first-call
+                # confidence was above the existing escalation threshold.
+                if self._hard_role != self._role:
+                    hard_result = self._call_and_validate(
+                        role=self._hard_role,
+                        prompt=prompt,
+                        parse_attempt_id=parse_attempt_id,
+                    )
+                    if hard_result.failure_type != "unknown":
+                        hard_result.notes = (
+                            f"[escalated: self-consistency disagreed across "
+                            f"{self._sc_votes} votes] " + hard_result.notes
+                        )
+                        result = hard_result
+                    else:
+                        result.notes = (
+                            f"[ambiguous: {self._sc_votes}-vote disagreement, hard role also unclear] "
+                            + result.notes
+                        )
+                        # Demote confidence to reflect the disagreement.
+                        result.confidence = min(result.confidence, 0.4)
+                else:
+                    result.notes = (
+                        f"[ambiguous: {self._sc_votes}-vote disagreement] " + result.notes
+                    )
+                    result.confidence = min(result.confidence, 0.4)
 
         # Escalate low-confidence triage to hard role
         if (

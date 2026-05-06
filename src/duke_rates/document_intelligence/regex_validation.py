@@ -96,6 +96,59 @@ class RegexValidationHarness:
         self._db_path = db_path
         self._max_test_docs = max_test_docs
 
+    def reset_human_review_for_revalidation(
+        self, *, limit: int = 100, min_age_minutes: int = 60
+    ) -> int:
+        """Move stuck ``needs_human_review`` suggestions back into the
+        pending-validation queue so they get another pass under the current
+        thresholds (which may have tightened or loosened since the prior run).
+
+        Skips suggestions whose most recent validation result is younger than
+        ``min_age_minutes`` — running revalidate twice within an hour just
+        re-evaluates the same regex against the same docs and produces the
+        same verdict, wasting cycles.
+
+        Deletes the prior validation results so the next ``validate`` task
+        picks them up. Returns the number of suggestions reset.
+        """
+        try:
+            conn = sqlite3.connect(str(self._db_path))
+            ids = [
+                r[0] for r in conn.execute(
+                    """
+                    SELECT s.id
+                    FROM llm_regex_suggestions s
+                    WHERE s.status = 'needs_human_review'
+                      AND NOT EXISTS (
+                          SELECT 1 FROM llm_regex_validation_results vr
+                          WHERE vr.suggestion_id = s.id
+                            AND vr.created_at > datetime('now', ?)
+                      )
+                    LIMIT ?
+                    """,
+                    (f'-{int(min_age_minutes)} minutes', limit),
+                ).fetchall()
+            ]
+            if not ids:
+                conn.close()
+                return 0
+            placeholders = ", ".join(["?"] * len(ids))
+            conn.execute(
+                f"DELETE FROM llm_regex_validation_results WHERE suggestion_id IN ({placeholders})",
+                ids,
+            )
+            conn.execute(
+                f"UPDATE llm_regex_suggestions SET status = 'pending_review' "
+                f"WHERE id IN ({placeholders})",
+                ids,
+            )
+            conn.commit()
+            conn.close()
+            return len(ids)
+        except Exception:
+            logger.warning("reset_human_review_for_revalidation failed", exc_info=True)
+            return 0
+
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------

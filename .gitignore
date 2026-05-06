@@ -49,6 +49,7 @@ tmp_*
 *.bak
 
 # Generated local run artifacts
+docs/reports/
 docs/reports/overnight_parse_improvement/*.json
 docs/reports/ollama_model_benchmarks/*.json
 *tmp_dry_run_output.txt

@@ -439,3 +439,49 @@ class ProfileConsensusEngine:
                 "failed to persist recommendation for parse_attempt=%s",
                 rec.parse_attempt_id, exc_info=True,
             )
+
+    # ------------------------------------------------------------------
+    # Diagnosis reclassifier
+    # ------------------------------------------------------------------
+
+    def reclassify_failing_already_best(
+        self, *, target_failure_type: str = "regex_gap"
+    ) -> int:
+        """Reclassify ``wrong_profile`` diagnoses where consensus said the
+        failing profile IS the best fit.
+
+        Those cases aren't actually mis-routed — the parser ran on the right
+        profile and still extracted nothing. Re-labeling them as
+        ``regex_gap`` makes them eligible for the suggest stage on the next
+        run.
+
+        Returns the number of diagnoses updated.
+        """
+        try:
+            conn = sqlite3.connect(str(self._db_path))
+            cur = conn.execute(
+                """
+                UPDATE llm_parse_diagnostics
+                SET failure_type = ?,
+                    notes = COALESCE(notes,'')
+                            || ' [reclassified by profile_consensus: '
+                            || 'failing_already_best -> ' || ? || ']'
+                WHERE id IN (
+                    SELECT diagnosis_id
+                    FROM parser_profile_recommendations
+                    WHERE status = 'failing_already_best'
+                      AND diagnosis_id IS NOT NULL
+                )
+                AND failure_type = 'wrong_profile'
+                """,
+                (target_failure_type, target_failure_type),
+            )
+            updated = cur.rowcount
+            conn.commit()
+            conn.close()
+            return updated
+        except Exception:
+            logger.warning(
+                "reclassify_failing_already_best failed", exc_info=True,
+            )
+            return 0

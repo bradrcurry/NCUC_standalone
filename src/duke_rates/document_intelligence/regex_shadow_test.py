@@ -129,16 +129,28 @@ class RegexShadowHarness:
     # Public
     # ------------------------------------------------------------------
 
-    def select_pending_shadow_tests(self, *, limit: int = 25) -> list[dict[str, Any]]:
-        """Return suggestions in ``accepted_synthetic`` that have no shadow run yet."""
+    def select_pending_shadow_tests(
+        self, *, limit: int = 25, include_human_review: bool = False
+    ) -> list[dict[str, Any]]:
+        """Return suggestions eligible for shadow testing.
+
+        By default this is ``accepted_synthetic`` rows with no shadow run yet.
+        With ``include_human_review=True``, also pulls ``needs_human_review``
+        rows so the corpus-wide signal can rescue them from limbo.
+        """
+        statuses = ["accepted_synthetic"]
+        if include_human_review:
+            statuses.append("needs_human_review")
+        placeholders = ", ".join(["?"] * len(statuses))
+
         conn = sqlite3.connect(str(self._db_path))
         conn.row_factory = sqlite3.Row
         try:
             rows = conn.execute(
-                """
+                f"""
                 SELECT s.*
                 FROM llm_regex_suggestions s
-                WHERE s.status = 'accepted_synthetic'
+                WHERE s.status IN ({placeholders})
                   AND s.id NOT IN (
                       SELECT DISTINCT suggestion_id FROM llm_regex_shadow_results
                   )
@@ -147,7 +159,7 @@ class RegexShadowHarness:
                 ORDER BY s.confidence DESC, s.id DESC
                 LIMIT ?
                 """,
-                (limit,),
+                (*statuses, limit),
             ).fetchall()
             return [dict(r) for r in rows]
         finally:
@@ -171,6 +183,11 @@ class RegexShadowHarness:
         target_profile = (suggestion_row.get("target_profile") or "").strip()
         candidate_regex = suggestion_row.get("candidate_regex") or ""
         candidate_norm = suggestion_row.get("candidate_normalization") or ""
+        # Pre-shadow status: when this is "needs_human_review", an inconclusive
+        # corpus verdict must still produce a final state (otherwise the row
+        # gets a shadow-result row logged AND stays at needs_human_review,
+        # making it ineligible for the next pass — silently ghosted).
+        pre_status = (suggestion_row.get("status") or "").strip()
 
         agg = ShadowAggregate(suggestion_id=suggestion_id, target_profile=target_profile)
 
@@ -241,7 +258,7 @@ class RegexShadowHarness:
                 agg.unrelated_match_docs += 1
 
         # Apply acceptance rules
-        agg.final_status, agg.notes = self._decide(agg)
+        agg.final_status, agg.notes = self._decide(agg, pre_status=pre_status)
         if agg.final_status:
             self._update_suggestion_status(suggestion_id, agg.final_status)
         return agg
@@ -250,7 +267,7 @@ class RegexShadowHarness:
     # Internal — decision rules
     # ------------------------------------------------------------------
 
-    def _decide(self, agg: ShadowAggregate) -> tuple[str, str]:
+    def _decide(self, agg: ShadowAggregate, *, pre_status: str = "") -> tuple[str, str]:
         fp_rate = (
             agg.unrelated_match_docs / agg.unrelated_total
             if agg.unrelated_total >= SHADOW_MIN_FP_SAMPLE
@@ -282,7 +299,17 @@ class RegexShadowHarness:
                 f"improved {agg.improved_docs} failed docs, "
                 f"0 regressions, fp_rate={fp_rate:.1%}",
             )
-        # Inconclusive — leave at accepted_synthetic for next run.
+        # Inconclusive corpus signal. For ``accepted_synthetic`` rows we leave
+        # status untouched so a richer corpus could rescue them later. For
+        # ``needs_human_review`` rows we MUST emit a verdict — otherwise the
+        # row stays at needs_human_review *and* gets a shadow_results row,
+        # making it ineligible for any subsequent pass (silent ghosting).
+        if pre_status == "needs_human_review":
+            return (
+                "rejected_no_gain",
+                f"two-path validation inconclusive: improved={agg.improved_docs}, "
+                f"regressed={agg.regressed_docs}, fp_rate={fp_rate:.1%}",
+            )
         return (
             "",
             f"inconclusive: improved={agg.improved_docs}, "

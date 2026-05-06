@@ -9914,7 +9914,7 @@ def run_overnight_parse_improvement_nc(
     max_documents: int = typer.Option(0, "--max-documents", help="Max documents to process (0 = unlimited)."),
     max_runtime_minutes: int = typer.Option(0, "--max-runtime-minutes", help="Hard wall-clock cap in minutes (0 = unlimited)."),
     max_consecutive_failures: int = typer.Option(5, "--max-consecutive-failures", help="Abort after N consecutive model call failures."),
-    task_kind: str = typer.Option("diagnose", "--task-kind", help="Comma-separated tasks: diagnose, suggest, validate, shadow_test, profile_consensus, extract."),
+    task_kind: str = typer.Option("diagnose", "--task-kind", help="Comma-separated tasks: diagnose, suggest, validate, revalidate, shadow_test, profile_consensus, extract."),
     profile: str | None = typer.Option(None, "--profile", help="Optional parser profile filter."),
     family: str | None = typer.Option(None, "--family", help="Optional family_key filter."),
     since: str = typer.Option("", "--since", help="ISO8601 datetime — only parse attempts after this."),
@@ -9930,6 +9930,18 @@ def run_overnight_parse_improvement_nc(
         False,
         "--exit-when-idle",
         help="Exit with code 42 if the run finds no work (lets wrapper loops break cleanly).",
+    ),
+    self_consistency_votes: int = typer.Option(
+        1,
+        "--self-consistency-votes",
+        help="For diagnose: total triage calls per case (1 = off; 3 recommended). "
+             "Extra votes only fire when first-call confidence is in the uncertain band.",
+    ),
+    auto_rediagnose_unknown: bool = typer.Option(
+        False,
+        "--auto-rediagnose-unknown",
+        help="If a fresh-diagnose pass finds no candidates, automatically retry with "
+             "rediagnose-unknown so the loop has work to do instead of exiting idle.",
     ),
 ) -> None:
     """Run parse-improvement tasks as a resumable overnight batch.
@@ -9958,7 +9970,7 @@ def run_overnight_parse_improvement_nc(
     settings, _ = _bootstrap()
 
     tasks = [t.strip() for t in task_kind.split(",") if t.strip()]
-    valid_tasks = {"diagnose", "suggest", "validate", "shadow_test", "profile_consensus", "extract"}
+    valid_tasks = {"diagnose", "suggest", "validate", "revalidate", "shadow_test", "profile_consensus", "extract"}
     for t in tasks:
         if t not in valid_tasks:
             typer.echo(f"Unknown task kind {t!r}. Valid: {', '.join(sorted(valid_tasks))}", err=True)
@@ -9985,6 +9997,8 @@ def run_overnight_parse_improvement_nc(
         resume=resume,
         rediagnose_unknown=rediagnose_unknown,
         limit=limit,
+        self_consistency_votes=self_consistency_votes,
+        auto_rediagnose_unknown=auto_rediagnose_unknown,
     )
 
     report_dict = report.to_dict()
@@ -10125,6 +10139,121 @@ def report_wrong_profile_diagnostics_nc(
             typer.echo(f"{'':>42}          - {ex}")
     if len(sorted_clusters) > limit:
         typer.echo(f"... ({len(sorted_clusters) - limit} more clusters omitted; use --json for full list)")
+
+
+@app.command("report-profile-recommendations-nc")
+def report_profile_recommendations_nc(
+    limit: int = typer.Option(40, "--limit", help="Max rows to show in stdout output."),
+    status: str = typer.Option(
+        "recommended",
+        "--status",
+        help="Filter by status: recommended | failing_already_best | no_recommendation | all.",
+    ),
+    min_confidence: float = typer.Option(
+        0.0, "--min-confidence", help="Hide rows below this confidence (0.0-1.0)."
+    ),
+    as_json: bool = typer.Option(False, "--json", help="Emit full grouped report as JSON."),
+    write_report: bool = typer.Option(
+        True,
+        "--write-report/--no-write-report",
+        help="Write JSON to docs/reports/profile_recommendations/<timestamp>.json.",
+    ),
+) -> None:
+    """List parser-profile reassignment recommendations from the consensus engine.
+
+    The consensus engine (``--task-kind profile_consensus``) writes one row to
+    ``parser_profile_recommendations`` per ``wrong_profile`` diagnosis. This
+    command summarizes those rows and surfaces the top failing→recommended
+    flips so you can decide whether to bulk-reassign.
+
+    Statuses:
+      - **recommended**          — top profile beats failing profile by both
+        confidence and margin thresholds; safe to act on.
+      - **failing_already_best** — engine agrees with the current assignment,
+        so the doc isn't really mis-routed — the parser is just failing to
+        extract. These should move to the regex/extraction fix path.
+      - **no_recommendation**    — too few signals to be confident.
+    """
+    import json as _json
+    from collections import Counter
+    from datetime import datetime as _dt, timezone as _tz
+    from pathlib import Path as _Path
+
+    from duke_rates.db.sqlite import connect
+
+    settings, _ = _bootstrap()
+    conn = connect(settings.database_path)
+    try:
+        if status == "all":
+            where = "WHERE confidence >= ?"
+            params: tuple[Any, ...] = (min_confidence,)
+        else:
+            where = "WHERE status = ? AND confidence >= ?"
+            params = (status, min_confidence)
+        rows = conn.execute(
+            f"""
+            SELECT id, parse_attempt_id, source_pdf, failing_profile,
+                   recommended_profile, confidence, margin, status,
+                   votes_json, evidence_json
+            FROM parser_profile_recommendations
+            {where}
+            ORDER BY confidence DESC, margin DESC, id DESC
+            """,
+            params,
+        ).fetchall()
+    finally:
+        conn.close()
+
+    rows_dicts = [dict(r) for r in rows]
+    flip_counts = Counter(
+        (r["failing_profile"], r["recommended_profile"]) for r in rows_dicts
+    )
+
+    payload = {
+        "generated_at": _dt.now(_tz.utc).isoformat(),
+        "filter_status": status,
+        "min_confidence": min_confidence,
+        "total": len(rows_dicts),
+        "top_flips": [
+            {"failing": k[0], "recommended": k[1], "count": n}
+            for k, n in flip_counts.most_common(20)
+        ],
+        "rows": rows_dicts[:limit],
+    }
+
+    if write_report:
+        report_dir = _Path("docs/reports/profile_recommendations")
+        report_dir.mkdir(parents=True, exist_ok=True)
+        ts = _dt.now(_tz.utc).strftime("%Y%m%dT%H%M%SZ")
+        path = report_dir / f"{ts}.json"
+        # Don't dump giant rows json blobs; persist a compact form.
+        compact = dict(payload)
+        compact["rows"] = [
+            {k: v for k, v in r.items() if k not in ("votes_json", "evidence_json")}
+            for r in rows_dicts
+        ]
+        path.write_text(_json.dumps(compact, indent=2), encoding="utf-8")
+        typer.echo(f"Report written: {path}")
+
+    if as_json:
+        typer.echo(_json.dumps(payload, indent=2, default=str))
+        return
+
+    typer.echo(f"\nProfile recommendations: status={status} count={len(rows_dicts)}")
+    typer.echo(f"\nTop failing -> recommended flips:")
+    typer.echo(f"  {'failing':<42} {'recommended':<42} {'count':>5}")
+    typer.echo("-" * 100)
+    for (failing, rec), n in flip_counts.most_common(15):
+        typer.echo(f"  {failing:<42} {rec:<42} {n:>5}")
+    typer.echo()
+    typer.echo(f"Top {min(limit, len(rows_dicts))} rows by confidence:")
+    typer.echo(f"  {'conf':>4} {'margin':>6}  {'failing':<35} {'recommended':<35}")
+    typer.echo("-" * 100)
+    for r in rows_dicts[:limit]:
+        typer.echo(
+            f"  {r['confidence']:>4.2f} {r['margin']:>6.2f}  "
+            f"{(r['failing_profile'] or '?'):<35} {(r['recommended_profile'] or '?'):<35}"
+        )
 
 
 @app.command("report-document-fingerprint-clusters-nc")

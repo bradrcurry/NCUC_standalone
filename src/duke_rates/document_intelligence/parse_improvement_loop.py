@@ -36,7 +36,10 @@ logger = logging.getLogger(__name__)
 # Task kinds
 # ---------------------------------------------------------------------------
 
-VALID_TASK_KINDS = frozenset({"diagnose", "suggest", "validate", "shadow_test", "profile_consensus", "extract"})
+VALID_TASK_KINDS = frozenset({
+    "diagnose", "suggest", "validate", "revalidate",
+    "shadow_test", "profile_consensus", "extract",
+})
 
 # ---------------------------------------------------------------------------
 # Report schema
@@ -147,6 +150,8 @@ class ParseImprovementLoop:
         resume: bool = False,
         rediagnose_unknown: bool = False,
         limit: int = 25,
+        self_consistency_votes: int = 1,
+        auto_rediagnose_unknown: bool = False,
     ) -> ParseImprovementReport:
         """Run the parse-improvement loop.
 
@@ -163,7 +168,9 @@ class ParseImprovementLoop:
             task_stats={t: {"ok": 0, "skip": 0, "fail": 0} for t in tasks},
         )
 
-        # Lazy-init components
+        # Lazy-init components (self-consistency setting affects diagnoser only)
+        self._sc_votes = max(1, int(self_consistency_votes))
+        self._auto_rediagnose = bool(auto_rediagnose_unknown)
         self._init_components(tasks)
 
         # --- Dry run --- (before health probes — no LLM needed)
@@ -265,13 +272,17 @@ class ParseImprovementLoop:
     def _init_components(self, tasks: list[str]) -> None:
         if "diagnose" in tasks and self._diagnoser is None:
             from duke_rates.document_intelligence.parse_diagnosis import ParseFailureDiagnoser
-            self._diagnoser = ParseFailureDiagnoser(self._orch, self._db_path)
+            self._diagnoser = ParseFailureDiagnoser(
+                self._orch,
+                self._db_path,
+                self_consistency_votes=getattr(self, "_sc_votes", 1),
+            )
 
         if "suggest" in tasks and self._suggestion_gen is None:
             from duke_rates.document_intelligence.regex_suggestions import RegexSuggestionGenerator
             self._suggestion_gen = RegexSuggestionGenerator(self._orch, self._db_path)
 
-        if "validate" in tasks and self._validator is None:
+        if ("validate" in tasks or "revalidate" in tasks) and self._validator is None:
             from duke_rates.document_intelligence.regex_validation import RegexValidationHarness
             self._validator = RegexValidationHarness(self._db_path)
 
@@ -312,6 +323,21 @@ class ParseImprovementLoop:
                 candidates = self._diagnoser.select_candidates(
                     limit=limit, profile=profile, family=family, since=since
                 )
+            # Auto-fallback: if a fresh-diagnose pass finds nothing AND we weren't
+            # already in rediagnose mode, fall through to rediagnose-unknown so
+            # the loop has work to do instead of exiting idle. Controlled by the
+            # _auto_rediagnose flag wired in from the run() call.
+            if (
+                not candidates
+                and not rediagnose_unknown
+                and getattr(self, "_auto_rediagnose", False)
+            ):
+                candidates = self._diagnoser.select_rediagnosis_candidates(
+                    limit=limit, profile=profile, family=family, since=since
+                )
+                if candidates:
+                    stats["fallback_to_rediagnose"] = len(candidates)
+                    rediagnose_unknown = True  # affect resume filter below
             if resume and not rediagnose_unknown:
                 # Filter out already-diagnosed (shouldn't happen with select_candidates,
                 # but double-check for resume safety)
@@ -360,11 +386,48 @@ class ParseImprovementLoop:
                         )
                         stats["fail"] += 1
 
+        elif task == "revalidate":
+            # Move stuck needs_human_review rows back into pending and run
+            # validate against them with the current thresholds.
+            if self._validator is None:
+                stats["skip"] = limit
+            else:
+                reset = self._validator.reset_human_review_for_revalidation(limit=limit)
+                stats["reset"] = reset
+                pending = self._validator.select_pending_suggestions(limit=limit)
+                stats["candidates"] = len(pending)
+                for row in pending:
+                    try:
+                        self._validator.validate_suggestion(row)
+                        stats["ok"] += 1
+                    except Exception as exc:
+                        logger.warning(
+                            "revalidate failed for id=%s: %s",
+                            row.get("id"), exc, exc_info=True,
+                        )
+                        stats["fail"] += 1
+
         elif task == "shadow_test":
             if self._shadow is None:
                 stats["skip"] = limit
             else:
-                pending = self._shadow.select_pending_shadow_tests(limit=limit)
+                # First, drain the strict pool (accepted_synthetic). Then, if
+                # there's budget left, top up with needs_human_review rows so
+                # the corpus-wide signal can rescue stuck cases too.
+                primary = self._shadow.select_pending_shadow_tests(limit=limit)
+                remaining = max(0, limit - len(primary))
+                if remaining > 0:
+                    secondary = self._shadow.select_pending_shadow_tests(
+                        limit=remaining, include_human_review=True
+                    )
+                    # de-dup any overlap (primary already covers accepted_synthetic)
+                    primary_ids = {r.get("id") for r in primary}
+                    rescue = [r for r in secondary if r.get("id") not in primary_ids]
+                    if rescue:
+                        stats["human_review_rescue"] = len(rescue)
+                    pending = primary + rescue
+                else:
+                    pending = primary
                 stats["candidates"] = len(pending)
                 for row in pending:
                     try:
@@ -398,6 +461,16 @@ class ParseImprovementLoop:
                             row.get("parse_attempt_id"), exc, exc_info=True,
                         )
                         stats["fail"] += 1
+                # Reclassify diagnoses where consensus said the existing profile
+                # IS the best fit — those are extraction failures, not routing
+                # failures, and should flow to the suggest stage.
+                reclassified = self._consensus.reclassify_failing_already_best()
+                if reclassified:
+                    stats["reclassified_to_regex_gap"] = reclassified
+                    logger.info(
+                        "profile_consensus reclassified %s diagnoses to regex_gap",
+                        reclassified,
+                    )
 
         elif task == "extract":
             candidates = self._extractor.select_extraction_candidates(
