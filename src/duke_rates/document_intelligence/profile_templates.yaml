@@ -1,0 +1,475 @@
+# Profile-as-Template metadata catalog (Phase 3A of parsing-architecture refactor).
+#
+# Each entry describes what a parser profile is *meant* to handle:
+#   - the schedule codes / rider codes the template targets,
+#   - the families / utilities it serves,
+#   - a "scope" hint for future Phase 4 routing decisions.
+#
+# This file is read-only metadata. It does NOT change extraction behavior.
+# Phase 3B's Tier 1 binder consumes it to decide which template to apply
+# for a given consensus profile name.
+#
+# Plan ref: docs/PARSING_ARCHITECTURE_REFACTOR_PLAN.md §6.3A.
+#
+# Schema (per template):
+#   <profile_name>:
+#     description:    one-line human summary
+#     utility:        which utility/company the template serves
+#                     (DEP | DEC | NAN | progress | carolinas | any)
+#     state:          jurisdiction (NC | SC | any)
+#     scope:          'template-level' (uniform across many docs)
+#                   | 'anchor-required' (regex must include doc-specific anchor)
+#                   | 'bundle-aware' (handles multi-tariff bundles)
+#                   | 'redline-aware'
+#     intended_schedule_codes: [list of codes the template is meant to parse]
+#     intended_rider_codes:    [list of rider codes the template handles]
+#     intended_families:       [family_key prefixes/values it covers]
+#     notes: |
+#       Free-form context — known limitations, related templates, etc.
+#
+# Conventions:
+#   - When in doubt about a template's intended codes, leave the list empty
+#     and add a TODO note. The Phase 3C comparison run will surface gaps.
+#   - "any" for utility/state means the template is intentionally generic.
+#   - 'template-level' scope means all docs that consensus-bind to this
+#     template will use the same regex set. 'anchor-required' means the
+#     binder should refuse Tier 1 binding here and downgrade to Tier 2/3
+#     until per-doc anchors are present.
+
+generic_residential:
+  description: "Catch-all residential template; the historical default for unrouted docs"
+  utility: any
+  state: any
+  scope: template-level
+  intended_schedule_codes: [RES-28, RES-50, RES-51, RES-57]
+  intended_rider_codes: []
+  intended_families: [residential, dep_residential, dec_residential]
+  notes: |
+    Used as the historical default. Many docs land here that should route
+    elsewhere (MGS, SGS, riders). Phase 3B should treat consensus-bind to
+    generic_residential cautiously — if the doc has high-specificity
+    non-residential schedule codes, the binder should refuse and let
+    Phase 4 per-doc rules take over.
+
+progress_residential_flat:
+  description: "DEP residential flat rates (RES-12, RES-17, RES-21)"
+  utility: progress
+  state: NC
+  scope: template-level
+  intended_schedule_codes: [RES-12, RES-14, RES-17, RES-19, RES-21, RES-23]
+  intended_rider_codes: []
+  intended_families: [dep_residential, progress_residential_flat]
+  notes: |
+    Older Progress NC residential rates. Generally clean text.
+
+progress_residential_tou:
+  description: "DEP residential time-of-use schedules"
+  utility: progress
+  state: NC
+  scope: template-level
+  intended_schedule_codes: [RES-63, RES-65, RES-77, RES-79]
+  intended_rider_codes: []
+  intended_families: [dep_residential_tou]
+  notes: |
+    Multi-period rates (on-peak / off-peak). Distinct from residential_flat.
+
+progress_current_leaf_bridge:
+  description: "Bridge profile for newer DEP leaf-numbered residential tariffs"
+  utility: progress
+  state: NC
+  scope: template-level
+  intended_schedule_codes: [RES-46, RES-47, RES-48, RES-50, RES-51]
+  intended_rider_codes: []
+  intended_families: [dep_residential]
+  notes: |
+    Bridges between old static schedule codes and current leaf-numbered
+    sheets. May overlap with progress_residential_flat for some codes.
+
+progress_single_value_rider:
+  description: "DEP single-value rider charges (one rate per rider doc)"
+  utility: progress
+  state: NC
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: [RAL-2, RECD-82, RES-77, RES-79, MGS-77]
+  intended_families: [dep_rider, progress_single_value_rider]
+  notes: |
+    Single-rate rider sheets (RDM, REPS, FCAR-style). Often very short
+    docs (1-2 pages). Multi-charge rider docs should NOT route here.
+
+progress_billing_adjustments:
+  description: "DEP billing-adjustment riders and surcharges"
+  utility: progress
+  state: NC
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: []
+  intended_families: [dep_billing_adjustments]
+  notes: |
+    TODO: enumerate intended rider codes once Phase 1D quality report
+    surfaces them.
+
+progress_energywise_business:
+  description: "DEP EnergyWise business demand-response rider"
+  utility: progress
+  state: NC
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: [EW]
+  intended_families: [dep_energywise_business]
+  notes: ""
+
+progress_greenpower_program:
+  description: "Progress NC GreenPower voluntary green-power program"
+  utility: progress
+  state: NC
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: [GP]
+  intended_families: [progress_greenpower]
+  notes: ""
+
+progress_solar_rebate_rider:
+  description: "Progress NC residential solar rebate rider"
+  utility: progress
+  state: NC
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: []
+  intended_families: [progress_solar_rebate]
+  notes: ""
+
+progress_sunsense_solar_rebate:
+  description: "DEP SunSense solar rebate program"
+  utility: progress
+  state: NC
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: []
+  intended_families: [progress_sunsense]
+  notes: ""
+
+progress_powerpair_pilot:
+  description: "DEP PowerPair pilot program (battery + solar)"
+  utility: progress
+  state: NC
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: [PP]
+  intended_families: [progress_powerpair]
+  notes: ""
+
+progress_residential_load_control:
+  description: "Progress residential load-control / direct-control rider"
+  utility: progress
+  state: NC
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: [PM]
+  intended_families: [progress_residential_load_control]
+  notes: ""
+
+progress_meter_related_optional_programs:
+  description: "Optional metering program riders"
+  utility: progress
+  state: NC
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: []
+  intended_families: []
+  notes: "TODO: enumerate."
+
+progress_demand_response_automation:
+  description: "DEP demand-response automation rider"
+  utility: progress
+  state: NC
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: []
+  intended_families: []
+  notes: ""
+
+progress_storm_securitization:
+  description: "DEP storm-recovery securitization rider"
+  utility: progress
+  state: NC
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: []
+  intended_families: []
+  notes: ""
+
+progress_street_lighting:
+  description: "DEP street-lighting schedules"
+  utility: progress
+  state: NC
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: []
+  intended_families: [dep_lighting]
+  notes: ""
+
+progress_traffic_signal_service:
+  description: "DEP traffic-signal-service schedule"
+  utility: progress
+  state: NC
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: []
+  intended_families: [dep_traffic_signal]
+  notes: ""
+
+progress_specialty_rider:
+  description: "Catch-all DEP specialty riders"
+  utility: progress
+  state: NC
+  scope: anchor-required
+  intended_schedule_codes: []
+  intended_rider_codes: []
+  intended_families: []
+  notes: |
+    Anchor-required because this template historically hosts many distinct
+    rider types. Phase 3B should NOT bind Tier 1 here without a doc-specific
+    anchor — risk of greedy matching across unrelated rider types.
+
+progress_rider_adjustment_matrix:
+  description: "Progress NC rider-adjustment matrix sheets"
+  utility: progress
+  state: NC
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: []
+  intended_families: []
+  notes: ""
+
+progress_income_qualified_load_control:
+  description: "DEP income-qualified load-control program"
+  utility: progress
+  state: NC
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: []
+  intended_families: []
+  notes: ""
+
+progress_lgs_rtp:
+  description: "DEP large general service real-time pricing"
+  utility: progress
+  state: NC
+  scope: template-level
+  intended_schedule_codes: [LGS]
+  intended_rider_codes: []
+  intended_families: [dep_large_general_service]
+  notes: ""
+
+progress_mgs:
+  description: "DEP medium general service schedules (MGS-31, MGS-32, etc.)"
+  utility: progress
+  state: NC
+  scope: template-level
+  intended_schedule_codes: [MGS-31, MGS-32, MGS-76, MGS-77]
+  intended_rider_codes: []
+  intended_families: [dep_medium_general_service]
+  notes: |
+    Phase 1D found MGS-32 docs incorrectly consensus-bound to
+    generic_residential. The Tier 1 binder should prefer this template
+    when MGS schedule codes are present in the doc anchors.
+
+carolinas_residential_flat:
+  description: "DEC residential flat-rate schedules"
+  utility: carolinas
+  state: NC
+  scope: template-level
+  intended_schedule_codes: [RS]
+  intended_rider_codes: []
+  intended_families: [dec_residential]
+  notes: ""
+
+carolinas_residential_tou:
+  description: "DEC residential time-of-use schedules (RT, RT-EV)"
+  utility: carolinas
+  state: NC
+  scope: template-level
+  intended_schedule_codes: [RT]
+  intended_rider_codes: []
+  intended_families: [dec_residential_tou]
+  notes: ""
+
+carolinas_general_service_schedule:
+  description: "DEC general service schedules (SGS, MGS, LGS)"
+  utility: carolinas
+  state: NC
+  scope: template-level
+  intended_schedule_codes: [SGS, MGS, LGS]
+  intended_rider_codes: []
+  intended_families: [dec_general_service]
+  notes: ""
+
+carolinas_lighting_schedule:
+  description: "DEC lighting schedules"
+  utility: carolinas
+  state: NC
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: []
+  intended_families: [dec_lighting]
+  notes: ""
+
+carolinas_schedule_bridge:
+  description: "Bridge profile for DEC schedule revisions"
+  utility: carolinas
+  state: NC
+  scope: anchor-required
+  intended_schedule_codes: []
+  intended_rider_codes: []
+  intended_families: []
+  notes: |
+    Bridge profiles cover schedule transitions; anchor-required because
+    a regex valid for one revision may not apply to others.
+
+carolinas_single_value_rider:
+  description: "DEC single-value rider charges"
+  utility: carolinas
+  state: NC
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: []
+  intended_families: [dec_rider]
+  notes: ""
+
+carolinas_flat_fee_rider:
+  description: "DEC flat-fee riders (PM, ED, CAR)"
+  utility: carolinas
+  state: NC
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: [PM, ED, CAR]
+  intended_families: []
+  notes: ""
+
+carolinas_fuel_cost_adj_rider:
+  description: "DEC/DEP fuel cost adjustment rider (FCAR)"
+  utility: carolinas
+  state: NC
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: [FCAR]
+  intended_families: [carolinas_fuel_cost_adj]
+  notes: ""
+
+carolinas_energy_efficiency_rider:
+  description: "DEC EE/DSM rider"
+  utility: carolinas
+  state: NC
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: [EE, DSM]
+  intended_families: []
+  notes: ""
+
+carolinas_solar_choice_rider:
+  description: "DEC Solar Choice rider (NSC, NMB)"
+  utility: carolinas
+  state: NC
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: [NSC, NMB]
+  intended_families: [carolinas_solar_choice]
+  notes: ""
+
+carolinas_net_metering_rider:
+  description: "DEC net metering rider"
+  utility: carolinas
+  state: NC
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: [NMB]
+  intended_families: [carolinas_net_metering]
+  notes: ""
+
+carolinas_economic_development_rider:
+  description: "DEC economic development rider"
+  utility: carolinas
+  state: NC
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: []
+  intended_families: []
+  notes: ""
+
+carolinas_rider_adjustment_matrix:
+  description: "DEC rider-adjustment matrix sheets"
+  utility: carolinas
+  state: NC
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: []
+  intended_families: []
+  notes: ""
+
+carolinas_nuclear_production_tax_credits:
+  description: "DEC nuclear PTC rider"
+  utility: carolinas
+  state: NC
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: []
+  intended_families: []
+  notes: ""
+
+carolinas_small_customer_generator:
+  description: "DEC small customer generator program"
+  utility: carolinas
+  state: NC
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: []
+  intended_families: []
+  notes: ""
+
+green_source_advantage_rider:
+  description: "Green Source Advantage rider (cross-utility)"
+  utility: any
+  state: NC
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: [GSA]
+  intended_families: []
+  notes: ""
+
+zero_charge_program:
+  description: "Programs that file tariffs but produce no rate charges"
+  utility: any
+  state: any
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: []
+  intended_families: []
+  notes: |
+    By design, parsing this profile produces zero charges. Failed
+    extraction here is NOT a template bug — it's the expected outcome.
+
+tiered_ingest:
+  description: "Tiered-ingest catch-all (legacy compliance bundles)"
+  utility: any
+  state: any
+  scope: anchor-required
+  intended_schedule_codes: []
+  intended_rider_codes: []
+  intended_families: []
+  notes: |
+    Legacy bundle-handling profile. Many docs here should route to a
+    more specific template once Phase 4 per-doc rules surface them.
+
+unknown:
+  description: "Sentinel for unrouted docs"
+  utility: any
+  state: any
+  scope: anchor-required
+  intended_schedule_codes: []
+  intended_rider_codes: []
+  intended_families: []
+  notes: |
+    Phase 1D identified that many high-confidence docs land here because
+    the legacy classifier didn't run. Phase 3B should refuse to bind
+    Tier 1 to "unknown" — it's a routing failure, not a template choice.

@@ -10719,6 +10719,170 @@ def report_routing_tier_validation_nc(
         )
 
 
+# ---------------------------------------------------------------------------
+# Phase 3 — Tier 1 binder + comparison
+# Plan ref: docs/PARSING_ARCHITECTURE_REFACTOR_PLAN.md §6
+# ---------------------------------------------------------------------------
+
+
+@app.command("bind-tier1-proposals-nc")
+def bind_tier1_proposals_nc(
+    limit: int = typer.Option(
+        0, "--limit", help="Process at most N Tier 1 docs (0 = unlimited)."
+    ),
+) -> None:
+    """Record Tier 1 binding proposals (Phase 3B, dry-run).
+
+    For each Tier 1 doc, looks up its consensus profile, checks the
+    profile_templates.yaml catalog for safety, and writes a row to
+    ``tier1_binding`` with status ``proposed`` (safe), ``refused`` (template
+    is anchor-required or missing from catalog), or ``no_consensus`` (data
+    bug: Tier 1 row with empty consensus_top).
+
+    This DOES NOT change extraction. Phase 3C's comparison report consumes
+    the proposals to evaluate disagreement rate before active binding is
+    enabled.
+    """
+    from duke_rates.document_intelligence.tier1_binder import Tier1Binder
+
+    settings, _ = _bootstrap()
+    binder = Tier1Binder(settings.database_path)
+    counts = binder.bind_all(limit=limit if limit > 0 else None)
+    nonzero = {k: v for k, v in counts.items() if v}
+    typer.echo(f"tier1_binding: {nonzero}")
+
+
+@app.command("report-tier1-binding-nc")
+def report_tier1_binding_nc(
+    sample: int = typer.Option(
+        15, "--sample", help="Number of disagreement samples to print."
+    ),
+    as_json: bool = typer.Option(False, "--json", help="Emit JSON instead of text."),
+) -> None:
+    """Print Tier 1 binding summary: status counts + agreement breakdown."""
+    import json as _json
+
+    from duke_rates.document_intelligence.tier1_binder import (
+        fetch_binding_summary,
+    )
+
+    settings, _ = _bootstrap()
+    summary = fetch_binding_summary(settings.database_path)
+
+    if as_json:
+        typer.echo(_json.dumps(summary, indent=2, default=str))
+        return
+
+    typer.echo("\n=== Tier 1 Binding Summary ===")
+    typer.echo("Status counts:")
+    for k, v in summary["status_counts"].items():
+        typer.echo(f"  {k:<15} {v}")
+    typer.echo()
+    typer.echo("By proposed profile:")
+    for k, v in summary["by_profile"].items():
+        typer.echo(f"  {k:<40} {v}")
+    typer.echo()
+    typer.echo("Agreement with current parser_profile:")
+    for k, v in summary["agreement"].items():
+        typer.echo(f"  {k:<10} {v}")
+    typer.echo()
+    typer.echo(f"--- Disagreement samples (top {sample} by confidence) ---")
+    for r in summary["disagreement_samples"][:sample]:
+        typer.echo(
+            f"  conf={r['overall_confidence']:.2f}  "
+            f"current={(r['current_parser_profile'] or '?'):<28} "
+            f"-> proposed={(r['proposed_profile'] or '?')}"
+        )
+
+
+@app.command("report-tier1-binding-comparison-nc")
+def report_tier1_binding_comparison_nc(
+    write_report: bool = typer.Option(
+        True,
+        "--write-report/--no-write-report",
+        help="Write JSON to docs/reports/tier1_binding_comparison/<timestamp>.json.",
+    ),
+    as_json: bool = typer.Option(False, "--json", help="Emit JSON to stdout."),
+) -> None:
+    """Run the Phase 3C comparison report.
+
+    Buckets Tier 1 binder proposals against current parser_profile and
+    surfaces disagreement rate, top flips by (current, proposed) pair, and
+    whether disagreements correlate with successful current parses (which
+    side is "right" for each disagreement).
+
+    The plan threshold for flipping active binding on is < 5%
+    disagreement. This report tells you whether you're there.
+    """
+    import json as _json
+    from datetime import datetime as _dt, timezone as _tz
+    from pathlib import Path as _Path
+
+    from duke_rates.document_intelligence.tier1_binder import (
+        build_comparison_report,
+    )
+
+    settings, _ = _bootstrap()
+    report = build_comparison_report(settings.database_path)
+    report["generated_at"] = _dt.now(_tz.utc).isoformat()
+
+    if write_report:
+        report_dir = _Path("docs/reports/tier1_binding_comparison")
+        report_dir.mkdir(parents=True, exist_ok=True)
+        ts = _dt.now(_tz.utc).strftime("%Y%m%dT%H%M%SZ")
+        path = report_dir / f"{ts}.json"
+        path.write_text(_json.dumps(report, indent=2, default=str), encoding="utf-8")
+        typer.echo(f"Report written: {path}")
+
+    if as_json:
+        typer.echo(_json.dumps(report, indent=2, default=str))
+        return
+
+    typer.echo("\n=== Tier 1 Binding Comparison (Phase 3C) ===")
+    t = report["totals"]
+    typer.echo(
+        f"Tier 1 docs total: {t['tier1_total']}  "
+        f"proposed={t.get('proposed', 0)}  refused={t.get('refused', 0)}  "
+        f"no_consensus={t.get('no_consensus', 0)}"
+    )
+    typer.echo(
+        f"Agreement: {report['agreement_count']}  "
+        f"Disagreement: {report['disagreement_count']}  "
+        f"No current attempt: {report['no_current_count']}"
+    )
+    typer.echo(
+        f"Agreement rate:    {report['agreement_rate']:.1%}"
+    )
+    typer.echo(
+        f"Disagreement rate: {report['disagreement_rate']:.1%}  "
+        f"(plan threshold: <5%)"
+    )
+    typer.echo()
+    typer.echo("Disagreements by kind:")
+    for k, v in report["disagreements_by_kind"].items():
+        typer.echo(f"  {k:<25} {v}")
+    typer.echo()
+    typer.echo("Top flips (current -> proposed):")
+    for f in report["top_flips"][:10]:
+        typer.echo(
+            f"  {(f['current'] or '?'):<30} -> {(f['proposed'] or '?'):<30} {f['count']}"
+        )
+    typer.echo()
+    typer.echo("When binder disagrees, current parse outcome is:")
+    for k, v in report["parsed_outcome_when_disagree"].items():
+        typer.echo(f"  {k:<22} {v}")
+    typer.echo()
+    typer.echo("Sample disagreement rows:")
+    for r in report["sample_rows"][:8]:
+        typer.echo(
+            f"  conf={r['overall_confidence']:.2f}  "
+            f"kind={r['kind']:<18}  "
+            f"current={(r['current_parser_profile'] or '?'):<25} "
+            f"-> {(r['proposed_profile'] or '?')}  "
+            f"(parse={r['current_parse_status']}/{r['current_charge_count']})"
+        )
+
+
 @app.command("report-document-fingerprint-clusters-nc")
 def report_document_fingerprint_clusters_nc(
     limit: int = typer.Option(40, "--limit", help="Max clusters to show."),
