@@ -10527,6 +10527,198 @@ def report_document_identity_quality_nc(
         )
 
 
+# ---------------------------------------------------------------------------
+# Phase 2 — routing tier system
+# Plan ref: docs/PARSING_ARCHITECTURE_REFACTOR_PLAN.md §5
+# ---------------------------------------------------------------------------
+
+
+@app.command("populate-routing-tier-nc")
+def populate_routing_tier_nc(
+    limit: int = typer.Option(
+        0, "--limit", help="Process at most N identity rows (0 = unlimited)."
+    ),
+) -> None:
+    """Label every ``document_identity`` row with a routing tier.
+
+    Tier labels are informational only in Phase 2 — they do not change
+    extraction. Phase 3/4 consume them to make routing decisions.
+    """
+    from duke_rates.document_intelligence.routing_tier import TierAggregator
+
+    settings, _ = _bootstrap()
+    agg = TierAggregator(settings.database_path)
+    n = agg.label_all(limit=limit if limit > 0 else None)
+    typer.echo(f"document_routing_tier: labeled/refreshed {n} rows")
+
+
+@app.command("report-routing-tier-nc")
+def report_routing_tier_nc(
+    sample_per_tier: int = typer.Option(
+        5, "--sample-per-tier", help="Show N example rationales per tier."
+    ),
+    as_json: bool = typer.Option(False, "--json", help="Emit summary as JSON."),
+) -> None:
+    """Show tier distribution and a few example rationales per tier.
+
+    Use this to eyeball tier assignments before committing to Phase 3
+    binding. The sample rationales surface borderline cases that may
+    inform threshold tuning.
+    """
+    import json as _json
+    import sqlite3 as _sql
+
+    from duke_rates.document_intelligence.routing_tier import (
+        fetch_tier_distribution,
+    )
+
+    settings, _ = _bootstrap()
+    dist = fetch_tier_distribution(settings.database_path)
+    total = sum(dist.values())
+
+    samples: dict[int, list[dict[str, Any]]] = {}
+    conn = _sql.connect(settings.database_path)
+    conn.row_factory = _sql.Row
+    try:
+        for tier in (1, 2, 3):
+            rows = conn.execute(
+                """
+                SELECT source_pdf, overall_confidence, profile_consensus_top,
+                       profile_consensus_margin, rationale
+                FROM document_routing_tier
+                WHERE tier = ?
+                ORDER BY overall_confidence DESC
+                LIMIT ?
+                """,
+                (tier, sample_per_tier),
+            ).fetchall()
+            samples[tier] = [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+    payload = {"distribution": dist, "total": total, "samples": samples}
+    if as_json:
+        typer.echo(_json.dumps(payload, indent=2, default=str))
+        return
+
+    typer.echo(f"\n=== Routing Tier Distribution ===")
+    typer.echo(f"Total docs labeled: {total}")
+    for tier in (1, 2, 3):
+        cnt = dist.get(tier, 0)
+        pct = (cnt / total * 100) if total else 0.0
+        bar = "#" * int(cnt / max(1, total) * 40)
+        typer.echo(f"  TIER_{tier}: {cnt:>5}  ({pct:5.1f}%)  {bar}")
+    typer.echo()
+    for tier in (1, 2, 3):
+        typer.echo(f"--- TIER_{tier} samples ---")
+        if not samples[tier]:
+            typer.echo("  (no rows)")
+            continue
+        for s in samples[tier]:
+            typer.echo(
+                f"  conf={s['overall_confidence']:.2f} "
+                f"top={(s['profile_consensus_top'] or '?'):<30} "
+                f"margin={s['profile_consensus_margin']}"
+            )
+            typer.echo(f"    {s['rationale']}")
+
+
+@app.command("report-routing-tier-validation-nc")
+def report_routing_tier_validation_nc(
+    write_report: bool = typer.Option(
+        True,
+        "--write-report/--no-write-report",
+        help="Write JSON to docs/reports/routing_tier_validation/<timestamp>.json.",
+    ),
+    as_json: bool = typer.Option(False, "--json", help="Emit full report as JSON."),
+) -> None:
+    """Cross-check tier predictions against actual parse outcomes (Phase 2B).
+
+    Per the plan §5.2B:
+      - Tier 1 docs SHOULD mostly parse cleanly. If they don't, the
+        underlying parser template needs work.
+      - Tier 3 docs SHOULD mostly diagnose as wrong_profile/unknown. If a
+        Tier 3 doc parses successfully, the cutoffs may be too strict.
+
+    The output surfaces the highest-leverage template-bug and
+    cutoff-tuning candidates.
+    """
+    import json as _json
+    from datetime import datetime as _dt, timezone as _tz
+    from pathlib import Path as _Path
+
+    from duke_rates.document_intelligence.routing_tier import (
+        build_tier_validation_report,
+    )
+
+    settings, _ = _bootstrap()
+    report = build_tier_validation_report(settings.database_path)
+    report["generated_at"] = _dt.now(_tz.utc).isoformat()
+
+    if write_report:
+        report_dir = _Path("docs/reports/routing_tier_validation")
+        report_dir.mkdir(parents=True, exist_ok=True)
+        ts = _dt.now(_tz.utc).strftime("%Y%m%dT%H%M%SZ")
+        path = report_dir / f"{ts}.json"
+        path.write_text(_json.dumps(report, indent=2, default=str), encoding="utf-8")
+        typer.echo(f"Report written: {path}")
+
+    if as_json:
+        typer.echo(_json.dumps(report, indent=2, default=str))
+        return
+
+    s = report["summary"]
+    typer.echo(f"\n=== Routing Tier Validation ===")
+    typer.echo(
+        f"Tier 1: {s['tier1_count']:>6} attempts  parsed-with-charges {s['tier1_parsed_rate']:>5.1%}  "
+        f"template_bugs={s['tier1_extraction_failure_count']}"
+    )
+    typer.echo(
+        f"Tier 2: {s['tier2_count']:>6} attempts"
+    )
+    typer.echo(
+        f"Tier 3: {s['tier3_count']:>6} attempts  parsed-with-charges {s['tier3_parsed_rate']:>5.1%}  "
+        f"unexpected_successes={s['tier3_unexpected_success_count']}"
+    )
+
+    typer.echo("\n--- Per-Tier Status Distribution (top 4) ---")
+    for tier, bucket in sorted(report["tier_outcomes"].items()):
+        top = sorted(bucket["by_status"].items(), key=lambda kv: -kv[1])[:4]
+        snip = ", ".join(f"{k}={v}" for k, v in top)
+        typer.echo(f"  TIER_{tier}: {snip}")
+
+    typer.echo("\n--- Per-Tier Diagnosed Failure Types ---")
+    for tier, fts in sorted(report["tier_diagnoses"].items()):
+        if not fts:
+            typer.echo(f"  TIER_{tier}: (none)")
+            continue
+        top = sorted(fts.items(), key=lambda kv: -kv[1])[:5]
+        snip = ", ".join(f"{k}={v}" for k, v in top)
+        typer.echo(f"  TIER_{tier}: {snip}")
+
+    typer.echo(
+        f"\n--- Tier 1 extraction failures (template bugs): "
+        f"{s['tier1_extraction_failure_count']} ---"
+    )
+    for r in report["tier1_extraction_failures"][:8]:
+        typer.echo(
+            f"  status={r.get('status', '?'):<10} "
+            f"profile={(r.get('parser_profile') or '?'):<28} "
+            f"recommended={(r.get('profile_consensus_top') or '?')}"
+        )
+
+    typer.echo(
+        f"\n--- Tier 3 unexpected successes (cutoff candidates): "
+        f"{s['tier3_unexpected_success_count']} ---"
+    )
+    for r in report["tier3_unexpected_successes"][:8]:
+        typer.echo(
+            f"  conf={r.get('overall_confidence', 0):.2f} "
+            f"profile={(r.get('parser_profile') or '?'):<28} "
+            f"charges={r.get('charge_count', 0)}"
+        )
+
+
 @app.command("report-document-fingerprint-clusters-nc")
 def report_document_fingerprint_clusters_nc(
     limit: int = typer.Option(40, "--limit", help="Max clusters to show."),

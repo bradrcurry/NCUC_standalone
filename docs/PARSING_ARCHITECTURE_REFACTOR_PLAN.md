@@ -69,10 +69,10 @@ a routing-layer change, not a parser-layer change.
   - [x] 1B. Aggregator that populates from existing tables *(2026-05-06)*
   - [x] 1C. CLI to inspect identity bundles *(2026-05-06)*
   - [x] 1D. Identity-quality report *(2026-05-06)*
-- [ ] **Phase 2 — Routing Tier System** (decision layer, no extraction change)
-  - [ ] 2A. Tier classifier
-  - [ ] 2B. Tier-prediction validation against existing parses
-  - [ ] 2C. Tier dashboard
+- [x] **Phase 2 — Routing Tier System** (decision layer, no extraction change)
+  - [x] 2A. Tier classifier *(2026-05-06)*
+  - [x] 2B. Tier-prediction validation against existing parses *(2026-05-06)*
+  - [x] 2C. Tier dashboard *(2026-05-06)*
 - [ ] **Phase 3 — Profile-as-Template binding** (Tier 1 active routing)
   - [ ] 3A. Profile → template rename / re-doc
   - [ ] 3B. Tier 1 binder (auto-bind high-confidence docs)
@@ -473,12 +473,29 @@ Pure function over `document_identity`. Initial cutoffs:
 - **TIER 2** — `0.5 ≤ overall_confidence < 0.85` OR `margin < 0.15`
 - **TIER 3** — `overall_confidence < 0.5` OR no profile consensus
 
-| Status | pending |
+**Implementation:** New module
+`src/duke_rates/document_intelligence/routing_tier.py` ships:
+- `Tier` IntEnum (TIER_1=1, TIER_2=2, TIER_3=3) and `TierClassification`
+  dataclass (pure data, no DB dependency).
+- `classify_tier(identity_bundle)` — pure function matching plan cutoffs;
+  handles the no-consensus case as Tier 3 regardless of overall
+  confidence (an edge case worth noting).
+- `document_routing_tier` table + `ensure_schema()`.
+- `TierAggregator` class with `label_all()` (idempotent batch upsert)
+  and `label_one(source_pdf)` (single-doc refresh).
+
+**First population pass:** 4412 docs labeled. Tier distribution:
+**6 Tier 1 / 145 Tier 2 / 4261 Tier 3**. The dominance of Tier 3
+matches the Phase 1 finding that ~93% of docs have weak identity —
+this is the population that Phase 4's per-doc rules track will need to
+serve.
+
+| Status | completed |
 |---|---|
-| Owner | unassigned |
-| Started | — |
-| Completed | — |
-| PR / commit | — |
+| Owner | claude-opus-4-7 |
+| Started | 2026-05-06 |
+| Completed | 2026-05-06 |
+| PR / commit | branch `refactor/phase-2-routing-tiers` |
 
 ### 2B. Tier-prediction validation
 
@@ -493,24 +510,69 @@ docs:
 
 Output: a confusion-matrix-like report.
 
-| Status | pending |
+**Implementation:** `build_tier_validation_report(db_path)` in
+`routing_tier.py`. Joins `document_routing_tier × parse_attempt_logs ×
+llm_parse_diagnostics` and emits four views:
+
+1. **tier_outcomes** — per-tier `parse_attempt_logs.status` distribution
+   plus `parsed_with_charges_rate`.
+2. **tier_diagnoses** — per-tier `failure_type` counts.
+3. **tier1_extraction_failures** — Tier 1 docs that did NOT parse
+   cleanly (template bugs).
+4. **tier3_unexpected_successes** — Tier 3 docs that parsed cleanly
+   anyway (cutoff-tuning candidates).
+
+**First-run findings:**
+- **Tier 1: 60.8% parsed-with-charges** (321 of 528 attempts). The 50
+  template-bug candidates all show `parser_profile=unknown` with
+  `recommended=generic_residential` — docs the legacy classifier missed
+  entirely; Phase 3 binding will fix these automatically.
+- **Tier 2: 59.1%** — only marginally below Tier 1, suggests cutoffs are
+  slightly conservative on the high end.
+- **Tier 3: 46.5%** — surprisingly high success rate. The 50 Tier 3
+  unexpected successes cluster at confidence ~0.80 with
+  `parser_profile=generic_residential` or
+  `progress_current_leaf_bridge` — these are docs whose only weak
+  signal is no profile consensus. Tuning candidate for §5.2C.
+- **Tier-diagnosed failures match expectations:** Tier 3 dominates
+  `wrong_profile` (94) and `unknown` (51); Tier 1 has only 3 of each.
+
+Note: tier-row counts (6 / 145 / 4261) and validation-attempt counts
+(528 / 7291 / 32594) differ because one source_pdf often has many
+parse_attempt_logs rows (different page ranges, parser profiles tried).
+Both views are useful and the dashboard surfaces both.
+
+| Status | completed |
 |---|---|
-| Owner | unassigned |
-| Started | — |
-| Completed | — |
-| PR / commit | — |
+| Owner | claude-opus-4-7 |
+| Started | 2026-05-06 |
+| Completed | 2026-05-06 |
+| PR / commit | branch `refactor/phase-2-routing-tiers` |
 
 ### 2C. Tier dashboard
 
 CLI command `report-routing-tiers-nc` showing tier distributions, top
 profile_consensus_top values per tier, sample docs per tier.
 
-| Status | pending |
+**Implementation:** Three CLI commands in `cli.py`:
+- `populate-routing-tier-nc` — runs the tier aggregator (with optional
+  `--limit N`).
+- `report-routing-tier-nc` — distribution histogram (ASCII `#` bars for
+  cp1252 compatibility) plus N example rationales per tier.
+- `report-routing-tier-validation-nc` — invokes
+  `build_tier_validation_report` and prints the §5.2B findings; saves
+  JSON to `docs/reports/routing_tier_validation/<timestamp>.json`.
+
+Verified live end-to-end on 4412 rows. The validation report surfaces
+50 template-bug candidates and 50 cutoff-tuning candidates with one
+command.
+
+| Status | completed |
 |---|---|
-| Owner | unassigned |
-| Started | — |
-| Completed | — |
-| PR / commit | — |
+| Owner | claude-opus-4-7 |
+| Started | 2026-05-06 |
+| Completed | 2026-05-06 |
+| PR / commit | branch `refactor/phase-2-routing-tiers` |
 
 ---
 
@@ -756,6 +818,30 @@ implementation begins:
 
 > Append-only. Newest entries on top. One paragraph per entry. Reference
 > commit hashes and the section number of the task.
+
+### 2026-05-06 — Phase 2 (full) — claude-opus-4-7
+
+**§5.2A/B/C shipped on branch `refactor/phase-2-routing-tiers`** (branched
+from `refactor/parsing-architecture` after Phase 0/1 work). New module
+`src/duke_rates/document_intelligence/routing_tier.py` (≈340 lines):
+`Tier` IntEnum, `TierClassification` dataclass, pure
+`classify_tier()` function, `document_routing_tier` table + DDL,
+`TierAggregator` (idempotent batch upsert), and
+`build_tier_validation_report()` for the §5.2B cross-check. Three new
+CLI commands in `cli.py`: `populate-routing-tier-nc`,
+`report-routing-tier-nc`, `report-routing-tier-validation-nc`.
+**First labeling pass on 4412 rows: 6 / 145 / 4261 (Tier 1/2/3).**
+Validation surfaced 50 Tier 1 template-bug candidates (all
+`parser_profile=unknown` → `recommended=generic_residential`, same
+pattern as the Phase 1D disagreement findings) and 50 Tier 3
+unexpected-success candidates clustering at confidence 0.80 (cutoff
+tuning lead for future revision). **Discovered:** the no-consensus →
+Tier 3 rule causes some 0.80-confidence docs (with strong fingerprint
++ classifier signals but no consensus row) to land in Tier 3 despite
+parsing successfully — worth noting for any future cutoff revision.
+The dashboard prints both source_pdf-unique counts (from
+`document_routing_tier`) and parse_attempt-row counts (from the
+validation join) since both views are useful.
 
 ### 2026-05-06 — Phase 1 (full) — claude-opus-4-7
 
