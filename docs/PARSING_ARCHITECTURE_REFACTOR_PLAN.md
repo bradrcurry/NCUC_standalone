@@ -73,10 +73,11 @@ a routing-layer change, not a parser-layer change.
   - [x] 2A. Tier classifier *(2026-05-06)*
   - [x] 2B. Tier-prediction validation against existing parses *(2026-05-06)*
   - [x] 2C. Tier dashboard *(2026-05-06)*
-- [x] **Phase 3 — Profile-as-Template binding** (Tier 1 active routing) — *dry-run only; active binding deferred*
+- [ ] **Phase 3 — Profile-as-Template binding** (Tier 1 active routing) — *dry-run portion shipped; 3D deferred*
   - [x] 3A. Profile → template rename / re-doc *(2026-05-06)*
   - [x] 3B. Tier 1 binder (auto-bind high-confidence docs) *(2026-05-06; dry-run only)*
   - [x] 3C. Compare binder output vs current parser routing *(2026-05-06)*
+  - [ ] 3D. Active-mode binding — bridge tier1_binding proposals into the parser pipeline *(deferred — re-evaluate after disagreement rate drops below 5% and Tier 1 sample size grows)*
 - [ ] **Phase 4 — Per-Document Rules track** (Tier 3 path)
   - [ ] 4A. `document_specific_rules` table
   - [ ] 4B. Rule-attachment generator (replaces current per-profile suggest for Tier 3)
@@ -732,6 +733,92 @@ over time.
 | Started | 2026-05-06 |
 | Completed | 2026-05-06 |
 | PR / commit | branch `refactor/phase-3-template-binding` |
+
+### 3D. Active-mode binding (deferred)
+
+**Goal:** When the §6.3C comparison-report disagreement rate drops below
+5% AND the Tier 1 sample population is large enough to be statistically
+meaningful (target: at least N=100 Tier 1 docs), bridge the
+``tier1_binding`` proposals into the existing parser pipeline so the
+binder actually produces charges for high-confidence docs.
+
+**What this task is:**
+
+For each `tier1_binding` row with `status = 'proposed'`:
+- Invoke the existing parser for the proposed profile against the doc
+  (using whatever pipeline currently handles `parse_attempt_logs`
+  ingestion).
+- On success (charges extracted): update the binding row to
+  `status = 'applied'`, write a new `parse_attempt_logs` row attributed
+  to the proposed profile, and persist the charges.
+- On failure (parser ran but produced no charges): update the binding
+  row to `status = 'template_bug'` and surface the doc in a
+  `report-tier1-template-bugs-nc` view so the template can be fixed.
+
+**Pre-conditions before flipping this on:**
+
+1. Disagreement rate from `report-tier1-binding-comparison-nc` is
+   ≤ 5% on the live corpus.
+2. Tier 1 population is at least 100 docs (the n=6 sample at the time
+   Phase 3B/C shipped is too small to ground an active-routing
+   change in).
+3. Phase 4 per-doc rules track is at least at 4A+4B (so that Tier 3
+   has a working alternative path before we further constrain Tier 1's
+   inputs).
+4. Confidence weight tuning from §4.1D's quality report has been
+   reviewed and adjusted if needed (see §10 Implementation Log entries
+   for context).
+
+**What this task is NOT:**
+
+- It is NOT a "rerun every Tier 1 doc through the parser" sweep. The
+  binder should be incremental — only act on docs whose `tier1_binding`
+  row is fresh (e.g., last_updated within the configured window) and
+  whose current parse outcome is `empty`/`failed`/`no_attempt`.
+  Production-parsed docs should be left alone unless explicitly
+  re-binding is requested via a flag.
+- It is NOT a parser refactor. It uses the existing
+  `parser_profiles.py` extraction code unchanged. The binder is a
+  *router* in front of the parser.
+
+**Files likely touched:**
+
+- `src/duke_rates/document_intelligence/tier1_binder.py` (add an
+  `apply_proposals()` method that uses an extraction adapter)
+- a new module `src/duke_rates/document_intelligence/tier1_active_adapter.py`
+  to encapsulate the bridge to `parser_profiles.py` so the binder
+  doesn't have a hard dependency on extraction internals
+- a new CLI command `apply-tier1-bindings-nc` (gated by an explicit
+  `--confirm-active` flag — there is no accidental enable path)
+
+**Acceptance test:**
+
+- A run with `--confirm-active --limit 5` should: (a) succeed without
+  raising, (b) produce 5 new `parse_attempt_logs` rows, (c) update 5
+  `tier1_binding` rows to `applied` or `template_bug`, (d) match the
+  `report-tier1-binding-comparison-nc` predicted outcome (within
+  tolerance — the binder should not generate charges that the
+  comparison report didn't predict it could).
+
+**GitNexus before editing:** run
+`gitnexus_impact({target: "ParserProfile.extract", direction: "upstream"})`
+and similar for the existing parser entry points so the adapter knows
+what it's wrapping.
+
+| Status | deferred |
+|---|---|
+| Owner | unassigned |
+| Started | — |
+| Completed | — |
+| PR / commit | — |
+
+> **Open question for whoever picks this up:** the deferred-task
+> threshold is "<5% disagreement at N≥100." If after Phase 4 the
+> Tier 1 population is still small (say 6–30 docs), we may want to
+> revise that gate downward — small N + high confidence-per-doc may
+> be enough to start with a conservative subset. Update §10
+> Implementation Log with the call and rationale before flipping the
+> switch.
 
 ---
 
