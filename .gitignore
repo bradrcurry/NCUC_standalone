@@ -1,0 +1,54 @@
+.env
+.venv/
+.venv312/
+.venv312-ocr/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.sqlite
+*.sqlite3
+tmp_streamlit_home.html
+duke_rates.db
+*.egg-info/
+# Keep repository lightweight: ignore runtime datasets/artifacts under data/
+data/
+
+# GitNexus knowledge graph indexes (re-generate: scripts/update-gitnexus-index.sh)
+.gitnexus/
+pipeline_index/
+
+# Scratch data directories from iterative development runs
+data_api_fl/
+data_api_fl2/
+data_api_fl3/
+data_api_nc/
+data_api_nc2/
+data_browser/
+data_eval/
+data_smoke/
+data_history_eval/
+
+# Exploration scripts and artifacts (not part of core system)
+experiments/
+
+# Local AI/agent tooling state
+.claude/
+.openclaw/
+.gitnexus-pipeline/
+.mcp.json
+
+# Local scratch work
+scratch/
+_quarantine/
+tmp_*
+*.tmp
+*.bak
+
+# Generated local run artifacts
+docs/reports/overnight_parse_improvement/*.json
+docs/reports/ollama_model_benchmarks/*.json
+*tmp_dry_run_output.txt

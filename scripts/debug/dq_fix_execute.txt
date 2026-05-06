@@ -1,0 +1,67 @@
+
+--- DQ-003: BPM Phantom Rows ---
+  Phantom rows to DELETE: 12466
+  Legitimate rows that survive: 5600
+  Deleted 12466 phantom rows.
+  Remaining rows in BPM family: 5600
+  [OK] All phantom rows deleted. Acceptance criteria met.
+
+--- DQ-005: Non-ISO effective_start Normalization ---
+  Total non-ISO rows: 48
+  UPDATE id=4498 (/pdfs/g2-nc-schedule-sgs-toue-dep.pdf 'January 1, 2015' -> 2015-01-01)
+  UPDATE id=4499 (/pdfs/g3-nc-schedule-mgs-dep.pdf 'January 1, 2015' -> 2015-01-01)
+  UPDATE id=4502 (/pdfs/rr1-nc-rider-ba-dep.pdf 'December 1, 2014' -> 2014-12-01)
+  UPDATE id=4017 (nc-progress-doc-FUELCHARGEADJUSTMENT 'December 1,\n2017' -> 2017-12-01)
+  UPDATE id=4020 (nc-progress-doc-FUELCHARGEADJUSTMENT 'December 1, 2019' -> 2019-12-01)
+  UPDATE id=4029 (nc-progress-doc-RESIDENTIALTIMEOFUSEENERGY 'March 16, 2018' -> 2018-03-16)
+  UPDATE id=4030 (nc-progress-doc-RESIDENTIALTIMEOFUSEENERGY 'March 16, 2022' -> 2022-03-16)
+  UPDATE id=5299 (nc-progress-leaf-500 'October 1, 2024' -> 2024-10-01)
+  [WARN->UPDATE+DELETE-STUB] id=5300 (nc-progress-leaf-500) has 65 charges vs ISO stub id=5101 with 5. Updating string-date to ISO, deleting stub.
+  [WARN->UPDATE+DELETE-STUB] id=5304 (nc-progress-leaf-501) has 42 charges vs ISO stub id=5102 with 5. Updating string-date to ISO, deleting stub.
+  UPDATE id=5306 (nc-progress-leaf-502 'October 1, 2024' -> 2024-10-01)
+  [WARN->UPDATE+DELETE-STUB] id=5307 (nc-progress-leaf-502) has 52 charges vs ISO stub id=5103 with 5. Updating string-date to ISO, deleting stub.
+  UPDATE id=5314 (nc-progress-leaf-503 'March 1, 2022' -> 2022-03-01)
+  DELETE id=5315 (nc-progress-leaf-503 'March 16, 2018') -- ISO dupe id=5309 has 0 charges, string version has 0
+  DELETE id=5316 (nc-progress-leaf-503 'September 1, 2019') -- ISO dupe id=5311 has 0 charges, string version has 0
+  [WARN->UPDATE+DELETE-STUB] id=5327 (nc-progress-leaf-526) has 39 charges vs ISO stub id=5112 with 2. Updating string-date to ISO, deleting stub.
+  UPDATE id=5340 (nc-progress-leaf-571 'March 16, 2022' -> 2022-03-16)
+  UPDATE id=5341 (nc-progress-leaf-571 'October 1, 2024' -> 2024-10-01)
+  [WARN->UPDATE+DELETE-STUB] id=5342 (nc-progress-leaf-571) has 36 charges vs ISO stub id=5122 with 0. Updating string-date to ISO, deleting stub.
+  UPDATE id=5346 (nc-progress-leaf-572 'October 1, 2024' -> 2024-10-01)
+  [WARN->UPDATE+DELETE-STUB] id=5347 (nc-progress-leaf-572) has 21 charges vs ISO stub id=5123 with 0. Updating string-date to ISO, deleting stub.
+  UPDATE id=5357 (nc-progress-leaf-600 'April 1, 2025' -> 2025-04-01)
+  UPDATE id=5358 (nc-progress-leaf-600 'December 1, 2025' -> 2025-12-01)
+  [WARN->UPDATE+DELETE-STUB] id=5359 (nc-progress-leaf-600) has 1989 charges vs ISO stub id=5130 with 1. Updating string-date to ISO, deleting stub.
+  UPDATE id=5373 (nc-progress-leaf-601 'December 1, 2025' -> 2025-12-01)
+  UPDATE id=5374 (nc-progress-leaf-601 'January 1, 2025' -> 2025-01-01)
+  [WARN->UPDATE+DELETE-STUB] id=5375 (nc-progress-leaf-601) has 65 charges vs ISO stub id=5131 with 5. Updating string-date to ISO, deleting stub.
+  [WARN->UPDATE+DELETE-STUB] id=5396 (nc-progress-leaf-602) has 13 charges vs ISO stub id=5386 with 0. Updating string-date to ISO, deleting stub.
+  UPDATE id=5400 (nc-progress-leaf-604 'December 1, 2016' -> 2016-12-01)
+  UPDATE id=5401 (nc-progress-leaf-604 'December 1, 2018' -> 2018-12-01)
+  UPDATE id=5407 (nc-progress-leaf-605 'December 1, 2020' -> 2020-12-01)
+  DELETE id=5408 (nc-progress-leaf-605 'February 1, 2017') -- ISO dupe id=5405 has 0 charges, string version has 0
+  [WARN->UPDATE+DELETE-STUB] id=5412 (nc-progress-leaf-607) has 65 charges vs ISO stub id=5135 with 5. Updating string-date to ISO, deleting stub.
+  UPDATE id=5413 (nc-progress-leaf-607 'July 1, 2025' -> 2025-07-01)
+  [WARN->UPDATE+DELETE-STUB] id=5415 (nc-progress-leaf-608) has 13 charges vs ISO stub id=5136 with 1. Updating string-date to ISO, deleting stub.
+  DELETE id=5418 (nc-progress-leaf-609 'April 1, 2025') -- ISO dupe id=5137 has 1 charges, string version has 0
+  [WARN->UPDATE+DELETE-STUB] id=5435 (nc-progress-leaf-613) has 65 charges vs ISO stub id=5140 with 5. Updating string-date to ISO, deleting stub.
+  DELETE id=5440 (nc-progress-leaf-640 'October 1, 2024') -- ISO dupe id=5141 has 0 charges, string version has 0
+  DELETE id=5478 (nc-progress-leaf-672 'January 15, 2025') -- ISO dupe id=5173 has 0 charges, string version has 0
+  DELETE id=5485 (nc-progress-leaf-703 'January 1, 2025') -- ISO dupe id=5178 has 0 charges, string version has 0
+  DELETE id=5502 (nc-progress-leaf-715 'November 28, 2023') -- ISO dupe id=5501 has 0 charges, string version has 0
+  UPDATE id=4568 (ncuc-dep-602 'December 1, 2016' -> 2016-12-01)
+  UPDATE id=4569 (ncuc-dep-604 'December 1, 2016' -> 2016-12-01)
+  UPDATE id=4570 (ncuc-dep-640 'December 1, 2020' -> 2020-12-01)
+  UPDATE id=4571 (ncuc-dep-674 'August 11, 2025' -> 2025-08-11)
+  UPDATE id=4572 (ncuc-dep-704 'February 27, 2019' -> 2019-02-27)
+  UPDATE id=4573 (ncuc-dep-722 'September 22, 2023' -> 2023-09-22)
+  UPDATE id=4574 (ncuc-dep-723 'September 22, 2023' -> 2023-09-22)
+
+  Plan: 8 string-date DELETEs, 12 ISO stub DELETEs, 40 UPDATEs
+
+  Deleted 8 string-date versions (+ 0 orphaned charges)
+  Updated 40 versions to ISO dates
+  Deleted 12 ISO stub versions (+ 34 charges)
+  [OK] All effective_start values are now ISO-8601. Acceptance criteria met.
+
+[OK] All changes committed.

@@ -1,0 +1,79 @@
+=== DQ-001: All Rider Adjustment rows in these families ===
+  nc-carolinas-doc-SCHEDULEOPTE                       Rider Adjustment           -8.0000 $/kWh   cnt=33
+  nc-carolinas-doc-SCHEDULEOPTE                       Rider Adjustment           -1.0000 $/kWh   cnt=33
+  nc-carolinas-doc-SCHEDULEWC                         Rider Adjustment           -8.0000 $/kWh   cnt=33
+  nc-carolinas-doc-SCHEDULEWC                         Rider Adjustment           -1.0000 $/kWh   cnt=33
+  nc-carolinas-doc-SCHEDULEWCRESIDENTIALWATERHEATING  Rider Adjustment           -8.0000 $/kWh   cnt=45
+  nc-carolinas-doc-SCHEDULEWCRESIDENTIALWATERHEATING  Rider Adjustment           -1.0000 $/kWh   cnt=45
+  nc-carolinas-schedule-I                             Rider Adjustment           -8.0000 $/kWh   cnt=14
+  nc-carolinas-schedule-I                             Rider Adjustment           -1.0000 $/kWh   cnt=14
+  nc-carolinas-schedule-PG                            Rider Adjustment           -8.0000 $/kWh   cnt=14
+  nc-carolinas-schedule-PG                            Rider Adjustment           -1.0000 $/kWh   cnt=14
+  nc-carolinas-schedule-SGS                           Rider Adjustment           -8.0000 $/kWh   cnt=14
+  nc-carolinas-schedule-SGS                           Rider Adjustment           -1.0000 $/kWh   cnt=14
+  nc-carolinas-schedule-TS                            Rider Adjustment           -8.0000 $/kWh   cnt=21
+  nc-carolinas-schedule-TS                            Rider Adjustment           -1.0000 $/kWh   cnt=21
+
+=== Non-(-1.0) non-(-8.0) rider adjustment rows ===
+  None
+
+=== Source snippet for -8.0 Rider Adjustment rows ===
+  snippet='OUTDOOR LIGHTING SERVICE \n(8) '
+
+=== DQ-004: v5302 source info ===
+  id=5302
+  family_key='nc-progress-leaf-501'
+  historical_document_id=233
+  effective_start='2014-09-15'
+  source_type='regulator'
+  confidence_score=0.5
+  notes='Bootstrapped for historical reprocess queue.'
+  created_at='2026-04-01T00:03:23.699557+00:00'
+
+  Linked historical_document:
+    id=233
+    family_key='nc-progress-leaf-501'
+    title='leaf-no-501-schedule-r-toud.pdf (Span 4-181)'
+    state='NC'
+    company='progress'
+    category='rate'
+    kind='pdf'
+    canonical_url='https://starw1.ncuc.gov/NCUC/PSC/PSCDocumentDetailsPageNCUC.aspx?DocumentId=2e63b554-53c6-42e0-bc21-c0a0adc72894&Class=
+    archived_url='ncuc://E-2/1659#page=4'
+    snapshot_timestamp='1970-01-01T00:00:00+00:00'
+    local_path='data\\raw\\historical\\ncuc\\e-2\\e-2-nodate-dep-compliance-tariffs.pdf'
+    content_hash='92d2e5e343d09e2a75331f0452458833b03461f80823d87e289dadd4ff7fdd4d'
+    content_type='application/pdf'
+    direct_status_code=200
+    direct_downloadable=1
+    leaf_no='501'
+    effective_start='2014-09-15'
+    retrieved_at='2026-03-24T19:47:18.099667+00:00'
+    metadata_json='{"archived_url": "ncuc://E-2/1659#page=4", "canonical_url": "https://starw1.ncuc.gov/NCUC/PSC/PSCDocumentDetailsPageNCU
+
+=== v5301 sample charges (2014-06-01, the preceding good version) ===
+  A. Basic Customer Charge             +30.00000 $/month   tou=None  cnt=52
+  A. Customer Charge                   +21.00000 $/month   tou=None  cnt=39
+  Adjustment, (                        +0.03978 $/kWh     tou=None  cnt=39
+  Fixed                                +14.60000 $/month   tou=None  cnt=39
+  A. On-Peak Billing Demand            +12.08000 $/kW      tou=on_peak  cnt=26
+  Demand                               +1.56000 $/kW      tou=None  cnt=26
+  Demand                               +1.56000 $/kW      tou=off_peak  cnt=26
+  Fixed                                +17.00000 $/month   tou=None  cnt=26
+  I. Basic Customer Charge             +160.00000 $/month   tou=None  cnt=26
+  Tou_Energy                           +0.04585 $/kWh     tou=off_peak  cnt=26
+  Tou_Energy                           +0.04800 $/kWh     tou=off_peak  cnt=26
+  Tou_Energy                           +0.04834 $/kWh     tou=on_peak  cnt=26
+  Tou_Energy                           +0.05455 $/kWh     tou=off_peak  cnt=26
+  Tou_Energy                           +0.06015 $/kWh     tou=on_peak  cnt=26
+  Tou_Energy                           +0.06550 $/kWh     tou=off_peak  cnt=26
+  A.                                   +17.00000 $/month   tou=None  cnt=13
+  A.                                   +21.00000 $/month   tou=None  cnt=13
+  A. Basic Customer Charge             +21.00000 $/month   tou=None  cnt=13
+  Adjustment, (                        +0.03979 $/kWh     tou=None  cnt=13
+  B. Billing Demand                    +1.37000 $/kW      tou=None  cnt=13
+  B. Billing Demand                    +4.97000 $/kW      tou=None  cnt=13
+  B. Kilowatt-hour Energy Charge       +0.13219 $/kWh     tou=None  cnt=13
+  B. Kilowatt-hour Energy Charge       +0.16450 $/kWh     tou=None  cnt=13
+  Billing Demand                       +1.19000 $/kW      tou=None  cnt=13
+  Billing Demand                       +17.56000 $/kW      tou=None  cnt=13

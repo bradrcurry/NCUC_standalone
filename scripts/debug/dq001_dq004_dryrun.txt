@@ -1,0 +1,21 @@
+
+--- DQ-001: Phantom Rider Adjustment rows (-1.0, -8.0) ---
+  Phantom rows to DELETE: 348
+  Other (non-adjustment) charges preserved: 4169
+  Legitimate adjustment rows (other values): 0
+  [DRY RUN] No changes made.
+
+--- DQ-004: nc-progress-leaf-501 v5302 runaway extractor ---
+  Version: id=5302 family=nc-progress-leaf-501 eff_start='2014-09-15'
+           source_type='regulator' doc_id=233
+           notes='Bootstrapped for historical reprocess queue.'
+  Rows to DELETE: 1722
+  Neighboring versions for context:
+    id= 5301  eff_start='2014-06-01'     charges= 949
+    id= 5302  eff_start='2014-09-15'     charges=1722 <<< TARGET
+    id= 5303  eff_start='2023-10-01'     charges=  65
+    id= 5572  eff_start='2024-10-01'     charges=   6
+    id= 5304  eff_start='2025-10-01'     charges=  42
+  [DRY RUN] No changes made.
+
+[DRY RUN complete -- no changes committed]

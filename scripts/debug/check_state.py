@@ -1,0 +1,10 @@
+import sqlite3
+conn = sqlite3.connect("data/db/duke_rates.db")
+cur = conn.cursor()
+cur.execute("SELECT COUNT(*) FROM tariff_charges WHERE family_key = 'nc-carolinas-rider-BPMPROSPECTIVERIDER'")
+print("BPM rows remaining:", cur.fetchone()[0])
+cur.execute("SELECT COUNT(*) FROM tariff_versions WHERE effective_start NOT GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]*' AND effective_start IS NOT NULL")
+print("Non-ISO date rows:", cur.fetchone()[0])
+cur.execute("SELECT COUNT(*) FROM tariff_charges")
+print("Total tariff_charges:", cur.fetchone()[0])
+conn.close()

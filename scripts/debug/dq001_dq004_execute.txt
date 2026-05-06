@@ -1,0 +1,26 @@
+
+--- DQ-001: Phantom Rider Adjustment rows (-1.0, -8.0) ---
+  Phantom rows to DELETE: 348
+  Other (non-adjustment) charges preserved: 4169
+  Legitimate adjustment rows (other values): 0
+  Deleted 348 phantom rows.
+  [OK] All phantom rows deleted. Acceptance criteria met.
+
+--- DQ-004: nc-progress-leaf-501 v5302 runaway extractor ---
+  Version: id=5302 family=nc-progress-leaf-501 eff_start='2014-09-15'
+           source_type='regulator' doc_id=233
+           notes='Bootstrapped for historical reprocess queue.'
+  Rows to DELETE: 1722
+  Neighboring versions for context:
+    id= 5301  eff_start='2014-06-01'     charges= 949
+    id= 5302  eff_start='2014-09-15'     charges=1722 <<< TARGET
+    id= 5303  eff_start='2023-10-01'     charges=  65
+    id= 5572  eff_start='2024-10-01'     charges=   6
+    id= 5304  eff_start='2025-10-01'     charges=  42
+  Deleted 1722 rows from version 5302.
+  Updated version notes to indicate re-extraction needed.
+  Reprocess tables found: ['historical_reprocess_queue']
+  [NOTE] No reprocess_queue table found. Version notes updated; enqueue manually.
+  [OK] All corrupted rows deleted from v5302.
+
+[OK] All changes committed.

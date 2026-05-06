@@ -1,0 +1,50 @@
+Total non-ISO date rows: 48
+
+  id= 4498  charges=210  parsed='2015-01-01'  raw='January 1, 2015'  family=/pdfs/g2-nc-schedule-sgs-toue-dep.pdf [PATH-KEY]
+  id= 4499  charges=126  parsed='2015-01-01'  raw='January 1, 2015'  family=/pdfs/g3-nc-schedule-mgs-dep.pdf [PATH-KEY]
+  id= 4502  charges=  0  parsed='2014-12-01'  raw='December 1, 2014'  family=/pdfs/rr1-nc-rider-ba-dep.pdf [PATH-KEY]
+  id= 4017  charges=  0  parsed='2017-12-01'  raw='December 1,\n2017'  family=nc-progress-doc-FUELCHARGEADJUSTMENT
+  id= 4020  charges=  0  parsed='2019-12-01'  raw='December 1, 2019'  family=nc-progress-doc-FUELCHARGEADJUSTMENT
+  id= 4029  charges=  0  parsed='2018-03-16'  raw='March 16, 2018'  family=nc-progress-doc-RESIDENTIALTIMEOFUSEENERGY
+  id= 4030  charges=  0  parsed='2022-03-16'  raw='March 16, 2022'  family=nc-progress-doc-RESIDENTIALTIMEOFUSEENERGY
+  id= 5299  charges= 65  parsed='2024-10-01'  raw='October 1, 2024'  family=nc-progress-leaf-500
+  id= 5300  charges= 65  parsed='2025-10-01'  raw='October 1, 2025'  family=nc-progress-leaf-500 [HAS-ISO-DUPE: 5101=2025-10-01]
+  id= 5304  charges= 42  parsed='2025-10-01'  raw='October 1, 2025'  family=nc-progress-leaf-501 [HAS-ISO-DUPE: 5102=2025-10-01]
+  id= 5306  charges= 52  parsed='2024-10-01'  raw='October 1, 2024'  family=nc-progress-leaf-502
+  id= 5307  charges= 52  parsed='2025-10-01'  raw='October 1, 2025'  family=nc-progress-leaf-502 [HAS-ISO-DUPE: 5103=2025-10-01]
+  id= 5314  charges=234  parsed='2022-03-01'  raw='March 1, 2022'  family=nc-progress-leaf-503
+  id= 5315  charges=  0  parsed='2018-03-16'  raw='March 16, 2018'  family=nc-progress-leaf-503 [HAS-ISO-DUPE: 5309=2018-03-16]
+  id= 5316  charges=  0  parsed='2019-09-01'  raw='September 1, 2019'  family=nc-progress-leaf-503 [HAS-ISO-DUPE: 5311=2019-09-01]
+  id= 5327  charges= 39  parsed='2025-10-01'  raw='October 1, 2025'  family=nc-progress-leaf-526 [HAS-ISO-DUPE: 5112=2025-10-01]
+  id= 5340  charges=  0  parsed='2022-03-16'  raw='March 16, 2022'  family=nc-progress-leaf-571
+  id= 5341  charges= 36  parsed='2024-10-01'  raw='October 1, 2024'  family=nc-progress-leaf-571
+  id= 5342  charges= 36  parsed='2025-10-01'  raw='October 1, 2025'  family=nc-progress-leaf-571 [HAS-ISO-DUPE: 5122=2025-10-01]
+  id= 5346  charges= 21  parsed='2024-10-01'  raw='October 1, 2024'  family=nc-progress-leaf-572
+  id= 5347  charges= 21  parsed='2025-10-01'  raw='October 1, 2025'  family=nc-progress-leaf-572 [HAS-ISO-DUPE: 5123=2025-10-01]
+  id= 5357  charges=1989  parsed='2025-04-01'  raw='April 1, 2025'  family=nc-progress-leaf-600
+  id= 5358  charges=1989  parsed='2025-12-01'  raw='December 1, 2025'  family=nc-progress-leaf-600
+  id= 5359  charges=1989  parsed='2026-01-01'  raw='January 1, 2026'  family=nc-progress-leaf-600 [HAS-ISO-DUPE: 5130=2026-01-01]
+  id= 5373  charges= 65  parsed='2025-12-01'  raw='December 1, 2025'  family=nc-progress-leaf-601
+  id= 5374  charges= 65  parsed='2025-01-01'  raw='January 1, 2025'  family=nc-progress-leaf-601
+  id= 5375  charges= 65  parsed='2026-01-01'  raw='January 1, 2026'  family=nc-progress-leaf-601 [HAS-ISO-DUPE: 5131=2026-01-01]
+  id= 5396  charges= 13  parsed='2018-12-01'  raw='December 1, 2018'  family=nc-progress-leaf-602 [HAS-ISO-DUPE: 5386=2018-12-01]
+  id= 5400  charges= 56  parsed='2016-12-01'  raw='December 1, 2016'  family=nc-progress-leaf-604
+  id= 5401  charges=  0  parsed='2018-12-01'  raw='December 1, 2018'  family=nc-progress-leaf-604
+  id= 5407  charges=  0  parsed='2020-12-01'  raw='December 1, 2020'  family=nc-progress-leaf-605
+  id= 5408  charges=  0  parsed='2017-02-01'  raw='February 1, 2017'  family=nc-progress-leaf-605 [HAS-ISO-DUPE: 5405=2017-02-01]
+  id= 5412  charges= 65  parsed='2026-01-01'  raw='January 1, 2026'  family=nc-progress-leaf-607 [HAS-ISO-DUPE: 5135=2026-01-01]
+  id= 5413  charges= 65  parsed='2025-07-01'  raw='July 1, 2025'  family=nc-progress-leaf-607
+  id= 5415  charges= 13  parsed='2025-04-01'  raw='April 1, 2025'  family=nc-progress-leaf-608 [HAS-ISO-DUPE: 5136=2025-04-01]
+  id= 5418  charges=  0  parsed='2025-04-01'  raw='April 1, 2025'  family=nc-progress-leaf-609 [HAS-ISO-DUPE: 5137=2025-04-01]
+  id= 5435  charges= 65  parsed='2025-11-01'  raw='November 1, 2025'  family=nc-progress-leaf-613 [HAS-ISO-DUPE: 5140=2025-11-01]
+  id= 5440  charges=  0  parsed='2024-10-01'  raw='October 1, 2024'  family=nc-progress-leaf-640 [HAS-ISO-DUPE: 5141=2024-10-01]
+  id= 5478  charges=  0  parsed='2025-01-15'  raw='January 15, 2025'  family=nc-progress-leaf-672 [HAS-ISO-DUPE: 5173=2025-01-15]
+  id= 5485  charges=  0  parsed='2025-01-01'  raw='January 1, 2025'  family=nc-progress-leaf-703 [HAS-ISO-DUPE: 5178=2025-01-01]
+  id= 5502  charges=  0  parsed='2023-11-28'  raw='November 28, 2023'  family=nc-progress-leaf-715 [HAS-ISO-DUPE: 5501=2023-11-28]
+  id= 4568  charges=2240  parsed='2016-12-01'  raw='December 1, 2016'  family=ncuc-dep-602
+  id= 4569  charges=  0  parsed='2016-12-01'  raw='December 1, 2016'  family=ncuc-dep-604
+  id= 4570  charges=  0  parsed='2020-12-01'  raw='December 1, 2020'  family=ncuc-dep-640
+  id= 4571  charges=  0  parsed='2025-08-11'  raw='August 11, 2025'  family=ncuc-dep-674
+  id= 4572  charges=  0  parsed='2019-02-27'  raw='February 27, 2019'  family=ncuc-dep-704
+  id= 4573  charges=  0  parsed='2023-09-22'  raw='September 22, 2023'  family=ncuc-dep-722
+  id= 4574  charges=  0  parsed='2023-09-22'  raw='September 22, 2023'  family=ncuc-dep-723

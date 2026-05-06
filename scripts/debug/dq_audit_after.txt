@@ -1,0 +1,22 @@
+DQ-001 (phantom -1.0 rows): 174 total
+  nc-carolinas-doc-SCHEDULEOPTE: 33 rows
+  nc-carolinas-doc-SCHEDULEWC: 33 rows
+  nc-carolinas-doc-SCHEDULEWCRESIDENTIALWATERHEATINGSERVICE: 45 rows
+  nc-carolinas-schedule-I: 14 rows
+  nc-carolinas-schedule-PG: 14 rows
+  nc-carolinas-schedule-SGS: 14 rows
+  nc-carolinas-schedule-TS: 21 rows
+
+DQ-002 (demand $1.00/kW): 111 total
+  nc-carolinas-doc-SCHEDULEOPTE: 33 rows
+  nc-carolinas-doc-SCHEDULEWC: 33 rows
+  nc-carolinas-doc-SCHEDULEWCRESIDENTIALWATERHEATINGSERVICE: 45 rows
+
+DQ-003 (BPM phantom rows): 0 rows
+  Total BPM rows: 5600
+
+DQ-004 (leaf-501 v5302 Tou_Energy): 420 rows
+
+DQ-005 (non-ISO date versions): 0 rows
+
+Total tariff_charges: 45,118

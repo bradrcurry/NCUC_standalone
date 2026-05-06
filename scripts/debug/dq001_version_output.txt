@@ -1,0 +1,80 @@
+Phantom rows details:
+  version_id=4424  family=nc-carolinas-doc-SCHEDULEOPTE
+  label='Rider Adjustment'  val=-1.0
+  snippet="OUTDOOR LIGHTING SERVICE \n(B) Other Luminaires \nDecorative and non-standard luminaires can be installed on request, at the Company's option, at the rate in (A) above plus an \nextra monthly charge 
+
+  version_id=4424  family=nc-carolinas-doc-SCHEDULEOPTE
+  label='Rider Adjustment'  val=-8.0
+  snippet='OUTDOOR LIGHTING SERVICE \n(8) '
+
+  version_id=4423  family=nc-carolinas-doc-SCHEDULEWC
+  label='Rider Adjustment'  val=-1.0
+  snippet="OUTDOOR LIGHTING SERVICE \n(B) Other Luminaires \nDecorative and non-standard luminaires can be installed on request, at the Company's option, at the rate in (A) above plus an \nextra monthly charge 
+
+  version_id=4423  family=nc-carolinas-doc-SCHEDULEWC
+  label='Rider Adjustment'  val=-8.0
+  snippet='OUTDOOR LIGHTING SERVICE \n(8) '
+
+  version_id=4397  family=nc-carolinas-doc-SCHEDULEWCRESIDENTIALWATERHEATINGSERVICE
+  label='Rider Adjustment'  val=-1.0
+  snippet="OUTDOOR LIGHTING SERVICE \n(B) Other Luminaires \nDecorative and non-standard luminaires can be installed on request, at the Company's option, at the rate in (A) above plus an \nextra monthly charge 
+
+  version_id=4397  family=nc-carolinas-doc-SCHEDULEWCRESIDENTIALWATERHEATINGSERVICE
+  label='Rider Adjustment'  val=-8.0
+  snippet='OUTDOOR LIGHTING SERVICE \n(8) '
+
+  version_id=4423  family=nc-carolinas-doc-SCHEDULEWCRESIDENTIALWATERHEATINGSERVICE
+  label='Rider Adjustment'  val=-1.0
+  snippet="OUTDOOR LIGHTING SERVICE \n(B) Other Luminaires \nDecorative and non-standard luminaires can be installed on request, at the Company's option, at the rate in (A) above plus an \nextra monthly charge 
+
+  version_id=4423  family=nc-carolinas-doc-SCHEDULEWCRESIDENTIALWATERHEATINGSERVICE
+  label='Rider Adjustment'  val=-8.0
+  snippet='OUTDOOR LIGHTING SERVICE \n(8) '
+
+  version_id=5267  family=nc-carolinas-schedule-I
+  label='Rider Adjustment'  val=-1.0
+  snippet="OUTDOOR LIGHTING SERVICE \n(B) Other Luminaires \nDecorative and non-standard luminaires can be installed on request, at the Company's option, at the rate in (A) above plus an \nextra monthly charge 
+
+  version_id=5267  family=nc-carolinas-schedule-I
+  label='Rider Adjustment'  val=-8.0
+  snippet='OUTDOOR LIGHTING SERVICE \n(8) '
+
+
+Version IDs with phantom rows: [4424, 4423, 4397, 5267, 5273, 5282, 5284, 5561]
+
+Sample version records:
+
+  id=4397 family=nc-carolinas-doc-SCHEDULEWCRESIDENTIALWATERHEATINGSERVICE eff_start='2013-11-01'
+    historical_document_id=560
+    source_type='regulator'
+    confidence_score=0.5
+    notes='Bootstrapped for historical reprocess queue.'
+    created_at='2026-03-27T13:15:26.892486+00:00'
+
+  id=4423 family=nc-carolinas-doc-SCHEDULEWC eff_start='2013-11-01'
+    historical_document_id=682
+    source_type='regulator'
+    confidence_score=0.5
+    notes='Bootstrapped for historical reprocess queue.'
+    created_at='2026-03-27T16:47:58.544202+00:00'
+
+  id=4424 family=nc-carolinas-doc-SCHEDULEOPTE eff_start='2013-11-01'
+    historical_document_id=679
+    source_type='regulator'
+    confidence_score=0.5
+    notes='Bootstrapped for historical reprocess queue.'
+    created_at='2026-03-27T17:07:02.326824+00:00'
+
+  id=5267 family=nc-carolinas-schedule-I eff_start='2013-11-01'
+    historical_document_id=686
+    source_type='regulator'
+    confidence_score=0.5
+    notes='Bootstrapped for historical reprocess queue.'
+    created_at='2026-04-01T00:03:21.619199+00:00'
+
+  id=5273 family=nc-carolinas-schedule-PG eff_start='2013-11-01'
+    historical_document_id=646
+    source_type='regulator'
+    confidence_score=0.5
+    notes='Bootstrapped for historical reprocess queue.'
+    created_at='2026-04-01T00:03:21.984601+00:00'

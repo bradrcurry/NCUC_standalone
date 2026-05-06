@@ -1,0 +1,185 @@
+# Ollama model role → primary/fallback mapping.
+# Phase 2.5 of docs/document_intelligence_roadmap.md.
+#
+# Semantics:
+#   - Every component asks for a model by *role*, not by name.
+#   - Fallback list is tried in order on first failure (timeout, HTTP error,
+#     malformed JSON, schema validation error). No silent retries.
+#   - prompt_versions are bumped when prompt text changes so the overnight
+#     loop can detect stale runs.
+#   - json_mode: true means the orchestrator sets format=json by default.
+
+defaults:
+  host: "${OLLAMA_HOST:-http://localhost:11434}"
+  request_timeout_s: 120
+  json_mode: true
+
+roles:
+  fast_classifier:
+    primary: "smallthinker:latest"
+    fallback:
+      - "qwen3.5:4b"
+    options:
+      temperature: 0.0
+    max_tokens: 512
+    description: "Quick triage / flag classifiers (Phase 3+)"
+
+  balanced_classifier:
+    primary: "qwen3:8b"
+    fallback:
+      - "qwen2.5:7b-instruct"
+    options:
+      temperature: 0.0
+    max_tokens: 1024
+    description: "document_type adjudication, disagreement resolution (Phase 5)"
+
+  structured_extractor:
+    primary: "glm-4.7-flash:latest"
+    fallback:
+      - "command-r:latest"
+    options:
+      temperature: 0.0
+    max_tokens: 4096
+    timeout_s: 180
+    description: "Rate-row / metadata JSON extraction (Phase 5 coverage path)"
+
+  vision_layout:
+    primary: "qwen3-vl:4b"
+    fallback: []
+    options:
+      temperature: 0.0
+    max_tokens: 1024
+    probe_kind: "tags_only"
+    description: "Page-image classification, layout analysis"
+
+  ocr_fallback:
+    primary: "glm-ocr:latest"
+    fallback: []
+    options:
+      temperature: 0.0
+    max_tokens: 4096
+    probe_kind: "tags_only"
+    description: "Already wired via GlmOcrNormalizer — registered here for health checks"
+
+  embedding_primary:
+    primary: "qwen3-embedding:0.6b"
+    fallback: []
+    options: {}
+    max_tokens: 0
+    probe_kind: "embed"
+    description: "Primary embedding model (Phase 4)"
+
+  embedding_secondary:
+    primary: "snowflake-arctic-embed2:latest"
+    fallback: []
+    options: {}
+    max_tokens: 0
+    probe_kind: "embed"
+    description: "Secondary embedding model (Phase 4 second axis)"
+
+  legacy_embedding_baseline:
+    primary: "nomic-embed-text:latest"
+    fallback: []
+    options: {}
+    max_tokens: 0
+    probe_kind: "embed"
+    description: "Phase 4 regression baseline only — not the default"
+
+  heavy_reasoning:
+    primary: "deepseek-r1:14b"
+    fallback:
+      - "gemma4:e4b-it-q4_K_M"
+    options:
+      temperature: 0.0
+    max_tokens: 4096
+    description: "Rare hard-case adjudication — slow, not on the hot path"
+
+  parse_failure_triage:
+    primary: "mistral:7b-instruct"
+    fallback:
+      - "gemma4:e4b-it-q4_K_M"
+      - "qwen3:8b"
+      - "phi3.5:latest"
+    options:
+      temperature: 0.0
+    max_tokens: 1024
+    description: "Parse failure classification (Phase 5.6). Fixture-backed 2026-05 benchmark: mistral:7b-instruct had the best gold accuracy for parse diagnosis. gemma4 and qwen3 remain fallbacks for complementary behavior and schema-valid output."
+
+  hard_parse_diagnosis:
+    primary: "qwen2.5-coder:7b"
+    fallback:
+      - "gemma4:e4b-it-q4_K_M"
+      - "deepseek-r1:14b"
+    options:
+      temperature: 0.0
+    max_tokens: 2048
+    description: "Deep parse failure root-cause analysis (Phase 5.6). Used for low-confidence qwen3:8b triage; qwen2.5-coder:7b benchmarked slower but more decisive."
+
+  regex_suggestion:
+    primary: "qwen3:8b"
+    fallback:
+      - "mistral:7b-instruct"
+      - "phi3.5:latest"
+      - "gemma4:e4b-it-q4_K_M"
+      - "nemotron-3-nano:4b"
+    options:
+      temperature: 0.0
+    max_tokens: 2048
+    description: "Regex/normalization candidate generation (Phase 5.6). 2026-05 two-fixture regex benchmark: qwen3:8b, mistral:7b-instruct, and phi3.5:latest all reached 100% valid JSON and 100% gold accuracy; qwen3:8b was the fastest among those fully valid models. gemma4, nemotron-3-nano, and ministral each failed schema validation on one of two cases."
+
+  structured_rate_extraction:
+    primary: "gemma4:e4b-it-q4_K_M"
+    fallback:
+      - "qwen3:8b"
+      - "qwen2.5-coder:7b"
+    options:
+      temperature: 0.0
+    max_tokens: 2048
+    timeout_s: 120
+    description: "Schema-guided rate-row JSON extraction (Phase 5.6). Fixture-backed 2026-05 benchmark: gemma4:e4b-it-q4_K_M was the only viable tested model, with 100% gold accuracy on valid returns and no timeouts."
+
+  layout_table_extraction:
+    primary: "qwen3-vl:4b"
+    fallback: []
+    options:
+      temperature: 0.0
+    max_tokens: 2048
+    probe_kind: "tags_only"
+    description: "VLM page-image table extraction (Phase 5.6)"
+
+  lightweight_batch_classifier:
+    primary: "smallthinker:latest"
+    fallback:
+      - "qwen3.5:4b"
+    options:
+      temperature: 0.0
+    max_tokens: 512
+    description: "Batch document triage / filtering (Phase 5.6)"
+
+  embeddings_clustering:
+    primary: "qwen3-embedding:0.6b"
+    fallback:
+      - "snowflake-arctic-embed2:latest"
+    options: {}
+    max_tokens: 0
+    probe_kind: "embed"
+    description: "Clustering / similarity for parse failure grouping (Phase 5.6)"
+
+  code_model:
+    primary: "qwen2.5-coder:14b"
+    fallback:
+      - "qwen2.5-coder:7b"
+    options:
+      temperature: 0.0
+    max_tokens: 4096
+    description: "Dev-side use only — code generation, prompt authoring"
+
+prompt_versions:
+  balanced_classifier: "v1"
+  structured_extractor: "v1"
+  fast_classifier: "v1"
+  heavy_reasoning: "v1"
+  parse_failure_triage: "v1"
+  hard_parse_diagnosis: "v1"
+  regex_suggestion: "v1"
+  structured_rate_extraction: "v1"

@@ -1,0 +1,555 @@
+{
+  "schema_version": 1,
+  "last_updated": "2026-04-21",
+  "scope": "Canonical supported workflows for AI agents and operators. These workflows intentionally use the supported tool registry instead of the full CLI surface.",
+  "workflows": [
+    {
+      "workflow_id": "orient_and_triage",
+      "name": "Orient And Triage",
+      "intent": "Start a session with a compact status view, then branch into the right sanctioned workflow.",
+      "entry_conditions": [
+        "Starting a new session",
+        "Inheriting work from another agent",
+        "Unsure which queue or audit surface currently matters"
+      ],
+      "read_first": [
+        "AGENT_ONBOARDING.md",
+        "docs/NEXT_SESSION_START_HERE.md",
+        "docs/source_of_truth_and_legacy_paths.md"
+      ],
+      "steps": [
+        {
+          "step_id": "status",
+          "tool_id": "show-workflow-status-nc",
+          "purpose": "Get the compact NC orientation summary.",
+          "mode": "required"
+        },
+        {
+          "step_id": "review_detail",
+          "tool_id": "parse-review-summary",
+          "purpose": "Inspect review debt when the summary indicates weak-parse pressure.",
+          "mode": "optional"
+        },
+        {
+          "step_id": "reprocess_detail",
+          "tool_id": "show-reprocess-queue-nc",
+          "purpose": "Inspect the current reprocess queue when targeted reruns are active.",
+          "mode": "optional"
+        },
+        {
+          "step_id": "stale_detail",
+          "tool_id": "show-stale-historical-nc",
+          "purpose": "Confirm stale-stage debt when stage freshness is the suspected issue.",
+          "mode": "optional"
+        },
+        {
+          "step_id": "ocr_detail",
+          "tool_id": "show-ocr-queue-nc",
+          "purpose": "Inspect OCR backlog when scanned PDFs are the likely blocker.",
+          "mode": "optional"
+        },
+        {
+          "step_id": "family_detail",
+          "tool_id": "list-provisional-families",
+          "purpose": "Inspect provisional-family load when intake produced unresolved families.",
+          "mode": "optional"
+        }
+      ],
+      "branching": [
+        {
+          "if": "Downloaded records are pending import or lineage repairs need to be materialized",
+          "next_workflow": "historical_intake_and_extract"
+        },
+        {
+          "if": "Lineage blockers or family-link ambiguity dominate the backlog",
+          "next_workflow": "lineage_audit"
+        },
+        {
+          "if": "Provenance coverage or path-vs-hash uncertainty dominates the backlog",
+          "next_workflow": "provenance_and_coverage_audit"
+        },
+        {
+          "if": "The active bottleneck is finding or advancing missing clean historical documents",
+          "next_workflow": "missing_document_recovery"
+        },
+        {
+          "if": "Review debt, stale-stage debt, or profile changes require targeted reruns",
+          "next_workflow": "targeted_reprocess"
+        },
+        {
+          "if": "Provisional families need promotion or cleanup",
+          "next_workflow": "provisional_family_review"
+        },
+        {
+          "if": "Scanned PDFs are blocking extraction",
+          "next_workflow": "ocr_triage"
+        }
+      ],
+      "default_next_workflows": [
+        "historical_intake_and_extract",
+        "missing_document_recovery",
+        "lineage_audit",
+        "targeted_reprocess"
+      ]
+    },
+    {
+      "workflow_id": "historical_intake_and_extract",
+      "name": "Historical Intake And Extract",
+      "intent": "Move downloaded NCUC records into mined historical state and extract charges through the supported path.",
+      "entry_conditions": [
+        "New or repaired downloaded NCUC records are ready for intake",
+        "Historical state needs to be rebuilt from queued downloads"
+      ],
+      "read_first": [
+        "AGENT_ONBOARDING.md",
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/source_of_truth_and_legacy_paths.md"
+      ],
+      "steps": [
+        {
+          "step_id": "import",
+          "tool_id": "ncuc-import-pipeline",
+          "purpose": "Run the primary page-aware intake path.",
+          "mode": "required"
+        },
+        {
+          "step_id": "bootstrap",
+          "tool_id": "bootstrap-missing-versions-nc",
+          "purpose": "Fill simple missing tariff_version links before extraction.",
+          "mode": "required"
+        },
+        {
+          "step_id": "extract",
+          "tool_id": "extract-rates-nc",
+          "purpose": "Run extraction once historical docs and version links exist.",
+          "mode": "required"
+        },
+        {
+          "step_id": "validate",
+          "tool_id": "validate-extraction-nc",
+          "purpose": "Check whether extraction materially succeeded.",
+          "mode": "required"
+        },
+        {
+          "step_id": "review_summary",
+          "tool_id": "parse-review-summary",
+          "purpose": "Inspect resulting review debt after extraction.",
+          "mode": "required"
+        }
+      ],
+      "branching": [
+        {
+          "if": "Lineage blockers remain after intake",
+          "next_workflow": "lineage_audit"
+        },
+        {
+          "if": "Extraction debt now requires selective reruns",
+          "next_workflow": "targeted_reprocess"
+        },
+        {
+          "if": "New provisional families were created",
+          "next_workflow": "provisional_family_review"
+        }
+      ],
+      "default_next_workflows": [
+        "targeted_reprocess",
+        "lineage_audit",
+        "provisional_family_review"
+      ]
+    },
+    {
+      "workflow_id": "lineage_audit",
+      "name": "Lineage Audit",
+      "intent": "Diagnose family-link, version-link, and extraction-readiness blockers across NC historical documents.",
+      "entry_conditions": [
+        "Historical documents are not linking cleanly to families or versions",
+        "Extraction readiness is blocked by family or version debt"
+      ],
+      "read_first": [
+        "docs/operator_workflows.md",
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/source_of_truth_and_legacy_paths.md"
+      ],
+      "steps": [
+        {
+          "step_id": "gap_summary",
+          "tool_id": "show-lineage-gaps-nc",
+          "purpose": "Get aggregate gap counts and categories.",
+          "mode": "required"
+        },
+        {
+          "step_id": "doc_validation",
+          "tool_id": "validate-lineage-nc",
+          "purpose": "Separate blockers from warnings at document level.",
+          "mode": "required"
+        },
+        {
+          "step_id": "link_suggestions",
+          "tool_id": "suggest-family-links-nc",
+          "purpose": "Review likely family-link recoveries before optional apply.",
+          "mode": "optional"
+        },
+        {
+          "step_id": "bootstrap_versions",
+          "tool_id": "bootstrap-missing-versions-nc",
+          "purpose": "Repair simple missing version links surfaced by the audit.",
+          "mode": "optional"
+        }
+      ],
+      "branching": [
+        {
+          "if": "Family suggestions are applied and repaired discovery rows need rematerialization",
+          "next_workflow": "historical_intake_and_extract"
+        },
+        {
+          "if": "The remaining issue is provisional-family ambiguity",
+          "next_workflow": "provisional_family_review"
+        },
+        {
+          "if": "The remaining issue is provenance or hash coverage rather than family assignment",
+          "next_workflow": "provenance_and_coverage_audit"
+        }
+      ],
+      "default_next_workflows": [
+        "historical_intake_and_extract",
+        "provisional_family_review"
+      ]
+    },
+    {
+      "workflow_id": "provenance_and_coverage_audit",
+      "name": "Provenance And Coverage Audit",
+      "intent": "Audit missing provenance fields and fingerprint/hash coverage without mixing that work into lineage or queue triage.",
+      "entry_conditions": [
+        "Historical versions or discovery links have missing provenance",
+        "You need to distinguish path-only coverage from hash-backed coverage"
+      ],
+      "read_first": [
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/source_of_truth_and_legacy_paths.md",
+        "docs/operator_workflows.md"
+      ],
+      "steps": [
+        {
+          "step_id": "provenance",
+          "tool_id": "show-provenance-gaps-nc",
+          "purpose": "Audit missing provenance fields and weak discovery linkage.",
+          "mode": "required"
+        },
+        {
+          "step_id": "fingerprints",
+          "tool_id": "show-fingerprint-coverage-nc",
+          "purpose": "Measure hash-backed coverage, fingerprint presence, and artifact reuse.",
+          "mode": "required"
+        },
+        {
+          "step_id": "lineage_context",
+          "tool_id": "validate-lineage-nc",
+          "purpose": "Use blocker-vs-warning context when provenance debt overlaps extraction readiness.",
+          "mode": "optional"
+        }
+      ],
+      "branching": [
+        {
+          "if": "Coverage gaps reveal broader lineage blockers",
+          "next_workflow": "lineage_audit"
+        },
+        {
+          "if": "Coverage work reveals the real blocker is missing clean companion documents",
+          "next_workflow": "missing_document_recovery"
+        },
+        {
+          "if": "Coverage or provenance debt should drive selective reruns",
+          "next_workflow": "targeted_reprocess"
+        }
+      ],
+      "default_next_workflows": [
+        "missing_document_recovery",
+        "lineage_audit",
+        "targeted_reprocess"
+      ]
+    },
+    {
+      "workflow_id": "missing_document_recovery",
+      "name": "Missing Document Recovery",
+      "intent": "Use the sanctioned resumable loop to find, fetch, import, and advance missing clean historical tariff documents.",
+      "entry_conditions": [
+        "A family is known but the clean historical tariff or rider PDF is still missing",
+        "Lineage or confidence audits point to document acquisition rather than parser weakness",
+        "Deferred missing-document targets need queue-driven remediation"
+      ],
+      "read_first": [
+        "docs/operator_workflows.md",
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/cli_command_reference.md"
+      ],
+      "steps": [
+        {
+          "step_id": "search",
+          "tool_id": "search-nc-missing-clean-docs",
+          "purpose": "Search NCUC for likely clean historical document candidates.",
+          "mode": "required"
+        },
+        {
+          "step_id": "run_workflow",
+          "tool_id": "run-nc-missing-doc-workflow",
+          "purpose": "Advance the target through fetch, import, bootstrap, and queue stages.",
+          "mode": "required"
+        },
+        {
+          "step_id": "status",
+          "tool_id": "show-nc-missing-doc-status",
+          "purpose": "Inspect target-level workflow state and provenance after advancement.",
+          "mode": "required"
+        },
+        {
+          "step_id": "triage_queue",
+          "tool_id": "report-nc-missing-doc-triage",
+          "purpose": "Read the persisted next-action queue, preferably with actionable-only/top filters, and use the included sanctioned command suggestions to resume from durable guidance.",
+          "mode": "required"
+        },
+        {
+          "step_id": "triage_execute",
+          "tool_id": "execute-top-nc-missing-doc-triage",
+          "purpose": "Optionally let the tool execute the single highest-ranked actionable target through its sanctioned workflow.",
+          "mode": "optional"
+        },
+        {
+          "step_id": "triage_batch_execute",
+          "tool_id": "execute-batch-nc-missing-doc-triage",
+          "purpose": "Optionally execute a bounded batch of top actionable targets when repeated single-step execution would be noisy.",
+          "mode": "optional"
+        },
+        {
+          "step_id": "deferred",
+          "tool_id": "report-nc-missing-doc-deferred",
+          "purpose": "Group still-blocked targets by repairable reason.",
+          "mode": "optional"
+        },
+        {
+          "step_id": "remediate",
+          "tool_id": "remediate-and-promote-nc-missing-docs",
+          "purpose": "Run supported remediations and promote targets that become eligible.",
+          "mode": "optional"
+        }
+      ],
+      "branching": [
+        {
+          "if": "Recovered documents now need ordinary intake and extraction follow-through",
+          "next_workflow": "historical_intake_and_extract"
+        },
+        {
+          "if": "Recovered documents mainly created targeted repair or review work",
+          "next_workflow": "targeted_reprocess"
+        },
+        {
+          "if": "The remaining blocker is lineage quality rather than acquisition",
+          "next_workflow": "lineage_audit"
+        }
+      ],
+      "default_next_workflows": [
+        "historical_intake_and_extract",
+        "targeted_reprocess",
+        "lineage_audit"
+      ]
+    },
+    {
+      "workflow_id": "targeted_reprocess",
+      "name": "Targeted Reprocess",
+      "intent": "Use queue-first reruns instead of broad extraction reruns.",
+      "entry_conditions": [
+        "Review backlog, stale-stage debt, or profile changes require selective reruns",
+        "A bounded reprocess pass is preferable to rerunning everything"
+      ],
+      "read_first": [
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/operator_workflows.md",
+        "docs/agent_task_routing.md"
+      ],
+      "steps": [
+        {
+          "step_id": "priority",
+          "tool_id": "show-reprocess-priority-nc",
+          "purpose": "Rank the next highest-value reprocess targets.",
+          "mode": "required"
+        },
+        {
+          "step_id": "queue",
+          "tool_id": "enqueue-reprocess-nc",
+          "purpose": "Queue targeted reruns using the supported filters.",
+          "mode": "required"
+        },
+        {
+          "step_id": "inspect_queue",
+          "tool_id": "show-reprocess-queue-nc",
+          "purpose": "Verify the queued work before execution.",
+          "mode": "required"
+        },
+        {
+          "step_id": "run_queue",
+          "tool_id": "process-reprocess-queue-nc",
+          "purpose": "Execute the queued repair pass.",
+          "mode": "required"
+        },
+        {
+          "step_id": "review_after",
+          "tool_id": "parse-review-summary",
+          "purpose": "Check whether review debt was reduced or changed.",
+          "mode": "required"
+        },
+        {
+          "step_id": "profile_scope",
+          "tool_id": "show-profile-impact-nc",
+          "purpose": "Scope parser-profile reruns before queueing profile-specific work.",
+          "mode": "optional"
+        },
+        {
+          "step_id": "profile_queue",
+          "tool_id": "enqueue-profile-impact-nc",
+          "purpose": "Queue reruns caused by a profile change.",
+          "mode": "optional"
+        },
+        {
+          "step_id": "stale_queue",
+          "tool_id": "enqueue-stale-reprocess-nc",
+          "purpose": "Queue specifically stale-stage reruns when that is the dominant issue.",
+          "mode": "optional"
+        }
+      ],
+      "branching": [
+        {
+          "if": "Scanned PDFs remain the blocker after reprocess work",
+          "next_workflow": "ocr_triage"
+        },
+        {
+          "if": "Lineage blockers remain after reruns",
+          "next_workflow": "lineage_audit"
+        }
+      ],
+      "default_next_workflows": [
+        "orient_and_triage",
+        "lineage_audit",
+        "ocr_triage"
+      ]
+    },
+    {
+      "workflow_id": "provisional_family_review",
+      "name": "Provisional Family Review",
+      "intent": "Review and resolve provisional families created by intake instead of leaving family ambiguity implicit.",
+      "entry_conditions": [
+        "Intake created provisional families",
+        "A lineage audit points to unresolved provisional-family state"
+      ],
+      "read_first": [
+        "docs/operator_workflows.md",
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/cli_command_reference.md"
+      ],
+      "steps": [
+        {
+          "step_id": "list_families",
+          "tool_id": "list-provisional-families",
+          "purpose": "Inspect the current provisional-family backlog.",
+          "mode": "required"
+        },
+        {
+          "step_id": "suggestions",
+          "tool_id": "suggest-family-links-nc",
+          "purpose": "Review likely family-link recoveries when provisional families came from weak clues.",
+          "mode": "optional"
+        },
+        {
+          "step_id": "score_review_candidates",
+          "tool_id": "show-provisional-review-candidates-nc",
+          "purpose": "Rank charged provisional families and surface inferred promotion fields before manual promotion.",
+          "mode": "optional"
+        },
+        {
+          "step_id": "promote",
+          "tool_id": "promote-provisional-family",
+          "purpose": "Promote a reviewed provisional family to curated state.",
+          "mode": "optional"
+        },
+        {
+          "step_id": "validate_after",
+          "tool_id": "show-lineage-gaps-nc",
+          "purpose": "Recheck lineage after promotion or cleanup.",
+          "mode": "required"
+        }
+      ],
+      "branching": [
+        {
+          "if": "Promotions or link suggestions changed historical state that now needs rematerialization",
+          "next_workflow": "historical_intake_and_extract"
+        },
+        {
+          "if": "The remaining problem is document-level linkage quality",
+          "next_workflow": "lineage_audit"
+        }
+      ],
+      "default_next_workflows": [
+        "historical_intake_and_extract",
+        "lineage_audit"
+      ]
+    },
+    {
+      "workflow_id": "ocr_triage",
+      "name": "OCR Triage",
+      "intent": "Treat OCR as a queue-driven repair path instead of a special-case side workflow.",
+      "entry_conditions": [
+        "Scanned PDFs are blocking extraction or review",
+        "The OCR queue needs inspection or execution"
+      ],
+      "read_first": [
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/agent_task_routing.md",
+        "docs/OCR_IMPLEMENTATION_PLAN.md"
+      ],
+      "steps": [
+        {
+          "step_id": "inspect_ocr",
+          "tool_id": "show-ocr-queue-nc",
+          "purpose": "Inspect current OCR queue depth and status.",
+          "mode": "required"
+        },
+        {
+          "step_id": "enqueue_ocr",
+          "tool_id": "enqueue-ocr-nc",
+          "purpose": "Queue scanned PDFs that still need OCR.",
+          "mode": "optional"
+        },
+        {
+          "step_id": "run_ocr",
+          "tool_id": "process-ocr-queue-nc",
+          "purpose": "Execute OCR processing for queued records.",
+          "mode": "required"
+        },
+        {
+          "step_id": "reextract",
+          "tool_id": "extract-rates-nc",
+          "purpose": "Rerun extraction after OCR materially improves readable content.",
+          "mode": "optional"
+        },
+        {
+          "step_id": "review_after",
+          "tool_id": "parse-review-summary",
+          "purpose": "Check whether OCR reduced downstream review debt.",
+          "mode": "optional"
+        }
+      ],
+      "branching": [
+        {
+          "if": "OCR resolved the blocker and extraction is the next step",
+          "next_workflow": "targeted_reprocess"
+        },
+        {
+          "if": "OCR revealed broader lineage or provenance issues",
+          "next_workflow": "lineage_audit"
+        }
+      ],
+      "default_next_workflows": [
+        "targeted_reprocess",
+        "lineage_audit"
+      ]
+    }
+  ]
+}

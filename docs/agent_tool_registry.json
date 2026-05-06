@@ -1,0 +1,1088 @@
+{
+  "schema_version": 1,
+  "last_updated": "2026-04-21",
+  "scope": "Supported and intentionally classified tool entry points for AI agents and operators working the NCUC historical pipeline.",
+  "default_database": "data/db/duke_rates.db",
+  "status_definitions": {
+    "supported": "Default operator-facing entry point that should be preferred for routine work.",
+    "compatibility_alias": "Retained for older workflows; valid, but not the preferred name.",
+    "narrow_helper": "Useful for bounded inspection or repair tasks, but not a default starting point.",
+    "legacy": "Retained for backward compatibility or repair only; do not choose this first."
+  },
+  "category_definitions": {
+    "orient": "Session-start summaries and queue overviews.",
+    "inspect": "State inspection commands that do not usually prescribe a repair.",
+    "diagnose": "Focused audits that explain why a workflow is blocked or degraded.",
+    "repair": "Commands that enqueue, mutate, or repair workflow state.",
+    "extract": "Commands that import, mine, or extract structured tariff data.",
+    "legacy": "Superseded or older paths kept for compatibility."
+  },
+  "tools": [
+    {
+      "tool_id": "show-workflow-status-nc",
+      "surface": "cli",
+      "status": "supported",
+      "category": "orient",
+      "command": "python -m duke_rates show-workflow-status-nc",
+      "goal": "Compact session-start summary of review, reprocess, stale, OCR, lineage, and provisional-family state.",
+      "use_when": [
+        "Starting a session",
+        "Inheriting work from another agent",
+        "Choosing which sanctioned workflow to run next"
+      ],
+      "avoid_when": [
+        "You already know the exact queue or audit surface you need"
+      ],
+      "prerequisites": [
+        "Use the active SQLite database at data/db/duke_rates.db unless told otherwise"
+      ],
+      "next_tools": [
+        "parse-review-summary",
+        "show-reprocess-queue-nc",
+        "show-stale-historical-nc",
+        "show-ocr-queue-nc",
+        "show-lineage-gaps-nc",
+        "list-provisional-families"
+      ],
+      "mutates_state": false,
+      "docs": [
+        "AGENT_ONBOARDING.md",
+        "docs/operator_workflows.md",
+        "docs/document_parsing_pipeline_guide.md"
+      ]
+    },
+    {
+      "tool_id": "parse-review-summary",
+      "surface": "cli",
+      "status": "supported",
+      "category": "orient",
+      "command": "python -m duke_rates parse-review-summary",
+      "goal": "Summarize the current parse-review backlog using latest-attempt semantics.",
+      "use_when": [
+        "Reviewing weak parses after extraction or reprocessing",
+        "Confirming whether review debt is the active bottleneck"
+      ],
+      "avoid_when": [
+        "You need row-level backlog details from the legacy review queue path"
+      ],
+      "prerequisites": [],
+      "next_tools": [
+        "enqueue-reprocess-nc",
+        "show-reprocess-priority-nc",
+        "process-reprocess-queue-nc"
+      ],
+      "mutates_state": false,
+      "docs": [
+        "docs/operator_workflows.md",
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/cli_command_reference.md"
+      ]
+    },
+    {
+      "tool_id": "show-reprocess-queue-nc",
+      "surface": "cli",
+      "status": "supported",
+      "category": "inspect",
+      "command": "python -m duke_rates show-reprocess-queue-nc",
+      "goal": "Inspect the current targeted reprocess queue.",
+      "use_when": [
+        "Checking what is already queued before adding more work",
+        "Verifying queue depth before or after processing"
+      ],
+      "avoid_when": [
+        "You need ranked reasons for what should be queued next"
+      ],
+      "prerequisites": [],
+      "next_tools": [
+        "show-reprocess-priority-nc",
+        "process-reprocess-queue-nc"
+      ],
+      "mutates_state": false,
+      "docs": [
+        "docs/operator_workflows.md",
+        "docs/document_parsing_pipeline_guide.md"
+      ]
+    },
+    {
+      "tool_id": "show-reprocess-priority-nc",
+      "surface": "cli",
+      "status": "supported",
+      "category": "diagnose",
+      "command": "python -m duke_rates show-reprocess-priority-nc",
+      "goal": "Rank NC documents that should be reprocessed based on queue, parse, stage, OCR, and linkage signals.",
+      "use_when": [
+        "Choosing the highest-value reprocess targets",
+        "Understanding why the reprocess backlog exists"
+      ],
+      "avoid_when": [
+        "You only need the raw queue contents"
+      ],
+      "prerequisites": [],
+      "next_tools": [
+        "enqueue-reprocess-nc",
+        "enqueue-stale-reprocess-nc",
+        "enqueue-profile-impact-nc"
+      ],
+      "mutates_state": false,
+      "docs": [
+        "docs/operator_workflows.md",
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/cli_command_reference.md"
+      ]
+    },
+    {
+      "tool_id": "show-stale-historical-nc",
+      "surface": "cli",
+      "status": "supported",
+      "category": "diagnose",
+      "command": "python -m duke_rates show-stale-historical-nc",
+      "goal": "Show historical docs with stale or missing page/span stage artifacts.",
+      "use_when": [
+        "Investigating stage freshness issues",
+        "Deciding whether stale-stage reprocessing is needed"
+      ],
+      "avoid_when": [
+        "You need a general orientation summary first"
+      ],
+      "prerequisites": [],
+      "next_tools": [
+        "enqueue-stale-reprocess-nc",
+        "process-reprocess-queue-nc"
+      ],
+      "mutates_state": false,
+      "docs": [
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/operator_workflows.md"
+      ]
+    },
+    {
+      "tool_id": "show-ocr-queue-nc",
+      "surface": "cli",
+      "status": "supported",
+      "category": "inspect",
+      "command": "python -m duke_rates show-ocr-queue-nc",
+      "goal": "Inspect OCR queue depth and status for scanned historical PDFs.",
+      "use_when": [
+        "Checking whether OCR is blocking extraction progress",
+        "Reviewing OCR queue depth before processing"
+      ],
+      "avoid_when": [
+        "You already know which documents need OCR and just need to enqueue them"
+      ],
+      "prerequisites": [],
+      "next_tools": [
+        "enqueue-ocr-nc",
+        "process-ocr-queue-nc"
+      ],
+      "mutates_state": false,
+      "docs": [
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/agent_task_routing.md"
+      ]
+    },
+    {
+      "tool_id": "list-provisional-families",
+      "surface": "cli",
+      "status": "supported",
+      "category": "inspect",
+      "command": "python -m duke_rates list-provisional-families --state NC",
+      "goal": "List provisional tariff families that still need review or promotion.",
+      "use_when": [
+        "Checking whether intake created new provisional families",
+        "Preparing provisional-family review work"
+      ],
+      "avoid_when": [
+        "You need lineage or provenance gaps across all historical docs"
+      ],
+      "prerequisites": [],
+      "next_tools": [
+        "suggest-family-links-nc",
+        "promote-provisional-family"
+      ],
+      "mutates_state": false,
+      "docs": [
+        "docs/operator_workflows.md",
+        "docs/cli_command_reference.md"
+      ]
+    },
+    {
+      "tool_id": "ncuc-import-pipeline",
+      "surface": "cli",
+      "status": "supported",
+      "category": "extract",
+      "command": "python -m duke_rates ncuc-import-pipeline --all-downloaded",
+      "goal": "Primary historical intake command: mine page/span evidence, assign family keys, and create candidate historical rows.",
+      "use_when": [
+        "Downloaded NCUC records need to enter the pipeline",
+        "Recovered discovery rows need to be rematerialized into historical state"
+      ],
+      "avoid_when": [
+        "You are working only current Duke website documents",
+        "No new or updated downloaded records exist"
+      ],
+      "prerequisites": [
+        "Historical PDFs must already be downloaded and registered",
+        "Do not stack this with mine-ncuc-pipeline in the same workflow"
+      ],
+      "next_tools": [
+        "bootstrap-missing-versions-nc",
+        "extract-rates-nc",
+        "list-provisional-families"
+      ],
+      "mutates_state": true,
+      "docs": [
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/operator_workflows.md",
+        "docs/source_of_truth_and_legacy_paths.md"
+      ]
+    },
+    {
+      "tool_id": "mine-ncuc-pipeline",
+      "surface": "cli",
+      "status": "compatibility_alias",
+      "category": "extract",
+      "command": "python -m duke_rates mine-ncuc-pipeline --all-downloaded",
+      "goal": "Compatibility alias for the page-aware intake path used by older notes or scripts.",
+      "use_when": [
+        "Following an older workflow that still refers to the pre-rename command"
+      ],
+      "avoid_when": [
+        "You are choosing a command name for new work",
+        "You already ran ncuc-import-pipeline"
+      ],
+      "prerequisites": [
+        "Same intake prerequisites as ncuc-import-pipeline"
+      ],
+      "next_tools": [
+        "bootstrap-missing-versions-nc",
+        "extract-rates-nc"
+      ],
+      "mutates_state": true,
+      "docs": [
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/operator_workflows.md"
+      ]
+    },
+    {
+      "tool_id": "bootstrap-missing-versions-nc",
+      "surface": "cli",
+      "status": "supported",
+      "category": "repair",
+      "command": "python -m duke_rates bootstrap-missing-versions-nc",
+      "goal": "Create minimal tariff_version rows for historical docs that have dates and paths but still lack version linkage.",
+      "use_when": [
+        "Intake created historical docs without tariff_version linkage",
+        "Extraction readiness is blocked by missing version links"
+      ],
+      "avoid_when": [
+        "Lineage gaps are broader than simple version bootstrapping"
+      ],
+      "prerequisites": [
+        "Historical docs should already exist from the intake pipeline"
+      ],
+      "next_tools": [
+        "extract-rates-nc",
+        "validate-lineage-nc"
+      ],
+      "mutates_state": true,
+      "docs": [
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/cli_command_reference.md"
+      ]
+    },
+    {
+      "tool_id": "search-nc-missing-clean-docs",
+      "surface": "cli",
+      "status": "supported",
+      "category": "diagnose",
+      "command": "python -m duke_rates search-nc-missing-clean-docs",
+      "goal": "Search NCUC for likely clean historical tariff/rider documents tied to known family gaps.",
+      "use_when": [
+        "A family has lineage continuity but is still missing the clean historical document",
+        "A gap audit points to document acquisition rather than parser weakness"
+      ],
+      "avoid_when": [
+        "The exact historical PDF is already known and can be registered directly",
+        "The current bottleneck is stale extraction or parser-profile debt"
+      ],
+      "prerequisites": [
+        "Prefer show-lineage-gaps-nc or a missing-doc audit first when the target family is unclear"
+      ],
+      "next_tools": [
+        "run-nc-missing-doc-workflow",
+        "show-nc-missing-doc-status",
+        "report-nc-missing-doc-triage",
+        "report-nc-missing-doc-deferred"
+      ],
+      "mutates_state": true,
+      "docs": [
+        "docs/operator_workflows.md",
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/cli_command_reference.md"
+      ]
+    },
+    {
+      "tool_id": "run-nc-missing-doc-workflow",
+      "surface": "cli",
+      "status": "supported",
+      "category": "repair",
+      "command": "python -m duke_rates run-nc-missing-doc-workflow",
+      "goal": "Run the resumable missing-document loop from search through fetch/import/bootstrap/reprocess.",
+      "use_when": [
+        "You want the sanctioned end-to-end clean-document recovery loop",
+        "A missing-document target should be resumed from an intermediate stage instead of rebuilt manually"
+      ],
+      "avoid_when": [
+        "You have not scoped the family or target and only need a broad orientation summary"
+      ],
+      "prerequisites": [
+        "Use targeted family, record, or historical-document filters whenever possible",
+        "Prefer this workflow over handwritten multi-command recovery loops"
+      ],
+      "next_tools": [
+        "show-nc-missing-doc-status",
+        "report-nc-missing-doc-deferred",
+        "parse-review-summary"
+      ],
+      "mutates_state": true,
+      "docs": [
+        "docs/operator_workflows.md",
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/cli_command_reference.md"
+      ]
+    },
+    {
+      "tool_id": "show-nc-missing-doc-status",
+      "surface": "cli",
+      "status": "supported",
+      "category": "inspect",
+      "command": "python -m duke_rates show-nc-missing-doc-status",
+      "goal": "Explain workflow state and provenance for one missing-document family or target.",
+      "use_when": [
+        "You need to inspect why one target stalled",
+        "You want family-level missing-document provenance before manual intervention"
+      ],
+      "avoid_when": [
+        "You need a bulk grouped view of deferred reasons across many targets"
+      ],
+      "prerequisites": [],
+      "next_tools": [
+        "report-nc-missing-doc-triage",
+        "report-nc-missing-doc-deferred",
+        "remediate-and-promote-nc-missing-docs",
+        "run-nc-missing-doc-workflow"
+      ],
+      "mutates_state": false,
+      "docs": [
+        "docs/operator_workflows.md",
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/cli_command_reference.md"
+      ]
+    },
+    {
+      "tool_id": "report-nc-missing-doc-triage",
+      "surface": "cli",
+      "status": "supported",
+      "category": "diagnose",
+      "command": "python -m duke_rates report-nc-missing-doc-triage",
+      "goal": "Show persisted next-action and blocker guidance for resumable missing-document work, including a ranked actionable queue and exact next-command suggestions.",
+      "use_when": [
+        "A future agent should resume missing-document recovery from persisted guidance instead of recomputing triage",
+        "You need a queue-like worklist grouped by next action and blocker",
+        "A weaker agent should start from the top actionable targets instead of scanning every persisted row"
+      ],
+      "avoid_when": [
+        "You need full provenance detail for exactly one target"
+      ],
+      "prerequisites": [
+        "A prior validate pass from run-nc-missing-doc-workflow should have persisted triage metadata"
+      ],
+      "next_tools": [
+        "execute-batch-nc-missing-doc-triage",
+        "execute-top-nc-missing-doc-triage",
+        "show-nc-missing-doc-status",
+        "report-nc-missing-doc-deferred",
+        "remediate-and-promote-nc-missing-docs",
+        "run-nc-missing-doc-workflow"
+      ],
+      "mutates_state": false,
+      "docs": [
+        "docs/operator_workflows.md",
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/cli_command_reference.md"
+      ]
+    },
+    {
+      "tool_id": "execute-top-nc-missing-doc-triage",
+      "surface": "cli",
+      "status": "supported",
+      "category": "repair",
+      "command": "python -m duke_rates execute-top-nc-missing-doc-triage",
+      "goal": "Execute the top ranked actionable missing-document triage target through its sanctioned underlying workflow.",
+      "use_when": [
+        "A weaker agent should let the tool take the next sanctioned step automatically",
+        "The ranked triage queue already exists and you want bounded forward progress without manual command selection"
+      ],
+      "avoid_when": [
+        "You need to inspect the ranked queue before mutating anything",
+        "No persisted triage metadata exists yet"
+      ],
+      "prerequisites": [
+        "A prior validate pass from run-nc-missing-doc-workflow should have persisted triage metadata",
+        "Prefer report-nc-missing-doc-triage first when human review of the queue is still needed"
+      ],
+      "next_tools": [
+        "report-nc-missing-doc-triage",
+        "show-nc-missing-doc-status",
+        "run-nc-missing-doc-workflow"
+      ],
+      "mutates_state": true,
+      "docs": [
+        "docs/operator_workflows.md",
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/cli_command_reference.md"
+      ]
+    },
+    {
+      "tool_id": "execute-batch-nc-missing-doc-triage",
+      "surface": "cli",
+      "status": "supported",
+      "category": "repair",
+      "command": "python -m duke_rates execute-batch-nc-missing-doc-triage",
+      "goal": "Execute multiple ranked actionable missing-document triage targets with bounded stop conditions.",
+      "use_when": [
+        "You want bounded forward progress across several top actionable targets",
+        "A weaker agent should not have to manually repeat top-target execution one item at a time"
+      ],
+      "avoid_when": [
+        "You need to inspect each ranked target before any mutation",
+        "The queue is not yet persisted from a validate pass"
+      ],
+      "prerequisites": [
+        "A prior validate pass from run-nc-missing-doc-workflow should have persisted triage metadata",
+        "Choose a conservative --max-actions value so the run stays bounded and reviewable"
+      ],
+      "next_tools": [
+        "report-nc-missing-doc-triage",
+        "show-nc-missing-doc-status",
+        "run-nc-missing-doc-workflow"
+      ],
+      "mutates_state": true,
+      "docs": [
+        "docs/operator_workflows.md",
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/cli_command_reference.md"
+      ]
+    },
+    {
+      "tool_id": "report-nc-missing-doc-deferred",
+      "surface": "cli",
+      "status": "supported",
+      "category": "diagnose",
+      "command": "python -m duke_rates report-nc-missing-doc-deferred",
+      "goal": "Group deferred missing-document targets by blocking reason so remediation work stays queue-driven.",
+      "use_when": [
+        "You need to understand why missing-document targets are stalled",
+        "You are choosing whether remediation or manual registration is the next step"
+      ],
+      "avoid_when": [
+        "You already know the exact single target you need to inspect"
+      ],
+      "prerequisites": [],
+      "next_tools": [
+        "report-nc-missing-doc-triage",
+        "show-nc-missing-doc-status",
+        "remediate-and-promote-nc-missing-docs",
+        "search-nc-missing-clean-docs"
+      ],
+      "mutates_state": false,
+      "docs": [
+        "docs/operator_workflows.md",
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/cli_command_reference.md"
+      ]
+    },
+    {
+      "tool_id": "remediate-and-promote-nc-missing-docs",
+      "surface": "cli",
+      "status": "supported",
+      "category": "repair",
+      "command": "python -m duke_rates remediate-and-promote-nc-missing-docs",
+      "goal": "Run supported missing-document remediations and immediately promote targets that become eligible.",
+      "use_when": [
+        "Deferred missing-document targets are blocked on supported repairable reasons",
+        "You want the command-first remediation path instead of ad hoc SQL or notes"
+      ],
+      "avoid_when": [
+        "You have not reviewed deferred reasons yet"
+      ],
+      "prerequisites": [
+        "Inspect report-nc-missing-doc-deferred first when the blocked reasons are not already known"
+      ],
+      "next_tools": [
+        "show-nc-missing-doc-status",
+        "run-nc-missing-doc-workflow",
+        "parse-review-summary"
+      ],
+      "mutates_state": true,
+      "docs": [
+        "docs/operator_workflows.md",
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/cli_command_reference.md"
+      ]
+    },
+    {
+      "tool_id": "extract-rates-nc",
+      "surface": "cli",
+      "status": "supported",
+      "category": "extract",
+      "command": "python -m duke_rates extract-rates-nc",
+      "goal": "Run parser profiles against linked NC historical docs and persist tariff charges.",
+      "use_when": [
+        "Historical documents and tariff versions are linked and ready for extraction",
+        "Profile changes need a targeted or broad rerun"
+      ],
+      "avoid_when": [
+        "Version linkage is still missing",
+        "You only need to inspect diagnostic state"
+      ],
+      "prerequisites": [
+        "Historical docs should have effective_start and tariff_version linkage",
+        "Prefer targeted reprocessing over broad reruns when possible"
+      ],
+      "next_tools": [
+        "validate-extraction-nc",
+        "parse-review-summary",
+        "show-reprocess-priority-nc"
+      ],
+      "mutates_state": true,
+      "docs": [
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/operator_workflows.md",
+        "docs/historical_parser_architecture.md"
+      ]
+    },
+    {
+      "tool_id": "validate-extraction-nc",
+      "surface": "cli",
+      "status": "supported",
+      "category": "diagnose",
+      "command": "python -m duke_rates validate-extraction-nc",
+      "goal": "Validate extraction results and surface anomalies after parser runs.",
+      "use_when": [
+        "Checking whether extraction materially succeeded",
+        "Reviewing profile changes after a rerun"
+      ],
+      "avoid_when": [
+        "You only need a quick queue overview"
+      ],
+      "prerequisites": [
+        "Run after extract-rates-nc or a targeted reprocess pass"
+      ],
+      "next_tools": [
+        "parse-review-summary",
+        "show-reprocess-priority-nc"
+      ],
+      "mutates_state": false,
+      "docs": [
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/cli_command_reference.md"
+      ]
+    },
+    {
+      "tool_id": "show-lineage-gaps-nc",
+      "surface": "cli",
+      "status": "supported",
+      "category": "diagnose",
+      "command": "python -m duke_rates show-lineage-gaps-nc",
+      "goal": "Summarize NC family-link, version-link, effective-date, and no-charge lineage gaps.",
+      "use_when": [
+        "Auditing family linkage quality",
+        "Investigating why historical docs are blocked before extraction"
+      ],
+      "avoid_when": [
+        "You only need provenance-field coverage"
+      ],
+      "prerequisites": [],
+      "next_tools": [
+        "validate-lineage-nc",
+        "suggest-family-links-nc",
+        "bootstrap-missing-versions-nc"
+      ],
+      "mutates_state": false,
+      "docs": [
+        "docs/operator_workflows.md",
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/cli_command_reference.md"
+      ]
+    },
+    {
+      "tool_id": "validate-lineage-nc",
+      "surface": "cli",
+      "status": "supported",
+      "category": "diagnose",
+      "command": "python -m duke_rates validate-lineage-nc",
+      "goal": "Separate lineage blockers from warnings for each NC historical document.",
+      "use_when": [
+        "You need document-level extraction readiness checks",
+        "You want blocker vs warning distinction instead of aggregate counts"
+      ],
+      "avoid_when": [
+        "You only need a high-level lineage summary"
+      ],
+      "prerequisites": [],
+      "next_tools": [
+        "suggest-family-links-nc",
+        "bootstrap-missing-versions-nc",
+        "show-provenance-gaps-nc"
+      ],
+      "mutates_state": false,
+      "docs": [
+        "docs/operator_workflows.md",
+        "docs/document_parsing_pipeline_guide.md"
+      ]
+    },
+    {
+      "tool_id": "suggest-family-links-nc",
+      "surface": "cli",
+      "status": "supported",
+      "category": "repair",
+      "command": "python -m duke_rates suggest-family-links-nc",
+      "goal": "Suggest likely family assignments for stranded NC discovery rows; optional --apply persists recoverable matches.",
+      "use_when": [
+        "Stranded discovery rows have enough clues for likely family matches",
+        "You want a bounded lineage repair before rerunning intake"
+      ],
+      "avoid_when": [
+        "You have not reviewed the suggestions or are not prepared to mutate state"
+      ],
+      "prerequisites": [
+        "Inspect show-lineage-gaps-nc or validate-lineage-nc first",
+        "Use --apply only after reviewing suggested matches"
+      ],
+      "next_tools": [
+        "ncuc-import-pipeline",
+        "show-lineage-gaps-nc"
+      ],
+      "mutates_state": true,
+      "docs": [
+        "docs/operator_workflows.md",
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/cli_command_reference.md"
+      ]
+    },
+    {
+      "tool_id": "show-provenance-gaps-nc",
+      "surface": "cli",
+      "status": "supported",
+      "category": "diagnose",
+      "command": "python -m duke_rates show-provenance-gaps-nc",
+      "goal": "Audit missing version provenance fields and weak discovery linkage across NC historical rows.",
+      "use_when": [
+        "Auditing provenance debt",
+        "Understanding missing path/hash/docket linkage"
+      ],
+      "avoid_when": [
+        "You only need family-link gaps"
+      ],
+      "prerequisites": [],
+      "next_tools": [
+        "show-fingerprint-coverage-nc",
+        "validate-lineage-nc"
+      ],
+      "mutates_state": false,
+      "docs": [
+        "docs/operator_workflows.md",
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/cli_command_reference.md"
+      ]
+    },
+    {
+      "tool_id": "show-fingerprint-coverage-nc",
+      "surface": "cli",
+      "status": "supported",
+      "category": "diagnose",
+      "command": "python -m duke_rates show-fingerprint-coverage-nc",
+      "goal": "Show hash-backed vs path-only coverage, fingerprint presence, and artifact reuse coverage for NC historical docs.",
+      "use_when": [
+        "Assessing historical document fingerprint coverage",
+        "Evaluating how much provenance can be recovered from hash-backed records"
+      ],
+      "avoid_when": [
+        "You only need queue or extraction state"
+      ],
+      "prerequisites": [],
+      "next_tools": [
+        "show-provenance-gaps-nc",
+        "show-lineage-gaps-nc"
+      ],
+      "mutates_state": false,
+      "docs": [
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/cli_command_reference.md"
+      ]
+    },
+    {
+      "tool_id": "enqueue-reprocess-nc",
+      "surface": "cli",
+      "status": "supported",
+      "category": "repair",
+      "command": "python -m duke_rates enqueue-reprocess-nc",
+      "goal": "Add targeted historical documents to the reprocess queue using workflow-aware filters.",
+      "use_when": [
+        "The review backlog or extraction validation points to specific rerun candidates",
+        "You need to queue bounded cleanup work instead of broad reruns"
+      ],
+      "avoid_when": [
+        "You have not inspected the current queue or priority signals"
+      ],
+      "prerequisites": [
+        "Prefer show-reprocess-priority-nc first when the next action is unclear"
+      ],
+      "next_tools": [
+        "show-reprocess-queue-nc",
+        "process-reprocess-queue-nc"
+      ],
+      "mutates_state": true,
+      "docs": [
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/operator_workflows.md"
+      ]
+    },
+    {
+      "tool_id": "enqueue-stale-reprocess-nc",
+      "surface": "cli",
+      "status": "supported",
+      "category": "repair",
+      "command": "python -m duke_rates enqueue-stale-reprocess-nc",
+      "goal": "Queue reprocessing specifically for stale or missing page/span stages.",
+      "use_when": [
+        "Stage artifacts are stale or absent and blocking extraction quality"
+      ],
+      "avoid_when": [
+        "Reprocess priority is driven by profile or review issues instead"
+      ],
+      "prerequisites": [
+        "Confirm stale-stage debt with show-stale-historical-nc"
+      ],
+      "next_tools": [
+        "show-reprocess-queue-nc",
+        "process-reprocess-queue-nc"
+      ],
+      "mutates_state": true,
+      "docs": [
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/cli_command_reference.md"
+      ]
+    },
+    {
+      "tool_id": "show-profile-impact-nc",
+      "surface": "cli",
+      "status": "supported",
+      "category": "diagnose",
+      "command": "python -m duke_rates show-profile-impact-nc",
+      "goal": "Estimate which documents would be affected by a specific parser profile change.",
+      "use_when": [
+        "Assessing blast radius before profile-driven reprocessing",
+        "Scoping parser work before enqueueing reruns"
+      ],
+      "avoid_when": [
+        "You are not working on parser profiles"
+      ],
+      "prerequisites": [],
+      "next_tools": [
+        "enqueue-profile-impact-nc",
+        "process-reprocess-queue-nc"
+      ],
+      "mutates_state": false,
+      "docs": [
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/agent_task_routing.md"
+      ]
+    },
+    {
+      "tool_id": "enqueue-profile-impact-nc",
+      "surface": "cli",
+      "status": "supported",
+      "category": "repair",
+      "command": "python -m duke_rates enqueue-profile-impact-nc",
+      "goal": "Queue reprocessing for documents affected by a specific parser profile.",
+      "use_when": [
+        "A profile change needs targeted reruns"
+      ],
+      "avoid_when": [
+        "You have not reviewed profile impact first"
+      ],
+      "prerequisites": [
+        "Prefer show-profile-impact-nc before mutating the queue"
+      ],
+      "next_tools": [
+        "show-reprocess-queue-nc",
+        "process-reprocess-queue-nc"
+      ],
+      "mutates_state": true,
+      "docs": [
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/agent_task_routing.md"
+      ]
+    },
+    {
+      "tool_id": "process-reprocess-queue-nc",
+      "surface": "cli",
+      "status": "supported",
+      "category": "repair",
+      "command": "python -m duke_rates process-reprocess-queue-nc",
+      "goal": "Process queued historical rework, including stage refresh and extraction reruns.",
+      "use_when": [
+        "The queue is populated and ready to run",
+        "A targeted repair pass should now be executed"
+      ],
+      "avoid_when": [
+        "The queue is empty",
+        "The task is only to inspect queue contents"
+      ],
+      "prerequisites": [
+        "Confirm queue contents with show-reprocess-queue-nc when the next action is uncertain"
+      ],
+      "next_tools": [
+        "parse-review-summary",
+        "validate-extraction-nc",
+        "show-workflow-status-nc"
+      ],
+      "mutates_state": true,
+      "docs": [
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/operator_workflows.md"
+      ]
+    },
+    {
+      "tool_id": "enqueue-ocr-nc",
+      "surface": "cli",
+      "status": "supported",
+      "category": "repair",
+      "command": "python -m duke_rates enqueue-ocr-nc",
+      "goal": "Add scanned or unreadable historical documents to the OCR queue.",
+      "use_when": [
+        "Scanned PDFs need OCR before extraction can proceed"
+      ],
+      "avoid_when": [
+        "The OCR queue is already saturated and you have not reviewed it"
+      ],
+      "prerequisites": [
+        "Confirm OCR need with show-ocr-queue-nc or extraction diagnostics"
+      ],
+      "next_tools": [
+        "show-ocr-queue-nc",
+        "process-ocr-queue-nc"
+      ],
+      "mutates_state": true,
+      "docs": [
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/agent_task_routing.md"
+      ]
+    },
+    {
+      "tool_id": "process-ocr-queue-nc",
+      "surface": "cli",
+      "status": "supported",
+      "category": "repair",
+      "command": "python -m duke_rates process-ocr-queue-nc",
+      "goal": "Process queued OCR work for scanned historical PDFs.",
+      "use_when": [
+        "OCR jobs are queued and the environment is ready to run them"
+      ],
+      "avoid_when": [
+        "The queue is empty",
+        "The task is only to inspect queue status"
+      ],
+      "prerequisites": [
+        "Review queue state with show-ocr-queue-nc if unclear"
+      ],
+      "next_tools": [
+        "extract-rates-nc",
+        "parse-review-summary",
+        "show-workflow-status-nc"
+      ],
+      "mutates_state": true,
+      "docs": [
+        "docs/document_parsing_pipeline_guide.md",
+        "docs/agent_task_routing.md"
+      ]
+    },
+    {
+      "tool_id": "promote-provisional-family",
+      "surface": "cli",
+      "status": "supported",
+      "category": "repair",
+      "command": "python -m duke_rates promote-provisional-family",
+      "goal": "Promote a provisional family into a curated family record when the auto-linking result is correct.",
+      "use_when": [
+        "A provisional family has been reviewed and should become curated"
+      ],
+      "avoid_when": [
+        "The family remains ambiguous or looks like garbage auto-key output"
+      ],
+      "prerequisites": [
+        "Inspect with list-provisional-families first"
+      ],
+      "next_tools": [
+        "show-lineage-gaps-nc",
+        "extract-rates-nc"
+      ],
+      "mutates_state": true,
+      "docs": [
+        "docs/operator_workflows.md",
+        "docs/cli_command_reference.md"
+      ]
+    },
+    {
+      "tool_id": "show-provisional-review-candidates-nc",
+      "surface": "cli",
+      "status": "supported",
+      "category": "inspect",
+      "command": "python -m duke_rates show-provisional-review-candidates-nc --state NC",
+      "goal": "Rank charged provisional NC families for cleanup or promotion using sanctioned review heuristics.",
+      "use_when": [
+        "Provisional families still have charges so retire-provisional-garbage-nc cannot help",
+        "An agent needs inferred promotion fields instead of guessing title or schedule overrides"
+      ],
+      "avoid_when": [
+        "You need to mutate state directly",
+        "The problem is zero-charge provisional sprawl better handled by retire-provisional-garbage-nc"
+      ],
+      "prerequisites": [
+        "Inspect with list-provisional-families first when you need the full backlog"
+      ],
+      "next_tools": [
+        "promote-provisional-family",
+        "show-lineage-gaps-nc"
+      ],
+      "mutates_state": false,
+      "docs": [
+        "docs/operator_workflows.md",
+        "docs/cli_command_reference.md"
+      ]
+    },
+    {
+      "tool_id": "retire-historical-document",
+      "surface": "cli",
+      "status": "narrow_helper",
+      "category": "repair",
+      "command": "python -m duke_rates retire-historical-document",
+      "goal": "Retire a bad historical document row while preserving reviewable audit intent.",
+      "use_when": [
+        "A specific historical document is known to be garbage or duplicate and should be removed from the active pipeline"
+      ],
+      "avoid_when": [
+        "You are looking for a general provisional-family cleanup command",
+        "You have not confirmed the row should be retired"
+      ],
+      "prerequisites": [
+        "Use only after bounded investigation"
+      ],
+      "next_tools": [
+        "show-lineage-gaps-nc",
+        "show-workflow-status-nc"
+      ],
+      "mutates_state": true,
+      "docs": [
+        "docs/operator_workflows.md",
+        "docs/cli_command_reference.md"
+      ]
+    },
+    {
+      "tool_id": "audit-historical-family-mismatches-script",
+      "surface": "script",
+      "status": "narrow_helper",
+      "category": "diagnose",
+      "command": "python scripts/maintenance/audit_historical_family_mismatches.py",
+      "script_path": "scripts/maintenance/audit_historical_family_mismatches.py",
+      "goal": "Narrow helper for bounded historical family mismatch inspection when the CLI does not yet expose a needed view.",
+      "use_when": [
+        "Investigating a specific mismatch case beyond the standard lineage summaries"
+      ],
+      "avoid_when": [
+        "A supported CLI command already answers the question",
+        "You are choosing a default workflow for a new agent"
+      ],
+      "prerequisites": [],
+      "next_tools": [
+        "show-lineage-gaps-nc",
+        "validate-lineage-nc"
+      ],
+      "mutates_state": false,
+      "docs": [
+        "scripts/README.md",
+        "docs/agent_task_routing.md"
+      ]
+    },
+    {
+      "tool_id": "review-queue",
+      "surface": "cli",
+      "status": "legacy",
+      "category": "legacy",
+      "command": "python -m duke_rates review-queue",
+      "goal": "Older current-document review queue surface retained for compatibility.",
+      "use_when": [
+        "Maintaining an older current-document workflow that still depends on it"
+      ],
+      "avoid_when": [
+        "Working the NC historical pipeline",
+        "Choosing a review surface for new workflows"
+      ],
+      "prerequisites": [],
+      "next_tools": [],
+      "mutates_state": false,
+      "docs": [
+        "docs/cli_command_reference.md",
+        "docs/source_of_truth_and_legacy_paths.md"
+      ]
+    },
+    {
+      "tool_id": "parse-review-queue",
+      "surface": "cli",
+      "status": "legacy",
+      "category": "legacy",
+      "command": "python -m duke_rates parse-review-queue",
+      "goal": "Older row-level parse review queue surface retained for compatibility and detailed inspection.",
+      "use_when": [
+        "A legacy workflow explicitly asks for it"
+      ],
+      "avoid_when": [
+        "Choosing a review surface for a new session",
+        "You only need backlog summary and prioritization"
+      ],
+      "prerequisites": [],
+      "next_tools": [
+        "parse-review-summary"
+      ],
+      "mutates_state": false,
+      "docs": [
+        "docs/cli_command_reference.md",
+        "docs/document_parsing_pipeline_guide.md"
+      ]
+    },
+    {
+      "tool_id": "ingest-ncuc",
+      "surface": "cli",
+      "status": "legacy",
+      "category": "legacy",
+      "command": "python -m duke_rates ingest-ncuc",
+      "goal": "Older JSON-oriented NCUC ingest flow retained for compatibility and repair work.",
+      "use_when": [
+        "Repairing or investigating a legacy JSON export/import path"
+      ],
+      "avoid_when": [
+        "Running the current historical NCUC pipeline",
+        "Choosing an intake path for new work"
+      ],
+      "prerequisites": [],
+      "next_tools": [],
+      "mutates_state": true,
+      "docs": [
+        "docs/source_of_truth_and_legacy_paths.md",
+        "docs/cli_command_reference.md"
+      ]
+    }
+  ]
+}

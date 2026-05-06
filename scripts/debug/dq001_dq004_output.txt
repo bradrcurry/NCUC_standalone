@@ -1,0 +1,174 @@
+================================================================================
+DQ-001: Phantom -1.0 Rider Adjustment rows
+================================================================================
+  nc-carolinas-doc-SCHEDULEOPTE: 33 rows
+  nc-carolinas-doc-SCHEDULEWC: 33 rows
+  nc-carolinas-doc-SCHEDULEWCRESIDENTIALWATERHEATINGSERVICE: 45 rows
+  nc-carolinas-schedule-I: 14 rows
+  nc-carolinas-schedule-PG: 14 rows
+  nc-carolinas-schedule-SGS: 14 rows
+  nc-carolinas-schedule-TS: 21 rows
+  Total: 174
+
+Sample source_snippets for phantom rows:
+
+  [nc-carolinas-schedule-SGS]
+    version_id=5282
+    label='Rider Adjustment'
+    snippet="OUTDOOR LIGHTING SERVICE \n(B) Other Luminaires \nDecorative and non-standard luminaires can be installed on request, at the Company's option, at the rate in (A) above plus an \nextra monthly charge 
+    version_id=5282
+    label='Rider Adjustment'
+    snippet="OUTDOOR LIGHTING SERVICE \n(B) Other Luminaires \nDecorative and non-standard luminaires can be installed on request, at the Company's option, at the rate in (A) above plus an \nextra monthly charge 
+
+  [nc-carolinas-schedule-I]
+    version_id=5267
+    label='Rider Adjustment'
+    snippet="OUTDOOR LIGHTING SERVICE \n(B) Other Luminaires \nDecorative and non-standard luminaires can be installed on request, at the Company's option, at the rate in (A) above plus an \nextra monthly charge 
+    version_id=5267
+    label='Rider Adjustment'
+    snippet="OUTDOOR LIGHTING SERVICE \n(B) Other Luminaires \nDecorative and non-standard luminaires can be installed on request, at the Company's option, at the rate in (A) above plus an \nextra monthly charge 
+
+  [nc-carolinas-schedule-PG]
+    version_id=5273
+    label='Rider Adjustment'
+    snippet="OUTDOOR LIGHTING SERVICE \n(B) Other Luminaires \nDecorative and non-standard luminaires can be installed on request, at the Company's option, at the rate in (A) above plus an \nextra monthly charge 
+    version_id=5273
+    label='Rider Adjustment'
+    snippet="OUTDOOR LIGHTING SERVICE \n(B) Other Luminaires \nDecorative and non-standard luminaires can be installed on request, at the Company's option, at the rate in (A) above plus an \nextra monthly charge 
+
+  [nc-carolinas-schedule-TS]
+    version_id=5284
+    label='Rider Adjustment'
+    snippet="OUTDOOR LIGHTING SERVICE \n(B) Other Luminaires \nDecorative and non-standard luminaires can be installed on request, at the Company's option, at the rate in (A) above plus an \nextra monthly charge 
+    version_id=5284
+    label='Rider Adjustment'
+    snippet="OUTDOOR LIGHTING SERVICE \n(B) Other Luminaires \nDecorative and non-standard luminaires can be installed on request, at the Company's option, at the rate in (A) above plus an \nextra monthly charge 
+
+All charge types in DQ-001 families (to confirm only phantom rows are -1.0):
+  nc-carolinas-doc-SCHEDULEOPTE             Basic Customer Charge           +6.2100 $/month  cnt=33
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +1.0000 $/kW    cnt=33
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +1.1940 $/kW    cnt=33
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +2.0900 $/kW    cnt=33
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +2.1100 $/kW    cnt=33
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +2.2200 $/kW    cnt=33
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +3.9361 $/kW    cnt=33
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +3.9899 $/kW    cnt=33
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +4.6197 $/kW    cnt=33
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +13.3312 $/kW    cnt=33
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +13.5105 $/kW    cnt=33
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +14.6869 $/kW    cnt=33
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +14.8877 $/kW    cnt=33
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +16.0301 $/kW    cnt=33
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +16.2522 $/kW    cnt=33
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +41.5800 $/kW    cnt=33
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +43.3100 $/kW    cnt=33
+  nc-carolinas-doc-SCHEDULEOPTE             Rider Adjustment                -8.0000 $/kWh   cnt=33
+  nc-carolinas-doc-SCHEDULEOPTE             Rider Adjustment                -1.0000 $/kWh   cnt=33
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +1.7900 $/kW    cnt=2
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +3.3900 $/kW    cnt=2
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +3.5300 $/kW    cnt=2
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +3.8300 $/kW    cnt=2
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +12.9173 $/kW    cnt=2
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +21.4800 $/kW    cnt=2
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +35.9300 $/kW    cnt=2
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +37.1400 $/kW    cnt=2
+  nc-carolinas-doc-SCHEDULEOPTE             Basic Customer Charge           +301.6200 $/month  cnt=1
+  nc-carolinas-doc-SCHEDULEOPTE             Basic Facilities Charge         +9.2200 $/month  cnt=1
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +0.2600 $/kW    cnt=1
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +1.1100 $/kW    cnt=1
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +1.8500 $/kW    cnt=1
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +7.0214 $/kW    cnt=1
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +7.0419 $/kW    cnt=1
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +7.3300 $/kW    cnt=1
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +8.1971 $/kW    cnt=1
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +10.3200 $/kW    cnt=1
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +10.7425 $/kW    cnt=1
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +11.8349 $/kW    cnt=1
+  nc-carolinas-doc-SCHEDULEOPTE             Demand Charge                   +28.3700 $/kW    cnt=1
+
+================================================================================
+DQ-004: leaf-501 v5302 runaway TOU rows
+================================================================================
+  version id=5302 family=nc-progress-leaf-501 eff_start='2014-09-15' eff_end=None charges=1722
+
+  Charge breakdown for v5302:
+    label='A. Basic Customer Charge' val=35.5 unit=$/month season=all_year tou=None cnt=112
+    label='A. Customer Charge'      val=28.5 unit=$/month season=all_year tou=None cnt=84
+    label='Demand'                  val=1.4 unit=$/kW season=all_year tou=None cnt=56
+    label='Demand'                  val=1.4 unit=$/kW season=all_year tou=off_peak cnt=56
+    label='Fixed'                   val=16.85 unit=$/month season=all_year tou=None cnt=56
+    label='Fixed'                   val=21.0 unit=$/month season=all_year tou=None cnt=56
+    label='I. Basic Customer Charge' val=200.0 unit=$/month season=all_year tou=None cnt=56
+    label='Adjustment, ('           val=0.06204 unit=$/kWh season=all_year tou=None cnt=42
+    label='Adjustment, ('           val=44.36204 unit=$/kWh season=all_year tou=None cnt=42
+    label='A.'                      val=21.0 unit=$/month season=all_year tou=None cnt=28
+    label='A.'                      val=28.5 unit=$/month season=all_year tou=None cnt=28
+    label='A. Basic Customer Charge' val=14.0 unit=$/month season=all_year tou=None cnt=28
+    label='A. Basic Customer Charge' val=21.0 unit=$/month season=all_year tou=None cnt=28
+    label='A. Basic Customer Charge' val=28.5 unit=$/month season=all_year tou=None cnt=28
+    label='A. On-Peak Billing Demand' val=13.28 unit=$/kW season=all_year tou=on_peak cnt=28
+    label='B. Billing Demand'       val=1.25 unit=$/kW season=all_year tou=None cnt=28
+    label='Billing Demand'          val=1.05 unit=$/kW season=all_year tou=None cnt=28
+    label='Demand'                  val=1.84 unit=$/kW season=all_year tou=None cnt=28
+    label='Demand'                  val=5.17 unit=$/kW season=all_year tou=on_peak cnt=28
+    label='Energy_Block'            val=0.09394999999999999 unit=$/kWh season=all_year tou=None cnt=28
+    label='Fixed'                   val=65.0 unit=$/month season=all_year tou=None cnt=28
+    label='Fixed'                   val=200.0 unit=$/month season=all_year tou=None cnt=28
+    label='I. Basic Customer Charge' val=35.5 unit=$/month season=all_year tou=None cnt=28
+    label='Tou_Energy'              val=0.05192 unit=$/kWh season=all_year tou=off_peak cnt=28
+    label='Tou_Energy'              val=0.05607 unit=$/kWh season=all_year tou=off_peak cnt=28
+    label='Tou_Energy'              val=0.05875 unit=$/kWh season=all_year tou=on_peak cnt=28
+    label='Tou_Energy'              val=0.06509000000000001 unit=$/kWh season=all_year tou=on_peak cnt=28
+    label='Tou_Energy'              val=0.06991 unit=$/kWh season=all_year tou=off_peak cnt=28
+    label='A. On-Peak Billing Demand' val=13.36 unit=$/kW season=all_year tou=on_peak cnt=14
+    label='A. On-Peak Billing Demand' val=13.3628 unit=$/kW season=all_year tou=on_peak cnt=14
+    label='Adjustment, ('           val=0.06398 unit=$/kWh season=all_year tou=None cnt=14
+    label='Adjustment, ('           val=58.263980000000004 unit=$/kWh season=all_year tou=None cnt=14
+    label='B. Billing Demand'       val=6.86 unit=$/kW season=all_year tou=None cnt=14
+    label='B. Billing Demand'       val=6.946 unit=$/kW season=all_year tou=None cnt=14
+    label='B. Kilowatt-hour Energy Charge' val=0.15279 unit=$/kWh season=all_year tou=None cnt=14
+    label='B. Kilowatt-hour Energy Charge' val=0.23717 unit=$/kWh season=all_year tou=None cnt=14
+    label='Billing Demand'          val=21.1416 unit=$/kW season=all_year tou=None cnt=14
+    label='Billing Demand'          val=21.16 unit=$/kW season=all_year tou=None cnt=14
+    label='Billing Demand'          val=23.1416 unit=$/kW season=all_year tou=None cnt=14
+    label='Billing Demand'          val=23.16 unit=$/kW season=all_year tou=None cnt=14
+    label='C. Kilowatt-hour Energy Charge' val=0.07454 unit=$/kWh season=all_year tou=None cnt=14
+    label='Demand'                  val=11.32 unit=$/kW season=all_year tou=on_peak cnt=14
+    label='Demand'                  val=11.4032 unit=$/kW season=all_year tou=on_peak cnt=14
+    label='Demand'                  val=13.43 unit=$/kW season=all_year tou=on_peak cnt=14
+    label='Demand'                  val=13.5143 unit=$/kW season=all_year tou=on_peak cnt=14
+    label='Energy_Block'            val=0.05872 unit=$/kWh season=all_year tou=None cnt=14
+    label='Energy_Block'            val=0.08059 unit=$/kWh season=all_year tou=None cnt=14
+    label='Energy_Block'            val=0.10566 unit=$/kWh season=all_year tou=None cnt=14
+    label='Energy_Block'            val=0.12397 unit=$/kWh season=all_year tou=None cnt=14
+    label='Energy_Block'            val=0.12448000000000001 unit=$/kWh season=all_year tou=None cnt=14
+    label='Kilowatt-Hour Energy Charge' val=0.07375 unit=$/kWh season=all_year tou=None cnt=14
+    label='Tou_Energy'              val=0.04795 unit=$/kWh season=all_year tou=off_peak cnt=14
+    label='Tou_Energy'              val=0.053040000000000004 unit=$/kWh season=all_year tou=on_peak cnt=14
+    label='Tou_Energy'              val=0.07437 unit=$/kWh season=all_year tou=off_peak cnt=14
+    label='Tou_Energy'              val=0.07658999999999999 unit=$/kWh season=all_year tou=off_peak cnt=14
+    label='Tou_Energy'              val=0.08846 unit=$/kWh season=all_year tou=off_peak cnt=14
+    label='Tou_Energy'              val=0.08965 unit=$/kWh season=all_year tou=on_peak cnt=14
+    label='Tou_Energy'              val=0.11094 unit=$/kWh season=all_year tou=off_peak cnt=14
+    label='Tou_Energy'              val=0.13171 unit=$/kWh season=all_year tou=shoulder cnt=14
+    label='Tou_Energy'              val=0.13814 unit=$/kWh season=all_year tou=off_peak cnt=14
+    label='Tou_Energy'              val=0.1408 unit=$/kWh season=all_year tou=shoulder cnt=14
+    label='Tou_Energy'              val=0.20653 unit=$/kWh season=all_year tou=on_peak cnt=14
+    label='Tou_Energy'              val=0.22277999999999998 unit=$/kWh season=all_year tou=on_peak cnt=14
+    label='Tou_Energy'              val=0.22328 unit=$/kWh season=all_year tou=on_peak cnt=14
+    label='Tou_Energy'              val=0.23645 unit=$/kWh season=all_year tou=on_peak cnt=14
+    label='Tou_Energy'              val=0.24194 unit=$/kWh season=all_year tou=on_peak cnt=14
+    label='Tou_Energy'              val=0.26305 unit=$/kWh season=all_year tou=on_peak cnt=14
+    label='Tou_Energy'              val=0.3728 unit=$/kWh season=all_year tou=critical_peak cnt=14
+    label='Tou_Energy'              val=0.37281 unit=$/kWh season=all_year tou=critical_peak cnt=14
+    label='Tou_Energy'              val=776.13171 unit=$/kWh season=all_year tou=shoulder cnt=14
+    label='Tou_Energy'              val=843.1408 unit=$/kWh season=all_year tou=shoulder cnt=14
+    label='of Billing Demand'       val=22.1416 unit=$/kW season=all_year tou=None cnt=14
+    label='of Billing Demand'       val=22.16 unit=$/kW season=all_year tou=None cnt=14
+
+  All nc-progress-leaf-501 versions:
+    id= 5301 eff_start='2014-06-01'    charges=949 labels='Energy_Block,Fixed,Demand,Tou_Energy,A.,Charge, if applicable, (,A. Customer Cha'
+    id= 5302 eff_start='2014-09-15'    charges=1722 labels='A.,Energy_Block,Fixed,Tou_Energy,A. Customer Charge,B. Billing Demand,Demand,A. '
+    id= 5303 eff_start='2023-10-01'    charges= 65 labels='Basic Customer Charge,Three-Phase Surcharge,Energy Charge - On-Peak,Energy Charg'
+    id= 5572 eff_start='2024-10-01'    charges=  6 labels='Fixed,Tou_Energy'
+    id= 5304 eff_start='2025-10-01'    charges= 42 labels='Fixed,Tou_Energy'
