@@ -10,16 +10,18 @@ GitNexus indexes this codebase into a graph of symbols, call chains, and cluster
 
 ### Re-index after significant changes
 
-```bash
+```powershell
 # From the repo root (c:\Python\Duke\Standalone)
-bash scripts/update-gitnexus-index.sh
+powershell -ExecutionPolicy Bypass -File scripts/update-gitnexus-index.ps1
 ```
 
-This syncs file mirrors and re-indexes all four repos (~40s total). To skip the full-project index (faster iteration):
+This syncs file mirrors and re-indexes all named repos. To skip the full-project index (faster iteration):
 
-```bash
-bash scripts/update-gitnexus-index.sh --skip-main
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/update-gitnexus-index.ps1 -SkipMain
 ```
+
+The older Bash wrapper remains available for Unix-like shells, but on this Windows workspace the PowerShell script is the reliable path.
 
 ### MCP is already configured
 
@@ -38,16 +40,25 @@ Shows the full knowledge graph as an interactive WebGL cluster diagram — usefu
 
 ## Multi-Repo Architecture
 
-GitNexus indexes this codebase as **four named repos** to work around Tree-sitter scope extraction limits (see Architecture Notes). All four are served by the same MCP server and queryable simultaneously.
+GitNexus indexes this codebase as multiple named repos to work around Tree-sitter scope extraction limits (see Architecture Notes). All repos are served by the same MCP server and queryable simultaneously.
 
 | Repo name | Directory | What it covers |
 |---|---|---|
 | `duke-standalone` | `C:\Python\Duke\Standalone` | Full project — analytics, billing, models, utils, EIA, Streamlit apps, test files, smaller modules |
 | `duke-pipeline` | `pipeline_index/pipeline/` | `parser_profiles`, `bulk_extractor`, `rate_extractor`, `ocr_normalization`, `document_prep` |
+| `duke-pipeline-docling` | `pipeline_index/pipeline-docling/` | `docling_backend`, `docling_page_miner`, `document_prep`, `metadata_extractor` |
 | `duke-parse` | `pipeline_index/parse/` | `nc_progress`, `nc_carolinas`, `rider_summary`, `heuristics` |
 | `duke-db` | `pipeline_index/db/` | `repository`, `schema`, `ncuc_loader` |
+| `duke-cli` | `pipeline_index/cli/` | `cli.py` best-effort only; currently still fails scope extraction when isolated |
+| `duke-doc-intel` | `pipeline_index/doc-intel/` | large document intelligence modules |
+| `duke-doc-triage` | `pipeline_index/doc-triage/` | parse diagnosis, overnight loop, regex validation/shadow/suggestion modules |
+| `duke-billing` | `pipeline_index/billing/` | billing engine modules |
+| `duke-analytics` | `pipeline_index/analytics/` | large analytics/audit modules |
+| `duke-ncuc-workflow` | `pipeline_index/ncuc-workflow/` | large NCUC workflow modules |
+| `duke-apps` | `pipeline_index/apps/` | Streamlit app/dashboard modules that fail in full-repo scope extraction |
+| `duke-tests-core` | `pipeline_index/tests-core/` | large test modules useful for impact analysis |
 
-The files in `pipeline_index/` are **mirrors** — copies of the actual source files under `src/duke_rates/`. `update-gitnexus-index.sh` keeps them in sync before re-indexing. Do not edit them directly; edit the source originals.
+The files in `pipeline_index/` are **mirrors** — copies of the actual source files under `src/duke_rates/`, `app/`, `dashboard_views/`, and `tests/`. `update-gitnexus-index.ps1` keeps them in sync before re-indexing. Do not edit them directly; edit the source originals.
 
 When targeting a specific repo in MCP tool calls, pass `--repo duke-pipeline` (or whichever applies). If the repo is omitted, the server defaults to the first registered repo.
 
@@ -72,7 +83,7 @@ The `query` tool (natural-language / BM25 keyword search) currently returns empt
 
 ### Previously failing files — now indexed via sub-repos
 
-These 12 files previously failed scope extraction in the main index. They now live in the sub-repos above and are fully indexed:
+These files previously failed scope extraction in the main index. They now live in the sub-repos above and are fully indexed:
 
 | File | Now in repo |
 |---|---|
@@ -88,8 +99,32 @@ These 12 files previously failed scope extraction in the main index. They now li
 | `src/duke_rates/db/repository.py` | `duke-db` |
 | `src/duke_rates/db/schema.py` | `duke-db` |
 | `src/duke_rates/db/ncuc_loader.py` | `duke-db` |
-
-**Still not indexed in any repo:** `src/duke_rates/cli.py` (629KB, explicitly skipped — use `docs/cli_command_reference.md` instead).
+| `src/duke_rates/cli.py` | `duke-cli` best-effort only; 18k-line file still has no reliable clusters/flows |
+| `src/duke_rates/document_intelligence/acquisition.py` | `duke-doc-intel` |
+| `src/duke_rates/document_intelligence/database_reports.py` | `duke-doc-intel` |
+| `src/duke_rates/document_intelligence/model_benchmark.py` | `duke-doc-intel` |
+| `src/duke_rates/document_intelligence/normalization.py` | `duke-doc-intel` |
+| `src/duke_rates/document_intelligence/parse_diagnosis.py` | `duke-doc-triage` |
+| `src/duke_rates/document_intelligence/parse_improvement_loop.py` | `duke-doc-triage` |
+| `src/duke_rates/document_intelligence/regex_shadow_test.py` | `duke-doc-triage` |
+| `src/duke_rates/document_intelligence/regex_validation.py` | `duke-doc-triage` |
+| `src/duke_rates/document_intelligence/regex_suggestions.py` | `duke-doc-triage` |
+| `src/duke_rates/billing/tariff_engine.py` | `duke-billing` |
+| `src/duke_rates/billing/reconciliation.py` | `duke-billing` |
+| `src/duke_rates/analytics/tariff_completeness_audit.py` | `duke-analytics` |
+| `src/duke_rates/historical/ncuc/missing_doc_workflow.py` | `duke-ncuc-workflow` |
+| `src/duke_rates/historical/ncuc/missing_clean_doc_search.py` | `duke-ncuc-workflow` |
+| `src/duke_rates/historical/ncuc/importer.py` | `duke-ncuc-workflow` |
+| `src/duke_rates/historical/ncuc/family_search_terms.py` | `duke-ncuc-workflow` |
+| `src/duke_rates/historical/ncuc/discovery.py` | `duke-ncuc-workflow` |
+| `dashboard_views/rate_comparison.py` | `duke-apps` |
+| `app/streamlit_rate_comparison_app.py` | `duke-apps` |
+| `app/streamlit_res_comparison_app.py` | `duke-apps` |
+| `tests/test_tariff_engine.py` | `duke-tests-core` |
+| `tests/test_reprocess_queue.py` | `duke-tests-core` |
+| `tests/test_repository.py` | `duke-tests-core` |
+| `tests/test_ncuc_pipeline.py` | `duke-tests-core` |
+| `tests/test_historical_parser_profiles.py` | `duke-tests-core` |
 
 ---
 

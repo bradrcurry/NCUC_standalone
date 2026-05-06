@@ -17,7 +17,7 @@ duke_rates.db
 # Keep repository lightweight: ignore runtime datasets/artifacts under data/
 data/
 
-# GitNexus knowledge graph indexes (re-generate: scripts/update-gitnexus-index.sh)
+# GitNexus knowledge graph indexes (re-generate: scripts/update-gitnexus-index.ps1)
 .gitnexus/
 pipeline_index/
 
