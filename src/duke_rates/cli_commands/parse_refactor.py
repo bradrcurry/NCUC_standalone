@@ -1077,6 +1077,403 @@ def report_document_fingerprint_clusters_nc(
 
 
 
+# =============================================================================
+# Phase 2 — Routing tier system
+# Plan ref: docs/PARSING_ARCHITECTURE_REFACTOR_PLAN.md §5
+# (commands were dropped during the cli-split refactor; restored here)
+# =============================================================================
+
+
+def populate_routing_tier_nc(
+    limit: int = typer.Option(
+        0, "--limit", help="Process at most N identity rows (0 = unlimited).",
+    ),
+) -> None:
+    """Label every ``document_identity`` row with a routing tier."""
+    from duke_rates.document_intelligence.routing_tier import TierAggregator
+
+    settings, _ = _bootstrap()
+    agg = TierAggregator(settings.database_path)
+    n = agg.label_all(limit=limit if limit > 0 else None)
+    typer.echo(f"document_routing_tier: labeled/refreshed {n} rows")
+
+
+def report_routing_tier_nc(
+    sample_per_tier: int = typer.Option(
+        5, "--sample-per-tier", help="Show N rationale samples per tier.",
+    ),
+    as_json: bool = typer.Option(False, "--json", help="Emit summary as JSON."),
+) -> None:
+    """Show tier distribution and a few example rationales per tier."""
+    import sqlite3 as _sql
+
+    from duke_rates.document_intelligence.routing_tier import (
+        fetch_tier_distribution,
+    )
+
+    settings, _ = _bootstrap()
+    dist = fetch_tier_distribution(settings.database_path)
+    total = sum(dist.values())
+
+    samples: dict[int, list[dict[str, Any]]] = {}
+    conn = _sql.connect(settings.database_path)
+    conn.row_factory = _sql.Row
+    try:
+        for tier in (1, 2, 3):
+            rows = conn.execute(
+                """
+                SELECT source_pdf, overall_confidence, profile_consensus_top,
+                       profile_consensus_margin, rationale
+                FROM document_routing_tier
+                WHERE tier = ?
+                ORDER BY overall_confidence DESC LIMIT ?
+                """,
+                (tier, sample_per_tier),
+            ).fetchall()
+            samples[tier] = [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+    payload = {"distribution": dist, "total": total, "samples": samples}
+    if as_json:
+        typer.echo(json.dumps(payload, indent=2, default=str))
+        return
+
+    typer.echo(f"\n=== Routing Tier Distribution ===")
+    typer.echo(f"Total docs labeled: {total}")
+    for tier in (1, 2, 3):
+        cnt = dist.get(tier, 0)
+        pct = (cnt / total * 100) if total else 0.0
+        bar = "#" * int(cnt / max(1, total) * 40)
+        typer.echo(f"  TIER_{tier}: {cnt:>5}  ({pct:5.1f}%)  {bar}")
+    typer.echo()
+    for tier in (1, 2, 3):
+        typer.echo(f"--- TIER_{tier} samples ---")
+        if not samples[tier]:
+            typer.echo("  (no rows)")
+            continue
+        for s in samples[tier]:
+            typer.echo(
+                f"  conf={s['overall_confidence']:.2f} "
+                f"top={(s['profile_consensus_top'] or '?'):<30} "
+                f"margin={s['profile_consensus_margin']}"
+            )
+            typer.echo(f"    {s['rationale']}")
+
+
+def report_routing_tier_validation_nc(
+    write_report: bool = typer.Option(
+        True, "--write-report/--no-write-report",
+        help="Write JSON to docs/reports/routing_tier_validation/<timestamp>.json.",
+    ),
+    as_json: bool = typer.Option(False, "--json", help="Emit full report as JSON."),
+) -> None:
+    """Cross-check tier predictions against actual parse outcomes."""
+    from datetime import datetime as _dt, timezone as _tz
+    from pathlib import Path as _Path
+
+    from duke_rates.document_intelligence.routing_tier import (
+        build_tier_validation_report,
+    )
+
+    settings, _ = _bootstrap()
+    report = build_tier_validation_report(settings.database_path)
+    report["generated_at"] = _dt.now(_tz.utc).isoformat()
+
+    if write_report:
+        report_dir = _Path("docs/reports/routing_tier_validation")
+        report_dir.mkdir(parents=True, exist_ok=True)
+        ts = _dt.now(_tz.utc).strftime("%Y%m%dT%H%M%SZ")
+        path = report_dir / f"{ts}.json"
+        path.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
+        typer.echo(f"Report written: {path}")
+
+    if as_json:
+        typer.echo(json.dumps(report, indent=2, default=str))
+        return
+
+    s = report["summary"]
+    typer.echo(f"\n=== Routing Tier Validation ===")
+    typer.echo(
+        f"Tier 1: {s['tier1_count']:>6} attempts  parsed-with-charges {s['tier1_parsed_rate']:>5.1%}  "
+        f"template_bugs={s['tier1_extraction_failure_count']}"
+    )
+    typer.echo(f"Tier 2: {s['tier2_count']:>6} attempts")
+    typer.echo(
+        f"Tier 3: {s['tier3_count']:>6} attempts  parsed-with-charges {s['tier3_parsed_rate']:>5.1%}  "
+        f"unexpected_successes={s['tier3_unexpected_success_count']}"
+    )
+
+    typer.echo("\n--- Per-Tier Status Distribution (top 4) ---")
+    for tier, bucket in sorted(report["tier_outcomes"].items()):
+        top = sorted(bucket["by_status"].items(), key=lambda kv: -kv[1])[:4]
+        snip = ", ".join(f"{k}={v}" for k, v in top)
+        typer.echo(f"  TIER_{tier}: {snip}")
+
+    typer.echo("\n--- Per-Tier Diagnosed Failure Types ---")
+    for tier, fts in sorted(report["tier_diagnoses"].items()):
+        if not fts:
+            typer.echo(f"  TIER_{tier}: (none)")
+            continue
+        top = sorted(fts.items(), key=lambda kv: -kv[1])[:5]
+        snip = ", ".join(f"{k}={v}" for k, v in top)
+        typer.echo(f"  TIER_{tier}: {snip}")
+
+
+# =============================================================================
+# Phase 3 — Tier 1 binder (dry-run) + comparison
+# Plan ref: docs/PARSING_ARCHITECTURE_REFACTOR_PLAN.md §6
+# (commands were dropped during the cli-split refactor; restored here)
+# =============================================================================
+
+
+def bind_tier1_proposals_nc(
+    limit: int = typer.Option(
+        0, "--limit", help="Process at most N Tier 1 docs (0 = unlimited).",
+    ),
+) -> None:
+    """Record Tier 1 binding proposals (Phase 3B, dry-run)."""
+    from duke_rates.document_intelligence.tier1_binder import Tier1Binder
+
+    settings, _ = _bootstrap()
+    binder = Tier1Binder(settings.database_path)
+    counts = binder.bind_all(limit=limit if limit > 0 else None)
+    nonzero = {k: v for k, v in counts.items() if v}
+    typer.echo(f"tier1_binding: {nonzero}")
+
+
+def report_tier1_binding_nc(
+    sample: int = typer.Option(15, "--sample", help="Disagreement samples to print."),
+    as_json: bool = typer.Option(False, "--json", help="Emit JSON instead of text."),
+) -> None:
+    """Print Tier 1 binding summary."""
+    from duke_rates.document_intelligence.tier1_binder import (
+        fetch_binding_summary,
+    )
+
+    settings, _ = _bootstrap()
+    summary = fetch_binding_summary(settings.database_path)
+
+    if as_json:
+        typer.echo(json.dumps(summary, indent=2, default=str))
+        return
+
+    typer.echo("\n=== Tier 1 Binding Summary ===")
+    typer.echo("Status counts:")
+    for k, v in summary["status_counts"].items():
+        typer.echo(f"  {k:<15} {v}")
+    typer.echo("\nBy proposed profile:")
+    for k, v in summary["by_profile"].items():
+        typer.echo(f"  {k:<40} {v}")
+    typer.echo("\nAgreement with current parser_profile:")
+    for k, v in summary["agreement"].items():
+        typer.echo(f"  {k:<10} {v}")
+    typer.echo(f"\n--- Disagreement samples (top {sample} by confidence) ---")
+    for r in summary["disagreement_samples"][:sample]:
+        typer.echo(
+            f"  conf={r['overall_confidence']:.2f}  "
+            f"current={(r['current_parser_profile'] or '?'):<28} "
+            f"-> proposed={(r['proposed_profile'] or '?')}"
+        )
+
+
+def report_tier1_binding_comparison_nc(
+    write_report: bool = typer.Option(
+        True, "--write-report/--no-write-report",
+        help="Write JSON to docs/reports/tier1_binding_comparison/<timestamp>.json.",
+    ),
+    as_json: bool = typer.Option(False, "--json", help="Emit JSON to stdout."),
+) -> None:
+    """Run the Phase 3C comparison report."""
+    from datetime import datetime as _dt, timezone as _tz
+    from pathlib import Path as _Path
+
+    from duke_rates.document_intelligence.tier1_binder import (
+        build_comparison_report,
+    )
+
+    settings, _ = _bootstrap()
+    report = build_comparison_report(settings.database_path)
+    report["generated_at"] = _dt.now(_tz.utc).isoformat()
+
+    if write_report:
+        report_dir = _Path("docs/reports/tier1_binding_comparison")
+        report_dir.mkdir(parents=True, exist_ok=True)
+        ts = _dt.now(_tz.utc).strftime("%Y%m%dT%H%M%SZ")
+        path = report_dir / f"{ts}.json"
+        path.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
+        typer.echo(f"Report written: {path}")
+
+    if as_json:
+        typer.echo(json.dumps(report, indent=2, default=str))
+        return
+
+    typer.echo("\n=== Tier 1 Binding Comparison (Phase 3C) ===")
+    t = report["totals"]
+    typer.echo(
+        f"Tier 1 docs total: {t['tier1_total']}  "
+        f"proposed={t.get('proposed', 0)}  refused={t.get('refused', 0)}  "
+        f"no_consensus={t.get('no_consensus', 0)}"
+    )
+    typer.echo(
+        f"Agreement: {report['agreement_count']}  "
+        f"Disagreement: {report['disagreement_count']}  "
+        f"No current attempt: {report['no_current_count']}"
+    )
+    typer.echo(f"Agreement rate:    {report['agreement_rate']:.1%}")
+    typer.echo(
+        f"Disagreement rate: {report['disagreement_rate']:.1%}  "
+        f"(plan threshold: <5%)"
+    )
+    typer.echo("\nDisagreements by kind:")
+    for k, v in report["disagreements_by_kind"].items():
+        typer.echo(f"  {k:<25} {v}")
+    typer.echo("\nTop flips (current -> proposed):")
+    for f in report["top_flips"][:10]:
+        typer.echo(
+            f"  {(f['current'] or '?'):<30} -> {(f['proposed'] or '?'):<30} {f['count']}"
+        )
+    typer.echo("\nWhen binder disagrees, current parse outcome is:")
+    for k, v in report["parsed_outcome_when_disagree"].items():
+        typer.echo(f"  {k:<22} {v}")
+
+
+# =============================================================================
+# Phase 4 — Per-document rules (Tier 3 path)
+# Plan ref: docs/PARSING_ARCHITECTURE_REFACTOR_PLAN.md §7
+# =============================================================================
+
+
+def generate_per_doc_rules_nc(
+    limit: int = typer.Option(5, "--limit", help="Max Tier 3 docs to process this run."),
+) -> None:
+    """Generate and validate per-document rules for Tier 3 docs (Phase 4B).
+
+    Picks Tier 3 docs whose ``document_identity`` row has signal evidence
+    and no accepted/pending rule yet. Asks the LLM for a doc-scoped regex,
+    validates against the target doc + 5 closest siblings (Jaccard on
+    schedule/rider/filename signals), and persists accepted rules to
+    ``document_specific_rules``.
+
+    Skips the corpus-wide false-positive check entirely — per-doc rules
+    can't leak.
+    """
+    from duke_rates.document_intelligence.ollama_orchestrator import (
+        OllamaOrchestrator,
+    )
+    from duke_rates.document_intelligence.per_doc_rule_generator import (
+        PerDocRuleGenerator,
+    )
+
+    settings, _ = _bootstrap()
+    orch = OllamaOrchestrator(db_path=settings.database_path)
+    gen = PerDocRuleGenerator(orch, settings.database_path)
+    outcomes = gen.generate_batch(limit=limit)
+
+    counts: dict[str, int] = {}
+    for o in outcomes:
+        counts[o.status] = counts.get(o.status, 0) + 1
+    typer.echo(f"per-doc rule generation: processed {len(outcomes)}; status counts: {counts}")
+    typer.echo("\nPer-doc outcomes:")
+    for o in outcomes:
+        s = o.to_summary()
+        typer.echo(
+            f"  doc={s['document_identity_id']:>4}  status={s['status']:<10} "
+            f"rule_id={s['rule_id']}  target_matches={s['target_matches']}  "
+            f"siblings={s['siblings_tested']}  oor={s['sibling_out_of_range']}"
+        )
+        if s["reason"]:
+            typer.echo(f"    {s['reason']}")
+
+
+def report_per_doc_rules_nc(
+    as_json: bool = typer.Option(False, "--json", help="Emit summary as JSON."),
+) -> None:
+    """Status distribution for ``document_specific_rules``."""
+    from duke_rates.document_intelligence.document_specific_rules import (
+        fetch_status_summary,
+    )
+
+    settings, _ = _bootstrap()
+    summary = fetch_status_summary(settings.database_path)
+
+    if as_json:
+        typer.echo(json.dumps(summary, indent=2, default=str))
+        return
+
+    typer.echo(f"\n=== Per-Doc Rules Summary ===")
+    typer.echo(f"Total rules: {summary['total']}")
+    typer.echo(f"Promotion candidates (accepted, >=3 siblings agree): {summary['promotion_candidates']}")
+    typer.echo("\nBy status:")
+    for k, v in summary["by_status"].items():
+        typer.echo(f"  {k:<12} {v}")
+    if summary["sample_pending"]:
+        typer.echo("\nRecent pending samples:")
+        for r in summary["sample_pending"]:
+            typer.echo(
+                f"  id={r['id']:>4}  doc_id={r['document_identity_id']:>4}  "
+                f"target_field={(r['target_field'] or '-'):<14} "
+                f"regex={r['regex_preview']!r}"
+            )
+
+
+def detect_rule_promotions_nc() -> None:
+    """Run the Phase 4C promotion-candidate detector.
+
+    Scans accepted ``document_specific_rules`` for clusters of regexes
+    that appear in 3+ documents in the same family/template. Records
+    promotion candidates in ``template_promotion_candidates`` for human
+    review. Idempotent — running twice doesn't create duplicates.
+
+    This command does NOT modify ``profile_templates.yaml`` or any
+    parser code. It surfaces candidates for manual approval.
+    """
+    from duke_rates.document_intelligence.rule_promotion import PromotionDetector
+
+    settings, _ = _bootstrap()
+    detector = PromotionDetector(settings.database_path)
+    candidates = detector.detect_all()
+    typer.echo(f"detected {len(candidates)} promotion candidate(s)")
+    for c in candidates[:20]:
+        typer.echo(
+            f"  template={c.target_template:<35} field={(c.target_field or '-'):<18} "
+            f"size={c.cluster_size}  regex={c.suggested_regex[:60]!r}"
+        )
+
+
+def report_rule_promotions_nc(
+    as_json: bool = typer.Option(False, "--json", help="Emit JSON instead of text."),
+) -> None:
+    """Show promotion-candidate summary for human review."""
+    from duke_rates.document_intelligence.rule_promotion import (
+        fetch_promotion_summary,
+    )
+
+    settings, _ = _bootstrap()
+    summary = fetch_promotion_summary(settings.database_path)
+
+    if as_json:
+        typer.echo(json.dumps(summary, indent=2, default=str))
+        return
+
+    typer.echo(f"\n=== Template Promotion Candidates (Phase 4C) ===")
+    typer.echo(f"Total candidates: {summary['total']}")
+    typer.echo("\nBy status:")
+    for k, v in summary["by_status"].items():
+        typer.echo(f"  {k:<12} {v}")
+    typer.echo("\nBy target template:")
+    for k, v in summary["by_template"].items():
+        typer.echo(f"  {k:<40} {v}")
+    typer.echo("\nTop clusters by size:")
+    for r in summary["top_clusters"]:
+        typer.echo(
+            f"  size={r['cluster_size']:>3}  "
+            f"template={(r['target_template'] or '?'):<35} "
+            f"field={(r['target_field'] or '-'):<14} "
+            f"regex={r['regex_preview']!r}"
+        )
+
+
 def register_parse_refactor_commands(app: typer.Typer) -> None:
     """Register parsing-refactor and document-identity command group."""
     app.command("analyze-parse-failures-nc")(analyze_parse_failures_nc)
@@ -1091,3 +1488,16 @@ def register_parse_refactor_commands(app: typer.Typer) -> None:
     app.command("report-document-identity-summary-nc")(report_document_identity_summary_nc)
     app.command("report-document-identity-quality-nc")(report_document_identity_quality_nc)
     app.command("report-document-fingerprint-clusters-nc")(report_document_fingerprint_clusters_nc)
+    # Phase 2 routing tier
+    app.command("populate-routing-tier-nc")(populate_routing_tier_nc)
+    app.command("report-routing-tier-nc")(report_routing_tier_nc)
+    app.command("report-routing-tier-validation-nc")(report_routing_tier_validation_nc)
+    # Phase 3 tier1 binder
+    app.command("bind-tier1-proposals-nc")(bind_tier1_proposals_nc)
+    app.command("report-tier1-binding-nc")(report_tier1_binding_nc)
+    app.command("report-tier1-binding-comparison-nc")(report_tier1_binding_comparison_nc)
+    # Phase 4 per-doc rules
+    app.command("generate-per-doc-rules-nc")(generate_per_doc_rules_nc)
+    app.command("report-per-doc-rules-nc")(report_per_doc_rules_nc)
+    app.command("detect-rule-promotions-nc")(detect_rule_promotions_nc)
+    app.command("report-rule-promotions-nc")(report_rule_promotions_nc)
