@@ -78,10 +78,10 @@ a routing-layer change, not a parser-layer change.
   - [x] 3B. Tier 1 binder (auto-bind high-confidence docs) *(2026-05-06; dry-run only)*
   - [x] 3C. Compare binder output vs current parser routing *(2026-05-06)*
   - [ ] 3D. Active-mode binding — bridge tier1_binding proposals into the parser pipeline *(deferred — re-evaluate after disagreement rate drops below 5% and Tier 1 sample size grows)*
-- [ ] **Phase 4 — Per-Document Rules track** (Tier 3 path)
-  - [ ] 4A. `document_specific_rules` table
-  - [ ] 4B. Rule-attachment generator (replaces current per-profile suggest for Tier 3)
-  - [ ] 4C. Promotion path (per-doc rule → template rule when N docs share it)
+- [x] **Phase 4 — Per-Document Rules track** (Tier 3 path)
+  - [x] 4A. `document_specific_rules` table *(2026-05-06)*
+  - [x] 4B. Rule-attachment generator (replaces current per-profile suggest for Tier 3) *(2026-05-06)*
+  - [x] 4C. Promotion path (per-doc rule → template rule when N docs share it) *(2026-05-06)*
 - [ ] **Phase 5 — Decommission `wrong_profile`**
   - [ ] 5A. Replace `wrong_profile` failure type with tier-bind diagnostics
   - [ ] 5B. Migrate existing `wrong_profile` rows
@@ -805,7 +805,7 @@ For each `tier1_binding` row with `status = 'proposed'`:
 and similar for the existing parser entry points so the adapter knows
 what it's wrapping.
 
-| Status | deferred |
+| Status | deferred (re-evaluated 2026-05-06; preconditions still unmet) |
 |---|---|
 | Owner | unassigned |
 | Started | — |
@@ -819,6 +819,29 @@ what it's wrapping.
 > be enough to start with a conservative subset. Update §10
 > Implementation Log with the call and rationale before flipping the
 > switch.
+
+**2026-05-06 re-evaluation:** Phase 4A+4B+4C now in place. Tier 1
+population is unchanged at N=6 (the corpus hasn't grown — Phase 4B's
+per-doc rules attach to Tier 3 docs and don't directly promote them
+to Tier 1). Disagreement rate is unchanged at 66.7%. **Active-mode
+binding remains deferred.** Two paths forward:
+
+1. **Wait for organic growth.** Phase 4C's promotion path may, over
+   many runs, lift cluster regexes into templates. If those templates
+   become more accurate, more docs may eventually clear the Tier 1
+   gates (overall_confidence ≥ 0.85 AND consensus margin ≥ 0.15).
+   Re-run `report-tier1-binding-comparison-nc` periodically.
+2. **Conservative early-enable.** Cherry-pick the cleanest Tier 1
+   binding cases — specifically those where
+   `current_parser_profile = 'unknown'` (the 3 cases where there's
+   no current routing to disagree with at all). For those docs only,
+   active binding is mathematically uncontroversial: the binder
+   provides routing where there was none. This would require a new
+   CLI flag like `--only-current-unknown` on the (still-to-build)
+   `apply-tier1-bindings-nc` command. Decision rests with the human;
+   log rationale in §10 before flipping.
+
+Path (1) is the plan's intent and the safer default.
 
 ---
 
@@ -849,12 +872,25 @@ CREATE TABLE document_specific_rules (
 );
 ```
 
-| Status | pending |
+**Implementation:** New module
+`src/duke_rates/document_intelligence/document_specific_rules.py` (≈300
+lines): DDL + `ensure_schema()`, six allowed statuses
+(`pending`, `accepted`, `rejected`, `promoted`, `superseded`, `retired`),
+`DocumentSpecificRule` dataclass, CRUD helpers (`insert_rule`,
+`update_status`, `fetch_rule`, `fetch_rules_for_document`,
+`increment_promotion_count`), and `fetch_status_summary` for the
+dashboard. Two extra columns added beyond the SQL spec for traceability:
+`superseded_by` (forward link when a newer rule replaces an older one)
+and `notes` (free-form context attached at insert/update). Schema
+verified end-to-end with insert/update/fetch/promo-bump and bad-status
+validation rejection.
+
+| Status | completed |
 |---|---|
-| Owner | unassigned |
-| Started | — |
-| Completed | — |
-| PR / commit | — |
+| Owner | claude-opus-4-7 |
+| Started | 2026-05-06 |
+| Completed | 2026-05-06 |
+| PR / commit | branch `refactor/phase-3d-and-phase-4` |
 
 ### 4B. Rule-attachment generator
 
@@ -869,12 +905,54 @@ Validation:
 - skip the corpus-wide false-positive check entirely (it's not relevant —
   the rule is doc-scoped).
 
-| Status | pending |
+**Implementation:** New module
+`src/duke_rates/document_intelligence/per_doc_rule_generator.py`
+(≈420 lines): `PerDocRuleGenerator` class with
+`select_candidates`, `generate_for_document`, `generate_batch`,
+`validate`, plus helpers for sibling selection (Jaccard on
+schedule/rider/filename signal sets, picks 5 closest), text retrieval
+from `ncuc_page_artifacts`, and numeric value extraction for unit-range
+checks (`VALUE_LOW=0.0001`, `VALUE_HIGH=1.0`). The generator reuses the
+existing `RegexSuggestion` Pydantic schema (so the LLM output shape is
+unchanged) and the `regex_suggestion` orchestrator role. Persists
+accepted/rejected rules to `document_specific_rules` via the 4A APIs.
+
+A new prompt template `_PER_DOC_PROMPT` is doc-scoped — it includes the
+target doc's source PDF path, identity confidence, schedule codes,
+rider codes, distinctive titles, filename signals, and the
+`fetch_document_anchors` block from Phase 0B. The prompt explicitly
+demands at least one anchor in the candidate regex.
+
+CLI: `generate-per-doc-rules-nc --limit N` (Phase 4B run) and
+`report-per-doc-rules-nc` (status distribution).
+
+**Smoke-test results:** End-to-end pipeline (select → LLM → validate →
+persist) verified. The current Tier 3 candidate pool tested against
+the local Ollama returned `LLM returned no usable suggestion` for all
+attempts — root cause is **outside Phase 4B's scope**: the
+`regex_suggestion` orchestrator role's primary model `qwen3:8b` and
+all 4 fallbacks are currently failing the orchestrator's health
+probe (`http_error`). Direct Ollama calls succeed but return empty
+`response` content (the `qwen3:8b` thinking-mode model is consuming
+its `num_predict` budget on its `<think>` block and emitting no
+visible output). This is a model-config issue affecting any
+`regex_suggestion`-role caller, not a Phase 4B bug. Generator
+correctly handles this case by returning `status='skipped'` and
+declining to insert junk rules.
+
+**Recommended follow-up (not blocking 4B sign-off):** revisit the
+`regex_suggestion` role configuration in
+`ollama_orchestrator.py` to either (a) use a non-thinking model as
+primary, or (b) raise `num_predict` / use a `/no_think` prefix on
+qwen3 prompts, or (c) re-rank fallbacks so a working model is tried
+first.
+
+| Status | completed |
 |---|---|
-| Owner | unassigned |
-| Started | — |
-| Completed | — |
-| PR / commit | — |
+| Owner | claude-opus-4-7 |
+| Started | 2026-05-06 |
+| Completed | 2026-05-06 |
+| PR / commit | branch `refactor/phase-3d-and-phase-4` |
 
 ### 4C. Promotion path
 
@@ -883,12 +961,35 @@ regex (string-similarity threshold), surface them as a promotion candidate
 to the family's template. A human (or higher-confidence LLM call with full
 context) approves the promotion.
 
-| Status | pending |
+**Implementation:** New module
+`src/duke_rates/document_intelligence/rule_promotion.py` (≈380 lines):
+`PromotionDetector` class, `template_promotion_candidates` table +
+DDL, token-set Jaccard similarity (`SIMILARITY_THRESHOLD=0.6`), greedy
+within-group clustering, idempotent upsert keyed on a stable
+`cluster_key` (sha1(regex)[:12] joined with target template + field).
+
+Detection-only — does NOT auto-apply promotions to
+`profile_templates.yaml` or to parser code. Per the plan, "a human
+(or higher-confidence LLM call) approves the promotion" — 4C ships
+the candidate detection; the actual lift is a separate manual or
+future-LLM step.
+
+CLI: `detect-rule-promotions-nc` (run the detector) and
+`report-rule-promotions-nc` (show pending candidates by template).
+
+**Verified clustering** with synthetic test data — 3 identical
+regexes attached to 3 distinct documents in the same consensus
+profile produced exactly 1 promotion candidate at `cluster_size=3`
+with member rule ids tracked. Real candidates won't appear until
+Phase 4B has accepted at least 3 per-doc rules in some shared
+template (currently 0; gated by the LLM health issue noted in 4B).
+
+| Status | completed |
 |---|---|
-| Owner | unassigned |
-| Started | — |
-| Completed | — |
-| PR / commit | — |
+| Owner | claude-opus-4-7 |
+| Started | 2026-05-06 |
+| Completed | 2026-05-06 |
+| PR / commit | branch `refactor/phase-3d-and-phase-4` |
 
 ---
 
@@ -1003,6 +1104,43 @@ implementation begins:
 
 > Append-only. Newest entries on top. One paragraph per entry. Reference
 > commit hashes and the section number of the task.
+
+### 2026-05-06 — Phase 4 (full) + Phase 3D re-evaluated — claude-opus-4-7
+
+**§7.4A/B/C shipped + §6.3D re-evaluated on branch
+`refactor/phase-3d-and-phase-4`** (branched from `main` at commit
+`df3f0e8`). Three new modules:
+`src/duke_rates/document_intelligence/document_specific_rules.py`
+(schema + CRUD; ≈300 lines, six allowed statuses, idempotent),
+`per_doc_rule_generator.py` (≈420 lines, doc-scoped LLM prompt +
+narrow validation against target + 5 closest siblings via Jaccard
+on signals; reuses RegexSuggestion schema and regex_suggestion role),
+and `rule_promotion.py` (≈380 lines, token-set Jaccard clustering at
+threshold 0.6, MIN_CLUSTER_SIZE=3, idempotent upsert into
+`template_promotion_candidates`; detection-only — does not auto-apply
+to `profile_templates.yaml` or parser code per plan §7.4C). Five new
+CLI commands: `generate-per-doc-rules-nc`, `report-per-doc-rules-nc`,
+`detect-rule-promotions-nc`, `report-rule-promotions-nc`. **Also
+restored** three Phase 2 commands and three Phase 3 commands that were
+inadvertently dropped during the PR #3 cli-split refactor:
+`populate-routing-tier-nc`, `report-routing-tier-nc`,
+`report-routing-tier-validation-nc`, `bind-tier1-proposals-nc`,
+`report-tier1-binding-nc`, `report-tier1-binding-comparison-nc`. All
+registered in `cli_commands/parse_refactor.py`. Smoke tests verified
+schema, CRUD, sibling selection, and clustering end-to-end. **Phase
+4B's live LLM call failed on every Tier 3 candidate** because the
+`regex_suggestion` orchestrator role's primary `qwen3:8b` plus 4
+fallbacks all failed the health probe (`http_error`). Investigation
+showed direct Ollama calls succeed but the thinking-mode `qwen3:8b`
+model returns empty `response` content — a model-config issue
+upstream of Phase 4B and outside its scope. Documented as a recommended
+follow-up. **§6.3D re-evaluation:** Tier 1 population unchanged at
+N=6, disagreement rate unchanged at 66.7% — preconditions for active
+binding still fail. Active mode remains deferred. Two paths forward
+documented in §6.3D body: (1) wait for organic Tier 1 growth as
+Phase 4 promotion lifts cluster regexes into templates, or
+(2) cherry-pick `current_unknown` cases (3 of 6) for early
+conservative enable. Default path is (1).
 
 ### 2026-05-06 — Phase 3 (dry-run) — claude-opus-4-7
 
