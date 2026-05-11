@@ -1,0 +1,798 @@
+"""
+Extraction-grounded rule generator (Phase 6F).
+
+Generates per-document regex rules using *already-extracted* high-confidence
+rows as the starting point. Inverts the normal "look at raw text, hallucinate
+a regex" problem: instead, we hand the LLM a verbatim source line plus the
+expected captured value/unit, and ask it to produce a regex that captures
+THIS specific text.
+
+Why this works where the previous approach didn't:
+    The overnight 9hr run produced 909 rejected per-doc rules vs 10 accepted
+    (98.9% reject rate). Bucket analysis showed 100% of recent rejections
+    were "target produced 0 matches" — the LLM was emitting regexes that
+    looked plausible but didn't match the actual OCR text. By giving the
+    LLM a confirmed source quote, we eliminate the "is this line really in
+    the doc?" guessing problem.
+
+Pipeline:
+    1. Select high-confidence rows from ``llm_candidate_rate_extractions``
+       (per-row confidence >= 0.7 OR doc extraction_confidence >= 0.7
+       with row value present).
+    2. For each row, fetch the parent document's identity for anchors.
+    3. Prompt the LLM with: source line, expected value, expected unit,
+       schedule code, charge type, and strict regex rules.
+    4. Validate the regex three ways: compiles, contains anchor, captures
+       the expected value when run against the source line.
+    5. Persist to ``document_specific_rules`` with origin tag for
+       downstream A/B comparison against the legacy LLM-only path.
+
+Plan reference: ``docs/PARSING_ARCHITECTURE_REFACTOR_PLAN.md`` §6.F.
+"""
+
+from __future__ import annotations
+
+import json
+import logging
+import re
+import sqlite3
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
+
+from duke_rates.document_intelligence.document_specific_rules import (
+    DocumentSpecificRule,
+    ensure_schema,
+    insert_rule,
+)
+from duke_rates.document_intelligence.per_doc_rule_generator import (
+    HIGH_SPECIFICITY_CODE_RE,
+)
+from duke_rates.document_intelligence.regex_suggestions import (
+    ALLOWED_RISK_LEVELS,
+    ALLOWED_SUGGESTION_TYPES,
+    RegexSuggestion,
+    fetch_document_anchors,
+)
+
+logger = logging.getLogger(__name__)
+
+
+# Per-row confidence threshold for inclusion. Lower than the doc threshold
+# because we use both (per-row OR doc-level) so rows from a high-doc-conf
+# extraction get included even when the model emitted confidence=0.0.
+_MIN_ROW_CONFIDENCE: float = 0.7
+_MIN_DOC_CONFIDENCE: float = 0.7
+
+# Skip source lines this short — they're rarely robust enough to anchor on.
+_MIN_QUOTE_LEN: int = 12
+
+# Cap on rules generated per (source_pdf, target_field) pair. Avoids
+# generating dozens of near-identical regexes for the same doc.
+_MAX_RULES_PER_TARGET_PER_DOC: int = 2
+
+# Maximum retries per row when the validator rejects the regex.
+_MAX_RETRIES: int = 1
+
+
+# ---------------------------------------------------------------------------
+# Prompt templates
+# ---------------------------------------------------------------------------
+
+
+_GROUNDED_PROMPT = """\
+You are writing a Python regex that extracts ONE specific rate value from a
+North Carolina tariff document. We have ALREADY identified the rate via a
+prior LLM extraction — your job is to produce the regex that captures it.
+
+## Source line (verbatim from document - your regex MUST match this line):
+"{source_line}"
+
+## What the regex must capture:
+- Value: {value} (numeric only, no units)
+- Unit: {unit}
+- Charge type: {charge_type}
+
+## Document-specific anchor (your regex MUST include this code):
+{anchor}
+
+## Document context:
+- Source PDF: {source_pdf}
+- Schedule codes in this doc: {schedule_codes}
+
+## Python regex rules (violations cause automatic rejection):
+- NO variable-length look-behinds: `(?<=X.*)Y` is INVALID.
+- DO NOT use lookaheads to position the anchor. Put the anchor in the MAIN
+  regex body, BEFORE the captured value. e.g. WRONG: `(\\d+)\\$(?=.*RES-28)`,
+  RIGHT: `RES-28[\\s\\S]*?(\\d+)\\$`.
+- For named groups use `(?P<name>...)` NOT PCRE `(?<name>...)`.
+- `.` does NOT match newlines by default. Use `[\\s\\S]*?` to cross lines lazily
+  in the main body, never inside a lookahead expecting `.` to span lines.
+- Replace literal spaces between tokens with `\\s+` to tolerate OCR noise.
+- Use `\\$` to match a literal dollar sign, `¢` matches as-is.
+
+## Construction rules (follow this order):
+1. Start the regex with the anchor literal `{anchor}` (escape `-` as `\\-`).
+2. Add `[\\s\\S]*?` to bridge across newlines from the anchor to the value.
+3. Add the charge-type context word(s) from the source line (e.g.
+   `Basic\\s+Customer\\s+Charge`, `Energy\\s+Charge`, `Demand\\s+Charge`)
+   so the regex doesn't grab the wrong number from the same doc.
+4. Add another `[\\s\\S]*?` then the capturing group `(\\d+\\.\\d+)` or
+   `(\\d+\\.?\\d*)`.
+5. Optionally add unit suffix like `\\s*per\\s+kWh` for further specificity.
+6. The result MUST match the source line above when tested.
+
+## Examples of GOOD regexes for this kind of task:
+- Source: "I. Basic Customer Charge, per month $14.00" → anchor RES-28
+  Good: `Schedule\\s+RES-28[\\s\\S]*?Basic\\s+Customer\\s+Charge[\\s\\S]*?\\$(\\d+\\.\\d+)`
+- Source: "Energy Charge 10.369¢ per kWh" → anchor RES-48
+  Good: `Schedule\\s+RES-48[\\s\\S]*?Energy\\s+Charge[\\s\\S]*?(\\d+\\.\\d+)¢\\s*per\\s+kWh`
+
+## Output (single JSON object):
+{{
+  "suggestion_type": "regex_candidate",
+  "target_field": "{charge_type_field}",
+  "candidate_regex": "<your regex>",
+  "candidate_normalization": "<optional, e.g. 'divide captured cents per kWh by 100'>",
+  "expected_unit": "{unit}",
+  "confidence": 0.0-1.0,
+  "risk": "low|medium|high"
+}}
+
+No other text. No markdown fences. JSON only."""
+
+
+_RETRY_PROMPT = """\
+Your previous regex was REJECTED. Fix it and return a corrected version.
+
+## Rejection reason: {reason}
+
+## Source line (your regex MUST match this exact line):
+"{source_line}"
+
+## Anchor required: {anchor}
+## Expected captured value: {value}
+
+## Your failed regex:
+{failed_regex}
+
+## Common fixes:
+- If regex didn't match: replace literal spaces with `\\s+`, use `[\\s\\S]*?`
+  between tokens instead of `.*?` or literal newlines.
+- If anchor missing: include the literal anchor code in the regex.
+- If wrong value captured: adjust the capturing group `(\\d+\\.\\d+)` so it
+  lines up with the value in the source.
+
+Return the same JSON shape as before with a corrected candidate_regex."""
+
+
+# ---------------------------------------------------------------------------
+# Result types
+# ---------------------------------------------------------------------------
+
+
+# Regex tokens that should be stripped before the anchor-presence check
+# so a pattern like `Basic\s+Customer\s+Charge` matches the anchor
+# "Basic Customer Charge".
+_REGEX_TOKEN_STRIP = re.compile(
+    r"(\\s\+?|\\s\*|\\d\+?|\\d\*|\[\\s\\S\]\*\??|\[\\s\\S\]\+\??|"
+    r"\\\\|\\\$|\\b|\\w\+?|\\w\*|\(\?P<[^>]+>|\(\?:|\(\?!|\(\?=|"
+    r"\(|\)|\*\??|\+\??|\?|\^|\{[\d,]+\}|\[\^?[^\]]+\])"
+)
+
+
+def _quote_substantively_in_text(quote: str, text: str) -> bool:
+    """Check whether the substantive content of *quote* appears in *text*.
+
+    Strict ``quote in text`` rejects legitimate quotes when the staged
+    classifier trimmed enumeration prefixes like ``1. `` or ``A. ``.
+    This loosens the check: we look for the longest "interior" substring
+    after stripping common enumeration prefixes and bullet markers.
+
+    Returns True when any of these matches:
+      - exact substring match (fast path)
+      - the quote with leading enumeration stripped is a substring
+      - all words in the quote longer than 3 chars appear in the same
+        order within a 200-char window of the document
+    """
+    if not quote or not text:
+        return False
+    if quote in text:
+        return True
+    # Strip leading enumeration: "1. ", "A.", "I.", "(1)", "1)" etc.
+    stripped = re.sub(r"^[\s\d]*[\.\)A-Za-z]\s+", "", quote, count=1).strip()
+    if stripped and stripped in text:
+        return True
+    # Try the last 25 chars (the "value + unit" tail is the most stable).
+    tail = quote[-25:].strip()
+    if len(tail) >= 10 and tail in text:
+        return True
+    # Word-order fallback: every word longer than 3 chars from the quote
+    # must appear in the same order somewhere in the doc.
+    words = [w for w in re.findall(r"[A-Za-z0-9$¢.]+", quote) if len(w) > 3]
+    if not words:
+        return False
+    cursor = 0
+    for w in words:
+        idx = text.find(w, cursor)
+        if idx < 0:
+            return False
+        cursor = idx + len(w)
+    return True
+
+
+def _compact_for_anchor_check(regex_str: str) -> str:
+    """Strip regex metacharacters and non-alphanumerics for anchor matching.
+
+    Converts ``Basic\\s+Customer\\s+Charge`` to ``basiccustomercharge`` so a
+    space-delimited anchor like "Basic Customer Charge" can be detected
+    inside the regex pattern.
+    """
+    stripped = _REGEX_TOKEN_STRIP.sub("", regex_str)
+    return re.sub(r"[^a-z0-9]", "", stripped.lower())
+
+
+@dataclass
+class GroundedValidationResult:
+    accept: bool = False
+    reason: str = ""
+    compiled: bool = False
+    anchor_present: bool = False
+    matches_source: bool = False
+    captures_expected_value: bool = False
+    captured_values: list[str] = field(default_factory=list)
+
+
+@dataclass
+class GroundedOutcome:
+    source_pdf: str
+    extraction_id: int
+    row_index: int
+    source_quote: str
+    suggestion: RegexSuggestion | None = None
+    validation: GroundedValidationResult | None = None
+    status: str = "pending"
+    error: str = ""
+    rule_id: int | None = None
+
+
+# ---------------------------------------------------------------------------
+# Generator
+# ---------------------------------------------------------------------------
+
+
+class ExtractionGroundedRuleGenerator:
+    """Generate per-doc rules using high-confidence extraction rows as grounding.
+
+    Reuses the ``regex_suggestion`` role (same models as the legacy per-doc
+    generator) but with a focused prompt that gives the LLM the exact text
+    we want it to capture.
+    """
+
+    def __init__(
+        self,
+        orchestrator: Any,  # OllamaOrchestrator
+        db_path: Path | str,
+        *,
+        role: str = "regex_suggestion",
+    ) -> None:
+        self._orch = orchestrator
+        self._db_path = Path(db_path)
+        self._role = role
+        ensure_schema(self._db_path)
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
+
+    def select_candidates(
+        self, *, limit: int | None = None
+    ) -> list[dict[str, Any]]:
+        """Return candidate rows from llm_candidate_rate_extractions.
+
+        Each candidate is one (extraction_id, row_index, source_quote,
+        value, unit, charge_type) tuple. Filters to per-row confidence
+        >= _MIN_ROW_CONFIDENCE OR extraction-level confidence >=
+        _MIN_DOC_CONFIDENCE (so high-quality extractions whose model
+        emitted confidence=0.0 per row still qualify).
+
+        Also skips:
+        - Rows whose source_pdf already has _MAX_RULES_PER_TARGET_PER_DOC
+          accepted/pending grounded rules for the same target_field.
+        - Rows whose document_identity has no high-specificity code anchors
+          (the regex can't be safely scoped otherwise).
+        """
+        conn = sqlite3.connect(str(self._db_path))
+        conn.row_factory = sqlite3.Row
+        try:
+            # Use a SQL join to filter out docs that lack anchors BEFORE we
+            # over-select, so a small ``limit`` doesn't get consumed by
+            # the first N extractions with no document_identity row.
+            sql = """
+            SELECT lcre.id, lcre.source_pdf, lcre.rate_rows_json,
+                   lcre.extraction_confidence, lcre.document_signals_json
+            FROM llm_candidate_rate_extractions lcre
+            JOIN document_identity di ON di.source_pdf = lcre.source_pdf
+            WHERE lcre.extraction_confidence >= ?
+              AND json_array_length(COALESCE(lcre.rate_rows_json, '[]')) > 0
+              AND (
+                    COALESCE(di.schedule_codes_strong_json, '[]') != '[]'
+                 OR COALESCE(di.rider_codes_strong_json, '[]') != '[]'
+              )
+            ORDER BY lcre.extraction_confidence DESC, lcre.id DESC
+            """
+            params: list[Any] = [_MIN_DOC_CONFIDENCE]
+            if limit:
+                sql += " LIMIT ?"
+                # Over-select 20x to allow the per-row filters (confidence,
+                # quote length, charge type, unit) to narrow further.
+                params.append(int(limit) * 20)
+            extraction_rows = conn.execute(sql, params).fetchall()
+        finally:
+            conn.close()
+
+        candidates: list[dict[str, Any]] = []
+        seen_doc_target: dict[tuple[str, str], int] = {}
+        for er in extraction_rows:
+            doc_conf = float(er["extraction_confidence"] or 0.0)
+            try:
+                rate_rows = json.loads(er["rate_rows_json"] or "[]")
+            except (json.JSONDecodeError, TypeError):
+                continue
+
+            anchors = self._get_doc_anchors(er["source_pdf"])
+            if not anchors:
+                continue  # no anchor -> can't safely scope a regex
+
+            existing_count = self._count_existing_grounded_rules(er["source_pdf"])
+
+            for row_idx, rr in enumerate(rate_rows):
+                row_conf = float(rr.get("confidence") or 0.0)
+                # Either per-row OR doc-level confidence qualifies.
+                if row_conf < _MIN_ROW_CONFIDENCE and doc_conf < _MIN_DOC_CONFIDENCE:
+                    continue
+                quote = (rr.get("source_quote") or "").strip()
+                if len(quote) < _MIN_QUOTE_LEN:
+                    continue
+                charge_type = (rr.get("charge_type") or "").strip()
+                if not charge_type or charge_type == "Other":
+                    continue
+                value = rr.get("value")
+                if value is None:
+                    continue
+                try:
+                    float(value)
+                except (TypeError, ValueError):
+                    continue
+                if float(value) == 0.0:
+                    continue
+                unit = (rr.get("unit") or "").strip()
+                if not unit:
+                    continue
+                target_field = self._charge_type_to_target_field(charge_type)
+                # Per-(doc, target) cap.
+                key = (er["source_pdf"], target_field)
+                if seen_doc_target.get(key, 0) + existing_count.get(target_field, 0) >= _MAX_RULES_PER_TARGET_PER_DOC:
+                    continue
+                seen_doc_target[key] = seen_doc_target.get(key, 0) + 1
+
+                candidates.append({
+                    "extraction_id": int(er["id"]),
+                    "source_pdf": er["source_pdf"],
+                    "row_index": row_idx,
+                    "source_quote": quote,
+                    "value": float(value),
+                    "unit": unit,
+                    "charge_type": charge_type,
+                    "target_field": target_field,
+                    "anchors": anchors,
+                    "doc_extraction_confidence": doc_conf,
+                    "row_confidence": row_conf,
+                })
+                if limit and len(candidates) >= limit:
+                    return candidates
+        return candidates
+
+    def generate_for_candidate(
+        self, candidate: dict[str, Any]
+    ) -> GroundedOutcome:
+        """Generate, validate, and persist a single grounded regex rule.
+
+        Never raises; returns the outcome with status='error' on
+        unexpected failures.
+        """
+        outcome = GroundedOutcome(
+            source_pdf=candidate["source_pdf"],
+            extraction_id=candidate["extraction_id"],
+            row_index=candidate["row_index"],
+            source_quote=candidate["source_quote"],
+        )
+
+        # Confirm the quote's substantive content exists in the document.
+        # The staged extractor often trims leading enumeration prefixes
+        # (e.g. "1. " from "1. 39.614¢ per Critical Peak kWh"), so a strict
+        # `quote in doc_text` check rejects legitimate quotes. We loosen
+        # this to a "key substring" match using the longest run of unique
+        # words from the quote.
+        doc_text = self._fetch_document_text(candidate["source_pdf"])
+        if doc_text and not _quote_substantively_in_text(
+            candidate["source_quote"], doc_text,
+        ):
+            outcome.status = "skipped"
+            outcome.error = (
+                "source_quote substance not found in document text "
+                "(likely hallucinated by stage-3 classifier)"
+            )
+            return outcome
+
+        try:
+            suggestion = self._call_llm(candidate)
+        except Exception as exc:
+            outcome.status = "error"
+            outcome.error = f"LLM call failed: {exc}"
+            return outcome
+        if suggestion is None:
+            outcome.status = "skipped"
+            outcome.error = "LLM returned no usable suggestion"
+            return outcome
+        outcome.suggestion = suggestion
+
+        if not (suggestion.candidate_regex or "").strip():
+            outcome.status = "skipped"
+            outcome.error = "empty candidate_regex"
+            return outcome
+
+        try:
+            validation = self.validate(suggestion, candidate)
+        except Exception as exc:
+            outcome.status = "error"
+            outcome.error = f"validation raised: {exc}"
+            return outcome
+        outcome.validation = validation
+
+        # Retry once on failure with corrective feedback.
+        if not validation.accept and _MAX_RETRIES > 0:
+            try:
+                retry_suggestion = self._call_llm(
+                    candidate,
+                    retry_reason=validation.reason,
+                    failed_regex=suggestion.candidate_regex,
+                )
+            except Exception:
+                retry_suggestion = None
+            if retry_suggestion is not None and (retry_suggestion.candidate_regex or "").strip():
+                try:
+                    retry_validation = self.validate(retry_suggestion, candidate)
+                except Exception:
+                    retry_validation = None
+                if retry_validation is not None:
+                    outcome.suggestion = retry_suggestion
+                    outcome.validation = retry_validation
+                    validation = retry_validation
+
+        rule_status = "accepted" if validation.accept else "rejected"
+        try:
+            outcome.rule_id = self._persist_rule(
+                outcome.suggestion, candidate, rule_status, validation,
+            )
+        except Exception as exc:
+            outcome.status = "error"
+            outcome.error = f"persist failed: {exc}"
+            return outcome
+
+        outcome.status = rule_status
+        return outcome
+
+    def generate_batch(
+        self, *, limit: int = 10
+    ) -> list[GroundedOutcome]:
+        """Run the full pipeline over a batch of candidates."""
+        candidates = self.select_candidates(limit=limit)
+        outcomes: list[GroundedOutcome] = []
+        for c in candidates:
+            outcomes.append(self.generate_for_candidate(c))
+        return outcomes
+
+    # ------------------------------------------------------------------
+    # Validation
+    # ------------------------------------------------------------------
+
+    def validate(
+        self,
+        suggestion: RegexSuggestion,
+        candidate: dict[str, Any],
+    ) -> GroundedValidationResult:
+        """Run the four-step validation: compile, anchor, source-match, value-match."""
+        result = GroundedValidationResult()
+        regex_str = (suggestion.candidate_regex or "").strip()
+        if not regex_str:
+            result.reason = "empty regex"
+            return result
+
+        # 1. Compile.
+        try:
+            # DOTALL is critical: LLMs frequently write `(?=.*ANCHOR)` style
+            # lookaheads expecting `.` to span newlines, even though Python's
+            # default doesn't. Without DOTALL, ~50% of generated regexes
+            # fail with "no match" when they would actually be correct.
+            pattern = re.compile(
+                regex_str, re.IGNORECASE | re.MULTILINE | re.DOTALL,
+            )
+        except re.error as e:
+            result.reason = f"regex compile error: {e}"
+            return result
+        result.compiled = True
+
+        # 2. Anchor presence — compact comparison after stripping common
+        # regex tokens so `Basic\s+Customer\s+Charge` matches the anchor
+        # "Basic Customer Charge" by becoming "basiccustomercharge".
+        anchors: list[str] = candidate.get("anchors") or []
+        compact_regex = _compact_for_anchor_check(regex_str)
+        for a in anchors:
+            compact_anchor = re.sub(r"[^a-z0-9]", "", a.lower())
+            if compact_anchor and compact_anchor in compact_regex:
+                result.anchor_present = True
+                break
+        if not result.anchor_present:
+            result.reason = (
+                "regex lacks a document-specific anchor; required one of: "
+                f"{', '.join(anchors[:3])}"
+            )
+            return result
+
+        # 3. Matches against the original source line.
+        source_line = candidate["source_quote"]
+        try:
+            line_matches = pattern.findall(source_line)
+        except Exception:
+            line_matches = []
+
+        # Some grounded regexes need cross-line context (e.g. anchor on
+        # Schedule code 3 lines above the rate). When the source line
+        # itself doesn't contain the anchor token, allow validation
+        # against the full document text instead.
+        if not line_matches:
+            doc_text = self._fetch_document_text(candidate["source_pdf"])
+            if doc_text:
+                try:
+                    doc_matches = pattern.findall(doc_text)
+                    if doc_matches:
+                        line_matches = doc_matches
+                        result.reason = ""  # cleared, will overwrite below
+                except Exception:
+                    pass
+
+        if not line_matches:
+            result.reason = (
+                "regex didn't match the source line or full document — "
+                "likely literal spaces or OCR-sensitive characters in pattern"
+            )
+            return result
+        result.matches_source = True
+        result.captured_values = [
+            str(m if isinstance(m, str) else (m[0] if isinstance(m, tuple) and m else ""))
+            for m in line_matches[:5]
+        ]
+
+        # 4. Captured value matches expected within tolerance.
+        expected = float(candidate["value"])
+        captured_floats: list[float] = []
+        for m in line_matches[:10]:
+            pieces = m if isinstance(m, tuple) else (m,)
+            for p in pieces:
+                if isinstance(p, str):
+                    try:
+                        captured_floats.append(float(p))
+                    except ValueError:
+                        continue
+        # Allow 1% tolerance on float comparison (handles OCR rounding).
+        for cf in captured_floats:
+            if abs(cf - expected) / max(abs(expected), 1e-6) < 0.01:
+                result.captures_expected_value = True
+                break
+
+        if not result.captures_expected_value:
+            result.reason = (
+                f"regex matched but didn't capture expected value {expected}; "
+                f"captured: {captured_floats[:5]}"
+            )
+            return result
+
+        result.accept = True
+        result.reason = "all validations passed"
+        return result
+
+    # ------------------------------------------------------------------
+    # Internal — LLM call
+    # ------------------------------------------------------------------
+
+    def _call_llm(
+        self,
+        candidate: dict[str, Any],
+        *,
+        retry_reason: str = "",
+        failed_regex: str = "",
+    ) -> RegexSuggestion | None:
+        anchor = candidate["anchors"][0] if candidate.get("anchors") else ""
+        if retry_reason:
+            prompt = _RETRY_PROMPT.format(
+                reason=retry_reason,
+                source_line=candidate["source_quote"],
+                anchor=anchor,
+                value=candidate["value"],
+                failed_regex=failed_regex,
+            )
+        else:
+            prompt = _GROUNDED_PROMPT.format(
+                source_line=candidate["source_quote"],
+                value=candidate["value"],
+                unit=candidate["unit"],
+                charge_type=candidate["charge_type"],
+                charge_type_field=candidate["target_field"],
+                anchor=anchor,
+                source_pdf=candidate["source_pdf"],
+                schedule_codes=", ".join(candidate.get("anchors") or [])[:200],
+            )
+
+        run_result = self._orch.generate_json(
+            role=self._role,
+            prompt=prompt,
+            schema=RegexSuggestion,
+            subject_kind="extraction_grounded",
+            subject_id=f"{candidate['extraction_id']}:{candidate['row_index']}",
+            stage="extraction_grounded_rule",
+        )
+        if run_result.status not in ("ok", "fallback_used"):
+            return None
+        suggestion: RegexSuggestion = run_result.result
+        # Defensive normalization.
+        if suggestion.suggestion_type not in ALLOWED_SUGGESTION_TYPES:
+            suggestion.suggestion_type = "regex_candidate"
+        if suggestion.risk not in ALLOWED_RISK_LEVELS:
+            suggestion.risk = "medium"
+        if not (suggestion.target_field or "").strip():
+            suggestion.target_field = candidate["target_field"]
+        if not (suggestion.expected_unit or "").strip():
+            suggestion.expected_unit = candidate["unit"]
+        return suggestion
+
+    # ------------------------------------------------------------------
+    # Internal — helpers
+    # ------------------------------------------------------------------
+
+    def _get_doc_anchors(self, source_pdf: str) -> list[str]:
+        """Return high-specificity schedule/rider codes for a document."""
+        try:
+            anchors_dict = fetch_document_anchors(self._db_path, source_pdf)
+        except Exception:
+            return []
+        out: list[str] = []
+        for key in ("schedule_codes", "rider_codes"):
+            for v in anchors_dict.get(key, []):
+                if isinstance(v, str) and HIGH_SPECIFICITY_CODE_RE.match(v.strip()):
+                    out.append(v.strip())
+        return out
+
+    def _count_existing_grounded_rules(
+        self, source_pdf: str,
+    ) -> dict[str, int]:
+        """Return {target_field: count} of existing grounded rules for this doc.
+
+        Used by ``select_candidates`` to enforce per-(doc, target) caps.
+        """
+        try:
+            conn = sqlite3.connect(str(self._db_path))
+            rows = conn.execute(
+                """
+                SELECT dsr.target_field, COUNT(*)
+                FROM document_specific_rules dsr
+                JOIN document_identity di
+                  ON di.id = dsr.document_identity_id
+                WHERE di.source_pdf = ?
+                  AND dsr.status IN ('accepted', 'pending')
+                  AND dsr.notes LIKE 'origin: extraction-grounded%'
+                GROUP BY dsr.target_field
+                """,
+                (source_pdf,),
+            ).fetchall()
+            conn.close()
+            return {(r[0] or ""): int(r[1] or 0) for r in rows}
+        except Exception:
+            return {}
+
+    def _fetch_document_text(self, source_pdf: str) -> str:
+        """Fetch full page text (not just rate-relevant) for verification.
+
+        Pulls every page's text_content concatenated, with NO truncation.
+        Large tariff bundles can be 100k+ chars and we'd otherwise miss
+        quotes that came from a later page during extraction.
+        """
+        if not source_pdf:
+            return ""
+        try:
+            conn = sqlite3.connect(str(self._db_path))
+            rows = conn.execute(
+                """
+                SELECT text_content FROM ncuc_page_artifacts
+                WHERE source_pdf = ?
+                ORDER BY page_number
+                """,
+                (source_pdf,),
+            ).fetchall()
+            conn.close()
+            return "\n".join((r[0] or "") for r in rows)
+        except Exception:
+            return ""
+
+    @staticmethod
+    def _charge_type_to_target_field(charge_type: str) -> str:
+        """Map ALLOWED_CHARGE_TYPES values into target_field labels used by
+        the parsing layer. Keeps the legacy per-doc rule taxonomy stable.
+        """
+        mapping = {
+            "Basic Facilities Charge": "fixed_charge",
+            "Fixed Monthly Charge": "fixed_charge",
+            "Energy Charge": "energy_charge",
+            "Demand Charge": "demand_charge",
+            "Rider Adjustment": "rider_charge",
+            "Minimum Bill": "minimum_bill",
+            "TOU Rate": "energy_charge",
+            "Seasonal Rate": "energy_charge",
+            "Lighting Charge": "lighting_charge",
+        }
+        return mapping.get(charge_type, "other_charge")
+
+    def _persist_rule(
+        self,
+        suggestion: RegexSuggestion | None,
+        candidate: dict[str, Any],
+        status: str,
+        validation: GroundedValidationResult,
+    ) -> int:
+        """Persist the rule to document_specific_rules with an origin tag.
+
+        The notes prefix ``origin: extraction-grounded`` lets downstream
+        analysis A/B compare grounded-vs-legacy rule acceptance rates and
+        eventually re-prioritize promotion.
+        """
+        if suggestion is None:
+            raise ValueError("persist_rule called with no suggestion")
+
+        # Need a document_identity_id; look it up.
+        doc_id = self._fetch_document_identity_id(candidate["source_pdf"])
+        if doc_id == 0:
+            raise ValueError(
+                f"no document_identity row for {candidate['source_pdf']}"
+            )
+
+        notes = (
+            f"origin: extraction-grounded; "
+            f"extraction_id={candidate['extraction_id']}; "
+            f"row_index={candidate['row_index']}; "
+            f"expected_value={candidate['value']}; "
+            f"validation: {validation.reason}"
+        )
+        rule = DocumentSpecificRule(
+            document_identity_id=int(doc_id),
+            candidate_regex=suggestion.candidate_regex or "",
+            candidate_normalization=(suggestion.candidate_normalization or None),
+            expected_unit=(suggestion.expected_unit or None),
+            target_field=candidate["target_field"],
+            status=status,
+            notes=notes,
+        )
+        return insert_rule(self._db_path, rule)
+
+    def _fetch_document_identity_id(self, source_pdf: str) -> int:
+        if not source_pdf:
+            return 0
+        try:
+            conn = sqlite3.connect(str(self._db_path))
+            row = conn.execute(
+                "SELECT id FROM document_identity WHERE source_pdf = ? LIMIT 1",
+                (source_pdf,),
+            ).fetchone()
+            conn.close()
+            return int(row[0]) if row else 0
+        except Exception:
+            return 0
