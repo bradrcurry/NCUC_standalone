@@ -105,33 +105,68 @@ any other document in the corpus.
 - Filename signals: {filename_signals}
 
 ## DOCUMENT-SPECIFIC ANCHORS (REQUIRED):
-The candidate regex MUST include at least one of these anchors so it does NOT
-match unrelated documents in the corpus. A regex without an anchor will be
+The candidate regex MUST include at least one of these schedule or rider codes
+so it does NOT match unrelated documents. A regex without an anchor will be
 rejected automatically.
 
-{document_anchors}
+Required anchors (pick at least one): {required_anchors}
 
-## Document text excerpt (first ~1500 chars of rate-relevant content):
+## PYTHON REGEX CONSTRAINTS (critical):
+Python's `re` module has these limitations:
+- NO variable-length look-behinds (e.g. `(?<=a.*)b` is INVALID).
+- Use capturing groups `(...)` to extract values instead of look-arounds.
+- `\\d` matches [0-9], `\\s` matches whitespace, `.` does NOT match newlines
+  unless you use `re.DOTALL`.
+- `[\\s\\S]*?` is the Python-safe way to match "any characters including
+  newlines, lazily" — use it instead of `.*?` when you need to cross lines.
+
+## Document text (rate-relevant pages first, up to {max_chars} chars):
 ```
 {document_text}
 ```
 
+{past_mistakes}
 ## Instructions:
 1. suggestion_type MUST be one of: {allowed_types}
 2. risk MUST be one of: {allowed_risks}
-3. The candidate_regex MUST contain at least one of the document anchors above.
-   A regex like `\\$\\d+\\.\\d+\\s*/kWh` is too generic — scope it, e.g.
+3. The candidate_regex MUST contain at least one of the required anchors above.
+   Include the schedule/rider code literally in the regex, e.g.
    `Schedule\\s+RES-28[\\s\\S]*?\\$(\\d+\\.\\d+)\\s*/kWh`.
+   NCUC tariff pages often express energy rates as cents, e.g.
+   `10.369¢ per kWh`. In that case capture the numeric cents value, set
+   expected_unit to `¢/kWh`, and set candidate_normalization to a concise
+   instruction such as `divide captured cents per kWh by 100`.
 4. Provide 2-5 positive_test_cases (lines from THIS document that SHOULD match)
    and 2-5 negative_test_cases (lines that should NOT match — include at least
    one line from a DIFFERENT schedule code as a negative case).
-5. expected_unit should be the physical or billing unit (kWh, $/kWh, $/month, etc.)
-   or empty if unknown.
+5. expected_unit should be the physical or billing unit ($/kWh, ¢/kWh, $/month, etc.)
+   or empty if unknown. Do not label cents-per-kWh rates as $/kWh unless the
+   regex or normalization converts them.
 6. Confidence 0.0-1.0 based on how specific and evidence-backed the regex is.
 7. Return an EMPTY candidate_regex if no plausible pattern exists for this doc —
    do not invent regexes.
 
 Respond with a single JSON object matching the required schema. No other text."""
+
+_RETRY_FEEDBACK_PROMPT = """\
+Your previous regex was REJECTED. Fix the issues below and return a corrected regex.
+
+## Rejection reason: {rejection_reason}
+
+## Required anchors you MUST include (pick at least one in your regex):
+{required_anchors}
+
+## Original document text (same as before):
+```
+{document_text}
+```
+
+## Your failed candidate_regex:
+```
+{failed_regex}
+```
+
+Return a corrected JSON object with a fixed candidate_regex. No other text."""
 
 
 # ---------------------------------------------------------------------------
@@ -260,6 +295,16 @@ class PerDocRuleGenerator:
     ) -> GenerationOutcome:
         """Run the full generate→validate→persist cycle for one doc.
 
+        Tries a deterministic templated regex first when the document has
+        exactly one strong anchor AND the pre-scan finds enough same-shape
+        rate values to confirm the format. The LLM is only invoked when the
+        deterministic shortcut can't apply or when its regex fails
+        validation.
+
+        On LLM validation failure with a retryable reason (anchor missing,
+        zero matches, regex compile error), re-prompts the LLM once with
+        specific feedback before giving up.
+
         Never raises; returns the outcome with status='error' on
         unexpected failures so the caller can keep going through a batch.
         """
@@ -267,6 +312,32 @@ class PerDocRuleGenerator:
             source_pdf=candidate.get("source_pdf") or "",
             document_identity_id=int(candidate.get("document_identity_id") or 0),
         )
+
+        # Fast path: try deterministic template generation before touching the LLM.
+        det_suggestion = self._try_deterministic_template(candidate)
+        if det_suggestion is not None:
+            outcome.suggestion = det_suggestion
+            outcome.status = "generated"
+            try:
+                det_validation = self.validate(det_suggestion, candidate)
+            except Exception:
+                det_validation = None
+            if det_validation is not None and det_validation.accept:
+                outcome.validation = det_validation
+                try:
+                    rule_id = self._persist_rule(
+                        det_suggestion, candidate, "accepted", det_validation,
+                    )
+                    outcome.rule_id = rule_id
+                    outcome.status = "accepted"
+                    outcome.error = "(deterministic template; no LLM call)"
+                    return outcome
+                except Exception as exc:
+                    outcome.status = "error"
+                    outcome.error = f"persist failed (deterministic): {exc}"
+                    return outcome
+            # Deterministic attempt failed validation — fall through to LLM.
+
         try:
             suggestion = self._call_llm(candidate)
         except Exception as exc:
@@ -293,9 +364,34 @@ class PerDocRuleGenerator:
             return outcome
         outcome.validation = validation
 
+        # Retry once on fixable validation failures.
+        if not validation.accept and self._is_retryable(validation.reason):
+            logger.info(
+                "retrying %s — %s",
+                outcome.source_pdf,
+                validation.reason,
+            )
+            try:
+                retry_suggestion = self._call_llm(
+                    candidate,
+                    retry_feedback=validation.reason,
+                    failed_regex=suggestion.candidate_regex or "",
+                )
+            except Exception:
+                retry_suggestion = None
+            if retry_suggestion is not None and (retry_suggestion.candidate_regex or "").strip():
+                try:
+                    retry_validation = self.validate(retry_suggestion, candidate)
+                except Exception:
+                    retry_validation = None
+                if retry_validation is not None:
+                    outcome.suggestion = retry_suggestion
+                    outcome.validation = retry_validation
+                    validation = retry_validation
+
         rule_status = "accepted" if validation.accept else "rejected"
         try:
-            rule_id = self._persist_rule(suggestion, candidate, rule_status, validation)
+            rule_id = self._persist_rule(outcome.suggestion, candidate, rule_status, validation)
             outcome.rule_id = rule_id
         except Exception as exc:
             outcome.status = "error"
@@ -304,6 +400,10 @@ class PerDocRuleGenerator:
 
         outcome.status = rule_status
         return outcome
+
+    def _is_retryable(self, reason: str) -> bool:
+        reason_lower = reason.lower()
+        return any(needle in reason_lower for needle in self._RETRYABLE_REASONS)
 
     def generate_batch(self, *, limit: int = 10) -> list[GenerationOutcome]:
         candidates = self.select_candidates(limit=limit)
@@ -341,6 +441,9 @@ class PerDocRuleGenerator:
         except re.error as e:
             result.reason = f"regex compile error: {e}"
             return result
+        if not self._regex_contains_candidate_anchor(regex_str, candidate):
+            result.reason = "candidate regex lacks a document-specific schedule/rider anchor"
+            return result
 
         target_text = self._get_document_text(candidate.get("source_pdf") or "")
         result.target_text_present = bool(target_text)
@@ -355,6 +458,17 @@ class PerDocRuleGenerator:
                 f"(need >= {MIN_TARGET_MATCHES})"
             )
             return result
+        if self._requires_kwh_range_check(suggestion, target_matches):
+            target_out_of_range = [
+                v for v in self._normalized_charge_values(target_matches, suggestion)
+                if not (VALUE_LOW <= v <= VALUE_HIGH)
+            ]
+            if target_out_of_range:
+                result.reason = (
+                    "target produced out-of-range per-kWh values after "
+                    f"normalization: {target_out_of_range[:5]}"
+                )
+                return result
 
         # Find sibling docs and run the regex against each.
         siblings = self._select_siblings(candidate, limit=SIBLING_SAMPLE_SIZE)
@@ -365,9 +479,10 @@ class PerDocRuleGenerator:
                 continue
             matches = pattern.findall(sib_text)
             result.sibling_match_total += len(matches)
-            for v in self._extract_numeric_values(matches):
-                if not (VALUE_LOW <= v <= VALUE_HIGH):
-                    result.sibling_out_of_range_total += 1
+            if self._requires_kwh_range_check(suggestion, matches):
+                for v in self._normalized_charge_values(matches, suggestion):
+                    if not (VALUE_LOW <= v <= VALUE_HIGH):
+                        result.sibling_out_of_range_total += 1
 
         if result.sibling_out_of_range_total > 0:
             result.reason = (
@@ -388,11 +503,35 @@ class PerDocRuleGenerator:
     # Internal — LLM call
     # ------------------------------------------------------------------
 
-    def _call_llm(self, candidate: dict[str, Any]) -> RegexSuggestion | None:
+    # Max retries for per-doc rule generation when validation fails with
+    # fixable reasons (anchor missing, zero matches, regex compile error).
+    _MAX_RETRIES = 1  # 1 initial + 1 retry = 2 total attempts
+
+    # How many recent rejection samples to include in the prompt's
+    # "past mistakes" block. Cap is small so we don't blow the context.
+    _RECENT_FAILURE_LIMIT = 3
+
+    # Minimum number of recent rejections for the same anchor + target_field
+    # before we bother showing the LLM "avoid these mistakes".
+    _RECENT_FAILURE_MIN = 2
+
+    # Validation rejection reasons that are worth retrying (i.e. the LLM
+    # might fix them with better instructions).
+    _RETRYABLE_REASONS: tuple[str, ...] = (
+        "target produced 0 matches",
+        "candidate regex lacks a document-specific",
+        "regex compile error",
+    )
+
+    def _call_llm(
+        self,
+        candidate: dict[str, Any],
+        *,
+        retry_feedback: str = "",
+        failed_regex: str = "",
+    ) -> RegexSuggestion | None:
         source_pdf = candidate.get("source_pdf") or ""
-        anchors = fetch_document_anchors(self._db_path, source_pdf)
-        document_anchors = render_anchors_for_prompt(anchors)
-        document_text = self._get_document_text(source_pdf, max_pages=8)
+        document_text = self._get_document_text(source_pdf)
         if not document_text:
             logger.info("skipping %s — no document text", source_pdf)
             return None
@@ -405,18 +544,43 @@ class PerDocRuleGenerator:
                 return []
             return [s for s in data if isinstance(s, str)]
 
-        prompt = _PER_DOC_PROMPT.format(
-            source_pdf=source_pdf,
-            overall_confidence=candidate.get("overall_confidence") or 0.0,
-            schedule_codes=", ".join(_load_list(candidate.get("schedule_codes_strong_json"))) or "(none)",
-            rider_codes=", ".join(_load_list(candidate.get("rider_codes_strong_json"))) or "(none)",
-            titles=", ".join(_load_list(candidate.get("detected_titles_json"))[:5]) or "(none)",
-            filename_signals=", ".join(_load_list(candidate.get("filename_signals_json"))) or "(none)",
-            document_anchors=document_anchors,
-            document_text=document_text[:1500],
-            allowed_types=", ".join(ALLOWED_SUGGESTION_TYPES),
-            allowed_risks=", ".join(ALLOWED_RISK_LEVELS),
-        )
+        required_anchors = self._get_required_anchors(candidate)
+
+        if retry_feedback:
+            prompt = _RETRY_FEEDBACK_PROMPT.format(
+                rejection_reason=retry_feedback,
+                required_anchors=", ".join(required_anchors) if required_anchors else "(no high-specificity codes — use a distinctive title or signal)",
+                document_text=document_text,
+                failed_regex=failed_regex,
+            )
+        else:
+            anchors = fetch_document_anchors(self._db_path, source_pdf)
+            document_anchors_render = render_anchors_for_prompt(anchors)
+            required_anchors_str = ", ".join(required_anchors) if required_anchors else "(use a distinctive title or signal as anchor)"
+            # Surface past failures for this anchor so the LLM doesn't repeat
+            # the same wrong pattern across siblings.
+            primary_anchor = required_anchors[0] if required_anchors else ""
+            past_mistakes = self._render_past_mistakes(
+                primary_anchor,
+                # Phase 4B doesn't pass target_field through candidate; query
+                # broadly across all target_fields for this anchor.
+                target_field=None,
+            )
+            prompt = _PER_DOC_PROMPT.format(
+                source_pdf=source_pdf,
+                overall_confidence=candidate.get("overall_confidence") or 0.0,
+                schedule_codes=", ".join(_load_list(candidate.get("schedule_codes_strong_json"))) or "(none)",
+                rider_codes=", ".join(_load_list(candidate.get("rider_codes_strong_json"))) or "(none)",
+                titles=", ".join(_load_list(candidate.get("detected_titles_json"))[:5]) or "(none)",
+                filename_signals=", ".join(_load_list(candidate.get("filename_signals_json"))) or "(none)",
+                document_anchors=document_anchors_render,
+                required_anchors=required_anchors_str,
+                document_text=document_text,
+                max_chars=len(document_text),
+                past_mistakes=past_mistakes,
+                allowed_types=", ".join(ALLOWED_SUGGESTION_TYPES),
+                allowed_risks=", ".join(ALLOWED_RISK_LEVELS),
+            )
         run_result = self._orch.generate_json(
             role=self._role,
             prompt=prompt,
@@ -434,6 +598,206 @@ class PerDocRuleGenerator:
             suggestion.suggestion_type = "regex_candidate"
         if suggestion.risk not in ALLOWED_RISK_LEVELS:
             suggestion.risk = "medium"
+        return suggestion
+
+    @staticmethod
+    def _get_required_anchors(candidate: dict[str, Any]) -> list[str]:
+        """Extract high-specificity codes that the regex must reference."""
+        anchors: list[str] = []
+        for key in ("schedule_codes_strong_json", "rider_codes_strong_json"):
+            try:
+                vals = json.loads(candidate.get(key) or "[]")
+            except (json.JSONDecodeError, TypeError):
+                continue
+            for v in vals:
+                if isinstance(v, str) and HIGH_SPECIFICITY_CODE_RE.match(v.strip()):
+                    anchors.append(v.strip())
+        return anchors
+
+    def _fetch_recent_failures_for_anchor(
+        self,
+        primary_anchor: str,
+        target_field: str | None,
+    ) -> list[tuple[str, str]]:
+        """Return (failed_regex, rejection_reason) pairs for rules previously
+        rejected on documents sharing this anchor.
+
+        We match on the literal anchor token appearing in the candidate_regex
+        so we don't need a separate anchor column. Reasons are normalized in
+        notes by ``_persist_rule`` so the same query catches both compile
+        errors and zero-match outcomes.
+        """
+        if not primary_anchor:
+            return []
+        try:
+            conn = sqlite3.connect(str(self._db_path))
+            try:
+                if target_field:
+                    rows = conn.execute(
+                        """
+                        SELECT candidate_regex, notes
+                        FROM document_specific_rules
+                        WHERE status = 'rejected'
+                          AND target_field = ?
+                          AND candidate_regex LIKE ?
+                        ORDER BY id DESC
+                        LIMIT ?
+                        """,
+                        (
+                            target_field,
+                            f"%{primary_anchor}%",
+                            self._RECENT_FAILURE_LIMIT * 3,
+                        ),
+                    ).fetchall()
+                else:
+                    rows = conn.execute(
+                        """
+                        SELECT candidate_regex, notes
+                        FROM document_specific_rules
+                        WHERE status = 'rejected'
+                          AND candidate_regex LIKE ?
+                        ORDER BY id DESC
+                        LIMIT ?
+                        """,
+                        (
+                            f"%{primary_anchor}%",
+                            self._RECENT_FAILURE_LIMIT * 3,
+                        ),
+                    ).fetchall()
+            finally:
+                conn.close()
+        except Exception:
+            return []
+
+        # Deduplicate by regex — different docs that hit the same wrong
+        # pattern shouldn't repeat the same lesson.
+        seen: set[str] = set()
+        unique: list[tuple[str, str]] = []
+        for regex_str, notes in rows:
+            if not regex_str or regex_str in seen:
+                continue
+            seen.add(regex_str)
+            unique.append((regex_str, notes or ""))
+            if len(unique) >= self._RECENT_FAILURE_LIMIT:
+                break
+        return unique
+
+    def _render_past_mistakes(
+        self,
+        primary_anchor: str,
+        target_field: str | None,
+    ) -> str:
+        """Render the prompt block describing recent regex rejections for
+        this anchor. Returns "" when there's not enough history.
+        """
+        failures = self._fetch_recent_failures_for_anchor(
+            primary_anchor, target_field,
+        )
+        if len(failures) < self._RECENT_FAILURE_MIN:
+            return ""
+
+        lines = [
+            "## PAST MISTAKES TO AVOID:",
+            f"Previous regex attempts for anchor {primary_anchor!r} were rejected. "
+            "Do not repeat these patterns:",
+        ]
+        for i, (regex_str, notes) in enumerate(failures, 1):
+            # Pull just the rejection reason from notes (format from
+            # ``_persist_rule``: "per-doc rule ...; validation: <reason>").
+            reason = notes.split("validation:", 1)[-1].strip() if notes else ""
+            reason = (reason[:150] + "…") if len(reason) > 150 else reason
+            display_regex = (regex_str[:120] + "…") if len(regex_str) > 120 else regex_str
+            lines.append(f"  {i}. regex: `{display_regex}`")
+            if reason:
+                lines.append(f"     rejection: {reason}")
+        lines.append("")  # blank line before next block
+        return "\n".join(lines)
+
+    # ------------------------------------------------------------------
+    # Internal — deterministic template path (Phase 4B fast path)
+    # ------------------------------------------------------------------
+
+    # Minimum number of same-shape rate values found in document text
+    # before we trust a templated regex without LLM verification.
+    _DETERMINISTIC_MIN_HITS = 3
+
+    _DET_DOLLAR_PER_KWH = re.compile(
+        r"\$(\d+\.\d{2,5})\s*(?:per\s*|/)\s*kWh", re.IGNORECASE,
+    )
+    _DET_CENTS_PER_KWH = re.compile(
+        r"(\d+\.\d{2,5})\s*(?:cents?|¢|c)\s*(?:per\s*|/)\s*kWh", re.IGNORECASE,
+    )
+
+    def _try_deterministic_template(
+        self, candidate: dict[str, Any]
+    ) -> RegexSuggestion | None:
+        """Build a templated regex when document signals are unambiguous.
+
+        Returns None when:
+        - The document has 0 or 2+ strong anchors (ambiguous).
+        - The pre-scan finds <_DETERMINISTIC_MIN_HITS same-shape rate values.
+        - The anchor character class makes templating unsafe.
+
+        When applicable, returns a suggestion of the form
+        ``Schedule\\s+{ANCHOR}[\\s\\S]*?(<rate-group>)`` with the appropriate
+        unit and normalization metadata filled in.
+        """
+        required_anchors = self._get_required_anchors(candidate)
+        # Exactly-one anchor keeps the templated regex unambiguous; with 2+
+        # anchors we'd risk binding to the wrong sub-schedule.
+        if len(required_anchors) != 1:
+            return None
+        anchor = required_anchors[0]
+        # Anchor must contain a digit or dash so it's specific enough that
+        # the templated regex doesn't false-match a bare word like "RES".
+        if not re.search(r"[\d\-]", anchor):
+            return None
+
+        source_pdf = candidate.get("source_pdf") or ""
+        document_text = self._get_document_text(source_pdf)
+        if not document_text:
+            return None
+
+        # Pre-scan: count same-shape rate values.
+        dollar_hits = self._DET_DOLLAR_PER_KWH.findall(document_text)
+        cent_hits = self._DET_CENTS_PER_KWH.findall(document_text)
+
+        # Prefer dollars when both present (more direct unit).
+        if len(dollar_hits) >= self._DETERMINISTIC_MIN_HITS:
+            shape = "$/kWh"
+        elif len(cent_hits) >= self._DETERMINISTIC_MIN_HITS:
+            shape = "¢/kWh"
+        else:
+            return None
+
+        # Build a regex anchored on the schedule code, capturing the rate.
+        # We don't constrain what's between the anchor and the rate — the
+        # validator will reject if there are no matches or out-of-range
+        # values across siblings.
+        escaped_anchor = re.escape(anchor)
+        if shape == "$/kWh":
+            regex_str = (
+                rf"{escaped_anchor}[\s\S]*?\$(\d+\.\d{{2,5}})\s*(?:per\s*|/)\s*kWh"
+            )
+            expected_unit = "$/kWh"
+            normalization = ""
+        else:
+            regex_str = (
+                rf"{escaped_anchor}[\s\S]*?(\d+\.\d{{2,5}})\s*"
+                r"(?:cents?|¢|c)\s*(?:per\s*|/)\s*kWh"
+            )
+            expected_unit = "¢/kWh"
+            normalization = "divide captured cents per kWh by 100"
+
+        suggestion = RegexSuggestion(
+            suggestion_type="regex_candidate",
+            target_field="energy_charge",
+            candidate_regex=regex_str,
+            candidate_normalization=normalization,
+            expected_unit=expected_unit,
+            confidence=0.9,
+            risk="low",
+        )
         return suggestion
 
     # ------------------------------------------------------------------
@@ -501,30 +865,48 @@ class PerDocRuleGenerator:
                     out.add(v.strip().upper())
         return out
 
+    @staticmethod
+    def _regex_contains_candidate_anchor(regex_str: str, row: dict[str, Any]) -> bool:
+        """Require a concrete schedule/rider signal in accepted per-doc rules."""
+        anchors: set[str] = set()
+        for key in ("schedule_codes_strong_json", "rider_codes_strong_json"):
+            try:
+                vals = json.loads(row.get(key) or "[]")
+            except (json.JSONDecodeError, TypeError):
+                continue
+            for v in vals:
+                if isinstance(v, str) and HIGH_SPECIFICITY_CODE_RE.match(v.strip()):
+                    anchors.add(v.strip())
+
+        # Some isolated tests or manually-invoked validations don't pass the
+        # full identity row. In production candidates do, and anchors are then
+        # mandatory.
+        if not anchors:
+            return True
+
+        compact_regex = re.sub(r"[^a-z0-9]", "", regex_str.lower())
+        for anchor in anchors:
+            compact_anchor = re.sub(r"[^a-z0-9]", "", anchor.lower())
+            if compact_anchor and compact_anchor in compact_regex:
+                return True
+        return False
+
     # ------------------------------------------------------------------
     # Internal — text retrieval & numeric extraction
     # ------------------------------------------------------------------
 
-    def _get_document_text(self, source_pdf: str, *, max_pages: int = 12) -> str:
+    def _get_document_text(
+        self, source_pdf: str, *, max_pages: int = 24, max_chars: int = 6000
+    ) -> str:
+        """Return rate-relevant text using DB classification signals."""
         if not source_pdf:
             return ""
-        conn = sqlite3.connect(str(self._db_path))
-        try:
-            rows = conn.execute(
-                """
-                SELECT text_content
-                FROM ncuc_page_artifacts
-                WHERE source_pdf = ?
-                ORDER BY page_number
-                LIMIT ?
-                """,
-                (source_pdf, max_pages),
-            ).fetchall()
-        except Exception:
-            return ""
-        finally:
-            conn.close()
-        return "\n".join((r[0] or "") for r in rows)
+        from duke_rates.document_intelligence.regex_suggestions import (
+            fetch_rate_relevant_text,
+        )
+        return fetch_rate_relevant_text(
+            self._db_path, source_pdf, max_chars=max_chars
+        )
 
     _NUMERIC = re.compile(r"-?\d+(?:\.\d+)?")
 
@@ -543,6 +925,72 @@ class PerDocRuleGenerator:
                 except ValueError:
                     continue
         return out
+
+    def _normalized_charge_values(
+        self,
+        matches: list[Any],
+        suggestion: RegexSuggestion,
+    ) -> list[float]:
+        """Return likely charge values, normalized into dollars when needed.
+
+        Regex groups often include an anchor like RES-48 and then the actual
+        rate. For range checks, use the last numeric token in each match; it is
+        the best local proxy for the extracted charge without requiring named
+        groups from the model.
+        """
+        out: list[float] = []
+        for m in matches:
+            pieces = self._match_pieces(m)
+            if not pieces:
+                continue
+            nums = self._NUMERIC.findall(pieces)
+            if not nums:
+                continue
+            try:
+                value = float(nums[-1])
+            except ValueError:
+                continue
+            if self._should_convert_cents(suggestion, pieces):
+                value = value / 100.0
+            out.append(value)
+        return out
+
+    def _requires_kwh_range_check(
+        self,
+        suggestion: RegexSuggestion,
+        matches: list[Any],
+    ) -> bool:
+        haystack = " ".join(
+            [
+                suggestion.expected_unit or "",
+                suggestion.target_field or "",
+                suggestion.candidate_normalization or "",
+                " ".join(self._match_pieces(m) for m in matches[:5]),
+            ]
+        ).lower()
+        return "kwh" in haystack
+
+    def _should_convert_cents(self, suggestion: RegexSuggestion, match_text: str) -> bool:
+        haystack = " ".join(
+            [
+                suggestion.expected_unit or "",
+                suggestion.candidate_normalization or "",
+                match_text,
+            ]
+        ).lower()
+        return (
+            "¢" in haystack
+            or "cent" in haystack
+            or "divide" in haystack and "100" in haystack
+        )
+
+    @staticmethod
+    def _match_pieces(match: Any) -> str:
+        if isinstance(match, tuple):
+            return " ".join(p for p in match if isinstance(p, str))
+        if isinstance(match, str):
+            return match
+        return ""
 
     # ------------------------------------------------------------------
     # Internal — persistence

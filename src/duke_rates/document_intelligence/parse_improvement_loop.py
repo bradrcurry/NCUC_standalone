@@ -39,6 +39,12 @@ logger = logging.getLogger(__name__)
 VALID_TASK_KINDS = frozenset({
     "diagnose", "suggest", "validate", "revalidate",
     "shadow_test", "profile_consensus", "extract",
+    # Phase 6E: staged iterative extraction (filter → find-lines → classify)
+    "extract_staged",
+    "populate_identity", "populate_routing_tier", "bind_tier1",
+    "generate_per_doc_rules", "detect_rule_promotions",
+    # Phase 6 sub-document sections
+    "populate_sections", "analyze_document_structure",
 })
 
 # Per-stage minimum runtime budget in seconds. When the wall-clock budget
@@ -51,11 +57,20 @@ STAGE_MIN_BUDGET_SECONDS: dict[str, int] = {
     "diagnose":          90,   # one diagnose call is ~30s; allow at least 3
     "suggest":           90,
     "extract":           90,
+    "extract_staged":   180,   # 1 find-lines call + N classify calls per doc
     # Deterministic stages are fast.
     "validate":          15,
     "revalidate":        15,
     "shadow_test":       30,   # corpus sweep can take seconds per suggestion
     "profile_consensus": 15,
+    "populate_identity": 15,
+    "populate_routing_tier": 15,
+    "bind_tier1": 15,
+    "generate_per_doc_rules": 90,
+    "detect_rule_promotions": 15,
+    # Phase 6 sub-document sections
+    "populate_sections": 15,
+    "analyze_document_structure": 120,
 }
 
 # ---------------------------------------------------------------------------
@@ -77,11 +92,16 @@ class ParseImprovementReport:
     normalization_suggestions_created: int = 0
     schema_extractions_attempted: int = 0
     schema_extractions_validated: int = 0
+    document_specific_rules_by_status: dict[str, int] = field(default_factory=dict)
+    promotion_candidates_by_status: dict[str, int] = field(default_factory=dict)
     human_review_candidates: list[dict[str, Any]] = field(default_factory=list)
     highest_value_next_actions: list[dict[str, Any]] = field(default_factory=list)
     task_stats: dict[str, dict[str, int]] = field(default_factory=dict)
     roles_used: dict[str, str] = field(default_factory=dict)
     runtime_seconds: float = 0.0
+    # Phase 6 section statistics
+    sections_total: int = 0
+    sections_by_type: dict[str, int] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -95,11 +115,15 @@ class ParseImprovementReport:
             "normalization_suggestions_created": self.normalization_suggestions_created,
             "schema_extractions_attempted": self.schema_extractions_attempted,
             "schema_extractions_validated": self.schema_extractions_validated,
+            "document_specific_rules_by_status": self.document_specific_rules_by_status,
+            "promotion_candidates_by_status": self.promotion_candidates_by_status,
             "human_review_candidates": self.human_review_candidates,
             "highest_value_next_actions": self.highest_value_next_actions,
             "task_stats": self.task_stats,
             "roles_used": self.roles_used,
             "runtime_seconds": self.runtime_seconds,
+            "sections_total": self.sections_total,
+            "sections_by_type": self.sections_by_type,
             "idle": self.is_idle(),
         }
 
@@ -148,6 +172,13 @@ class ParseImprovementLoop:
         self._shadow: Any = None
         self._consensus: Any = None
         self._extractor: Any = None
+        self._identity_agg: Any = None
+        self._tier_agg: Any = None
+        self._tier1_binder: Any = None
+        self._per_doc_generator: Any = None
+        self._promotion_detector: Any = None
+        self._sections_populator: Any = None
+        self._structure_analyst: Any = None
 
     # ------------------------------------------------------------------
     # Public API
@@ -204,7 +235,14 @@ class ParseImprovementLoop:
             roles_needed.add("regex_suggestion")
         if "extract" in tasks:
             roles_needed.add("structured_rate_extraction")
-        # validate task doesn't need LLM
+        if "extract_staged" in tasks:
+            roles_needed.add("structured_rate_extraction")
+            roles_needed.add("structured_rate_classify")
+        if "generate_per_doc_rules" in tasks:
+            roles_needed.add("regex_suggestion")
+        if "analyze_document_structure" in tasks:
+            roles_needed.add("document_structure_analyst")
+        # validate, populate_sections tasks don't need LLM
 
         for role in roles_needed:
             ok, err = self._orch.health_probe(role)
@@ -275,6 +313,9 @@ class ParseImprovementLoop:
             task_limit = min(remaining, limit) if max_documents > 0 else limit
 
             try:
+                task_deadline = (
+                    wall_deadline if wall_deadline != float("inf") else None
+                )
                 task_result = self._run_task(
                     task,
                     task_limit,
@@ -283,9 +324,10 @@ class ParseImprovementLoop:
                     since,
                     resume,
                     rediagnose_unknown,
+                    wall_deadline=task_deadline,
                 )
                 report.task_stats[task] = task_result
-                total_processed += task_result.get("ok", 0) + task_result.get("fail", 0)
+                total_processed += self._document_count_for_task(task, task_result)
                 report.documents_analyzed = total_processed
             except Exception as exc:
                 report.task_stats[task]["fail"] += 1
@@ -331,9 +373,46 @@ class ParseImprovementLoop:
             from duke_rates.document_intelligence.profile_consensus import ProfileConsensusEngine
             self._consensus = ProfileConsensusEngine(self._db_path)
 
-        if "extract" in tasks and self._extractor is None:
+        if (
+            "extract" in tasks or "extract_staged" in tasks
+        ) and self._extractor is None:
             from duke_rates.document_intelligence.schema_extraction import SchemaGuidedExtractor
             self._extractor = SchemaGuidedExtractor(self._orch, self._db_path)
+
+        if "populate_identity" in tasks and self._identity_agg is None:
+            from duke_rates.document_intelligence.document_identity import DocumentIdentityAggregator
+            self._identity_agg = DocumentIdentityAggregator(self._db_path)
+
+        if "populate_routing_tier" in tasks and self._tier_agg is None:
+            from duke_rates.document_intelligence.routing_tier import TierAggregator
+            self._tier_agg = TierAggregator(self._db_path)
+
+        if "bind_tier1" in tasks and self._tier1_binder is None:
+            from duke_rates.document_intelligence.tier1_binder import Tier1Binder
+            self._tier1_binder = Tier1Binder(self._db_path)
+
+        if "generate_per_doc_rules" in tasks and self._per_doc_generator is None:
+            from duke_rates.document_intelligence.per_doc_rule_generator import PerDocRuleGenerator
+            self._per_doc_generator = PerDocRuleGenerator(self._orch, self._db_path)
+
+        if "detect_rule_promotions" in tasks and self._promotion_detector is None:
+            from duke_rates.document_intelligence.rule_promotion import PromotionDetector
+            self._promotion_detector = PromotionDetector(self._db_path)
+
+        # Phase 6 sub-document sections
+        if "populate_sections" in tasks and self._sections_populator is None:
+            from duke_rates.document_intelligence.section_aggregator import (
+                DocumentSectionAggregator,
+            )
+            self._sections_populator = DocumentSectionAggregator(self._db_path)
+
+        if "analyze_document_structure" in tasks and self._structure_analyst is None:
+            from duke_rates.document_intelligence.document_structure_analyst import (
+                DocumentStructureAnalyst,
+            )
+            self._structure_analyst = DocumentStructureAnalyst(
+                self._orch, self._db_path,
+            )
 
     # ------------------------------------------------------------------
     # Internal — task execution
@@ -348,6 +427,7 @@ class ParseImprovementLoop:
         since: str | None,
         resume: bool,
         rediagnose_unknown: bool,
+        wall_deadline: float | None = None,
     ) -> dict[str, int]:
         stats: dict[str, int] = {"ok": 0, "skip": 0, "fail": 0}
 
@@ -525,11 +605,138 @@ class ParseImprovementLoop:
                 except Exception:
                     stats["fail"] += 1
 
+        elif task == "extract_staged":
+            candidates = self._extractor.select_extraction_candidates(
+                limit=limit, profile=profile, family=family
+            )
+            stats["filtered_at_stage_1"] = 0
+            stats["rate_rows_total"] = 0
+            for candidate in candidates:
+                if wall_deadline is not None:
+                    import time as _time
+                    if _time.monotonic() >= wall_deadline:
+                        stats["skip"] += 1
+                        stats.setdefault("stopped_at_deadline", 1)
+                        continue
+                try:
+                    extraction = self._extractor.extract_candidate_staged(candidate)
+                except Exception:
+                    stats["fail"] += 1
+                    continue
+                if extraction is None:
+                    stats["fail"] += 1
+                    continue
+                # Stage-1 deterministic filter outcomes have very low conf.
+                if extraction.extraction_confidence <= 0.1 and not extraction.rate_rows:
+                    stats["filtered_at_stage_1"] += 1
+                    stats["skip"] += 1
+                elif extraction.rate_rows:
+                    stats["ok"] += 1
+                    stats["rate_rows_total"] += len(extraction.rate_rows)
+                else:
+                    stats["skip"] += 1
+
+        elif task == "populate_identity":
+            processed = self._identity_agg.populate_all(limit=limit if limit > 0 else None)
+            stats["ok"] = processed
+
+        elif task == "populate_routing_tier":
+            processed = self._tier_agg.label_all(limit=limit if limit > 0 else None)
+            stats["ok"] = processed
+
+        elif task == "bind_tier1":
+            counts = self._tier1_binder.bind_all(limit=limit if limit > 0 else None)
+            stats.update({str(k): int(v) for k, v in counts.items()})
+            stats["ok"] = sum(int(v) for v in counts.values())
+
+        elif task == "generate_per_doc_rules":
+            outcomes = self._per_doc_generator.generate_batch(limit=limit)
+            status_counts: dict[str, int] = {}
+            rejection_reasons: list[str] = []
+            for outcome in outcomes:
+                status_counts[outcome.status] = status_counts.get(outcome.status, 0) + 1
+                if outcome.status == "rejected" and outcome.validation and outcome.validation.reason:
+                    rejection_reasons.append(outcome.validation.reason)
+                elif outcome.status == "error" and outcome.error:
+                    rejection_reasons.append(f"error: {outcome.error}")
+            stats.update(status_counts)
+            stats["candidates"] = len(outcomes)
+            stats["ok"] = status_counts.get("accepted", 0)
+            stats["skip"] = status_counts.get("skipped", 0)
+            stats["fail"] = status_counts.get("rejected", 0) + status_counts.get("error", 0)
+            if rejection_reasons:
+                stats["rejection_reasons"] = rejection_reasons[:20]
+
+        elif task == "detect_rule_promotions":
+            # Skip the clustering pass when there aren't enough accepted rules
+            # to form a cluster (MIN_CLUSTER_SIZE=3 in rule_promotion.py).
+            accepted_count = self._count_where(
+                "document_specific_rules", "status = 'accepted'", limit=1000,
+            )
+            if accepted_count < 3:
+                stats["ok"] = 0
+                stats["skip"] = 0
+                stats["fail"] = 0
+                stats["skipped_few_accepted"] = accepted_count
+            else:
+                candidates = self._promotion_detector.detect_all()
+                stats["ok"] = len(candidates)
+                stats["candidates"] = len(candidates)
+
+        # Phase 6 sub-document sections
+        elif task == "populate_sections":
+            n = self._sections_populator.populate_all(limit=limit)
+            stats["ok"] = n
+            stats["documents_populated"] = n
+
+        elif task == "analyze_document_structure":
+            # Short-circuit if there's no work — avoids burning the wall-clock
+            # budget on empty queues when populate_sections hasn't run yet.
+            small_candidates = self._structure_analyst.select_candidates(limit=1)
+            large_count = self._structure_analyst._count_large_section_docs(limit=1)
+            if not small_candidates and large_count == 0:
+                stats["ok"] = 0
+                stats["skip"] = 1
+                stats["candidates"] = 0
+                stats["skipped_no_work"] = 1
+                return stats
+            results = self._structure_analyst.analyze_batch(
+                limit=limit, deadline=wall_deadline,
+            )
+            stats["ok"] = results["analyzed"]
+            stats["fail"] = results["failed"]
+            stats["skip"] = results.get("skipped", 0)
+            stats["candidates"] = results["candidates"]
+            stats["sections_updated"] = results["merged"]
+            # Per-page boundary classifier for large sections
+            ls = results.get("large_sections", {})
+            if ls:
+                stats["large_section_docs"] = ls.get("docs_analyzed", 0)
+                stats["large_section_boundaries"] = ls.get("boundaries_found", 0)
+                stats["large_section_splits"] = ls.get("sections_split", 0)
+
         return stats
 
     # ------------------------------------------------------------------
     # Internal — helpers
     # ------------------------------------------------------------------
+
+    @staticmethod
+    def _document_count_for_task(task: str, stats: dict[str, int]) -> int:
+        """Count document-like LLM work, not deterministic refresh rows.
+
+        ``candidates`` is the queue size discovered before processing — it must
+        NOT be used to bump ``total_processed`` because that prematurely trips
+        ``--max-documents``. Always count actual outcomes (ok+fail+skip).
+        """
+        if task in {"populate_identity", "populate_routing_tier", "bind_tier1",
+                     "detect_rule_promotions", "populate_sections"}:
+            return 0
+        return (
+            int(stats.get("ok", 0) or 0)
+            + int(stats.get("fail", 0) or 0)
+            + int(stats.get("skip", 0) or 0)
+        )
 
     def _is_already_done(
         self, subject_kind: str, subject_id: str, stage: str
@@ -594,9 +801,63 @@ class ParseImprovementLoop:
                     limit=limit, profile=profile, family=family
                 )
                 report.task_stats[task] = {"ok": 0, "skip": 0, "fail": 0, "candidates": len(candidates)}
+            elif task == "extract_staged":
+                candidates = self._extractor.select_extraction_candidates(
+                    limit=limit, profile=profile, family=family
+                )
+                report.task_stats[task] = {"ok": 0, "skip": 0, "fail": 0, "candidates": len(candidates)}
+            elif task == "populate_identity":
+                candidates = self._count_rows("document_fingerprints_v2", "source_pdf", limit=limit)
+                report.task_stats[task] = {"ok": 0, "skip": 0, "fail": 0, "candidates": candidates}
+            elif task == "populate_routing_tier":
+                candidates = self._count_rows("document_identity", "source_pdf", limit=limit)
+                report.task_stats[task] = {"ok": 0, "skip": 0, "fail": 0, "candidates": candidates}
+            elif task == "bind_tier1":
+                candidates = self._count_where("document_routing_tier", "tier = 1", limit=limit)
+                report.task_stats[task] = {"ok": 0, "skip": 0, "fail": 0, "candidates": candidates}
+            elif task == "generate_per_doc_rules":
+                candidates = self._per_doc_generator.select_candidates(limit=limit)
+                report.task_stats[task] = {"ok": 0, "skip": 0, "fail": 0, "candidates": len(candidates)}
+            elif task == "detect_rule_promotions":
+                candidates = self._count_where("document_specific_rules", "status = 'accepted'", limit=limit)
+                report.task_stats[task] = {"ok": 0, "skip": 0, "fail": 0, "candidates": candidates}
+            # Phase 6 sub-document sections
+            elif task == "populate_sections":
+                candidates = len(self._sections_populator.select_candidates(limit=limit))
+                report.task_stats[task] = {"ok": 0, "skip": 0, "fail": 0, "candidates": candidates}
+            elif task == "analyze_document_structure":
+                candidates = len(self._structure_analyst.select_candidates(limit=limit))
+                large_docs = self._structure_analyst._count_large_section_docs(limit=limit)
+                report.task_stats[task] = {
+                    "ok": 0, "skip": 0, "fail": 0,
+                    "candidates": candidates,
+                    "large_section_docs": large_docs,
+                }
 
         report.completed_at = datetime.now(timezone.utc).isoformat()
         return report
+
+    def _count_rows(self, table: str, distinct_column: str, *, limit: int) -> int:
+        return self._count_sql(
+            f"SELECT COUNT(*) FROM (SELECT DISTINCT {distinct_column} FROM {table} LIMIT ?)",
+            (limit,),
+        )
+
+    def _count_where(self, table: str, where: str, *, limit: int) -> int:
+        return self._count_sql(
+            f"SELECT COUNT(*) FROM (SELECT 1 FROM {table} WHERE {where} LIMIT ?)",
+            (limit,),
+        )
+
+    def _count_sql(self, sql: str, params: tuple[Any, ...]) -> int:
+        import sqlite3
+        try:
+            conn = sqlite3.connect(str(self._db_path))
+            row = conn.execute(sql, params).fetchone()
+            conn.close()
+            return int(row[0]) if row else 0
+        except Exception:
+            return 0
 
     def _collect_summary_stats(self, report: ParseImprovementReport) -> None:
         """Collect aggregate statistics from the database for the report."""
@@ -635,6 +896,34 @@ class ParseImprovementLoop:
             ).fetchone()
             report.schema_extractions_attempted = ext_total[0] if ext_total else 0
             report.schema_extractions_validated = ext_validated[0] if ext_validated else 0
+
+            dsr_rows = conn.execute(
+                "SELECT status, COUNT(*) as cnt FROM document_specific_rules GROUP BY status"
+            ).fetchall()
+            report.document_specific_rules_by_status = {
+                r["status"]: r["cnt"] for r in dsr_rows
+            }
+
+            promo_rows = conn.execute(
+                "SELECT status, COUNT(*) as cnt FROM template_promotion_candidates GROUP BY status"
+            ).fetchall()
+            report.promotion_candidates_by_status = {
+                r["status"]: r["cnt"] for r in promo_rows
+            }
+
+            # Phase 6 section statistics
+            try:
+                sec_total = conn.execute(
+                    "SELECT COUNT(*) FROM document_sections"
+                ).fetchone()
+                report.sections_total = sec_total[0] if sec_total else 0
+                sec_types = conn.execute(
+                    "SELECT section_type, COUNT(*) as cnt FROM document_sections GROUP BY section_type"
+                ).fetchall()
+                report.sections_by_type = {r[0]: r[1] for r in sec_types}
+            except Exception:
+                report.sections_total = 0
+                report.sections_by_type = {}
 
             conn.close()
         except Exception:

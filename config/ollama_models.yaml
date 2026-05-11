@@ -116,16 +116,16 @@ roles:
     description: "Deep parse failure root-cause analysis (Phase 5.6). Used for low-confidence qwen3:8b triage; qwen2.5-coder:7b benchmarked slower but more decisive."
 
   regex_suggestion:
-    primary: "qwen3:8b"
+    primary: "llama3.1:8b-instruct-q4_K_M"
     fallback:
-      - "mistral:7b-instruct"
-      - "phi3.5:latest"
-      - "gemma4:e4b-it-q4_K_M"
-      - "nemotron-3-nano:4b"
+      - "qwen2.5-coder:7b"
+      - "deepseek-r1:14b"
+      - "mistral-nemo:latest"
     options:
       temperature: 0.0
     max_tokens: 2048
-    description: "Regex/normalization candidate generation (Phase 5.6). 2026-05 two-fixture regex benchmark: qwen3:8b, mistral:7b-instruct, and phi3.5:latest all reached 100% valid JSON and 100% gold accuracy; qwen3:8b was the fastest among those fully valid models. gemma4, nemotron-3-nano, and ministral each failed schema validation on one of two cases."
+    timeout_s: 240
+    description: "Regex/normalization candidate generation (Phase 5.6). 2026-05 8-model 10-case benchmark (300s timeout): llama3.1:8b-instruct-q4_K_M 10/10 valid, 100% actionable, 0.80 confidence. qwen2.5-coder:7b 9/10, highest confidence (0.82). deepseek-r1:14b 9/10, 0.80. mistral-nemo:latest 9/10. qwen3:8b (previous primary) dropped to 5/10 under full test."
 
   structured_rate_extraction:
     primary: "gemma4:e4b-it-q4_K_M"
@@ -136,7 +136,18 @@ roles:
       temperature: 0.0
     max_tokens: 2048
     timeout_s: 120
-    description: "Schema-guided rate-row JSON extraction (Phase 5.6). Fixture-backed 2026-05 benchmark: gemma4:e4b-it-q4_K_M was the only viable tested model, with 100% gold accuracy on valid returns and no timeouts."
+    description: "Schema-guided rate-row JSON extraction (Phase 5.6). Also drives stage 2 (find-lines) of the staged extractor — 2026-05 benchmark: gemma4 achieved perfect 1.0 recall vs deterministic baseline and 100% valid line precision on 3 cases. mistral:7b-instruct is the universal fallback for both staged stages."
+
+  structured_rate_classify:
+    primary: "qwen3:8b"
+    fallback:
+      - "mistral:7b-instruct"
+      - "qwen2.5:7b-instruct"
+    options:
+      temperature: 0.0
+    max_tokens: 512
+    timeout_s: 90
+    description: "Stage 3 of staged extractor — per-line classification into one CandidateRateRow. 2026-05 8-model benchmark on 5 real source quotes: qwen3:8b is the only model with 100% valid JSON + 100% unit-match + meaningful confidence (avg 0.99). gemma4 (the structured_rate_extraction primary) only validates 40% of classify calls — wrong tool for this smaller, denser prompt. mistral:7b-instruct is the universal fallback: 100% valid + 100% unit-match but emits confidence=0.0 (we keep its rows but the loop's low-confidence warning misfires)."
 
   layout_table_extraction:
     primary: "qwen3-vl:4b"
@@ -174,6 +185,16 @@ roles:
     max_tokens: 4096
     description: "Dev-side use only — code generation, prompt authoring"
 
+  document_structure_analyst:
+    primary: "llama3.1:8b-instruct-q4_K_M"
+    fallback:
+      - "qwen2.5-coder:7b"
+    options:
+      temperature: 0.0
+    max_tokens: 2000
+    timeout_s: 120
+    description: "Sub-document section boundary refinement (Phase 6C). Page-by-page structure analysis to correct deterministic section splits. 2026-05 swap: llama3.1:8b-instruct made primary because the task is reading comprehension on tariff page text, not code generation — instruction-tuned models read prose better than coder models. qwen2.5-coder:7b retained as fallback. deepseek-r1:14b removed entirely — it times out on 40-page prompts due to chain-of-thought overhead."
+
 prompt_versions:
   balanced_classifier: "v1"
   structured_extractor: "v1"
@@ -183,3 +204,5 @@ prompt_versions:
   hard_parse_diagnosis: "v1"
   regex_suggestion: "v1"
   structured_rate_extraction: "v1"
+  structured_rate_classify: "v1"
+  document_structure_analyst: "v1"

@@ -126,14 +126,25 @@ class OllamaOrchestrator:
     # Public API
     # ------------------------------------------------------------------
 
+    # Cross-process health cache: 5-minute TTL. Avoids re-probing every
+    # role at the start of each wrapper-script iteration.
+    _HEALTH_CACHE_FILE = Path(".cache/ollama_health.json")
+    _HEALTH_CACHE_TTL_S = 300
+
     def health_probe(self, role: str) -> tuple[bool, str | None]:
         """Probe *role*'s primary model, then fallbacks.
 
-        Caches the result for the process lifetime — same fail-fast
-        pattern as ``GlmOcrNormalizer.is_available()``.
+        Caches the result for the process lifetime AND across processes
+        (5-minute TTL on disk). Same fail-fast pattern as
+        ``GlmOcrNormalizer.is_available()``.
         """
         if role in self._health_cache:
             return self._health_cache[role]
+
+        disk_cached = self._read_disk_health_cache(role)
+        if disk_cached is not None:
+            self._health_cache[role] = disk_cached
+            return disk_cached
 
         cfg = self._roles.get(role)
         if cfg is None:
@@ -147,10 +158,49 @@ class OllamaOrchestrator:
             ok, err = self._probe_model(model, cfg.probe_kind, probe_timeout)
             if ok:
                 self._health_cache[role] = (True, None)
+                self._write_disk_health_cache(role, True, None)
                 return self._health_cache[role]
 
-        self._health_cache[role] = (False, f"all {len(models_to_probe)} model(s) failed for role {role!r}")
+        msg = f"all {len(models_to_probe)} model(s) failed for role {role!r}"
+        self._health_cache[role] = (False, msg)
+        # Don't persist failures to disk — failure may be transient (e.g.
+        # Ollama still starting) and we want the next process to retry.
         return self._health_cache[role]
+
+    def _read_disk_health_cache(self, role: str) -> tuple[bool, str | None] | None:
+        try:
+            if not self._HEALTH_CACHE_FILE.exists():
+                return None
+            payload = json.loads(self._HEALTH_CACHE_FILE.read_text(encoding="utf-8"))
+            entry = payload.get(role)
+            if not entry:
+                return None
+            ts = float(entry.get("ts", 0))
+            if time.time() - ts > self._HEALTH_CACHE_TTL_S:
+                return None
+            return (bool(entry.get("ok")), entry.get("err"))
+        except Exception:
+            return None
+
+    def _write_disk_health_cache(
+        self, role: str, ok: bool, err: str | None
+    ) -> None:
+        try:
+            self._HEALTH_CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
+            payload: dict[str, Any] = {}
+            if self._HEALTH_CACHE_FILE.exists():
+                try:
+                    payload = json.loads(
+                        self._HEALTH_CACHE_FILE.read_text(encoding="utf-8")
+                    )
+                except Exception:
+                    payload = {}
+            payload[role] = {"ok": ok, "err": err, "ts": time.time()}
+            self._HEALTH_CACHE_FILE.write_text(
+                json.dumps(payload), encoding="utf-8"
+            )
+        except Exception:
+            pass
 
     def list_available_roles(self) -> list[RoleHealth]:
         """Return health status for every configured role."""

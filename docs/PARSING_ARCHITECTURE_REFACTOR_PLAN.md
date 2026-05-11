@@ -85,7 +85,7 @@ a routing-layer change, not a parser-layer change.
 - [ ] **Phase 5 — Decommission `wrong_profile`**
   - [ ] 5A. Replace `wrong_profile` failure type with tier-bind diagnostics
   - [ ] 5B. Migrate existing `wrong_profile` rows
-  - [ ] 5C. Update overnight loop to skip the legacy path
+  - [x] 5C. Update overnight loop to include routing + per-doc rule path *(2026-05-06)*
 
 ---
 
@@ -927,25 +927,15 @@ CLI: `generate-per-doc-rules-nc --limit N` (Phase 4B run) and
 `report-per-doc-rules-nc` (status distribution).
 
 **Smoke-test results:** End-to-end pipeline (select → LLM → validate →
-persist) verified. The current Tier 3 candidate pool tested against
-the local Ollama returned `LLM returned no usable suggestion` for all
-attempts — root cause is **outside Phase 4B's scope**: the
-`regex_suggestion` orchestrator role's primary model `qwen3:8b` and
-all 4 fallbacks are currently failing the orchestrator's health
-probe (`http_error`). Direct Ollama calls succeed but return empty
-`response` content (the `qwen3:8b` thinking-mode model is consuming
-its `num_predict` budget on its `<think>` block and emitting no
-visible output). This is a model-config issue affecting any
-`regex_suggestion`-role caller, not a Phase 4B bug. Generator
-correctly handles this case by returning `status='skipped'` and
-declining to insert junk rules.
-
-**Recommended follow-up (not blocking 4B sign-off):** revisit the
-`regex_suggestion` role configuration in
-`ollama_orchestrator.py` to either (a) use a non-thinking model as
-primary, or (b) raise `num_predict` / use a `/no_think` prefix on
-qwen3 prompts, or (c) re-rank fallbacks so a working model is tried
-first.
+persist) verified. A later targeted health probe showed the
+`regex_suggestion` role healthy locally, so the earlier all-skipped
+behavior is not a permanent orchestrator outage. The remaining issue is
+quality/normalization: one real Tier 3 candidate produced a rejected
+regex because the model looked for dollar-denominated `/kWh` text while
+the target document used cents-per-kWh text such as `10.369¢ per kWh`.
+Follow-up 5C tightened the prompt and validation around `¢/kWh`
+normalization so cents values are range-checked after dividing by 100
+and schedule-code numbers such as `RES-48` are not mistaken for rates.
 
 | Status | completed |
 |---|---|
@@ -1025,15 +1015,40 @@ go to per-doc rules.
 
 ### 5C. Update overnight loop
 
-Drop the `profile_consensus` task (its function moves into the routing
-layer). Add a new task kind `route_tier_1` and `route_tier_3_rules`.
+The original placeholder task names (`route_tier_1`,
+`route_tier_3_rules`) were replaced with explicit pipeline stages that
+match the concrete modules and existing CLI vocabulary:
 
-| Status | pending |
+- `populate_identity`
+- `populate_routing_tier`
+- `bind_tier1`
+- `generate_per_doc_rules`
+- `detect_rule_promotions`
+
+`profile_consensus` is retained for now because existing diagnosis →
+consensus recovery still depends on it. Removing it safely belongs with
+5A/5B when `wrong_profile` is fully migrated out of the diagnosis path.
+
+**Implementation:** `ParseImprovementLoop` accepts and executes the
+new task kinds, initializes the Phase 1-4 components lazily, includes
+`generate_per_doc_rules` in the `regex_suggestion` health-probe set,
+supports dry-run candidate enumeration for all new tasks, and adds
+per-doc rule / promotion status summaries to the overnight JSON report.
+The `run-overnight-parse-improvement-nc` CLI now validates against the
+shared `VALID_TASK_KINDS` set so the CLI and loop cannot drift.
+
+**Validation:** `python -m pytest tests\test_parse_refactor_phase5c.py -q`
+passes. `python -m duke_rates.cli run-overnight-parse-improvement-nc
+--task-kind populate_identity,populate_routing_tier,bind_tier1,generate_per_doc_rules,detect_rule_promotions
+--dry-run --limit 1` accepts the new task list and enumerates work
+without writes.
+
+| Status | completed |
 |---|---|
-| Owner | unassigned |
-| Started | — |
-| Completed | — |
-| PR / commit | — |
+| Owner | codex-gpt-5 |
+| Started | 2026-05-06 |
+| Completed | 2026-05-06 |
+| PR / commit | branch `refactor/phase-3d-and-phase-4` |
 
 ---
 
@@ -1104,6 +1119,31 @@ implementation begins:
 
 > Append-only. Newest entries on top. One paragraph per entry. Reference
 > commit hashes and the section number of the task.
+
+### 2026-05-06 — Phase 5C overnight integration + Phase 4B validation follow-up — codex-gpt-5
+
+**§8.5C shipped on branch `refactor/phase-3d-and-phase-4`.** The
+overnight parse-improvement loop now accepts and executes the concrete
+Phase 1-4 maintenance tasks `populate_identity`,
+`populate_routing_tier`, `bind_tier1`, `generate_per_doc_rules`, and
+`detect_rule_promotions`; initializes their batch components lazily;
+includes `generate_per_doc_rules` in the `regex_suggestion` health
+probe set; supports dry-run candidate counts; and reports
+`document_specific_rules` / `template_promotion_candidates` status
+histograms in the end-of-run JSON. The CLI validates against the shared
+`VALID_TASK_KINDS` set to prevent CLI/loop drift. Follow-up on §7.4B:
+a targeted local health probe showed `regex_suggestion` is currently
+healthy, shifting the remaining problem from role availability to
+model output quality. The per-doc prompt and validator now handle
+cents-per-kWh rules explicitly (`¢/kWh` values divide by 100 before
+range checks), validate target-doc per-kWh ranges as well as sibling
+ranges, and avoid treating schedule-code numerics such as `RES-48` as
+charge values. Validation run: `python -m pytest
+tests\test_parse_refactor_phase5c.py -q` passed; compileall passed;
+CLI dry-run accepted the new task list. GitNexus `analyze` still fails
+on scope extraction and `detect-changes -r duke-standalone` reports
+storage/FTS assertion warnings, so the graph could not be trusted for
+symbol-level verification.
 
 ### 2026-05-06 — Phase 4 (full) + Phase 3D re-evaluated — claude-opus-4-7
 

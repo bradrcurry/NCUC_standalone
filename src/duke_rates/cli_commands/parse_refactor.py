@@ -374,7 +374,18 @@ def run_overnight_parse_improvement_nc(
     max_documents: int = typer.Option(0, "--max-documents", help="Max documents to process (0 = unlimited)."),
     max_runtime_minutes: int = typer.Option(0, "--max-runtime-minutes", help="Hard wall-clock cap in minutes (0 = unlimited)."),
     max_consecutive_failures: int = typer.Option(5, "--max-consecutive-failures", help="Abort after N consecutive model call failures."),
-    task_kind: str = typer.Option("diagnose", "--task-kind", help="Comma-separated tasks: diagnose, suggest, validate, revalidate, shadow_test, profile_consensus, extract."),
+    task_kind: str = typer.Option(
+        "diagnose",
+        "--task-kind",
+        help=(
+            "Comma-separated tasks: diagnose, suggest, validate, revalidate, "
+            "shadow_test, profile_consensus, extract, extract_staged, "
+            "populate_identity, populate_routing_tier, bind_tier1, "
+            "generate_per_doc_rules, detect_rule_promotions, "
+            "populate_sections, analyze_document_structure. "
+            "Use extract_staged for higher-accuracy per-line classification."
+        ),
+    ),
     profile: str | None = typer.Option(None, "--profile", help="Optional parser profile filter."),
     family: str | None = typer.Option(None, "--family", help="Optional family_key filter."),
     since: str = typer.Option("", "--since", help="ISO8601 datetime — only parse attempts after this."),
@@ -411,6 +422,17 @@ def run_overnight_parse_improvement_nc(
       2. **suggest** — generate regex/normalization candidates (LLM)
       3. **validate** — deterministic validation of pending suggestions (local)
       4. **extract** — schema-guided LLM fallback extraction (LLM)
+      5. **populate_identity / populate_routing_tier / bind_tier1** — Phase 1-3 routing refresh (local)
+      6. **generate_per_doc_rules / detect_rule_promotions** — Phase 4 per-doc rule path (LLM + local)
+
+    Recommended overnight pattern (two-phase):
+      Seed (once):  --task-kind diagnose,populate_identity,populate_routing_tier,bind_tier1 --limit 500
+      Loop (repeat): --task-kind diagnose,suggest,validate,generate_per_doc_rules,detect_rule_promotions
+                     --max-runtime-minutes 55 --limit 10
+
+    The seed phase refreshes identity/tier routing and runs a fresh diagnosis
+    pass. The loop alternates between the legacy suggest pipeline (for Tier 1/2
+    docs with diagnosed failures) and the per-doc rule path (for Tier 3 docs).
 
     Safety guarantees:
       - No destructive overwrites — only INSERTs new rows
@@ -425,12 +447,15 @@ def run_overnight_parse_improvement_nc(
     from pathlib import Path as _Path
 
     from duke_rates.document_intelligence.ollama_orchestrator import OllamaOrchestrator
-    from duke_rates.document_intelligence.parse_improvement_loop import ParseImprovementLoop
+    from duke_rates.document_intelligence.parse_improvement_loop import (
+        ParseImprovementLoop,
+        VALID_TASK_KINDS,
+    )
 
     settings, _ = _bootstrap()
 
     tasks = [t.strip() for t in task_kind.split(",") if t.strip()]
-    valid_tasks = {"diagnose", "suggest", "validate", "revalidate", "shadow_test", "profile_consensus", "extract"}
+    valid_tasks = set(VALID_TASK_KINDS)
     for t in tasks:
         if t not in valid_tasks:
             typer.echo(f"Unknown task kind {t!r}. Valid: {', '.join(sorted(valid_tasks))}", err=True)
@@ -474,7 +499,10 @@ def run_overnight_parse_improvement_nc(
     typer.echo(f"  runtime:         {report.runtime_seconds:.1f}s")
     typer.echo(f"  docs analyzed:   {report.documents_analyzed}")
     for task, stats in report_dict.get("task_stats", {}).items():
-        parts = ", ".join(f"{k}={v}" for k, v in stats.items() if v > 0)
+        parts = ", ".join(
+            f"{k}={v}" for k, v in stats.items()
+            if (isinstance(v, int) and v > 0) or (isinstance(v, list) and len(v) > 0)
+        )
         typer.echo(f"  {task}: {parts}")
     typer.echo(f"  failures by type: {report.parse_failures_by_type}")
     idle = report.is_idle()
@@ -1474,6 +1502,353 @@ def report_rule_promotions_nc(
         )
 
 
+# =============================================================================
+# Phase 6 — sub-document section intelligence
+# =============================================================================
+
+
+def populate_document_sections_nc(
+    limit: int = typer.Option(
+        0, "--limit", help="Process at most N source_pdfs (0 = unlimited).",
+    ),
+) -> None:
+    """Build sub-document section bundles from span + page-level evidence (Phase 6AB).
+
+    Reads from ``ncuc_span_artifacts`` and ``ncuc_page_artifacts``, seeds
+    section boundaries, refines via page-level signals, classifies section
+    types, and persists the result to ``document_sections``.
+
+    Deterministic and idempotent — running multiple times is safe.
+    """
+    from duke_rates.document_intelligence.section_aggregator import (
+        DocumentSectionAggregator,
+    )
+
+    settings = get_settings()
+    configure_logging(settings.log_level)
+    agg = DocumentSectionAggregator(settings.database_path)
+    n = agg.populate_all(limit=limit if limit > 0 else None)
+    typer.echo(f"document_sections: populated/refreshed {n} documents")
+
+
+def report_document_sections_nc(
+    source_pdf: str = typer.Option(
+        ..., "--source-pdf", help="Path of the source PDF to inspect.",
+    ),
+    min_confidence: float = typer.Option(
+        0.0, "--min-confidence", help="Hide sections below this confidence (0.0-1.0).",
+    ),
+    as_json: bool = typer.Option(False, "--json", help="Emit data as JSON."),
+) -> None:
+    """Print the persisted section bundles for one document.
+
+    Shows section boundaries, types, codes, and confidence scores
+    for every section in the document.
+    """
+    from duke_rates.document_intelligence.document_sections import (
+        fetch_sections,
+    )
+
+    settings = get_settings()
+    configure_logging(settings.log_level)
+    sections = fetch_sections(
+        settings.database_path, source_pdf,
+        min_confidence=min_confidence if min_confidence > 0 else None,
+    )
+
+    if as_json:
+        typer.echo(json.dumps(
+            [s.__dict__ for s in sections] if sections else [],
+            indent=2, default=str,
+        ))
+        return
+
+    typer.echo(f"\n=== Document Sections ===")
+    typer.echo(f"PDF: {source_pdf}")
+    typer.echo(f"Sections: {len(sections)}")
+    for s in sections:
+        typer.echo(
+            f"  [{s.section_index}] pages {s.start_page}-{s.end_page} "
+            f"type={s.section_type.value} conf={s.overall_confidence:.2f}"
+        )
+        if s.schedule_codes:
+            typer.echo(f"       schedule_codes={s.schedule_codes}")
+        if s.rider_codes:
+            typer.echo(f"       rider_codes={s.rider_codes}")
+        if s.leaf_numbers:
+            typer.echo(f"       leaf_numbers={s.leaf_numbers}")
+
+
+def report_document_sections_summary_nc(
+    as_json: bool = typer.Option(False, "--json", help="Emit summary as JSON."),
+) -> None:
+    """Print aggregate statistics for the document_sections table.
+
+    Shows total sections, total documents with sections, type distribution,
+    and confidence histogram.
+    """
+    from duke_rates.document_intelligence.document_sections import (
+        fetch_sections_summary,
+    )
+
+    settings = get_settings()
+    configure_logging(settings.log_level)
+    summary = fetch_sections_summary(settings.database_path)
+
+    if as_json:
+        typer.echo(json.dumps(summary, indent=2))
+        return
+
+    typer.echo(f"\n=== Document Sections Summary ===")
+    typer.echo(f"Total sections:     {summary['total_sections']}")
+    typer.echo(f"Total documents:    {summary['total_documents']}")
+    typer.echo()
+    typer.echo("By section type:")
+    total = max(1, summary["total_sections"])
+    for t, n in summary["type_distribution"].items():
+        bar = "#" * int(n / total * 40)
+        typer.echo(f"  {t:<20} {n:>5}  {bar}")
+    typer.echo()
+    typer.echo("Confidence distribution:")
+    for bucket, n in summary["confidence_histogram"].items():
+        bar = "#" * int(n / total * 40) if total else ""
+        typer.echo(f"  {bucket:<10} {n:>5}  {bar}")
+
+
+def analyze_document_structure_nc(
+    limit: int = typer.Option(
+        5, "--limit", help="Max candidate documents to analyze this run.",
+    ),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="List candidates without calling the LLM.",
+    ),
+    max_pages: int = typer.Option(
+        40, "--max-pages", help="Max pages per document to include in the LLM prompt.",
+    ),
+    as_json: bool = typer.Option(False, "--json", help="Emit results as JSON."),
+) -> None:
+    """Use a local LLM to review and refine deterministic section boundaries (Phase 6C).
+
+    Analyzes documents where sections have low confidence (<0.5) or where
+    over-splitting (>8 sections) is suspected. The LLM reviews page-level
+    signals and proposes boundary refinements. Agreements boost confidence;
+    disagreements flag sections as ``needs_review``.
+
+    Idempotent — re-running re-evaluates all candidates.
+    """
+    from pathlib import Path as _Path
+
+    from duke_rates.document_intelligence.document_structure_analyst import (
+        DocumentStructureAnalyst,
+    )
+    from duke_rates.document_intelligence.ollama_orchestrator import (
+        OllamaOrchestrator,
+    )
+
+    settings, _ = _bootstrap()
+    db_path = _Path(settings.database_path)
+
+    orch = OllamaOrchestrator(db_path=settings.database_path)
+    analyst = DocumentStructureAnalyst(
+        orch, db_path, max_pages=max_pages,
+    )
+
+    if dry_run:
+        candidates = analyst.select_candidates(limit=limit)
+        typer.echo(f"Candidates: {len(candidates)}")
+        for pdf in candidates[:10]:
+            typer.echo(f"  {pdf}")
+        return
+
+    ok, err = orch.health_probe("document_structure_analyst")
+    if not ok:
+        typer.echo(
+            f"ERROR: document_structure_analyst health check failed: {err}",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+    typer.echo(
+        f"  document_structure_analyst -> "
+        f"{orch.roles['document_structure_analyst'].primary} (OK)"
+    )
+
+    results = analyst.analyze_batch(limit=limit)
+
+    if as_json:
+        typer.echo(json.dumps(results, indent=2, default=str))
+        return
+
+    typer.echo(f"\n=== Document Structure Analysis ===")
+    typer.echo(f"Candidates: {results['candidates']}")
+    typer.echo(f"Analyzed:   {results['analyzed']}")
+    typer.echo(f"Merged:     {results['merged']} total section updates")
+    typer.echo(f"Failed:     {results['failed']}")
+    typer.echo()
+    for pdf, info in results["per_document"].items():
+        status = info["status"]
+        if status == "ok":
+            typer.echo(
+                f"  {pdf}: {info['sections_proposed']} sections proposed, "
+                f"{info['sections_updated']} updated, "
+                f"quality={info['overall_quality']:.2f}"
+            )
+        else:
+            typer.echo(f"  {pdf}: {status}")
+
+
+def aggregate_overnight_reports_nc(
+    glob_pattern: str = typer.Option(
+        "docs/reports/overnight_parse_improvement/*.json",
+        "--glob",
+        help="Glob pattern for report JSON files to aggregate.",
+    ),
+    since: str = typer.Option(
+        "", "--since",
+        help="Only include reports with started_at >= this ISO8601 datetime.",
+    ),
+    top_n: int = typer.Option(5, "--top", help="Top-N models / failure types to display."),
+) -> None:
+    """Roll up overnight-loop JSON reports into a single deltas summary.
+
+    Reads every report matching --glob (after the optional --since cutoff),
+    sums task throughput, surfaces failure-type movement, and lists the models
+    that actually got used. Useful for "what did the loop do last night?"
+    without having to open 30 individual JSON files.
+    """
+    from pathlib import Path as _Path
+    from datetime import datetime as _dt
+    from glob import glob as _glob
+
+    paths = sorted(_glob(glob_pattern))
+    if not paths:
+        typer.echo(f"No reports found matching: {glob_pattern}", err=True)
+        raise typer.Exit(code=1)
+
+    from datetime import timezone as _tz
+    cutoff: _dt | None = None
+    if since:
+        try:
+            cutoff = _dt.fromisoformat(since.replace("Z", "+00:00"))
+        except ValueError:
+            typer.echo(f"Invalid --since ISO8601: {since!r}", err=True)
+            raise typer.Exit(code=1)
+        if cutoff.tzinfo is None:
+            cutoff = cutoff.replace(tzinfo=_tz.utc)
+
+    total = {
+        "runs": 0,
+        "runtime_seconds": 0.0,
+        "documents_analyzed": 0,
+        "regex_suggestions_created": 0,
+        "normalization_suggestions_created": 0,
+        "schema_extractions_attempted": 0,
+        "schema_extractions_validated": 0,
+    }
+    task_totals: dict[str, dict[str, int]] = {}
+    failures_by_type: dict[str, int] = {}
+    roles_seen: dict[str, dict[str, int]] = {}
+    dsr_by_status: dict[str, int] = {}
+    stop_reasons: dict[str, int] = {}
+    first_run: str | None = None
+    last_run: str | None = None
+
+    for path in paths:
+        try:
+            data = json.loads(_Path(path).read_text(encoding="utf-8"))
+        except Exception:
+            continue
+
+        started = data.get("started_at") or ""
+        if cutoff and started:
+            try:
+                started_dt = _dt.fromisoformat(started.replace("Z", "+00:00"))
+                if started_dt.tzinfo is None:
+                    started_dt = started_dt.replace(tzinfo=_tz.utc)
+                if started_dt < cutoff:
+                    continue
+            except ValueError:
+                pass
+
+        total["runs"] += 1
+        total["runtime_seconds"] += float(data.get("runtime_seconds") or 0)
+        total["documents_analyzed"] += int(data.get("documents_analyzed") or 0)
+        total["regex_suggestions_created"] += int(data.get("regex_suggestions_created") or 0)
+        total["normalization_suggestions_created"] += int(data.get("normalization_suggestions_created") or 0)
+        total["schema_extractions_attempted"] += int(data.get("schema_extractions_attempted") or 0)
+        total["schema_extractions_validated"] += int(data.get("schema_extractions_validated") or 0)
+
+        for task, stats in (data.get("task_stats") or {}).items():
+            tt = task_totals.setdefault(task, {})
+            for k, v in stats.items():
+                if isinstance(v, int):
+                    tt[k] = tt.get(k, 0) + v
+
+        for failure, cnt in (data.get("parse_failures_by_type") or {}).items():
+            failures_by_type[failure] = failures_by_type.get(failure, 0) + int(cnt)
+
+        for role, model in (data.get("roles_used") or {}).items():
+            r = roles_seen.setdefault(role, {})
+            r[model] = r.get(model, 0) + 1
+
+        for status, cnt in (data.get("document_specific_rules_by_status") or {}).items():
+            dsr_by_status[status] = max(dsr_by_status.get(status, 0), int(cnt))
+
+        reason = data.get("stop_reason") or "unknown"
+        stop_reasons[reason] = stop_reasons.get(reason, 0) + 1
+
+        if first_run is None or started < first_run:
+            first_run = started
+        if last_run is None or started > last_run:
+            last_run = started
+
+    if total["runs"] == 0:
+        typer.echo(f"No reports passed the --since filter.", err=True)
+        raise typer.Exit(code=1)
+
+    typer.echo("=" * 70)
+    typer.echo(f"Overnight Reports Summary - {total['runs']} run(s)")
+    typer.echo(f"  window: {first_run} -> {last_run}")
+    typer.echo(f"  total runtime: {total['runtime_seconds'] / 3600:.2f} h "
+               f"({total['runtime_seconds']:.0f}s)")
+    typer.echo("=" * 70)
+    typer.echo("")
+    typer.echo("Throughput:")
+    typer.echo(f"  documents analyzed:       {total['documents_analyzed']}")
+    typer.echo(f"  regex suggestions:        {total['regex_suggestions_created']}")
+    typer.echo(f"  normalization rules:      {total['normalization_suggestions_created']}")
+    typer.echo(f"  schema extractions:       {total['schema_extractions_attempted']} "
+               f"(validated: {total['schema_extractions_validated']})")
+    typer.echo("")
+
+    typer.echo("Per-task totals:")
+    for task in sorted(task_totals):
+        parts = ", ".join(f"{k}={v}" for k, v in sorted(task_totals[task].items()) if v)
+        typer.echo(f"  {task}: {parts or '(no activity)'}")
+    typer.echo("")
+
+    typer.echo("Stop reasons:")
+    for reason, cnt in sorted(stop_reasons.items(), key=lambda kv: -kv[1]):
+        typer.echo(f"  {reason}: {cnt}")
+    typer.echo("")
+
+    typer.echo(f"Top {top_n} failure types (summed across runs):")
+    sorted_failures = sorted(failures_by_type.items(), key=lambda kv: -kv[1])
+    for failure, cnt in sorted_failures[:top_n]:
+        typer.echo(f"  {failure}: {cnt}")
+    typer.echo("")
+
+    typer.echo("Models used (per role):")
+    for role, models in sorted(roles_seen.items()):
+        for model, cnt in sorted(models.items(), key=lambda kv: -kv[1]):
+            typer.echo(f"  {role}: {model} ({cnt} run(s))")
+    typer.echo("")
+
+    if dsr_by_status:
+        typer.echo("Document-specific rules (max snapshot across runs):")
+        for status, cnt in sorted(dsr_by_status.items(), key=lambda kv: -kv[1]):
+            typer.echo(f"  {status}: {cnt}")
+
+
 def register_parse_refactor_commands(app: typer.Typer) -> None:
     """Register parsing-refactor and document-identity command group."""
     app.command("analyze-parse-failures-nc")(analyze_parse_failures_nc)
@@ -1481,6 +1856,7 @@ def register_parse_refactor_commands(app: typer.Typer) -> None:
     app.command("validate-regex-suggestions-nc")(validate_regex_suggestions_nc)
     app.command("run-llm-parse-fallback-nc")(run_llm_parse_fallback_nc)
     app.command("run-overnight-parse-improvement-nc")(run_overnight_parse_improvement_nc)
+    app.command("aggregate-overnight-reports-nc")(aggregate_overnight_reports_nc)
     app.command("report-wrong-profile-diagnostics-nc")(report_wrong_profile_diagnostics_nc)
     app.command("report-profile-recommendations-nc")(report_profile_recommendations_nc)
     app.command("populate-document-identity-nc")(populate_document_identity_nc)
@@ -1501,3 +1877,8 @@ def register_parse_refactor_commands(app: typer.Typer) -> None:
     app.command("report-per-doc-rules-nc")(report_per_doc_rules_nc)
     app.command("detect-rule-promotions-nc")(detect_rule_promotions_nc)
     app.command("report-rule-promotions-nc")(report_rule_promotions_nc)
+    # Phase 6 sub-document sections
+    app.command("populate-document-sections-nc")(populate_document_sections_nc)
+    app.command("report-document-sections-nc")(report_document_sections_nc)
+    app.command("report-document-sections-summary-nc")(report_document_sections_summary_nc)
+    app.command("analyze-document-structure-nc")(analyze_document_structure_nc)
