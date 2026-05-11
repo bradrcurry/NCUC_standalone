@@ -89,28 +89,96 @@ def _is_generic_heading(text: str) -> bool:
     return any(heading.startswith(prefix) for prefix in _GENERIC_HEADING_PREFIXES)
 
 
+# Prefixes that signal a heading is a rate schedule / rider identifier
+# rather than a descriptive phrase. Stripped before code-likeness check.
+_CODE_HEADING_PREFIX_RE = re.compile(
+    r'^(?:SCHEDULE|RIDER|RATE)\s+', re.IGNORECASE,
+)
+
+# A code-like token has a digit or a dash, OR is a short all-caps acronym
+# (2-6 letters). Examples that should pass: "RES-28", "SGS", "EDPR", "B-13",
+# "RA-1". Examples that should fail: "RESIDENTIAL", "GENERAL", "APPLICABLE",
+# "SERVICE" — these are descriptive English words.
+_CODE_TOKEN_RE = re.compile(
+    r"""
+    ^(?:
+        [A-Z0-9]{1,6}(?:-[A-Z0-9]+){1,3}     # RES-28, B-13-A, SGS-TOU-E
+      | \d+[A-Za-z]?                          # 28, 31a
+      | [A-Z]{2,6}                            # SGS, EDPR, REPS  (short acronym)
+      | [A-Z][A-Za-z]*\d+                     # Sub3, RES28
+    )$
+    """,
+    re.VERBOSE,
+)
+
+
+def _is_likely_code(text: str) -> bool:
+    """Return True if *text* looks like a schedule/rider code, not a phrase.
+
+    A heading is "code-like" when, after stripping any SCHEDULE/RIDER/RATE
+    prefix, the remaining content is either (a) a single token matching the
+    code-token pattern (digits, dashes, or short all-caps), or (b) ALL of
+    its tokens are individually code-like.
+
+    This is the inverse of a deny-list: instead of enumerating every English
+    word that could appear in a descriptive heading, we require positive
+    evidence that each token looks like an identifier. This prevents
+    descriptive phrases like "APPLICABLE TO ELECTRIC UTILITY SERVICE" from
+    being stored as schedule codes, while still admitting legitimate codes
+    that contain words like "RES" (Residential) or "SGS" (Small General
+    Service) — those abbreviations are already short all-caps acronyms.
+    """
+    if not text or len(text) > 25:
+        return False
+    check_text = _CODE_HEADING_PREFIX_RE.sub("", text).strip()
+    if not check_text:
+        return False
+    raw_tokens = [
+        t.strip(".,;:()[]{}!?\"'")
+        for t in check_text.replace("/", " ").split()
+    ]
+    tokens = [t for t in raw_tokens if t]
+    if not tokens:
+        return False
+    return all(bool(_CODE_TOKEN_RE.match(t)) for t in tokens)
+
+
 def _expand_heading_codes(headings: list[str]) -> list[str]:
     expanded: list[str] = []
     seen: set[str] = set()
+
     for heading in headings:
         candidate = heading.strip()
         if not candidate:
             continue
-        normalized = _normalize_heading(candidate)
-        if normalized not in seen:
-            expanded.append(candidate)
-            seen.add(normalized)
+
+        # Extract explicit code from SCHEDULE/RIDER/RATE prefix first —
+        # this is the cleanest signal and works even when the rest of
+        # the heading is descriptive.
         explicit_match = EXPLICIT_HEADING_CODE_REGEX.match(candidate)
         if explicit_match:
             explicit_code = explicit_match.group(1).upper()
-            if explicit_code not in seen:
+            if explicit_code and explicit_code not in seen:
                 expanded.append(explicit_code)
                 seen.add(explicit_code)
+
+        # Extract numeric schedule codes via metadata module patterns
         for code in extract_schedule_codes(candidate) + extract_rider_codes(candidate):
             code_norm = _normalize_heading(code)
             if code_norm and code_norm not in seen:
                 expanded.append(code)
                 seen.add(code_norm)
+
+        # Only add the full heading text as a fallback code when it
+        # actually looks like a code (short, no common English words).
+        # Descriptive phrases like "APPLICABLE TO ELECTRIC UTILITY
+        # SERVICE" are NOT schedule codes and must not be stored.
+        if _is_likely_code(candidate):
+            normalized = _normalize_heading(candidate)
+            if normalized not in seen:
+                expanded.append(candidate)
+                seen.add(normalized)
+
     return expanded
 
 def _extract_page_features_from_text(text: str, page_num: int) -> PageEvidence:

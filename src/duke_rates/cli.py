@@ -7889,7 +7889,8 @@ def benchmark_ollama_roles_nc(
         help=(
             "Benchmark task, comma-separated tasks, or all. Tasks: "
             "parse_diagnosis, hard_parse_diagnosis, regex_suggestion, "
-            "structured_rate_extraction, document_classification."
+            "structured_rate_extraction, staged_find_lines, "
+            "staged_classify_line, document_classification."
         ),
     ),
     models: str = typer.Option(

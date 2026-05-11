@@ -47,6 +47,14 @@ _quarantine/
 tmp_*
 *.tmp
 *.bak
+# Repo-root scratch files (one-off analysis scripts and test outputs)
+/_*.py
+/_*.json
+/duke_standalone.db
+/test_*.py
+
+# Local runtime caches
+.cache/
 
 # Generated local run artifacts
 docs/reports/

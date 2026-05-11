@@ -161,8 +161,10 @@ class PromotionDetector:
     def _fetch_accepted_rules(self) -> list[dict[str, Any]]:
         """Pull accepted rules joined with their parent document_identity row.
 
-        Skips rules attached to documents with no consensus_top — a
-        rule without a target template can't be promoted.
+        Prefer consensus_top as the promotion target. Tier 3 documents often
+        have no consensus yet, so fall back to an unresolved anchor target
+        such as ``unresolved_schedule:RES``. Those candidates still require
+        human review before any template-level rule is applied.
         """
         conn = sqlite3.connect(str(self._db_path))
         conn.row_factory = sqlite3.Row
@@ -172,19 +174,26 @@ class PromotionDetector:
                 SELECT dsr.id AS rule_id,
                        dsr.candidate_regex,
                        dsr.candidate_normalization,
+                       dsr.expected_unit,
                        dsr.target_field,
                        dsr.document_identity_id,
                        di.source_pdf,
-                       di.profile_consensus_top
+                       di.profile_consensus_top,
+                       di.inferred_family,
+                       di.schedule_codes_strong_json,
+                       di.rider_codes_strong_json
                 FROM document_specific_rules dsr
                 JOIN document_identity di
                     ON di.id = dsr.document_identity_id
                 WHERE dsr.status = 'accepted'
-                  AND di.profile_consensus_top IS NOT NULL
-                  AND di.profile_consensus_top != ''
                 """
             ).fetchall()
-            return [dict(r) for r in rows]
+            out: list[dict[str, Any]] = []
+            for r in rows:
+                row = dict(r)
+                row["promotion_target"] = _promotion_target(row)
+                out.append(row)
+            return out
         finally:
             conn.close()
 
@@ -205,8 +214,8 @@ class PromotionDetector:
         groups: dict[tuple[str, str], list[dict[str, Any]]] = defaultdict(list)
         for r in rules:
             key = (
-                r.get("profile_consensus_top") or "",
-                r.get("target_field") or "",
+                r.get("promotion_target") or "",
+                r.get("target_field") or r.get("expected_unit") or "",
             )
             groups[key].append(r)
 
@@ -268,8 +277,8 @@ class PromotionDetector:
         )[0]
         best_norm = max(norm_counts.items(), key=lambda kv: kv[1])[0] or None
 
-        target_template = cluster[0].get("profile_consensus_top") or ""
-        target_field = cluster[0].get("target_field") or None
+        target_template = cluster[0].get("promotion_target") or ""
+        target_field = cluster[0].get("target_field") or cluster[0].get("expected_unit") or None
         cluster_key = self._cluster_key(target_template, target_field, best_regex)
 
         member_ids = [int(r["rule_id"]) for r in cluster]
@@ -376,6 +385,34 @@ def _tokenize_regex(regex: str) -> set[str]:
     if not regex:
         return set()
     return {t.lower() for t in _TOKEN_RE.findall(regex)}
+
+
+def _promotion_target(row: dict[str, Any]) -> str:
+    """Choose the safest available human-review promotion bucket."""
+    consensus = (row.get("profile_consensus_top") or "").strip()
+    if consensus:
+        return consensus
+
+    family = (row.get("inferred_family") or "").strip()
+    if family:
+        return f"unresolved_family:{family}"
+
+    for key, prefix in (
+        ("schedule_codes_strong_json", "unresolved_schedule"),
+        ("rider_codes_strong_json", "unresolved_rider"),
+    ):
+        try:
+            vals = json.loads(row.get(key) or "[]")
+        except (json.JSONDecodeError, TypeError):
+            vals = []
+        for val in vals:
+            if not isinstance(val, str) or not val.strip():
+                continue
+            token = val.strip().upper()
+            base = re.split(r"[-\d]", token, maxsplit=1)[0] or token
+            return f"{prefix}:{base}"
+
+    return "unresolved_template"
 
 
 def _jaccard(a: set[str], b: set[str]) -> float:

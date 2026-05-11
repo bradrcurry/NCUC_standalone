@@ -38,14 +38,21 @@ from duke_rates.document_intelligence.regex_suggestions import (
     RegexSuggestion,
     RegexSuggestionGenerator,
     _SUGGESTION_SYSTEM_PROMPT,
+    fetch_document_anchors,
+    render_anchors_for_prompt,
 )
 from duke_rates.document_intelligence.schema_extraction import (
     ALLOWED_CHARGE_TYPES,
     ALLOWED_TOU_PERIODS,
     ALLOWED_UNITS,
     CandidateRateExtraction,
+    CandidateRateRow,
+    DocumentSignals,
+    RateLineList,
     SchemaGuidedExtractor,
     _EXTRACTION_SYSTEM_PROMPT,
+    _STAGE_CLASSIFY_LINE_PROMPT,
+    _STAGE_LINE_FINDER_PROMPT,
 )
 
 
@@ -54,6 +61,11 @@ TASK_TO_ROLE: dict[str, str] = {
     "hard_parse_diagnosis": "hard_parse_diagnosis",
     "regex_suggestion": "regex_suggestion",
     "structured_rate_extraction": "structured_rate_extraction",
+    # Staged extraction benchmarks (Phase 6E). Both reuse the
+    # structured_rate_extraction role so the model selection process is
+    # symmetric across the staged pipeline and the one-shot extractor.
+    "staged_find_lines": "structured_rate_extraction",
+    "staged_classify_line": "structured_rate_extraction",
     "document_classification": "balanced_classifier",
 }
 
@@ -374,6 +386,10 @@ def build_cases(
         return build_regex_suggestion_cases(db_path, limit, fixture_case_ids=fixture_case_ids)
     if task == "structured_rate_extraction":
         return build_structured_extraction_cases(db_path, limit)
+    if task == "staged_find_lines":
+        return build_staged_find_lines_cases(db_path, limit)
+    if task == "staged_classify_line":
+        return build_staged_classify_line_cases(db_path, limit)
     if task == "document_classification":
         return build_document_classification_cases(db_path, limit)
     raise ValueError(f"Unsupported benchmark task {task!r}")
@@ -467,12 +483,18 @@ def build_regex_suggestion_cases(
             parse_meta = {}
         parser_profile = row.get("parser_profile") or "unknown"
         missed_text = generator._get_missed_text(row, parse_meta)
+        source_pdf = row.get("source_pdf") or ""
+        anchors = fetch_document_anchors(db_path, source_pdf)
+        document_anchors = render_anchors_for_prompt(anchors)
+        rate_candidates = generator._scan_rate_candidates(missed_text)
         prompt = _SUGGESTION_SYSTEM_PROMPT.format(
             failure_type=row.get("failure_type") or "unknown",
             target_field=parse_meta.get("target_field", "") or "(unknown)",
             target_profile=parser_profile,
             current_patterns=generator.get_current_patterns(parser_profile),
             expected_schema=generator.get_expected_schema(parser_profile),
+            document_anchors=document_anchors,
+            rate_candidates=rate_candidates,
             missed_text=missed_text[:1500] if missed_text else "(no text available)",
             successful_examples=generator.get_successful_examples(parser_profile),
             allowed_types=", ".join(ALLOWED_SUGGESTION_TYPES),
@@ -490,6 +512,8 @@ def build_regex_suggestion_cases(
                     "diagnosis_id": row.get("diagnosis_id"),
                     "failure_type": row.get("failure_type"),
                     "text_chars": len(missed_text),
+                    "document_text": missed_text,
+                    "anchors": anchors,
                 },
             )
         )
@@ -569,6 +593,180 @@ def build_structured_extraction_cases(db_path: Path, limit: int) -> list[Benchma
     return [case for score, case in scored_cases if score > 0][:limit] or [
         case for _, case in scored_cases[:limit]
     ]
+
+
+def build_staged_find_lines_cases(db_path: Path, limit: int) -> list[BenchmarkCase]:
+    """Build benchmark cases for stage 2 (rate-line finder).
+
+    Picks real candidate documents, generates the staged find-lines prompt,
+    and stores the document text in metadata so scoring can compare each
+    model's returned line count against a deterministic dollar/cent token
+    baseline.
+    """
+    extractor = SchemaGuidedExtractor(OllamaOrchestrator(db_path=None), db_path)
+    candidates = extractor.select_extraction_candidates(limit=max(limit * 4, limit))
+    scored: list[tuple[int, BenchmarkCase]] = []
+    for candidate in candidates:
+        signals = extractor.get_document_signals(candidate)
+        text = extractor.get_document_text(
+            candidate.get("source_pdf", ""),
+            candidate.get("historical_document_id"),
+        )
+        # Deterministic baseline: lines that contain $ or ¢. Stage 2 should
+        # return roughly this many (with some discretion — declarations like
+        # "rates are subject to" don't count even if they contain $).
+        baseline_lines = [
+            ln for ln in text.split("\n")
+            if ("$" in ln or "¢" in ln) and any(c.isdigit() for c in ln)
+        ]
+        prompt = _STAGE_LINE_FINDER_PROMPT.format(
+            utility=signals.utility or "(unknown)",
+            tariff_family=signals.tariff_family or "(unknown)",
+            effective_date=signals.effective_date or "(unknown)",
+            leaf_number=signals.leaf_number or "(unknown)",
+            document_text=text,
+        )
+        case = BenchmarkCase(
+            task="staged_find_lines",
+            case_id=f"parse_attempt:{candidate.get('parse_attempt_id')}",
+            subject_id=str(candidate.get("parse_attempt_id")),
+            subject_label=str(candidate.get("family_key") or "unknown"),
+            prompt=prompt,
+            schema=RateLineList,
+            metadata={
+                "source_pdf": candidate.get("source_pdf"),
+                "historical_document_id": candidate.get("historical_document_id"),
+                "text_chars": len(text),
+                "document_text": text,
+                "baseline_line_count": len(baseline_lines),
+            },
+        )
+        scored.append((_rate_signal_score(text), case))
+    scored.sort(key=lambda item: item[0], reverse=True)
+    return [c for s, c in scored if s > 0][:limit] or [c for _, c in scored[:limit]]
+
+
+def build_staged_classify_line_cases(db_path: Path, limit: int) -> list[BenchmarkCase]:
+    """Build benchmark cases for stage 3 (per-line classifier).
+
+    Pulls real rate lines from the most recent ``llm_candidate_rate_extractions``
+    rows (which have a ``source_quote`` field with the actual rate text).
+    Generates one classify-prompt per source quote. Scoring then checks:
+
+    - Does the returned ``unit`` actually match the line's text?
+      ("per month" → ``$/month``; "per kWh" with $ → ``$/kWh``)
+    - Is the unit bare ``$`` when it should be qualified?
+    - Did the model output a numeric ``value``?
+    - Is per-row ``confidence > 0`` (vs. gemma4's tendency to emit 0.0)?
+    """
+    cases: list[BenchmarkCase] = []
+    conn = sqlite3.connect(str(db_path))
+    conn.row_factory = sqlite3.Row
+    try:
+        rows = conn.execute(
+            """
+            SELECT id, source_pdf, rate_rows_json, document_signals_json
+            FROM llm_candidate_rate_extractions
+            WHERE json_array_length(COALESCE(rate_rows_json, '[]')) > 0
+            ORDER BY id DESC
+            LIMIT ?
+            """,
+            (max(limit * 3, limit),),
+        ).fetchall()
+    finally:
+        conn.close()
+
+    seen_quotes: set[str] = set()
+    for r in rows:
+        try:
+            extracted_rows = json.loads(r["rate_rows_json"] or "[]")
+            signals_dict = json.loads(r["document_signals_json"] or "{}")
+        except (json.JSONDecodeError, TypeError):
+            continue
+        signals = DocumentSignals(**{
+            k: v for k, v in signals_dict.items()
+            if k in DocumentSignals.model_fields
+        })
+        # Customer-class hint mirrors what the staged extractor uses at runtime.
+        customer_class_hint = SchemaGuidedExtractor._derive_customer_class_hint(signals)
+        for er in extracted_rows:
+            quote = (er.get("source_quote") or "").strip()
+            if not quote or len(quote) < 10:
+                continue
+            key = quote.lower()
+            if key in seen_quotes:
+                continue
+            seen_quotes.add(key)
+            # Derive ground-truth from line text (deterministic).
+            expected_unit = _infer_unit_from_line(quote)
+            prompt = _STAGE_CLASSIFY_LINE_PROMPT.format(
+                rate_line=quote[:400],
+                context=quote[:600],  # benchmark: no surrounding context
+                utility=signals.utility or "(unknown)",
+                tariff_family=signals.tariff_family or "(unknown)",
+                customer_class_hint=customer_class_hint,
+                allowed_charge_types=", ".join(ALLOWED_CHARGE_TYPES),
+                allowed_tou_periods=", ".join(ALLOWED_TOU_PERIODS),
+                allowed_units=", ".join(ALLOWED_UNITS),
+            )
+            cases.append(
+                BenchmarkCase(
+                    task="staged_classify_line",
+                    case_id=f"extraction:{r['id']}:quote:{len(cases)}",
+                    subject_id=str(r["id"]),
+                    subject_label=(r["source_pdf"] or "")[-50:],
+                    prompt=prompt,
+                    schema=CandidateRateRow,
+                    metadata={
+                        "source_quote": quote,
+                        "expected_unit": expected_unit,
+                        "original_charge_type": er.get("charge_type"),
+                        "original_unit": er.get("unit"),
+                    },
+                )
+            )
+            if len(cases) >= limit:
+                return cases
+    return cases
+
+
+_UNIT_HINTS: tuple[tuple[str, str], ...] = (
+    ("per kwh", "_perkwh"),
+    ("/kwh", "_perkwh"),
+    ("per kw-hr", "_perkwh"),
+    ("per kw", "$/kW"),
+    ("/kw", "$/kW"),
+    ("per month", "$/month"),
+    ("/month", "$/month"),
+    ("per day", "$/day"),
+    ("per fixture", "$"),
+)
+
+
+def _infer_unit_from_line(line: str) -> str:
+    """Deterministically infer the expected unit from a rate line.
+
+    Returns one of ALLOWED_UNITS or "" if we can't decide. Used by the
+    benchmark scorer to check whether a model's emitted unit matches the
+    line text.
+    """
+    if not line:
+        return ""
+    lower = line.lower()
+    has_dollar = "$" in line
+    has_cents = "¢" in line or " cents " in lower or "cents per" in lower or "c per" in lower
+    for marker, hint in _UNIT_HINTS:
+        if marker in lower:
+            if hint == "_perkwh":
+                return "¢/kWh" if has_cents else "$/kWh"
+            return hint
+    if has_dollar and "month" in lower:
+        return "$/month"
+    if has_cents and "kwh" in lower:
+        return "¢/kWh"
+    if has_dollar and "kw" in lower and "kwh" not in lower:
+        return "$/kW"
+    return ""
 
 
 def build_document_classification_cases(db_path: Path, limit: int) -> list[BenchmarkCase]:
@@ -733,7 +931,10 @@ def call_model_for_case(
         tokens_per_second=tokens_per_second,
         raw_payload=raw_text[:2000],
         parsed=parsed,
-        metrics=score_task_output(task, parsed, case.metadata.get("expected")),
+        metrics=score_task_output(
+            task, parsed, case.metadata.get("expected"),
+            context=case.metadata,
+        ),
     )
 
 
@@ -741,6 +942,7 @@ def score_task_output(
     task: str,
     parsed: dict[str, Any],
     expected: dict[str, Any] | None = None,
+    context: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Compute task-specific quality proxies from a validated response."""
     if task in ("parse_diagnosis", "hard_parse_diagnosis"):
@@ -770,6 +972,8 @@ def score_task_output(
             "positive_tests": len(positives) if isinstance(positives, list) else 0,
             "negative_tests": len(negatives) if isinstance(negatives, list) else 0,
         }
+        if candidate_regex and context:
+            metrics.update(_score_regex_against_text(candidate_regex, context))
         return _with_expected_metrics(metrics, expected, "suggestion_type")
     if task == "structured_rate_extraction":
         rows = parsed.get("rate_rows") or []
@@ -782,6 +986,75 @@ def score_task_output(
             "warning_count": len(warnings) if isinstance(warnings, list) else 0,
         }
         return _with_expected_metrics(metrics, expected, "min_rate_row_count")
+    if task == "staged_find_lines":
+        lines = parsed.get("rate_lines") or []
+        line_count = len(lines) if isinstance(lines, list) else 0
+        baseline = int((context or {}).get("baseline_line_count") or 0) if context else 0
+        # Quality: how many returned lines actually contain a digit AND a
+        # $ or ¢ token (i.e. genuine rate lines, not procedural text).
+        valid_lines = 0
+        if isinstance(lines, list):
+            for ln in lines:
+                if not isinstance(ln, str):
+                    continue
+                if not any(c.isdigit() for c in ln):
+                    continue
+                if "$" in ln or "¢" in ln or "cents" in ln.lower():
+                    valid_lines += 1
+        # Recall proxy: ratio of returned lines to deterministic baseline.
+        # A score of 1.0 means the model returned roughly the same number
+        # of rate lines as a regex-count baseline. Capped at 1.5 to penalize
+        # severe over-extraction.
+        recall_ratio = (
+            min(line_count / baseline, 1.5) if baseline > 0 else 0.0
+        )
+        metrics = {
+            "actionable": line_count > 0,
+            "line_count": line_count,
+            "baseline_line_count": baseline,
+            "valid_line_count": valid_lines,
+            "valid_line_pct": (
+                round(valid_lines * 100.0 / line_count, 2) if line_count else 0.0
+            ),
+            "recall_ratio": round(recall_ratio, 3),
+            "confidence": 0.0,  # find-lines doesn't have a confidence field
+        }
+        return _with_expected_metrics(metrics, expected, "min_line_count")
+    if task == "staged_classify_line":
+        charge_type = str(parsed.get("charge_type") or "")
+        unit = str(parsed.get("unit") or "")
+        value = parsed.get("value")
+        confidence = float(parsed.get("confidence") or 0.0)
+        expected_unit = (context or {}).get("expected_unit") or "" if context else ""
+        # Numeric value present and non-zero
+        value_present = False
+        try:
+            value_present = float(value or 0.0) != 0.0
+        except (TypeError, ValueError):
+            value_present = False
+        unit_matches_expected = (
+            bool(expected_unit) and unit == expected_unit
+        )
+        bare_dollar_when_qualified_expected = (
+            unit == "$" and expected_unit in ("$/month", "$/kW", "$/day", "$/kWh")
+        )
+        empty_unit = unit == ""
+        confidence_nonzero = confidence > 0.0
+        ct_other = charge_type == "Other"
+        metrics = {
+            "actionable": bool(charge_type) and bool(unit),
+            "charge_type": charge_type,
+            "unit": unit,
+            "expected_unit": expected_unit,
+            "confidence": confidence,
+            "value_present": value_present,
+            "unit_matches_expected": unit_matches_expected,
+            "bare_dollar_bug": bare_dollar_when_qualified_expected,
+            "empty_unit_bug": empty_unit,
+            "confidence_nonzero": confidence_nonzero,
+            "classified_as_other": ct_other,
+        }
+        return _with_expected_metrics(metrics, expected, "charge_type")
     if task == "document_classification":
         document_type = str(parsed.get("document_type") or parsed.get("label") or "UNKNOWN")
         confidence = float(parsed.get("confidence") or 0.0)
@@ -836,8 +1109,52 @@ def summarize_runs(runs: list[BenchmarkRun]) -> dict[str, Any]:
             "diversity_count": len(_task_distribution(ok)),
             "statuses": statuses,
             "task_distribution": _task_distribution(ok),
+            **_summarize_regex_metrics(ok),
+            **_summarize_staged_metrics(ok),
         }
     return summary
+
+
+def _summarize_staged_metrics(ok_runs: list[BenchmarkRun]) -> dict[str, Any]:
+    """Aggregate stage-2/stage-3 quality metrics across runs.
+
+    Returns {} unless at least one run carries staged metrics — keeps the
+    summary clean when benchmarking unrelated tasks.
+    """
+    find_runs = [
+        r for r in ok_runs
+        if r.task == "staged_find_lines" and "recall_ratio" in r.metrics
+    ]
+    classify_runs = [
+        r for r in ok_runs
+        if r.task == "staged_classify_line" and "unit_matches_expected" in r.metrics
+    ]
+    out: dict[str, Any] = {}
+    if find_runs:
+        recall_values = [float(r.metrics.get("recall_ratio", 0.0)) for r in find_runs]
+        valid_pct = [float(r.metrics.get("valid_line_pct", 0.0)) for r in find_runs]
+        out.update({
+            "find_lines_runs": len(find_runs),
+            "find_lines_avg_recall": round(mean(recall_values), 3) if recall_values else 0.0,
+            "find_lines_avg_valid_pct": round(mean(valid_pct), 2) if valid_pct else 0.0,
+        })
+    if classify_runs:
+        unit_match = sum(1 for r in classify_runs if r.metrics.get("unit_matches_expected"))
+        bare_dollar = sum(1 for r in classify_runs if r.metrics.get("bare_dollar_bug"))
+        empty_unit = sum(1 for r in classify_runs if r.metrics.get("empty_unit_bug"))
+        value_present = sum(1 for r in classify_runs if r.metrics.get("value_present"))
+        confidence_nonzero = sum(1 for r in classify_runs if r.metrics.get("confidence_nonzero"))
+        classified_as_other = sum(1 for r in classify_runs if r.metrics.get("classified_as_other"))
+        out.update({
+            "classify_runs": len(classify_runs),
+            "classify_unit_match_pct": round(unit_match * 100.0 / len(classify_runs), 2),
+            "classify_bare_dollar_bug_pct": round(bare_dollar * 100.0 / len(classify_runs), 2),
+            "classify_empty_unit_bug_pct": round(empty_unit * 100.0 / len(classify_runs), 2),
+            "classify_value_present_pct": round(value_present * 100.0 / len(classify_runs), 2),
+            "classify_confidence_nonzero_pct": round(confidence_nonzero * 100.0 / len(classify_runs), 2),
+            "classify_other_pct": round(classified_as_other * 100.0 / len(classify_runs), 2),
+        })
+    return out
 
 
 def summarize_specialization(task_reports: dict[str, Any]) -> dict[str, Any]:
@@ -862,6 +1179,19 @@ def summarize_specialization(task_reports: dict[str, Any]) -> dict[str, Any]:
                 "diversity_count": stats.get("diversity_count", 0),
                 "task_distribution": stats.get("task_distribution", {}),
             }
+            # Surface regex quality metrics in specialization rankings so model
+            # selection isn't fooled by models that return valid JSON with
+            # broken regexes.
+            for key in (
+                "regex_runs",
+                "regex_compiles_pct",
+                "regex_matches_target_pct",
+                "regex_avg_match_count",
+                "regex_python_syntax_ok_pct",
+                "regex_anchor_pct",
+            ):
+                if key in stats:
+                    row[key] = stats[key]
             task_rankings.append(row)
             by_model.setdefault(model, {"tasks": {}, "avg_score": 0.0})
             by_model[model]["tasks"][task] = row
@@ -939,6 +1269,123 @@ def _label_bias_score(runs: list[BenchmarkRun]) -> float:
     return round(max(distribution.values()) / total, 4)
 
 
+def _score_regex_against_text(
+    candidate_regex: str,
+    context: dict[str, Any],
+) -> dict[str, Any]:
+    """Test a candidate regex: compile with Python ``re`` and run against document text.
+
+    Returns metrics that reveal whether the LLM-generated regex actually works
+    — the benchmark's previous metrics only checked whether JSON was valid and
+    the regex field was non-empty, which is a meaningless quality signal.
+    """
+    import re as _re
+
+    document_text = str(context.get("document_text") or "")
+    anchors = context.get("anchors") or {}
+
+    result: dict[str, Any] = {
+        "regex_compiles": False,
+        "regex_error": None,
+        "regex_target_match_count": 0,
+        "regex_has_anchor": False,
+        "regex_python_syntax_ok": True,
+        "regex_python_syntax_issues": [],
+    }
+
+    # --- Check for Python-invalid regex patterns before compilation ---
+    syntax_issues: list[str] = []
+
+    # Variable-length look-behind: (?<= ... ) where ... contains |, *, +, {n,}
+    # or is unbounded. Python re rejects these at compile time.
+    if "(?<=" in candidate_regex:
+        # Crude detection: find look-behind portions and flag if they contain
+        # alternation or quantifiers.
+        for m in _re.finditer(r"\(\?<=[^)]*\)", candidate_regex):
+            lookbehind = m.group(0)
+            if "|" in lookbehind:
+                syntax_issues.append(
+                    f"variable-length look-behind with alternation: {lookbehind[:80]}"
+                )
+            elif _re.search(r"[*+{]", lookbehind):
+                syntax_issues.append(
+                    f"look-behind with quantifier: {lookbehind[:80]}"
+                )
+
+    # PCRE/JavaScript named groups: (?<name>...) instead of Python (?P<name>...)
+    if _re.search(r"\(\?<[^!=]", candidate_regex):
+        for m in _re.finditer(r"\(\?<([^>]+)>", candidate_regex):
+            syntax_issues.append(
+                f"PCRE named group (?<{m.group(1)}>...) — Python requires (?P<{m.group(1)}>...)"
+            )
+
+    if syntax_issues:
+        result["regex_python_syntax_ok"] = False
+        result["regex_python_syntax_issues"] = syntax_issues
+
+    # --- Compile with Python re ---
+    try:
+        pattern = _re.compile(candidate_regex, _re.IGNORECASE | _re.MULTILINE)
+        result["regex_compiles"] = True
+    except _re.error as exc:
+        result["regex_error"] = str(exc)[:500]
+        # Compilation failed — can't test further
+        return result
+
+    # --- Run against document text ---
+    if document_text:
+        try:
+            matches = pattern.findall(document_text)
+            result["regex_target_match_count"] = len(matches)
+        except Exception:
+            pass  # defensive — findall shouldn't raise after compile succeeds
+
+    # --- Check for anchor presence (schedule/rider codes) ---
+    if anchors and candidate_regex:
+        regex_upper = candidate_regex.upper()
+        for key in ("schedule_codes", "rider_codes", "leaf_numbers"):
+            for code in anchors.get(key, []):
+                if code.upper() in regex_upper or code.upper().replace("-", r"\-") in regex_upper:
+                    result["regex_has_anchor"] = True
+                    break
+            if result["regex_has_anchor"]:
+                break
+
+    return result
+
+
+def _summarize_regex_metrics(ok_runs: list[BenchmarkRun]) -> dict[str, Any]:
+    """Aggregate regex quality metrics across benchmark runs.
+
+    Only included when at least one run has regex metrics (i.e. the task was
+    regex_suggestion and the benchmark cases carried document text context).
+    """
+    runs_with_regex = [
+        r for r in ok_runs
+        if r.metrics.get("has_regex") and "regex_compiles" in r.metrics
+    ]
+    if not runs_with_regex:
+        return {}
+
+    compiles = [r for r in runs_with_regex if r.metrics.get("regex_compiles")]
+    matches = [r for r in runs_with_regex if r.metrics.get("regex_target_match_count", 0) > 0]
+    syntax_ok = [r for r in runs_with_regex if r.metrics.get("regex_python_syntax_ok")]
+    has_anchor = [r for r in runs_with_regex if r.metrics.get("regex_has_anchor")]
+    match_counts = [
+        r.metrics.get("regex_target_match_count", 0)
+        for r in runs_with_regex
+    ]
+
+    return {
+        "regex_runs": len(runs_with_regex),
+        "regex_compiles_pct": round((len(compiles) / len(runs_with_regex)) * 100, 2),
+        "regex_matches_target_pct": round((len(matches) / len(runs_with_regex)) * 100, 2),
+        "regex_avg_match_count": round(mean(match_counts), 2) if match_counts else 0.0,
+        "regex_python_syntax_ok_pct": round((len(syntax_ok) / len(runs_with_regex)) * 100, 2),
+        "regex_anchor_pct": round((len(has_anchor) / len(runs_with_regex)) * 100, 2),
+    }
+
+
 def _rate_signal_score(text: str) -> int:
     lower = text.lower()
     signals = (
@@ -969,6 +1416,22 @@ def _specialization_score(stats: dict[str, Any]) -> float:
     speed_score = min(tps / 20.0, 1.0) * 100.0
     diversity_score = (1.0 - min(max(bias, 0.0), 1.0)) * 100.0
     accuracy_score = float(accuracy) if isinstance(accuracy, (int, float)) else valid
+
+    # When regex quality metrics are present, they replace the naive "valid_pct"
+    # signal — a regex that doesn't compile or match target text is not useful,
+    # regardless of whether the LLM returned valid JSON.
+    regex_compiles = stats.get("regex_compiles_pct")
+    regex_matches = stats.get("regex_matches_target_pct")
+    if regex_compiles is not None and regex_matches is not None:
+        accuracy_score = regex_matches  # "does the regex actually find text?" is truth
+        # Penalize models whose regexes don't even compile
+        valid = regex_compiles
+        # Gate speed_score on compile rate. A model that's fast at producing
+        # broken regex isn't useful — full speed credit only when ≥50% of
+        # regexes compile; below that we linearly scale down.
+        gate = max(0.0, min(1.0, regex_compiles / 50.0))
+        speed_score = speed_score * gate
+
     score = (
         accuracy_score * 0.25
         + valid * 0.20
