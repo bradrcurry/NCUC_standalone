@@ -381,9 +381,11 @@ def run_overnight_parse_improvement_nc(
             "Comma-separated tasks: diagnose, suggest, validate, revalidate, "
             "shadow_test, profile_consensus, extract, extract_staged, "
             "populate_identity, populate_routing_tier, bind_tier1, "
-            "generate_per_doc_rules, detect_rule_promotions, "
-            "populate_sections, analyze_document_structure. "
-            "Use extract_staged for higher-accuracy per-line classification."
+            "generate_per_doc_rules, generate_grounded_rules, "
+            "detect_rule_promotions, populate_sections, "
+            "analyze_document_structure. Use extract_staged for "
+            "higher-accuracy per-line classification; use generate_grounded_rules "
+            "to build regex rules from high-confidence extractions."
         ),
     ),
     profile: str | None = typer.Option(None, "--profile", help="Optional parser profile filter."),

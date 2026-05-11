@@ -478,6 +478,121 @@ def test_staged_extractor_flags_low_confidence_for_review(
     assert any("Low average confidence" in w for w in result.warnings)
 
 
+def test_grounded_validator_accepts_correct_capture(tmp_path: Path) -> None:
+    """Phase 6F: validation accepts a regex that captures the expected value."""
+    from duke_rates.document_intelligence.extraction_grounded_rules import (
+        ExtractionGroundedRuleGenerator,
+    )
+    from duke_rates.document_intelligence.document_specific_rules import ensure_schema
+    from duke_rates.document_intelligence.regex_suggestions import RegexSuggestion
+
+    db = tmp_path / "rules.db"
+    ensure_schema(db)
+    gen = ExtractionGroundedRuleGenerator(_DummyOrchestrator(), db)
+    suggestion = RegexSuggestion(
+        suggestion_type="regex_candidate",
+        candidate_regex=r"Basic\s+Customer\s+Charge[\s\S]*?\$(\d+\.\d+)",
+        expected_unit="$/month",
+        confidence=0.9,
+    )
+    candidate = {
+        "extraction_id": 1,
+        "source_pdf": "fake.pdf",
+        "row_index": 0,
+        "source_quote": "I. Basic Customer Charge, per month $14.00",
+        "value": 14.0,
+        "unit": "$/month",
+        "charge_type": "Fixed Monthly Charge",
+        "target_field": "fixed_charge",
+        "anchors": ["Basic Customer Charge"],
+    }
+    result = gen.validate(suggestion, candidate)
+    assert result.accept is True
+    assert result.captures_expected_value is True
+    assert result.captured_values == ["14.00"]
+
+
+def test_grounded_validator_rejects_when_anchor_missing(tmp_path: Path) -> None:
+    """Validator rejects regexes that lack a document-specific anchor."""
+    from duke_rates.document_intelligence.extraction_grounded_rules import (
+        ExtractionGroundedRuleGenerator,
+    )
+    from duke_rates.document_intelligence.document_specific_rules import ensure_schema
+    from duke_rates.document_intelligence.regex_suggestions import RegexSuggestion
+
+    db = tmp_path / "rules.db"
+    ensure_schema(db)
+    gen = ExtractionGroundedRuleGenerator(_DummyOrchestrator(), db)
+    suggestion = RegexSuggestion(
+        suggestion_type="regex_candidate",
+        candidate_regex=r"\$(\d+\.\d+)",  # no anchor
+        expected_unit="$/month",
+        confidence=0.9,
+    )
+    candidate = {
+        "extraction_id": 1,
+        "source_pdf": "fake.pdf",
+        "row_index": 0,
+        "source_quote": "I. Basic Customer Charge, per month $14.00",
+        "value": 14.0,
+        "unit": "$/month",
+        "charge_type": "Fixed Monthly Charge",
+        "target_field": "fixed_charge",
+        "anchors": ["RES-28"],
+    }
+    result = gen.validate(suggestion, candidate)
+    assert result.accept is False
+    assert "lacks a document-specific anchor" in result.reason
+
+
+def test_grounded_validator_rejects_when_value_off(tmp_path: Path) -> None:
+    """Validator rejects when captured value doesn't match expected (within 1%)."""
+    from duke_rates.document_intelligence.extraction_grounded_rules import (
+        ExtractionGroundedRuleGenerator,
+    )
+    from duke_rates.document_intelligence.document_specific_rules import ensure_schema
+    from duke_rates.document_intelligence.regex_suggestions import RegexSuggestion
+
+    db = tmp_path / "rules.db"
+    ensure_schema(db)
+    gen = ExtractionGroundedRuleGenerator(_DummyOrchestrator(), db)
+    suggestion = RegexSuggestion(
+        suggestion_type="regex_candidate",
+        candidate_regex=r"Basic\s+Customer\s+Charge[\s\S]*?\$(\d+)",  # captures int part only
+        expected_unit="$/month",
+        confidence=0.9,
+    )
+    candidate = {
+        "extraction_id": 1,
+        "source_pdf": "fake.pdf",
+        "row_index": 0,
+        "source_quote": "I. Basic Customer Charge, per month $14.00",
+        "value": 99.0,  # expecting 99 but regex would capture 14
+        "unit": "$/month",
+        "charge_type": "Fixed Monthly Charge",
+        "target_field": "fixed_charge",
+        "anchors": ["Basic Customer Charge"],
+    }
+    result = gen.validate(suggestion, candidate)
+    assert result.accept is False
+    assert "didn't capture expected value" in result.reason
+
+
+def test_grounded_compact_for_anchor_strips_regex_tokens() -> None:
+    """The compaction helper strips \\s+ and similar regex tokens before comparison."""
+    from duke_rates.document_intelligence.extraction_grounded_rules import (
+        _compact_for_anchor_check,
+    )
+
+    # Anchor "Basic Customer Charge" should be findable inside a regex that
+    # uses \s+ between tokens.
+    out = _compact_for_anchor_check(r"Basic\s+Customer\s+Charge[\s\S]*?\$(\d+\.\d+)")
+    assert "basiccustomercharge" in out
+    # Should also handle [\s\S]*? and (\d+\.\d+) gracefully
+    out2 = _compact_for_anchor_check(r"RES-28[\s\S]*?\$(\d+)")
+    assert "res28" in out2
+
+
 def test_staged_classify_benchmark_scores_unit_match() -> None:
     """The staged_classify_line scorer detects unit-match against expected unit."""
     from duke_rates.document_intelligence.model_benchmark import score_task_output

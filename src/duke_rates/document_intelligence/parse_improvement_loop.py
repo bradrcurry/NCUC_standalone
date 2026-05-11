@@ -43,6 +43,8 @@ VALID_TASK_KINDS = frozenset({
     "extract_staged",
     "populate_identity", "populate_routing_tier", "bind_tier1",
     "generate_per_doc_rules", "detect_rule_promotions",
+    # Phase 6F: extraction-grounded rule generation
+    "generate_grounded_rules",
     # Phase 6 sub-document sections
     "populate_sections", "analyze_document_structure",
 })
@@ -68,6 +70,7 @@ STAGE_MIN_BUDGET_SECONDS: dict[str, int] = {
     "bind_tier1": 15,
     "generate_per_doc_rules": 90,
     "detect_rule_promotions": 15,
+    "generate_grounded_rules": 60,
     # Phase 6 sub-document sections
     "populate_sections": 15,
     "analyze_document_structure": 120,
@@ -176,6 +179,7 @@ class ParseImprovementLoop:
         self._tier_agg: Any = None
         self._tier1_binder: Any = None
         self._per_doc_generator: Any = None
+        self._grounded_generator: Any = None
         self._promotion_detector: Any = None
         self._sections_populator: Any = None
         self._structure_analyst: Any = None
@@ -239,6 +243,8 @@ class ParseImprovementLoop:
             roles_needed.add("structured_rate_extraction")
             roles_needed.add("structured_rate_classify")
         if "generate_per_doc_rules" in tasks:
+            roles_needed.add("regex_suggestion")
+        if "generate_grounded_rules" in tasks:
             roles_needed.add("regex_suggestion")
         if "analyze_document_structure" in tasks:
             roles_needed.add("document_structure_analyst")
@@ -394,6 +400,14 @@ class ParseImprovementLoop:
         if "generate_per_doc_rules" in tasks and self._per_doc_generator is None:
             from duke_rates.document_intelligence.per_doc_rule_generator import PerDocRuleGenerator
             self._per_doc_generator = PerDocRuleGenerator(self._orch, self._db_path)
+
+        if "generate_grounded_rules" in tasks and self._grounded_generator is None:
+            from duke_rates.document_intelligence.extraction_grounded_rules import (
+                ExtractionGroundedRuleGenerator,
+            )
+            self._grounded_generator = ExtractionGroundedRuleGenerator(
+                self._orch, self._db_path,
+            )
 
         if "detect_rule_promotions" in tasks and self._promotion_detector is None:
             from duke_rates.document_intelligence.rule_promotion import PromotionDetector
@@ -667,6 +681,30 @@ class ParseImprovementLoop:
             if rejection_reasons:
                 stats["rejection_reasons"] = rejection_reasons[:20]
 
+        elif task == "generate_grounded_rules":
+            # Extraction-grounded rule generation (Phase 6F). Each candidate
+            # is one high-confidence rate row from llm_candidate_rate_extractions
+            # — the LLM produces a regex anchored on the doc's schedule code
+            # that captures the row's known value.
+            outcomes = self._grounded_generator.generate_batch(limit=limit)
+            g_status_counts: dict[str, int] = {}
+            g_rejection_reasons: list[str] = []
+            for outcome in outcomes:
+                g_status_counts[outcome.status] = g_status_counts.get(outcome.status, 0) + 1
+                if outcome.status == "rejected" and outcome.validation and outcome.validation.reason:
+                    g_rejection_reasons.append(outcome.validation.reason)
+                elif outcome.status == "skipped" and outcome.error:
+                    g_rejection_reasons.append(f"skipped: {outcome.error}")
+                elif outcome.status == "error" and outcome.error:
+                    g_rejection_reasons.append(f"error: {outcome.error}")
+            stats.update(g_status_counts)
+            stats["candidates"] = len(outcomes)
+            stats["ok"] = g_status_counts.get("accepted", 0)
+            stats["skip"] = g_status_counts.get("skipped", 0)
+            stats["fail"] = g_status_counts.get("rejected", 0) + g_status_counts.get("error", 0)
+            if g_rejection_reasons:
+                stats["rejection_reasons"] = g_rejection_reasons[:10]
+
         elif task == "detect_rule_promotions":
             # Skip the clustering pass when there aren't enough accepted rules
             # to form a cluster (MIN_CLUSTER_SIZE=3 in rule_promotion.py).
@@ -817,6 +855,9 @@ class ParseImprovementLoop:
                 report.task_stats[task] = {"ok": 0, "skip": 0, "fail": 0, "candidates": candidates}
             elif task == "generate_per_doc_rules":
                 candidates = self._per_doc_generator.select_candidates(limit=limit)
+                report.task_stats[task] = {"ok": 0, "skip": 0, "fail": 0, "candidates": len(candidates)}
+            elif task == "generate_grounded_rules":
+                candidates = self._grounded_generator.select_candidates(limit=limit)
                 report.task_stats[task] = {"ok": 0, "skip": 0, "fail": 0, "candidates": len(candidates)}
             elif task == "detect_rule_promotions":
                 candidates = self._count_where("document_specific_rules", "status = 'accepted'", limit=limit)
