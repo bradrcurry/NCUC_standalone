@@ -82,71 +82,95 @@ _MAX_RETRIES: int = 1
 
 _GROUNDED_PROMPT = """\
 You are writing a Python regex that extracts ONE specific rate value from a
-North Carolina tariff document. We have ALREADY identified the rate via a
-prior LLM extraction — your job is to produce the regex that captures it.
+North Carolina tariff document. The rate has ALREADY been identified — your
+job is to produce the regex that captures it.
 
-## Source line (verbatim from document - your regex MUST match this line):
+## Source line (verbatim — your regex MUST match this exact text):
 "{source_line}"
 
 ## What the regex must capture:
-- Value: {value} (numeric only, no units)
+- The value `{value}` (the captured group must yield this number, not a different number on a nearby line)
 - Unit: {unit}
 - Charge type: {charge_type}
 
-## Document-specific anchor (your regex MUST include this code):
+## Required anchor (must appear LITERALLY in the regex body):
 {anchor}
 
-## Document context:
-- Source PDF: {source_pdf}
-- Schedule codes in this doc: {schedule_codes}
+## Schedule codes present in this document:
+{schedule_codes}
 
-## Python regex rules (violations cause automatic rejection):
-- NO variable-length look-behinds: `(?<=X.*)Y` is INVALID.
-- DO NOT use lookaheads to position the anchor. Put the anchor in the MAIN
-  regex body, BEFORE the captured value. e.g. WRONG: `(\\d+)\\$(?=.*RES-28)`,
-  RIGHT: `RES-28[\\s\\S]*?(\\d+)\\$`.
-- For named groups use `(?P<name>...)` NOT PCRE `(?<name>...)`.
-- `.` does NOT match newlines by default. Use `[\\s\\S]*?` to cross lines lazily
-  in the main body, never inside a lookahead expecting `.` to span lines.
-- Replace literal spaces between tokens with `\\s+` to tolerate OCR noise.
-- Use `\\$` to match a literal dollar sign, `¢` matches as-is.
+## ABSOLUTELY DO NOT (these are the most common failures):
 
-## Construction rules (follow this order):
-1. Start the regex with the anchor literal `{anchor}` (escape `-` as `\\-`).
-2. Add `[\\s\\S]*?` to bridge across newlines from the anchor to the value.
-3. Add the charge-type context word(s) from the source line (e.g.
-   `Basic\\s+Customer\\s+Charge`, `Energy\\s+Charge`, `Demand\\s+Charge`)
-   so the regex doesn't grab the wrong number from the same doc.
-4. Add another `[\\s\\S]*?` then the capturing group `(\\d+\\.\\d+)` or
-   `(\\d+\\.?\\d*)`.
-5. Optionally add unit suffix like `\\s*per\\s+kWh` for further specificity.
-6. The result MUST match the source line above when tested.
+DO NOT put the anchor in a lookahead.
+  WRONG: `(\\d+\\.\\d+)¢\\s*per\\s+kWh(?=.*{anchor})`
+  RIGHT: `{anchor}[\\s\\S]*?(\\d+\\.\\d+)¢\\s*per\\s+kWh`
 
-## Examples of GOOD regexes for this kind of task:
-- Source: "I. Basic Customer Charge, per month $14.00" → anchor RES-28
-  Good: `Schedule\\s+RES-28[\\s\\S]*?Basic\\s+Customer\\s+Charge[\\s\\S]*?\\$(\\d+\\.\\d+)`
-- Source: "Energy Charge 10.369¢ per kWh" → anchor RES-48
-  Good: `Schedule\\s+RES-48[\\s\\S]*?Energy\\s+Charge[\\s\\S]*?(\\d+\\.\\d+)¢\\s*per\\s+kWh`
+DO NOT use unbalanced parentheses. Every `(` needs a `)`. Every `(?P<name>`
+needs a closing `)`. Count them before responding.
 
-## Output (single JSON object):
+DO NOT write `.*?` expecting it to cross newlines. Use `[\\s\\S]*?` instead.
+
+DO NOT make the regex so loose it matches a different sibling line.
+  Example: if the doc has "1. 39.614¢ per Critical Peak kWh" AND
+  "2. 21.209¢ per On-Peak kWh", a regex like `(\\d+\\.\\d+)¢\\s*per\\s+kWh`
+  will capture both — you need a distinguishing context word
+  (`Critical\\s+Peak` or `On\\-Peak`) BEFORE the capture.
+
+DO NOT use `(?<=...)` variable-length look-behinds (Python rejects them).
+
+DO NOT use PCRE-style `(?<name>...)` named groups. Python requires `(?P<name>...)`.
+
+## Construction recipe (follow EXACTLY this 5-step order):
+
+1. ANCHOR. Start with the literal anchor token:
+   `{anchor}` (escape `-` as `\\-` if your regex engine needs it).
+
+2. BRIDGE. Add `[\\s\\S]*?` to lazily skip across lines from the anchor to
+   the relevant charge.
+
+3. CONTEXT. Add a distinguishing word from the source line so this regex
+   doesn't grab a DIFFERENT rate value from the same document. Pick the
+   word(s) most specific to THIS line. For TOU lines this is usually
+   `Critical\\s+Peak`, `On\\-Peak`, `Off\\-Peak`, `Shoulder`, `Discount`.
+   For others it might be `Basic\\s+Customer\\s+Charge`, `Energy\\s+Charge`,
+   `Demand\\s+Charge`, `Administrative\\s+Charge`, etc.
+
+4. CAPTURE. Add another `[\\s\\S]*?` then the capturing group. Choose
+   `(\\d+\\.\\d+)` when the value has a decimal, `(\\d+)` when it's a whole
+   number, `(\\d+\\.?\\d*)` if either is possible.
+
+5. UNIT MARKER. Optionally add the unit suffix (`¢\\s*per\\s+kWh`,
+   `\\s*per\\s+month`, `\\s*per\\s+kW`) for additional precision.
+
+## Worked examples:
+
+Source: "I. Basic Customer Charge, per month $14.00" → anchor RES-28
+GOOD: `RES\\-28[\\s\\S]*?Basic\\s+Customer\\s+Charge[\\s\\S]*?\\$(\\d+\\.\\d+)`
+
+Source: "1. 39.614¢ per Critical Peak kWh" → anchor EDIT-4
+GOOD: `EDIT\\-4[\\s\\S]*?Critical\\s+Peak[\\s\\S]*?(\\d+\\.\\d+)¢`
+BAD (matches On-Peak too): `EDIT\\-4[\\s\\S]*?(\\d+\\.\\d+)¢\\s*per\\s+kWh`
+
+Source: "Administrative Charge = $200 per month" → anchor HP
+GOOD: `HP[\\s\\S]*?Administrative\\s+Charge[\\s\\S]*?\\$(\\d+)`
+
+## Output (single JSON object, no other text):
 {{
   "suggestion_type": "regex_candidate",
   "target_field": "{charge_type_field}",
-  "candidate_regex": "<your regex>",
+  "candidate_regex": "<your regex following steps 1-5>",
   "candidate_normalization": "<optional, e.g. 'divide captured cents per kWh by 100'>",
   "expected_unit": "{unit}",
   "confidence": 0.0-1.0,
   "risk": "low|medium|high"
-}}
-
-No other text. No markdown fences. JSON only."""
+}}"""
 
 
 _RETRY_PROMPT = """\
 Your previous regex was REJECTED. Fix it and return a corrected version.
 
 ## Rejection reason: {reason}
-
+{captured_actual_block}
 ## Source line (your regex MUST match this exact line):
 "{source_line}"
 
@@ -156,14 +180,45 @@ Your previous regex was REJECTED. Fix it and return a corrected version.
 ## Your failed regex:
 {failed_regex}
 
-## Common fixes:
-- If regex didn't match: replace literal spaces with `\\s+`, use `[\\s\\S]*?`
-  between tokens instead of `.*?` or literal newlines.
-- If anchor missing: include the literal anchor code in the regex.
-- If wrong value captured: adjust the capturing group `(\\d+\\.\\d+)` so it
-  lines up with the value in the source.
+## Diagnostic checklist (fix the SPECIFIC issue named above):
 
-Return the same JSON shape as before with a corrected candidate_regex."""
+If "regex didn't match":
+  - Replace literal spaces between tokens with `\\s+`.
+  - Use `[\\s\\S]*?` to bridge across line breaks; do NOT use `.*?` for this.
+  - Make sure the anchor `{anchor}` appears BEFORE any `[\\s\\S]*?` bridge,
+    not inside a lookahead.
+
+If "captured wrong value":
+  - The regex matched but grabbed a different number from the same doc.
+  - Add a distinguishing context word from the source line BEFORE the
+    capture group (e.g. `Critical\\s+Peak`, `Basic\\s+Customer\\s+Charge`).
+  - Look at the captured-actual list above — those are values your
+    previous regex pulled out. Avoid matching them by being more specific.
+
+If "regex compile error":
+  - Count your parentheses. Every `(` needs a `)`.
+  - `(?P<name>...)` not `(?<name>...)`. Close named groups properly.
+
+If "anchor missing":
+  - Include the literal anchor `{anchor}` in the regex body (escape `-` as `\\-`).
+
+Return the same JSON shape as before with a corrected candidate_regex.
+No other text. JSON only."""
+
+
+def _format_captured_actual_block(captured: list[str], expected: float) -> str:
+    """Render the 'here's what your regex actually captured' block for retries.
+
+    Returns "" when no captured values exist (e.g. compile errors), so the
+    placeholder slot in the retry prompt collapses cleanly.
+    """
+    if not captured:
+        return ""
+    pretty = ", ".join(c for c in captured[:6])
+    return (
+        "\n## What your regex actually captured (expected was "
+        f"{expected}):\n{pretty}\n"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -179,6 +234,117 @@ _REGEX_TOKEN_STRIP = re.compile(
     r"\\\\|\\\$|\\b|\\w\+?|\\w\*|\(\?P<[^>]+>|\(\?:|\(\?!|\(\?=|"
     r"\(|\)|\*\??|\+\??|\?|\^|\{[\d,]+\}|\[\^?[^\]]+\])"
 )
+
+
+# Tokens that look like they could anchor a rate line: schedule/rider
+# codes (R-TOU-CPP, RES-28), leaf-number references, or section labels.
+_LOCAL_ANCHOR_RE = re.compile(
+    r"(?:"
+    r"Leaf\s+No\.\s*\d+[A-Za-z]?"      # "Leaf No. 503"
+    r"|Schedule\s+[A-Z][A-Z0-9\-]{1,15}" # "Schedule R-TOU-CPP"
+    r"|Rider\s+[A-Z][A-Z0-9\-]{1,15}"  # "Rider EDIT-4"
+    r"|[A-Z]{2,8}-[A-Z0-9\-]{1,10}"    # bare code like RES-28, R-TOU-CPP
+    r")",
+    re.MULTILINE,
+)
+
+
+# Phrases inside a rate line that work as in-line anchors when there's no
+# nearby schedule code. The captured group is what we use as the anchor.
+_IN_LINE_ANCHOR_PATTERNS: tuple[str, ...] = (
+    r"(Basic\s+Customer\s+Charge)",
+    r"(Basic\s+Facilities\s+Charge)",
+    r"(Administrative\s+Charge)",
+    r"(Incremental\s+Demand\s+Charge)",
+    r"(Demand\s+Charge)",
+    r"(Energy\s+Charge)",
+    r"(Minimum\s+Bill)",
+    r"(Customer\s+Charge)",
+    r"(Facilities\s+Charge)",
+    r"(Incentive\s+Margin)",
+    r"(Critical\s+Peak\s+Energy)",
+    r"(On-Peak\s+Energy)",
+    r"(Off-Peak\s+Energy)",
+    r"(Discount\s+Energy)",
+    r"(Fuel\s+Adjustment)",
+    r"(Rider\s+[A-Z]{2,8})",
+    r"(Schedule\s+[A-Z][A-Z0-9\-]+)",
+)
+_IN_LINE_ANCHOR_RE = re.compile(
+    "|".join(_IN_LINE_ANCHOR_PATTERNS), re.IGNORECASE,
+)
+
+
+def _extract_in_line_anchor(source_quote: str) -> str:
+    """Pick a distinctive phrase from the source line itself to use as an anchor.
+
+    For rate lines like "II. Administrative Charge = $200 per month", we
+    can't easily anchor on a schedule code (HP is far away), but the
+    phrase "Administrative Charge" is itself distinctive enough to
+    scope the regex. Returns the first matching phrase or "" if none.
+    """
+    if not source_quote:
+        return ""
+    m = _IN_LINE_ANCHOR_RE.search(source_quote)
+    if not m:
+        return ""
+    # Return the actual matched text (preserving original casing).
+    return m.group(0).strip()
+
+
+def _find_local_anchor(
+    source_quote: str,
+    doc_text: str,
+    *,
+    window: int = 800,
+) -> str:
+    """Return the nearest preceding code-like anchor for *source_quote*.
+
+    Document-level identity anchors (from ``schedule_codes_strong_json``)
+    often live in a table-of-contents far from the actual rate line. A
+    regex spanning 50,000+ chars with `[\\s\\S]*?` is impractical. Instead
+    we look ~*window* chars BEFORE the source quote in the doc and pick
+    the closest match for a schedule code, leaf number, or rider label.
+
+    Returns the matched anchor text (e.g. ``"Schedule R-TOU-CPP"`` or
+    ``"Leaf No. 503"``), or an empty string if no local anchor is found.
+    """
+    if not source_quote or not doc_text:
+        return ""
+
+    # Try a series of progressively-looser substring matches to find the
+    # quote's position in the doc. The staged classifier sometimes trims
+    # the leading "1. " enumeration so a strict find fails.
+    candidates_to_try: list[str] = [source_quote]
+    # Stripped of enumeration prefix.
+    stripped = re.sub(r"^[\s\d]*[\.\)A-Za-z]\s+", "", source_quote, count=1).strip()
+    if stripped and stripped != source_quote:
+        candidates_to_try.append(stripped)
+    # Last 25 chars (value+unit tail tends to be the most stable signature).
+    tail = source_quote[-25:].strip()
+    if len(tail) >= 10:
+        candidates_to_try.append(tail)
+    # First 25 chars.
+    head = source_quote[:25].strip()
+    if len(head) >= 10:
+        candidates_to_try.append(head)
+
+    idx = -1
+    for needle in candidates_to_try:
+        idx = doc_text.find(needle)
+        if idx >= 0:
+            break
+    if idx < 0:
+        return ""
+
+    # Look back up to *window* chars.
+    start = max(0, idx - window)
+    preceding = doc_text[start:idx]
+    matches = list(_LOCAL_ANCHOR_RE.finditer(preceding))
+    if not matches:
+        return ""
+    # Closest preceding match = last one.
+    return matches[-1].group(0).strip()
 
 
 def _quote_substantively_in_text(quote: str, text: str) -> bool:
@@ -333,6 +499,8 @@ class ExtractionGroundedRuleGenerator:
 
         candidates: list[dict[str, Any]] = []
         seen_doc_target: dict[tuple[str, str], int] = {}
+        # Cache doc text per source_pdf so we only fetch each large PDF once.
+        doc_text_cache: dict[str, str] = {}
         for er in extraction_rows:
             doc_conf = float(er["extraction_confidence"] or 0.0)
             try:
@@ -340,9 +508,14 @@ class ExtractionGroundedRuleGenerator:
             except (json.JSONDecodeError, TypeError):
                 continue
 
-            anchors = self._get_doc_anchors(er["source_pdf"])
-            if not anchors:
+            identity_anchors = self._get_doc_anchors(er["source_pdf"])
+            if not identity_anchors:
                 continue  # no anchor -> can't safely scope a regex
+            if er["source_pdf"] not in doc_text_cache:
+                doc_text_cache[er["source_pdf"]] = self._fetch_document_text(
+                    er["source_pdf"],
+                )
+            doc_text = doc_text_cache[er["source_pdf"]]
 
             existing_count = self._count_existing_grounded_rules(er["source_pdf"])
 
@@ -376,6 +549,30 @@ class ExtractionGroundedRuleGenerator:
                     continue
                 seen_doc_target[key] = seen_doc_target.get(key, 0) + 1
 
+                # Local anchor: pick the closest preceding schedule/leaf
+                # code within ~800 chars of the source quote. This is much
+                # more useful than identity anchors that can live thousands
+                # of chars away in a table-of-contents.
+                local_anchor = _find_local_anchor(quote, doc_text)
+                # If no local schedule code is nearby, fall back to a
+                # distinctive phrase from the source line itself. Most
+                # rate lines have a unique anchor phrase like "Administrative
+                # Charge =", "Basic Customer Charge", "Energy Charge".
+                in_line_anchor = ""
+                if not local_anchor:
+                    in_line_anchor = _extract_in_line_anchor(quote)
+                primary_anchor = (
+                    local_anchor
+                    or in_line_anchor
+                    or identity_anchors[0]
+                )
+                # Keep identity anchors as fallback context.
+                effective_anchors = (
+                    [primary_anchor] + [
+                        a for a in identity_anchors if a != primary_anchor
+                    ]
+                )
+
                 candidates.append({
                     "extraction_id": int(er["id"]),
                     "source_pdf": er["source_pdf"],
@@ -385,7 +582,8 @@ class ExtractionGroundedRuleGenerator:
                     "unit": unit,
                     "charge_type": charge_type,
                     "target_field": target_field,
-                    "anchors": anchors,
+                    "anchors": effective_anchors,
+                    "local_anchor": local_anchor,
                     "doc_extraction_confidence": doc_conf,
                     "row_confidence": row_conf,
                 })
@@ -450,13 +648,17 @@ class ExtractionGroundedRuleGenerator:
             return outcome
         outcome.validation = validation
 
-        # Retry once on failure with corrective feedback.
+        # Retry once on failure with corrective feedback. We pass the
+        # captured-values list to the retry prompt so when the failure mode
+        # is "wrong value captured", the LLM sees what it grabbed and can
+        # disambiguate with a context word.
         if not validation.accept and _MAX_RETRIES > 0:
             try:
                 retry_suggestion = self._call_llm(
                     candidate,
                     retry_reason=validation.reason,
                     failed_regex=suggestion.candidate_regex,
+                    captured_actual=validation.captured_values,
                 )
             except Exception:
                 retry_suggestion = None
@@ -612,11 +814,16 @@ class ExtractionGroundedRuleGenerator:
         *,
         retry_reason: str = "",
         failed_regex: str = "",
+        captured_actual: list[str] | None = None,
     ) -> RegexSuggestion | None:
         anchor = candidate["anchors"][0] if candidate.get("anchors") else ""
         if retry_reason:
+            captured_block = _format_captured_actual_block(
+                captured_actual or [], float(candidate["value"]),
+            )
             prompt = _RETRY_PROMPT.format(
                 reason=retry_reason,
+                captured_actual_block=captured_block,
                 source_line=candidate["source_quote"],
                 anchor=anchor,
                 value=candidate["value"],

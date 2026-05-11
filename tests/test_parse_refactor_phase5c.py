@@ -578,6 +578,52 @@ def test_grounded_validator_rejects_when_value_off(tmp_path: Path) -> None:
     assert "didn't capture expected value" in result.reason
 
 
+def test_grounded_in_line_anchor_picks_distinctive_phrase() -> None:
+    """When no schedule code is nearby, an in-line phrase becomes the anchor."""
+    from duke_rates.document_intelligence.extraction_grounded_rules import (
+        _extract_in_line_anchor,
+    )
+
+    cases = [
+        ("II. Administrative Charge = $200 per month", "Administrative Charge"),
+        ("A. $22.00 Basic Customer Charge", "Basic Customer Charge"),
+        ("Critical Peak Energy per month, per kWh 43.1833¢", "Critical Peak Energy"),
+        ("VI. Incremental Demand Charge = $0.96 per kW", "Incremental Demand Charge"),
+        ("Incentive Margin = 0.6 cents per kWh", "Incentive Margin"),
+        ("(no recognizable phrase here)", ""),
+    ]
+    for quote, expected in cases:
+        got = _extract_in_line_anchor(quote)
+        assert got == expected, f"quote={quote!r} got={got!r} expected={expected!r}"
+
+
+def test_grounded_local_anchor_finds_nearby_schedule_code(tmp_path: Path) -> None:
+    """Local anchor picks the closest preceding Leaf/Schedule/Rider code."""
+    from duke_rates.document_intelligence.extraction_grounded_rules import (
+        _find_local_anchor,
+    )
+
+    doc_text = (
+        "Some preamble text here.\n"
+        "Leaf No. 503 Residential Service Schedule R-TOU-CPP\n"
+        "B. kWh Energy Charge:\n"
+        "1. 39.614¢ per Critical Peak kWh\n"
+        "2. 21.209¢ per On-Peak kWh\n"
+    )
+    # Both Leaf No. 503 and Schedule R-TOU-CPP precede the quote; we pick
+    # the CLOSEST preceding match. "Schedule R-TOU-CPP" is later in the
+    # preceding window so it wins, which is fine — it's actually more
+    # specific to the rate than the leaf number.
+    anchor = _find_local_anchor("39.614¢ per Critical Peak kWh", doc_text)
+    assert anchor in ("Leaf No. 503", "Schedule R-TOU-CPP", "TOU-CPP")
+    # Quote with trimmed enumeration prefix (the "2. " was already
+    # stripped by the staged classifier) should still find an anchor.
+    anchor2 = _find_local_anchor("21.209¢ per On-Peak kWh", doc_text)
+    assert anchor2 != ""
+    # Quote not in doc
+    assert _find_local_anchor("Some bogus rate 99.99¢", doc_text) == ""
+
+
 def test_grounded_compact_for_anchor_strips_regex_tokens() -> None:
     """The compaction helper strips \\s+ and similar regex tokens before comparison."""
     from duke_rates.document_intelligence.extraction_grounded_rules import (
