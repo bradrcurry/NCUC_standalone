@@ -743,7 +743,15 @@ python -m duke_rates run-overnight-doc-intelligence-nc --stages llm_adjudicate -
 | `suggest-regex-fixes-nc` | Generate regex/normalization suggestions for diagnosed failures. Uses `regex_suggestion` role. Exports review artifacts to `docs/reports/regex_suggestions/`. Suggestions NEVER auto-applied. |
 | `validate-regex-suggestions-nc` | Deterministic validation harness — tests candidate regexes against known-good, known-failed, and unrelated documents. No LLM calls (local regex testing). Does NOT modify parser code. |
 | `run-llm-parse-fallback-nc` | Schema-guided LLM fallback extraction for weak/empty parses. Uses `structured_rate_extraction` role. Rows stored as CANDIDATES only — never production. |
-| `run-overnight-parse-improvement-nc` | Resumable unattended batch: diagnose → suggest → validate → extract in sequence. Same safety pattern as Phase 5.5 (wall-clock cap, resume, dry-run, SIGINT/SIGTERM). End-of-run JSON at `docs/reports/overnight_parse_improvement/<ts>.json`. |
+| `validate-llm-rate-extractions-nc` | Deterministically validate LLM candidate rate rows against source text. Checks source-quote grounding, value grounding, and unit evidence. Defaults to report-only; `--execute` updates candidate extraction status to `validated`, `review_candidate`, or `rejected` and writes row-level advisory records to `llm_candidate_rate_row_validations`, never production charges. |
+| `locate-llm-row-evidence-nc` | Focused LLM pass over unresolved row validations. Asks the model to locate exact unit evidence, then deterministically verifies the evidence quote before optionally writing advisory repairs to `llm_candidate_rate_row_repairs`. |
+| `reclassify-llm-row-conflicts-nc` | Focused LLM pass over row validations with `unit_conflicts_with_inferred`. Proposes advisory charge-type/unit repairs and stores accepted/rejected repair evidence separately from production charges. |
+| `apply-deterministic-llm-row-repairs-nc` | Create advisory repairs for repeated deterministic row-validation patterns, such as lighting table rows where accepted evidence already proves `Lighting Charge` and `$/month`. |
+| `show-llm-row-effective-status-nc` | Report row-level validation status after accounting for accepted advisory repairs (`validated_with_repair`). |
+| `propose-llm-charge-promotions-nc` | Build proposal rows for validated/effective LLM rate rows after lineage, version, duplicate, and conflict checks. Does not insert production charges. |
+| `promote-llm-charge-proposals-nc` | Promote eligible, novel, conflict-free LLM charge proposals into `tariff_charges`; dry-run by default and audited on execute. |
+| `run-llm-promotion-overnight-nc` | Run the guarded deterministic promotion-maintenance loop: validate candidate/review extractions, apply deterministic repairs, create proposals for newly validated rows, refresh existing proposals, dry-run promotion, optionally safe-execute promotions, and write a timestamped JSON morning report under `docs/reports/llm_promotion_overnight/`. |
+| `run-overnight-parse-improvement-nc` | Resumable unattended batch. For backlog reduction, prefer `diagnose,extract_staged`; regex suggestion / grounded-rule tasks remain useful for parser research but are not the default production-oriented path. Same safety pattern as Phase 5.5 (wall-clock cap, resume, dry-run, SIGINT/SIGTERM). End-of-run JSON at `docs/reports/overnight_parse_improvement/<ts>.json`. |
 
 Diagnosis flags:
 ```
@@ -778,7 +786,7 @@ Overnight loop flags:
 --max-documents N            (0 = unlimited)
 --max-runtime-minutes N      (0 = unlimited, wall-clock cap)
 --max-consecutive-failures N (default 5)
---task-kind diagnose,suggest,validate,extract
+--task-kind diagnose,extract_staged
 --profile TEXT / --family TEXT
 --since ISO8601
 --rediagnose-unknown         (diagnose stage re-runs prior unknown/0.0 rows)
@@ -788,12 +796,48 @@ Overnight loop flags:
 
 Overnight workflow:
 ```bash
-python -m duke_rates run-overnight-parse-improvement-nc --dry-run --task-kind diagnose,suggest,validate,extract
-python -m duke_rates run-overnight-parse-improvement-nc --task-kind diagnose --limit 25 --max-runtime-minutes 480 --resume
-python -m duke_rates run-overnight-parse-improvement-nc --task-kind diagnose --rediagnose-unknown --limit 25 --max-runtime-minutes 120
-python -m duke_rates analyze-parse-failures-nc --limit 5 --dry-run
-python -m duke_rates run-llm-parse-fallback-nc --limit 5 --dry-run
+python -m duke_rates show-llm-row-effective-status-nc --json
+python -m duke_rates propose-llm-charge-promotions-nc --limit 10000 --refresh-existing --json
+python -m duke_rates promote-llm-charge-proposals-nc --limit 500 --json
+
+# Short iterative loop while tuning prompt/model behavior or measuring blocker reduction.
+python -m duke_rates run-overnight-parse-improvement-nc --task-kind diagnose,extract_staged --max-runtime-minutes 10 --limit 10 --resume --auto-rediagnose-unknown
+python -m duke_rates run-llm-promotion-overnight-nc --validation-limit 500 --repair-limit 1000 --proposal-limit 10000 --promotion-limit 500 --json
+
+# Full overnight extraction-first run after the short loop is productive.
+python -m duke_rates run-overnight-parse-improvement-nc --task-kind diagnose,extract_staged --max-runtime-minutes 360 --limit 100 --resume --auto-rediagnose-unknown
+python -m duke_rates run-llm-promotion-overnight-nc --validation-limit 2000 --repair-limit 4000 --proposal-limit 20000 --promotion-limit 1000 --json
+
+# Optional targeted repair passes.
+python -m duke_rates validate-llm-rate-extractions-nc --limit 2000 --execute
+python -m duke_rates locate-llm-row-evidence-nc --issue unit_missing --limit 250 --execute
+python -m duke_rates reclassify-llm-row-conflicts-nc --limit 250 --execute
+python -m duke_rates apply-deterministic-llm-row-repairs-nc --limit 2000 --execute
+python -m duke_rates propose-llm-charge-promotions-nc --limit 10000 --execute
+python -m duke_rates propose-llm-charge-promotions-nc --limit 10000 --refresh-existing --execute
+python -m duke_rates promote-llm-charge-proposals-nc --limit 500 --json
+
+# Use only after dry-run output is clean.
+python -m duke_rates run-llm-promotion-overnight-nc --validation-limit 2000 --repair-limit 4000 --proposal-limit 20000 --promotion-limit 250 --execute-safe --json
 ```
+
+Operational notes:
+- `extract_staged` is now the recommended overnight value-creation path. It has been more productive than asking local models to synthesize reusable regex.
+- `run-llm-promotion-overnight-nc` now has two proposal phases:
+  - create proposals for newly validated rows
+  - refresh existing pending proposals
+- Promotion remains dry-run unless `--execute` or `--execute-safe` is supplied.
+- Recommended blocker order:
+  1. `missing_version_effective_start`
+  2. `malformed_family_key`
+  3. `unqualified_rate_unit`
+  4. `unsupported_charge_type`
+  5. `ambiguous_numeric_table_row`
+- `ambiguous_numeric_table_row` is an intentional safety hold for broad multi-number summary/table lines where the selected value may be column-ambiguous.
+- Proposal rerouting can already exploit:
+  - same-family dated sibling versions inferred from historical snapshot/effective metadata
+  - bounded bundle rerouting via unique leaf/date evidence
+  - Leaf 601 BA-like summary-line dates when a unique rider-summary match points to an existing dated Leaf 601 version.
 
 Model note:
 - `parse_failure_triage` should favor fixture accuracy over action rate. A May
