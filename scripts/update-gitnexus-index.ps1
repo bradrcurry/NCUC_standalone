@@ -187,6 +187,29 @@ $Mirrors = @(
             "tests/test_ncuc_pipeline.py",
             "tests/test_historical_parser_profiles.py"
         )
+    },
+    @{
+        Name = "duke-phase6-extraction"
+        Directory = Join-Path $PipelineRoot "phase6-extraction"
+        Files = @(
+            "src/duke_rates/document_intelligence/schema_extraction.py",
+            "src/duke_rates/document_intelligence/extraction_grounded_rules.py",
+            "src/duke_rates/document_intelligence/per_doc_rule_generator.py",
+            "src/duke_rates/document_intelligence/rule_promotion.py",
+            "src/duke_rates/document_intelligence/llm_charge_promotion.py"
+        )
+    },
+    @{
+        Name = "duke-phase6-sections"
+        Directory = Join-Path $PipelineRoot "phase6-sections"
+        Files = @(
+            "src/duke_rates/document_intelligence/document_sections.py",
+            "src/duke_rates/document_intelligence/document_structure_analyst.py",
+            "src/duke_rates/document_intelligence/section_aggregator.py",
+            "src/duke_rates/document_intelligence/document_specific_rules.py",
+            "src/duke_rates/document_intelligence/llm_promotion_overnight.py",
+            "src/duke_rates/document_intelligence/llm_extraction_validation.py"
+        )
     }
 )
 
@@ -209,5 +232,5 @@ Write-Host ""
 Write-Host "Done. GitNexus repos refreshed:"
 Write-Host "  duke-standalone       full project"
 foreach ($mirror in $Mirrors) {
-    Write-Host ("  {0,-21} {1}" -f $mirror.Name, $mirror.Directory)
+    Write-Host ("  {0,-25} {1}" -f $mirror.Name, $mirror.Directory)
 }

@@ -1,5 +1,5 @@
 # GitNexus Usage Guide
-**Last Updated:** 2026-04-26
+**Last Updated:** 2026-05-12
 **Purpose:** Code navigation, impact analysis, and AI-agent efficiency layer using the GitNexus knowledge graph.
 
 GitNexus indexes this codebase into a graph of symbols, call chains, and clusters. It exposes that graph to Claude Code (and other AI agents) via MCP, enabling structural queries that grep alone can't answer.
@@ -57,6 +57,8 @@ GitNexus indexes this codebase as multiple named repos to work around Tree-sitte
 | `duke-ncuc-workflow` | `pipeline_index/ncuc-workflow/` | large NCUC workflow modules |
 | `duke-apps` | `pipeline_index/apps/` | Streamlit app/dashboard modules that fail in full-repo scope extraction |
 | `duke-tests-core` | `pipeline_index/tests-core/` | large test modules useful for impact analysis |
+| `duke-phase6-extraction` | `pipeline_index/phase6-extraction/` | Phase 6 extraction pipeline: `schema_extraction`, `extraction_grounded_rules`, `per_doc_rule_generator`, `rule_promotion`, `llm_charge_promotion` |
+| `duke-phase6-sections` | `pipeline_index/phase6-sections/` | Phase 6 document sections: `document_sections`, `document_structure_analyst`, `section_aggregator`, `document_specific_rules`, `llm_promotion_overnight`, `llm_extraction_validation` |
 
 The files in `pipeline_index/` are **mirrors** — copies of the actual source files under `src/duke_rates/`, `app/`, `dashboard_views/`, and `tests/`. `update-gitnexus-index.ps1` keeps them in sync before re-indexing. Do not edit them directly; edit the source originals.
 
@@ -125,6 +127,17 @@ These files previously failed scope extraction in the main index. They now live 
 | `tests/test_repository.py` | `duke-tests-core` |
 | `tests/test_ncuc_pipeline.py` | `duke-tests-core` |
 | `tests/test_historical_parser_profiles.py` | `duke-tests-core` |
+| `src/duke_rates/document_intelligence/schema_extraction.py` | `duke-phase6-extraction` |
+| `src/duke_rates/document_intelligence/extraction_grounded_rules.py` | `duke-phase6-extraction` |
+| `src/duke_rates/document_intelligence/per_doc_rule_generator.py` | `duke-phase6-extraction` |
+| `src/duke_rates/document_intelligence/rule_promotion.py` | `duke-phase6-extraction` |
+| `src/duke_rates/document_intelligence/llm_charge_promotion.py` | `duke-phase6-extraction` |
+| `src/duke_rates/document_intelligence/document_sections.py` | `duke-phase6-sections` |
+| `src/duke_rates/document_intelligence/document_structure_analyst.py` | `duke-phase6-sections` |
+| `src/duke_rates/document_intelligence/section_aggregator.py` | `duke-phase6-sections` |
+| `src/duke_rates/document_intelligence/document_specific_rules.py` | `duke-phase6-sections` |
+| `src/duke_rates/document_intelligence/llm_promotion_overnight.py` | `duke-phase6-sections` |
+| `src/duke_rates/document_intelligence/llm_extraction_validation.py` | `duke-phase6-sections` |
 
 ---
 
@@ -341,7 +354,7 @@ echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":
 - **Index location:** `.gitnexus/lbug/` (LadybugDB embedded graph, gitignored)
 - **Sub-index location:** `pipeline_index/` (file mirrors for sub-repos, gitignored)
 - **No external services:** All processing is local. Nothing is uploaded.
-- **Version:** `gitnexus@latest` resolves to 1.6.3 as of 2026-04-26
+- **Version:** `gitnexus@latest` resolves to 1.6.3 as of 2026-05-12
 - **Python support level:** Handles imports, function/class definitions, call chains. Fails on files >512KB (raise with `--max-file-size`) and files that accumulate too many nodes in a single batch (workaround: sub-index directories with ≤5 large files each).
 - **Node accumulation overflow:** Root cause of scope extraction failures — when >~600 nodes accumulate from prior files in a batch, Tree-sitter's scope query buffer overflows for large complex files. Files that fail in a full index pass in isolation (e.g., `parser_profiles.py` alone: 933 nodes, succeeds). Sub-index directories with ≤5 large files stay under the threshold.
 - **FTS search bug:** The `query` tool (hybrid BM25 + semantic search) fails on this codebase due to a lazy FTS index write attempting a read-only DB connection. Use `cypher` instead.
