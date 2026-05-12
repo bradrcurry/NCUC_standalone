@@ -5,6 +5,7 @@ from datetime import UTC, datetime
 from typer.testing import CliRunner
 
 from duke_rates import cli
+from duke_rates.cli_commands import ocr as ocr_module
 from duke_rates.db.sqlite import connect
 
 
@@ -217,14 +218,12 @@ def test_show_ocr_remediation_candidates_nc_cli(monkeypatch, tmp_path) -> None:
     conn.commit()
     conn.close()
 
-    monkeypatch.setattr(
-        cli,
-        "_bootstrap",
-        lambda: (type("S", (), {"database_path": str(db_path)})(), None),
-    )
+    fake_bootstrap = lambda: (type("S", (), {"database_path": str(db_path)})(), None)
+    monkeypatch.setattr(cli, "_bootstrap", fake_bootstrap)
+    monkeypatch.setattr(ocr_module, "_bootstrap", fake_bootstrap)
 
     runner = CliRunner()
-    result = runner.invoke(cli.app, ["show-ocr-remediation-candidates-nc", "--limit", "5"])
+    result = runner.invoke(cli.app, ["ocr", "show-remediation-candidates-nc", "--limit", "5"])
 
     assert result.exit_code == 0
     assert "OCR Remediation Candidates (NC)" in result.stdout

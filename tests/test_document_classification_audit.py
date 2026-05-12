@@ -444,4 +444,4 @@ def test_show_parser_improvement_candidates_nc_cli(monkeypatch, tmp_path: Path) 
     assert result.exit_code == 0
     assert "Parser Improvement Candidates (NC)" in result.stdout
     assert "action=enqueue_ocr_remediation" in result.stdout
-    assert "next=python -m duke_rates enqueue-ocr-remediation-nc --limit 10 --family-key nc-carolinas-rider-PROSPECTIVERIDER" in result.stdout
+    assert "next=python -m duke_rates ocr enqueue-remediation-nc --limit 10 --family-key nc-carolinas-rider-PROSPECTIVERIDER" in result.stdout

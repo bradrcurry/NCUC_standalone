@@ -44,7 +44,7 @@
         },
         {
           "step_id": "ocr_detail",
-          "tool_id": "show-ocr-queue-nc",
+          "tool_id": "ocr show-queue-nc",
           "purpose": "Inspect OCR backlog when scanned PDFs are the likely blocker.",
           "mode": "optional"
         },
@@ -507,19 +507,19 @@
       "steps": [
         {
           "step_id": "inspect_ocr",
-          "tool_id": "show-ocr-queue-nc",
+          "tool_id": "ocr show-queue-nc",
           "purpose": "Inspect current OCR queue depth and status.",
           "mode": "required"
         },
         {
           "step_id": "enqueue_ocr",
-          "tool_id": "enqueue-ocr-nc",
+          "tool_id": "ocr enqueue-nc",
           "purpose": "Queue scanned PDFs that still need OCR.",
           "mode": "optional"
         },
         {
           "step_id": "run_ocr",
-          "tool_id": "process-ocr-queue-nc",
+          "tool_id": "ocr process-queue-nc",
           "purpose": "Execute OCR processing for queued records.",
           "mode": "required"
         },

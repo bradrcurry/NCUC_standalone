@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 from typer.testing import CliRunner
 
 from duke_rates import cli
+from duke_rates.cli_commands import ocr as ocr_module
 from duke_rates.db.sqlite import connect
 
 
@@ -122,12 +123,11 @@ def test_execute_workflow_next_action_enqueues_ocr_remediation(monkeypatch, tmp_
     conn.commit()
     conn.close()
 
-    monkeypatch.setattr(
-        cli,
-        "_bootstrap",
-        lambda: (type("S", (), {"database_path": str(db_path)})(), None),
-    )
+    fake_bootstrap = lambda: (type("S", (), {"database_path": str(db_path)})(), None)
+    monkeypatch.setattr(cli, "_bootstrap", fake_bootstrap)
+    monkeypatch.setattr(ocr_module, "_bootstrap", fake_bootstrap)
     monkeypatch.setattr(cli, "triage_pdf", lambda _path: _FakeTriage())
+    monkeypatch.setattr(ocr_module, "triage_pdf", lambda _path: _FakeTriage())
 
     runner = CliRunner()
     result = runner.invoke(cli.app, ["execute-workflow-next-action-nc", "--limit", "1"])
@@ -145,7 +145,7 @@ def test_execute_workflow_next_action_enqueues_ocr_remediation(monkeypatch, tmp_
     assert queue_count == 1
     assert receipt[0] == "enqueue_ocr_remediation"
     assert receipt[1] == "completed"
-    assert "enqueue-ocr-remediation-nc" in receipt[2]
+    assert "ocr enqueue-remediation-nc" in receipt[2]
 
 
 def test_execute_workflow_next_action_uses_workers_for_local_queue(monkeypatch, tmp_path) -> None:
@@ -165,11 +165,9 @@ def test_execute_workflow_next_action_uses_workers_for_local_queue(monkeypatch, 
     conn.commit()
     conn.close()
 
-    monkeypatch.setattr(
-        cli,
-        "_bootstrap",
-        lambda: (type("S", (), {"database_path": str(db_path)})(), None),
-    )
+    fake_bootstrap = lambda: (type("S", (), {"database_path": str(db_path)})(), None)
+    monkeypatch.setattr(cli, "_bootstrap", fake_bootstrap)
+    monkeypatch.setattr(ocr_module, "_bootstrap", fake_bootstrap)
 
     calls: list[tuple[int, int, bool]] = []
 
@@ -195,7 +193,7 @@ def test_execute_workflow_next_action_uses_workers_for_local_queue(monkeypatch, 
     conn.close()
     assert receipt[0] == "process_ocr_queue"
     assert receipt[1] == "completed"
-    assert receipt[2] == "python -m duke_rates process-ocr-queue-nc --limit 2 --workers 2"
+    assert receipt[2] == "python -m duke_rates ocr process-queue-nc --limit 2 --workers 2"
 
 
 def test_show_workflow_action_receipts_cli(monkeypatch, tmp_path) -> None:
@@ -213,7 +211,7 @@ def test_show_workflow_action_receipts_cli(monkeypatch, tmp_path) -> None:
             "process_ocr_queue",
             "completed",
             "nc-progress-leaf-720",
-            "python -m duke_rates process-ocr-queue-nc --limit 1",
+            "python -m duke_rates ocr process-queue-nc --limit 1",
             1,
             "{}",
             datetime(2026, 4, 21, tzinfo=UTC).isoformat(),
@@ -223,11 +221,9 @@ def test_show_workflow_action_receipts_cli(monkeypatch, tmp_path) -> None:
     conn.commit()
     conn.close()
 
-    monkeypatch.setattr(
-        cli,
-        "_bootstrap",
-        lambda: (type("S", (), {"database_path": str(db_path)})(), None),
-    )
+    fake_bootstrap = lambda: (type("S", (), {"database_path": str(db_path)})(), None)
+    monkeypatch.setattr(cli, "_bootstrap", fake_bootstrap)
+    monkeypatch.setattr(ocr_module, "_bootstrap", fake_bootstrap)
 
     runner = CliRunner()
     result = runner.invoke(cli.app, ["show-workflow-action-receipts-nc", "--limit", "5"])
@@ -252,11 +248,9 @@ def test_process_ocr_queue_nc_workers(monkeypatch, tmp_path) -> None:
     db_path = tmp_path / "ocr-workers.db"
     connect(db_path).close()
 
-    monkeypatch.setattr(
-        cli,
-        "_bootstrap",
-        lambda: (type("S", (), {"database_path": str(db_path)})(), None),
-    )
+    fake_bootstrap = lambda: (type("S", (), {"database_path": str(db_path)})(), None)
+    monkeypatch.setattr(cli, "_bootstrap", fake_bootstrap)
+    monkeypatch.setattr(ocr_module, "_bootstrap", fake_bootstrap)
 
     state = {"calls": 0}
     lock = threading.Lock()
@@ -270,10 +264,10 @@ def test_process_ocr_queue_nc_workers(monkeypatch, tmp_path) -> None:
             return {"processed": True, "completed": 1, "failed": 0}
         return {"processed": False, "completed": 0, "failed": 0}
 
-    monkeypatch.setattr(cli, "_process_single_ocr_queue_item", _fake_process)
+    monkeypatch.setattr(ocr_module, "_process_single_ocr_queue_item", _fake_process)
 
     runner = CliRunner()
-    result = runner.invoke(cli.app, ["process-ocr-queue-nc", "--limit", "3", "--workers", "2"])
+    result = runner.invoke(cli.app, ["ocr", "process-queue-nc", "--limit", "3", "--workers", "2"])
 
     assert result.exit_code == 0
     assert "OCR queue processed=2 completed=2 failed=0 workers=2" in result.stdout
@@ -283,11 +277,9 @@ def test_process_reprocess_queue_nc_workers(monkeypatch, tmp_path) -> None:
     db_path = tmp_path / "reprocess-workers.db"
     connect(db_path).close()
 
-    monkeypatch.setattr(
-        cli,
-        "_bootstrap",
-        lambda: (type("S", (), {"database_path": str(db_path)})(), None),
-    )
+    fake_bootstrap = lambda: (type("S", (), {"database_path": str(db_path)})(), None)
+    monkeypatch.setattr(cli, "_bootstrap", fake_bootstrap)
+    monkeypatch.setattr(ocr_module, "_bootstrap", fake_bootstrap)
 
     state = {"calls": 0}
     lock = threading.Lock()
@@ -330,7 +322,7 @@ def test_reconcile_workflow_action_receipts_marks_running_and_completed(tmp_path
             "nc_guided",
             "process_ocr_queue",
             "started",
-            "python -m duke_rates process-ocr-queue-nc --limit 1",
+            "python -m duke_rates ocr process-queue-nc --limit 1",
             1,
             "{}",
             now,
