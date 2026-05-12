@@ -2,10 +2,11 @@
     [string]$DeadlineTime = "09:00",  # Stop at this time (24h format)
     [int]$MaxRuntimeMinutes = 55,
     [int]$ExtractLimit = 12,           # docs per extract_staged iteration
-    [int]$RulesLimit = 8,              # docs per generate_per_doc_rules iteration
+    [int]$GroundedLimit = 10,          # docs per generate_grounded_rules iteration
     [int]$SectionsLimit = 50,          # docs per populate_sections iteration
     [int]$BoundaryLimit = 20,          # docs per analyze_document_structure iteration
-    [int]$MaxConsecutiveFailures = 15
+    [int]$MaxConsecutiveFailures = 15,
+    [switch]$ExecutePromotions         # Pass to allow safe promotion after each cycle
 )
 
 # Compute deadline - today at $DeadlineTime, or tomorrow if that's already past.
@@ -23,7 +24,8 @@ Write-Host "=================================================================="
 Write-Host "Now:        $($now.ToString('yyyy-MM-dd HH:mm:ss'))"
 Write-Host "Hours:      $('{0:N2}' -f $hoursToRun)"
 Write-Host "Slice cap:  ${MaxRuntimeMinutes}m per iteration"
-Write-Host "Limits:     extract=$ExtractLimit rules=$RulesLimit sections=$SectionsLimit boundary=$BoundaryLimit"
+Write-Host "Limits:     extract=$ExtractLimit grounded=$GroundedLimit sections=$SectionsLimit boundary=$BoundaryLimit"
+Write-Host "Promotions: $($ExecutePromotions ? 'execute-safe (after each cycle)' : 'dry-run only (pass -ExecutePromotions to enable)')"
 Write-Host "Reports:    docs/reports/overnight_parse_improvement/<run_id>.json"
 Write-Host ""
 
@@ -40,18 +42,22 @@ Write-Host ""
 # --- Workload rotation ---
 # Each iteration runs ONE focused task so the wall-clock budget is spent
 # on the work that has signal, instead of fragmenting across stages.
-# Rotation order is by priority: extract_staged is the highest-value
-# pipeline (model-per-stage just optimized), then per-doc rules (largest
-# parser-coverage gap), then boundary refinement (helps future extracts),
-# then a quick populate_sections refresh.
+# Rotation order by priority:
+#   1. extract_staged — highest-value path, feeds the promotion funnel directly.
+#   2. generate_grounded_rules — builds doc-scoped rules from confirmed extraction
+#      rows (much higher acceptance rate than generate_per_doc_rules which is
+#      parked until its prompt anchoring is fixed).
+#   3. boundary / populate_sections — structural work that improves future extracts.
+# generate_per_doc_rules is intentionally excluded: ~72% rejection rate with
+# "0 matches" failures; use generate_grounded_rules instead.
 $rotation = @(
-    @{ name="extract_staged"; tasks="extract_staged"; limit=$ExtractLimit },
-    @{ name="extract_staged"; tasks="extract_staged"; limit=$ExtractLimit },
-    @{ name="per_doc_rules";  tasks="generate_per_doc_rules,detect_rule_promotions"; limit=$RulesLimit },
-    @{ name="extract_staged"; tasks="extract_staged"; limit=$ExtractLimit },
-    @{ name="boundary";       tasks="populate_sections,analyze_document_structure"; limit=$BoundaryLimit },
-    @{ name="extract_staged"; tasks="extract_staged"; limit=$ExtractLimit },
-    @{ name="per_doc_rules";  tasks="generate_per_doc_rules,detect_rule_promotions"; limit=$RulesLimit }
+    @{ name="extract_staged";    tasks="extract_staged"; limit=$ExtractLimit },
+    @{ name="extract_staged";    tasks="extract_staged"; limit=$ExtractLimit },
+    @{ name="grounded_rules";    tasks="generate_grounded_rules,detect_rule_promotions"; limit=$GroundedLimit },
+    @{ name="extract_staged";    tasks="extract_staged"; limit=$ExtractLimit },
+    @{ name="boundary";          tasks="populate_sections,analyze_document_structure"; limit=$BoundaryLimit },
+    @{ name="extract_staged";    tasks="extract_staged"; limit=$ExtractLimit },
+    @{ name="grounded_rules";    tasks="generate_grounded_rules,detect_rule_promotions"; limit=$GroundedLimit }
 )
 
 $loopCount = 0
@@ -85,6 +91,28 @@ while ((Get-Date) -lt $deadline) {
         if ($exitCode -ne 0) {
             Write-Host "Loop ${loopCount}: exit code $exitCode. Continuing..."
         }
+    }
+
+    # After each full rotation cycle, run the promotion funnel.
+    if ($rotIdx -eq ($rotation.Count - 1)) {
+        Write-Host "--- Promotion pass at $(Get-Date) ---"
+        if ($ExecutePromotions) {
+            python -m duke_rates.cli run-llm-promotion-overnight-nc `
+                --validation-limit 500 `
+                --repair-limit 1000 `
+                --proposal-limit 10000 `
+                --promotion-limit 500 `
+                --execute-safe `
+                --json
+        } else {
+            python -m duke_rates.cli run-llm-promotion-overnight-nc `
+                --validation-limit 500 `
+                --repair-limit 1000 `
+                --proposal-limit 10000 `
+                --promotion-limit 500 `
+                --json
+        }
+        Write-Host "Promotion pass exit code: $LASTEXITCODE"
     }
 
     $elapsed = [math]::Round(((Get-Date) - $now).TotalMinutes, 1)

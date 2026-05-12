@@ -437,7 +437,7 @@ class PerDocRuleGenerator:
 
         regex_str = suggestion.candidate_regex or ""
         try:
-            pattern = re.compile(regex_str, re.IGNORECASE | re.MULTILINE)
+            pattern = re.compile(regex_str, re.IGNORECASE | re.MULTILINE | re.DOTALL)
         except re.error as e:
             result.reason = f"regex compile error: {e}"
             return result
@@ -629,6 +629,7 @@ class PerDocRuleGenerator:
         """
         if not primary_anchor:
             return []
+        conn = None
         try:
             conn = sqlite3.connect(str(self._db_path))
             try:
@@ -665,7 +666,8 @@ class PerDocRuleGenerator:
                         ),
                     ).fetchall()
             finally:
-                conn.close()
+                if conn:
+                    conn.close()
         except Exception:
             return []
 

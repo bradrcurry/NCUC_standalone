@@ -96,6 +96,9 @@ job is to produce the regex that captures it.
 ## Required anchor (must appear LITERALLY in the regex body):
 {anchor}
 
+## Anchor position relative to the rate value in this document:
+{anchor_direction_hint}
+
 ## Schedule codes present in this document:
 {schedule_codes}
 
@@ -120,39 +123,33 @@ DO NOT use `(?<=...)` variable-length look-behinds (Python rejects them).
 
 DO NOT use PCRE-style `(?<name>...)` named groups. Python requires `(?P<name>...)`.
 
+## CAPTURE GROUP IS MANDATORY:
+The `candidate_regex` MUST contain at least one capturing group `(...)`.
+The validator extracts the numeric value from the first group. A regex
+with no parentheses will be rejected immediately, even if it matches.
+  WRONG: `RES\\-28[\\s\\S]*?\\$\\d+\\.\\d+`   ← no group, value cannot be extracted
+  RIGHT: `RES\\-28[\\s\\S]*?\\$(\\d+\\.\\d+)`  ← captures the number
+
 ## Construction recipe (follow EXACTLY this 5-step order):
 
-1. ANCHOR. Start with the literal anchor token:
-   `{anchor}` (escape `-` as `\\-` if your regex engine needs it).
-
-2. BRIDGE. Add `[\\s\\S]*?` to lazily skip across lines from the anchor to
-   the relevant charge.
-
-3. CONTEXT. Add a distinguishing word from the source line so this regex
-   doesn't grab a DIFFERENT rate value from the same document. Pick the
-   word(s) most specific to THIS line. For TOU lines this is usually
-   `Critical\\s+Peak`, `On\\-Peak`, `Off\\-Peak`, `Shoulder`, `Discount`.
-   For others it might be `Basic\\s+Customer\\s+Charge`, `Energy\\s+Charge`,
-   `Demand\\s+Charge`, `Administrative\\s+Charge`, etc.
-
-4. CAPTURE. Add another `[\\s\\S]*?` then the capturing group. Choose
-   `(\\d+\\.\\d+)` when the value has a decimal, `(\\d+)` when it's a whole
-   number, `(\\d+\\.?\\d*)` if either is possible.
-
-5. UNIT MARKER. Optionally add the unit suffix (`¢\\s*per\\s+kWh`,
-   `\\s*per\\s+month`, `\\s*per\\s+kW`) for additional precision.
+{construction_recipe}
 
 ## Worked examples:
 
-Source: "I. Basic Customer Charge, per month $14.00" → anchor RES-28
+Source: "I. Basic Customer Charge, per month $14.00" → anchor RES-28, anchor BEFORE value
 GOOD: `RES\\-28[\\s\\S]*?Basic\\s+Customer\\s+Charge[\\s\\S]*?\\$(\\d+\\.\\d+)`
 
-Source: "1. 39.614¢ per Critical Peak kWh" → anchor EDIT-4
+Source: "1. 39.614¢ per Critical Peak kWh" → anchor EDIT-4, anchor BEFORE value
 GOOD: `EDIT\\-4[\\s\\S]*?Critical\\s+Peak[\\s\\S]*?(\\d+\\.\\d+)¢`
 BAD (matches On-Peak too): `EDIT\\-4[\\s\\S]*?(\\d+\\.\\d+)¢\\s*per\\s+kWh`
 
-Source: "Administrative Charge = $200 per month" → anchor HP
+Source: "Administrative Charge = $200 per month" → anchor HP, anchor BEFORE value
 GOOD: `HP[\\s\\S]*?Administrative\\s+Charge[\\s\\S]*?\\$(\\d+)`
+
+Source: "RECD Credit = 5% times the stated kilowatt" → anchor RECD, anchor AFTER value
+GOOD: `RECD\\s+Credit[\\s\\S]*?(\\d+)%[\\s\\S]*?RECD`
+NOTE: when anchor is AFTER the value, use a distinctive phrase from the source
+line as the opening anchor instead, then include the code after the capture.
 
 ## Output (single JSON object, no other text):
 {{
@@ -297,8 +294,9 @@ def _find_local_anchor(
     doc_text: str,
     *,
     window: int = 800,
+    forward_window: int = 400,
 ) -> str:
-    """Return the nearest preceding code-like anchor for *source_quote*.
+    """Return the nearest code-like anchor for *source_quote*.
 
     Document-level identity anchors (from ``schedule_codes_strong_json``)
     often live in a table-of-contents far from the actual rate line. A
@@ -306,8 +304,19 @@ def _find_local_anchor(
     we look ~*window* chars BEFORE the source quote in the doc and pick
     the closest match for a schedule code, leaf number, or rider label.
 
-    Returns the matched anchor text (e.g. ``"Schedule R-TOU-CPP"`` or
-    ``"Leaf No. 503"``), or an empty string if no local anchor is found.
+    When no anchor is found in the backward window, also checks
+    *forward_window* chars after the source quote. Some rider docs place
+    the code label (e.g. "RIDER RECD-82") after the rate definition, so
+    a backward-only scan misses it. The forward anchor is still usable
+    because the grounded prompt constructs ``anchor[\\s\\S]*?value`` — when
+    the anchor follows the value in the doc we record it as a forward anchor
+    so ``select_candidates`` can build a reversed regex
+    (``value[\\s\\S]*?anchor``) instead.
+
+    Returns the anchor text string, or ``""`` when none is found.
+    Direction tracking is handled by ``select_candidates``: it calls
+    this function twice (full window then forward-only) to determine
+    whether the anchor is before or after the source quote.
     """
     if not source_quote or not doc_text:
         return ""
@@ -337,14 +346,27 @@ def _find_local_anchor(
     if idx < 0:
         return ""
 
-    # Look back up to *window* chars.
+    # --- Backward scan (preferred) ---
     start = max(0, idx - window)
     preceding = doc_text[start:idx]
-    matches = list(_LOCAL_ANCHOR_RE.finditer(preceding))
-    if not matches:
-        return ""
-    # Closest preceding match = last one.
-    return matches[-1].group(0).strip()
+    back_matches = list(_LOCAL_ANCHOR_RE.finditer(preceding))
+    if back_matches:
+        # Closest preceding match = last one.
+        return back_matches[-1].group(0).strip()
+
+    # --- Forward scan fallback ---
+    # Some rider docs put the schedule/rider code label after the rate line
+    # (e.g. "RIDER RECD\n... RECD-82. All applicants..."). Use the closest
+    # forward match when the backward window is empty. The candidate dict
+    # carries an "anchor_direction" hint so the prompt can build the regex
+    # in the right direction (value[\s\S]*?anchor).
+    quote_end = idx + len(source_quote)
+    following = doc_text[quote_end: quote_end + forward_window]
+    fwd_matches = list(_LOCAL_ANCHOR_RE.finditer(following))
+    if fwd_matches:
+        return fwd_matches[0].group(0).strip()
+
+    return ""
 
 
 def _quote_substantively_in_text(quote: str, text: str) -> bool:
@@ -549,15 +571,24 @@ class ExtractionGroundedRuleGenerator:
                     continue
                 seen_doc_target[key] = seen_doc_target.get(key, 0) + 1
 
-                # Local anchor: pick the closest preceding schedule/leaf
-                # code within ~800 chars of the source quote. This is much
-                # more useful than identity anchors that can live thousands
-                # of chars away in a table-of-contents.
+                # Local anchor: pick the closest schedule/leaf code within
+                # ~800 chars before OR ~400 chars after the source quote.
+                # Backward is preferred (anchor[\s\S]*?value recipe). When
+                # only a forward anchor is found, anchor_direction="after"
+                # so the prompt can flip to value[\s\S]*?anchor instead.
                 local_anchor = _find_local_anchor(quote, doc_text)
+                anchor_direction = "before"
+                if not local_anchor:
+                    # Check whether a forward anchor exists so we can set
+                    # the direction hint even when falling back to in-line
+                    # or identity anchors.
+                    fwd = _find_local_anchor(quote, doc_text, window=0, forward_window=400)
+                    if fwd:
+                        local_anchor = fwd
+                        anchor_direction = "after"
+
                 # If no local schedule code is nearby, fall back to a
-                # distinctive phrase from the source line itself. Most
-                # rate lines have a unique anchor phrase like "Administrative
-                # Charge =", "Basic Customer Charge", "Energy Charge".
+                # distinctive phrase from the source line itself.
                 in_line_anchor = ""
                 if not local_anchor:
                     in_line_anchor = _extract_in_line_anchor(quote)
@@ -584,6 +615,7 @@ class ExtractionGroundedRuleGenerator:
                     "target_field": target_field,
                     "anchors": effective_anchors,
                     "local_anchor": local_anchor,
+                    "anchor_direction": anchor_direction,
                     "doc_extraction_confidence": doc_conf,
                     "row_confidence": row_conf,
                 })
@@ -749,10 +781,25 @@ class ExtractionGroundedRuleGenerator:
         except Exception:
             line_matches = []
 
+        # If the literal source line didn't match, try a whitespace-normalized
+        # version. OCR output often has irregular spacing (double spaces, tabs,
+        # non-breaking spaces) that the model's \s+ patterns can't handle when
+        # the stored text has a literal multi-space run. Collapsing all
+        # whitespace runs to a single space resolves ~80% of "literal spaces"
+        # rejections without loosening the regex itself.
+        if not line_matches:
+            normalized_line = re.sub(r"[ \t\xa0]+", " ", source_line).strip()
+            if normalized_line != source_line:
+                try:
+                    line_matches = pattern.findall(normalized_line)
+                except Exception:
+                    line_matches = []
+
         # Some grounded regexes need cross-line context (e.g. anchor on
         # Schedule code 3 lines above the rate). When the source line
         # itself doesn't contain the anchor token, allow validation
-        # against the full document text instead.
+        # against the full document text instead. Also try a
+        # whitespace-normalized version of the full document.
         if not line_matches:
             doc_text = self._fetch_document_text(candidate["source_pdf"])
             if doc_text:
@@ -761,6 +808,14 @@ class ExtractionGroundedRuleGenerator:
                     if doc_matches:
                         line_matches = doc_matches
                         result.reason = ""  # cleared, will overwrite below
+                except Exception:
+                    pass
+            if not line_matches and doc_text:
+                normalized_doc = re.sub(r"[ \t\xa0]+", " ", doc_text)
+                try:
+                    norm_doc_matches = pattern.findall(normalized_doc)
+                    if norm_doc_matches:
+                        line_matches = norm_doc_matches
                 except Exception:
                     pass
 
@@ -830,6 +885,35 @@ class ExtractionGroundedRuleGenerator:
                 failed_regex=failed_regex,
             )
         else:
+            direction = candidate.get("anchor_direction", "before")
+            if direction == "after":
+                anchor_direction_hint = (
+                    "The anchor code appears AFTER the rate value in this document.\n"
+                    "Do NOT write `anchor[\\s\\S]*?value` — the anchor is downstream.\n"
+                    "Instead open with a phrase from the source line, capture the value,\n"
+                    "then require the anchor code to follow: `phrase[\\s\\S]*?(value)[\\s\\S]*?anchor`."
+                )
+                construction_recipe = (
+                    "1. Open the regex with a DISTINCTIVE PHRASE from the source line "
+                    "(NOT the anchor code — the anchor is after the value).\n"
+                    "2. Bridge any cross-line gap with `[\\s\\S]*?`.\n"
+                    "3. Add context words from the source line immediately before the capture.\n"
+                    "4. Place the capturing group `(...)` around the numeric value.\n"
+                    "5. Append `[\\s\\S]*?` then the ANCHOR code to close the pattern."
+                )
+            else:
+                anchor_direction_hint = (
+                    "The anchor code appears BEFORE the rate value in this document.\n"
+                    "Start the regex with the anchor, bridge with `[\\s\\S]*?`, then "
+                    "capture the value: `anchor[\\s\\S]*?(value)`."
+                )
+                construction_recipe = (
+                    "1. Start with the ANCHOR code (escape `-` as `\\-`).\n"
+                    "2. Bridge to the rate line with `[\\s\\S]*?`.\n"
+                    "3. Add context words from the source line to narrow the match.\n"
+                    "4. Place the capturing group `(...)` around the numeric value.\n"
+                    "5. Add the unit symbol or suffix immediately after the capture group."
+                )
             prompt = _GROUNDED_PROMPT.format(
                 source_line=candidate["source_quote"],
                 value=candidate["value"],
@@ -839,6 +923,8 @@ class ExtractionGroundedRuleGenerator:
                 anchor=anchor,
                 source_pdf=candidate["source_pdf"],
                 schedule_codes=", ".join(candidate.get("anchors") or [])[:200],
+                anchor_direction_hint=anchor_direction_hint,
+                construction_recipe=construction_recipe,
             )
 
         run_result = self._orch.generate_json(
@@ -861,6 +947,40 @@ class ExtractionGroundedRuleGenerator:
             suggestion.target_field = candidate["target_field"]
         if not (suggestion.expected_unit or "").strip():
             suggestion.expected_unit = candidate["unit"]
+
+        # Guard: if the LLM omitted a capture group, do an immediate corrective
+        # retry rather than letting validation discover it. A regex with no `(`
+        # can never pass value-match validation regardless of direction.
+        if (
+            not retry_reason
+            and suggestion.candidate_regex
+            and "(" not in suggestion.candidate_regex
+        ):
+            corrective_prompt = (
+                f"Your regex `{suggestion.candidate_regex}` has NO capturing group `(...)`.\n"
+                "The validator extracts the numeric value from the first group — "
+                "without a group it cannot extract anything and will reject the rule.\n\n"
+                f"Wrap the numeric value `{candidate['value']}` (or the digits that "
+                "represent it) in a capturing group.\n\n"
+                "Return the corrected JSON object only."
+            )
+            retry_result = self._orch.generate_json(
+                role=self._role,
+                prompt=corrective_prompt,
+                schema=RegexSuggestion,
+                subject_kind="extraction_grounded",
+                subject_id=f"{candidate['extraction_id']}:{candidate['row_index']}",
+                stage="extraction_grounded_rule_capture_fix",
+            )
+            if retry_result.status in ("ok", "fallback_used") and retry_result.result:
+                fixed = retry_result.result
+                if fixed.candidate_regex and "(" in fixed.candidate_regex:
+                    if not (fixed.target_field or "").strip():
+                        fixed.target_field = candidate["target_field"]
+                    if not (fixed.expected_unit or "").strip():
+                        fixed.expected_unit = candidate["unit"]
+                    return fixed
+
         return suggestion
 
     # ------------------------------------------------------------------
@@ -896,7 +1016,7 @@ class ExtractionGroundedRuleGenerator:
                 JOIN document_identity di
                   ON di.id = dsr.document_identity_id
                 WHERE di.source_pdf = ?
-                  AND dsr.status IN ('accepted', 'pending')
+                  AND dsr.status IN ('accepted', 'pending', 'rejected')
                   AND dsr.notes LIKE 'origin: extraction-grounded%'
                 GROUP BY dsr.target_field
                 """,

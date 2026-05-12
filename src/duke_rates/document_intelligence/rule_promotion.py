@@ -359,11 +359,11 @@ class PromotionDetector:
             conn.execute(
                 f"""
                 UPDATE document_specific_rules
-                SET promotion_eligible_count = ?,
+                SET promotion_eligible_count = promotion_eligible_count + 1,
                     last_updated = datetime('now')
                 WHERE id IN ({placeholders})
                 """,
-                (cand.cluster_size, *cand.member_rule_ids),
+                tuple(cand.member_rule_ids),
             )
             conn.commit()
         finally:

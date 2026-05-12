@@ -770,3 +770,89 @@ def test_promotion_detection_uses_unresolved_schedule_bucket_without_consensus(
     assert len(candidates) == 1
     assert candidates[0].target_template == "unresolved_schedule:RES"
     assert candidates[0].cluster_size == 3
+
+
+def test_infer_unit_demand_charge_per_kw_not_overridden_by_nearest_header() -> None:
+    """Demand Charge source quote with 'per kW' must resolve to $/kW even when
+    a nearby energy-section header mentions 'per kWh'."""
+    from duke_rates.document_intelligence.llm_extraction_validation import _infer_unit
+
+    source_text = (
+        "Energy Charge per kWh\n"
+        "On-Peak Energy per month, per kWh 9.9164\xA2\n"
+        "Demand Charge per kW\n"
+        "On-Peak Demand per month, per kW $2.53\n"
+        "Mid-Peak Demand per month, per kW $6.29\n"
+    )
+
+    # Demand charge with explicit 'per kW' in quote — must not fall through
+    # to nearest-header inference that would pick up the energy-section kWh header.
+    unit, reason = _infer_unit(
+        charge_type="Demand Charge",
+        unit="",
+        quote="On-Peak Demand per month, per kW $2.53",
+        source_text=source_text,
+    )
+    assert unit == "$/kW", f"Expected $/kW, got {unit!r} (reason={reason!r})"
+
+    # Basic Facilities Charge with bare-dollar unit must infer $/month from context.
+    unit2, reason2 = _infer_unit(
+        charge_type="Basic Facilities Charge",
+        unit="$",
+        quote="A. Basic Customer Charge $34.00",
+        source_text="Basic Customer Charge section\nA. Basic Customer Charge $34.00",
+    )
+    assert unit2 == "$/month", f"Expected $/month, got {unit2!r} (reason={reason2!r})"
+
+
+def test_propose_skips_inter_proposal_duplicates(tmp_path) -> None:
+    """When two validation rows for the same (version, type, value, unit) are
+    proposed, the second must be detected as duplicate_existing rather than novel."""
+    import sqlite3
+    from duke_rates.db.schema import SCHEMA_SQL, migrate
+    from duke_rates.document_intelligence.llm_charge_promotion import (
+        propose_llm_charge_promotions,
+    )
+
+    db_path = tmp_path / "test.db"
+    conn = sqlite3.connect(str(db_path))
+    conn.executescript(SCHEMA_SQL)
+    migrate(conn)
+
+    hd_id = 9999  # synthetic; no FK enforcement in SQLite by default
+
+    conn.execute(
+        "INSERT INTO tariff_versions"
+        " (family_key, effective_start, source_type, historical_document_id, created_at)"
+        " VALUES ('nc-test-leaf-1', '2024-01-01', 'historical', ?, datetime('now'))",
+        (hd_id,),
+    )
+
+    rate_rows_json = '[{"charge_type":"Energy Charge","value":10.5,"unit":"¢/kWh","source_quote":"10.5¢ per kWh"}]'
+    for _ in range(2):
+        conn.execute(
+            "INSERT INTO llm_candidate_rate_extractions"
+            " (historical_document_id, source_pdf, rate_rows_json, extraction_confidence,"
+            "  status, model, model_role, prompt_version)"
+            " VALUES (?, 'test.pdf', ?, 0.95, 'validated', 'test', 'test', '1')",
+            (hd_id, rate_rows_json),
+        )
+        ext_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+        conn.execute(
+            "INSERT INTO llm_candidate_rate_row_validations"
+            " (extraction_id, row_index, source_pdf, historical_document_id, charge_type, value, unit,"
+            "  source_quote, source_quote_grounded, value_grounded, unit_grounded,"
+            "  validation_score, recommended_status, inferred_unit, inferred_unit_reason)"
+            " VALUES (?, 0, 'test.pdf', ?, 'Energy Charge', 10.5, '¢/kWh', '10.5¢ per kWh',"
+            "         1, 1, 1, 1.0, 'validated', '¢/kWh', 'explicit_per_kwh_quote')",
+            (ext_id, hd_id),
+        )
+    conn.commit()
+    conn.close()
+
+    result = propose_llm_charge_promotions(db_path, limit=10, execute=True)
+    rows = result["rows"]
+    novel = [r for r in rows if r["duplicate_status"] == "novel"]
+    duplicate = [r for r in rows if r["duplicate_status"] == "duplicate_existing"]
+    assert len(novel) == 1, f"Expected 1 novel, got {len(novel)}"
+    assert len(duplicate) == 1, f"Expected 1 duplicate, got {len(duplicate)}"

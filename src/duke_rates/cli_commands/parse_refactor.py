@@ -370,6 +370,441 @@ def run_llm_parse_fallback_nc(
     typer.echo("  CAUTION: These are CANDIDATE rows only. Review before use.")
 
 
+def validate_llm_rate_extractions_nc(
+    limit: int = typer.Option(50, "--limit", help="Max candidate extraction rows to validate."),
+    status: str = typer.Option("candidate", "--status", help="Candidate status filter. Ignored when targeting a specific id."),
+    extraction_id: int | None = typer.Option(None, "--extraction-id", help="Validate a specific llm_candidate_rate_extractions id."),
+    historical_document_id: int | None = typer.Option(None, "--historical-document-id", help="Validate candidates for one historical document."),
+    min_confidence: float = typer.Option(0.0, "--min-confidence", help="Minimum document-level extraction confidence."),
+    execute: bool = typer.Option(False, "--execute", help="Persist validated/review_candidate/rejected status updates. Default is report-only."),
+    as_json: bool = typer.Option(False, "--json", help="Emit the full validation report as JSON."),
+) -> None:
+    """Validate LLM-extracted candidate rate rows against source evidence.
+
+    This command does not promote rows into production tariff charges. It checks
+    whether each candidate row is grounded in the document text, whether the
+    extracted value appears in the source quote, and whether the unit is
+    supported by nearby text. With ``--execute``, rows are marked
+    ``validated``, ``review_candidate``, or ``rejected`` in
+    ``llm_candidate_rate_extractions.status``.
+    """
+    from pathlib import Path as _Path
+
+    from duke_rates.document_intelligence.llm_extraction_validation import (
+        validate_candidate_extractions,
+    )
+
+    settings, _ = _bootstrap()
+    report = validate_candidate_extractions(
+        _Path(settings.database_path),
+        limit=limit,
+        status=status,
+        extraction_id=extraction_id,
+        historical_document_id=historical_document_id,
+        min_extraction_confidence=min_confidence,
+        execute=execute,
+    )
+
+    if as_json:
+        typer.echo(json.dumps(report, indent=2, default=str))
+        return
+
+    summary = report["summary"]
+    typer.echo("\n--- LLM Rate Extraction Validation ---")
+    typer.echo(f"  Evaluated:          {summary['evaluated']}")
+    typer.echo(f"  Mode:               {'execute' if execute else 'report-only'}")
+    typer.echo(f"  Status updates:     {summary['updates']}")
+    typer.echo(f"  Row validations:    {report['row_validation_upserts']}")
+    typer.echo(f"  Validated rows:     {summary['validated_rows']}")
+    typer.echo(f"  Rejected rows:      {summary['rejected_rows']}")
+    typer.echo(f"  Review rows:        {summary['review_candidate_rows']}")
+    typer.echo("  Recommendations:")
+    for key, count in summary["recommended_status_counts"].items():
+        typer.echo(f"    {key}: {count}")
+    typer.echo("  Row recommendations:")
+    for key, count in summary["row_recommended_status_counts"].items():
+        typer.echo(f"    {key}: {count}")
+
+    for row in report["rows"][:10]:
+        issues = ",".join(row["issues"]) if row["issues"] else "-"
+        typer.echo(
+            f"  [{row['recommended_status']}] id={row['extraction_id']} "
+            f"score={row['score']:.2f} rows={row['row_count']} "
+            f"validated={row['validated_row_count']} rejected={row['rejected_row_count']} "
+            f"issues={issues}"
+        )
+    if not execute:
+        typer.echo("  Re-run with --execute to persist validated/review_candidate/rejected status updates.")
+
+
+def locate_llm_row_evidence_nc(
+    limit: int = typer.Option(25, "--limit", help="Max unresolved row validations to send to the LLM."),
+    issue: str = typer.Option("", "--issue", help="Optional issue filter, e.g. unit_missing or unit_not_grounded."),
+    role: str = typer.Option("structured_rate_classify", "--role", help="Ollama role to use for evidence location."),
+    min_confidence: float = typer.Option(0.6, "--min-confidence", help="Minimum repair confidence for deterministic acceptance."),
+    execute: bool = typer.Option(False, "--execute", help="Persist advisory repair rows. Default is report-only."),
+    as_json: bool = typer.Option(False, "--json", help="Emit the full evidence-location report as JSON."),
+) -> None:
+    """Use a focused LLM pass to locate missing row-level evidence.
+
+    This command targets unresolved rows in ``llm_candidate_rate_row_validations``.
+    It asks the LLM only to find source text proving the unit, then validates
+    that evidence deterministically before optionally storing an advisory repair
+    in ``llm_candidate_rate_row_repairs``. It does not write production charges.
+    """
+    from pathlib import Path as _Path
+
+    from duke_rates.document_intelligence.llm_row_evidence_locator import (
+        LLMRowEvidenceLocator,
+    )
+    from duke_rates.document_intelligence.ollama_orchestrator import (
+        OllamaOrchestrator,
+    )
+
+    settings, _ = _bootstrap()
+    orch = OllamaOrchestrator(db_path=settings.database_path)
+    ok, err = orch.health_probe(role)
+    if not ok:
+        typer.echo(f"ERROR: {role} health check failed: {err}", err=True)
+        raise typer.Exit(code=1)
+    typer.echo(f"  {role} -> {orch.roles[role].primary} (OK)")
+
+    locator = LLMRowEvidenceLocator(
+        orch,
+        _Path(settings.database_path),
+        role=role,
+    )
+    report = locator.locate(
+        issue=issue,
+        limit=limit,
+        execute=execute,
+        min_confidence=min_confidence,
+    )
+
+    if as_json:
+        typer.echo(json.dumps(report, indent=2, default=str))
+        return
+
+    summary = report["summary"]
+    typer.echo("\n--- LLM Row Evidence Location ---")
+    typer.echo(f"  Evaluated:      {summary['evaluated']}")
+    typer.echo(f"  Mode:           {'execute' if execute else 'report-only'}")
+    typer.echo(f"  Accepted:       {summary['accepted']}")
+    typer.echo(f"  Rejected:       {summary['rejected']}")
+    typer.echo("  Validation status:")
+    for key, count in summary["validation_status_counts"].items():
+        typer.echo(f"    {key}: {count}")
+    for row in report["rows"][:10]:
+        issues = ",".join(row["validation_issues"]) if row["validation_issues"] else "-"
+        typer.echo(
+            f"  [{row['validation_status']}] validation_id={row['validation_id']} "
+            f"extraction={row['extraction_id']} row={row['row_index']} "
+            f"unit={row['supported_unit'] or '?'} conf={row['confidence']:.2f} "
+            f"issues={issues}"
+        )
+    if not execute:
+        typer.echo("  Re-run with --execute to persist advisory row repairs.")
+
+
+def reclassify_llm_row_conflicts_nc(
+    limit: int = typer.Option(25, "--limit", help="Max unit-conflict row validations to send to the LLM."),
+    role: str = typer.Option("structured_rate_classify", "--role", help="Ollama role to use for reclassification."),
+    min_confidence: float = typer.Option(0.6, "--min-confidence", help="Minimum repair confidence for deterministic acceptance."),
+    execute: bool = typer.Option(False, "--execute", help="Persist advisory reclassification repairs. Default is report-only."),
+    as_json: bool = typer.Option(False, "--json", help="Emit the full reclassification report as JSON."),
+) -> None:
+    """Use a focused LLM pass to propose row charge-type/unit repairs.
+
+    This targets rows with ``unit_conflicts_with_inferred`` and stores accepted
+    or rejected advisory repairs in ``llm_candidate_rate_row_repairs``. It does
+    not mutate candidate extractions or production charges.
+    """
+    from pathlib import Path as _Path
+
+    from duke_rates.document_intelligence.llm_row_evidence_locator import (
+        LLMRowEvidenceLocator,
+    )
+    from duke_rates.document_intelligence.ollama_orchestrator import (
+        OllamaOrchestrator,
+    )
+
+    settings, _ = _bootstrap()
+    orch = OllamaOrchestrator(db_path=settings.database_path)
+    ok, err = orch.health_probe(role)
+    if not ok:
+        typer.echo(f"ERROR: {role} health check failed: {err}", err=True)
+        raise typer.Exit(code=1)
+    typer.echo(f"  {role} -> {orch.roles[role].primary} (OK)")
+
+    locator = LLMRowEvidenceLocator(
+        orch,
+        _Path(settings.database_path),
+        role=role,
+    )
+    report = locator.reclassify_conflicts(
+        limit=limit,
+        execute=execute,
+        min_confidence=min_confidence,
+    )
+
+    if as_json:
+        typer.echo(json.dumps(report, indent=2, default=str))
+        return
+
+    summary = report["summary"]
+    typer.echo("\n--- LLM Row Conflict Reclassification ---")
+    typer.echo(f"  Evaluated:      {summary['evaluated']}")
+    typer.echo(f"  Mode:           {'execute' if execute else 'report-only'}")
+    typer.echo(f"  Accepted:       {summary['accepted']}")
+    typer.echo(f"  Rejected:       {summary['rejected']}")
+    typer.echo("  Validation status:")
+    for key, count in summary["validation_status_counts"].items():
+        typer.echo(f"    {key}: {count}")
+    for row in report["rows"][:10]:
+        issues = ",".join(row["validation_issues"]) if row["validation_issues"] else "-"
+        typer.echo(
+            f"  [{row['validation_status']}] validation_id={row['validation_id']} "
+            f"extraction={row['extraction_id']} row={row['row_index']} "
+            f"type={row['proposed_charge_type'] or '?'} unit={row['supported_unit'] or '?'} "
+            f"conf={row['confidence']:.2f} issues={issues}"
+        )
+    if not execute:
+        typer.echo("  Re-run with --execute to persist advisory reclassification repairs.")
+
+
+def apply_deterministic_llm_row_repairs_nc(
+    limit: int = typer.Option(100, "--limit", help="Max deterministic repairs to create."),
+    execute: bool = typer.Option(False, "--execute", help="Persist deterministic advisory repairs. Default is report-only."),
+    as_json: bool = typer.Option(False, "--json", help="Emit the full repair report as JSON."),
+) -> None:
+    """Create advisory repairs for repeated deterministic row-validation patterns.
+
+    Currently applies the accepted lighting-table rule:
+    ``Lamp Rating Per Month Per Luminaire`` implies conflicting lighting-table
+    dollar rows should use ``Lighting Charge`` and ``$/month``.
+    """
+    from pathlib import Path as _Path
+
+    from duke_rates.document_intelligence.llm_row_evidence_locator import (
+        LLMRowEvidenceLocator,
+    )
+
+    settings, _ = _bootstrap()
+    locator = LLMRowEvidenceLocator(None, _Path(settings.database_path))
+    report = locator.apply_deterministic_repairs(limit=limit, execute=execute)
+
+    if as_json:
+        typer.echo(json.dumps(report, indent=2, default=str))
+        return
+
+    summary = report["summary"]
+    typer.echo("\n--- Deterministic LLM Row Repairs ---")
+    typer.echo(f"  Evaluated:      {summary['evaluated']}")
+    typer.echo(f"  Mode:           {'execute' if execute else 'report-only'}")
+    typer.echo(f"  Accepted:       {summary['accepted']}")
+    typer.echo(f"  Rejected:       {summary['rejected']}")
+    for row in report["rows"][:10]:
+        typer.echo(
+            f"  [{row['validation_status']}] validation_id={row['validation_id']} "
+            f"extraction={row['extraction_id']} row={row['row_index']} "
+            f"type={row['proposed_charge_type'] or '?'} unit={row['supported_unit'] or '?'}"
+        )
+    if not execute:
+        typer.echo("  Re-run with --execute to persist deterministic advisory repairs.")
+
+
+def show_llm_row_effective_status_nc(
+    as_json: bool = typer.Option(False, "--json", help="Emit the effective status report as JSON."),
+) -> None:
+    """Show row-level validation status after accounting for accepted repairs."""
+    from pathlib import Path as _Path
+
+    from duke_rates.document_intelligence.llm_row_evidence_locator import (
+        LLMRowEvidenceLocator,
+    )
+
+    settings, _ = _bootstrap()
+    locator = LLMRowEvidenceLocator(None, _Path(settings.database_path))
+    report = locator.effective_status_report()
+
+    if as_json:
+        typer.echo(json.dumps(report, indent=2, default=str))
+        return
+
+    typer.echo("\n--- LLM Row Effective Status ---")
+    typer.echo("  Effective row status:")
+    for key, count in report["effective_status_counts"].items():
+        typer.echo(f"    {key}: {count}")
+    typer.echo(f"  Unresolved review rows: {report['unresolved_review_rows']}")
+    typer.echo("  Repairs:")
+    for row in report["repair_counts"]:
+        typer.echo(
+            f"    {row['repair_type']} / {row['validation_status']}: {row['count']}"
+        )
+
+
+def propose_llm_charge_promotions_nc(
+    limit: int = typer.Option(100, "--limit", help="Max effective rows to evaluate for promotion proposals."),
+    include_repaired: bool = typer.Option(True, "--include-repaired/--validated-only", help="Include rows validated via accepted repairs."),
+    refresh_existing: bool = typer.Option(False, "--refresh-existing", help="Re-evaluate existing proposal rows instead of only selecting new rows."),
+    execute: bool = typer.Option(False, "--execute", help="Persist promotion proposals. Default is report-only."),
+    as_json: bool = typer.Option(False, "--json", help="Emit the full proposal report as JSON."),
+) -> None:
+    """Build safe promotion proposals from validated/effective LLM rows.
+
+    This does not insert into ``tariff_charges``. It checks lineage, version
+    linkage, duplicates, conflicts, and stores proposal rows only with
+    ``--execute``.
+    """
+    from pathlib import Path as _Path
+
+    from duke_rates.document_intelligence.llm_charge_promotion import (
+        propose_llm_charge_promotions,
+    )
+
+    settings, _ = _bootstrap()
+    report = propose_llm_charge_promotions(
+        _Path(settings.database_path),
+        limit=limit,
+        include_repaired=include_repaired,
+        refresh_existing=refresh_existing,
+        execute=execute,
+    )
+
+    if as_json:
+        typer.echo(json.dumps(report, indent=2, default=str))
+        return
+
+    summary = report["summary"]
+    typer.echo("\n--- LLM Charge Promotion Proposals ---")
+    typer.echo(f"  Evaluated: {summary['evaluated']}")
+    typer.echo(f"  Mode:      {'execute' if execute else 'report-only'}")
+    typer.echo("  Eligibility:")
+    for key, count in summary["eligibility_counts"].items():
+        typer.echo(f"    {key}: {count}")
+    typer.echo("  Duplicates:")
+    for key, count in summary["duplicate_counts"].items():
+        typer.echo(f"    {key}: {count}")
+    typer.echo("  Effective status:")
+    for key, count in summary["effective_status_counts"].items():
+        typer.echo(f"    {key}: {count}")
+    for row in report["rows"][:10]:
+        issues = ",".join(row["eligibility_issues"]) if row["eligibility_issues"] else "-"
+        typer.echo(
+            f"  [{row['eligibility_status']}] validation={row['validation_id']} "
+            f"version={row['version_id'] or '?'} {row['charge_type']} "
+            f"{row['rate_value']} {row['rate_unit']} duplicate={row['duplicate_status']} "
+            f"issues={issues}"
+        )
+    if not execute:
+        typer.echo("  Re-run with --execute to persist proposal rows.")
+
+
+def promote_llm_charge_proposals_nc(
+    limit: int = typer.Option(25, "--limit", help="Max eligible pending proposals to promote."),
+    execute: bool = typer.Option(False, "--execute", help="Insert tariff_charges rows. Default is dry-run."),
+    as_json: bool = typer.Option(False, "--json", help="Emit the full promotion report as JSON."),
+) -> None:
+    """Promote eligible LLM charge proposals into tariff_charges.
+
+    Only proposals that are eligible, novel, conflict-free, and still
+    non-duplicate at execution time are inserted. Dry-run is the default.
+    """
+    from pathlib import Path as _Path
+
+    from duke_rates.document_intelligence.llm_charge_promotion import (
+        promote_llm_charge_proposals,
+    )
+
+    settings, _ = _bootstrap()
+    report = promote_llm_charge_proposals(
+        _Path(settings.database_path),
+        limit=limit,
+        execute=execute,
+    )
+
+    if as_json:
+        typer.echo(json.dumps(report, indent=2, default=str))
+        return
+
+    summary = report["summary"]
+    typer.echo("\n--- LLM Charge Proposal Promotion ---")
+    typer.echo(f"  Evaluated: {summary['evaluated']}")
+    typer.echo(f"  Mode:      {'execute' if execute else 'dry-run'}")
+    typer.echo(f"  Promoted:  {summary['promoted']}")
+    typer.echo(f"  Skipped:   {summary['skipped']}")
+    for row in report["promoted"][:10]:
+        if execute:
+            typer.echo(
+                f"  promoted proposal={row['proposal_id']} tariff_charge={row['tariff_charge_id']}"
+            )
+        else:
+            typer.echo(f"  would promote proposal={row['proposal_id']}")
+
+
+def run_llm_promotion_overnight_nc(
+    validation_limit: int = typer.Option(500, "--validation-limit", help="Max candidate/review extractions per validation status."),
+    repair_limit: int = typer.Option(1000, "--repair-limit", help="Max deterministic repair candidates to evaluate."),
+    proposal_limit: int = typer.Option(5000, "--proposal-limit", help="Max pending proposal rows to refresh."),
+    promotion_limit: int = typer.Option(100, "--promotion-limit", help="Max promotable rows to dry-run or safely promote."),
+    execute_safe: bool = typer.Option(False, "--execute-safe", help="Promote only rows that pass the dry-run without skips."),
+    output_dir: str = typer.Option("docs/reports/llm_promotion_overnight", "--output-dir", help="Directory for the timestamped overnight JSON report."),
+    as_json: bool = typer.Option(False, "--json", help="Emit the full overnight report as JSON."),
+) -> None:
+    """Run the guarded deterministic LLM-promotion overnight loop."""
+    from pathlib import Path as _Path
+
+    from duke_rates.document_intelligence.llm_promotion_overnight import (
+        run_llm_promotion_overnight,
+    )
+
+    settings, _ = _bootstrap()
+    report = run_llm_promotion_overnight(
+        _Path(settings.database_path),
+        validation_limit=validation_limit,
+        repair_limit=repair_limit,
+        proposal_limit=proposal_limit,
+        promotion_limit=promotion_limit,
+        execute_safe=execute_safe,
+        output_dir=_Path(output_dir),
+    )
+
+    if as_json:
+        typer.echo(json.dumps(report, indent=2, default=str))
+        return
+
+    typer.echo("\n--- LLM Promotion Overnight ---")
+    typer.echo(f"  Mode:              {'execute-safe' if execute_safe else 'report-safe'}")
+    typer.echo(f"  Report:            {report['report_path']}")
+    typer.echo(
+        f"  Charges:           {report['before']['tariff_charges']} -> "
+        f"{report['after']['tariff_charges']} "
+        f"(delta {report['delta']['tariff_charges']:+d})"
+    )
+    typer.echo(
+        f"  Promotion audit:   {report['before']['promoted_audit']} -> "
+        f"{report['after']['promoted_audit']} "
+        f"(delta {report['delta']['promoted_audit']:+d})"
+    )
+    typer.echo(
+        f"  Pending promotable:{report['before']['pending_promotable']} -> "
+        f"{report['after']['pending_promotable']}"
+    )
+    dry_run = report["promotion_dry_run"]
+    typer.echo(
+        f"  Dry-run promotion: evaluated={dry_run['evaluated']} "
+        f"promoted={dry_run['promoted']} skipped={dry_run['skipped']}"
+    )
+    if report["promotion_execute"]:
+        executed = report["promotion_execute"]
+        typer.echo(
+            f"  Executed promotion:evaluated={executed['evaluated']} "
+            f"promoted={executed['promoted']} skipped={executed['skipped']}"
+        )
+    else:
+        typer.echo("  Executed promotion:none")
+
+
 def run_overnight_parse_improvement_nc(
     max_documents: int = typer.Option(0, "--max-documents", help="Max documents to process (0 = unlimited)."),
     max_runtime_minutes: int = typer.Option(0, "--max-runtime-minutes", help="Hard wall-clock cap in minutes (0 = unlimited)."),
@@ -1857,6 +2292,14 @@ def register_parse_refactor_commands(app: typer.Typer) -> None:
     app.command("suggest-regex-fixes-nc")(suggest_regex_fixes_nc)
     app.command("validate-regex-suggestions-nc")(validate_regex_suggestions_nc)
     app.command("run-llm-parse-fallback-nc")(run_llm_parse_fallback_nc)
+    app.command("validate-llm-rate-extractions-nc")(validate_llm_rate_extractions_nc)
+    app.command("locate-llm-row-evidence-nc")(locate_llm_row_evidence_nc)
+    app.command("reclassify-llm-row-conflicts-nc")(reclassify_llm_row_conflicts_nc)
+    app.command("apply-deterministic-llm-row-repairs-nc")(apply_deterministic_llm_row_repairs_nc)
+    app.command("show-llm-row-effective-status-nc")(show_llm_row_effective_status_nc)
+    app.command("propose-llm-charge-promotions-nc")(propose_llm_charge_promotions_nc)
+    app.command("promote-llm-charge-proposals-nc")(promote_llm_charge_proposals_nc)
+    app.command("run-llm-promotion-overnight-nc")(run_llm_promotion_overnight_nc)
     app.command("run-overnight-parse-improvement-nc")(run_overnight_parse_improvement_nc)
     app.command("aggregate-overnight-reports-nc")(aggregate_overnight_reports_nc)
     app.command("report-wrong-profile-diagnostics-nc")(report_wrong_profile_diagnostics_nc)
