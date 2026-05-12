@@ -1,5 +1,5 @@
 # Next Session: Start Here
-**Date Updated:** 2026-05-01 (Session 46+ — Phase 6.5 autonomous loop implemented)
+**Date Updated:** 2026-05-12 (LLM extraction/promotion overnight workflow refreshed)
 **Purpose:** Short operational handoff with current state, immediate priorities, and the correct entry docs
 
 ## Read First
@@ -12,7 +12,7 @@ Read these before broad repo exploration:
 4. [document_parsing_pipeline_guide.md](/c:/Python/Duke/Standalone/docs/document_parsing_pipeline_guide.md)
 5. [NEXT_SESSION_PRIORITIES.md](/c:/Python/Duke/Standalone/docs/NEXT_SESSION_PRIORITIES.md)
 6. [document_intelligence_roadmap.md](/c:/Python/Duke/Standalone/docs/document_intelligence_roadmap.md) — read before extending classification, fingerprinting, or document understanding. Phases 1–6.5 implemented.
-7. [cli_command_reference.md](/c:/Python/Duke/Standalone/docs/cli_command_reference.md) — **§16 (Database Intelligence) added this session.** Covers 5 new corrective tools + autonomous loop controller.
+7. [cli_command_reference.md](/c:/Python/Duke/Standalone/docs/cli_command_reference.md) — use §15g for the current LLM extraction, blocker-reduction, and guarded promotion loop.
 
 Use [agent_workflows.json](/c:/Python/Duke/Standalone/docs/agent_workflows.json) and
 [agent_tool_registry.json](/c:/Python/Duke/Standalone/docs/agent_tool_registry.json)
@@ -60,6 +60,23 @@ Interpretation:
 - **HP, NL still need OCR text** — they're in the Docling structure-sensitive lane (94 candidates).
 - **Extraction ran 4/27 16:29-17:53 ET** with Ollama disabled, completing all 757 docs in ~84 min (vs ~6h estimated with broken Ollama).
 
+### 2026-05-12 LLM Extraction / Promotion Status
+
+The current highest-value long-run workflow is **LLM extraction + deterministic validation/repair + guarded promotion**, not regex synthesis.
+
+Recent short-loop observations:
+- A bounded `10`-minute parse-improvement test processed `10` docs and produced `44` staged candidate rate rows.
+- Deterministic validation accepted `42` of those rows.
+- The guarded promotion runner now creates proposals for newly validated rows before refreshing existing proposals.
+- Current proposal gate after the latest repair pass:
+  - `31` pending promotable proposals
+  - promotion dry-run: `31 evaluated`, `31 would promote`, `0 skipped`
+  - no production charges are inserted unless `--execute-safe` is explicitly used.
+- Recent blocker reductions:
+  - `missing_version_effective_start` fell from a broad backlog to only a few residual cases after safe rerouting through same-family dated versions.
+  - broad multi-number summary/table lines are now held by `ambiguous_numeric_table_row` instead of being auto-promotable.
+  - future Leaf 601 BA component rows can use rider-summary line dates when the match is unique and a dated target version already exists.
+
 ## Immediate Focus
 
 1. **Priority 30 (OCR):** 132 Tesseract candidates processed ✓. Remaining: 94 Docling structure lane + 16 GLM review.
@@ -96,7 +113,7 @@ python -m duke_rates report-classification-disagreements-nc --cross-stage docume
 python -m duke_rates report-flag-classifications-nc
 python -m duke_rates analyze-parse-failures-nc --dry-run --limit 10
 python -m duke_rates benchmark-ollama-roles-nc --task parse_diagnosis --limit 5 --max-runtime-minutes 60
-python -m duke_rates run-overnight-parse-improvement-nc --dry-run --task-kind diagnose,suggest,validate,extract --limit 10
+python -m duke_rates run-overnight-parse-improvement-nc --dry-run --task-kind diagnose,extract_staged --limit 10
 ```
 
 Parse-improvement model note:
@@ -108,7 +125,10 @@ Parse-improvement model note:
 - `structured_rate_extraction` now uses `gemma4:e4b-it-q4_K_M` as primary. It
   was the only viable tested extraction model: 100% gold accuracy on valid
   fixture returns and no timeouts in the fixture-backed run.
-- `regex_suggestion` now uses `qwen3:8b` as primary. After expanding regex gold
+- `regex_suggestion` now uses `qwen3:8b` as primary. Treat it as a **secondary**
+  advisory path, not the default overnight value-creation lane. The more reliable
+  current pattern is direct extraction plus deterministic validation and blocker
+  remediation. After expanding regex gold
   fixtures from 1 to 2 cases, `qwen3:8b`, `mistral:7b-instruct`, and
   `phi3.5:latest` all reached 100% valid JSON and 100% gold accuracy; `qwen3:8b`
   was the fastest among those fully valid models. `gemma4:e4b-it-q4_K_M`,
@@ -212,8 +232,123 @@ python -m duke_rates export-dep-storm-history-inventory
 - **Phase 5.6 re-diagnose prior unknowns:** `python -m duke_rates run-overnight-parse-improvement-nc --task-kind diagnose --rediagnose-unknown --limit 25 --max-runtime-minutes 120`
 - **Phase 5.6 model benchmark:** `python -m duke_rates benchmark-ollama-roles-nc --task parse_diagnosis --models gemma4:e4b-it-q4_K_M,qwen3:8b,mistral:7b-instruct,phi3.5:latest --limit 10 --max-runtime-minutes 90`
 - **Phase 5.6 specialization benchmark:** `python -m duke_rates benchmark-ollama-roles-nc --task all --models gemma4:e4b-it-q4_K_M,qwen3:8b,mistral:7b-instruct,phi3.5:latest --limit 5 --timeout-s 120 --max-runtime-minutes 360`
-- **Phase 5.6 staged follow-up:** after diagnosis produces `regex_gap`, run `python -m duke_rates run-overnight-parse-improvement-nc --task-kind suggest,validate --limit 25 --max-runtime-minutes 120 --resume`. Run `extract` separately; it is the heaviest Ollama stage.
+- **Phase 5.6 staged follow-up:** use regex suggestion/validation selectively for parser research, not as the main production backlog reducer. Default to `extract_staged` plus the deterministic promotion loop below.
 - **Phase 6 (review queue):** New `classification_reviews` table, `review-queue-nc` CLI, `export-training-dataset-nc`. Turns reviewed labels into training data for future ML classifiers.
+
+## Recommended LLM Extraction Overnight Workflow
+
+Use this when the goal is to reduce uncharged-document backlog and convert extracted rows into safe promotion candidates.
+
+### A. Start With a Baseline
+
+```powershell
+python -m duke_rates show-llm-row-effective-status-nc --json
+python -m duke_rates propose-llm-charge-promotions-nc --limit 10000 --refresh-existing --json
+python -m duke_rates promote-llm-charge-proposals-nc --limit 500 --json
+```
+
+Interpretation:
+- `show-llm-row-effective-status-nc` tells you whether extraction quality is improving.
+- `propose-llm-charge-promotions-nc --refresh-existing` shows current blocker mix without writing new proposals.
+- `promote-llm-charge-proposals-nc` is a dry-run unless `--execute` is added.
+
+### B. Preferred Iterative Short Loop
+
+Use `10`-minute bounded loops while tuning prompts/models or measuring whether a blocker-remediation change is helping:
+
+```powershell
+python -m duke_rates run-overnight-parse-improvement-nc `
+  --task-kind diagnose,extract_staged `
+  --max-runtime-minutes 10 `
+  --limit 10 `
+  --resume `
+  --auto-rediagnose-unknown
+
+python -m duke_rates run-llm-promotion-overnight-nc `
+  --validation-limit 500 `
+  --repair-limit 1000 `
+  --proposal-limit 10000 `
+  --promotion-limit 500 `
+  --json
+```
+
+Read the second report before changing code:
+- Did validated row count increase?
+- Did `proposal_create` find new rows?
+- Did pending promotable rows rise?
+- Did blocker counts move in the intended direction?
+
+### C. Full Overnight Pattern
+
+When the short loop is productive, scale the exact same workflow:
+
+```powershell
+python -m duke_rates run-overnight-parse-improvement-nc `
+  --task-kind diagnose,extract_staged `
+  --max-runtime-minutes 360 `
+  --limit 100 `
+  --resume `
+  --auto-rediagnose-unknown
+
+python -m duke_rates run-llm-promotion-overnight-nc `
+  --validation-limit 2000 `
+  --repair-limit 4000 `
+  --proposal-limit 20000 `
+  --promotion-limit 1000 `
+  --json
+```
+
+Do **not** assume this should execute promotions immediately. First inspect:
+- `pending_promotable`
+- `promotion_dry_run.skipped`
+- the largest `pending_blockers`
+
+### D. Safe Promotion Decision
+
+Only use safe execution after a dry-run shows clean promotable rows:
+
+```powershell
+python -m duke_rates run-llm-promotion-overnight-nc `
+  --validation-limit 2000 `
+  --repair-limit 4000 `
+  --proposal-limit 20000 `
+  --promotion-limit 250 `
+  --execute-safe `
+  --json
+```
+
+Current rule of thumb:
+- promote when the dry-run shows `skipped = 0`
+- pause if promotable rows are dominated by new semantic edge cases
+- add deterministic blockers/repairs before execution if the rows look structurally suspicious
+
+### E. Backlog-Reduction Heuristics
+
+Work blocker buckets in this order:
+
+1. `missing_version_effective_start`
+   - Often reducible with deterministic rerouting to an existing dated sibling version.
+   - Leaf 601 BA-like rider rows can also use unique rider-summary line dates when available.
+2. `malformed_family_key`
+   - Canonical reroute only when an exact dated canonical version already exists.
+3. `unqualified_rate_unit`
+   - Prefer deterministic unit evidence and focused evidence-location passes.
+4. `unsupported_charge_type`
+   - Expand mappings only when text patterns are stable and auditable.
+5. `ambiguous_numeric_table_row`
+   - Treat as a hold/review class, not an execution target, until a precise table-column locator exists.
+
+The goal is to move work through this funnel:
+
+```text
+extract_staged
+-> validate rows
+-> deterministic repairs
+-> propose promotions
+-> review blocker distribution
+-> dry-run promotion
+-> execute-safe only when clean
+```
 
 ## Where Historical Detail Lives
 

@@ -13,9 +13,13 @@ VLM pathway for table-layout failures.
 from __future__ import annotations
 
 import json
+import logging
+import re
 import sqlite3
 from pathlib import Path
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 from pydantic import BaseModel, Field
 
@@ -64,6 +68,7 @@ ALLOWED_UNITS: tuple[str, ...] = (
 
 ALLOWED_CANDIDATE_STATUSES: tuple[str, ...] = (
     "candidate",
+    "review_candidate",
     "validated",
     "rejected",
     "promoted",
@@ -337,9 +342,6 @@ class SchemaGuidedExtractor:
             if profile:
                 cte_where += " AND pal.parser_profile = ?"
                 params.append(profile)
-            if family:
-                outer_where += " AND lr.family_key = ?"
-                params.append(family)
 
             # Doc-type filter: when no specific target is given, focus on
             # documents that are actually rate schedules / tariff bundles.
@@ -359,6 +361,12 @@ class SchemaGuidedExtractor:
                     f"AND di.inferred_doc_type IN ({placeholders})"
                 )
                 params.extend(_doc_types)
+
+            # family goes after doc_types in params to match SQL binding order:
+            # {doc_type_where} appears before {outer_where} in the query.
+            if family:
+                outer_where += " AND lr.family_key = ?"
+                params.append(family)
 
             rows = conn.execute(
                 f"""
@@ -421,6 +429,10 @@ class SchemaGuidedExtractor:
                       SELECT parse_attempt_id FROM llm_parse_diagnostics
                       WHERE parse_attempt_id IS NOT NULL
                         AND recommended_action = 'schema_extract_candidate'
+                  )
+                  AND la.source_pdf NOT IN (
+                      SELECT DISTINCT source_pdf FROM llm_candidate_rate_extractions
+                      WHERE extraction_confidence >= 0.5
                   )
                 ORDER BY la.charge_count ASC
                 LIMIT ?
@@ -533,7 +545,7 @@ class SchemaGuidedExtractor:
             if row and row[0]:
                 return _read_text_file(row[0], self._max_text_chars)
         except Exception:
-            pass
+            logger.debug("get_document_text failed for %s", source_pdf, exc_info=True)
         finally:
             conn.close()
         return ""
@@ -897,7 +909,7 @@ class SchemaGuidedExtractor:
         end = min(len(text), idx + len(line) + window)
         return text[start:end]
 
-    _NUMERIC_LINE_RE = __import__("re").compile(r"(\d+(?:\.\d+)?)")
+    _NUMERIC_LINE_RE = re.compile(r"(\d+(?:\.\d+)?)")
 
     @classmethod
     def _extract_numeric_from_line(cls, line: str) -> float | None:
@@ -1056,7 +1068,7 @@ class SchemaGuidedExtractor:
             conn.commit()
             conn.close()
         except Exception:
-            pass
+            logger.warning("_persist_extraction failed for %s", candidate.get("source_pdf"), exc_info=True)
 
 
 def _read_text_file(path_value: str, max_chars: int) -> str:

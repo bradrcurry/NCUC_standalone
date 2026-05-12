@@ -307,26 +307,24 @@ class DocumentStructureAnalyst:
         if context is None:
             return None
 
+        # Truncate page_summary (the variable content) before formatting so
+        # the instruction template is always fully preserved in the prompt.
+        page_summary = context["page_summary"]
+        template_overhead = len(_SECTION_ANALYSIS_PROMPT) + 500
+        max_summary_chars = max(500, _MAX_SECTION_PROMPT_CHARS - template_overhead)
+        if len(page_summary) > max_summary_chars:
+            page_summary = page_summary[:max_summary_chars] + "\n...[truncated]"
+
         prompt = _SECTION_ANALYSIS_PROMPT.format(
             source_pdf=source_pdf,
             doc_signals=context["doc_signals"],
             section_index=section_index,
-            page_summary=context["page_summary"],
+            page_summary=page_summary,
             current_type=context["current_type"],
             start_page=context["start_page"],
             end_page=context["end_page"],
             current_confidence=context["current_confidence"],
         )
-
-        # Truncate if needed
-        if len(prompt) > _MAX_SECTION_PROMPT_CHARS:
-            prompt = prompt[:_MAX_SECTION_PROMPT_CHARS]
-            json_start = prompt.rfind('{"section_type":')
-            if json_start > _MAX_SECTION_PROMPT_CHARS - 500:
-                prompt = (
-                    prompt[:_MAX_SECTION_PROMPT_CHARS - 500]
-                    + "\n...\n" + prompt[json_start:]
-                )
 
         run_result = self._orch.generate_json(
             role=self._role,
@@ -977,19 +975,19 @@ class DocumentStructureAnalyst:
 
         # Doc signals
         sig_parts = []
-        try:
-            sched = json.loads(identity["schedule_codes_strong_json"] or "[]")
-            if sched:
-                sig_parts.append(f"schedule_codes={sched[:4]}")
-            rider = json.loads(identity["rider_codes_strong_json"] or "[]")
-            if rider:
-                sig_parts.append(f"rider_codes={rider[:4]}")
-            leaves = json.loads(identity["leaf_numbers_json"] or "[]")
-            if leaves:
-                sig_parts.append(f"leaf_numbers={leaves[:4]}")
-        except (json.JSONDecodeError, TypeError):
-            pass
         if identity:
+            try:
+                sched = json.loads(identity["schedule_codes_strong_json"] or "[]")
+                if sched:
+                    sig_parts.append(f"schedule_codes={sched[:4]}")
+                rider = json.loads(identity["rider_codes_strong_json"] or "[]")
+                if rider:
+                    sig_parts.append(f"rider_codes={rider[:4]}")
+                leaves = json.loads(identity["leaf_numbers_json"] or "[]")
+                if leaves:
+                    sig_parts.append(f"leaf_numbers={leaves[:4]}")
+            except (json.JSONDecodeError, TypeError):
+                pass
             if identity["profile_consensus_top"]:
                 sig_parts.append(f"profile={identity['profile_consensus_top']}")
             if identity["inferred_doc_type"]:

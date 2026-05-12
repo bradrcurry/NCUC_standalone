@@ -99,9 +99,10 @@ class ParseImprovementReport:
     promotion_candidates_by_status: dict[str, int] = field(default_factory=dict)
     human_review_candidates: list[dict[str, Any]] = field(default_factory=list)
     highest_value_next_actions: list[dict[str, Any]] = field(default_factory=list)
-    task_stats: dict[str, dict[str, int]] = field(default_factory=dict)
+    task_stats: dict[str, dict[str, Any]] = field(default_factory=dict)
     roles_used: dict[str, str] = field(default_factory=dict)
     runtime_seconds: float = 0.0
+    notes: str = ""
     # Phase 6 section statistics
     sections_total: int = 0
     sections_by_type: dict[str, int] = field(default_factory=dict)
@@ -337,7 +338,10 @@ class ParseImprovementLoop:
                 report.documents_analyzed = total_processed
             except Exception as exc:
                 report.task_stats[task]["fail"] += 1
+                consecutive_failures += 1
                 logger.warning("Task %s failed: %s", task, exc, exc_info=True)
+            else:
+                consecutive_failures = 0
 
         report.completed_at = datetime.now(timezone.utc).isoformat()
         report.runtime_seconds = round(time.monotonic() - start_time, 1)

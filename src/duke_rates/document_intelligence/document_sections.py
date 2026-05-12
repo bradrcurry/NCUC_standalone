@@ -313,19 +313,19 @@ def upsert_section(db_path: Path | str, bundle: SectionBundle) -> int:
     """Insert or update a section row. Returns the row id."""
     conn = sqlite3.connect(str(db_path))
     try:
-        conn.execute("""DELETE FROM document_sections
-                        WHERE source_pdf = ? AND section_index = ?""",
-                     (bundle.source_pdf, bundle.section_index))
-        conn.execute(
-            """INSERT INTO document_sections
-               (source_pdf, section_index, start_page, end_page, section_type,
-                schedule_codes_json, rider_codes_json, leaf_numbers_json,
-                detected_titles_json, overall_confidence, evidence_log_json,
-                parent_section_index, last_updated)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            bundle.to_persistence_tuple(),
-        )
-        conn.commit()
+        with conn:
+            conn.execute("""DELETE FROM document_sections
+                            WHERE source_pdf = ? AND section_index = ?""",
+                         (bundle.source_pdf, bundle.section_index))
+            conn.execute(
+                """INSERT INTO document_sections
+                   (source_pdf, section_index, start_page, end_page, section_type,
+                    schedule_codes_json, rider_codes_json, leaf_numbers_json,
+                    detected_titles_json, overall_confidence, evidence_log_json,
+                    parent_section_index, last_updated)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                bundle.to_persistence_tuple(),
+            )
         row_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
         return row_id
     finally:

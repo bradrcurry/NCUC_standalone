@@ -2014,6 +2014,108 @@ def migrate(conn) -> None:
         ON llm_candidate_rate_extractions(historical_document_id);
         CREATE INDEX IF NOT EXISTS idx_llm_cand_extract_status
         ON llm_candidate_rate_extractions(status, created_at);
+
+        CREATE TABLE IF NOT EXISTS llm_candidate_rate_row_validations (
+            id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+            extraction_id           INTEGER NOT NULL,
+            row_index               INTEGER NOT NULL,
+            historical_document_id  INTEGER,
+            source_pdf              TEXT NOT NULL,
+            charge_type             TEXT,
+            value                   REAL,
+            unit                    TEXT,
+            inferred_unit           TEXT,
+            inferred_unit_reason    TEXT,
+            source_quote            TEXT,
+            source_quote_grounded   INTEGER NOT NULL DEFAULT 0,
+            value_grounded          INTEGER NOT NULL DEFAULT 0,
+            unit_grounded           INTEGER NOT NULL DEFAULT 0,
+            validation_score        REAL NOT NULL DEFAULT 0.0,
+            recommended_status      TEXT NOT NULL,
+            issues_json             TEXT NOT NULL DEFAULT '[]',
+            validated_at            TEXT NOT NULL DEFAULT (datetime('now')),
+            UNIQUE(extraction_id, row_index)
+        );
+        CREATE INDEX IF NOT EXISTS idx_llm_row_val_status
+        ON llm_candidate_rate_row_validations(recommended_status, validated_at);
+        CREATE INDEX IF NOT EXISTS idx_llm_row_val_hd
+        ON llm_candidate_rate_row_validations(historical_document_id);
+
+        CREATE TABLE IF NOT EXISTS llm_candidate_rate_row_repairs (
+            id                          INTEGER PRIMARY KEY AUTOINCREMENT,
+            validation_id               INTEGER NOT NULL,
+            extraction_id               INTEGER NOT NULL,
+            row_index                   INTEGER NOT NULL,
+            repair_type                 TEXT NOT NULL,
+            original_charge_type        TEXT,
+            proposed_charge_type        TEXT,
+            original_unit               TEXT,
+            proposed_unit               TEXT,
+            evidence_quote              TEXT,
+            confidence                  REAL NOT NULL DEFAULT 0.0,
+            reason                      TEXT,
+            validation_status           TEXT NOT NULL,
+            validation_issues_json      TEXT NOT NULL DEFAULT '[]',
+            model                       TEXT,
+            model_role                  TEXT,
+            status                      TEXT NOT NULL DEFAULT 'pending',
+            created_at                  TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+        CREATE INDEX IF NOT EXISTS idx_llm_row_repairs_validation
+        ON llm_candidate_rate_row_repairs(validation_id, created_at);
+        CREATE INDEX IF NOT EXISTS idx_llm_row_repairs_status
+        ON llm_candidate_rate_row_repairs(status, validation_status, created_at);
+
+        CREATE TABLE IF NOT EXISTS llm_rate_charge_promotion_proposals (
+            id                          INTEGER PRIMARY KEY AUTOINCREMENT,
+            validation_id               INTEGER NOT NULL,
+            extraction_id               INTEGER NOT NULL,
+            row_index                   INTEGER NOT NULL,
+            repair_id                   INTEGER,
+            historical_document_id      INTEGER,
+            version_id                  INTEGER,
+            family_key                  TEXT,
+            charge_type                 TEXT NOT NULL,
+            charge_label                TEXT,
+            rate_value                  REAL,
+            rate_unit                   TEXT,
+            tou_period                  TEXT,
+            season                      TEXT,
+            customer_class              TEXT,
+            source_quote                TEXT,
+            evidence_quote              TEXT,
+            effective_status            TEXT NOT NULL,
+            eligibility_status          TEXT NOT NULL,
+            eligibility_issues_json     TEXT NOT NULL DEFAULT '[]',
+            duplicate_status            TEXT NOT NULL,
+            conflict_status             TEXT NOT NULL,
+            promotion_status            TEXT NOT NULL DEFAULT 'pending',
+            tariff_charge_id            INTEGER,
+            created_at                  TEXT NOT NULL DEFAULT (datetime('now')),
+            promoted_at                 TEXT,
+            UNIQUE(validation_id, repair_id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_llm_charge_prop_status
+        ON llm_rate_charge_promotion_proposals(
+            promotion_status, eligibility_status, duplicate_status, conflict_status
+        );
+        CREATE INDEX IF NOT EXISTS idx_llm_charge_prop_version
+        ON llm_rate_charge_promotion_proposals(version_id);
+
+        CREATE TABLE IF NOT EXISTS llm_promoted_charge_audit (
+            id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            proposal_id          INTEGER NOT NULL,
+            tariff_charge_id     INTEGER NOT NULL,
+            validation_id        INTEGER NOT NULL,
+            repair_id            INTEGER,
+            extraction_id        INTEGER NOT NULL,
+            row_index            INTEGER NOT NULL,
+            source_quote         TEXT,
+            evidence_quote       TEXT,
+            promoted_at          TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+        CREATE INDEX IF NOT EXISTS idx_llm_promoted_charge_audit_charge
+        ON llm_promoted_charge_audit(tariff_charge_id);
         """
     )
     conn.commit()

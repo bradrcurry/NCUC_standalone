@@ -2,7 +2,8 @@ param(
     [int]$DurationHours = 8,
     [int]$MaxRuntimeMinutes = 55,
     [int]$Limit = 10,
-    [int]$MaxConsecutiveFailures = 12
+    [int]$MaxConsecutiveFailures = 12,
+    [switch]$ExecutePromotions   # Pass to allow safe promotion after each loop
 )
 
 $deadline = (Get-Date).AddHours($DurationHours)
@@ -11,6 +12,7 @@ Write-Host "=== Staged extraction loop (Phase 6E) ==="
 Write-Host "Duration: $DurationHours h, slice cap: ${MaxRuntimeMinutes}m, limit: $Limit"
 Write-Host "Deadline: $deadline"
 Write-Host "Pipeline: filter -> find-lines -> classify-per-line"
+Write-Host "Promotions: $($ExecutePromotions ? 'execute-safe (after each iteration)' : 'dry-run only (pass -ExecutePromotions to enable)')"
 Write-Host "Per-iteration JSON reports: docs/reports/overnight_parse_improvement/<run_id>.json"
 Write-Host ""
 
@@ -46,6 +48,27 @@ while ((Get-Date) -lt $deadline) {
     if ($exitCode -ne 0) {
         Write-Host "Loop ${loopCount}: exit code $exitCode. Continuing..."
     }
+
+    # Run the promotion funnel after each extraction iteration so work lands
+    # in tariff_charges without a manual follow-up step.
+    Write-Host "--- Promotion pass at $(Get-Date) ---"
+    if ($ExecutePromotions) {
+        python -m duke_rates.cli run-llm-promotion-overnight-nc `
+            --validation-limit 500 `
+            --repair-limit 1000 `
+            --proposal-limit 10000 `
+            --promotion-limit 500 `
+            --execute-safe `
+            --json
+    } else {
+        python -m duke_rates.cli run-llm-promotion-overnight-nc `
+            --validation-limit 500 `
+            --repair-limit 1000 `
+            --proposal-limit 10000 `
+            --promotion-limit 500 `
+            --json
+    }
+    Write-Host "Promotion pass exit code: $LASTEXITCODE"
 
     Write-Host "Loop $loopCount done. Sleeping 5s..."
     Start-Sleep -Seconds 5

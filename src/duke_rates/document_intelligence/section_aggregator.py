@@ -1041,7 +1041,7 @@ class DocumentSectionAggregator:
         Used as additional split points in _refine_boundaries for sections
         that are too large (> 8 pages).
         """
-        boundary_pages: set[int] = []
+        boundary_pages: list[int] = []
         seen_codes: set[str] = set()
 
         for i, pg in enumerate(section_pages):
@@ -1074,8 +1074,6 @@ class DocumentSectionAggregator:
                 or bool(pg.extracted_leaf_nos)
             )
 
-            # For very large sections, lower the bar
-            section_size = section_pages[-1].page_number - section_pages[0].page_number + 1
             if len(section_pages) > 15:
                 # Aggressive: any strong text signal is enough
                 boundary_pages.append(i)
