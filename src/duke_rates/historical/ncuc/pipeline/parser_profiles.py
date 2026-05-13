@@ -5883,6 +5883,11 @@ class ZeroChargeProgramProfile:
         "nc-progress-program-efficiencyprogram",
         "nc-progress-program-automationprogram",
         "nc-progress-program-multifamilyenergyefficiencyprogram",
+        "nc-progress-program-schoolsprogram",
+        "nc-progress-program-nmavigantprogram",
+        "nc-progress-program-demandresponseprogram",
+        "nc-progress-program-stateweatherizationassistanceprogram",
+        "nc-progress-program-carolinasincomequalifiedweatherizationprogram",
         "nc-progress-program-aboutavailableprogram",
         "nc-progress-program-appendixcprogram",
     }
@@ -6113,6 +6118,11 @@ class HistoricalRateParserRegistry:
                 "nc-progress-program-efficiencyprogram",
                 "nc-progress-program-automationprogram",
                 "nc-progress-program-multifamilyenergyefficiencyprogram",
+                "nc-progress-program-schoolsprogram",
+                "nc-progress-program-nmavigantprogram",
+                "nc-progress-program-demandresponseprogram",
+                "nc-progress-program-stateweatherizationassistanceprogram",
+                "nc-progress-program-carolinasincomequalifiedweatherizationprogram",
                 "nc-progress-program-aboutavailableprogram",
                 "nc-progress-program-appendixcprogram",
             }:
