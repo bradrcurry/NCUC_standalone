@@ -2503,6 +2503,7 @@ class ProgressSingleValueRiderProfile:
         "nc-progress-leaf-722",   # rider
         "nc-progress-leaf-724",   # rider
         "nc-progress-leaf-664",   # SSR — Shared Solar Rider
+        "nc-progress-rider-agencyassetridertorecovercostsrelatedtofacilitie",
         # DEC (Carolinas) equivalent riders — same format as Progress single-value riders
         "nc-carolinas-rider-rdm",   # RDM — Revenue Decoupling Mechanism
         "nc-carolinas-rider-pim",   # PIM — Performance Incentive Mechanism
@@ -2535,6 +2536,7 @@ class ProgressSingleValueRiderProfile:
         "nc-progress-leaf-700",   # Program NSSEE
         "nc-progress-leaf-702",   # SSP — Non-Residential Smart $aver
         "nc-progress-leaf-724",   # YFB — Your Fixed Bill
+        "nc-progress-rider-agencyassetridertorecovercostsrelatedtofacilitie",
     }
 
     @staticmethod
@@ -2616,6 +2618,132 @@ class ProgressSingleValueRiderProfile:
                 )
             )
         return extracted
+
+
+@dataclass
+class ProgressRecoveryRiderProfile:
+    """Profile for the high-volume DEP Recovery Rider family."""
+
+    name: str = "progress_recovery_rider"
+    _SUPPORTED_FAMILIES = {"nc-progress-rider-recoveryrider"}
+
+    def supports(self, doc: dict, text: str) -> bool:
+        family_key = (doc.get("family_key") or "").lower()
+        if family_key not in self._SUPPORTED_FAMILIES:
+            return False
+        lowered = text.lower()
+        title = (doc.get("title") or "").lower()
+        has_recovery_signal = "recovery rider" in lowered or "recovery rider" in title
+        has_rate_signal = "monthly rate" in lowered or "cost recovery" in lowered
+        return has_recovery_signal and has_rate_signal
+
+    def score(self, doc: dict, text: str) -> float:
+        if not self.supports(doc, text):
+            return 0.0
+        lowered = text.lower()
+        score = 0.9
+        if "cost recovery" in lowered:
+            score += 0.03
+        if "monthly rate" in lowered:
+            score += 0.03
+        if "applicability" in lowered:
+            score += 0.02
+        return min(score, 0.97)
+
+    def extract(self, doc: dict, text: str) -> list[ExtractedCharge]:
+        family_key = doc.get("family_key") or "nc-progress-rider-RECOVERYRIDER"
+        path = Path(doc.get("local_path") or "")
+        if doc.get("start_page") is not None and doc.get("end_page") is not None:
+            _, charges, _ = parse_nc_progress_leaf(text, version_id=0, family_key=family_key)
+        elif path.is_file() and path.suffix.lower() == ".pdf":
+            _, charges, _ = parse_nc_progress_leaf_file(path, version_id=0, family_key=family_key)
+        else:
+            _, charges, _ = parse_nc_progress_leaf(text, version_id=0, family_key=family_key)
+        return _convert_progress_tariff_charges(charges)
+
+
+@dataclass
+class ProgressManagementEnergyEfficiencyCostRecoveryRiderProfile:
+    """Profile for the DEP management and energy-efficiency cost recovery rider."""
+
+    name: str = "progress_management_energy_efficiency_cost_recovery_rider"
+    _SUPPORTED_FAMILIES = {"nc-progress-rider-managementandenergyefficiencycostrecoveryrider"}
+
+    def supports(self, doc: dict, text: str) -> bool:
+        family_key = (doc.get("family_key") or "").lower()
+        if family_key not in self._SUPPORTED_FAMILIES:
+            return False
+        lowered = text.lower()
+        title = (doc.get("title") or "").lower()
+        has_rider_signal = "management and energy efficiency cost recovery rider" in lowered or "management and energy efficiency cost recovery rider" in title
+        has_rate_signal = "monthly rate" in lowered or "cost recovery" in lowered
+        return has_rider_signal and has_rate_signal
+
+    def score(self, doc: dict, text: str) -> float:
+        if not self.supports(doc, text):
+            return 0.0
+        lowered = text.lower()
+        score = 0.9
+        if "cost recovery" in lowered:
+            score += 0.03
+        if "monthly rate" in lowered:
+            score += 0.03
+        if "applicability" in lowered:
+            score += 0.02
+        return min(score, 0.97)
+
+    def extract(self, doc: dict, text: str) -> list[ExtractedCharge]:
+        family_key = doc.get("family_key") or "nc-progress-rider-MANAGEMENTANDENERGYEFFICIENCYCOSTRECOVERYRIDER"
+        path = Path(doc.get("local_path") or "")
+        if doc.get("start_page") is not None and doc.get("end_page") is not None:
+            _, charges, _ = parse_nc_progress_leaf(text, version_id=0, family_key=family_key)
+        elif path.is_file() and path.suffix.lower() == ".pdf":
+            _, charges, _ = parse_nc_progress_leaf_file(path, version_id=0, family_key=family_key)
+        else:
+            _, charges, _ = parse_nc_progress_leaf(text, version_id=0, family_key=family_key)
+        return _convert_progress_tariff_charges(charges)
+
+
+@dataclass
+class ProgressComplianceReportAndCostRecoveryRiderProfile:
+    """Profile for the DEP compliance report and cost recovery rider."""
+
+    name: str = "progress_compliance_report_and_cost_recovery_rider"
+    _SUPPORTED_FAMILIES = {"nc-progress-rider-compliancereportandcostrecoveryrider"}
+
+    def supports(self, doc: dict, text: str) -> bool:
+        family_key = (doc.get("family_key") or "").lower()
+        if family_key not in self._SUPPORTED_FAMILIES:
+            return False
+        lowered = text.lower()
+        title = (doc.get("title") or "").lower()
+        has_rider_signal = "compliance report and cost recovery rider" in lowered or "compliance report and cost recovery rider" in title
+        has_rate_signal = "monthly rate" in lowered or "cost recovery" in lowered
+        return has_rider_signal and has_rate_signal
+
+    def score(self, doc: dict, text: str) -> float:
+        if not self.supports(doc, text):
+            return 0.0
+        lowered = text.lower()
+        score = 0.9
+        if "cost recovery" in lowered:
+            score += 0.03
+        if "monthly rate" in lowered:
+            score += 0.03
+        if "applicability" in lowered:
+            score += 0.02
+        return min(score, 0.97)
+
+    def extract(self, doc: dict, text: str) -> list[ExtractedCharge]:
+        family_key = doc.get("family_key") or "nc-progress-rider-COMPLIANCEREPORTANDCOSTRECOVERYRIDER"
+        path = Path(doc.get("local_path") or "")
+        if doc.get("start_page") is not None and doc.get("end_page") is not None:
+            _, charges, _ = parse_nc_progress_leaf(text, version_id=0, family_key=family_key)
+        elif path.is_file() and path.suffix.lower() == ".pdf":
+            _, charges, _ = parse_nc_progress_leaf_file(path, version_id=0, family_key=family_key)
+        else:
+            _, charges, _ = parse_nc_progress_leaf(text, version_id=0, family_key=family_key)
+        return _convert_progress_tariff_charges(charges)
 
 
 @dataclass
@@ -5752,6 +5880,20 @@ class ZeroChargeProgramProfile:
         "nc-progress-leaf-707",  # HERP
         "nc-progress-leaf-713",  # REEAD
         "nc-carolinas-rider-cei", # Clean Energy Impact
+        "nc-progress-program-appliancerecyclingprogram",
+        "nc-progress-program-lightingprogram",
+        "nc-progress-program-efficiencyprogram",
+        "nc-progress-program-automationprogram",
+        "nc-progress-program-multifamilyenergyefficiencyprogram",
+        "nc-progress-program-schoolsprogram",
+        "nc-progress-program-nmavigantprogram",
+        "nc-progress-program-demandresponseprogram",
+        "nc-progress-program-stateweatherizationassistanceprogram",
+        "nc-progress-program-carolinasincomequalifiedweatherizationprogram",
+        "nc-progress-program-aboutavailableprogram",
+        "nc-progress-program-appendixcprogram",
+        "nc-progress-leaf-700",
+        "nc-progress-leaf-723",
     }
 
     def supports(self, doc: dict, text: str) -> bool:
@@ -5879,6 +6021,9 @@ class HistoricalRateParserRegistry:
             ProgressCurrentLeafBridgeProfile(),
             ProgressBillingAdjustmentsProfile(),
             ProgressSingleValueRiderProfile(),
+            ProgressRecoveryRiderProfile(),
+            ProgressManagementEnergyEfficiencyCostRecoveryRiderProfile(),
+            ProgressComplianceReportAndCostRecoveryRiderProfile(),
             ProgressResidentialTouProfile(),
             ProgressMediumGeneralServiceProfile(),
             ProgressResidentialTOUEVProfile(),
@@ -5965,12 +6110,27 @@ class HistoricalRateParserRegistry:
         reasons: list[str] = []
 
         if profile_name == "zero_charge_program":
-            if signals.family_key not in {
+            normalized_family_key = signals.family_key.lower()
+            if normalized_family_key not in {
                 "nc-progress-leaf-703",
                 "nc-progress-leaf-641",
                 "nc-progress-leaf-707",
                 "nc-progress-leaf-713",
                 "nc-carolinas-rider-cei",
+                "nc-progress-program-appliancerecyclingprogram",
+                "nc-progress-program-lightingprogram",
+                "nc-progress-program-efficiencyprogram",
+                "nc-progress-program-automationprogram",
+                "nc-progress-program-multifamilyenergyefficiencyprogram",
+                "nc-progress-program-schoolsprogram",
+                "nc-progress-program-nmavigantprogram",
+                "nc-progress-program-demandresponseprogram",
+                "nc-progress-program-stateweatherizationassistanceprogram",
+                "nc-progress-program-carolinasincomequalifiedweatherizationprogram",
+                "nc-progress-program-aboutavailableprogram",
+                "nc-progress-program-appendixcprogram",
+                "nc-progress-leaf-700",
+                "nc-progress-leaf-723",
             }:
                 return 0.0, ()
             return 0.99, ("zero_charge_program_explicit_match",)
@@ -5987,6 +6147,72 @@ class HistoricalRateParserRegistry:
                 return 0.0, ()
             reasons.extend(("family=leaf600", "summary_text"))
             return 0.96, tuple(reasons)
+
+        if profile_name == "progress_recovery_rider":
+            if signals.family_key != "nc-progress-rider-recoveryrider":
+                return 0.0, ()
+            lowered = signals.text_lower
+            title = signals.title
+            if "recovery rider" not in lowered and "recovery rider" not in title:
+                return 0.0, ()
+            if "monthly rate" not in lowered and "cost recovery" not in lowered:
+                return 0.0, ()
+            score = 0.9
+            reasons.append("recovery_rider")
+            if "cost recovery" in lowered:
+                score += 0.03
+                reasons.append("cost_recovery_rider")
+            if "monthly rate" in lowered:
+                score += 0.03
+                reasons.append("monthly_rate")
+            if "applicability" in lowered:
+                score += 0.02
+                reasons.append("applicability")
+            return min(score, 0.97), tuple(reasons)
+
+        if profile_name == "progress_management_energy_efficiency_cost_recovery_rider":
+            if signals.family_key != "nc-progress-rider-managementandenergyefficiencycostrecoveryrider":
+                return 0.0, ()
+            lowered = signals.text_lower
+            title = signals.title
+            if "management and energy efficiency cost recovery rider" not in lowered and "management and energy efficiency cost recovery rider" not in title:
+                return 0.0, ()
+            if "monthly rate" not in lowered and "cost recovery" not in lowered:
+                return 0.0, ()
+            score = 0.9
+            reasons.append("management_energy_efficiency_cost_recovery_rider")
+            if "cost recovery" in lowered:
+                score += 0.03
+                reasons.append("cost_recovery_rider")
+            if "monthly rate" in lowered:
+                score += 0.03
+                reasons.append("monthly_rate")
+            if "applicability" in lowered:
+                score += 0.02
+                reasons.append("applicability")
+            return min(score, 0.97), tuple(reasons)
+
+        if profile_name == "progress_compliance_report_and_cost_recovery_rider":
+            if signals.family_key != "nc-progress-rider-compliancereportandcostrecoveryrider":
+                return 0.0, ()
+            lowered = signals.text_lower
+            title = signals.title
+            if "compliance report and cost recovery rider" not in lowered and "compliance report and cost recovery rider" not in title:
+                return 0.0, ()
+            if "monthly rate" not in lowered and "cost recovery" not in lowered:
+                return 0.0, ()
+            score = 0.9
+            reasons.append("compliance_report_and_cost_recovery_rider")
+            if "cost recovery" in lowered:
+                score += 0.03
+                reasons.append("cost_recovery_rider")
+            if "monthly rate" in lowered:
+                score += 0.03
+                reasons.append("monthly_rate")
+            if "applicability" in lowered:
+                score += 0.02
+                reasons.append("applicability")
+            return min(score, 0.97), tuple(reasons)
 
         if profile_name == "progress_residential_tou":
             if signals.family_key not in {"nc-progress-leaf-502", "nc-progress-leaf-503", "nc-progress-leaf-504"}:
@@ -6452,6 +6678,7 @@ class HistoricalRateParserRegistry:
                 "nc-progress-leaf-700", "nc-progress-leaf-702", "nc-progress-leaf-705",
                 "nc-progress-leaf-708", "nc-progress-leaf-719", "nc-progress-leaf-722",
                 "nc-progress-leaf-724",
+                "nc-progress-rider-agencyassetridertorecovercostsrelatedtofacilitie",
             }
             if signals.family_key not in _svr_families:
                 return 0.0, ()
