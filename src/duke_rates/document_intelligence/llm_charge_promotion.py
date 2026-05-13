@@ -1074,6 +1074,17 @@ def _infer_unit_from_row(row: sqlite3.Row) -> tuple[str, str]:
     )
     if has_dollar_amount and bill_level_context:
         return "$/bill", "bill_level_context"
+    program_incentive_context = any(
+        token in evidence
+        for token in (
+            "hero",
+            "high efficiency air source heat pump",
+            "central air conditioning",
+            "heat pump",
+        )
+    )
+    if has_dollar_amount and program_incentive_context:
+        return "$/bill", "program_incentive_context"
     fixed_monthly_charge = any(
         token in charge_type.lower()
         for token in ("fixed", "basic", "facilities", "monthly", "minimum")
@@ -1124,6 +1135,10 @@ def _normalize_charge_type(
         return "Rider Adjustment"
     if "fuel" in evidence and ("adjustment" in evidence or "cost" in evidence):
         return "Rider Adjustment"
+    if _looks_like_fee_charge(evidence):
+        return "Fee"
+    if _looks_like_program_incentive(evidence):
+        return "Program Incentive"
     if "demand" in evidence and ("kw" in evidence or "kilowatt" in evidence):
         return "Demand Charge"
     if (
@@ -1166,6 +1181,42 @@ def _looks_like_rider_adjustment(evidence: str) -> bool:
         token in evidence
         for token in ("energy", "load", "participant", "monthly", "rider", "conservation")
     ):
+        return True
+    return False
+
+
+def _looks_like_fee_charge(evidence: str) -> bool:
+    if not evidence:
+        return False
+    if "returned payment" in evidence:
+        return True
+    if "liquidated damages" in evidence:
+        return True
+    if "application fee" in evidence:
+        return True
+    if "set-up fee" in evidence or "setup fee" in evidence:
+        return True
+    if "connection fee" in evidence or "disconnect fee" in evidence:
+        return True
+    if "connect and disconnect" in evidence:
+        return True
+    if "estimated cost of connecting and disconnecting service" in evidence:
+        return True
+    return False
+
+
+def _looks_like_program_incentive(evidence: str) -> bool:
+    if not evidence:
+        return False
+    if "up to $" not in evidence and "$" not in evidence:
+        return False
+    if "hero" in evidence:
+        return True
+    if "high efficiency air source heat pump" in evidence:
+        return True
+    if "central air conditioning" in evidence:
+        return True
+    if "heat pump" in evidence and "program" in evidence:
         return True
     return False
 

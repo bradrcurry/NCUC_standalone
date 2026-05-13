@@ -35,6 +35,8 @@ ALLOWED_CHARGE_TYPES: tuple[str, ...] = (
     "Energy Charge",
     "Demand Charge",
     "Rider Adjustment",
+    "Fee",
+    "Program Incentive",
     "Fixed Monthly Charge",
     "Minimum Bill",
     "Seasonal Rate",

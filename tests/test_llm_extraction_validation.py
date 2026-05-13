@@ -294,6 +294,57 @@ def test_validate_candidate_extractions_grounds_bare_minimum_bill_units_from_cha
     assert row == (1, "validated")
 
 
+def test_validate_candidate_extractions_grounds_program_incentive_bill_units(tmp_path):
+    db_path = tmp_path / "test.sqlite"
+    conn = _init_db(db_path)
+    conn.execute("INSERT INTO historical_documents (id, raw_text_path) VALUES (1, '')")
+    conn.execute(
+        "INSERT INTO ncuc_page_artifacts (source_pdf, page_number, text_content) VALUES (?, ?, ?)",
+        ("doc.pdf", 1, "High Efficiency Air Source Heat Pump or Central Air Conditioning Up to $300"),
+    )
+    conn.execute(
+        """
+        INSERT INTO llm_candidate_rate_extractions
+        (historical_document_id, source_pdf, rate_rows_json, extraction_confidence, model, model_role)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        (
+            1,
+            "doc.pdf",
+            json.dumps(
+                [
+                    {
+                        "charge_type": "Program Incentive",
+                        "value": 300.0,
+                        "unit": "$",
+                        "source_quote": "High Efficiency Air Source Heat Pump or Central Air Conditioning Up to $300",
+                        "confidence": 0.95,
+                    }
+                ]
+            ),
+            0.95,
+            "test-model",
+            "structured_rate_extraction",
+        ),
+    )
+    conn.commit()
+    conn.close()
+
+    report = validate_candidate_extractions(db_path, execute=True)
+
+    assert report["summary"]["recommended_status_counts"] == {"validated": 1}
+    conn = sqlite3.connect(db_path)
+    row = conn.execute(
+        """
+        SELECT unit_grounded, recommended_status
+        FROM llm_candidate_rate_row_validations
+        WHERE row_index = 0
+        """
+    ).fetchone()
+    conn.close()
+    assert row == (1, "validated")
+
+
 def test_validate_candidate_extractions_persists_mixed_row_statuses(tmp_path):
     db_path = tmp_path / "test.sqlite"
     conn = _init_db(db_path)
