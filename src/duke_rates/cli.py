@@ -98,7 +98,21 @@ from duke_rates.selection import (
     supports_usage_input,
 )
 
+# Sub-app imports (registered at end of file)
+from duke_rates.cli_commands.ocr import (
+    ocr_app,
+    enqueue_ocr_remediation_nc,
+    process_ocr_queue_nc,
+)
+from duke_rates.cli_commands._ocr_reports import (
+    _safe_text_file_length,
+    _classify_ocr_route,
+    _build_ocr_benchmark_nc_report,
+    _build_ocr_remediation_candidates_nc_report,
+)
+
 app = typer.Typer(help="Duke Energy tariff discovery and analysis CLI.")
+app.add_typer(ocr_app, name="ocr")
 
 
 def _safe_cli_text(value: object) -> str:
@@ -616,541 +630,12 @@ def _build_workflow_status_nc_report(conn: sqlite3.Connection) -> dict[str, obje
     }
 
 
-def _safe_text_file_length(path_value: object) -> int:
-    path_text = str(path_value or "").strip()
-    if not path_text:
-        return 0
-    try:
-        path = Path(path_text)
-        if not path.exists() or not path.is_file():
-            return 0
-        return len(path.read_text(encoding="utf-8", errors="ignore").strip())
-    except Exception:
-        return 0
+# OCR helpers (_safe_text_file_length, _classify_ocr_route,
+# _build_ocr_benchmark_nc_report, _build_ocr_remediation_candidates_nc_report)
+# now live in duke_rates.cli_commands._ocr_reports and are imported at the top
+# of this module.
 
 
-def _classify_ocr_route(
-    *,
-    raw_text_chars: int,
-    outcome_quality: str,
-    parser_profile: str,
-    page_count: int,
-    title: str,
-    has_ocr_artifact: bool,
-    stale_reasons: list[str],
-) -> tuple[str, str]:
-    lowered_title = title.lower()
-    layout_heavy = (
-        page_count >= 5
-        or "summary" in lowered_title
-        or "compliance" in lowered_title
-        or "book" in lowered_title
-    )
-    if raw_text_chars == 0 and parser_profile == "unknown":
-        return (
-            "no_usable_text_unknown_profile",
-            "run_docling_or_paddle_structure" if layout_heavy else "queue_ocr_or_paddle",
-        )
-    if raw_text_chars == 0:
-        return (
-            "no_usable_text",
-            "run_docling_or_paddle_structure" if layout_heavy else "queue_ocr_or_paddle",
-        )
-    if outcome_quality in {"weak", "empty"} and not has_ocr_artifact:
-        return ("weak_without_ocr", "queue_ocr_or_paddle")
-    if outcome_quality in {"weak", "empty"} and layout_heavy:
-        return ("weak_layout_sensitive", "run_docling_or_paddle_structure")
-    if outcome_quality in {"weak", "empty"}:
-        return ("weak_after_text_recovery", "parser_or_page_level_glm_review")
-    if stale_reasons:
-        return ("stale_artifacts", "reprocess_or_refresh_ocr")
-    return ("healthy_or_non_ocr_issue", "no_ocr_action")
-
-
-def _build_ocr_benchmark_nc_report(
-    conn: sqlite3.Connection,
-    *,
-    limit: int = 50,
-    backend_filter: str | None = None,
-    outcome_filter: str | None = None,
-    needs_review_only: bool = False,
-    stale_only: bool = False,
-    sort_by: str = "recent",
-) -> dict[str, object]:
-    from duke_rates.db.reprocess import find_stale_historical_documents
-
-    stale_rows = find_stale_historical_documents(conn, limit=max(limit * 5, 100))
-    stale_by_document_id = {
-        int(item["historical_document_id"]): list(item.get("reasons") or [])
-        for item in stale_rows
-    }
-    rows = conn.execute(
-        """
-        WITH latest_ocr AS (
-            SELECT oa.*
-            FROM ocr_artifacts oa
-            JOIN (
-                SELECT source_pdf, file_hash, MAX(id) AS max_id
-                FROM ocr_artifacts
-                GROUP BY source_pdf, file_hash
-            ) latest
-              ON latest.max_id = oa.id
-        ),
-        ocr_docs AS (
-            SELECT
-                hd.id AS historical_document_id,
-                hd.family_key,
-                hd.company,
-                hd.title,
-                hd.local_path,
-                hd.raw_text_path,
-                hd.content_hash,
-                lo.backend,
-                lo.status AS ocr_status,
-                lo.page_count,
-                lo.ocr_confidence,
-                lo.metadata_json AS ocr_metadata_json
-            FROM historical_documents hd
-            JOIN latest_ocr lo
-              ON lo.source_pdf = hd.local_path
-             AND (lo.file_hash IS hd.content_hash OR lo.file_hash = hd.content_hash)
-            WHERE hd.state = 'NC'
-        ),
-        latest_runs AS (
-            SELECT hpr.*
-            FROM historical_processing_runs hpr
-            JOIN (
-                SELECT historical_document_id, MAX(id) AS max_id
-                FROM historical_processing_runs
-                WHERE historical_document_id IN (SELECT historical_document_id FROM ocr_docs)
-                GROUP BY historical_document_id
-            ) latest
-              ON latest.max_id = hpr.id
-        ),
-        latest_page_artifacts AS (
-            SELECT pa.*
-            FROM ncuc_page_artifacts pa
-            JOIN (
-                SELECT source_pdf, file_hash, MAX(id) AS max_id
-                FROM ncuc_page_artifacts
-                WHERE source_pdf IN (SELECT local_path FROM ocr_docs)
-                GROUP BY source_pdf, file_hash
-            ) latest
-              ON latest.max_id = pa.id
-        ),
-        latest_span_artifacts AS (
-            SELECT sa.*
-            FROM ncuc_span_artifacts sa
-            JOIN (
-                SELECT source_pdf, file_hash, MAX(id) AS max_id
-                FROM ncuc_span_artifacts
-                WHERE source_pdf IN (SELECT local_path FROM ocr_docs)
-                GROUP BY source_pdf, file_hash
-            ) latest
-              ON latest.max_id = sa.id
-        ),
-        latest_parse_attempts AS (
-            SELECT pal.*
-            FROM parse_attempt_logs pal
-            JOIN (
-                SELECT CAST(json_extract(metadata_json, '$.historical_document_id') AS INTEGER) AS historical_document_id,
-                       MAX(id) AS max_id
-                FROM parse_attempt_logs
-                WHERE json_extract(metadata_json, '$.historical_document_id') IS NOT NULL
-                  AND CAST(json_extract(metadata_json, '$.historical_document_id') AS INTEGER)
-                      IN (SELECT historical_document_id FROM ocr_docs)
-                GROUP BY CAST(json_extract(metadata_json, '$.historical_document_id') AS INTEGER)
-            ) latest
-              ON latest.max_id = pal.id
-        ),
-        latest_reviews AS (
-            SELECT pro.*
-            FROM parse_review_outcomes pro
-            JOIN (
-                SELECT parse_attempt_id, MAX(id) AS max_id
-                FROM parse_review_outcomes
-                WHERE parse_attempt_id IS NOT NULL
-                GROUP BY parse_attempt_id
-            ) latest
-              ON latest.max_id = pro.id
-        )
-        SELECT
-            od.historical_document_id,
-            od.family_key,
-            od.company,
-            od.title,
-            od.local_path,
-            od.raw_text_path,
-            od.content_hash,
-            od.backend,
-            od.ocr_status,
-            od.page_count,
-            od.ocr_confidence,
-            od.ocr_metadata_json,
-            lpa.artifact_version AS page_artifact_version,
-            lpa.metadata_json AS page_metadata_json,
-            lsa.artifact_version AS span_artifact_version,
-            lr.status AS parse_status,
-            lr.outcome_quality,
-            lr.charge_count,
-            lr.parser_profile,
-            lpat.id AS parse_attempt_id,
-            lrev.outcome AS review_outcome
-        FROM ocr_docs od
-        LEFT JOIN latest_runs lr
-          ON lr.historical_document_id = od.historical_document_id
-        LEFT JOIN latest_page_artifacts lpa
-          ON lpa.source_pdf = od.local_path
-         AND (lpa.file_hash IS od.content_hash OR lpa.file_hash = od.content_hash)
-        LEFT JOIN latest_span_artifacts lsa
-          ON lsa.source_pdf = od.local_path
-         AND (lsa.file_hash IS od.content_hash OR lsa.file_hash = od.content_hash)
-        LEFT JOIN latest_parse_attempts lpat
-          ON CAST(json_extract(lpat.metadata_json, '$.historical_document_id') AS INTEGER) = od.historical_document_id
-        LEFT JOIN latest_reviews lrev
-          ON lrev.parse_attempt_id = lpat.id
-        ORDER BY od.historical_document_id DESC
-        LIMIT ?
-        """,
-        (limit,),
-    ).fetchall()
-
-    report_rows: list[dict[str, object]] = []
-    backend_counts: dict[str, int] = {}
-    normalization_counts: dict[str, int] = {}
-    outcome_counts: dict[str, int] = {}
-    backend_outcome_counts: dict[tuple[str, str], int] = {}
-    route_reason_counts: dict[str, int] = {}
-    recommended_lane_counts: dict[str, int] = {}
-    page_artifact_version_counts: dict[str, int] = {}
-    span_artifact_version_counts: dict[str, int] = {}
-    review_outcome_counts: dict[str, int] = {}
-
-    for row in rows:
-        ocr_metadata = json.loads(row["ocr_metadata_json"] or "{}")
-        page_metadata = json.loads(row["page_metadata_json"] or "{}")
-        backend = str(ocr_metadata.get("selected_backend") or row["backend"] or "unknown")
-        normalization_version = str(ocr_metadata.get("ocr_normalization_version") or "unknown")
-        outcome_quality = str(row["outcome_quality"] or "missing")
-        page_artifact_version = str(row["page_artifact_version"] or "missing")
-        span_artifact_version = str(row["span_artifact_version"] or "missing")
-        review_outcome = str(row["review_outcome"] or "unreviewed")
-        historical_document_id = int(row["historical_document_id"])
-        stale_reasons = list(stale_by_document_id.get(historical_document_id) or [])
-        raw_text_chars = _safe_text_file_length(row["raw_text_path"])
-        route_reason, recommended_lane = _classify_ocr_route(
-            raw_text_chars=raw_text_chars,
-            outcome_quality=outcome_quality,
-            parser_profile=str(row["parser_profile"] or "unknown"),
-            page_count=int(row["page_count"] or 0),
-            title=str(row["title"] or ""),
-            has_ocr_artifact=bool(row["backend"]),
-            stale_reasons=stale_reasons,
-        )
-
-        if backend_filter and backend != backend_filter:
-            continue
-        if outcome_filter and outcome_quality != outcome_filter:
-            continue
-        if needs_review_only and review_outcome != "needs_review":
-            continue
-        if stale_only and not stale_reasons:
-            continue
-
-        backend_counts[backend] = backend_counts.get(backend, 0) + 1
-        normalization_counts[normalization_version] = normalization_counts.get(normalization_version, 0) + 1
-        outcome_counts[outcome_quality] = outcome_counts.get(outcome_quality, 0) + 1
-        backend_outcome_counts[(backend, outcome_quality)] = backend_outcome_counts.get((backend, outcome_quality), 0) + 1
-        route_reason_counts[route_reason] = route_reason_counts.get(route_reason, 0) + 1
-        recommended_lane_counts[recommended_lane] = recommended_lane_counts.get(recommended_lane, 0) + 1
-        page_artifact_version_counts[page_artifact_version] = page_artifact_version_counts.get(page_artifact_version, 0) + 1
-        span_artifact_version_counts[span_artifact_version] = span_artifact_version_counts.get(span_artifact_version, 0) + 1
-        review_outcome_counts[review_outcome] = review_outcome_counts.get(review_outcome, 0) + 1
-
-        report_rows.append(
-            {
-                "historical_document_id": row["historical_document_id"],
-                "family_key": row["family_key"],
-                "company": row["company"],
-                "title": row["title"],
-                "stale_reasons": stale_reasons,
-                "backend": backend,
-                "ocr_status": row["ocr_status"],
-                "ocr_normalization_version": normalization_version,
-                "attempted_backends": list(ocr_metadata.get("attempted_backends") or []),
-                "page_count": int(row["page_count"] or 0),
-                "raw_text_chars": raw_text_chars,
-                "route_reason": route_reason,
-                "recommended_lane": recommended_lane,
-                "ocr_confidence": row["ocr_confidence"],
-                "page_artifact_version": page_artifact_version,
-                "span_artifact_version": span_artifact_version,
-                "page_artifact_source": page_metadata.get("artifact_source"),
-                "parse_status": row["parse_status"],
-                "outcome_quality": outcome_quality,
-                "charge_count": int(row["charge_count"] or 0),
-                "parser_profile": row["parser_profile"],
-                "review_outcome": review_outcome,
-                "parse_attempt_id": row["parse_attempt_id"],
-            }
-        )
-
-    backend_summary = [
-        {"backend": key, "count": value}
-        for key, value in sorted(backend_counts.items(), key=lambda item: (-item[1], item[0]))
-    ]
-    normalization_summary = [
-        {"ocr_normalization_version": key, "count": value}
-        for key, value in sorted(normalization_counts.items(), key=lambda item: (-item[1], item[0]))
-    ]
-    outcome_summary = [
-        {"outcome_quality": key, "count": value}
-        for key, value in sorted(outcome_counts.items(), key=lambda item: (-item[1], item[0]))
-    ]
-    route_reason_summary = [
-        {"route_reason": key, "count": value}
-        for key, value in sorted(route_reason_counts.items(), key=lambda item: (-item[1], item[0]))
-    ]
-    recommended_lane_summary = [
-        {"recommended_lane": key, "count": value}
-        for key, value in sorted(recommended_lane_counts.items(), key=lambda item: (-item[1], item[0]))
-    ]
-    page_artifact_version_summary = [
-        {"page_artifact_version": key, "count": value}
-        for key, value in sorted(page_artifact_version_counts.items(), key=lambda item: (-item[1], item[0]))
-    ]
-    span_artifact_version_summary = [
-        {"span_artifact_version": key, "count": value}
-        for key, value in sorted(span_artifact_version_counts.items(), key=lambda item: (-item[1], item[0]))
-    ]
-    review_outcome_summary = [
-        {"review_outcome": key, "count": value}
-        for key, value in sorted(review_outcome_counts.items(), key=lambda item: (-item[1], item[0]))
-    ]
-    backend_outcome_summary = [
-        {"backend": backend, "outcome_quality": outcome, "count": count}
-        for (backend, outcome), count in sorted(
-            backend_outcome_counts.items(),
-            key=lambda item: (-item[1], item[0][0], item[0][1]),
-        )
-    ]
-
-    weak_rank = {"weak": 0, "missing": 1, "strong": 2}
-    review_rank = {"needs_review": 0, "unreviewed": 1, "accepted": 2, "corrected": 3, "rejected": 4}
-    if sort_by == "weak-first":
-        report_rows.sort(
-            key=lambda row: (
-                weak_rank.get(str(row.get("outcome_quality") or "missing"), 9),
-                -len(list(row.get("stale_reasons") or [])),
-                int(row.get("historical_document_id") or 0),
-            )
-        )
-    elif sort_by == "review-first":
-        report_rows.sort(
-            key=lambda row: (
-                review_rank.get(str(row.get("review_outcome") or "unreviewed"), 9),
-                weak_rank.get(str(row.get("outcome_quality") or "missing"), 9),
-                int(row.get("historical_document_id") or 0),
-            )
-        )
-    elif sort_by == "stale-first":
-        report_rows.sort(
-            key=lambda row: (
-                0 if row.get("stale_reasons") else 1,
-                -len(list(row.get("stale_reasons") or [])),
-                weak_rank.get(str(row.get("outcome_quality") or "missing"), 9),
-                int(row.get("historical_document_id") or 0),
-            )
-        )
-    else:
-        report_rows.sort(
-            key=lambda row: -int(row.get("historical_document_id") or 0)
-        )
-
-    return {
-        "row_count": len(report_rows),
-        "backend_summary": backend_summary,
-        "normalization_summary": normalization_summary,
-        "outcome_summary": outcome_summary,
-        "route_reason_summary": route_reason_summary,
-        "recommended_lane_summary": recommended_lane_summary,
-        "page_artifact_version_summary": page_artifact_version_summary,
-        "span_artifact_version_summary": span_artifact_version_summary,
-        "review_outcome_summary": review_outcome_summary,
-        "backend_outcome_summary": backend_outcome_summary,
-        "rows": report_rows,
-    }
-
-
-def _build_ocr_remediation_candidates_nc_report(
-    conn: sqlite3.Connection,
-    *,
-    limit: int = 25,
-    company: str | None = None,
-    family_key: str | None = None,
-) -> dict[str, Any]:
-    from duke_rates.db.reprocess import find_stale_historical_documents
-
-    stale_rows = find_stale_historical_documents(conn, limit=max(limit * 10, 250))
-    stale_by_document_id = {
-        int(item["historical_document_id"]): list(item.get("reasons") or [])
-        for item in stale_rows
-    }
-    query = """
-        WITH latest_runs AS (
-            SELECT hpr.*
-            FROM historical_processing_runs hpr
-            JOIN (
-                SELECT historical_document_id, MAX(id) AS max_id
-                FROM historical_processing_runs
-                WHERE historical_document_id IS NOT NULL
-                GROUP BY historical_document_id
-            ) latest
-              ON latest.max_id = hpr.id
-        ),
-        latest_ocr AS (
-            SELECT oa.*
-            FROM ocr_artifacts oa
-            JOIN (
-                SELECT source_pdf, file_hash, MAX(id) AS max_id
-                FROM ocr_artifacts
-                GROUP BY source_pdf, file_hash
-            ) latest
-              ON latest.max_id = oa.id
-        ),
-        page_text AS (
-            SELECT
-                source_pdf,
-                file_hash,
-                SUM(text_length) AS page_artifact_text_chars
-            FROM ncuc_page_artifacts
-            GROUP BY source_pdf, file_hash
-        )
-        SELECT
-            hd.id AS historical_document_id,
-            hd.family_key,
-            hd.company,
-            hd.title,
-            hd.local_path,
-            hd.raw_text_path,
-            hd.start_page,
-            hd.end_page,
-            lr.parser_profile,
-            lr.outcome_quality,
-            lr.charge_count,
-            lo.backend AS ocr_backend,
-            lo.status AS ocr_status,
-            lo.page_count AS ocr_page_count,
-            lo.ocr_confidence,
-            COALESCE(pt.page_artifact_text_chars, 0) AS page_artifact_text_chars
-        FROM historical_documents hd
-        LEFT JOIN latest_runs lr
-          ON lr.historical_document_id = hd.id
-        LEFT JOIN latest_ocr lo
-          ON lo.source_pdf = hd.local_path
-         AND (lo.file_hash IS hd.content_hash OR lo.file_hash = hd.content_hash)
-        LEFT JOIN page_text pt
-          ON pt.source_pdf = hd.local_path
-         AND (pt.file_hash IS hd.content_hash OR pt.file_hash = hd.content_hash)
-        WHERE hd.state = 'NC'
-    """
-    params: list[Any] = []
-    if company:
-        query += " AND hd.company = ?"
-        params.append(company)
-    if family_key:
-        query += " AND hd.family_key = ?"
-        params.append(family_key)
-    query += " ORDER BY hd.id DESC"
-
-    rows = conn.execute(query, tuple(params)).fetchall()
-    candidates: list[dict[str, Any]] = []
-    route_counts: Counter[str] = Counter()
-    lane_counts: Counter[str] = Counter()
-
-    for row in rows:
-        raw_text_chars = max(
-            _safe_text_file_length(row["raw_text_path"]),
-            int(row["page_artifact_text_chars"] or 0),
-        )
-        parser_profile = str(row["parser_profile"] or "unknown")
-        outcome_quality = str(row["outcome_quality"] or "missing")
-        stale_reasons = list(stale_by_document_id.get(int(row["historical_document_id"]), []) or [])
-        bounded_page_count = 0
-        if row["start_page"] and row["end_page"]:
-            bounded_page_count = max(int(row["end_page"]) - int(row["start_page"]) + 1, 0)
-        page_count = max(1, int(row["ocr_page_count"] or 0), bounded_page_count)
-        route_reason, recommended_lane = _classify_ocr_route(
-            raw_text_chars=raw_text_chars,
-            outcome_quality=outcome_quality,
-            parser_profile=parser_profile,
-            page_count=page_count,
-            title=str(row["title"] or ""),
-            has_ocr_artifact=bool(row["ocr_backend"]),
-            stale_reasons=stale_reasons,
-        )
-        if route_reason == "healthy_or_non_ocr_issue":
-            continue
-
-        priority = 0
-        if route_reason == "no_usable_text_unknown_profile":
-            priority = 0
-        elif route_reason == "no_usable_text":
-            priority = 1
-        elif route_reason == "weak_without_ocr":
-            priority = 2
-        elif route_reason == "weak_layout_sensitive":
-            priority = 3
-        elif route_reason == "stale_artifacts":
-            priority = 4
-        else:
-            priority = 5
-
-        route_counts[route_reason] += 1
-        lane_counts[recommended_lane] += 1
-        candidates.append(
-            {
-                "historical_document_id": int(row["historical_document_id"]),
-                "family_key": row["family_key"],
-                "company": row["company"],
-                "title": row["title"],
-                "parser_profile": parser_profile,
-                "outcome_quality": outcome_quality,
-                "charge_count": int(row["charge_count"] or 0),
-                "raw_text_chars": raw_text_chars,
-                "ocr_backend": row["ocr_backend"],
-                "ocr_status": row["ocr_status"],
-                "ocr_confidence": row["ocr_confidence"],
-                "page_count": page_count,
-                "route_reason": route_reason,
-                "recommended_lane": recommended_lane,
-                "stale_reasons": stale_reasons,
-                "_priority": priority,
-            }
-        )
-
-    candidates.sort(
-        key=lambda row: (
-            int(row["_priority"]),
-            int(row["raw_text_chars"]),
-            0 if row["ocr_backend"] is None else 1,
-            int(row["historical_document_id"]),
-        )
-    )
-
-    trimmed = [{key: value for key, value in row.items() if key != "_priority"} for row in candidates[:limit]]
-    return {
-        "candidate_count": len(candidates),
-        "route_reason_summary": [
-            {"route_reason": name, "count": count}
-            for name, count in route_counts.most_common(10)
-        ],
-        "recommended_lane_summary": [
-            {"recommended_lane": name, "count": count}
-            for name, count in lane_counts.most_common(10)
-        ],
-        "rows": trimmed,
-    }
 
 
 def _build_fast_ocr_remediation_summary_nc(
@@ -1344,8 +829,8 @@ def _build_workflow_next_actions_nc_report(
                 "source": "ocr_queue",
                 **_policy(
                     "process_ocr_queue",
-                    recommended_command="python -m duke_rates process-ocr-queue-nc --limit 1",
-                    recommended_parallel_command="python -m duke_rates process-ocr-queue-nc --limit 2 --workers 2",
+                    recommended_command="python -m duke_rates ocr process-queue-nc --limit 1",
+                    recommended_parallel_command="python -m duke_rates ocr process-queue-nc --limit 2 --workers 2",
                 ),
             }
         )
@@ -1386,7 +871,7 @@ def _build_workflow_next_actions_nc_report(
                 "target_historical_document_id": int(top_row["historical_document_id"]) if top_row.get("historical_document_id") else None,
                 **_policy(
                     "enqueue_ocr_remediation",
-                    recommended_command="python -m duke_rates enqueue-ocr-remediation-nc --limit 1 --execute",
+                    recommended_command="python -m duke_rates ocr enqueue-remediation-nc --limit 1 --execute",
                 ),
             }
         )
@@ -1441,7 +926,7 @@ def _build_workflow_next_actions_nc_report(
                 "target_historical_document_id": int(top_row["historical_document_id"]) if top_row.get("historical_document_id") else None,
                 **_policy(
                     "review_docling_candidates",
-                    recommended_command="python -m duke_rates show-ocr-remediation-candidates-nc --limit 10",
+                    recommended_command="python -m duke_rates ocr show-remediation-candidates-nc --limit 10",
                 ),
             }
         )
@@ -6037,8 +5522,8 @@ def show_workflow_capabilities_nc(
                 "concurrency_policy": "workers_allowed",
                 "workers_allowed": True,
                 "notes": "Bounded local OCR queue processing only; do not generalize to portal/search.",
-                "recommended_command": "python -m duke_rates process-ocr-queue-nc --limit 1",
-                "recommended_parallel_command": "python -m duke_rates process-ocr-queue-nc --limit 2 --workers 2",
+                "recommended_command": "python -m duke_rates ocr process-queue-nc --limit 1",
+                "recommended_parallel_command": "python -m duke_rates ocr process-queue-nc --limit 2 --workers 2",
             },
             {
                 "action_type": "process_reprocess_queue",
@@ -6053,7 +5538,7 @@ def show_workflow_capabilities_nc(
                 "concurrency_policy": "sequential_only",
                 "workers_allowed": False,
                 "notes": "Queue-enqueue step is kept sequential in guided mode for predictable receipts and batching.",
-                "recommended_command": "python -m duke_rates enqueue-ocr-remediation-nc --limit 1 --execute",
+                "recommended_command": "python -m duke_rates ocr enqueue-remediation-nc --limit 1 --execute",
                 "recommended_parallel_command": None,
             },
             {
@@ -6118,7 +5603,7 @@ def execute_workflow_next_action_nc(
         selected_workers = max(1, min(workers, limit))
     if action_type == "process_ocr_queue":
         selected["recommended_command"] = (
-            f"python -m duke_rates process-ocr-queue-nc --limit {limit}"
+            f"python -m duke_rates ocr process-queue-nc --limit {limit}"
             + (f" --workers {selected_workers}" if selected_workers > 1 else "")
         )
     elif action_type == "process_reprocess_queue":
@@ -6127,7 +5612,7 @@ def execute_workflow_next_action_nc(
             + (f" --workers {selected_workers}" if selected_workers > 1 else "")
         )
     elif action_type == "enqueue_ocr_remediation":
-        selected["recommended_command"] = f"python -m duke_rates enqueue-ocr-remediation-nc --limit {limit} --execute"
+        selected["recommended_command"] = f"python -m duke_rates ocr enqueue-remediation-nc --limit {limit} --execute"
     elif action_type == "enqueue_stale_reprocess":
         selected["recommended_command"] = f"python -m duke_rates enqueue-stale-reprocess-nc --limit {limit}"
     selected["guided_workers"] = selected_workers
@@ -6258,208 +5743,6 @@ def reconcile_skipped_parse_reviews(
         conn.close()
 
     typer.echo(f"Reconciled skipped parse reviews: {report['reconciled']}")
-
-
-@app.command("enqueue-ocr-nc")
-def enqueue_ocr_nc(
-    limit: int = typer.Option(100, "--limit", help="Max downloaded discovery records to inspect."),
-    backend: str = typer.Option("pytesseract_cpu", "--backend", help="OCR backend label."),
-    requested_by: str = typer.Option("operator", "--requested-by", help="Queue requester label."),
-    force_rescan: bool = typer.Option(False, "--force-rescan", help="Queue even if a completed artifact exists."),
-) -> None:
-    """Queue OCR_REQUIRED NCUC downloads for OCR artifact generation."""
-    from duke_rates.db.ocr_queue import enqueue_ocr_candidates
-    from duke_rates.db.sqlite import connect
-
-    settings, _ = _bootstrap()
-    conn = connect(settings.database_path)
-    try:
-        report = enqueue_ocr_candidates(
-            conn,
-            limit=limit,
-            backend=backend,
-            requested_by=requested_by,
-            force_rescan=force_rescan,
-        )
-        conn.commit()
-    finally:
-        conn.close()
-
-    typer.echo(f"OCR queue: inserted={report['inserted']} skipped={report['skipped']}")
-
-
-@app.command("show-ocr-queue-nc")
-def show_ocr_queue_nc(
-    status: str | None = typer.Option("pending", "--status", help="pending | running | completed | failed | all"),
-    limit: int = typer.Option(50, "--limit", help="Max queue rows to display."),
-) -> None:
-    """Show the OCR processing queue."""
-    from duke_rates.db.ocr_queue import list_ocr_queue
-    from duke_rates.db.sqlite import connect
-
-    settings, _ = _bootstrap()
-    conn = connect(settings.database_path)
-    try:
-        counts = {
-            row[0]: row[1]
-            for row in conn.execute(
-                "SELECT status, COUNT(*) FROM ocr_processing_queue GROUP BY status"
-            ).fetchall()
-        }
-        rows = list_ocr_queue(conn, status=None if status == "all" else status, limit=limit)
-    finally:
-        conn.close()
-
-    total = sum(counts.values())
-    typer.echo(
-        f"OCR Queue (NC): total={total} "
-        f"pending={counts.get('pending', 0)} "
-        f"running={counts.get('running', 0)} "
-        f"completed={counts.get('completed', 0)} "
-        f"failed={counts.get('failed', 0)}"
-    )
-
-    for row in rows:
-        typer.echo(
-            "\t".join(
-                [
-                    str(row["id"]),
-                    row["status"],
-                    str(row["priority"]),
-                    row.get("backend") or "-",
-                    row.get("source_pdf") or "-",
-                ]
-            )
-        )
-
-
-@app.command("report-ocr-benchmark-nc")
-def report_ocr_benchmark_nc(
-    limit: int = typer.Option(50, "--limit", help="Maximum number of OCR-backed historical documents to summarize."),
-    backend: str | None = typer.Option(None, "--backend", help="Filter to a selected OCR backend."),
-    outcome: str | None = typer.Option(None, "--outcome", help="Filter to a selected parse outcome_quality."),
-    needs_review_only: bool = typer.Option(False, "--needs-review-only", help="Only include rows whose latest parse review is still needs_review."),
-    stale_only: bool = typer.Option(False, "--stale-only", help="Only include rows whose artifacts or parser run are stale vs current stage versions."),
-    sort_by: str = typer.Option("recent", "--sort-by", help="Sort rows by recent | weak-first | review-first | stale-first."),
-    as_json: bool = typer.Option(False, "--json", help="Emit the full report as JSON."),
-) -> None:
-    """Summarize OCR backend, normalization version, and parse outcomes for NC historical documents."""
-    from duke_rates.db.sqlite import connect
-
-    settings, _ = _bootstrap()
-    conn = connect(settings.database_path)
-    try:
-        report = _build_ocr_benchmark_nc_report(
-            conn,
-            limit=limit,
-            backend_filter=backend,
-            outcome_filter=outcome,
-            needs_review_only=needs_review_only,
-            stale_only=stale_only,
-            sort_by=sort_by,
-        )
-    finally:
-        conn.close()
-
-    if as_json:
-        typer.echo(json.dumps(report, indent=2, default=str))
-        return
-
-    typer.echo(f"ocr_rows={report['row_count']}")
-    typer.echo("Backends:")
-    for row in report["backend_summary"]:
-        typer.echo(f"  {row['backend']}: {row['count']}")
-    typer.echo("Normalization:")
-    for row in report["normalization_summary"]:
-        typer.echo(f"  {row['ocr_normalization_version']}: {row['count']}")
-    typer.echo("Outcomes:")
-    for row in report["outcome_summary"]:
-        typer.echo(f"  {row['outcome_quality']}: {row['count']}")
-    typer.echo("Route Reasons:")
-    for row in report["route_reason_summary"]:
-        typer.echo(f"  {row['route_reason']}: {row['count']}")
-    typer.echo("Recommended Lanes:")
-    for row in report["recommended_lane_summary"]:
-        typer.echo(f"  {row['recommended_lane']}: {row['count']}")
-    typer.echo("Page Artifacts:")
-    for row in report["page_artifact_version_summary"]:
-        typer.echo(f"  {row['page_artifact_version']}: {row['count']}")
-    typer.echo("Span Artifacts:")
-    for row in report["span_artifact_version_summary"]:
-        typer.echo(f"  {row['span_artifact_version']}: {row['count']}")
-    typer.echo("Review Outcomes:")
-    for row in report["review_outcome_summary"]:
-        typer.echo(f"  {row['review_outcome']}: {row['count']}")
-    typer.echo("Backend x Outcome:")
-    for row in report["backend_outcome_summary"][:10]:
-        typer.echo(f"  {row['backend']} | {row['outcome_quality']}: {row['count']}")
-    typer.echo("Sample Rows:")
-    for row in report["rows"][:10]:
-        typer.echo(
-            "  "
-            f"hd={row['historical_document_id']} "
-            f"family={row['family_key']} "
-            f"backend={row['backend']} "
-            f"outcome={row['outcome_quality']} "
-            f"raw_text_chars={row['raw_text_chars']} "
-            f"route={row['route_reason']} "
-            f"lane={row['recommended_lane']}"
-        )
-
-
-@app.command("show-ocr-remediation-candidates-nc")
-def show_ocr_remediation_candidates_nc(
-    limit: int = typer.Option(25, "--limit", help="Max rows to display."),
-    company: str | None = typer.Option(None, help="Optional company filter."),
-    family_key: str | None = typer.Option(None, "--family-key", help="Optional family filter."),
-    json_out: bool = typer.Option(False, "--json", help="Output raw JSON."),
-) -> None:
-    """Show NC OCR remediation candidates such as unknown-profile / no-text historical documents."""
-    settings, _ = _bootstrap()
-    conn = connect_sqlite(Path(settings.database_path))
-    try:
-        report = _build_ocr_remediation_candidates_nc_report(
-            conn,
-            limit=limit,
-            company=company,
-            family_key=family_key,
-        )
-    finally:
-        conn.close()
-
-    if json_out:
-        typer.echo(json.dumps(report, indent=2, default=str))
-        return
-
-    typer.echo("OCR Remediation Candidates (NC)")
-    typer.echo(f"  candidates={report['candidate_count']}")
-
-    typer.echo("\nRoute Reasons")
-    for row in report["route_reason_summary"]:
-        typer.echo(f"  {row['route_reason']:<36} count={row['count']}")
-
-    typer.echo("\nRecommended Lanes")
-    for row in report["recommended_lane_summary"]:
-        typer.echo(f"  {row['recommended_lane']:<36} count={row['count']}")
-
-    typer.echo("\nSample Rows")
-    for row in report["rows"]:
-        typer.echo(
-            "  "
-            f"hd={row['historical_document_id']} "
-            f"family={row['family_key']} "
-            f"profile={row['parser_profile']} "
-            f"outcome={row['outcome_quality']} "
-            f"raw_text_chars={row['raw_text_chars']} "
-            f"ocr_backend={row['ocr_backend'] or '-'} "
-            f"lane={row['recommended_lane']}"
-        )
-        typer.echo(
-            "    "
-            f"reason={row['route_reason']} "
-            f"charges={row['charge_count']} "
-            f"pages={row['page_count']}"
-        )
 
 
 @app.command("validate-document-diagnostics")
@@ -6600,337 +5883,6 @@ def validate_document_diagnostics(
         typer.echo("\nView and Python report agree on all non-healthy lane counts.")
 
 
-@app.command("enqueue-ocr-remediation-nc")
-def enqueue_ocr_remediation_nc(
-    limit: int = typer.Option(500, "--limit", help="Max remediation candidates to enqueue per invocation."),
-    company: str | None = typer.Option(None, help="Optional company filter."),
-    family_key: str | None = typer.Option(None, "--family-key", help="Optional family filter."),
-    backend: str = typer.Option("pytesseract_cpu", "--backend", help="OCR backend label."),
-    requested_by: str = typer.Option("operator", "--requested-by", help="Queue requester label."),
-    dry_run: bool = typer.Option(True, "--dry-run/--execute", help="Preview by default; use --execute to enqueue."),
-) -> None:
-    """Enqueue OCR remediation candidates from the historical-document audit."""
-    from duke_rates.db.ocr_queue import enqueue_ocr_queue_item
-
-    settings, _ = _bootstrap()
-    conn = connect_sqlite(Path(settings.database_path))
-    try:
-        report = _build_ocr_remediation_candidates_nc_report(
-            conn,
-            limit=max(limit * 10, 500),
-            company=company,
-            family_key=family_key,
-        )
-        inserted = 0
-        skipped = 0
-        considered = 0
-        sample_rows: list[dict[str, Any]] = []
-        for row in report["rows"]:
-            if row["recommended_lane"] != "queue_ocr_or_paddle":
-                continue
-            if inserted >= limit:
-                break
-            considered += 1
-            source_pdf = str(
-                conn.execute(
-                    "SELECT local_path FROM historical_documents WHERE id = ?",
-                    (int(row["historical_document_id"]),),
-                ).fetchone()["local_path"]
-            )
-            if not source_pdf or not Path(source_pdf).exists():
-                skipped += 1
-                continue
-            triage = triage_pdf(source_pdf)
-            priority = 80
-            if triage.gpu_ocr_candidate:
-                priority = 95
-            elif triage.ocr_confidence_score >= 0.85:
-                priority = 90
-            metadata = {
-                "requested_by": requested_by,
-                "source": "ocr_remediation_audit",
-                "historical_document_id": int(row["historical_document_id"]),
-                "family_key": row["family_key"],
-                "recommended_lane": row["recommended_lane"],
-                "route_reason": row["route_reason"],
-                "ocr_backend_version": OCR_BACKEND_VERSION,
-                "ocr_normalization_version": OCR_NORMALIZATION_VERSION,
-            }
-            if dry_run:
-                sample_rows.append(
-                    {
-                        "historical_document_id": int(row["historical_document_id"]),
-                        "family_key": row["family_key"],
-                        "priority": priority,
-                        "backend": backend,
-                        "route_reason": row["route_reason"],
-                    }
-                )
-                continue
-            queue_id, did_insert = enqueue_ocr_queue_item(
-                conn,
-                discovery_record_id=None,
-                source_pdf=source_pdf,
-                file_hash=None,
-                backend=backend,
-                priority=priority,
-                ocr_confidence=triage.ocr_confidence_score,
-                structure_complexity=triage.structure_complexity_score,
-                gpu_candidate=triage.gpu_ocr_candidate,
-                metadata=metadata,
-            )
-            if did_insert and queue_id is not None:
-                inserted += 1
-                sample_rows.append(
-                    {
-                        "historical_document_id": int(row["historical_document_id"]),
-                        "family_key": row["family_key"],
-                        "queue_id": queue_id,
-                        "priority": priority,
-                        "backend": backend,
-                    }
-                )
-            else:
-                skipped += 1
-        if not dry_run:
-            conn.commit()
-    finally:
-        conn.close()
-
-    mode = "dry_run" if dry_run else "execute"
-    typer.echo(f"OCR remediation enqueue ({mode})")
-    typer.echo(f"  considered={considered} inserted={inserted} skipped={skipped}")
-    for row in sample_rows[: min(10, len(sample_rows))]:
-        line = (
-            f"  hd={row['historical_document_id']} family={row['family_key']} "
-            f"backend={row['backend']} priority={row['priority']}"
-        )
-        if "queue_id" in row:
-            line += f" queue_id={row['queue_id']}"
-        if "route_reason" in row:
-            line += f" reason={row['route_reason']}"
-        typer.echo(line)
-
-
-@app.command("process-ocr-queue-nc")
-def process_ocr_queue_nc(
-    limit: int = typer.Option(500, "--limit", help="Max OCR queue items to process per invocation."),
-    workers: int = typer.Option(1, "--workers", min=1, help="Parallel local OCR workers. Safe for local file processing; keep portal/search workflows sequential."),
-    force: bool = typer.Option(False, "--force", help="Re-run OCR even if sidecars exist."),
-    until_empty: bool = typer.Option(False, "--until-empty", help="Keep processing until the queue is empty (overrides --limit)."),
-) -> None:
-    """Process pending OCR queue items and persist OCR artifacts."""
-    settings, _ = _bootstrap()
-    processed = 0
-    completed = 0
-    failed = 0
-
-    if until_empty:
-        limit = 1_000_000
-
-    max_workers = max(1, min(workers, limit))
-    if max_workers == 1:
-        while processed < limit:
-            result = _process_single_ocr_queue_item(Path(settings.database_path), force=force)
-            if not result["processed"]:
-                break
-            processed += 1
-            completed += int(result["completed"])
-            failed += int(result["failed"])
-        typer.echo(f"OCR queue processed={processed} completed={completed} failed={failed}")
-        return
-
-    submitted = 0
-    futures = set()
-    queue_exhausted = False
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        while submitted < limit and len(futures) < max_workers:
-            futures.add(executor.submit(_process_single_ocr_queue_item, Path(settings.database_path), force))
-            submitted += 1
-
-        while futures:
-            done, futures = wait(futures, return_when=FIRST_COMPLETED)
-            for future in done:
-                result = future.result()
-                if result["processed"]:
-                    processed += 1
-                    completed += int(result["completed"])
-                    failed += int(result["failed"])
-                else:
-                    queue_exhausted = True
-
-            while not queue_exhausted and submitted < limit and len(futures) < max_workers:
-                futures.add(executor.submit(_process_single_ocr_queue_item, Path(settings.database_path), force))
-                submitted += 1
-
-    typer.echo(
-        f"OCR queue processed={processed} completed={completed} failed={failed} workers={max_workers}"
-    )
-
-
-@app.command("process-ocr-backlog-nc")
-def process_ocr_backlog_nc(
-    workers: int = typer.Option(4, "--workers", min=1, help="Parallel Tesseract OCR workers."),
-    company: str | None = typer.Option(None, "--company", help="Optional company filter for enqueue step."),
-    family_key: str | None = typer.Option(None, "--family-key", help="Optional family filter for enqueue and extract steps."),
-    skip_enqueue: bool = typer.Option(False, "--skip-enqueue", help="Skip the remediation enqueue step (use when the queue is already populated)."),
-    skip_extract: bool = typer.Option(False, "--skip-extract", help="Skip the extract-rates step after the queue drains."),
-    force: bool = typer.Option(False, "--force", help="Re-run OCR even if sidecars exist."),
-    enqueue_limit: int = typer.Option(500, "--enqueue-limit", help="Max candidates to enqueue in the remediation step."),
-) -> None:
-    """Canonical OCR backlog workflow: enqueue remediation candidates, drain the OCR queue, then extract charges.
-
-    Replaces the hand-written loop around enqueue-ocr-remediation-nc, process-ocr-queue-nc
-    (repeated), and extract-rates-nc. Uses the Tesseract lane (queue_ocr_or_paddle).
-    For the structure-sensitive lane (run_docling_or_paddle_structure), run
-    process-docling-batch --ocr-remediation --source historical after this.
-    """
-    typer.echo("=== Step 1/3: Enqueue OCR remediation candidates ===")
-    if skip_enqueue:
-        typer.echo("  skipped (--skip-enqueue)")
-    else:
-        enqueue_ocr_remediation_nc(
-            limit=enqueue_limit,
-            company=company,
-            family_key=family_key,
-            backend="pytesseract_cpu",
-            requested_by="ocr_backlog_workflow",
-            dry_run=False,
-        )
-
-    typer.echo("")
-    typer.echo("=== Step 2/3: Drain OCR queue ===")
-    process_ocr_queue_nc(
-        limit=500,
-        workers=workers,
-        force=force,
-        until_empty=True,
-    )
-
-    typer.echo("")
-    typer.echo("=== Step 3/3: Extract rates from newly-OCR'd documents ===")
-    if skip_extract:
-        typer.echo("  skipped (--skip-extract)")
-    else:
-        extract_rates_nc(
-            limit=None,
-            family_key=family_key,
-            verbose=False,
-            progress=False,
-            progress_interval=30,
-        )
-
-    typer.echo("")
-    typer.echo("=== OCR backlog workflow complete ===")
-
-
-def _process_single_ocr_queue_item(database_path: Path, force: bool = False) -> dict[str, int | bool]:
-    """Claim and process one OCR queue item. Safe unit of parallel local work.
-
-    Holds one DB connection for the lifetime of the item. The connection is
-    only used at claim time and again at completion (the OCR work itself is
-    pure CPU/IO outside SQLite), so the lock is not held during long OCR runs.
-    """
-    from duke_rates.db.ocr_queue import (
-        claim_next_ocr_queue_item,
-        complete_ocr_queue_item,
-        upsert_ocr_artifact,
-    )
-    from duke_rates.historical.ncuc.pipeline.ocr import (
-        _compute_file_hash,
-        _ocr_pages_sidecar_path,
-        _ocr_text_sidecar_path,
-        extract_ocr_document_pages,
-        get_ocr_backend_unavailable_reason,
-        load_ocr_sidecar_payload,
-        summarize_ocr_payload,
-    )
-
-    conn = connect_sqlite(database_path)
-    try:
-        item = claim_next_ocr_queue_item(conn)
-        if not item:
-            return {"processed": False, "completed": 0, "failed": 0}
-        # Claim already commits internally via BEGIN IMMEDIATE / COMMIT.
-
-        queue_id = int(item["id"])
-        source_pdf = str(item["source_pdf"])
-        backend = str(item.get("backend") or "pytesseract_cpu")
-
-        # Short-circuit: file missing → mark failed and return without OCR work.
-        if not Path(source_pdf).exists():
-            complete_ocr_queue_item(
-                conn,
-                queue_id=queue_id,
-                status="failed",
-                error_message=f"OCR source missing: {source_pdf}",
-            )
-            conn.commit()
-            return {"processed": True, "completed": 0, "failed": 1}
-
-        # Short-circuit: backend unavailable.
-        unavailable_reason = get_ocr_backend_unavailable_reason(backend)
-        if unavailable_reason:
-            complete_ocr_queue_item(
-                conn,
-                queue_id=queue_id,
-                status="failed",
-                error_message=unavailable_reason,
-            )
-            conn.commit()
-            return {"processed": True, "completed": 0, "failed": 1}
-
-        # OCR runs outside any SQLite transaction; SQLite is autocommit here
-        # so other workers can claim items in parallel during this call.
-        try:
-            pages = extract_ocr_document_pages(source_pdf, force=force, backend=backend)
-        except Exception as exc:
-            complete_ocr_queue_item(
-                conn,
-                queue_id=queue_id,
-                status="failed",
-                error_message=str(exc),
-            )
-            conn.commit()
-            return {"processed": True, "completed": 0, "failed": 1}
-
-        file_hash = _compute_file_hash(source_pdf)
-        payload = load_ocr_sidecar_payload(source_pdf)
-        ocr_summary = summarize_ocr_payload(payload)
-
-        artifact_id = upsert_ocr_artifact(
-            conn,
-            discovery_record_id=item.get("discovery_record_id"),
-            source_pdf=source_pdf,
-            file_hash=file_hash,
-            backend=backend,
-            status="completed" if pages else "empty",
-            text_sidecar_path=str(_ocr_text_sidecar_path(source_pdf)),
-            pages_sidecar_path=str(_ocr_pages_sidecar_path(source_pdf)),
-            page_count=len(pages),
-            ocr_confidence=item.get("ocr_confidence"),
-            metadata={
-                "gpu_candidate": bool(item.get("gpu_candidate")),
-                "queue_id": queue_id,
-                "ocr_normalization_version": OCR_NORMALIZATION_VERSION,
-                **ocr_summary,
-            },
-        )
-        complete_ocr_queue_item(
-            conn,
-            queue_id=queue_id,
-            status="completed" if pages else "failed",
-            latest_artifact_id=artifact_id,
-            error_message=None if pages else "OCR produced no pages.",
-            metadata={
-                "page_count": len(pages),
-                **ocr_summary,
-            },
-        )
-        conn.commit()
-        return {"processed": True, "completed": 1 if pages else 0, "failed": 0 if pages else 1}
-    finally:
-        conn.close()
 
 
 @app.command("run-docling-nc")
@@ -9878,7 +8830,7 @@ def process_docling_batch(
         if classification:
             hints.append(f"--classification={classification!r} filter is active; remove to widen")
         if ocr_remediation:
-            hints.append("--ocr-remediation restricts to the run_docling_or_paddle_structure lane; check show-ocr-remediation-candidates-nc")
+            hints.append("--ocr-remediation restricts to the run_docling_or_paddle_structure lane; check `ocr show-remediation-candidates-nc`")
         if source == "historical":
             hints.append("source=historical only sees docs with hd.local_path set; check show-fingerprint-coverage-nc")
         elif source == "discovery":
@@ -13104,7 +12056,7 @@ def _build_parser_improvement_candidates_nc_report(
         family_key = row.get("family_key")
         family_flag = f" --family-key {family_key}" if family_key else ""
         if action == "enqueue_ocr_remediation":
-            return f"python -m duke_rates enqueue-ocr-remediation-nc --limit 10{family_flag}"
+            return f"python -m duke_rates ocr enqueue-remediation-nc --limit 10{family_flag}"
         if action == "enqueue_reprocess":
             hd_flags = " ".join(
                 f"--hd-id {doc_id}"
@@ -18060,8 +17012,8 @@ def _build_diagnostic_recommendation(report: dict) -> dict:
         return {
             "action": "run_ocr",
             "reason": f"No extractable text (text_length={text_len}). PDF is likely scanned/image-based.",
-            "suggested_command": f"python -m duke_rates enqueue-ocr-nc --hd-id {doc['id']}\n"
-                                 f"python -m duke_rates process-ocr-queue-nc",
+            "suggested_command": f"python -m duke_rates ocr enqueue-nc --hd-id {doc['id']}\n"
+                                 f"python -m duke_rates ocr process-queue-nc",
             "priority": "high",
         }
 
@@ -18110,7 +17062,7 @@ def _build_diagnostic_recommendation(report: dict) -> dict:
                 f"# Inspect text, then choose repair path:\n"
                 f"python -m duke_rates diagnose-document-nc --hd-id {doc['id']} --show-text\n"
                 f"# If OCR issue:\n"
-                f"python -m duke_rates enqueue-ocr-nc --hd-id {doc['id']}\n"
+                f"python -m duke_rates ocr enqueue-nc --hd-id {doc['id']}\n"
                 f"# If profile routing issue (e.g., Carolinas doc matched progress profile):\n"
                 f"python -m duke_rates enqueue-reprocess-nc --hd-id {doc['id']} --priority 90"
             ),
@@ -19076,7 +18028,7 @@ def diagnose_empty_nc(
         "ocr": {
             "label": "OCR Needed (no extractable text)",
             "description": "Documents with zero text_length. PDF is scanned/image-based and needs OCR before parsing.",
-            "command": "python -m duke_rates enqueue-ocr-nc --hd-id {ids}\npython -m duke_rates process-ocr-queue-nc",
+            "command": "python -m duke_rates ocr enqueue-nc --hd-id {ids}\npython -m duke_rates ocr process-queue-nc",
             "docs": [],
         },
         "generic": {
@@ -19412,7 +18364,7 @@ def repair_anomaly_nc(
                 )
                 conn.commit()
                 typer.echo(f"  [EXECUTED] Enqueued in OCR queue. Process with:")
-                typer.echo(f"    python -m duke_rates process-ocr-queue-nc")
+                typer.echo(f"    python -m duke_rates ocr process-queue-nc")
             else:
                 typer.echo(f"  [DRY RUN] Would enqueue in OCR queue")
 

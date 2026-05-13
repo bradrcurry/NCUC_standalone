@@ -64,6 +64,16 @@ Read these before inventing a new workflow:
 
 ---
 
+## Sub-Apps (Typer Sub-Commands)
+
+As of 2026-05-12, some commands are being reorganized into Typer sub-apps to make the CLI surface easier to navigate and to enable GitNexus indexing of the sub-app modules. The first migration is the `ocr` group.
+
+| Sub-app | Invocation | Status | Module |
+|---|---|---|---|
+| `ocr` | `python -m duke_rates ocr <command>` | ✅ Active | `src/duke_rates/cli_commands/ocr.py` |
+
+Run `python -m duke_rates <subapp> --help` to list the commands in a sub-app. The full refactor plan is in [CLI_REFACTOR_PLAN.md](/c:/Python/Duke/Standalone/docs/CLI_REFACTOR_PLAN.md); future phases will add `doc-intel`, `ncuc`, `lineage`, `export`, `billing`, `reprocess`, `workflow`, `progress`, and `search` sub-apps.
+
 ## Quick Orientation Commands
 
 Run these at the start of any session to understand current pipeline state:
@@ -73,7 +83,7 @@ python -m duke_rates show-workflow-status-nc      # compact NC workflow summary
 python -m duke_rates parse-review-summary          # review backlog overview (legacy vs new pipeline)
 python -m duke_rates show-reprocess-queue-nc       # pending reprocess jobs
 python -m duke_rates show-stale-historical-nc      # historical docs with stale or missing stage
-python -m duke_rates show-ocr-queue-nc             # OCR queue depth
+python -m duke_rates ocr show-queue-nc             # OCR queue depth (sub-app)
 python -m duke_rates list-provisional-families --state NC   # provisional families needing review
 ```
 
@@ -381,19 +391,21 @@ Use this stack when the question is not just "what extracted?" but:
 - do clean exact-date companions already exist
 - which families most need docket hunting versus reparsing
 
-### 2e. OCR Queue
+### 2e. OCR Queue (`ocr` sub-app)
 
 For scanned PDFs that pdfplumber cannot read — routes them through Docling or Tesseract.
 
+> **2026-05-12 refactor:** OCR commands moved from the root namespace to the `ocr` sub-app. Invoke as `python -m duke_rates ocr <command>`. See [CLI_REFACTOR_PLAN.md](/c:/Python/Duke/Standalone/docs/CLI_REFACTOR_PLAN.md) for the broader plan.
+
 | Command | What it does |
 |---|---|
-| `enqueue-ocr-nc` | Add documents to the OCR queue |
-| `show-ocr-queue-nc` | Show current OCR queue depth and status. Leads with a status-summary header (`total=N pending=N running=N completed=N failed=N`) |
-| `show-ocr-remediation-candidates-nc` | Rank NC historical documents that are likely blocked by missing OCR/plaintext, with a recommended next lane (`queue_ocr_or_paddle` vs `run_docling_or_paddle_structure`) |
-| `enqueue-ocr-remediation-nc` | Enqueue the `queue_ocr_or_paddle` subset from the remediation audit directly into the OCR queue; defaults to `pytesseract_cpu` and previews with `--dry-run` |
-| `process-ocr-queue-nc` | Process OCR queue (Tesseract-based). Supports `--workers N` for bounded parallel local OCR and `--until-empty` to drain the queue in one invocation. Default `--limit` is 500. Does not apply to portal/search workflows |
-| `process-ocr-backlog-nc` | **Canonical OCR backlog workflow.** One-shot: enqueue remediation candidates → drain the Tesseract queue with `--until-empty` → extract rates. Replaces the hand-written `enqueue` + `process` loop + `extract-rates` sequence. Flags: `--workers N`, `--skip-enqueue`, `--skip-extract`, `--company`, `--family-key`, `--enqueue-limit` |
-| `report-ocr-benchmark-nc` | Summarize OCR-backed historical docs, downstream parse outcomes, and recommended remediation lanes when OCR artifacts already exist |
+| `ocr enqueue-nc` | Add documents to the OCR queue (was `enqueue-ocr-nc`) |
+| `ocr show-queue-nc` | Show current OCR queue depth and status. Leads with a status-summary header (`total=N pending=N running=N completed=N failed=N`) (was `show-ocr-queue-nc`) |
+| `ocr show-remediation-candidates-nc` | Rank NC historical documents that are likely blocked by missing OCR/plaintext, with a recommended next lane (`queue_ocr_or_paddle` vs `run_docling_or_paddle_structure`) (was `show-ocr-remediation-candidates-nc`) |
+| `ocr enqueue-remediation-nc` | Enqueue the `queue_ocr_or_paddle` subset from the remediation audit directly into the OCR queue; defaults to `pytesseract_cpu` and previews with `--dry-run` (was `enqueue-ocr-remediation-nc`) |
+| `ocr process-queue-nc` | Process OCR queue (Tesseract-based). Supports `--workers N` for bounded parallel local OCR and `--until-empty` to drain the queue in one invocation. Default `--limit` is 500. Does not apply to portal/search workflows (was `process-ocr-queue-nc`) |
+| `ocr process-backlog-nc` | **Canonical OCR backlog workflow.** One-shot: enqueue remediation candidates → drain the Tesseract queue with `--until-empty` → extract rates. Replaces the hand-written `enqueue` + `process` loop + `extract-rates` sequence. Flags: `--workers N`, `--skip-enqueue`, `--skip-extract`, `--company`, `--family-key`, `--enqueue-limit` (was `process-ocr-backlog-nc`) |
+| `ocr report-benchmark-nc` | Summarize OCR-backed historical docs, downstream parse outcomes, and recommended remediation lanes when OCR artifacts already exist (was `report-ocr-benchmark-nc`) |
 | `mine-docling-nc` | Process documents via Docling (GPU-accelerated layout+text) |
 | `run-docling-nc` | Run Docling on NC documents |
 | `run-docling-vlm` | Run Docling VLM (vision-language model) mode |
@@ -823,6 +835,9 @@ python -m duke_rates run-llm-promotion-overnight-nc --validation-limit 2000 --re
 
 Operational notes:
 - `extract_staged` is now the recommended overnight value-creation path. It has been more productive than asking local models to synthesize reusable regex.
+- If `extract_staged` repeatedly reports `filtered_at_stage_1` with the same
+  `regex_gap` / `wrong_profile` distribution, the LLM lane is idle. Move to
+  parser-profile/routing fixes before running another long extraction loop.
 - `run-llm-promotion-overnight-nc` now has two proposal phases:
   - create proposals for newly validated rows
   - refresh existing pending proposals
@@ -838,6 +853,93 @@ Operational notes:
   - same-family dated sibling versions inferred from historical snapshot/effective metadata
   - bounded bundle rerouting via unique leaf/date evidence
   - Leaf 601 BA-like summary-line dates when a unique rider-summary match points to an existing dated Leaf 601 version.
+
+### 15h. One-Hour Targeted LLM Loop
+
+Use this when you want to test whether the LLM lane can improve the backlog
+without a full overnight run. Keep the scope narrow: `generic_residential` and
+`progress_single_value_rider` are the current high-value profiles.
+
+For a reusable launcher, use
+[`scripts/overnight/targeted_llm_blocker_loop.ps1`](/c:/Python/Duke/Standalone/scripts/overnight/targeted_llm_blocker_loop.ps1).
+
+```powershell
+# Baseline
+python -m duke_rates show-workflow-status-nc
+python -m duke_rates show-parser-improvement-candidates-nc --limit 25
+python -m duke_rates show-near-miss-profiles-nc --limit 25
+
+# Extraction passes
+python -m duke_rates run-overnight-parse-improvement-nc --task-kind extract_staged --max-runtime-minutes 15 --limit 10 --resume --auto-rediagnose-unknown --profile generic_residential
+python -m duke_rates run-overnight-parse-improvement-nc --task-kind extract_staged --max-runtime-minutes 15 --limit 10 --resume --auto-rediagnose-unknown --profile progress_single_value_rider
+
+# Deterministic cleanup
+python -m duke_rates validate-llm-rate-extractions-nc --limit 200 --execute
+python -m duke_rates locate-llm-row-evidence-nc --issue unit_missing --limit 50 --execute
+python -m duke_rates reclassify-llm-row-conflicts-nc --limit 50 --execute
+python -m duke_rates apply-deterministic-llm-row-repairs-nc --limit 200 --execute
+
+# Promotion refresh
+python -m duke_rates propose-llm-charge-promotions-nc --limit 10000 --refresh-existing --json
+python -m duke_rates promote-llm-charge-proposals-nc --limit 500 --json
+python -m duke_rates show-llm-row-effective-status-nc --json
+python -m duke_rates show-workflow-status-nc
+```
+
+Stop early if the extraction passes are idle or the promotion dry-run is still
+fully blocked. This is a blocker-reduction test, not a full backlog sweep.
+
+### 15i. Multi-Phase Backlog-Drain Wrapper
+
+Use the wrapper when multiple lanes have real work: OCR remediation, stale
+reprocess, bootstrap, and LLM promotion. Do not use it as a blind replacement
+for targeted blocker work.
+
+```powershell
+pwsh scripts\overnight\backlog_drain_overnight.ps1 `
+  -DeadlineTime "08:00" `
+  -MaxSliceMinutes 30 `
+  -OcrEnqueueLimit 25 `
+  -OcrWorkers 4 `
+  -ReprocessLimit 20 `
+  -ReprocessWorkers 2 `
+  -BootstrapLimit 50 `
+  -ExtractLimit 12 `
+  -GroundedLimit 10
+```
+
+Preflight:
+
+```powershell
+python -m duke_rates show-workflow-status-nc
+python -m duke_rates ocr show-queue-nc --status all --limit 10
+python -m duke_rates ocr show-remediation-candidates-nc --limit 25
+python -m duke_rates show-reprocess-queue-nc --status running --limit 10
+python -m duke_rates propose-llm-charge-promotions-nc --limit 10000 --refresh-existing --json
+```
+
+Morning readout:
+
+```powershell
+python -m duke_rates show-workflow-status-nc
+python -m duke_rates ocr report-benchmark-nc --limit 50
+python -m duke_rates ocr show-remediation-candidates-nc --limit 25
+python -m duke_rates show-reprocess-queue-nc --status running --limit 10
+python -m duke_rates promote-llm-charge-proposals-nc --limit 500 --json
+```
+
+Wrapper behavior notes:
+- The wrapper uses environment-backed scalar SQL probes instead of inline
+  `SELECT COUNT(*)` strings, avoiding PowerShell glob parsing errors around `*`.
+- Bootstrap now skips the expensive full `extract-rates-nc` call when
+  `bootstrap-missing-versions-nc` creates no new linked versions.
+- `null_effective_start` is reported as a separate blocker. Use
+  `remediate-nc-missing-doc-effective-start`; bootstrap cannot fix historical
+  docs that already have versions but lack effective dates.
+- If OCR remediation keeps cycling the same families, inspect
+  `ocr show-remediation-candidates-nc` and `ocr report-benchmark-nc`. Completed
+  OCR should no longer be treated as absent solely because the artifact hash and
+  historical document hash differ.
 
 Model note:
 - `parse_failure_triage` should favor fixture accuracy over action rate. A May
@@ -1096,7 +1198,7 @@ Some commands require optional extras installed via `pip install -e ".[group]"`:
 |---|---|
 | `browser` | `ncuc-playwright-discover`, `ncuc-portal-scrape`, portal download scripts |
 | `pdf` | All PDF parsing and extraction commands |
-| `ocr` | `process-ocr-queue-nc`, `enqueue-ocr-nc` |
+| `ocr` | `ocr process-queue-nc`, `ocr enqueue-nc` |
 | `docling` | `mine-docling-nc`, `run-docling-nc`, `run-docling-vlm`, `process-docling-batch` |
 | `ai` | `run-docling-vlm`, LLM-based classification commands |
 | `viz` | `app/streamlit_*.py` apps |

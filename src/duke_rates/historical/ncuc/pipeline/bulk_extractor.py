@@ -215,7 +215,7 @@ class BulkExtractor:
         self.date_extractor = DateExtractor()
         self.parser_registry = HistoricalRateParserRegistry()
         # Extraction operates on cached representations — OCR escalation
-        # belongs in the ingestion path (process-ocr-queue-nc, process-docling-batch),
+        # belongs in the ingestion path (`ocr process-queue-nc`, process-docling-batch),
         # not here. Disabling GLM/Paddle prevents per-doc Ollama/GPU calls during
         # rate extraction.
         self.document_intelligence = DocumentIntelligenceOrchestrator(

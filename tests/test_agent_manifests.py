@@ -7,9 +7,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CLI_PATH = ROOT / "src" / "duke_rates" / "cli.py"
+CLI_COMMANDS_DIR = ROOT / "src" / "duke_rates" / "cli_commands"
 TOOL_REGISTRY_PATH = ROOT / "docs" / "agent_tool_registry.json"
 WORKFLOW_PATH = ROOT / "docs" / "agent_workflows.json"
-COMMAND_RE = re.compile(r'@app\.command\("([^"]+)"\)')
+ROOT_COMMAND_RE = re.compile(r'@app\.command\("([^"]+)"\)')
+SUBAPP_COMMAND_RE = re.compile(r'@(\w+)_app\.command\("([^"]+)"\)')
+SUBAPP_REGISTRATION_RE = re.compile(r'app\.add_typer\((\w+)_app,\s*name="([^"]+)"\)')
 
 
 def _load_json(path: Path) -> dict:
@@ -17,7 +20,32 @@ def _load_json(path: Path) -> dict:
 
 
 def _cli_commands() -> set[str]:
-    return set(COMMAND_RE.findall(CLI_PATH.read_text(encoding="utf-8")))
+    """Return the full set of registered CLI command paths.
+
+    Includes both root-level commands (e.g. ``crawl``) and sub-app commands
+    (e.g. ``ocr show-queue-nc``).
+    """
+    cli_text = CLI_PATH.read_text(encoding="utf-8")
+    commands: set[str] = set(ROOT_COMMAND_RE.findall(cli_text))
+
+    # Map sub-app variable name (e.g. "ocr_app" → "ocr") from cli.py registration.
+    subapp_names: dict[str, str] = {
+        match.group(1): match.group(2)
+        for match in SUBAPP_REGISTRATION_RE.finditer(cli_text)
+    }
+
+    # Scan each sub-app module for its commands.
+    for module_path in CLI_COMMANDS_DIR.glob("*.py"):
+        if module_path.name.startswith("_"):
+            continue
+        text = module_path.read_text(encoding="utf-8")
+        for match in SUBAPP_COMMAND_RE.finditer(text):
+            subapp_var = match.group(1)
+            subcommand = match.group(2)
+            if subapp_var in subapp_names:
+                commands.add(f"{subapp_names[subapp_var]} {subcommand}")
+
+    return commands
 
 
 def test_agent_tool_registry_is_well_formed_and_matches_cli_surface() -> None:

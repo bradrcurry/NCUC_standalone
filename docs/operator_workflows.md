@@ -62,7 +62,7 @@ If you need detail after the compact summary, follow with:
 python -m duke_rates parse-review-summary
 python -m duke_rates show-reprocess-queue-nc
 python -m duke_rates show-stale-historical-nc
-python -m duke_rates show-ocr-queue-nc
+python -m duke_rates ocr show-queue-nc
 ```
 
 To regenerate all DB-driven audit reports (do this at session end to keep reports current):
@@ -432,13 +432,13 @@ python -m duke_rates show-workflow-next-actions-nc --limit 10
 python -m duke_rates show-workflow-capabilities-nc
 python -m duke_rates show-workflow-action-receipts-nc --limit 10
 python -m duke_rates reconcile-workflow-action-receipts-nc --limit 10
-python -m duke_rates show-ocr-remediation-candidates-nc --limit 25
-python -m duke_rates enqueue-ocr-remediation-nc --limit 10          # dry-run by default
-python -m duke_rates enqueue-ocr-remediation-nc --limit 10 --execute
-python -m duke_rates process-ocr-backlog-nc --workers 4             # full workflow: enqueue -> drain -> extract
+python -m duke_rates ocr show-remediation-candidates-nc --limit 25
+python -m duke_rates ocr enqueue-remediation-nc --limit 10          # dry-run by default
+python -m duke_rates ocr enqueue-remediation-nc --limit 10 --execute
+python -m duke_rates ocr process-backlog-nc --workers 4             # full workflow: enqueue -> drain -> extract
 ```
 
-The canonical OCR backlog workflow is `process-ocr-backlog-nc`. It wraps the
+The canonical OCR backlog workflow is `ocr process-backlog-nc`. It wraps the
 three-step sequence (remediation enqueue, queue drain via `--until-empty`, rate
 extraction) in one command. Use the individual commands only when you need to
 inspect intermediate state or operate on a subset. For structure-sensitive
@@ -466,8 +466,8 @@ Outcome:
   question is whether the corpus needs better parser routing versus a different
   document lane entirely such as formula/reference/redline/unrelated-but-keep
 - `needs_normalization` rows in the classification audit are not parser-profile
-  work yet; route them through `show-ocr-remediation-candidates-nc` or
-  `enqueue-ocr-remediation-nc` so OCR/Paddle/Docling can recover usable text
+  work yet; route them through `ocr show-remediation-candidates-nc` or
+  `ocr enqueue-remediation-nc` so OCR/Paddle/Docling can recover usable text
   before profile selection is re-evaluated
 - `needs_processing` rows have usable text but no latest historical processing
   run; queue the concrete `--hd-id` values suggested by
@@ -484,7 +484,7 @@ Outcome:
   latest pipeline run — pure operational debt, no parser changes required.
   Defaults to `--dry-run`; add `--execute` to enqueue and `--process` to drain
   the reprocess queue in the same invocation.
-- `show-ocr-remediation-candidates-nc` is the preferred first OCR triage surface
+- `ocr show-remediation-candidates-nc` is the preferred first OCR triage surface
   for `unknown` / no-text cohorts; it recommends either the lighter OCR lane or
   Docling/layout-heavy escalation
 
@@ -494,7 +494,7 @@ OCR triage note:
   ranked list
 - `show-workflow-capabilities-nc` is the policy surface for sanctioned
   concurrency:
-  `process-ocr-queue-nc` and `process-reprocess-queue-nc` are local-only
+  `ocr process-queue-nc` and `process-reprocess-queue-nc` are local-only
   `workers_allowed`; portal/search and queue-enqueue actions remain
   `sequential_only`
 - `execute-workflow-next-action-nc --limit N --workers M` now honors that
@@ -506,11 +506,11 @@ OCR triage note:
 - `show-workflow-action-receipts-nc` now reconciles receipts by default, and
   `reconcile-workflow-action-receipts-nc` is the explicit repair command if you
   want to refresh receipt status first
-- use `show-ocr-remediation-candidates-nc` first when the problem is
+- use `ocr show-remediation-candidates-nc` first when the problem is
   `unknown + no text` or repeated weak/empty parsing
-- use `enqueue-ocr-remediation-nc` to move only the lighter
+- use `ocr enqueue-remediation-nc` to move only the lighter
   `queue_ocr_or_paddle` cohort into the OCR queue
-- use `report-ocr-benchmark-nc` only when OCR artifacts already exist and you
+- use `ocr report-benchmark-nc` only when OCR artifacts already exist and you
   want to compare backend/outcome cohorts
 
 **Note on parse-review-summary:** The large `tiered_ingest / unknown` backlog

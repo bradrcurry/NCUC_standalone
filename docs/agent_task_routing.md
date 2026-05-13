@@ -56,9 +56,9 @@ Touch:
 - [triage.py](/c:/Python/Duke/Standalone/src/duke_rates/historical/ncuc/pipeline/triage.py)
 
 Use:
-- `enqueue-ocr-nc`
-- `show-ocr-queue-nc`
-- `process-ocr-queue-nc`
+- `ocr enqueue-nc`
+- `ocr show-queue-nc`
+- `ocr process-queue-nc`
 
 ### Weak-parse or targeted reprocessing work
 

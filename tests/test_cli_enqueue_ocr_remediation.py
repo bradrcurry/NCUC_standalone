@@ -5,6 +5,7 @@ from datetime import UTC, datetime
 from typer.testing import CliRunner
 
 from duke_rates import cli
+from duke_rates.cli_commands import ocr as ocr_module
 from duke_rates.db.sqlite import connect
 
 
@@ -89,15 +90,13 @@ def test_enqueue_ocr_remediation_nc_dry_run(monkeypatch, tmp_path) -> None:
     db_path = tmp_path / "ocr-remediation-dry.db"
     _seed_remediation_db(db_path, tmp_path)
 
-    monkeypatch.setattr(
-        cli,
-        "_bootstrap",
-        lambda: (type("S", (), {"database_path": str(db_path)})(), None),
-    )
-    monkeypatch.setattr(cli, "triage_pdf", lambda _path: _FakeTriage())
+    fake_bootstrap = lambda: (type("S", (), {"database_path": str(db_path)})(), None)
+    monkeypatch.setattr(cli, "_bootstrap", fake_bootstrap)
+    monkeypatch.setattr(ocr_module, "_bootstrap", fake_bootstrap)
+    monkeypatch.setattr(ocr_module, "triage_pdf", lambda _path: _FakeTriage())
 
     runner = CliRunner()
-    result = runner.invoke(cli.app, ["enqueue-ocr-remediation-nc", "--limit", "5"])
+    result = runner.invoke(cli.app, ["ocr", "enqueue-remediation-nc", "--limit", "5"])
 
     assert result.exit_code == 0
     assert "OCR remediation enqueue (dry_run)" in result.stdout
@@ -109,15 +108,13 @@ def test_enqueue_ocr_remediation_nc_execute_inserts_queue(monkeypatch, tmp_path)
     db_path = tmp_path / "ocr-remediation-exec.db"
     _seed_remediation_db(db_path, tmp_path)
 
-    monkeypatch.setattr(
-        cli,
-        "_bootstrap",
-        lambda: (type("S", (), {"database_path": str(db_path)})(), None),
-    )
-    monkeypatch.setattr(cli, "triage_pdf", lambda _path: _FakeTriage())
+    fake_bootstrap = lambda: (type("S", (), {"database_path": str(db_path)})(), None)
+    monkeypatch.setattr(cli, "_bootstrap", fake_bootstrap)
+    monkeypatch.setattr(ocr_module, "_bootstrap", fake_bootstrap)
+    monkeypatch.setattr(ocr_module, "triage_pdf", lambda _path: _FakeTriage())
 
     runner = CliRunner()
-    result = runner.invoke(cli.app, ["enqueue-ocr-remediation-nc", "--limit", "5", "--execute"])
+    result = runner.invoke(cli.app, ["ocr", "enqueue-remediation-nc", "--limit", "5", "--execute"])
 
     assert result.exit_code == 0
     assert "OCR remediation enqueue (execute)" in result.stdout

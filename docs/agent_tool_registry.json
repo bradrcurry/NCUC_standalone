@@ -40,7 +40,7 @@
         "parse-review-summary",
         "show-reprocess-queue-nc",
         "show-stale-historical-nc",
-        "show-ocr-queue-nc",
+        "ocr show-queue-nc",
         "show-lineage-gaps-nc",
         "list-provisional-families"
       ],
@@ -156,11 +156,11 @@
       ]
     },
     {
-      "tool_id": "show-ocr-queue-nc",
+      "tool_id": "ocr show-queue-nc",
       "surface": "cli",
       "status": "supported",
       "category": "inspect",
-      "command": "python -m duke_rates show-ocr-queue-nc",
+      "command": "python -m duke_rates ocr show-queue-nc",
       "goal": "Inspect OCR queue depth and status for scanned historical PDFs.",
       "use_when": [
         "Checking whether OCR is blocking extraction progress",
@@ -171,8 +171,8 @@
       ],
       "prerequisites": [],
       "next_tools": [
-        "enqueue-ocr-nc",
-        "process-ocr-queue-nc"
+        "ocr enqueue-nc",
+        "ocr process-queue-nc"
       ],
       "mutates_state": false,
       "docs": [
@@ -856,11 +856,11 @@
       ]
     },
     {
-      "tool_id": "enqueue-ocr-nc",
+      "tool_id": "ocr enqueue-nc",
       "surface": "cli",
       "status": "supported",
       "category": "repair",
-      "command": "python -m duke_rates enqueue-ocr-nc",
+      "command": "python -m duke_rates ocr enqueue-nc",
       "goal": "Add scanned or unreadable historical documents to the OCR queue.",
       "use_when": [
         "Scanned PDFs need OCR before extraction can proceed"
@@ -872,8 +872,8 @@
         "Confirm OCR need with show-ocr-queue-nc or extraction diagnostics"
       ],
       "next_tools": [
-        "show-ocr-queue-nc",
-        "process-ocr-queue-nc"
+        "ocr show-queue-nc",
+        "ocr process-queue-nc"
       ],
       "mutates_state": true,
       "docs": [
@@ -882,11 +882,11 @@
       ]
     },
     {
-      "tool_id": "process-ocr-queue-nc",
+      "tool_id": "ocr process-queue-nc",
       "surface": "cli",
       "status": "supported",
       "category": "repair",
-      "command": "python -m duke_rates process-ocr-queue-nc",
+      "command": "python -m duke_rates ocr process-queue-nc",
       "goal": "Process queued OCR work for scanned historical PDFs.",
       "use_when": [
         "OCR jobs are queued and the environment is ready to run them"

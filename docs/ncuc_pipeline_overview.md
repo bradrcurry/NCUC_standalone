@@ -524,9 +524,9 @@ Planned additions:
   - recommendation order is persisted in parse diagnostics
   - alternate profiles are auto-tried only for empty first-pass extractions
 - OCR queue/cache support now exists through:
-  - `enqueue-ocr-nc`
-  - `show-ocr-queue-nc`
-  - `process-ocr-queue-nc`
+  - `ocr enqueue-nc`
+  - `ocr show-queue-nc`
+  - `ocr process-queue-nc`
 
 3. Evidence retention from existing PDFs
 - keep more than final extracted fields
