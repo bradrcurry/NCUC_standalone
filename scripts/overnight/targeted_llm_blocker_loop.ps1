@@ -12,7 +12,13 @@ param(
 )
 
 $deadline = (Get-Date).AddHours($DurationHours)
-$profiles = @('generic_residential', 'progress_single_value_rider')
+$profiles = @('progress_single_value_rider', 'generic_residential')
+$routingProfiles = @(
+    'progress_single_value_rider',
+    'generic_residential',
+    'zero_charge_program',
+    'progress_current_leaf_bridge'
+)
 $loopCount = 0
 
 $stamp = Get-Date -Format 'yyyyMMdd_HHmmss'
@@ -36,14 +42,24 @@ Write-Both "Now:        $((Get-Date).ToString('yyyy-MM-dd HH:mm:ss'))"
 Write-Both "Deadline:   $($deadline.ToString('yyyy-MM-dd HH:mm:ss'))"
 Write-Both "Hours:      $('{0:N2}' -f ($deadline - (Get-Date)).TotalHours)"
 Write-Both "Profiles:   $($profiles -join ', ')"
+Write-Both "Routing:    $($routingProfiles -join ', ')"
 Write-Both "Slice cap:  ${MaxRuntimeMinutes}m per extract pass"
 Write-Both "Limits:     extract=$ExtractLimit validation=$ValidationLimit evidence=$EvidenceLimit conflict=$ConflictLimit repair=$RepairLimit"
-Write-Both "Promotion:  $($ExecutePromotions ? 'execute-safe on promotion dry-run' : 'dry-run only')"
+Write-Both "Promotion:  $($ExecutePromotions ? 'execute on promotion pass' : 'dry-run only')"
 Write-Both "Log file:   $logFile"
 Write-Both ""
 
 Write-Both "=== Baseline workflow status ==="
 python -m duke_rates show-workflow-status-nc 2>&1 | ForEach-Object { Write-Both "  $_" }
+Write-Both ""
+Write-Both "=== Baseline parser improvement candidates ==="
+python -m duke_rates show-parser-improvement-candidates-nc --limit 10 2>&1 | ForEach-Object { Write-Both "  $_" }
+Write-Both ""
+Write-Both "=== Baseline near-miss profiles ==="
+python -m duke_rates show-near-miss-profiles-nc --limit 10 2>&1 | ForEach-Object { Write-Both "  $_" }
+Write-Both ""
+Write-Both "=== Baseline unknown routing audit ==="
+python -m duke_rates show-unknown-routing-audit-nc --limit 10 2>&1 | ForEach-Object { Write-Both "  $_" }
 Write-Both ""
 Write-Both "=== Baseline LLM effective status ==="
 python -m duke_rates show-llm-row-effective-status-nc --json 2>&1 | ForEach-Object { Write-Both "  $_" }
@@ -54,7 +70,26 @@ while ((Get-Date) -lt $deadline) {
     $loopCount++
     $remaining = [math]::Round(($deadline - (Get-Date)).TotalMinutes, 1)
 
-    Write-Both "=== Cycle $loopCount profile=$profile remaining=${remaining}m ==="
+    Write-Both "=== Cycle $loopCount routing-first profile=$profile remaining=${remaining}m ==="
+    Write-Both "Routing diagnostics"
+    python -m duke_rates show-parser-improvement-candidates-nc --limit 10 2>&1 | ForEach-Object { Write-Both "  $_" }
+    python -m duke_rates show-near-miss-profiles-nc --limit 10 2>&1 | ForEach-Object { Write-Both "  $_" }
+    python -m duke_rates show-unknown-routing-audit-nc --limit 10 2>&1 | ForEach-Object { Write-Both "  $_" }
+
+    Write-Both "Profile impact enqueue"
+    foreach ($routingProfile in $routingProfiles) {
+        python -m duke_rates enqueue-profile-impact-nc `
+            --parser-profile $routingProfile `
+            --limit 25 `
+            --requested-by targeted_llm_blocker_loop 2>&1 | ForEach-Object { Write-Both "  $_" }
+    }
+
+    Write-Both "Profile impact drain"
+    python -m duke_rates process-reprocess-queue-nc `
+        --limit 25 `
+        --workers 4 2>&1 | Select-Object -Last 20 | ForEach-Object { Write-Both "  $_" }
+
+    Write-Both "Targeted extraction"
     python -m duke_rates run-overnight-parse-improvement-nc `
         --task-kind extract_staged `
         --max-runtime-minutes $MaxRuntimeMinutes `
@@ -118,7 +153,7 @@ while ((Get-Date) -lt $deadline) {
     if ($ExecutePromotions) {
         python -m duke_rates promote-llm-charge-proposals-nc `
             --limit $PromotionLimit `
-            --execute-safe `
+            --execute `
             --json 2>&1 | Select-Object -Last 12 | ForEach-Object { Write-Both "  $_" }
     } else {
         python -m duke_rates promote-llm-charge-proposals-nc `

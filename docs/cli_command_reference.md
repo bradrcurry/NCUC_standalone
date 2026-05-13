@@ -864,14 +864,22 @@ For a reusable launcher, use
 [`scripts/overnight/targeted_llm_blocker_loop.ps1`](/c:/Python/Duke/Standalone/scripts/overnight/targeted_llm_blocker_loop.ps1).
 
 ```powershell
-# Baseline
+# Baseline and routing diagnostics
 python -m duke_rates show-workflow-status-nc
 python -m duke_rates show-parser-improvement-candidates-nc --limit 25
 python -m duke_rates show-near-miss-profiles-nc --limit 25
+python -m duke_rates show-unknown-routing-audit-nc --limit 25
+
+# Routing-impact enqueue and queue drain
+python -m duke_rates enqueue-profile-impact-nc --parser-profile progress_single_value_rider --limit 25 --requested-by targeted_llm_blocker_loop
+python -m duke_rates enqueue-profile-impact-nc --parser-profile generic_residential --limit 25 --requested-by targeted_llm_blocker_loop
+python -m duke_rates enqueue-profile-impact-nc --parser-profile zero_charge_program --limit 25 --requested-by targeted_llm_blocker_loop
+python -m duke_rates enqueue-profile-impact-nc --parser-profile progress_current_leaf_bridge --limit 25 --requested-by targeted_llm_blocker_loop
+python -m duke_rates process-reprocess-queue-nc --limit 25 --workers 4
 
 # Extraction passes
-python -m duke_rates run-overnight-parse-improvement-nc --task-kind extract_staged --max-runtime-minutes 15 --limit 10 --resume --auto-rediagnose-unknown --profile generic_residential
 python -m duke_rates run-overnight-parse-improvement-nc --task-kind extract_staged --max-runtime-minutes 15 --limit 10 --resume --auto-rediagnose-unknown --profile progress_single_value_rider
+python -m duke_rates run-overnight-parse-improvement-nc --task-kind extract_staged --max-runtime-minutes 15 --limit 10 --resume --auto-rediagnose-unknown --profile generic_residential
 
 # Deterministic cleanup
 python -m duke_rates validate-llm-rate-extractions-nc --limit 200 --execute
@@ -880,14 +888,18 @@ python -m duke_rates reclassify-llm-row-conflicts-nc --limit 50 --execute
 python -m duke_rates apply-deterministic-llm-row-repairs-nc --limit 200 --execute
 
 # Promotion refresh
-python -m duke_rates propose-llm-charge-promotions-nc --limit 10000 --refresh-existing --json
-python -m duke_rates promote-llm-charge-proposals-nc --limit 500 --json
+python -m duke_rates propose-llm-charge-promotions-nc --limit 10000 --refresh-existing --execute --json
+python -m duke_rates promote-llm-charge-proposals-nc --limit 500 --execute --json
 python -m duke_rates show-llm-row-effective-status-nc --json
 python -m duke_rates show-workflow-status-nc
 ```
 
-Stop early if the extraction passes are idle or the promotion dry-run is still
-fully blocked. This is a blocker-reduction test, not a full backlog sweep.
+Stop early if:
+- the routing diagnostics keep surfacing the same top families with no enqueue impact
+- the extraction passes are idle or filtered at stage 1
+- promotion still evaluates to `0 promotable` after cleanup
+
+This is a routing-first backlog-reduction test, not a full backlog sweep.
 
 ### 15i. Multi-Phase Backlog-Drain Wrapper
 

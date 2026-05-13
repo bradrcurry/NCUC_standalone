@@ -324,40 +324,49 @@ If you want a reusable launcher instead of manual copy/paste, use
 [`scripts/overnight/targeted_llm_blocker_loop.ps1`](/c:/Python/Duke/Standalone/scripts/overnight/targeted_llm_blocker_loop.ps1).
 
 ```powershell
-# 0. Baseline and target selection
+# 0. Baseline and routing diagnostics
 python -m duke_rates show-workflow-status-nc
 python -m duke_rates show-parser-improvement-candidates-nc --limit 25
 python -m duke_rates show-near-miss-profiles-nc --limit 25
+python -m duke_rates show-unknown-routing-audit-nc --limit 25
 
-# 1. Extract from the two highest-value near-miss profiles
-python -m duke_rates run-overnight-parse-improvement-nc --task-kind extract_staged --max-runtime-minutes 15 --limit 10 --resume --auto-rediagnose-unknown --profile generic_residential
+# 1. Requeue routing-impact docs and drain the queue
+python -m duke_rates enqueue-profile-impact-nc --parser-profile progress_single_value_rider --limit 25 --requested-by targeted_llm_blocker_loop
+python -m duke_rates enqueue-profile-impact-nc --parser-profile generic_residential --limit 25 --requested-by targeted_llm_blocker_loop
+python -m duke_rates enqueue-profile-impact-nc --parser-profile zero_charge_program --limit 25 --requested-by targeted_llm_blocker_loop
+python -m duke_rates enqueue-profile-impact-nc --parser-profile progress_current_leaf_bridge --limit 25 --requested-by targeted_llm_blocker_loop
+python -m duke_rates process-reprocess-queue-nc --limit 25 --workers 4
+
+# 2. Extract from the two highest-value near-miss profiles
 python -m duke_rates run-overnight-parse-improvement-nc --task-kind extract_staged --max-runtime-minutes 15 --limit 10 --resume --auto-rediagnose-unknown --profile progress_single_value_rider
+python -m duke_rates run-overnight-parse-improvement-nc --task-kind extract_staged --max-runtime-minutes 15 --limit 10 --resume --auto-rediagnose-unknown --profile generic_residential
 
-# 2. Convert candidate rows into actionable validation / repair state
+# 3. Convert candidate rows into actionable validation / repair state
 python -m duke_rates validate-llm-rate-extractions-nc --limit 200 --execute
 python -m duke_rates locate-llm-row-evidence-nc --issue unit_missing --limit 50 --execute
 python -m duke_rates reclassify-llm-row-conflicts-nc --limit 50 --execute
 python -m duke_rates apply-deterministic-llm-row-repairs-nc --limit 200 --execute
 
-# 3. Refresh promotion state and inspect whether anything became promotable
-python -m duke_rates propose-llm-charge-promotions-nc --limit 10000 --refresh-existing --json
-python -m duke_rates promote-llm-charge-proposals-nc --limit 500 --json
+# 4. Refresh promotion state and inspect whether anything became promotable
+python -m duke_rates propose-llm-charge-promotions-nc --limit 10000 --refresh-existing --execute --json
+python -m duke_rates promote-llm-charge-proposals-nc --limit 500 --execute --json
 python -m duke_rates show-llm-row-effective-status-nc --json
 python -m duke_rates show-workflow-status-nc
 ```
 
 Stop early if:
-- both extraction passes report only `skip` / `filtered_at_stage_1`
+- the routing diagnostics keep surfacing the same top families with no enqueue impact
+- the extraction passes report only `skip` / `filtered_at_stage_1`
 - validation mostly returns `no_rate_rows`
 - evidence-location mostly returns `unsupported_unit` or `evidence_quote_missing`
-- promotion dry-run still evaluates to `0 promotable`
+- promotion still evaluates to `0 promotable` after deterministic cleanup
 
 Interpretation:
 - If `generic_residential` or `progress_single_value_rider` produce new
   `validated` rows but promotions still block, the remaining problem is unit /
   charge-type / table-ambiguity cleanup, not extraction volume.
-- If both extraction passes are mostly idle, stop the LLM lane and switch to
-  parser-profile or routing work instead.
+- If both extraction passes are mostly idle, stop the extraction lane and stay
+  on routing / reprocess work instead.
 
 ### C. Full Overnight Pattern
 
