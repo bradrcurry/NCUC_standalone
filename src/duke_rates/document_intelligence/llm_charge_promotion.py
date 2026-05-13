@@ -350,6 +350,7 @@ def _build_proposal(conn: sqlite3.Connection, row: sqlite3.Row) -> PromotionProp
         source_quote=str(row["source_quote"] or ""),
         charge_type=charge_type,
         rate_unit=rate_unit,
+        rate_value=rate_value,
     ):
         issues.append("ambiguous_numeric_table_row")
 
@@ -932,6 +933,7 @@ def _ambiguous_numeric_table_row(
     source_quote: str,
     charge_type: str,
     rate_unit: str,
+    rate_value: float | None,
 ) -> bool:
     quote = _normalize_text_symbols(source_quote or "")
     if not quote:
@@ -942,6 +944,17 @@ def _ambiguous_numeric_table_row(
     unit = rate_unit.strip()
     normalized_quote = quote.lower()
     explicit_unit = any(marker in normalized_quote for marker in ("kwh", "kw", "¢", "cents", "$/", "per "))
+    if rate_value is not None and explicit_unit and charge_type in {"Energy Charge", "Lighting Charge", "Rider Adjustment"}:
+        exact_matches = 0
+        for token in numeric_tokens:
+            token_value = str(token).strip("()")
+            if _float_close(token_value, rate_value):
+                exact_matches += 1
+        if exact_matches == 1 and any(
+            marker in normalized_quote
+            for marker in ("energy", "lighting", "rider", "adjustment", "fuel")
+        ):
+            return False
     money_values = re.findall(r"\$\s*\d+(?:,\d{3})*(?:\.\d+)?", quote)
     cent_values = re.findall(r"\d+(?:,\d{3})*(?:\.\d+)?\s*(?:¢|cents?)", normalized_quote)
     if unit == "$/month" and len(money_values) == 1:
@@ -1013,7 +1026,51 @@ def _effective_unit(row: sqlite3.Row) -> str:
         return proposed
     if original in {"$", "¢"} and inferred:
         return inferred
+    if original in {"$", "¢", ""}:
+        derived_unit, _ = _infer_unit_from_row(row)
+        if derived_unit:
+            return derived_unit
     return original or inferred
+
+
+def _infer_unit_from_row(row: sqlite3.Row) -> tuple[str, str]:
+    charge_type = str(row["charge_type"] or "")
+    quote = str(row["source_quote"] or "")
+    evidence = " ".join(
+        str(value or "")
+        for value in (
+            row["source_quote"],
+            row["evidence_quote"],
+        )
+    ).lower()
+    if not quote and not evidence:
+        return "", ""
+    has_dollar_amount = "$" in quote or "$" in evidence
+    has_cent_amount = "¢" in quote or "cents" in evidence
+    if re.search(r"per\s+(?:[a-z-]+\s+){0,4}kwh\b", evidence):
+        if has_cent_amount or str(row["unit"] or "").strip() == "¢/kWh":
+            return "¢/kWh", "explicit_per_kwh_quote"
+        if has_dollar_amount or str(row["unit"] or "").strip() == "$/kWh":
+            return "$/kWh", "explicit_per_kwh_quote"
+    if re.search(r"per\s+(?:[a-z-]+\s+){0,4}kw\b", evidence):
+        if has_dollar_amount or str(row["unit"] or "").strip() == "$/kW":
+            return "$/kW", "explicit_per_kw_quote"
+    if has_dollar_amount and re.search(r"per\s+month\b|\bmonthly\b", evidence):
+        return "$/month", "explicit_monthly_quote"
+    fixed_monthly_charge = any(
+        token in charge_type.lower()
+        for token in ("fixed", "basic", "facilities", "monthly", "minimum")
+    )
+    if has_dollar_amount and fixed_monthly_charge and (
+        "monthly rate" in evidence
+        or "basic customer charge" in evidence
+        or "basic facilities charge" in evidence
+        or "customer charge" in evidence
+    ):
+        return "$/month", "fixed_charge_monthly_context"
+    if ("lighting" in charge_type.lower() or "lighting" in evidence) and has_dollar_amount:
+        return "$/month", "lighting_table_per_month_per_luminaire"
+    return "", ""
 
 
 def _normalize_charge_type(
@@ -1032,6 +1089,8 @@ def _normalize_charge_type(
             rate_row.get("label"),
         )
     ).lower()
+    if _looks_like_rider_adjustment(evidence):
+        return "Rider Adjustment"
     if (
         "storm recovery" in evidence
         or "storm cost recovery" in evidence
@@ -1054,6 +1113,36 @@ def _normalize_charge_type(
     if _is_lighting_monthly_row(rate_row, row):
         return "Lighting Charge"
     return charge_type
+
+
+def _looks_like_rider_adjustment(evidence: str) -> bool:
+    if not evidence:
+        return False
+    if "regulatory fee" in evidence:
+        return True
+    if any(
+        token in evidence
+        for token in (
+            "adjustment",
+            "surcharge",
+            "recovery",
+            "adder",
+            "late payment",
+            "incentiv",
+            "discount",
+            "rebate",
+            "dsm",
+            "saved",
+            "savings",
+        )
+    ):
+        return True
+    if "credit" in evidence and any(
+        token in evidence
+        for token in ("energy", "load", "participant", "monthly", "rider", "conservation")
+    ):
+        return True
+    return False
 
 
 def _malformed_family_key(family_key: str) -> bool:
@@ -1137,6 +1226,9 @@ def _is_lighting_monthly_row(rate_row: dict[str, Any], row: sqlite3.Row) -> bool
         "suburban" in evidence
         or "luminaire" in evidence
         or "lighting" in evidence
+        or "led" in evidence
+        or "shoebox" in evidence
+        or "streetlight" in evidence
         or "schedule-pl" in family_key
     )
 

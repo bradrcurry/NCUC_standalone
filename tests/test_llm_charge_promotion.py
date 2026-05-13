@@ -292,6 +292,49 @@ def test_propose_llm_charge_promotions_uses_inferred_unit_for_bare_original_unit
     assert report["rows"][0]["rate_unit"] == "$/month"
 
 
+def test_propose_llm_charge_promotions_infers_bare_unit_from_source_quote(tmp_path):
+    db_path = tmp_path / "test.sqlite"
+    conn = _init_db(db_path)
+    _insert_validated_row(conn)
+    conn.execute(
+        """
+        UPDATE llm_candidate_rate_row_validations
+        SET charge_type = 'Basic Facilities Charge',
+            value = 21.0,
+            unit = '$',
+            source_quote = 'A. Basic Customer Charge: $21.00 per month'
+        WHERE id = 1
+        """,
+    )
+    conn.execute(
+        """
+        UPDATE llm_candidate_rate_extractions
+        SET rate_rows_json = ?
+        WHERE id = 10
+        """,
+        (
+            json.dumps(
+                [
+                    {
+                        "charge_type": "Basic Facilities Charge",
+                        "value": 21.0,
+                        "unit": "$",
+                        "source_quote": "A. Basic Customer Charge: $21.00 per month",
+                    }
+                ]
+            ),
+        ),
+    )
+    conn.commit()
+    conn.close()
+
+    report = propose_llm_charge_promotions(db_path, limit=10, execute=False)
+
+    assert report["summary"]["eligibility_counts"] == {"eligible": 1}
+    assert report["rows"][0]["rate_unit"] == "$/month"
+    assert "unqualified_rate_unit" not in report["rows"][0]["eligibility_issues"]
+
+
 def test_propose_llm_charge_promotions_refreshes_existing_null_repair_proposal(tmp_path):
     db_path = tmp_path / "test.sqlite"
     conn = _init_db(db_path)
@@ -444,6 +487,96 @@ def test_propose_llm_charge_promotions_blocks_path_like_family_keys(tmp_path):
     assert "malformed_family_key" in report["rows"][0]["eligibility_issues"]
 
 
+def test_propose_llm_charge_promotions_normalizes_regulatory_fee_other_rows(tmp_path):
+    db_path = tmp_path / "test.sqlite"
+    conn = _init_db(db_path)
+    _insert_validated_row(conn)
+    source_quote = "Taxes = NC Regulatory Fee (currently 0.1703%)"
+    conn.execute(
+        """
+        UPDATE llm_candidate_rate_row_validations
+        SET charge_type = 'Other',
+            value = 0.1703,
+            unit = '%',
+            source_quote = ?
+        WHERE id = 1
+        """,
+        (source_quote,),
+    )
+    conn.execute(
+        """
+        UPDATE llm_candidate_rate_extractions
+        SET rate_rows_json = ?
+        WHERE id = 10
+        """,
+        (
+            json.dumps(
+                [
+                    {
+                        "charge_type": "Other",
+                        "value": 0.1703,
+                        "unit": "%",
+                        "source_quote": source_quote,
+                    }
+                ]
+            ),
+        ),
+    )
+    conn.commit()
+    conn.close()
+
+    report = propose_llm_charge_promotions(db_path, limit=10, execute=False)
+
+    assert report["summary"]["eligibility_counts"] == {"eligible": 1}
+    assert report["rows"][0]["charge_type"] == "Rider Adjustment"
+    assert "unsupported_charge_type" not in report["rows"][0]["eligibility_issues"]
+
+
+def test_propose_llm_charge_promotions_normalizes_late_payment_other_rows(tmp_path):
+    db_path = tmp_path / "test.sqlite"
+    conn = _init_db(db_path)
+    _insert_validated_row(conn)
+    source_quote = "shall be subject to a one percent (1%) late payment charge on the unpaid amount."
+    conn.execute(
+        """
+        UPDATE llm_candidate_rate_row_validations
+        SET charge_type = 'Other',
+            value = 1.0,
+            unit = '%',
+            source_quote = ?
+        WHERE id = 1
+        """,
+        (source_quote,),
+    )
+    conn.execute(
+        """
+        UPDATE llm_candidate_rate_extractions
+        SET rate_rows_json = ?
+        WHERE id = 10
+        """,
+        (
+            json.dumps(
+                [
+                    {
+                        "charge_type": "Other",
+                        "value": 1.0,
+                        "unit": "%",
+                        "source_quote": source_quote,
+                    }
+                ]
+            ),
+        ),
+    )
+    conn.commit()
+    conn.close()
+
+    report = propose_llm_charge_promotions(db_path, limit=10, execute=False)
+
+    assert report["summary"]["eligibility_counts"] == {"eligible": 1}
+    assert report["rows"][0]["charge_type"] == "Rider Adjustment"
+    assert "unsupported_charge_type" not in report["rows"][0]["eligibility_issues"]
+
+
 def test_propose_llm_charge_promotions_reroutes_path_like_family_key_when_canonical_version_exists(tmp_path):
     db_path = tmp_path / "test.sqlite"
     conn = _init_db(db_path)
@@ -521,6 +654,55 @@ def test_propose_llm_charge_promotions_normalizes_lighting_monthly_other_rows(tm
     row = report["rows"][0]
     assert row["charge_type"] == "Lighting Charge"
     assert row["charge_label"] == "Lighting Charge - Suburban (1)"
+    assert "unsupported_charge_type" not in row["eligibility_issues"]
+
+
+def test_propose_llm_charge_promotions_normalizes_led_shoebox_other_rows(tmp_path):
+    db_path = tmp_path / "test.sqlite"
+    conn = _init_db(db_path)
+    _insert_validated_row(conn)
+    source_quote = "LED 220 Shoebox 24.51 79"
+    conn.execute(
+        """
+        UPDATE llm_candidate_rate_row_validations
+        SET charge_type = 'Other',
+            value = 24.51,
+            unit = '$/month',
+            source_quote = ?
+        WHERE id = 1
+        """,
+        (source_quote,),
+    )
+    conn.execute(
+        """
+        UPDATE llm_candidate_rate_extractions
+        SET rate_rows_json = ?
+        WHERE id = 10
+        """,
+        (
+            json.dumps(
+                [
+                    {
+                        "charge_type": "Other",
+                        "charge_label": "Other - Residential",
+                        "customer_class": "Residential",
+                        "value": 24.51,
+                        "unit": "$/month",
+                        "source_quote": source_quote,
+                    }
+                ]
+            ),
+        ),
+    )
+    conn.commit()
+    conn.close()
+
+    report = propose_llm_charge_promotions(db_path, limit=10, execute=False)
+
+    assert report["summary"]["eligibility_counts"] == {"eligible": 1}
+    row = report["rows"][0]
+    assert row["charge_type"] == "Lighting Charge"
+    assert row["charge_label"] == "Lighting Charge - Residential"
     assert "unsupported_charge_type" not in row["eligibility_issues"]
 
 
@@ -615,6 +797,144 @@ def test_propose_llm_charge_promotions_normalizes_other_demand_rows(tmp_path):
 
     assert report["summary"]["eligibility_counts"] == {"eligible": 1}
     assert report["rows"][0]["charge_type"] == "Demand Charge"
+    assert "unsupported_charge_type" not in report["rows"][0]["eligibility_issues"]
+
+
+def test_propose_llm_charge_promotions_normalizes_incentive_other_rows(tmp_path):
+    db_path = tmp_path / "test.sqlite"
+    conn = _init_db(db_path)
+    _insert_validated_row(conn)
+    source_quote = (
+        "All kWh savings shall be incentivized at up to $0.75/kWh in homes "
+        "that consume natural gas for space heating with at least one unit."
+    )
+    conn.execute(
+        """
+        UPDATE llm_candidate_rate_row_validations
+        SET charge_type = 'Other',
+            value = 0.75,
+            unit = '$/kWh',
+            source_quote = ?
+        WHERE id = 1
+        """,
+        (source_quote,),
+    )
+    conn.execute(
+        """
+        UPDATE llm_candidate_rate_extractions
+        SET rate_rows_json = ?
+        WHERE id = 10
+        """,
+        (
+            json.dumps(
+                [
+                    {
+                        "charge_type": "Other",
+                        "value": 0.75,
+                        "unit": "$/kWh",
+                        "source_quote": source_quote,
+                    }
+                ]
+            ),
+        ),
+    )
+    conn.commit()
+    conn.close()
+
+    report = propose_llm_charge_promotions(db_path, limit=10, execute=False)
+
+    assert report["summary"]["eligibility_counts"] == {"eligible": 1}
+    assert report["rows"][0]["charge_type"] == "Rider Adjustment"
+    assert "unsupported_charge_type" not in report["rows"][0]["eligibility_issues"]
+
+
+def test_propose_llm_charge_promotions_normalizes_dsm_other_rows(tmp_path):
+    db_path = tmp_path / "test.sqlite"
+    conn = _init_db(db_path)
+    _insert_validated_row(conn)
+    source_quote = "0.049 (DSM Only) (0.005) (DSM"
+    conn.execute(
+        """
+        UPDATE llm_candidate_rate_row_validations
+        SET charge_type = 'Other',
+            value = 0.005,
+            unit = '¢/kWh',
+            source_quote = ?
+        WHERE id = 1
+        """,
+        (source_quote,),
+    )
+    conn.execute(
+        """
+        UPDATE llm_candidate_rate_extractions
+        SET rate_rows_json = ?
+        WHERE id = 10
+        """,
+        (
+            json.dumps(
+                [
+                    {
+                        "charge_type": "Other",
+                        "value": 0.005,
+                        "unit": "¢/kWh",
+                        "source_quote": source_quote,
+                    }
+                ]
+            ),
+        ),
+    )
+    conn.commit()
+    conn.close()
+
+    report = propose_llm_charge_promotions(db_path, limit=10, execute=False)
+
+    assert report["summary"]["eligibility_counts"] == {"eligible": 1}
+    assert report["rows"][0]["charge_type"] == "Rider Adjustment"
+    assert "unsupported_charge_type" not in report["rows"][0]["eligibility_issues"]
+
+
+def test_propose_llm_charge_promotions_normalizes_saved_other_rows(tmp_path):
+    db_path = tmp_path / "test.sqlite"
+    conn = _init_db(db_path)
+    _insert_validated_row(conn)
+    source_quote = "Up to $0.75/kWh saved"
+    conn.execute(
+        """
+        UPDATE llm_candidate_rate_row_validations
+        SET charge_type = 'Other',
+            value = 0.75,
+            unit = '$/kWh',
+            source_quote = ?
+        WHERE id = 1
+        """,
+        (source_quote,),
+    )
+    conn.execute(
+        """
+        UPDATE llm_candidate_rate_extractions
+        SET rate_rows_json = ?
+        WHERE id = 10
+        """,
+        (
+            json.dumps(
+                [
+                    {
+                        "charge_type": "Other",
+                        "value": 0.75,
+                        "unit": "$/kWh",
+                        "source_quote": source_quote,
+                    }
+                ]
+            ),
+        ),
+    )
+    conn.commit()
+    conn.close()
+
+    report = propose_llm_charge_promotions(db_path, limit=10, execute=False)
+
+    assert report["summary"]["eligibility_counts"] == {"eligible": 1}
+    assert report["rows"][0]["charge_type"] == "Rider Adjustment"
     assert "unsupported_charge_type" not in report["rows"][0]["eligibility_issues"]
 
 
@@ -944,6 +1264,55 @@ def test_propose_llm_charge_promotions_keeps_single_currency_lighting_table_row_
                         "charge_type": "Lighting Charge",
                         "value": 6.76,
                         "unit": "$/month",
+                        "source_quote": source_quote,
+                    }
+                ]
+            ),
+        ),
+    )
+    conn.commit()
+    conn.close()
+
+    report = propose_llm_charge_promotions(db_path, limit=10, execute=False)
+
+    assert report["summary"]["eligibility_counts"] == {"eligible": 1}
+    assert "ambiguous_numeric_table_row" not in report["rows"][0]["eligibility_issues"]
+
+
+def test_propose_llm_charge_promotions_allows_unique_lighting_summary_row(tmp_path):
+    db_path = tmp_path / "test.sqlite"
+    conn = _init_db(db_path)
+    _insert_validated_row(conn)
+    source_quote = (
+        "The fuel rate included in base tariff rates effective October 1, 2023 "
+        "are 2.808¢/kWh for RES, 3.097¢/kWh for SGS, 2.580¢/kWh for MGS, "
+        "2.138¢/kWh for LGS and 3.377¢/kWh for Lighting, excluding the North "
+        "Carolina regulatory fee."
+    )
+    conn.execute(
+        """
+        UPDATE llm_candidate_rate_row_validations
+        SET charge_type = 'Lighting Charge',
+            value = 3.377,
+            unit = '¢/kWh',
+            source_quote = ?
+        WHERE id = 1
+        """,
+        (source_quote,),
+    )
+    conn.execute(
+        """
+        UPDATE llm_candidate_rate_extractions
+        SET rate_rows_json = ?
+        WHERE id = 10
+        """,
+        (
+            json.dumps(
+                [
+                    {
+                        "charge_type": "Lighting Charge",
+                        "value": 3.377,
+                        "unit": "¢/kWh",
                         "source_quote": source_quote,
                     }
                 ]
