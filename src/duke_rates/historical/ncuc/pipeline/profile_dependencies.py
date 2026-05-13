@@ -249,6 +249,13 @@ _PROFILE_IMPACT_RULES: dict[str, ParserProfileImpactRule] = {
         candidate_reason_tokens=("management_energy_efficiency_cost_recovery_rider", "cost_recovery_rider", "monthly_rate", "applicability"),
         description="DEP Management and Energy Efficiency Cost Recovery Rider sheets that were previously collapsing into unknown routing.",
     ),
+    "progress_compliance_report_and_cost_recovery_rider": ParserProfileImpactRule(
+        parser_profile="progress_compliance_report_and_cost_recovery_rider",
+        family_keys=("nc-progress-rider-COMPLIANCEREPORTANDCOSTRECOVERYRIDER",),
+        companies=("progress",),
+        candidate_reason_tokens=("compliance_report_and_cost_recovery_rider", "cost_recovery_rider", "monthly_rate", "applicability"),
+        description="DEP Compliance Report and Cost Recovery Rider sheets that were previously collapsing into unknown routing.",
+    ),
     "progress_rider_adjustment_matrix": ParserProfileImpactRule(
         parser_profile="progress_rider_adjustment_matrix",
         family_keys=("nc-progress-leaf-600",),
