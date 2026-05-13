@@ -479,6 +479,17 @@ def _infer_unit(
     )
     if has_dollar_amount and program_incentive_context:
         return "$/bill", "program_incentive_context"
+    if has_dollar_amount and any(
+        token in haystack
+        for token in (
+            "load control device",
+            "thermostat",
+            "evse",
+            "gateway",
+            "heat strip",
+        )
+    ):
+        return "$/bill", "device_program_incentive_context"
     fixed_monthly_charge = any(
         token in normalized_charge_type
         for token in ("fixed", "basic", "facilities", "monthly", "minimum")

@@ -773,6 +773,11 @@ def _infer_unit_from_line(line: str) -> str:
         for token in ("hero", "heat pump", "central air conditioning")
     ):
         return "$/bill"
+    if has_dollar and any(
+        token in lower
+        for token in ("load control device", "thermostat", "evse", "gateway", "heat strip")
+    ):
+        return "$/bill"
     if has_dollar and ("bill" in lower or "credit" in lower or "incentive" in lower or "fee" in lower):
         return "$/bill"
     if has_cents and "kwh" in lower:
