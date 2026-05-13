@@ -294,12 +294,12 @@ Practical note:
 Use these for scanned documents and OCR-required work:
 
 ```powershell
-python -m duke_rates enqueue-ocr-nc
-python -m duke_rates show-ocr-queue-nc
-python -m duke_rates show-ocr-remediation-candidates-nc
-python -m duke_rates enqueue-ocr-remediation-nc --limit 10
-python -m duke_rates process-ocr-queue-nc
-python -m duke_rates process-ocr-queue-nc --workers 2
+python -m duke_rates ocr enqueue-nc
+python -m duke_rates ocr show-queue-nc
+python -m duke_rates ocr show-remediation-candidates-nc
+python -m duke_rates ocr enqueue-remediation-nc --limit 10
+python -m duke_rates ocr process-queue-nc
+python -m duke_rates ocr process-queue-nc --workers 2
 ```
 
 Prerequisites:
@@ -319,11 +319,11 @@ Recommended routing:
 
 Triage surfaces:
 
-- `show-ocr-remediation-candidates-nc` is the first audit for `unknown` /
+- `ocr show-remediation-candidates-nc` is the first audit for `unknown` /
   no-text / weak-without-OCR cohorts
-- `enqueue-ocr-remediation-nc` is the direct bridge from that audit into the
+- `ocr enqueue-remediation-nc` is the direct bridge from that audit into the
   OCR queue for the `queue_ocr_or_paddle` subset
-- `report-ocr-benchmark-nc` is useful only after OCR artifacts exist and you
+- `ocr report-benchmark-nc` is useful only after OCR artifacts exist and you
   want backend/outcome cohort reporting
 - `process-ocr-queue-nc --workers N` is safe for bounded parallel local OCR;
   do not generalize that concurrency to authenticated portal/search work
@@ -567,7 +567,7 @@ python -m duke_rates show-reprocess-queue-nc
 python -m duke_rates show-reprocess-priority-nc
 python -m duke_rates show-stale-historical-nc
 python -m duke_rates show-profile-impact-nc --parser-profile progress_residential_tou
-python -m duke_rates show-ocr-queue-nc
+python -m duke_rates ocr show-queue-nc
 python -m duke_rates list-provisional-families
 python -m duke_rates list-historical-only-families
 python -m duke_rates list-current-anchor-mismatches
@@ -841,9 +841,9 @@ When to use:
 Use this when many records are `OCR_REQUIRED` or low-text.
 
 ```powershell
-python -m duke_rates enqueue-ocr-nc
-python -m duke_rates show-ocr-queue-nc
-python -m duke_rates process-ocr-queue-nc
+python -m duke_rates ocr enqueue-nc
+python -m duke_rates ocr show-queue-nc
+python -m duke_rates ocr process-queue-nc
 python -m duke_rates enqueue-stale-reprocess-nc
 python -m duke_rates process-reprocess-queue-nc
 ```

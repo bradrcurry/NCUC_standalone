@@ -56,7 +56,7 @@ python -m duke_rates show-workflow-status-nc
 python -m duke_rates parse-review-summary
 python -m duke_rates show-reprocess-priority-nc
 python -m duke_rates export-nc-anomaly-audit
-python -m duke_rates report-ocr-benchmark-nc --sort-by weak-first
+python -m duke_rates ocr report-benchmark-nc --sort-by weak-first
 ```
 
 ## Not For This File

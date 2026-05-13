@@ -1,6 +1,8 @@
 # Next Session: Start Here
-**Date Updated:** 2026-05-12 (LLM extraction/promotion overnight workflow refreshed)
+**Date Updated:** 2026-05-12 (CLI refactor pilot landed + LLM extraction/promotion overnight workflow)
 **Purpose:** Short operational handoff with current state, immediate priorities, and the correct entry docs
+
+> **CLI refactor in flight on branch `refactor/cli-sub-apps`.** The 7 OCR commands moved into an `ocr` sub-app: `python -m duke_rates ocr <command>` (e.g. `ocr show-queue-nc`, `ocr process-backlog-nc`). See [CLI_REFACTOR_PLAN.md](/c:/Python/Duke/Standalone/docs/CLI_REFACTOR_PLAN.md) for the full plan — 9 more sub-apps (`doc-intel`, `ncuc`, `lineage`, etc.) are pending. All in-tree references (suggestion strings, tests, agent docs) were updated in the pilot commit; further phases will follow the same pattern.
 
 ## Read First
 
@@ -98,7 +100,7 @@ Run these first:
 ```powershell
 python -m duke_rates show-workflow-status-nc
 python -m duke_rates show-workflow-next-actions-nc
-python -m duke_rates show-ocr-remediation-candidates-nc
+python -m duke_rates ocr show-remediation-candidates-nc
 python -m duke_rates parse-review-summary
 python -m duke_rates show-reprocess-queue-nc
 python -m duke_rates show-stale-historical-nc
@@ -189,7 +191,7 @@ python -m duke_rates recommend-missing-dockets-nc --json
 1
 For continuing OCR backlog processing (canonical path):
 ```powershell
-python -m duke_rates process-ocr-backlog-nc --workers 4
+python -m duke_rates ocr process-backlog-nc --workers 4
 ```
 The super-command runs enqueue → drain (`--until-empty`) → extract in sequence. Use
 `--skip-enqueue` or `--skip-extract` to run partial phases. For the structure-sensitive

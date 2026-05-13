@@ -64,6 +64,16 @@ Read these before inventing a new workflow:
 
 ---
 
+## Sub-Apps (Typer Sub-Commands)
+
+As of 2026-05-12, some commands are being reorganized into Typer sub-apps to make the CLI surface easier to navigate and to enable GitNexus indexing of the sub-app modules. The first migration is the `ocr` group.
+
+| Sub-app | Invocation | Status | Module |
+|---|---|---|---|
+| `ocr` | `python -m duke_rates ocr <command>` | ✅ Active | `src/duke_rates/cli_commands/ocr.py` |
+
+Run `python -m duke_rates <subapp> --help` to list the commands in a sub-app. The full refactor plan is in [CLI_REFACTOR_PLAN.md](/c:/Python/Duke/Standalone/docs/CLI_REFACTOR_PLAN.md); future phases will add `doc-intel`, `ncuc`, `lineage`, `export`, `billing`, `reprocess`, `workflow`, `progress`, and `search` sub-apps.
+
 ## Quick Orientation Commands
 
 Run these at the start of any session to understand current pipeline state:
@@ -73,7 +83,7 @@ python -m duke_rates show-workflow-status-nc      # compact NC workflow summary
 python -m duke_rates parse-review-summary          # review backlog overview (legacy vs new pipeline)
 python -m duke_rates show-reprocess-queue-nc       # pending reprocess jobs
 python -m duke_rates show-stale-historical-nc      # historical docs with stale or missing stage
-python -m duke_rates show-ocr-queue-nc             # OCR queue depth
+python -m duke_rates ocr show-queue-nc             # OCR queue depth (sub-app)
 python -m duke_rates list-provisional-families --state NC   # provisional families needing review
 ```
 
@@ -381,19 +391,21 @@ Use this stack when the question is not just "what extracted?" but:
 - do clean exact-date companions already exist
 - which families most need docket hunting versus reparsing
 
-### 2e. OCR Queue
+### 2e. OCR Queue (`ocr` sub-app)
 
 For scanned PDFs that pdfplumber cannot read — routes them through Docling or Tesseract.
 
+> **2026-05-12 refactor:** OCR commands moved from the root namespace to the `ocr` sub-app. Invoke as `python -m duke_rates ocr <command>`. See [CLI_REFACTOR_PLAN.md](/c:/Python/Duke/Standalone/docs/CLI_REFACTOR_PLAN.md) for the broader plan.
+
 | Command | What it does |
 |---|---|
-| `enqueue-ocr-nc` | Add documents to the OCR queue |
-| `show-ocr-queue-nc` | Show current OCR queue depth and status. Leads with a status-summary header (`total=N pending=N running=N completed=N failed=N`) |
-| `show-ocr-remediation-candidates-nc` | Rank NC historical documents that are likely blocked by missing OCR/plaintext, with a recommended next lane (`queue_ocr_or_paddle` vs `run_docling_or_paddle_structure`) |
-| `enqueue-ocr-remediation-nc` | Enqueue the `queue_ocr_or_paddle` subset from the remediation audit directly into the OCR queue; defaults to `pytesseract_cpu` and previews with `--dry-run` |
-| `process-ocr-queue-nc` | Process OCR queue (Tesseract-based). Supports `--workers N` for bounded parallel local OCR and `--until-empty` to drain the queue in one invocation. Default `--limit` is 500. Does not apply to portal/search workflows |
-| `process-ocr-backlog-nc` | **Canonical OCR backlog workflow.** One-shot: enqueue remediation candidates → drain the Tesseract queue with `--until-empty` → extract rates. Replaces the hand-written `enqueue` + `process` loop + `extract-rates` sequence. Flags: `--workers N`, `--skip-enqueue`, `--skip-extract`, `--company`, `--family-key`, `--enqueue-limit` |
-| `report-ocr-benchmark-nc` | Summarize OCR-backed historical docs, downstream parse outcomes, and recommended remediation lanes when OCR artifacts already exist |
+| `ocr enqueue-nc` | Add documents to the OCR queue (was `enqueue-ocr-nc`) |
+| `ocr show-queue-nc` | Show current OCR queue depth and status. Leads with a status-summary header (`total=N pending=N running=N completed=N failed=N`) (was `show-ocr-queue-nc`) |
+| `ocr show-remediation-candidates-nc` | Rank NC historical documents that are likely blocked by missing OCR/plaintext, with a recommended next lane (`queue_ocr_or_paddle` vs `run_docling_or_paddle_structure`) (was `show-ocr-remediation-candidates-nc`) |
+| `ocr enqueue-remediation-nc` | Enqueue the `queue_ocr_or_paddle` subset from the remediation audit directly into the OCR queue; defaults to `pytesseract_cpu` and previews with `--dry-run` (was `enqueue-ocr-remediation-nc`) |
+| `ocr process-queue-nc` | Process OCR queue (Tesseract-based). Supports `--workers N` for bounded parallel local OCR and `--until-empty` to drain the queue in one invocation. Default `--limit` is 500. Does not apply to portal/search workflows (was `process-ocr-queue-nc`) |
+| `ocr process-backlog-nc` | **Canonical OCR backlog workflow.** One-shot: enqueue remediation candidates → drain the Tesseract queue with `--until-empty` → extract rates. Replaces the hand-written `enqueue` + `process` loop + `extract-rates` sequence. Flags: `--workers N`, `--skip-enqueue`, `--skip-extract`, `--company`, `--family-key`, `--enqueue-limit` (was `process-ocr-backlog-nc`) |
+| `ocr report-benchmark-nc` | Summarize OCR-backed historical docs, downstream parse outcomes, and recommended remediation lanes when OCR artifacts already exist (was `report-ocr-benchmark-nc`) |
 | `mine-docling-nc` | Process documents via Docling (GPU-accelerated layout+text) |
 | `run-docling-nc` | Run Docling on NC documents |
 | `run-docling-vlm` | Run Docling VLM (vision-language model) mode |
@@ -1096,7 +1108,7 @@ Some commands require optional extras installed via `pip install -e ".[group]"`:
 |---|---|
 | `browser` | `ncuc-playwright-discover`, `ncuc-portal-scrape`, portal download scripts |
 | `pdf` | All PDF parsing and extraction commands |
-| `ocr` | `process-ocr-queue-nc`, `enqueue-ocr-nc` |
+| `ocr` | `ocr process-queue-nc`, `ocr enqueue-nc` |
 | `docling` | `mine-docling-nc`, `run-docling-nc`, `run-docling-vlm`, `process-docling-batch` |
 | `ai` | `run-docling-vlm`, LLM-based classification commands |
 | `viz` | `app/streamlit_*.py` apps |

@@ -233,7 +233,7 @@ python -m duke_rates show-workflow-status-nc
 python -m duke_rates parse-review-summary
 python -m duke_rates show-reprocess-queue-nc
 python -m duke_rates show-stale-historical-nc
-python -m duke_rates show-ocr-queue-nc
+python -m duke_rates ocr show-queue-nc
 ```
 
 Discovery, intake, and extraction:

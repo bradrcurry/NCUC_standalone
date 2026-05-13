@@ -92,7 +92,7 @@ raw file
 | Span segmentation | `pipeline/segmentation.py`, `ncuc_span_artifacts` table | Page→span grouping with leaf/code detection. |
 | Family matching (rules) | `pipeline/family_matcher.py` `score_span_against_family` | Now wraps `classify_span_against_families` — see Phase 1. |
 | OCR backend routing | `pipeline/ocr.py` `select_ocr_backend`, progressive escalation | Decision matrix already exists. Do not write a new router. |
-| OCR queue + drain | `db/ocr_queue.py`, CLI `process-ocr-queue-nc` | Race-free claim, single-conn-per-item. |
+| OCR queue + drain | `db/ocr_queue.py`, CLI `ocr process-queue-nc` | Race-free claim, single-conn-per-item. |
 | Docling chunked conversion | `pipeline/docling_backend.py` `convert_pdf_safe` | OOM-safe with degradation ladder, GLM-OCR last-resort. |
 | Document representation | `document_intelligence/representation.py` | Pages, blocks, tables. Used by normalization router. |
 | Normalization routing | `document_intelligence/normalization.py` `DocumentNormalizationRouter` | Native PDF / Paddle / GLM-OCR fallback. **Disabled in extract-rates path** — see [bulk_extractor.py:213](src/duke_rates/historical/ncuc/pipeline/bulk_extractor.py#L213). |
@@ -102,7 +102,7 @@ raw file
 | Document fingerprints (redline detection) | `document_fingerprints` table | Used by redline analysis. **Don't reuse for general classification.** |
 | Document fingerprints v2 (general) | `document_fingerprints_v2` table — Phase 1 | New, broader feature set. |
 | Classification observability | `document_classifications` table — Phase 1 | New polymorphic record per classifier decision. |
-| Reporting CLIs | `report-ocr-benchmark-nc`, `report-docling-skipped-pages-nc`, `report-classification-disagreements-nc`, `report-document-fingerprint-clusters-nc`, `report-database-intelligence-nc`, `summarize-database-intelligence-nc`, `ask-ncuc-db`, `run-overnight-db-intelligence-nc` | Existing + Phase 1, 6.5 additions. |
+| Reporting CLIs | `ocr report-benchmark-nc`, `report-docling-skipped-pages-nc`, `report-classification-disagreements-nc`, `report-document-fingerprint-clusters-nc`, `report-database-intelligence-nc`, `summarize-database-intelligence-nc`, `ask-ncuc-db`, `run-overnight-db-intelligence-nc` | Existing + Phase 1, 6.5 additions. |
 | Database intelligence | `database_reports.py`, `db_llm_analysis.py`, `database_intelligence_runs` table — Phase 6.5 | Deterministic SQL reports, LLM summarization, safe NL querying. |
 
 ## Phased plan
