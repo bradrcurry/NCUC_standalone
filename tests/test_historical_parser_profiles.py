@@ -4149,12 +4149,12 @@ def test_bulk_extractor_skips_reference_only_program_families_as_accepted(
 def test_registry_selects_zero_charge_program_for_program_only_families() -> None:
     registry = HistoricalRateParserRegistry()
     doc = {
-        "family_key": "nc-progress-leaf-700",
-        "title": "Program NSSEE",
+        "family_key": "nc-progress-leaf-723",
+        "title": "Residential Smart Saver Energy Efficiency Program",
     }
-    selected = registry.select(doc, "Program NSSEE Terms and Conditions")
+    selected = registry.select(doc, "Residential Smart Saver Energy Efficiency Program TOBR")
     assert selected.name == "zero_charge_program"
-    assert selected.extract(doc, "Program NSSEE Terms and Conditions") == []
+    assert selected.extract(doc, "Residential Smart Saver Energy Efficiency Program TOBR") == []
 
 
 def test_bulk_extractor_applies_fallback_on_weak_parse_only_when_materially_better(
