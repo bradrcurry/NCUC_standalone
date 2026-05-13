@@ -1563,6 +1563,53 @@ def test_propose_llm_charge_promotions_blocks_ambiguous_multi_numeric_adjustment
     assert "ambiguous_numeric_table_row" in report["rows"][0]["eligibility_issues"]
 
 
+def test_propose_llm_charge_promotions_allows_leaf_601_table_rows(tmp_path):
+    db_path = tmp_path / "test.sqlite"
+    conn = _init_db(db_path)
+    _insert_validated_row(conn)
+    source_quote = "Small General Service (0.123) 0.116 0.417 (EE Only) (0.221) (EE Only) 0.233"
+    conn.execute(
+        """
+        UPDATE llm_candidate_rate_row_validations
+        SET charge_type = 'Energy Charge',
+            value = 0.116,
+            unit = '¢/kWh',
+            source_quote = ?
+        WHERE id = 1
+        """,
+        (source_quote,),
+    )
+    conn.execute(
+        """
+        UPDATE llm_candidate_rate_extractions
+        SET rate_rows_json = ?
+        WHERE id = 10
+        """,
+        (
+            json.dumps(
+                [
+                    {
+                        "charge_type": "Energy Charge",
+                        "value": 0.116,
+                        "unit": "¢/kWh",
+                        "source_quote": source_quote,
+                    }
+                ]
+            ),
+        ),
+    )
+    conn.execute(
+        "UPDATE tariff_versions SET family_key = 'nc-progress-leaf-601' WHERE id = 200"
+    )
+    conn.commit()
+    conn.close()
+
+    report = propose_llm_charge_promotions(db_path, limit=10, execute=False)
+
+    assert report["summary"]["eligibility_counts"] == {"eligible": 1}
+    assert "ambiguous_numeric_table_row" not in report["rows"][0]["eligibility_issues"]
+
+
 def test_propose_llm_charge_promotions_keeps_single_currency_lighting_table_row_promotable(tmp_path):
     db_path = tmp_path / "test.sqlite"
     conn = _init_db(db_path)

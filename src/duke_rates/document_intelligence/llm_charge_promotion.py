@@ -352,6 +352,7 @@ def _build_proposal(conn: sqlite3.Connection, row: sqlite3.Row) -> PromotionProp
         charge_type=charge_type,
         rate_unit=rate_unit,
         rate_value=rate_value,
+        family_key=family_key,
     ):
         issues.append("ambiguous_numeric_table_row")
 
@@ -935,6 +936,7 @@ def _ambiguous_numeric_table_row(
     charge_type: str,
     rate_unit: str,
     rate_value: float | None,
+    family_key: str | None = None,
 ) -> bool:
     quote = _normalize_text_symbols(source_quote or "")
     if not quote:
@@ -945,6 +947,22 @@ def _ambiguous_numeric_table_row(
     unit = rate_unit.strip()
     normalized_quote = quote.lower()
     explicit_unit = any(marker in normalized_quote for marker in ("kwh", "kw", "¢", "cents", "$/", "per "))
+    if (
+        (family_key or "").lower() == "nc-progress-leaf-601"
+        and charge_type in {"Energy Charge", "Lighting Charge", "Rider Adjustment"}
+        and rate_value is not None
+        and any(
+            marker in normalized_quote
+            for marker in ("small general service", "medium general service", "lighting")
+        )
+    ):
+        exact_matches = 0
+        for token in numeric_tokens:
+            token_value = str(token).strip("()")
+            if _float_close(token_value, rate_value):
+                exact_matches += 1
+        if exact_matches == 1:
+            return False
     if rate_value is not None and explicit_unit and charge_type in {"Energy Charge", "Lighting Charge", "Rider Adjustment"}:
         exact_matches = 0
         for token in numeric_tokens:
