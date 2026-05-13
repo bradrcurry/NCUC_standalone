@@ -350,6 +350,7 @@ def _build_proposal(conn: sqlite3.Connection, row: sqlite3.Row) -> PromotionProp
         source_quote=str(row["source_quote"] or ""),
         charge_type=charge_type,
         rate_unit=rate_unit,
+        rate_value=rate_value,
     ):
         issues.append("ambiguous_numeric_table_row")
 
@@ -932,6 +933,7 @@ def _ambiguous_numeric_table_row(
     source_quote: str,
     charge_type: str,
     rate_unit: str,
+    rate_value: float | None,
 ) -> bool:
     quote = _normalize_text_symbols(source_quote or "")
     if not quote:
@@ -942,6 +944,17 @@ def _ambiguous_numeric_table_row(
     unit = rate_unit.strip()
     normalized_quote = quote.lower()
     explicit_unit = any(marker in normalized_quote for marker in ("kwh", "kw", "¢", "cents", "$/", "per "))
+    if rate_value is not None and explicit_unit and charge_type in {"Energy Charge", "Lighting Charge", "Rider Adjustment"}:
+        exact_matches = 0
+        for token in numeric_tokens:
+            token_value = str(token).strip("()")
+            if _float_close(token_value, rate_value):
+                exact_matches += 1
+        if exact_matches == 1 and any(
+            marker in normalized_quote
+            for marker in ("energy", "lighting", "rider", "adjustment", "fuel")
+        ):
+            return False
     money_values = re.findall(r"\$\s*\d+(?:,\d{3})*(?:\.\d+)?", quote)
     cent_values = re.findall(r"\d+(?:,\d{3})*(?:\.\d+)?\s*(?:¢|cents?)", normalized_quote)
     if unit == "$/month" and len(money_values) == 1:

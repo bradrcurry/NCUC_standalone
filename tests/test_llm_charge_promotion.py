@@ -1095,6 +1095,55 @@ def test_propose_llm_charge_promotions_keeps_single_currency_lighting_table_row_
     assert "ambiguous_numeric_table_row" not in report["rows"][0]["eligibility_issues"]
 
 
+def test_propose_llm_charge_promotions_allows_unique_lighting_summary_row(tmp_path):
+    db_path = tmp_path / "test.sqlite"
+    conn = _init_db(db_path)
+    _insert_validated_row(conn)
+    source_quote = (
+        "The fuel rate included in base tariff rates effective October 1, 2023 "
+        "are 2.808¢/kWh for RES, 3.097¢/kWh for SGS, 2.580¢/kWh for MGS, "
+        "2.138¢/kWh for LGS and 3.377¢/kWh for Lighting, excluding the North "
+        "Carolina regulatory fee."
+    )
+    conn.execute(
+        """
+        UPDATE llm_candidate_rate_row_validations
+        SET charge_type = 'Lighting Charge',
+            value = 3.377,
+            unit = '¢/kWh',
+            source_quote = ?
+        WHERE id = 1
+        """,
+        (source_quote,),
+    )
+    conn.execute(
+        """
+        UPDATE llm_candidate_rate_extractions
+        SET rate_rows_json = ?
+        WHERE id = 10
+        """,
+        (
+            json.dumps(
+                [
+                    {
+                        "charge_type": "Lighting Charge",
+                        "value": 3.377,
+                        "unit": "¢/kWh",
+                        "source_quote": source_quote,
+                    }
+                ]
+            ),
+        ),
+    )
+    conn.commit()
+    conn.close()
+
+    report = propose_llm_charge_promotions(db_path, limit=10, execute=False)
+
+    assert report["summary"]["eligibility_counts"] == {"eligible": 1}
+    assert "ambiguous_numeric_table_row" not in report["rows"][0]["eligibility_issues"]
+
+
 def test_propose_llm_charge_promotions_reroutes_leaf601_from_unique_summary_line_date(tmp_path):
     db_path = tmp_path / "test.sqlite"
     conn = _init_db(db_path)
