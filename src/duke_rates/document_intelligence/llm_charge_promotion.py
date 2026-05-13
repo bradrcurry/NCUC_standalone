@@ -1127,6 +1127,7 @@ def _looks_like_rider_adjustment(evidence: str) -> bool:
             "surcharge",
             "recovery",
             "adder",
+            "late payment",
             "incentiv",
             "discount",
             "rebate",

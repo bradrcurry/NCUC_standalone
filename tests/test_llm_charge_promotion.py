@@ -532,6 +532,51 @@ def test_propose_llm_charge_promotions_normalizes_regulatory_fee_other_rows(tmp_
     assert "unsupported_charge_type" not in report["rows"][0]["eligibility_issues"]
 
 
+def test_propose_llm_charge_promotions_normalizes_late_payment_other_rows(tmp_path):
+    db_path = tmp_path / "test.sqlite"
+    conn = _init_db(db_path)
+    _insert_validated_row(conn)
+    source_quote = "shall be subject to a one percent (1%) late payment charge on the unpaid amount."
+    conn.execute(
+        """
+        UPDATE llm_candidate_rate_row_validations
+        SET charge_type = 'Other',
+            value = 1.0,
+            unit = '%',
+            source_quote = ?
+        WHERE id = 1
+        """,
+        (source_quote,),
+    )
+    conn.execute(
+        """
+        UPDATE llm_candidate_rate_extractions
+        SET rate_rows_json = ?
+        WHERE id = 10
+        """,
+        (
+            json.dumps(
+                [
+                    {
+                        "charge_type": "Other",
+                        "value": 1.0,
+                        "unit": "%",
+                        "source_quote": source_quote,
+                    }
+                ]
+            ),
+        ),
+    )
+    conn.commit()
+    conn.close()
+
+    report = propose_llm_charge_promotions(db_path, limit=10, execute=False)
+
+    assert report["summary"]["eligibility_counts"] == {"eligible": 1}
+    assert report["rows"][0]["charge_type"] == "Rider Adjustment"
+    assert "unsupported_charge_type" not in report["rows"][0]["eligibility_issues"]
+
+
 def test_propose_llm_charge_promotions_reroutes_path_like_family_key_when_canonical_version_exists(tmp_path):
     db_path = tmp_path / "test.sqlite"
     conn = _init_db(db_path)
