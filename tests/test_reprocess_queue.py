@@ -1544,6 +1544,36 @@ def test_progress_current_leaf_bridge_profile_impact_targets_supported_current_l
         ],
         signals={"is_current_progress_pdf": True, "has_tou_terms": True},
     )
+    doc_leaf_520 = insert_doc(
+        "nc-progress-leaf-520",
+        "progress-520",
+        "progress_current_leaf_bridge",
+        local_path=r"data\raw\nc\progress\rate\leaf-no-520.pdf",
+        candidate_profiles=[
+            {
+                "name": "progress_current_leaf_bridge",
+                "score": 0.92,
+                "supported": True,
+                "reasons": ["current_progress_pdf", "leaf520_sgs", "schedule_sgs"],
+            }
+        ],
+        signals={"is_current_progress_pdf": True, "has_progress_company_text": True},
+    )
+    doc_leaf_532 = insert_doc(
+        "nc-progress-leaf-532",
+        "progress-532",
+        "progress_current_leaf_bridge",
+        local_path=r"data\raw\nc\progress\rate\leaf-no-532.pdf",
+        candidate_profiles=[
+            {
+                "name": "progress_current_leaf_bridge",
+                "score": 0.92,
+                "supported": True,
+                "reasons": ["current_progress_pdf", "leaf532_lgs", "schedule_lgs"],
+            }
+        ],
+        signals={"is_current_progress_pdf": True, "has_progress_company_text": True},
+    )
     _doc_leaf_609 = insert_doc(
         "nc-progress-leaf-609",
         "progress-609",
@@ -1567,7 +1597,7 @@ def test_progress_current_leaf_bridge_profile_impact_targets_supported_current_l
         limit=10,
     )
     impacted_ids = {row["historical_document_id"] for row in impacted}
-    assert impacted_ids == {doc_leaf_501}
+    assert impacted_ids == {doc_leaf_501, doc_leaf_520, doc_leaf_532}
     assert "latest_parser_profile" in impacted[0]["reasons"]
     assert "family_key" in impacted[0]["reasons"]
 
@@ -1577,18 +1607,21 @@ def test_progress_current_leaf_bridge_profile_impact_targets_supported_current_l
         requested_by="test-suite",
     )
     conn.commit()
-    assert report["inserted"] == 1
+    assert report["inserted"] == 3
 
     queued = conn.execute(
         """
         SELECT historical_document_id, queue_reason, metadata_json
         FROM historical_reprocess_queue
+        ORDER BY historical_document_id
         """
-    ).fetchone()
-    assert queued is not None
-    assert queued["historical_document_id"] == doc_leaf_501
-    assert queued["queue_reason"].startswith("profile_dependency:progress_current_leaf_bridge:")
-    assert json.loads(queued["metadata_json"])["impact_rule"]["parser_profile"] == "progress_current_leaf_bridge"
+    ).fetchall()
+    assert [row["historical_document_id"] for row in queued] == [doc_leaf_501, doc_leaf_520, doc_leaf_532]
+    assert all(row["queue_reason"].startswith("profile_dependency:progress_current_leaf_bridge:") for row in queued)
+    assert all(
+        json.loads(row["metadata_json"])["impact_rule"]["parser_profile"] == "progress_current_leaf_bridge"
+        for row in queued
+    )
     conn.close()
 
 
