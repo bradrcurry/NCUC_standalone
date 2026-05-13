@@ -2503,6 +2503,7 @@ class ProgressSingleValueRiderProfile:
         "nc-progress-leaf-722",   # rider
         "nc-progress-leaf-724",   # rider
         "nc-progress-leaf-664",   # SSR — Shared Solar Rider
+        "nc-progress-rider-agencyassetridertorecovercostsrelatedtofacilitie",
         # DEC (Carolinas) equivalent riders — same format as Progress single-value riders
         "nc-carolinas-rider-rdm",   # RDM — Revenue Decoupling Mechanism
         "nc-carolinas-rider-pim",   # PIM — Performance Incentive Mechanism
@@ -2535,6 +2536,7 @@ class ProgressSingleValueRiderProfile:
         "nc-progress-leaf-700",   # Program NSSEE
         "nc-progress-leaf-702",   # SSP — Non-Residential Smart $aver
         "nc-progress-leaf-724",   # YFB — Your Fixed Bill
+        "nc-progress-rider-agencyassetridertorecovercostsrelatedtofacilitie",
     }
 
     @staticmethod
@@ -6676,6 +6678,7 @@ class HistoricalRateParserRegistry:
                 "nc-progress-leaf-700", "nc-progress-leaf-702", "nc-progress-leaf-705",
                 "nc-progress-leaf-708", "nc-progress-leaf-719", "nc-progress-leaf-722",
                 "nc-progress-leaf-724",
+                "nc-progress-rider-agencyassetridertorecovercostsrelatedtofacilitie",
             }
             if signals.family_key not in _svr_families:
                 return 0.0, ()

@@ -1439,6 +1439,29 @@ def test_registry_selects_progress_single_value_rider_for_leaf_602_with_relaxed_
     assert "relaxed_family_selection" in ranked[0].reasons
 
 
+def test_registry_selects_progress_single_value_rider_for_agency_asset_rider_variant() -> None:
+    registry = HistoricalRateParserRegistry()
+    doc = {
+        "family_key": "nc-progress-rider-AGENCYASSETRIDERTORECOVERCOSTSRELATEDTOFACILITIE",
+        "company": "progress",
+        "title": "Agency Asset Rider to Recover Costs Related to Facilities Purchased from the North",
+    }
+    text = """
+    Agency Asset Rider to Recover Costs Related to Facilities Purchased from the North
+    Monthly Rate:
+    Leaf No. 602
+    """
+
+    profile = registry.select(doc, text)
+    assert isinstance(profile, ProgressSingleValueRiderProfile)
+    assert profile.name == "progress_single_value_rider"
+
+    ranked = registry.rank_candidates(doc, text)
+    assert ranked[0].name == "progress_single_value_rider"
+    assert "single_value_rider_family" in ranked[0].reasons
+    assert "relaxed_family_selection" in ranked[0].reasons
+
+
 def test_registry_selects_progress_recovery_rider_for_recovery_rider_family() -> None:
     registry = HistoricalRateParserRegistry()
     doc = {

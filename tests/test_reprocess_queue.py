@@ -1592,6 +1592,121 @@ def test_progress_current_leaf_bridge_profile_impact_targets_supported_current_l
     conn.close()
 
 
+def test_progress_single_value_rider_profile_impact_targets_agency_asset_variant(tmp_path) -> None:
+    conn = connect(tmp_path / "profile-impact-single-value-agency-asset.db")
+    now = datetime(2026, 3, 26, tzinfo=UTC).isoformat()
+
+    historical_id = conn.execute(
+        """
+        INSERT INTO historical_documents (
+            family_key, title, state, company, category, kind,
+            canonical_url, archived_url, snapshot_timestamp,
+            local_path, content_hash, effective_start, retrieved_at
+        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+        """,
+        (
+            "nc-progress-rider-AGENCYASSETRIDERTORECOVERCOSTSRELATEDTOFACILITIE",
+            "Agency Asset Rider to Recover Costs Related to Facilities Purchased from the North",
+            "NC",
+            "progress",
+            "rider",
+            "pdf",
+            "https://example.test/agency-asset-rider.pdf",
+            "https://archive.test/agency-asset-rider",
+            "2026-03-26T00:00:00Z",
+            "data/historical/ncuc/e-2-sub-1207/agency-asset-rider.pdf",
+            "hash-agency-asset-rider",
+            "2024-01-01",
+            now,
+        ),
+    ).lastrowid
+    record_historical_processing_run(
+        conn,
+        historical_document_id=historical_id,
+        source_pdf="data/historical/ncuc/e-2-sub-1207/agency-asset-rider.pdf",
+        family_key="nc-progress-rider-AGENCYASSETRIDERTORECOVERCOSTSRELATEDTOFACILITIE",
+        content_hash="hash-agency-asset-rider",
+        parser_stage="historical_bulk",
+        parser_profile="unknown",
+        parser_version="historical_bulk_v2",
+        processing_mode="historical_bulk",
+        status="parsed",
+        outcome_quality="weak",
+        charge_count=0,
+    )
+    conn.execute(
+        """
+        INSERT INTO parse_attempt_logs (
+            source_pdf, docket_dir, page_start, page_end, parser_stage,
+            parser_profile, status, confidence, utility, schedule_code,
+            effective_date, charge_count, review_flags_json, metadata_json, created_at
+        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        """,
+        (
+            "data/historical/ncuc/e-2-sub-1207/agency-asset-rider.pdf",
+            "e-2-sub-1207",
+            1,
+            1,
+            "historical_bulk",
+            "unknown",
+            "empty",
+            0.1,
+            "DEP",
+            None,
+            None,
+            0,
+            "[]",
+            json.dumps(
+                {
+                    "historical_document_id": historical_id,
+                    "family_key": "nc-progress-rider-AGENCYASSETRIDERTORECOVERCOSTSRELATEDTOFACILITIE",
+                    "candidate_profiles": [
+                        {
+                            "name": "progress_single_value_rider",
+                            "score": 0.91,
+                            "supported": True,
+                            "reasons": ["single_value_rider_family", "monthly_rate", "agency_asset_rider"],
+                        }
+                    ],
+                    "signals": {"has_progress_company_text": True},
+                }
+            ),
+            now,
+        ),
+    )
+    conn.commit()
+
+    impacted = find_profile_impacted_historical_documents(
+        conn,
+        parser_profile="progress_single_value_rider",
+        limit=10,
+    )
+    impacted_ids = {row["historical_document_id"] for row in impacted}
+    assert impacted_ids == {historical_id}
+    assert "candidate_profile" in impacted[0]["reasons"]
+    assert "candidate_reason" in impacted[0]["reasons"]
+
+    report = enqueue_profile_impacted_historical_documents(
+        conn,
+        parser_profile="progress_single_value_rider",
+        requested_by="test-suite",
+    )
+    conn.commit()
+    assert report["inserted"] == 1
+
+    queued = conn.execute(
+        """
+        SELECT historical_document_id, queue_reason, metadata_json
+        FROM historical_reprocess_queue
+        """
+    ).fetchone()
+    assert queued is not None
+    assert queued["historical_document_id"] == historical_id
+    assert queued["queue_reason"].startswith("profile_dependency:progress_single_value_rider:")
+    assert json.loads(queued["metadata_json"])["impact_rule"]["parser_profile"] == "progress_single_value_rider"
+    conn.close()
+
+
 def test_progress_recovery_rider_profile_impact_targets_legacy_unknown_family(tmp_path) -> None:
     conn = connect(tmp_path / "profile-impact-recovery-rider.db")
     now = datetime(2026, 3, 26, tzinfo=UTC).isoformat()

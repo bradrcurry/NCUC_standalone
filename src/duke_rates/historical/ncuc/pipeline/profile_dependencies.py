@@ -230,9 +230,16 @@ _PROFILE_IMPACT_RULES: dict[str, ParserProfileImpactRule] = {
             "nc-progress-leaf-608",
             "nc-progress-leaf-609",
             "nc-progress-leaf-610",
+            "nc-progress-rider-AGENCYASSETRIDERTORECOVERCOSTSRELATEDTOFACILITIE",
         ),
         companies=("progress",),
-        candidate_reason_tokens=("single_value_rider_family", "monthly_rate", "approved_rate_sentence"),
+        candidate_reason_tokens=(
+            "single_value_rider_family",
+            "monthly_rate",
+            "approved_rate_sentence",
+            "agency_asset_rider",
+            "cost_recovery",
+        ),
         description="DEP one-page single-value riders such as RDM, ESM, and PIM.",
     ),
     "progress_recovery_rider": ParserProfileImpactRule(
