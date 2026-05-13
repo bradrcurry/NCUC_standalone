@@ -1225,6 +1225,9 @@ def _is_lighting_monthly_row(rate_row: dict[str, Any], row: sqlite3.Row) -> bool
         "suburban" in evidence
         or "luminaire" in evidence
         or "lighting" in evidence
+        or "led" in evidence
+        or "shoebox" in evidence
+        or "streetlight" in evidence
         or "schedule-pl" in family_key
     )
 

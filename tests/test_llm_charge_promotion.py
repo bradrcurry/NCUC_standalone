@@ -612,6 +612,55 @@ def test_propose_llm_charge_promotions_normalizes_lighting_monthly_other_rows(tm
     assert "unsupported_charge_type" not in row["eligibility_issues"]
 
 
+def test_propose_llm_charge_promotions_normalizes_led_shoebox_other_rows(tmp_path):
+    db_path = tmp_path / "test.sqlite"
+    conn = _init_db(db_path)
+    _insert_validated_row(conn)
+    source_quote = "LED 220 Shoebox 24.51 79"
+    conn.execute(
+        """
+        UPDATE llm_candidate_rate_row_validations
+        SET charge_type = 'Other',
+            value = 24.51,
+            unit = '$/month',
+            source_quote = ?
+        WHERE id = 1
+        """,
+        (source_quote,),
+    )
+    conn.execute(
+        """
+        UPDATE llm_candidate_rate_extractions
+        SET rate_rows_json = ?
+        WHERE id = 10
+        """,
+        (
+            json.dumps(
+                [
+                    {
+                        "charge_type": "Other",
+                        "charge_label": "Other - Residential",
+                        "customer_class": "Residential",
+                        "value": 24.51,
+                        "unit": "$/month",
+                        "source_quote": source_quote,
+                    }
+                ]
+            ),
+        ),
+    )
+    conn.commit()
+    conn.close()
+
+    report = propose_llm_charge_promotions(db_path, limit=10, execute=False)
+
+    assert report["summary"]["eligibility_counts"] == {"eligible": 1}
+    row = report["rows"][0]
+    assert row["charge_type"] == "Lighting Charge"
+    assert row["charge_label"] == "Lighting Charge - Residential"
+    assert "unsupported_charge_type" not in row["eligibility_issues"]
+
+
 def test_propose_llm_charge_promotions_normalizes_all_customer_reduction(tmp_path):
     db_path = tmp_path / "test.sqlite"
     conn = _init_db(db_path)
