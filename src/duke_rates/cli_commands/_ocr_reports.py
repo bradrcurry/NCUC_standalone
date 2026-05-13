@@ -89,9 +89,9 @@ def _build_ocr_benchmark_nc_report(
             SELECT oa.*
             FROM ocr_artifacts oa
             JOIN (
-                SELECT source_pdf, file_hash, MAX(id) AS max_id
+                SELECT source_pdf, MAX(id) AS max_id
                 FROM ocr_artifacts
-                GROUP BY source_pdf, file_hash
+                GROUP BY source_pdf
             ) latest
               ON latest.max_id = oa.id
         ),
@@ -112,7 +112,6 @@ def _build_ocr_benchmark_nc_report(
             FROM historical_documents hd
             JOIN latest_ocr lo
               ON lo.source_pdf = hd.local_path
-             AND (lo.file_hash IS hd.content_hash OR lo.file_hash = hd.content_hash)
             WHERE hd.state = 'NC'
         ),
         latest_runs AS (
@@ -411,9 +410,9 @@ def _build_ocr_remediation_candidates_nc_report(
             SELECT oa.*
             FROM ocr_artifacts oa
             JOIN (
-                SELECT source_pdf, file_hash, MAX(id) AS max_id
+                SELECT source_pdf, MAX(id) AS max_id
                 FROM ocr_artifacts
-                GROUP BY source_pdf, file_hash
+                GROUP BY source_pdf
             ) latest
               ON latest.max_id = oa.id
         ),
@@ -447,7 +446,6 @@ def _build_ocr_remediation_candidates_nc_report(
           ON lr.historical_document_id = hd.id
         LEFT JOIN latest_ocr lo
           ON lo.source_pdf = hd.local_path
-         AND (lo.file_hash IS hd.content_hash OR lo.file_hash = hd.content_hash)
         LEFT JOIN page_text pt
           ON pt.source_pdf = hd.local_path
          AND (pt.file_hash IS hd.content_hash OR pt.file_hash = hd.content_hash)

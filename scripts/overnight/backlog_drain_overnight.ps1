@@ -106,6 +106,28 @@ function Write-Both {
     Add-Content -Path $LogFile -Value $line -Encoding utf8
 }
 
+function Get-DbScalar {
+    param([string]$Sql)
+
+    $previousSql = $env:DUKE_RATES_SCALAR_SQL
+    $env:DUKE_RATES_SCALAR_SQL = $Sql
+    try {
+        $value = & python -c 'import os, sqlite3; from duke_rates.config import get_settings; conn = sqlite3.connect(get_settings().database_path); print(conn.execute(os.environ["DUKE_RATES_SCALAR_SQL"]).fetchone()[0]); conn.close()' 2>&1
+    } finally {
+        if ($null -eq $previousSql) {
+            Remove-Item Env:\DUKE_RATES_SCALAR_SQL -ErrorAction SilentlyContinue
+        } else {
+            $env:DUKE_RATES_SCALAR_SQL = $previousSql
+        }
+    }
+
+    $text = ($value | Select-Object -Last 1).ToString().Trim()
+    if (-not ($text -match '^-?\d+$')) {
+        throw "Scalar SQL returned non-integer output for [$Sql]: $value"
+    }
+    return [int]$text
+}
+
 Write-Both "=================================================================="
 Write-Both "Overnight backlog-drain loop"
 Write-Both "=================================================================="
@@ -150,7 +172,7 @@ $phaseOcr = {
         --workers $OcrWorkers `
         --until-empty 2>&1 | Select-Object -Last 5 | ForEach-Object { Write-Both "  $_" }
     # Return queue pending count for idle detection
-    $pending = & python -c "import sqlite3; conn=sqlite3.connect(__import__('duke_rates.config', fromlist=['get_settings']).get_settings().database_path); print(conn.execute(\"SELECT COUNT(*) FROM ocr_processing_queue WHERE status IN ('pending','running')\").fetchone()[0]); conn.close()" 2>&1
+    $pending = Get-DbScalar "SELECT COUNT(*) FROM ocr_processing_queue WHERE status IN ('pending','running')"
     Write-Both "  ocr_queue_pending_after=$pending"
     return [int]$pending
 }
@@ -164,20 +186,30 @@ $phaseStale = {
         --workers $ReprocessWorkers `
         --limit ($ReprocessLimit * 2) 2>&1 | Select-Object -Last 5 | ForEach-Object { Write-Both "  $_" }
     # Cheap proxy: count pending+running items in historical_reprocess_queue
-    $pendingReprocess = & python -c "import sqlite3; conn=sqlite3.connect(__import__('duke_rates.config', fromlist=['get_settings']).get_settings().database_path); print(conn.execute(\"SELECT COUNT(*) FROM historical_reprocess_queue WHERE status IN ('pending','running')\").fetchone()[0]); conn.close()" 2>&1
+    $pendingReprocess = Get-DbScalar "SELECT COUNT(*) FROM historical_reprocess_queue WHERE status IN ('pending','running')"
     Write-Both "  reprocess_queue_pending=$pendingReprocess"
     return [int]$pendingReprocess
 }
 
 $phaseBootstrap = {
     Write-Both "--- Phase: Bootstrap never-processed ---"
+    $missingVersionsBefore = Get-DbScalar "SELECT COUNT(*) FROM historical_documents hd WHERE hd.state = 'NC' AND hd.effective_start IS NOT NULL AND hd.local_path IS NOT NULL AND NOT EXISTS (SELECT 1 FROM tariff_versions tv WHERE tv.historical_document_id = hd.id)"
     & python -m duke_rates bootstrap-missing-versions-nc `
         --limit $BootstrapLimit 2>&1 | Select-Object -Last 5 | ForEach-Object { Write-Both "  $_" }
-    # Then run a bounded extract on the newly bootstrapped docs
-    & python -m duke_rates extract-rates-nc 2>&1 | Select-Object -Last 5 | ForEach-Object { Write-Both "  $_" }
-    $neverProcessed = & python -c "import sqlite3; conn=sqlite3.connect(__import__('duke_rates.config', fromlist=['get_settings']).get_settings().database_path); print(conn.execute('SELECT COUNT(*) FROM historical_documents WHERE state = ? AND effective_start IS NULL', ('NC',)).fetchone()[0]); conn.close()" 2>&1
-    Write-Both "  null_effective_start_remaining=$neverProcessed"
-    return [int]$neverProcessed
+    $missingVersionsAfter = Get-DbScalar "SELECT COUNT(*) FROM historical_documents hd WHERE hd.state = 'NC' AND hd.effective_start IS NOT NULL AND hd.local_path IS NOT NULL AND NOT EXISTS (SELECT 1 FROM tariff_versions tv WHERE tv.historical_document_id = hd.id)"
+    if ($missingVersionsBefore -gt $missingVersionsAfter) {
+        # Only pay the expensive extraction cost when bootstrap actually linked new versions.
+        & python -m duke_rates extract-rates-nc 2>&1 | Select-Object -Last 5 | ForEach-Object { Write-Both "  $_" }
+    } else {
+        Write-Both "  no newly bootstrapped versions; skipping extract-rates-nc"
+    }
+    $nullEffectiveStart = Get-DbScalar "SELECT COUNT(*) FROM historical_documents WHERE state = 'NC' AND effective_start IS NULL"
+    Write-Both "  missing_versions_remaining=$missingVersionsAfter"
+    Write-Both "  null_effective_start_remaining=$nullEffectiveStart"
+    if ($nullEffectiveStart -gt 0) {
+        Write-Both "  note: null effective-start rows need remediate-nc-missing-doc-effective-start, not bootstrap"
+    }
+    return [int]$missingVersionsAfter
 }
 
 $phaseLlm = {
@@ -210,7 +242,7 @@ $phaseLlm = {
                 Select-Object -Last 3 | ForEach-Object { Write-Both "  $_" }
     }
     # Cheap idle proxy: count pending llm_rate_charge_promotion_proposals
-    $pending = & python -c "import sqlite3; conn=sqlite3.connect(__import__('duke_rates.config', fromlist=['get_settings']).get_settings().database_path); print(conn.execute(\"SELECT COUNT(*) FROM llm_rate_charge_promotion_proposals WHERE promotion_status = 'pending'\").fetchone()[0]); conn.close()" 2>&1
+    $pending = Get-DbScalar "SELECT COUNT(*) FROM llm_rate_charge_promotion_proposals WHERE promotion_status = 'pending'"
     Write-Both "  llm_proposals_pending=$pending"
     return [int]$pending
 }

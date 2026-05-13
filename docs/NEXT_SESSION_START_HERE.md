@@ -1,5 +1,5 @@
 # Next Session: Start Here
-**Date Updated:** 2026-05-12 (CLI refactor pilot landed + LLM extraction/promotion overnight workflow)
+**Date Updated:** 2026-05-13 (overnight backlog-drain follow-up + OCR loop guard)
 **Purpose:** Short operational handoff with current state, immediate priorities, and the correct entry docs
 
 > **CLI refactor in flight on branch `refactor/cli-sub-apps`.** The 7 OCR commands moved into an `ocr` sub-app: `python -m duke_rates ocr <command>` (e.g. `ocr show-queue-nc`, `ocr process-backlog-nc`). See [CLI_REFACTOR_PLAN.md](/c:/Python/Duke/Standalone/docs/CLI_REFACTOR_PLAN.md) for the full plan — 9 more sub-apps (`doc-intel`, `ncuc`, `lineage`, etc.) are pending. All in-tree references (suggestion strings, tests, agent docs) were updated in the pilot commit; further phases will follow the same pattern.
@@ -39,28 +39,36 @@ as the default command/workflow source of truth.
 
 ## Current State
 
-Operational metrics from `python -m duke_rates show-workflow-status-nc`:
+Operational metrics from `python -m duke_rates show-workflow-status-nc` after the
+2026-05-12 overnight backlog-drain run:
 
 | Metric | Value |
 |---|---|
-| NC historical_docs | 476 |
-| NC linked tariff_versions | 849 |
-| NC versions with charges | 639/849 (75.3%) |
-| tariff_charges | 14,999 |
-| Reprocess queue | 0 pending ✅ |
-| Stale historical docs | 0 ✅ |
-| Evidence coverage | 360/476 (75.6%) |
-| Never processed | 21 |
-| Provisional families | 1 |
-| Null `effective_start` | 89 |
-| OCR pending | 0 ✅ |
+| NC historical_docs | 928 |
+| NC linked tariff_versions | 1,191 |
+| NC versions with charges | 728/1,191 (61.1%) |
+| Reprocess queue | 0 pending, 5 stale `running` |
+| Stale historical docs | 0 |
+| Never processed | 202 |
+| Provisional families | 139 |
+| Null `effective_start` | 413 |
+| OCR queue | 10 pending, 0 running after smoke reset |
 
 Interpretation:
-- **Session 44 completed** — profile registrations + OCR drain + extraction.
-- **107 OCR Tesseract candidates processed** (0 failures). Ollama 500 errors blocked by setting `OLLAMA_HOST` to dummy address.
-- **Profile changes took effect in extraction:** OPT-E → 28 charges, OPT-V → 20, OPT-G/H/I → 11/6/6, BC → 28, I → 103, TS → 27, WC → 6, leaf-607 → 87.
-- **HP, NL still need OCR text** — they're in the Docling structure-sensitive lane (94 candidates).
-- **Extraction ran 4/27 16:29-17:53 ET** with Ollama disabled, completing all 757 docs in ~84 min (vs ~6h estimated with broken Ollama).
+- The overnight run improved charge coverage from `60.1%` to `61.1%` and drained
+  stale historical docs from `33` to `0`.
+- The old repeated Tesseract OCR loop was caused by remediation reporting not
+  recognizing completed OCR artifacts when the artifact hash did not match
+  `historical_documents.content_hash`. The report now joins latest OCR artifacts
+  by `source_pdf`, so completed OCR should not be re-enqueued just because the
+  stored hash differs.
+- `null_effective_start=413` is not a bootstrap problem. Run
+  `remediate-nc-missing-doc-effective-start`, then re-check promotion blockers.
+- The 5 `reprocess_running` rows are stale rows from 2026-05-01 through
+  2026-05-04. Inspect before resetting or requeueing.
+- LLM extraction is currently idle because the remaining stage-1 candidate pool
+  is dominated by parser/routing blockers (`regex_gap`, `wrong_profile`) rather
+  than rows ready for extraction.
 
 ### 2026-05-12 LLM Extraction / Promotion Status
 
@@ -241,6 +249,31 @@ python -m duke_rates export-dep-storm-history-inventory
 
 Use this when the goal is to reduce uncharged-document backlog and convert extracted rows into safe promotion candidates.
 
+### Preflight: Do Not Start Blind
+
+Run this before a long overnight loop:
+
+```powershell
+python -m duke_rates show-workflow-status-nc
+python -m duke_rates ocr show-queue-nc --status all --limit 10
+python -m duke_rates ocr show-remediation-candidates-nc --limit 25
+python -m duke_rates show-reprocess-queue-nc --status running --limit 10
+python -m duke_rates show-llm-row-effective-status-nc --json
+python -m duke_rates propose-llm-charge-promotions-nc --limit 10000 --refresh-existing --json
+```
+
+Decision rules:
+- If OCR candidates are mostly `run_docling_or_paddle_structure`, do not spend
+  the night on repeated Tesseract. Run the Docling/Paddle lane or parser review.
+- If bootstrap reports `Historical docs missing versions: 0`, do not run full
+  `extract-rates-nc` repeatedly just because `null_effective_start` is nonzero.
+- If LLM extraction reports `filtered_at_stage_1` with unchanged
+  `regex_gap`/`wrong_profile`, switch to parser-profile/routing work instead of
+  another extraction loop.
+- If promotion blockers are mostly `unqualified_rate_unit` or
+  `unsupported_charge_type`, run focused evidence/mapping repair passes before
+  another broad LLM extraction pass.
+
 ### A. Start With a Baseline
 
 ```powershell
@@ -280,6 +313,52 @@ Read the second report before changing code:
 - Did pending promotable rows rise?
 - Did blocker counts move in the intended direction?
 
+### B2. One-Hour Targeted Loop
+
+Use this when you want to test whether the LLM lane can improve the blocker
+mix without spending the whole night on it. The point is to focus on the two
+profiles that still produce useful candidates, then immediately push those rows
+through validation and repair.
+
+If you want a reusable launcher instead of manual copy/paste, use
+[`scripts/overnight/targeted_llm_blocker_loop.ps1`](/c:/Python/Duke/Standalone/scripts/overnight/targeted_llm_blocker_loop.ps1).
+
+```powershell
+# 0. Baseline and target selection
+python -m duke_rates show-workflow-status-nc
+python -m duke_rates show-parser-improvement-candidates-nc --limit 25
+python -m duke_rates show-near-miss-profiles-nc --limit 25
+
+# 1. Extract from the two highest-value near-miss profiles
+python -m duke_rates run-overnight-parse-improvement-nc --task-kind extract_staged --max-runtime-minutes 15 --limit 10 --resume --auto-rediagnose-unknown --profile generic_residential
+python -m duke_rates run-overnight-parse-improvement-nc --task-kind extract_staged --max-runtime-minutes 15 --limit 10 --resume --auto-rediagnose-unknown --profile progress_single_value_rider
+
+# 2. Convert candidate rows into actionable validation / repair state
+python -m duke_rates validate-llm-rate-extractions-nc --limit 200 --execute
+python -m duke_rates locate-llm-row-evidence-nc --issue unit_missing --limit 50 --execute
+python -m duke_rates reclassify-llm-row-conflicts-nc --limit 50 --execute
+python -m duke_rates apply-deterministic-llm-row-repairs-nc --limit 200 --execute
+
+# 3. Refresh promotion state and inspect whether anything became promotable
+python -m duke_rates propose-llm-charge-promotions-nc --limit 10000 --refresh-existing --json
+python -m duke_rates promote-llm-charge-proposals-nc --limit 500 --json
+python -m duke_rates show-llm-row-effective-status-nc --json
+python -m duke_rates show-workflow-status-nc
+```
+
+Stop early if:
+- both extraction passes report only `skip` / `filtered_at_stage_1`
+- validation mostly returns `no_rate_rows`
+- evidence-location mostly returns `unsupported_unit` or `evidence_quote_missing`
+- promotion dry-run still evaluates to `0 promotable`
+
+Interpretation:
+- If `generic_residential` or `progress_single_value_rider` produce new
+  `validated` rows but promotions still block, the remaining problem is unit /
+  charge-type / table-ambiguity cleanup, not extraction volume.
+- If both extraction passes are mostly idle, stop the LLM lane and switch to
+  parser-profile or routing work instead.
+
 ### C. Full Overnight Pattern
 
 When the short loop is productive, scale the exact same workflow:
@@ -304,6 +383,41 @@ Do **not** assume this should execute promotions immediately. First inspect:
 - `pending_promotable`
 - `promotion_dry_run.skipped`
 - the largest `pending_blockers`
+
+### C2. Multi-Phase Backlog-Drain Wrapper
+
+The wrapper is useful when OCR, stale reprocess, bootstrap, and LLM promotion all
+have real work. It is not the best tool when only one lane is active.
+
+```powershell
+pwsh scripts\overnight\backlog_drain_overnight.ps1 `
+  -DeadlineTime "08:00" `
+  -MaxSliceMinutes 30 `
+  -OcrEnqueueLimit 25 `
+  -OcrWorkers 4 `
+  -ReprocessLimit 20 `
+  -ReprocessWorkers 2 `
+  -BootstrapLimit 50 `
+  -ExtractLimit 12 `
+  -GroundedLimit 10
+```
+
+Morning checks:
+
+```powershell
+python -m duke_rates show-workflow-status-nc
+python -m duke_rates ocr show-remediation-candidates-nc --limit 25
+python -m duke_rates ocr report-benchmark-nc --limit 50
+python -m duke_rates show-reprocess-queue-nc --status running --limit 10
+python -m duke_rates propose-llm-charge-promotions-nc --limit 10000 --refresh-existing --json
+python -m duke_rates promote-llm-charge-proposals-nc --limit 500 --json
+```
+
+Stop conditions:
+- Stop or retarget if the same OCR families reappear after completed OCR.
+- Stop or retarget if `bootstrap-missing-versions-nc` creates zero rows.
+- Stop or retarget if LLM extraction is idle for two consecutive passes.
+- Stop before `--execute-safe` if dry-run promotions show any skipped rows.
 
 ### D. Safe Promotion Decision
 
