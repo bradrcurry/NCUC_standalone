@@ -36,6 +36,7 @@ from duke_rates.historical.ncuc.pipeline.parser_profiles import (
     ProgressPowerPairPilotProfile,
     ProgressResidentialLoadControlProfile,
     ProgressResidentialFlatProfile,
+    ProgressManagementEnergyEfficiencyCostRecoveryRiderProfile,
     ProgressRecoveryRiderProfile,
     ProgressRiderAdjustmentMatrixProfile,
     ProgressSpecialtyRiderProfile,
@@ -213,6 +214,15 @@ RECOVERY RIDER
 Effective for service rendered on and after January 1, 2025
 MONTHLY RATE
 The approved recovery rider rate is 0.012 cents per kilowatt-hour.
+"""
+
+PROGRESS_MEECR_TEXT = """\
+Duke Energy Progress, LLC
+NC First Revised Leaf No. 81
+MANAGEMENT AND ENERGY EFFICIENCY COST RECOVERY RIDER
+Effective for service rendered on and after January 1, 2025
+MONTHLY RATE
+The approved cost recovery rider rate is 0.014 cents per kilowatt-hour.
 """
 
 PROGRESS_R_TOUD_TEXT = """\
@@ -1438,6 +1448,25 @@ def test_registry_selects_progress_recovery_rider_for_recovery_rider_family() ->
     assert "monthly_rate" in ranked[0].reasons
 
 
+def test_registry_selects_progress_management_cost_recovery_rider_family() -> None:
+    registry = HistoricalRateParserRegistry()
+    doc = {
+        "family_key": "nc-progress-rider-MANAGEMENTANDENERGYEFFICIENCYCOSTRECOVERYRIDER",
+        "company": "progress",
+        "title": "Management and Energy Efficiency Cost Recovery Rider",
+    }
+
+    profile = registry.select(doc, PROGRESS_MEECR_TEXT)
+
+    assert isinstance(profile, ProgressManagementEnergyEfficiencyCostRecoveryRiderProfile)
+    assert profile.name == "progress_management_energy_efficiency_cost_recovery_rider"
+
+    ranked = registry.rank_candidates(doc, PROGRESS_MEECR_TEXT)
+    assert ranked[0].name == "progress_management_energy_efficiency_cost_recovery_rider"
+    assert "management_energy_efficiency_cost_recovery_rider" in ranked[0].reasons
+    assert "monthly_rate" in ranked[0].reasons
+
+
 def test_registry_selects_rider_adjustment_profile_for_leaf_600_summary() -> None:
     registry = HistoricalRateParserRegistry()
     doc = {"family_key": "nc-progress-leaf-600", "effective_start": "2026-01-01"}
@@ -2165,6 +2194,42 @@ def test_progress_recovery_rider_profile_extracts_delegated_charges(monkeypatch:
     assert len(charges) == 1
     assert charges[0].charge_label == "Recovery Rider Monthly Rate"
     assert charges[0].rate_value == pytest.approx(0.012)
+    assert charges[0].rate_unit == "$/kWh"
+
+
+def test_progress_management_cost_recovery_rider_profile_extracts_delegated_charges(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    profile = ProgressManagementEnergyEfficiencyCostRecoveryRiderProfile()
+    doc = {
+        "family_key": "nc-progress-rider-MANAGEMENTANDENERGYEFFICIENCYCOSTRECOVERYRIDER",
+        "company": "progress",
+        "effective_start": "2025-01-01",
+    }
+
+    def _fake_parse_text(text: str, *, version_id: int, family_key: str, document_id=None):
+        return None, [
+            ExtractedCharge(
+                charge_type="adjustment",
+                charge_label="Management and Energy Efficiency Cost Recovery Rider Rate",
+                rate_value=0.014,
+                rate_unit="$/kWh",
+                season="all_year",
+                tou_period=None,
+                tier_min=None,
+                tier_max=None,
+                source_snippet="Management and Energy Efficiency Cost Recovery Rider",
+                confidence_score=0.91,
+            )
+        ], []
+
+    monkeypatch.setattr(parser_profiles_module, "parse_nc_progress_leaf", _fake_parse_text)
+
+    charges = profile.extract(doc, PROGRESS_MEECR_TEXT)
+
+    assert len(charges) == 1
+    assert charges[0].charge_label == "Management and Energy Efficiency Cost Recovery Rider Rate"
+    assert charges[0].rate_value == pytest.approx(0.014)
     assert charges[0].rate_unit == "$/kWh"
 
 

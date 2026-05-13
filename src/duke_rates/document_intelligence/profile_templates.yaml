@@ -109,6 +109,18 @@ progress_recovery_rider:
     Dedicated routing for the high-volume Recovery Rider family that was
     previously collapsing into unknown routing.
 
+progress_management_energy_efficiency_cost_recovery_rider:
+  description: "DEP management and energy-efficiency cost recovery rider sheets"
+  utility: progress
+  state: NC
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: []
+  intended_families: [progress_management_energy_efficiency_cost_recovery_rider]
+  notes: |
+    Dedicated routing for the Management and Energy Efficiency Cost Recovery
+    Rider family that was previously collapsing into unknown routing.
+
 progress_billing_adjustments:
   description: "DEP billing-adjustment riders and surcharges"
   utility: progress
