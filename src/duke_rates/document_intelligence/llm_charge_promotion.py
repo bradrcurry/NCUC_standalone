@@ -1130,6 +1130,9 @@ def _looks_like_rider_adjustment(evidence: str) -> bool:
             "incentiv",
             "discount",
             "rebate",
+            "dsm",
+            "saved",
+            "savings",
         )
     ):
         return True
