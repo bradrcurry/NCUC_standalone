@@ -1062,6 +1062,8 @@ class ExtractionGroundedRuleGenerator:
             "Energy Charge": "energy_charge",
             "Demand Charge": "demand_charge",
             "Rider Adjustment": "rider_charge",
+            "Fee": "fee_charge",
+            "Program Incentive": "program_incentive",
             "Minimum Bill": "minimum_bill",
             "TOU Rate": "energy_charge",
             "Seasonal Rate": "energy_charge",

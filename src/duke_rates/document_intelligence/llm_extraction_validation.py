@@ -396,6 +396,7 @@ def _unit_grounded(unit: str, quote: str, source_text: str = "") -> bool:
         "¢/kwh": [r"¢/kwh\b", r"¢\s+per\s+kilowatt-hour\b", r"cents?\s+per\s+(?:[a-z-]+\s+){0,4}kwh\b", r"cents?\s+per\s+kilowatt-hour\b", r"per\s+(?:[a-z-]+\s+){0,4}kwh\b", r"per\s+kilowatt-hour\b"],
         "$/kw": [r"\$/kw\b", r"\$\s*\d[\d,]*(?:\.\d+)?\s*/\s*kw\b", r"per\s+(?:[a-z-]+\s+){0,4}kw\b", r"per\s+kilowatt\b", r"dollars?\s+per\s+(?:[a-z-]+\s+){0,4}kw\b", r"dollars?\s+per\s+kilowatt\b"],
         "$/month": [r"\$/month\b", r"\$\s*\d[\d,]*(?:\.\d+)?\s*/\s*month\b", r"per\s+month\b", r"\bmonthly\b", r"\bmonth\b"],
+        "$/bill": [r"\$/bill\b", r"\$\s*\d[\d,]*(?:\.\d+)?\s*/\s*bill\b", r"\bbill\s+credit\b", r"\bone-time\b", r"\bannual\s+bill\s+credit\b", r"\breturned\s+payment\b", r"\bincentive\b", r"\bfee\b", r"\bpenalty\b", r"\bconnection\b", r"\bdisconnect\b"],
         "$/day": [r"\$/day\b", r"per\s+day\b", r"\bdaily\b", r"\bday\b"],
         "kwh": ["kwh"],
         "kw": ["kw"],
@@ -443,19 +444,68 @@ def _infer_unit(
         return "$/month", "explicit_monthly_quote"
     if re.search(r"\$\s*\d[\d,]*(?:\.\d+)?\s*/\s*month\b", q):
         return "$/month", "explicit_dollars_per_month_quote"
+    if re.search(r"\$\s*\d[\d,]*(?:\.\d+)?\s*/\s*bill\b", q):
+        return "$/bill", "explicit_dollars_per_bill_quote"
     if has_cent_amount and re.search(r"per\s+kilowatt-hour\b", q):
         return "¢/kWh", "explicit_cents_per_kilowatt_hour_quote"
     nearest_header_unit, nearest_header_reason = _nearest_unit_header(quote, source_text)
     if nearest_header_unit:
         return nearest_header_unit, nearest_header_reason
+    bill_level_context = any(
+        token in haystack
+        for token in (
+            "bill credit",
+            "one-time",
+            "annual bill credit",
+            "returned payment",
+            "incentive",
+            "rebate",
+            "fee",
+            "penalty",
+            "connection",
+            "disconnect",
+        )
+    )
+    if has_dollar_amount and bill_level_context:
+        return "$/bill", "bill_level_context"
+    program_incentive_context = any(
+        token in haystack
+        for token in (
+            "hero",
+            "high efficiency air source heat pump",
+            "central air conditioning",
+            "heat pump",
+        )
+    )
+    if has_dollar_amount and program_incentive_context:
+        return "$/bill", "program_incentive_context"
+    if has_dollar_amount and any(
+        token in haystack
+        for token in (
+            "load control device",
+            "thermostat",
+            "evse",
+            "gateway",
+            "heat strip",
+        )
+    ):
+        return "$/bill", "device_program_incentive_context"
     fixed_monthly_charge = any(
         token in normalized_charge_type
         for token in ("fixed", "basic", "facilities", "monthly", "minimum")
     )
+    if has_dollar_amount and normalized_charge_type in (
+        "basic facilities charge",
+        "fixed monthly charge",
+        "minimum bill",
+    ):
+        return "$/month", "fixed_charge_type_monthly_context"
     if has_dollar_amount and fixed_monthly_charge and (
         "monthly rate" in haystack
         or "basic customer charge" in haystack
         or "basic facilities charge" in haystack
+        or "minimum bill" in haystack
+        or "fixed monthly charge" in haystack
         or "customer charge" in haystack
     ):
         return "$/month", "fixed_charge_monthly_context"

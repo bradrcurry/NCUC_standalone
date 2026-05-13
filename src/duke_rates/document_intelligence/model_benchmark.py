@@ -738,6 +738,7 @@ _UNIT_HINTS: tuple[tuple[str, str], ...] = (
     ("/kw", "$/kW"),
     ("per month", "$/month"),
     ("/month", "$/month"),
+    ("per bill", "$/bill"),
     ("per day", "$/day"),
     ("per fixture", "$"),
 )
@@ -762,6 +763,23 @@ def _infer_unit_from_line(line: str) -> str:
             return hint
     if has_dollar and "month" in lower:
         return "$/month"
+    if has_dollar and any(
+        token in lower
+        for token in ("basic facilities charge", "minimum bill", "fixed monthly charge")
+    ):
+        return "$/month"
+    if has_dollar and any(
+        token in lower
+        for token in ("hero", "heat pump", "central air conditioning")
+    ):
+        return "$/bill"
+    if has_dollar and any(
+        token in lower
+        for token in ("load control device", "thermostat", "evse", "gateway", "heat strip")
+    ):
+        return "$/bill"
+    if has_dollar and ("bill" in lower or "credit" in lower or "incentive" in lower or "fee" in lower):
+        return "$/bill"
     if has_cents and "kwh" in lower:
         return "¢/kWh"
     if has_dollar and "kw" in lower and "kwh" not in lower:
@@ -1036,7 +1054,7 @@ def score_task_output(
             bool(expected_unit) and unit == expected_unit
         )
         bare_dollar_when_qualified_expected = (
-            unit == "$" and expected_unit in ("$/month", "$/kW", "$/day", "$/kWh")
+            unit == "$" and expected_unit in ("$/month", "$/bill", "$/kW", "$/day", "$/kWh")
         )
         empty_unit = unit == ""
         confidence_nonzero = confidence > 0.0
