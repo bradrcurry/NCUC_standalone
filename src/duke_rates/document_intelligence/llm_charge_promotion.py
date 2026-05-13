@@ -1057,14 +1057,39 @@ def _infer_unit_from_row(row: sqlite3.Row) -> tuple[str, str]:
             return "$/kW", "explicit_per_kw_quote"
     if has_dollar_amount and re.search(r"per\s+month\b|\bmonthly\b", evidence):
         return "$/month", "explicit_monthly_quote"
+    bill_level_context = any(
+        token in evidence
+        for token in (
+            "bill credit",
+            "one-time",
+            "annual bill credit",
+            "returned payment",
+            "incentive",
+            "rebate",
+            "fee",
+            "penalty",
+            "connection",
+            "disconnect",
+        )
+    )
+    if has_dollar_amount and bill_level_context:
+        return "$/bill", "bill_level_context"
     fixed_monthly_charge = any(
         token in charge_type.lower()
         for token in ("fixed", "basic", "facilities", "monthly", "minimum")
     )
+    if has_dollar_amount and charge_type.lower() in (
+        "basic facilities charge",
+        "fixed monthly charge",
+        "minimum bill",
+    ):
+        return "$/month", "fixed_charge_type_monthly_context"
     if has_dollar_amount and fixed_monthly_charge and (
         "monthly rate" in evidence
         or "basic customer charge" in evidence
         or "basic facilities charge" in evidence
+        or "minimum bill" in evidence
+        or "fixed monthly charge" in evidence
         or "customer charge" in evidence
     ):
         return "$/month", "fixed_charge_monthly_context"

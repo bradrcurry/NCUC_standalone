@@ -57,6 +57,7 @@ ALLOWED_UNITS: tuple[str, ...] = (
     "¢/kWh",
     "$/kW",
     "$/month",
+    "$/bill",
     "$/day",
     "kWh",
     "kW",
