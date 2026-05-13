@@ -279,6 +279,7 @@ _PROFILE_IMPACT_RULES: dict[str, ParserProfileImpactRule] = {
             "nc-progress-program-CAROLINASINCOMEQUALIFIEDWEATHERIZATIONPROGRAM",
             "nc-progress-program-ABOUTAVAILABLEPROGRAM",
             "nc-progress-program-APPENDIXCPROGRAM",
+            "nc-progress-leaf-700",
         ),
         companies=("progress",),
         candidate_reason_tokens=(
@@ -294,6 +295,7 @@ _PROFILE_IMPACT_RULES: dict[str, ParserProfileImpactRule] = {
             "carolinas_income_qualified_weatherization_program",
             "about_available_program",
             "appendix_c_program",
+            "leaf700",
             "program_terms",
         ),
         description="DEP program-only tariff documents that intentionally produce zero charges and should route to the zero-charge sentinel.",

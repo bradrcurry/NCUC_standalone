@@ -5890,6 +5890,7 @@ class ZeroChargeProgramProfile:
         "nc-progress-program-carolinasincomequalifiedweatherizationprogram",
         "nc-progress-program-aboutavailableprogram",
         "nc-progress-program-appendixcprogram",
+        "nc-progress-leaf-700",
     }
 
     def supports(self, doc: dict, text: str) -> bool:
@@ -6125,6 +6126,7 @@ class HistoricalRateParserRegistry:
                 "nc-progress-program-carolinasincomequalifiedweatherizationprogram",
                 "nc-progress-program-aboutavailableprogram",
                 "nc-progress-program-appendixcprogram",
+                "nc-progress-leaf-700",
             }:
                 return 0.0, ()
             return 0.99, ("zero_charge_program_explicit_match",)
