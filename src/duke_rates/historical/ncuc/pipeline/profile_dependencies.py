@@ -235,6 +235,13 @@ _PROFILE_IMPACT_RULES: dict[str, ParserProfileImpactRule] = {
         candidate_reason_tokens=("single_value_rider_family", "monthly_rate", "approved_rate_sentence"),
         description="DEP one-page single-value riders such as RDM, ESM, and PIM.",
     ),
+    "progress_recovery_rider": ParserProfileImpactRule(
+        parser_profile="progress_recovery_rider",
+        family_keys=("nc-progress-rider-RECOVERYRIDER",),
+        companies=("progress",),
+        candidate_reason_tokens=("recovery_rider", "cost_recovery_rider", "monthly_rate", "applicability"),
+        description="DEP Recovery Rider sheets that were previously collapsing into unknown routing.",
+    ),
     "progress_rider_adjustment_matrix": ParserProfileImpactRule(
         parser_profile="progress_rider_adjustment_matrix",
         family_keys=("nc-progress-leaf-600",),

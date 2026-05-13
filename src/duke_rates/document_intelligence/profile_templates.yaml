@@ -97,6 +97,18 @@ progress_single_value_rider:
     Single-rate rider sheets (RDM, REPS, FCAR-style). Often very short
     docs (1-2 pages). Multi-charge rider docs should NOT route here.
 
+progress_recovery_rider:
+  description: "DEP recovery rider sheets"
+  utility: progress
+  state: NC
+  scope: template-level
+  intended_schedule_codes: []
+  intended_rider_codes: []
+  intended_families: [progress_recovery_rider]
+  notes: |
+    Dedicated routing for the high-volume Recovery Rider family that was
+    previously collapsing into unknown routing.
+
 progress_billing_adjustments:
   description: "DEP billing-adjustment riders and surcharges"
   utility: progress

@@ -2619,6 +2619,48 @@ class ProgressSingleValueRiderProfile:
 
 
 @dataclass
+class ProgressRecoveryRiderProfile:
+    """Profile for the high-volume DEP Recovery Rider family."""
+
+    name: str = "progress_recovery_rider"
+    _SUPPORTED_FAMILIES = {"nc-progress-rider-recoveryrider"}
+
+    def supports(self, doc: dict, text: str) -> bool:
+        family_key = (doc.get("family_key") or "").lower()
+        if family_key not in self._SUPPORTED_FAMILIES:
+            return False
+        lowered = text.lower()
+        title = (doc.get("title") or "").lower()
+        has_recovery_signal = "recovery rider" in lowered or "recovery rider" in title
+        has_rate_signal = "monthly rate" in lowered or "cost recovery" in lowered
+        return has_recovery_signal and has_rate_signal
+
+    def score(self, doc: dict, text: str) -> float:
+        if not self.supports(doc, text):
+            return 0.0
+        lowered = text.lower()
+        score = 0.9
+        if "cost recovery" in lowered:
+            score += 0.03
+        if "monthly rate" in lowered:
+            score += 0.03
+        if "applicability" in lowered:
+            score += 0.02
+        return min(score, 0.97)
+
+    def extract(self, doc: dict, text: str) -> list[ExtractedCharge]:
+        family_key = doc.get("family_key") or "nc-progress-rider-RECOVERYRIDER"
+        path = Path(doc.get("local_path") or "")
+        if doc.get("start_page") is not None and doc.get("end_page") is not None:
+            _, charges, _ = parse_nc_progress_leaf(text, version_id=0, family_key=family_key)
+        elif path.is_file() and path.suffix.lower() == ".pdf":
+            _, charges, _ = parse_nc_progress_leaf_file(path, version_id=0, family_key=family_key)
+        else:
+            _, charges, _ = parse_nc_progress_leaf(text, version_id=0, family_key=family_key)
+        return _convert_progress_tariff_charges(charges)
+
+
+@dataclass
 class ProgressRiderAdjustmentMatrixProfile:
     """Profile for Progress Leaf 600-style rider adjustment summary tables."""
 
@@ -5879,6 +5921,7 @@ class HistoricalRateParserRegistry:
             ProgressCurrentLeafBridgeProfile(),
             ProgressBillingAdjustmentsProfile(),
             ProgressSingleValueRiderProfile(),
+            ProgressRecoveryRiderProfile(),
             ProgressResidentialTouProfile(),
             ProgressMediumGeneralServiceProfile(),
             ProgressResidentialTOUEVProfile(),
@@ -5987,6 +6030,28 @@ class HistoricalRateParserRegistry:
                 return 0.0, ()
             reasons.extend(("family=leaf600", "summary_text"))
             return 0.96, tuple(reasons)
+
+        if profile_name == "progress_recovery_rider":
+            if signals.family_key != "nc-progress-rider-recoveryrider":
+                return 0.0, ()
+            lowered = signals.text_lower
+            title = signals.title
+            if "recovery rider" not in lowered and "recovery rider" not in title:
+                return 0.0, ()
+            if "monthly rate" not in lowered and "cost recovery" not in lowered:
+                return 0.0, ()
+            score = 0.9
+            reasons.append("recovery_rider")
+            if "cost recovery" in lowered:
+                score += 0.03
+                reasons.append("cost_recovery_rider")
+            if "monthly rate" in lowered:
+                score += 0.03
+                reasons.append("monthly_rate")
+            if "applicability" in lowered:
+                score += 0.02
+                reasons.append("applicability")
+            return min(score, 0.97), tuple(reasons)
 
         if profile_name == "progress_residential_tou":
             if signals.family_key not in {"nc-progress-leaf-502", "nc-progress-leaf-503", "nc-progress-leaf-504"}:
