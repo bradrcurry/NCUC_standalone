@@ -1940,6 +1940,120 @@ def test_progress_compliance_report_cost_recovery_rider_profile_impact_targets_l
     conn.close()
 
 
+def test_zero_charge_program_profile_impact_targets_program_only_families(tmp_path) -> None:
+    conn = connect(tmp_path / "profile-impact-zero-charge-program.db")
+    now = datetime(2026, 3, 26, tzinfo=UTC).isoformat()
+
+    historical_id = conn.execute(
+        """
+        INSERT INTO historical_documents (
+            family_key, title, state, company, category, kind,
+            canonical_url, archived_url, snapshot_timestamp,
+            local_path, content_hash, effective_start, retrieved_at
+        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+        """,
+        (
+            "nc-progress-program-LIGHTINGPROGRAM",
+            "Lighting Program",
+            "NC",
+            "progress",
+            "program",
+            "pdf",
+            "https://example.test/lighting-program.pdf",
+            "https://archive.test/lighting-program",
+            "2026-03-26T00:00:00Z",
+            "data/historical/ncuc/e-2-sub-1300/lighting-program.pdf",
+            "hash-lighting-program",
+            None,
+            now,
+        ),
+    ).lastrowid
+    record_historical_processing_run(
+        conn,
+        historical_document_id=historical_id,
+        source_pdf="data/historical/ncuc/e-2-sub-1300/lighting-program.pdf",
+        family_key="nc-progress-program-LIGHTINGPROGRAM",
+        content_hash="hash-lighting-program",
+        parser_stage="historical_bulk",
+        parser_profile="unknown",
+        parser_version="historical_bulk_v2",
+        processing_mode="historical_bulk",
+        status="parsed",
+        outcome_quality="weak",
+        charge_count=0,
+    )
+    conn.execute(
+        """
+        INSERT INTO parse_attempt_logs (
+            source_pdf, docket_dir, page_start, page_end, parser_stage,
+            parser_profile, status, confidence, utility, schedule_code,
+            effective_date, charge_count, review_flags_json, metadata_json, created_at
+        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        """,
+        (
+            "data/historical/ncuc/e-2-sub-1300/lighting-program.pdf",
+            "e-2-sub-1300",
+            1,
+            1,
+            "historical_bulk",
+            "unknown",
+            "empty",
+            0.1,
+            "DEP",
+            None,
+            None,
+            0,
+            "[]",
+            json.dumps(
+                {
+                    "historical_document_id": historical_id,
+                    "family_key": "nc-progress-program-LIGHTINGPROGRAM",
+                    "candidate_profiles": [
+                        {
+                            "name": "zero_charge_program",
+                            "score": 0.99,
+                            "supported": True,
+                            "reasons": ["zero_charge_program_explicit_match"],
+                        }
+                    ],
+                    "signals": {"has_progress_company_text": True},
+                }
+            ),
+            now,
+        ),
+    )
+    conn.commit()
+
+    impacted = find_profile_impacted_historical_documents(
+        conn,
+        parser_profile="zero_charge_program",
+        limit=10,
+    )
+    impacted_ids = {row["historical_document_id"] for row in impacted}
+    assert impacted_ids == {historical_id}
+    assert "candidate_profile" in impacted[0]["reasons"]
+
+    report = enqueue_profile_impacted_historical_documents(
+        conn,
+        parser_profile="zero_charge_program",
+        requested_by="test-suite",
+    )
+    conn.commit()
+    assert report["inserted"] == 1
+
+    queued = conn.execute(
+        """
+        SELECT historical_document_id, queue_reason, metadata_json
+        FROM historical_reprocess_queue
+        """
+    ).fetchone()
+    assert queued is not None
+    assert queued["historical_document_id"] == historical_id
+    assert queued["queue_reason"].startswith("profile_dependency:zero_charge_program:")
+    assert json.loads(queued["metadata_json"])["impact_rule"]["parser_profile"] == "zero_charge_program"
+    conn.close()
+
+
 def test_progress_specialty_rider_profile_impact_targets_supported_current_riders(tmp_path) -> None:
     conn = connect(tmp_path / "profile-impact-specialty-rider.db")
     now = datetime(2026, 3, 26, tzinfo=UTC).isoformat()

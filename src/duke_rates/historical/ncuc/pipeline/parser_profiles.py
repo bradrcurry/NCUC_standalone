@@ -5878,6 +5878,13 @@ class ZeroChargeProgramProfile:
         "nc-progress-leaf-707",  # HERP
         "nc-progress-leaf-713",  # REEAD
         "nc-carolinas-rider-cei", # Clean Energy Impact
+        "nc-progress-program-appliancerecyclingprogram",
+        "nc-progress-program-lightingprogram",
+        "nc-progress-program-efficiencyprogram",
+        "nc-progress-program-automationprogram",
+        "nc-progress-program-multifamilyenergyefficiencyprogram",
+        "nc-progress-program-aboutavailableprogram",
+        "nc-progress-program-appendixcprogram",
     }
 
     def supports(self, doc: dict, text: str) -> bool:
@@ -6094,12 +6101,20 @@ class HistoricalRateParserRegistry:
         reasons: list[str] = []
 
         if profile_name == "zero_charge_program":
-            if signals.family_key not in {
+            normalized_family_key = signals.family_key.lower()
+            if normalized_family_key not in {
                 "nc-progress-leaf-703",
                 "nc-progress-leaf-641",
                 "nc-progress-leaf-707",
                 "nc-progress-leaf-713",
                 "nc-carolinas-rider-cei",
+                "nc-progress-program-appliancerecyclingprogram",
+                "nc-progress-program-lightingprogram",
+                "nc-progress-program-efficiencyprogram",
+                "nc-progress-program-automationprogram",
+                "nc-progress-program-multifamilyenergyefficiencyprogram",
+                "nc-progress-program-aboutavailableprogram",
+                "nc-progress-program-appendixcprogram",
             }:
                 return 0.0, ()
             return 0.99, ("zero_charge_program_explicit_match",)

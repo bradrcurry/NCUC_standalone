@@ -264,6 +264,30 @@ _PROFILE_IMPACT_RULES: dict[str, ParserProfileImpactRule] = {
         required_signal_flags=("has_summary_text", "has_progress_company_text"),
         description="DEP rider summary matrix pages and documents already parsed by the Progress rider-summary profile.",
     ),
+    "zero_charge_program": ParserProfileImpactRule(
+        parser_profile="zero_charge_program",
+        family_keys=(
+            "nc-progress-program-APPLIANCERECYCLINGPROGRAM",
+            "nc-progress-program-LIGHTINGPROGRAM",
+            "nc-progress-program-EFFICIENCYPROGRAM",
+            "nc-progress-program-AUTOMATIONPROGRAM",
+            "nc-progress-program-MULTIFAMILYENERGYEFFICIENCYPROGRAM",
+            "nc-progress-program-ABOUTAVAILABLEPROGRAM",
+            "nc-progress-program-APPENDIXCPROGRAM",
+        ),
+        companies=("progress",),
+        candidate_reason_tokens=(
+            "appliance_recycling_program",
+            "lighting_program",
+            "efficiency_program",
+            "automation_program",
+            "multifamily_energy_efficiency_program",
+            "about_available_program",
+            "appendix_c_program",
+            "program_terms",
+        ),
+        description="DEP program-only tariff documents that intentionally produce zero charges and should route to the zero-charge sentinel.",
+    ),
     "carolinas_rider_adjustment_matrix": ParserProfileImpactRule(
         parser_profile="carolinas_rider_adjustment_matrix",
         family_keys=(
