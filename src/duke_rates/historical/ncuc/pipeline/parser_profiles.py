@@ -3790,6 +3790,108 @@ class CarolinasSingleValueRiderProfile:
 
 
 @dataclass
+class CarolinasCepsRiderProfile:
+    """Profile for Duke Energy Carolinas RIDER CEPS (Clean Energy Portfolio Standard).
+
+    CEPS bills a fixed monthly charge per customer agreement, broken into
+    three customer classes (Residential, General Service, Industrial).
+    The tariff page lists:
+        CEPS Monthly Charge         X.XX  $/month
+        Experience Modification Factor  +Y.YY  $/month
+        Net CEPS Monthly Charge     Z.ZZ  $/month
+        Regulatory Fee Multiplier   * M.MMMM
+        Total CEPS Monthly Charge per agreement per month  T.TT  $/month
+
+    We extract the "Total CEPS Monthly Charge" line per class.
+    """
+
+    name: str = "carolinas_ceps_rider"
+    _SUPPORTED_FAMILIES = {"nc-carolinas-rider-ceps"}
+
+    # "Total CEPS Monthly Charge per agreement per month   1.25  $/month"
+    _TOTAL_LINE_RE = re.compile(
+        r"Total\s+CEPS\s+Monthly\s+Charge\s+per\s+agreement\s+per\s+month\s+([\d.]+)\s*\$?/month",
+        re.I,
+    )
+    # Section headers identifying customer class
+    # Text uses: "RESIDENTIAL SERVICE AGREEMENTS", "GENERAL SERVICE AGREEMENTS", "INDUSTRIAL SERVICE AGREEMENTS"
+    _SECTION_RE = re.compile(
+        r"^(RESIDENTIAL SERVICE|GENERAL SERVICE|INDUSTRIAL(?:\s+SERVICE)?)\s+AGREEMENTS",
+        re.I | re.M,
+    )
+    _CLASS_MAP = {
+        "residential service": "residential",
+        "general service": "general_service",
+        "industrial service": "industrial",
+        "industrial": "industrial",
+    }
+
+    def supports(self, doc: dict, text: str) -> bool:
+        family_key = (doc.get("family_key") or "").lower()
+        if family_key != "nc-carolinas-rider-ceps":
+            return False
+        lowered = text.lower()
+        return "ceps" in lowered and (
+            "monthly charge" in lowered or "$/month" in text
+        )
+
+    def score(self, doc: dict, text: str) -> float:
+        if not self.supports(doc, text):
+            return 0.0
+        return 0.93 if self._TOTAL_LINE_RE.search(text) else 0.84
+
+    def extract(self, doc: dict, text: str) -> list[ExtractedCharge]:
+        charges: list[ExtractedCharge] = []
+        # Split text on section headers to assign per-class values
+        sections = self._SECTION_RE.split(text)
+        # sections = [pre_text, class_name1, class_body1, class_name2, ...]
+        i = 1
+        while i + 1 < len(sections):
+            class_raw = sections[i].strip().lower()
+            class_body = sections[i + 1]
+            customer_class = self._CLASS_MAP.get(class_raw, "all")
+            m = self._TOTAL_LINE_RE.search(class_body)
+            if m:
+                rate_value = float(m.group(1))
+                snippet = m.group(0)[:120]
+                class_label = customer_class.replace("_", " ").title()
+                charges.append(
+                    ExtractedCharge(
+                        charge_type="Fixed Monthly Charge",
+                        charge_label=f"Fixed Monthly Charge - {class_label}",
+                        rate_value=rate_value,
+                        rate_unit="$/month",
+                        season="all_year",
+                        tou_period=None,
+                        tier_min=None,
+                        tier_max=None,
+                        source_snippet=snippet,
+                        confidence_score=0.92,
+                    )
+                )
+            i += 2
+        # Fallback: if no section split found, try document-wide
+        if not charges:
+            for m in self._TOTAL_LINE_RE.finditer(text):
+                rate_value = float(m.group(1))
+                charges.append(
+                    ExtractedCharge(
+                        charge_type="Fixed Monthly Charge",
+                        charge_label="Fixed Monthly Charge - CEPS",
+                        rate_value=rate_value,
+                        rate_unit="$/month",
+                        season="all_year",
+                        tou_period=None,
+                        tier_min=None,
+                        tier_max=None,
+                        source_snippet=m.group(0)[:120],
+                        confidence_score=0.85,
+                    )
+                )
+        return charges
+
+
+@dataclass
 class CarolinasGeneralServiceScheduleProfile:
     """Profile for historical Carolinas PG/LGS and similar general-service schedule sheets."""
 
@@ -6032,6 +6134,7 @@ class HistoricalRateParserRegistry:
             CarolinasSmallCustomerGeneratorProfile(),
             CarolinasNetMeteringRiderProfile(),
             GreenSourceAdvantageRiderProfile(),
+            CarolinasCepsRiderProfile(),
             CarolinasEnergyEfficiencyRiderProfile(),
             CarolinasEconomicDevelopmentRiderProfile(),
             CarolinasInterruptibleServiceRiderProfile(),
@@ -7185,6 +7288,19 @@ class HistoricalRateParserRegistry:
                 score = max(score, 0.85)
                 reasons.append("monthly_charge_language")
             return min(score, 0.97), tuple(reasons)
+
+        if profile_name == "carolinas_ceps_rider":
+            if signals.family_key != "nc-carolinas-rider-ceps":
+                return 0.0, ()
+            lowered = signals.text_lower
+            score = 0.0
+            if "ceps" in lowered and "monthly charge" in lowered:
+                score = 0.84
+                reasons.append("ceps_monthly_charge")
+            if "total ceps monthly charge per agreement per month" in lowered:
+                score = 0.93
+                reasons.append("total_ceps_line")
+            return min(score, 0.95), tuple(reasons)
 
         if profile_name == "generic_residential":
             family_match = signals.family_key.startswith(("nc-progress-leaf-", "nc-carolinas-leaf-"))
