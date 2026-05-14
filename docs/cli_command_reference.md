@@ -905,6 +905,28 @@ Stop early if:
 
 This is a routing-first backlog-reduction test, not a full backlog sweep.
 
+### 15h1. Routing-First Overnight Loop Until 9am
+
+Use this when you want an overnight loop that spends most of its time on the
+highest-leverage backlog reduction path: routing unknown families into explicit
+profiles and draining the impacted reprocess queue.
+
+For the reusable launcher, use
+[`scripts/overnight/routing_first_until_9am.ps1`](/c:/Python/Duke/Standalone/scripts/overnight/routing_first_until_9am.ps1).
+
+```powershell
+pwsh scripts\overnight\routing_first_until_9am.ps1 -DeadlineTime "09:00"
+```
+
+This loop:
+- reads `show-unknown-routing-audit-nc --json` each cycle
+- enqueues profile-impact work for synthesized existing-profile candidates
+- drains `process-reprocess-queue-nc --until-empty`
+- re-checks workflow status before the next cycle
+
+Use this instead of the OCR-heavy backlog drain when the main bottleneck is
+still `unknown_profile` routing and reprocess backlog, not OCR throughput.
+
 ### 15i. Multi-Phase Backlog-Drain Wrapper
 
 Use the wrapper when multiple lanes have real work: OCR remediation, stale

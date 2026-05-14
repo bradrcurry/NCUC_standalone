@@ -372,6 +372,32 @@ Interpretation:
 - If both extraction passes are mostly idle, stop the extraction lane and stay
   on routing / reprocess work instead.
 
+### C2. Routing-First Overnight Until 9am
+
+Use this when the backlog is still dominated by `unknown_profile` routing
+gaps and reprocess work. It is the best overnight loop when the main objective
+is to reduce backlog rather than to keep broad extraction lanes busy.
+
+For a reusable launcher, use
+[`scripts/overnight/routing_first_until_9am.ps1`](/c:/Python/Duke/Standalone/scripts/overnight/routing_first_until_9am.ps1).
+
+```powershell
+pwsh scripts\overnight\routing_first_until_9am.ps1 -DeadlineTime "09:00"
+```
+
+This loop:
+- inspects `show-unknown-routing-audit-nc` each cycle
+- enqueues impacted docs for synthesized existing profiles such as
+  `progress_recovery_rider`, `zero_charge_program`, and
+  `progress_billing_adjustments`
+- drains `process-reprocess-queue-nc --until-empty`
+- re-measures workflow status after each cycle
+
+Stop early if:
+- the unknown-routing audit keeps returning the same families with no new
+  profile-impact enqueues
+- the reprocess queue is empty and no new impacted profiles are being found
+
 ### C. Full Overnight Pattern
 
 When the short loop is productive, scale the exact same workflow:

@@ -2600,11 +2600,8 @@ class ProgressSingleValueRiderProfile:
         "nc-progress-leaf-724",   # rider
         "nc-progress-leaf-664",   # SSR — Shared Solar Rider
         "nc-progress-rider-agencyassetridertorecovercostsrelatedtofacilitie",
-        # DEC (Carolinas) equivalent riders — same format as Progress single-value riders
-        "nc-carolinas-rider-rdm",   # RDM — Revenue Decoupling Mechanism
-        "nc-carolinas-rider-pim",   # PIM — Performance Incentive Mechanism
-        "nc-carolinas-rider-edit4", # EDIT4 — Excess Deferred Income Tax
-        "nc-carolinas-rider-sts",   # STS — Storm Securitization (multi-class table)
+        # DEC (Carolinas) equivalent riders — same single-value format as Progress riders
+        # NOTE: EDIT4 and STS removed — handled by carolinas_multi_class_rate_table (higher score)
         # NOTE: nc-carolinas-rider-cei intentionally excluded — CEI rate is market-based
         # (annual CEEA price set by solar REC market), not a fixed extractable $/kWh value.
         # NOTE: nc-progress-leaf-641 (NM) and nc-progress-leaf-664 (SSR) are in _SUPPORTED_FAMILIES
@@ -2614,10 +2611,9 @@ class ProgressSingleValueRiderProfile:
     _RELAXED_SELECTION_FAMILIES = {
         # leaf-602 (JAA) removed — handled by ProgressJaaRiderProfile
         "nc-progress-leaf-640",   # RECD — uses % credit, not ¢/kWh; needs relaxed kwh gate
-        # Purchased Power schedules — use price schedules not traditional rate tables
-        "nc-progress-leaf-590",   # PP — Purchased Power Schedule
-        "nc-progress-leaf-591",   # PP — Terms & Conditions (legal text, no rates)
-        "nc-progress-leaf-592",   # PPBE — Purchased Power Blend and Extend
+        # Purchased Power schedules: leaf-590/591/592 removed — historical span docs have
+        # actual kWh content so they qualify without relaxation; current-format docs have
+        # no extractable rate and should fall through to zero_charge_program.
         # Riders with rate data but using different terminology (no explicit kWh marker)
         "nc-progress-leaf-646",   # Rider CM (terms-only, no rates)
         "nc-progress-leaf-647",   # Rider 28 (terms-only, no rates)
@@ -3728,6 +3724,9 @@ class CarolinasSingleValueRiderProfile:
         "nc-carolinas-rider-prospectiverider",
         "nc-carolinas-rider-ps",
         "nc-carolinas-rider-riderlc",
+        "nc-carolinas-rider-pim",   # Performance Incentive Mechanism — single ¢/kWh rate
+        "nc-carolinas-rider-rdm",   # Revenue Decoupling Mechanism — single ¢/kWh rate
+        "nc-carolinas-rider-sts",   # Storm Securitization — handled by multi-class if table; CSV fallback
     }
     _RATE_RE = re.compile(
         r"\(?([\-]?[\d.]+)\)?\s*(?:¢|c)\s*/?\s*kwh|\(?([\-]?[\d.]+)\)?\s*(?:¢|c)\s*per\s+kilowatt-?hour|\(?([\-]?[\d.]+)\)?\s*cents\s+per\s+kwh|\(?([\-]?[\d.]+)\)?\s*[pf¢¢(i]\s*/?\s*kwh",
@@ -3883,6 +3882,87 @@ class CarolinasSingleValueRiderProfile:
         if candidates:
             return candidates[0]
         return None, ""
+
+
+@dataclass
+class CarolinasMultiClassRateTableProfile:
+    """Profile for DEC riders that publish per-class ¢/kWh rates in a Rate Class table.
+
+    Handles EDIT4 (Excess Deferred Income Tax), STS (Storm Securitization), and similar
+    riders where the rate sheet has four rows:
+        Residential      | RS, RE, ...  | (0.5081)
+        General Service  | SGS, BC, ... | (0.3033)
+        Industrial       | I, ...       | (0.2371)
+        Lighting         | OL, PL, NL  | (1.3455)
+    Values may be positive increments or negative decrements (parenthesised).
+    """
+
+    name: str = "carolinas_multi_class_rate_table"
+    _SUPPORTED_FAMILIES = {
+        "nc-carolinas-rider-edit4",
+        "nc-carolinas-rider-sts",
+    }
+    # Matches: optional ( + digits + optional ) then optional ¢/c then /kWh or per kWh
+    _RATE_CELL_RE = re.compile(
+        r"\(?([\-]?[\d]+\.[\d]+)\)?\s*(?:[¢c�]\s*(?:/\s*kWh|per\s+kilowatt-?hour)|/\s*kWh)?",
+        re.I,
+    )
+    # (regex_pattern, display_label)
+    _CLASS_ANCHORS = [
+        ("Residential", "Residential"),
+        ("General Service", "General Service"),
+        (r"Industrial(?:\s+Service)?", "Industrial Service"),
+        ("Lighting", "Lighting"),
+    ]
+
+    def supports(self, doc: dict, text: str) -> bool:
+        family_key = (doc.get("family_key") or "").lower()
+        if family_key not in self._SUPPORTED_FAMILIES:
+            return False
+        lowered = text.lower()
+        return "rate class" in lowered and ("residential" in lowered) and "/kwh" in lowered
+
+    def score(self, doc: dict, text: str) -> float:
+        if not self.supports(doc, text):
+            return 0.0
+        lowered = text.lower()
+        score = 0.88
+        if "applicable schedules" in lowered:
+            score += 0.05
+        if "billing rate" in lowered:
+            score += 0.04
+        return min(score, 0.97)
+
+    def extract(self, doc: dict, text: str) -> list[ExtractedCharge]:
+        charges: list[ExtractedCharge] = []
+        for pattern, display_label in self._CLASS_ANCHORS:
+            pat = re.compile(
+                pattern + r"\s*\n(?:[^\n]*\n)?\s*\(?([\-]?[\d]+\.[\d]+)\)?",
+                re.I,
+            )
+            m = pat.search(text)
+            if not m:
+                continue
+            raw = float(m.group(1))
+            # Parenthesised values are decrements
+            if "(" in m.group(0) and ")" in m.group(0) and raw > 0:
+                raw = -raw
+            value = raw / 100.0  # ¢ → $
+            charges.append(
+                ExtractedCharge(
+                    charge_type="adjustment",
+                    charge_label=f"Rate Adjustment - {display_label}",
+                    rate_value=value,
+                    rate_unit="$/kWh",
+                    season="all_year",
+                    tou_period=None,
+                    tier_min=None,
+                    tier_max=None,
+                    source_snippet=m.group(0)[:120],
+                    confidence_score=0.92,
+                )
+            )
+        return charges
 
 
 @dataclass
@@ -4937,17 +5017,17 @@ class CarolinasSmallCustomerGeneratorProfile:
     name: str = "carolinas_small_customer_generator"
     _SUPPORTED_FAMILIES = {"nc-carolinas-rider-scg"}
     _SUPPLEMENTAL_CHARGE_RE = re.compile(
-        r"Supplemental Basic (?P<label>Customer|Facilities) Charge per month[:\s]+\$?(?P<value>[\d.]+)",
+        r"Supplemental Basic (?P<label>Customer|Facilities) Charge per month[:\s]+[$]?\s*(?P<value>[\d.]+)",
         re.I,
     )
     # Standby charge is per KW for systems > 20 KW
     _STANDBY_KW_RE = re.compile(
-        r"For systems more than 20 KW\s+\$\s*([\d.]+)\s+per\s+KW",
+        r"For systems more than 20 KW\s+[$]\s*([\d.]+)\s+per\s+KW",
         re.I,
     )
     # Legacy: flat standby charge format
     _STANDBY_CHARGE_RE = re.compile(
-        r"Standby Charge per month(?:,\s*if applicable)?:\s*\$?([\d.]+)",
+        r"Standby Charge per month(?:,\s*if applicable)?:\s*[$]?\s*([\d.]+)",
         re.I,
     )
 
@@ -6231,6 +6311,7 @@ class HistoricalRateParserRegistry:
             CarolinasSmallCustomerGeneratorProfile(),
             CarolinasNetMeteringRiderProfile(),
             GreenSourceAdvantageRiderProfile(),
+            CarolinasMultiClassRateTableProfile(),
             CarolinasCepsRiderProfile(),
             CarolinasEnergyEfficiencyRiderProfile(),
             CarolinasEconomicDevelopmentRiderProfile(),
@@ -6883,9 +6964,8 @@ class HistoricalRateParserRegistry:
                 "nc-progress-leaf-648", "nc-progress-leaf-649", "nc-progress-leaf-651",
                 "nc-progress-leaf-652", "nc-progress-leaf-655", "nc-progress-leaf-656",
                 "nc-progress-leaf-657", "nc-progress-leaf-662", "nc-progress-leaf-663",
-                # DEC equivalent riders
-                "nc-carolinas-rider-rdm", "nc-carolinas-rider-pim", "nc-carolinas-rider-edit4",
-                "nc-carolinas-rider-sts", "nc-carolinas-rider-cei",
+                # DEC equivalent riders (EDIT4/STS moved to carolinas_multi_class_rate_table)
+                "nc-carolinas-rider-cei",
                 "nc-progress-leaf-700", "nc-progress-leaf-702", "nc-progress-leaf-705",
                 "nc-progress-leaf-708", "nc-progress-leaf-719", "nc-progress-leaf-722",
                 "nc-progress-leaf-724",
@@ -7125,23 +7205,25 @@ class HistoricalRateParserRegistry:
                 "nc-carolinas-rider-prospectiverider",
                 "nc-carolinas-rider-ps",
                 "nc-carolinas-rider-riderlc",
+                "nc-carolinas-rider-pim",
+                "nc-carolinas-rider-rdm",
+                "nc-carolinas-rider-sts",
             }:
                 return 0.0, ()
             lowered = signals.text_lower
-            _new_rider_families = {
-                "nc-carolinas-rider-ps",
-                "nc-carolinas-rider-riderlc",
-                "nc-carolinas-rider-prospectiverider",
-                "nc-carolinas-rider-bpmprospectiverider",
+            _kwh_rate_check = "per kilowatt-hour" in lowered or "c/kwh" in lowered or "/kwh" in lowered
+            _legacy_families = {
+                "nc-carolinas-rider-edpr",
+                "nc-carolinas-rider-bpmppttrueup",
             }
-            if signals.family_key in _new_rider_families:
-                if not ("per kilowatt-hour" in lowered or "c/kwh" in lowered or "/kwh" in lowered):
-                    return 0.0, ()
-            else:
+            if signals.family_key in _legacy_families:
                 if not (
                     ("existing dsm program" in lowered or "bpm true-up rider" in lowered or "bpm prospective rider" in lowered)
-                    and ("per kilowatt-hour" in lowered or "c/kwh" in lowered or "/kwh" in lowered)
+                    and _kwh_rate_check
                 ):
+                    return 0.0, ()
+            else:
+                if not _kwh_rate_check:
                     return 0.0, ()
             score = 0.9
             reasons.extend(("carolinas_single_value", "kwh_rate"))
@@ -7395,6 +7477,22 @@ class HistoricalRateParserRegistry:
             if "subscription rate" in lowered or "monthly rate" in lowered or "monthly charge" in lowered:
                 score = max(score, 0.85)
                 reasons.append("monthly_charge_language")
+            return min(score, 0.97), tuple(reasons)
+
+        if profile_name == "carolinas_multi_class_rate_table":
+            if signals.family_key not in {"nc-carolinas-rider-edit4", "nc-carolinas-rider-sts"}:
+                return 0.0, ()
+            lowered = signals.text_lower
+            if "rate class" not in lowered or "residential" not in lowered or "/kwh" not in lowered:
+                return 0.0, ()
+            score = 0.88
+            reasons.append("multi_class_rate_table")
+            if "applicable schedules" in lowered:
+                score += 0.05
+                reasons.append("applicable_schedules_col")
+            if "billing rate" in lowered:
+                score += 0.04
+                reasons.append("billing_rate_col")
             return min(score, 0.97), tuple(reasons)
 
         if profile_name == "carolinas_ceps_rider":
