@@ -2465,12 +2465,108 @@ class ProgressBillingAdjustmentsProfile:
 
 
 @dataclass
+class ProgressJaaRiderProfile:
+    """Profile for DEP Joint Agency Asset Rider JAA (Leaf No. 602).
+
+    JAA uses a multi-class rate table rather than the single-sentence "is X.XXX¢ per
+    kilowatt-hour" format.  The table has two sections:
+        Non-Demand Rate Class (dollars per kilowatt-hour): Residential, SGS, MGS, SI, TSS, OL
+        Demand Rate Classes (dollars per kilowatt): MGS-demand, LGS-demand
+
+    Each row: <class name>\n<schedules>\n<rate value>
+    """
+
+    name: str = "progress_jaa_rider"
+
+    # Matches "Non-Demand Rate Class (dollars per kilowatt-hour)" header
+    _NON_DEMAND_RE = re.compile(
+        r"Non-Demand Rate Class\s*\(dollars per kilowatt-hour\)(.*?)(?:Demand Rate Class|$)",
+        re.I | re.S,
+    )
+    # Matches "Demand Rate Classes (dollars per kilowatt)" header
+    _DEMAND_RE = re.compile(
+        r"Demand Rate Class(?:es)?\s*\(dollars per kilowatt\)(.*?)(?:\*\s*Incremental|$)",
+        re.I | re.S,
+    )
+    # A rate value: optional leading paren for negatives, digits, dot
+    _RATE_RE = re.compile(r"\(?([\d.]+)\)?(?:\s*\n|$)", re.M)
+    # Class name labels we care about (first word(s) before schedules line)
+    _CLASS_LABELS = [
+        ("Residential", "residential"),
+        ("Small General Service", "small_general_service"),
+        ("Medium General Service", "medium_general_service"),
+        ("Seasonal and Intermittent", "seasonal_intermittent"),
+        ("Traffic Signal", "traffic_signal"),
+        ("Outdoor Lighting", "outdoor_lighting"),
+        ("Large General Service", "large_general_service"),
+    ]
+
+    def supports(self, doc: dict, text: str) -> bool:
+        return (doc.get("family_key") or "").lower() == "nc-progress-leaf-602"
+
+    def score(self, doc: dict, text: str) -> float:
+        if not self.supports(doc, text):
+            return 0.0
+        lowered = text.lower()
+        if "joint agency asset" in lowered and "non-demand rate class" in lowered:
+            return 0.94
+        if "joint agency asset" in lowered or "rider jaa" in lowered:
+            return 0.82
+        return 0.0
+
+    def extract(self, doc: dict, text: str) -> list[ExtractedCharge]:
+        charges: list[ExtractedCharge] = []
+
+        def _parse_section(section_text: str, rate_unit: str, charge_type: str) -> None:
+            # Walk through class labels in order; for each, find its rate value
+            remaining = section_text
+            for label, class_key in self._CLASS_LABELS:
+                idx = remaining.find(label)
+                if idx < 0:
+                    continue
+                after = remaining[idx + len(label):]
+                m = self._RATE_RE.search(after[:200])
+                if not m:
+                    continue
+                raw = m.group(1)
+                # parenthetical negative
+                neg = "(" in after[:after.find(raw) + len(raw) + 5] if "(" in after[:50] else False
+                try:
+                    val = float(raw) * (-1 if neg else 1)
+                except ValueError:
+                    continue
+                snippet = f"JAA {label}: {m.group(0).strip()}"
+                charges.append(ExtractedCharge(
+                    charge_type=charge_type,
+                    charge_label=f"JAA Rate - {label}",
+                    rate_value=val,
+                    rate_unit=rate_unit,
+                    season="all_year",
+                    tou_period=None,
+                    tier_min=None,
+                    tier_max=None,
+                    source_snippet=snippet[:120],
+                    confidence_score=0.90,
+                ))
+
+        m_nd = self._NON_DEMAND_RE.search(text)
+        if m_nd:
+            _parse_section(m_nd.group(1), "$/kWh", "adjustment")
+
+        m_d = self._DEMAND_RE.search(text)
+        if m_d:
+            _parse_section(m_d.group(1), "$/kW", "demand")
+
+        return charges
+
+
+@dataclass
 class ProgressSingleValueRiderProfile:
-    """Profile for single-value Progress riders like RDM, ESM, PIM, JAA, STS, CPRE, RECD."""
+    """Profile for single-value Progress riders like RDM, ESM, PIM, STS, CPRE, RECD."""
 
     name: str = "progress_single_value_rider"
     _SUPPORTED_FAMILIES = {
-        "nc-progress-leaf-602",   # JAA — Joint Agency Asset
+        # leaf-602 (JAA) handled by ProgressJaaRiderProfile — excluded here
         "nc-progress-leaf-603",   # REPS — Renewable Energy Portfolio Standard
         "nc-progress-leaf-604",   # ED  — Economic Development
         "nc-progress-leaf-605",   # CPRE — Competitive Procurement Renewable Energy
@@ -2516,7 +2612,7 @@ class ProgressSingleValueRiderProfile:
         # SSR rate is site-specific per contract (not a tariff-filed fixed value).
     }
     _RELAXED_SELECTION_FAMILIES = {
-        "nc-progress-leaf-602",   # JAA — some valid spans omit explicit kWh wording
+        # leaf-602 (JAA) removed — handled by ProgressJaaRiderProfile
         "nc-progress-leaf-640",   # RECD — uses % credit, not ¢/kWh; needs relaxed kwh gate
         # Purchased Power schedules — use price schedules not traditional rate tables
         "nc-progress-leaf-590",   # PP — Purchased Power Schedule
@@ -6122,6 +6218,7 @@ class HistoricalRateParserRegistry:
             ProgressSpecialtyRiderProfile(),
             ProgressCurrentLeafBridgeProfile(),
             ProgressBillingAdjustmentsProfile(),
+            ProgressJaaRiderProfile(),
             ProgressSingleValueRiderProfile(),
             ProgressRecoveryRiderProfile(),
             ProgressManagementEnergyEfficiencyCostRecoveryRiderProfile(),
@@ -6764,9 +6861,20 @@ class HistoricalRateParserRegistry:
                 reasons.append("notice_net_changes")
             return min(score, 0.98), tuple(reasons)
 
+        if profile_name == "progress_jaa_rider":
+            if signals.family_key != "nc-progress-leaf-602":
+                return 0.0, ()
+            lowered = signals.text_lower
+            if "joint agency asset" in lowered and "non-demand rate class" in lowered:
+                return 0.94, ("jaa_family", "rate_table")
+            if "joint agency asset" in lowered or "rider jaa" in lowered:
+                return 0.82, ("jaa_family",)
+            return 0.0, ()
+
         if profile_name == "progress_single_value_rider":
             _svr_families = {
-                "nc-progress-leaf-602", "nc-progress-leaf-603",
+                # leaf-602 (JAA) handled by progress_jaa_rider
+                "nc-progress-leaf-603",
                 "nc-progress-leaf-604", "nc-progress-leaf-605", "nc-progress-leaf-606",
                 "nc-progress-leaf-607", "nc-progress-leaf-608", "nc-progress-leaf-609",
                 "nc-progress-leaf-590", "nc-progress-leaf-591", "nc-progress-leaf-592",
