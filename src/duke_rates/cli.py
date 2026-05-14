@@ -16474,6 +16474,197 @@ def remediate_nc_missing_doc_no_download_url_cmd(
         typer.echo(f"  unresolved_record_ids={report['unresolved_record_ids']}")
 
 
+@app.command("normalize-nc-effective-dates")
+def normalize_nc_effective_dates_cmd(
+    dry_run: bool = typer.Option(
+        False,
+        "--dry-run",
+        help="Print what would be changed without updating the database.",
+    ),
+    state: str = typer.Option(
+        "NC",
+        "--state",
+        help="State filter (default: NC).",
+    ),
+) -> None:
+    """Normalize malformed effective_start / effective_end values in historical_documents.
+
+    Converts 'Month D, YYYY' strings (and similar) that were stored without ISO
+    normalisation into 'YYYY-MM-DD' format.  Safe to re-run: rows already in
+    ISO format are skipped.
+    """
+    from duke_rates.db.ncuc_loader import _normalize_date
+
+    settings, repository = _bootstrap()
+    with repository._connect() as conn:
+        rows = conn.execute(
+            """
+            SELECT id, family_key, effective_start, effective_end
+            FROM historical_documents
+            WHERE state = ?
+              AND (
+                (effective_start IS NOT NULL AND effective_start NOT GLOB '????-??-??*')
+                OR
+                (effective_end IS NOT NULL AND effective_end NOT GLOB '????-??-??*')
+              )
+            ORDER BY id
+            """,
+            (state,),
+        ).fetchall()
+
+    updated = 0
+    skipped = 0
+    errors = []
+
+    for hd_id, family_key, raw_start, raw_end in rows:
+        norm_start = _normalize_date(raw_start or "") if raw_start else raw_start
+        norm_end = _normalize_date(raw_end or "") if raw_end else raw_end
+
+        changed = (norm_start != raw_start) or (norm_end != raw_end)
+        if not changed:
+            skipped += 1
+            continue
+
+        if dry_run:
+            typer.echo(
+                f"  [dry-run] hd={hd_id} {family_key}"
+                + (f"  start: {raw_start!r} -> {norm_start!r}" if norm_start != raw_start else "")
+                + (f"  end: {raw_end!r} -> {norm_end!r}" if norm_end != raw_end else "")
+            )
+            updated += 1
+            continue
+
+        try:
+            with repository._connect() as conn:
+                conn.execute(
+                    "UPDATE historical_documents SET effective_start = ?, effective_end = ? WHERE id = ?",
+                    (norm_start, norm_end, hd_id),
+                )
+            typer.echo(
+                f"  hd={hd_id} {family_key}"
+                + (f"  start: {raw_start!r} -> {norm_start!r}" if norm_start != raw_start else "")
+                + (f"  end: {raw_end!r} -> {norm_end!r}" if norm_end != raw_end else "")
+            )
+            updated += 1
+        except Exception as exc:
+            errors.append(f"hd={hd_id}: {exc}")
+
+    typer.echo(
+        f"normalize-nc-effective-dates: found={len(rows)} updated={updated} skipped={skipped} errors={len(errors)}"
+        + (" [dry-run]" if dry_run else "")
+    )
+    for e in errors:
+        typer.echo(f"  ERROR: {e}")
+
+
+@app.command("remediate-nc-null-effective-dates")
+def remediate_nc_null_effective_dates_cmd(
+    dry_run: bool = typer.Option(
+        False,
+        "--dry-run",
+        help="Print what would change without writing to the database.",
+    ),
+    family_key: str | None = typer.Option(
+        None,
+        "--family-key",
+        help="Restrict to a single family key.",
+    ),
+    limit: int = typer.Option(
+        500,
+        "--limit",
+        help="Maximum number of null-effective_start docs to process.",
+    ),
+    passes: str = typer.Option(
+        "1,2,3",
+        "--passes",
+        help="Comma-separated pass numbers to run (e.g. '1,2' skips docket fallback).",
+    ),
+    enable_llm: bool = typer.Option(
+        False,
+        "--enable-llm",
+        help=(
+            "Enable Pass 1C: LLM-assisted date extraction via local Ollama. "
+            "Runs qwen2.5:7b-instruct on docs where regex passes fail. "
+            "High-confidence effective dates are written; medium-confidence "
+            "dates are stored in metadata_json for review."
+        ),
+    ),
+    state: str = typer.Option(
+        "NC",
+        "--state",
+        help="State filter.",
+    ),
+) -> None:
+    """Remediate null effective_start on historical_documents via multi-pass strategy.
+
+    Pass 1  - Footer/header PDF scan: reads the span pages and regex-matches
+               the standard Duke 'Effective for ... on and after ...' footer.
+               Also handles garbled OCR years (e.g. 4996 -> 1996).
+
+    Pass 1B - Redline regex scan: detects concatenated redline date pairs
+               (e.g. 'September 30, 2024January 1, 2025'), stores the proposed
+               date as effective_start with superseded date in metadata.
+
+    Pass 1C - LLM extraction (--enable-llm): uses qwen2.5:7b-instruct to read
+               raw page text and identify effective dates in prose. High-confidence
+               results set effective_start; medium-confidence stored for review.
+
+    Pass 2  - Rider summary cross-reference: matches the doc's rider/leaf code
+               against the effective dates recorded in the leaf-600/602 Summary
+               of Rider Adjustments sheets already in tariff_charges.
+
+    Pass 3  - Docket filing-date proxy: falls back to the earliest filing_date
+               found in ncuc_discovery_records for the same docket directory.
+               Low confidence; stored with source=docket_filing_proxy in metadata.
+    """
+    from duke_rates.historical.ncuc.effective_date_remediation import (
+        remediate_null_effective_dates,
+    )
+
+    try:
+        pass_nums = tuple(int(p.strip()) for p in passes.split(",") if p.strip())
+    except ValueError:
+        typer.echo(f"ERROR: --passes must be comma-separated integers, got {passes!r}")
+        raise typer.Exit(1)
+
+    _, repository = _bootstrap()
+    result = remediate_null_effective_dates(
+        repository,
+        state=state,
+        family_key=family_key,
+        limit=limit,
+        dry_run=dry_run,
+        passes=pass_nums,
+        enable_llm=enable_llm,
+    )
+
+    suffix = " [dry-run]" if dry_run else ""
+    typer.echo(
+        f"remediate-nc-null-effective-dates{suffix}: "
+        f"total_null={result.total_null} "
+        f"pass1={result.pass1_resolved} "
+        f"pass1b={result.pass1b_resolved} "
+        f"pass1c={result.pass1c_resolved} "
+        f"pass1c_medium={result.pass1c_medium} "
+        f"pass2={result.pass2_resolved} "
+        f"pass3={result.pass3_resolved} "
+        f"unresolved={result.unresolved}"
+    )
+    if enable_llm and result.pass1c_medium > 0:
+        typer.echo(
+            f"  NOTE: {result.pass1c_medium} docs have medium-confidence LLM dates "
+            "stored in metadata_json (llm_medium_date) — review before promoting."
+        )
+    if result.updated_ids:
+        typer.echo(f"  updated ({len(result.updated_ids)}): {result.updated_ids[:20]}"
+                   + (" ..." if len(result.updated_ids) > 20 else ""))
+    if result.unresolved_ids:
+        typer.echo(f"  unresolved ({len(result.unresolved_ids)}): {result.unresolved_ids[:20]}"
+                   + (" ..." if len(result.unresolved_ids) > 20 else ""))
+    for e in result.errors:
+        typer.echo(f"  ERROR: {e}")
+
+
 @app.command("remediate-nc-missing-doc-effective-start")
 def remediate_nc_missing_doc_effective_start_cmd(
     family_key: str | None = typer.Option(
