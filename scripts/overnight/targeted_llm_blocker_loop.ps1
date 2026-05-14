@@ -76,6 +76,14 @@ while ((Get-Date) -lt $deadline) {
     python -m duke_rates show-near-miss-profiles-nc --limit 10 2>&1 | ForEach-Object { Write-Both "  $_" }
     python -m duke_rates show-unknown-routing-audit-nc --limit 10 2>&1 | ForEach-Object { Write-Both "  $_" }
 
+    Write-Both "Stale reprocess recovery"
+    python -m duke_rates show-stale-reprocess-nc --limit 10 2>&1 | ForEach-Object { Write-Both "  $_" }
+    python -m duke_rates recover-stale-reprocess-nc `
+        --limit 10 `
+        --older-than-minutes 240 `
+        --requested-by targeted_llm_blocker_loop `
+        --execute 2>&1 | ForEach-Object { Write-Both "  $_" }
+
     Write-Both "Profile impact enqueue"
     foreach ($routingProfile in $routingProfiles) {
         python -m duke_rates enqueue-profile-impact-nc `

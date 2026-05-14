@@ -17,7 +17,9 @@ from duke_rates.db.reprocess import (
     enqueue_stale_historical_documents,
     find_profile_impacted_historical_documents,
     find_stale_historical_documents,
+    find_stale_running_historical_reprocess_queue,
     latest_processing_run_for_document,
+    recover_stale_running_historical_reprocess_queue,
     record_historical_processing_run,
 )
 from duke_rates.db.artifact_cache import save_page_artifacts, save_span_artifacts
@@ -419,6 +421,167 @@ def test_show_reprocess_queue_cli_tolerates_non_console_source_pdf(tmp_path, mon
     assert result.exit_code == 0
     assert "manual_recheck" in result.stdout
     conn.close()
+
+
+def test_recover_stale_running_historical_reprocess_queue_resets_old_running_rows(tmp_path) -> None:
+    conn = connect(tmp_path / "stale-running.db")
+    now = datetime(2026, 4, 1, tzinfo=UTC).isoformat()
+    doc_id = conn.execute(
+        """
+        INSERT INTO historical_documents (
+            family_key, title, state, company, category, kind,
+            canonical_url, archived_url, snapshot_timestamp,
+            local_path, content_hash, effective_start, retrieved_at
+        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+        """,
+        (
+            "nc-progress-leaf-500",
+            "Progress Residential",
+            "NC",
+            "progress",
+            "rate",
+            "pdf",
+            "https://example.test/stale-running.pdf",
+            "https://archive.test/stale-running",
+            now,
+            str(tmp_path / "stale-running.pdf"),
+            "hash-stale-running",
+            "2024-01-01",
+            now,
+        ),
+    ).lastrowid
+    conn.execute(
+        """
+        INSERT INTO historical_reprocess_queue (
+            historical_document_id, source_pdf, family_key, priority, queue_reason,
+            requested_by, status, metadata_json, requested_at, started_at
+        ) VALUES (?,?,?,?,?,?,?,?,?,?)
+        """,
+        (
+            doc_id,
+            str(tmp_path / "stale-running.pdf"),
+            "nc-progress-leaf-500",
+            80,
+            "manual_recheck",
+            "test-suite",
+            "running",
+            json.dumps({"seed": True}, sort_keys=True),
+            "2026-04-01T00:00:00+00:00",
+            "2026-04-01T00:00:00+00:00",
+        ),
+    )
+    conn.commit()
+
+    stale_before = find_stale_running_historical_reprocess_queue(
+        conn,
+        older_than_minutes=240,
+        limit=10,
+    )
+    assert len(stale_before) == 1
+    assert stale_before[0]["queue_id"] == 1
+
+    report = recover_stale_running_historical_reprocess_queue(
+        conn,
+        older_than_minutes=240,
+        limit=10,
+        requested_by="test-suite",
+    )
+    conn.commit()
+
+    assert report["recovered"] == 1
+    row = conn.execute(
+        """
+        SELECT status, latest_run_id, error_message, started_at, completed_at, metadata_json
+        FROM historical_reprocess_queue
+        WHERE id = 1
+        """
+    ).fetchone()
+    conn.close()
+    assert row is not None
+    assert row["status"] == "pending"
+    assert row["latest_run_id"] is None
+    assert row["error_message"] is None
+    assert row["started_at"] is None
+    assert row["completed_at"] is None
+    metadata = json.loads(row["metadata_json"] or "{}")
+    assert metadata["recovered_from_stale_running"] is True
+    assert metadata["recovered_by"] == "test-suite"
+
+
+def test_recover_stale_reprocess_cli_requeues_stale_running_rows(tmp_path, monkeypatch) -> None:
+    db_path = tmp_path / "cli-stale-running.db"
+    conn = connect(db_path)
+    now = datetime(2026, 4, 1, tzinfo=UTC).isoformat()
+    doc_id = conn.execute(
+        """
+        INSERT INTO historical_documents (
+            family_key, title, state, company, category, kind,
+            canonical_url, archived_url, snapshot_timestamp,
+            local_path, content_hash, effective_start, retrieved_at
+        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+        """,
+        (
+            "nc-progress-leaf-500",
+            "Progress Residential",
+            "NC",
+            "progress",
+            "rate",
+            "pdf",
+            "https://example.test/stale-cli.pdf",
+            "https://archive.test/stale-cli",
+            now,
+            str(tmp_path / "stale-cli.pdf"),
+            "hash-stale-cli",
+            "2024-01-01",
+            now,
+        ),
+    ).lastrowid
+    conn.execute(
+        """
+        INSERT INTO historical_reprocess_queue (
+            historical_document_id, source_pdf, family_key, priority, queue_reason,
+            requested_by, status, metadata_json, requested_at, started_at
+        ) VALUES (?,?,?,?,?,?,?,?,?,?)
+        """,
+        (
+            doc_id,
+            str(tmp_path / "stale-cli.pdf"),
+            "nc-progress-leaf-500",
+            80,
+            "manual_recheck",
+            "test-suite",
+            "running",
+            "{}",
+            "2026-04-01T00:00:00+00:00",
+            "2026-04-01T00:00:00+00:00",
+        ),
+    )
+    conn.commit()
+    conn.close()
+
+    monkeypatch.setattr(
+        cli,
+        "_bootstrap",
+        lambda: (SimpleNamespace(database_path=str(db_path)), None),
+    )
+    runner = CliRunner()
+
+    dry_run = runner.invoke(cli.app, ["recover-stale-reprocess-nc", "--limit", "10"])
+    assert dry_run.exit_code == 0
+    assert "dry_run" in dry_run.stdout
+
+    execute = runner.invoke(cli.app, ["recover-stale-reprocess-nc", "--limit", "10", "--execute"])
+    assert execute.exit_code == 0
+    assert "execute" in execute.stdout
+
+    conn = connect(db_path)
+    row = conn.execute(
+        "SELECT status, started_at, completed_at FROM historical_reprocess_queue WHERE id = 1"
+    ).fetchone()
+    conn.close()
+    assert row["status"] == "pending"
+    assert row["started_at"] is None
+    assert row["completed_at"] is None
 
 
 def test_add_historical_document_nc_cli_registers_bounded_slice(tmp_path, monkeypatch) -> None:

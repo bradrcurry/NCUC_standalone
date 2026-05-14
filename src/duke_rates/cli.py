@@ -785,6 +785,26 @@ def _build_fast_reprocess_priority_summary_nc(conn: sqlite3.Connection) -> dict[
     }
 
 
+def _build_fast_stale_reprocess_summary_nc(
+    conn: sqlite3.Connection,
+    *,
+    older_than_minutes: int = 240,
+) -> dict[str, Any]:
+    from duke_rates.db.reprocess import find_stale_running_historical_reprocess_queue
+
+    rows = find_stale_running_historical_reprocess_queue(
+        conn,
+        older_than_minutes=older_than_minutes,
+        limit=50,
+    )
+    top_row = rows[0] if rows else None
+    return {
+        "stale_running_count": len(rows),
+        "top_row": top_row,
+        "older_than_minutes": older_than_minutes,
+    }
+
+
 def _build_workflow_next_actions_nc_report(
     conn: sqlite3.Connection,
     *,
@@ -794,6 +814,7 @@ def _build_workflow_next_actions_nc_report(
     ocr_summary = _build_fast_ocr_remediation_summary_nc(conn)
     parser_summary = _build_fast_parser_problem_summary_nc(conn)
     reprocess_summary = _build_fast_reprocess_priority_summary_nc(conn)
+    stale_reprocess_summary = _build_fast_stale_reprocess_summary_nc(conn)
 
     actions: list[dict[str, Any]] = []
 
@@ -852,6 +873,32 @@ def _build_workflow_next_actions_nc_report(
                     "process_reprocess_queue",
                     recommended_command="python -m duke_rates process-reprocess-queue-nc --limit 1",
                     recommended_parallel_command="python -m duke_rates process-reprocess-queue-nc --limit 2 --workers 2",
+                ),
+            }
+        )
+
+    if stale_reprocess_summary["stale_running_count"] > 0:
+        top_row = stale_reprocess_summary["top_row"] or {}
+        actions.append(
+            {
+                "action_type": "recover_stale_reprocess",
+                "priority": 15,
+                "executable": True,
+                "count": int(stale_reprocess_summary["stale_running_count"]),
+                "summary": (
+                    f"{stale_reprocess_summary['stale_running_count']} running reprocess rows appear stale "
+                    f"(older than {stale_reprocess_summary['older_than_minutes']} minutes)"
+                ),
+                "failure_class": "stale_running_queue",
+                "source": "reprocess_queue",
+                "target_family_key": top_row.get("family_key"),
+                "target_note": top_row.get("queue_reason"),
+                **_policy(
+                    "recover_stale_reprocess",
+                    recommended_command=(
+                        f"python -m duke_rates recover-stale-reprocess-nc --limit 10 "
+                        f"--older-than-minutes {stale_reprocess_summary['older_than_minutes']} --execute"
+                    ),
                 ),
             }
         )
@@ -1949,6 +1996,15 @@ def show_unknown_routing_audit_nc(
             typer.echo(f"    normalization_lane={row.get('top_normalization_lane') or '-'}")
         typer.echo(f"    reason={row['reason']}")
         typer.echo(f"    title={(row['sample_title'] or '')[:100]}")
+        if row.get("synthesized_profile_name"):
+            typer.echo(
+                "    "
+                f"candidate_profile={row['synthesized_profile_name']} "
+                f"kind={row.get('synthesized_profile_kind') or '-'}"
+            )
+            typer.echo(f"    synthesis_reason={row.get('synthesized_profile_reason') or '-'}")
+            if row.get("synthesized_next_command"):
+                typer.echo(f"    next={row['synthesized_next_command']}")
 
 
 @app.command("validate-lineage-nc")
@@ -3793,6 +3849,104 @@ def show_reprocess_queue_nc(
         )
 
 
+@app.command("show-stale-reprocess-nc")
+def show_stale_reprocess_nc(
+    older_than_minutes: int = typer.Option(240, "--older-than-minutes", help="Minimum age for a running row to be considered stale."),
+    limit: int = typer.Option(50, "--limit", help="Max stale running rows to display."),
+) -> None:
+    """Show running historical reprocess queue items that appear stale."""
+    from duke_rates.db.reprocess import find_stale_running_historical_reprocess_queue
+    from duke_rates.db.sqlite import connect
+
+    settings, _ = _bootstrap()
+    conn = connect(settings.database_path)
+    try:
+        rows = find_stale_running_historical_reprocess_queue(
+            conn,
+            older_than_minutes=older_than_minutes,
+            limit=limit,
+        )
+    finally:
+        conn.close()
+
+    for row in rows:
+        typer.echo(
+            "\t".join(
+                [
+                    _safe_cli_text(row["queue_id"]),
+                    _safe_cli_text(row["historical_document_id"]),
+                    _safe_cli_text(row["status"]),
+                    _safe_cli_text(row["priority"]),
+                    _safe_cli_text(row.get("family_key") or "-"),
+                    _safe_cli_text(row.get("age_minutes") if row.get("age_minutes") is not None else "-"),
+                    _safe_cli_text(",".join(row.get("reasons") or [])),
+                    _safe_cli_text(row.get("queue_reason") or "-"),
+                ]
+            )
+        )
+
+
+@app.command("recover-stale-reprocess-nc")
+def recover_stale_reprocess_nc(
+    older_than_minutes: int = typer.Option(240, "--older-than-minutes", help="Minimum age for a running row to be considered stale."),
+    limit: int = typer.Option(50, "--limit", help="Max stale running rows to inspect or recover."),
+    requested_by: str = typer.Option("operator", "--requested-by", help="Queue recovery label."),
+    dry_run: bool = typer.Option(True, "--dry-run/--execute", help="Preview the recovery without committing. Defaults to dry-run."),
+) -> None:
+    """Recover stale running reprocess rows by returning them to pending."""
+    from duke_rates.db.reprocess import (
+        find_stale_running_historical_reprocess_queue,
+        recover_stale_running_historical_reprocess_queue,
+    )
+    from duke_rates.db.sqlite import connect
+
+    settings, _ = _bootstrap()
+    conn = connect(settings.database_path)
+    try:
+        preview_rows = find_stale_running_historical_reprocess_queue(
+            conn,
+            older_than_minutes=older_than_minutes,
+            limit=limit,
+        )
+        if dry_run:
+            conn.rollback()
+            report = {
+                "scanned": len(preview_rows),
+                "recovered": 0,
+                "queue_ids": [row["queue_id"] for row in preview_rows],
+                "rows": preview_rows,
+            }
+        else:
+            report = recover_stale_running_historical_reprocess_queue(
+                conn,
+                older_than_minutes=older_than_minutes,
+                limit=limit,
+                requested_by=requested_by,
+            )
+            conn.commit()
+    finally:
+        conn.close()
+
+    mode = "dry_run" if dry_run else "execute"
+    typer.echo(
+        f"Stale running reprocess recovery ({mode}): scanned={report['scanned']} recovered={report['recovered']}"
+    )
+    for row in report["rows"]:
+        typer.echo(
+            "\t".join(
+                [
+                    _safe_cli_text(row["queue_id"]),
+                    _safe_cli_text(row["historical_document_id"]),
+                    _safe_cli_text(row["priority"]),
+                    _safe_cli_text(row.get("family_key") or "-"),
+                    _safe_cli_text(row.get("age_minutes") if row.get("age_minutes") is not None else "-"),
+                    _safe_cli_text(",".join(row.get("reasons") or [])),
+                    _safe_cli_text(row.get("queue_reason") or "-"),
+                ]
+            )
+        )
+
+
 @app.command("show-reprocess-priority-nc")
 def show_reprocess_priority_nc(
     status: str | None = typer.Option("pending", "--status", help="pending | running | completed | failed | all"),
@@ -4814,9 +4968,14 @@ def parse_review_summary(
     for row in report["top_correction_categories"]:
         typer.echo(f"  {row['category']:<24} count={row['count']}")
 
+    typer.echo("\nTop Needs-Review Root Causes")
+    for row in report["top_root_causes"]:
+        typer.echo(f"  {row['root_cause']:<32} count={row['count']}")
+
     typer.echo("\nTop Parser Profiles")
     for row in report["top_profiles"]:
         top_categories = ",".join(item["category"] for item in row["top_correction_categories"]) or "-"
+        top_root_causes = ",".join(item["root_cause"] for item in row["top_root_causes"]) or "-"
         typer.echo(
             "  "
             f"{row['parser_profile']:<32} "
@@ -4826,12 +4985,14 @@ def parse_review_summary(
             f"rejected={row['rejected']:<3} "
             f"human={row['human_reviewed']:<3} "
             f"corrections={row['correction_count']:<3} "
-            f"categories={top_categories}"
+            f"categories={top_categories} "
+            f"root_causes={top_root_causes}"
         )
 
     typer.echo("\nTop Families")
     for row in report["top_families"]:
         top_categories = ",".join(item["category"] for item in row["top_correction_categories"]) or "-"
+        top_root_causes = ",".join(item["root_cause"] for item in row["top_root_causes"]) or "-"
         typer.echo(
             "  "
             f"{row['family_key']:<36} "
@@ -4840,7 +5001,8 @@ def parse_review_summary(
             f"needs_review={row['needs_review']:<3} "
             f"corrected={row['corrected']:<3} "
             f"rejected={row['rejected']:<3} "
-            f"categories={top_categories}"
+            f"categories={top_categories} "
+            f"root_causes={top_root_causes}"
         )
 
 
@@ -5534,6 +5696,14 @@ def show_workflow_capabilities_nc(
                 "recommended_parallel_command": "python -m duke_rates process-reprocess-queue-nc --limit 2 --workers 2",
             },
             {
+                "action_type": "recover_stale_reprocess",
+                "concurrency_policy": "sequential_only",
+                "workers_allowed": False,
+                "notes": "Safe queue recovery for running reprocess rows that appear stale; use before more extraction loops when the queue is stuck.",
+                "recommended_command": "python -m duke_rates recover-stale-reprocess-nc --limit 10 --older-than-minutes 240 --execute",
+                "recommended_parallel_command": None,
+            },
+            {
                 "action_type": "enqueue_ocr_remediation",
                 "concurrency_policy": "sequential_only",
                 "workers_allowed": False,
@@ -5611,6 +5781,11 @@ def execute_workflow_next_action_nc(
             f"python -m duke_rates process-reprocess-queue-nc --limit {limit}"
             + (f" --workers {selected_workers}" if selected_workers > 1 else "")
         )
+    elif action_type == "recover_stale_reprocess":
+        selected["recommended_command"] = (
+            f"python -m duke_rates recover-stale-reprocess-nc --limit {limit} "
+            f"--older-than-minutes 240 --execute"
+        )
     elif action_type == "enqueue_ocr_remediation":
         selected["recommended_command"] = f"python -m duke_rates ocr enqueue-remediation-nc --limit {limit} --execute"
     elif action_type == "enqueue_stale_reprocess":
@@ -5644,6 +5819,13 @@ def execute_workflow_next_action_nc(
             process_ocr_queue_nc(limit=limit, force=False, workers=selected_workers)
         elif action_type == "process_reprocess_queue":
             process_reprocess_queue_nc(limit=limit, workers=selected_workers)
+        elif action_type == "recover_stale_reprocess":
+            recover_stale_reprocess_nc(
+                limit=limit,
+                older_than_minutes=240,
+                requested_by="workflow_next_action",
+                dry_run=False,
+            )
         elif action_type == "enqueue_ocr_remediation":
             enqueue_ocr_remediation_nc(limit=limit, company=None, family_key=None, backend="pytesseract_cpu", requested_by="workflow_next_action", dry_run=False)
         elif action_type == "enqueue_stale_reprocess":

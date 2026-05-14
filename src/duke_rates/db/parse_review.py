@@ -41,6 +41,34 @@ def _extract_correction_categories(corrections: dict[str, Any]) -> list[str]:
     return sorted({_categorize_correction_key(key) for key in corrections})
 
 
+def _derive_needs_review_root_cause(row: dict[str, Any]) -> str:
+    status = str(row.get("status") or "").lower()
+    profile = str(row.get("parser_profile") or "unknown").lower()
+    review_source = str(row.get("review_source") or "unknown").lower()
+    flags = json.loads(row.get("review_flags_json") or "[]")
+    flag_set = {str(flag).lower() for flag in flags if str(flag).strip()}
+
+    if "no_charges_extracted" in flag_set:
+        return "no_charges_extracted"
+    if "generic_fallback_selected" in flag_set:
+        return "generic_fallback_selected"
+    if "low_selector_confidence" in flag_set:
+        return "low_selector_confidence"
+    if "sparse_charge_set" in flag_set:
+        return "sparse_charge_set"
+    if "fallback_below_threshold" in flag_set:
+        return "fallback_below_threshold"
+    if status.startswith("skipped"):
+        return "skipped_status"
+    if review_source == "human":
+        return "human_review_followup"
+    if profile == "unknown":
+        return "unknown_profile"
+    if profile == "generic_residential":
+        return "generic_residential_weak"
+    return "other_needs_review"
+
+
 def record_parse_review_outcome(
     conn: sqlite3.Connection,
     *,
@@ -371,6 +399,7 @@ def build_parse_review_summary(
     review_source_counts: Counter[str] = Counter()
     correction_category_counts: Counter[str] = Counter()
     correction_field_counts: Counter[str] = Counter()
+    root_cause_counts: Counter[str] = Counter()
     parser_profiles: dict[str, dict[str, Any]] = defaultdict(lambda: {
         "parser_profile": "",
         "attempt_count": 0,
@@ -381,6 +410,7 @@ def build_parse_review_summary(
         "human_reviewed": 0,
         "correction_count": 0,
         "correction_categories": Counter(),
+        "root_causes": Counter(),
     })
     families: dict[str, dict[str, Any]] = defaultdict(lambda: {
         "family_key": "",
@@ -393,6 +423,7 @@ def build_parse_review_summary(
         "human_reviewed": 0,
         "correction_count": 0,
         "correction_categories": Counter(),
+        "root_causes": Counter(),
     })
 
     for row in rows:
@@ -407,11 +438,14 @@ def build_parse_review_summary(
         correction_count = int(row["correction_count"] or 0)
         correction_categories = list(notes.get("correction_categories") or _extract_correction_categories(corrections))
         correction_fields = list(notes.get("correction_fields") or _extract_correction_fields(corrections))
+        root_cause = _derive_needs_review_root_cause(row) if outcome == "needs_review" else None
 
         outcome_counts[outcome] += 1
         review_source_counts[review_source] += 1
         correction_category_counts.update(correction_categories)
         correction_field_counts.update(correction_fields)
+        if root_cause:
+            root_cause_counts[root_cause] += 1
 
         profile_bucket = parser_profiles[profile]
         profile_bucket["parser_profile"] = profile
@@ -421,6 +455,8 @@ def build_parse_review_summary(
         if review_source == "human":
             profile_bucket["human_reviewed"] += 1
         profile_bucket["correction_categories"].update(correction_categories)
+        if root_cause:
+            profile_bucket["root_causes"].update([root_cause])
 
         family_bucket = families[family_key]
         family_bucket["family_key"] = family_key
@@ -431,6 +467,8 @@ def build_parse_review_summary(
         if review_source == "human":
             family_bucket["human_reviewed"] += 1
         family_bucket["correction_categories"].update(correction_categories)
+        if root_cause:
+            family_bucket["root_causes"].update([root_cause])
 
     def _finalize_bucket(item: dict[str, Any]) -> dict[str, Any]:
         finalized = dict(item)
@@ -438,6 +476,11 @@ def build_parse_review_summary(
         finalized["top_correction_categories"] = [
             {"category": category, "count": count}
             for category, count in counter.most_common(3)
+        ]
+        root_cause_counter = finalized.pop("root_causes", Counter())
+        finalized["top_root_causes"] = [
+            {"root_cause": root_cause, "count": count}
+            for root_cause, count in root_cause_counter.most_common(3)
         ]
         return finalized
 
@@ -472,6 +515,10 @@ def build_parse_review_summary(
         "top_correction_fields": [
             {"field": field, "count": count}
             for field, count in correction_field_counts.most_common(top_n)
+        ],
+        "top_root_causes": [
+            {"root_cause": root_cause, "count": count}
+            for root_cause, count in root_cause_counts.most_common(top_n)
         ],
         "top_profiles": by_profile,
         "top_families": by_family,

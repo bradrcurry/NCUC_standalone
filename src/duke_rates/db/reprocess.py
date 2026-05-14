@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from duke_rates.historical.ncuc.pipeline.stage_versions import (
@@ -302,6 +302,21 @@ def list_historical_reprocess_queue(
     return [dict(row) for row in rows]
 
 
+def _parse_queue_timestamp(value: Any) -> datetime | None:
+    if not value:
+        return None
+    text = str(value).strip()
+    if not text:
+        return None
+    try:
+        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=UTC)
+    return parsed.astimezone(UTC)
+
+
 def claim_next_historical_reprocess(
     conn: sqlite3.Connection,
     *,
@@ -333,6 +348,116 @@ def claim_next_historical_reprocess(
         (row["id"],),
     ).fetchone()
     return dict(claimed) if claimed else None
+
+
+def find_stale_running_historical_reprocess_queue(
+    conn: sqlite3.Connection,
+    *,
+    older_than_minutes: int = 240,
+    limit: int = 100,
+) -> list[dict[str, Any]]:
+    """Return running reprocess rows that appear stale based on started_at age."""
+    cutoff = datetime.now(UTC) - timedelta(minutes=max(0, older_than_minutes))
+    rows = conn.execute(
+        """
+        SELECT *
+        FROM historical_reprocess_queue
+        WHERE status = 'running'
+        ORDER BY priority DESC, requested_at ASC, id ASC
+        LIMIT ?
+        """,
+        (limit,),
+    ).fetchall()
+
+    stale_rows: list[dict[str, Any]] = []
+    for row in rows:
+        started_at = _parse_queue_timestamp(row["started_at"])
+        reasons: list[str] = []
+        if started_at is None:
+            reasons.append("started_at_missing_or_unparseable")
+        elif started_at <= cutoff:
+            reasons.append("running_too_long")
+        else:
+            continue
+
+        age_minutes: int | None = None
+        if started_at is not None:
+            age_minutes = max(0, int((datetime.now(UTC) - started_at).total_seconds() // 60))
+
+        stale_rows.append(
+            {
+                "queue_id": int(row["id"]),
+                "historical_document_id": int(row["historical_document_id"]),
+                "family_key": row["family_key"],
+                "priority": int(row["priority"] or 0),
+                "queue_reason": row["queue_reason"],
+                "requested_by": row["requested_by"],
+                "status": row["status"],
+                "requested_at": row["requested_at"],
+                "started_at": row["started_at"],
+                "completed_at": row["completed_at"],
+                "latest_run_id": row["latest_run_id"],
+                "error_message": row["error_message"],
+                "metadata": json.loads(row["metadata_json"] or "{}"),
+                "age_minutes": age_minutes,
+                "reasons": reasons,
+            }
+        )
+    return stale_rows
+
+
+def recover_stale_running_historical_reprocess_queue(
+    conn: sqlite3.Connection,
+    *,
+    older_than_minutes: int = 240,
+    limit: int = 100,
+    requested_by: str = "system",
+) -> dict[str, Any]:
+    """Return stale running rows to pending so they can be claimed again."""
+    stale_rows = find_stale_running_historical_reprocess_queue(
+        conn,
+        older_than_minutes=older_than_minutes,
+        limit=limit,
+    )
+    recovered = 0
+    queue_ids: list[int] = []
+    for row in stale_rows:
+        cur = conn.execute(
+            """
+            UPDATE historical_reprocess_queue
+            SET status = 'pending',
+                latest_run_id = NULL,
+                error_message = NULL,
+                metadata_json = ?,
+                started_at = NULL,
+                completed_at = NULL
+            WHERE id = ? AND status = 'running'
+            """,
+            (
+                json.dumps(
+                    row["metadata"]
+                    | {
+                        "recovered_from_stale_running": True,
+                        "recovered_at": datetime.now(UTC).isoformat(),
+                        "recovered_by": requested_by,
+                        "recovery_age_minutes": row["age_minutes"],
+                        "recovery_reasons": row["reasons"],
+                    },
+                    sort_keys=True,
+                ),
+                row["queue_id"],
+            ),
+        )
+        if cur.rowcount:
+            recovered += 1
+            queue_ids.append(row["queue_id"])
+
+    return {
+        "scanned": len(stale_rows),
+        "recovered": recovered,
+        "queue_ids": queue_ids,
+        "rows": stale_rows,
+    }
 
 
 def complete_historical_reprocess(

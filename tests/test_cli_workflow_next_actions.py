@@ -116,6 +116,38 @@ def test_build_workflow_next_actions_prefers_pending_queues(tmp_path) -> None:
     conn.close()
 
 
+def test_build_workflow_next_actions_prioritizes_stale_running_recovery(tmp_path) -> None:
+    db_path = tmp_path / "workflow-next-stale.db"
+    conn = connect(db_path)
+    _seed_history_doc(conn, tmp_path, doc_id=1)
+    now = datetime(2026, 4, 21, tzinfo=UTC).isoformat()
+    conn.execute(
+        """
+        INSERT INTO historical_reprocess_queue (
+            historical_document_id, source_pdf, family_key, priority, queue_reason,
+            requested_by, status, metadata_json, requested_at, started_at
+        ) VALUES (?,?,?,?,?,?,?,?,?,?)
+        """,
+        (1, str(tmp_path / "1.pdf"), "nc-progress-leaf-715", 90, "stale_stage:parser_version", "test-suite", "running", "{}", now, "2026-04-01T00:00:00+00:00"),
+    )
+    conn.execute(
+        """
+        INSERT INTO historical_reprocess_queue (
+            historical_document_id, source_pdf, family_key, priority, queue_reason,
+            requested_by, status, metadata_json, requested_at
+        ) VALUES (?,?,?,?,?,?,?,?,?)
+        """,
+        (1, str(tmp_path / "1.pdf"), "nc-progress-leaf-715", 70, "needs_review:generic_residential", "test-suite", "pending", "{}", now),
+    )
+    conn.commit()
+
+    report = cli._build_workflow_next_actions_nc_report(conn, limit=10)
+    assert report["rows"][0]["action_type"] == "recover_stale_reprocess"
+    assert report["rows"][1]["action_type"] == "process_reprocess_queue"
+    assert report["rows"][0]["concurrency_policy"] == "sequential_only"
+    conn.close()
+
+
 def test_execute_workflow_next_action_enqueues_ocr_remediation(monkeypatch, tmp_path) -> None:
     db_path = tmp_path / "workflow-next-exec.db"
     conn = connect(db_path)

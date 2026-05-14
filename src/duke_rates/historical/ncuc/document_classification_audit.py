@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from collections import Counter
 from pathlib import Path
 from typing import Any
@@ -354,6 +355,106 @@ def _derive_unknown_routing_action(rows: list[dict[str, Any]]) -> tuple[str, str
     )
 
 
+def _synthesize_routing_profile(
+    *,
+    family_key: str,
+    company: str | None,
+    title: str,
+    recommended_action: str,
+    reason: str,
+) -> dict[str, Any]:
+    family_key_l = family_key.lower()
+    company_l = str(company or "").lower()
+    title_l = title.lower()
+
+    candidate_profile: str | None = None
+    synthesis_kind = "manual_review"
+    synthesis_reason = reason
+
+    if recommended_action in {"enqueue_ocr_remediation", "enqueue_reprocess"}:
+        return {
+            "synthesized_profile_name": None,
+            "synthesized_profile_kind": "queue_only",
+            "synthesized_profile_reason": synthesis_reason,
+            "synthesized_next_command": None,
+        }
+
+    if (
+        "billing adjustments" in title_l
+        or "summary of rider adjustments" in title_l
+        or family_key_l == "nc-progress-leaf-601"
+    ):
+        candidate_profile = "progress_billing_adjustments" if company_l == "progress" else "progress_rider_adjustment_matrix"
+        synthesis_kind = "existing_profile"
+        synthesis_reason = "billing-adjustment summary/matrix language"
+    elif "management and energy efficiency cost recovery rider" in title_l or "managementandenergyefficiencycostrecoveryrider" in family_key_l:
+        candidate_profile = "progress_management_energy_efficiency_cost_recovery_rider"
+        synthesis_kind = "existing_profile"
+        synthesis_reason = "management and energy-efficiency cost recovery rider language"
+    elif "compliance report and cost recovery rider" in title_l or "compliancereportandcostrecoveryrider" in family_key_l:
+        candidate_profile = "progress_compliance_report_and_cost_recovery_rider"
+        synthesis_kind = "existing_profile"
+        synthesis_reason = "compliance report and cost recovery rider language"
+    elif "recovery rider" in title_l or "recoveryrider" in family_key_l:
+        candidate_profile = "progress_recovery_rider"
+        synthesis_kind = "existing_profile"
+        synthesis_reason = "recovery rider language"
+    elif any(
+        token in title_l
+        for token in (
+            "appliance recycling program",
+            "lighting program",
+            "efficiency program",
+            "demand response program",
+            "construction program",
+            "schools program",
+            "weatherization assistance program",
+            "appendix c program",
+            "program",
+        )
+    ) or "program" in family_key_l:
+        candidate_profile = "zero_charge_program"
+        synthesis_kind = "existing_profile"
+        synthesis_reason = "program/reference sheet language"
+    elif any(
+        token in title_l
+        for token in (
+            "agency asset rider",
+            "single value rider",
+            "load control",
+            "income-qualified load control",
+            "monthly rate",
+            "approved rate",
+        )
+    ) or "rider" in family_key_l:
+        if company_l == "carolinas" and "prospective rider" in title_l:
+            candidate_profile = "carolinas_prospective_rider"
+            synthesis_kind = "new_profile_candidate"
+            synthesis_reason = "carolinas prospective rider language"
+        elif company_l == "carolinas" and "lighting" in title_l:
+            candidate_profile = "carolinas_lighting_schedule"
+            synthesis_kind = "existing_profile"
+            synthesis_reason = "carolinas lighting schedule language"
+        else:
+            candidate_profile = "progress_single_value_rider" if company_l == "progress" else "carolinas_single_value_rider"
+            synthesis_kind = "existing_profile"
+            synthesis_reason = "single-value rider language"
+
+    next_command = None
+    if candidate_profile and synthesis_kind == "existing_profile":
+        next_command = (
+            "python -m duke_rates enqueue-profile-impact-nc "
+            f"--parser-profile {candidate_profile} --limit 25 --requested-by unknown_routing_audit"
+        )
+
+    return {
+        "synthesized_profile_name": candidate_profile,
+        "synthesized_profile_kind": synthesis_kind,
+        "synthesized_profile_reason": synthesis_reason,
+        "synthesized_next_command": next_command,
+    }
+
+
 def build_unknown_routing_audit_report(
     repo: Repository,
     *,
@@ -420,6 +521,13 @@ def build_unknown_routing_audit_report(
                 "sample_title": rows[0].get("title"),
                 "recommended_action": action,
                 "reason": reason,
+                **_synthesize_routing_profile(
+                    family_key=family_key,
+                    company=rows[0].get("company"),
+                    title=str(rows[0].get("title") or ""),
+                    recommended_action=action,
+                    reason=reason,
+                ),
             }
         )
 

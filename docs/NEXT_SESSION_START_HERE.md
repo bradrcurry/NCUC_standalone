@@ -65,7 +65,8 @@ Interpretation:
 - `null_effective_start=413` is not a bootstrap problem. Run
   `remediate-nc-missing-doc-effective-start`, then re-check promotion blockers.
 - The 5 `reprocess_running` rows are stale rows from 2026-05-01 through
-  2026-05-04. Inspect before resetting or requeueing.
+  2026-05-04. Inspect with `show-stale-reprocess-nc` and recover them with
+  `recover-stale-reprocess-nc --execute` if they are still stuck.
 - LLM extraction is currently idle because the remaining stage-1 candidate pool
   is dominated by parser/routing blockers (`regex_gap`, `wrong_profile`) rather
   than rows ready for extraction.
@@ -111,6 +112,7 @@ python -m duke_rates show-workflow-next-actions-nc
 python -m duke_rates ocr show-remediation-candidates-nc
 python -m duke_rates parse-review-summary
 python -m duke_rates show-reprocess-queue-nc
+python -m duke_rates show-stale-reprocess-nc
 python -m duke_rates show-stale-historical-nc
 ```
 
@@ -331,6 +333,8 @@ python -m duke_rates show-near-miss-profiles-nc --limit 25
 python -m duke_rates show-unknown-routing-audit-nc --limit 25
 
 # 1. Requeue routing-impact docs and drain the queue
+python -m duke_rates show-stale-reprocess-nc --limit 10
+python -m duke_rates recover-stale-reprocess-nc --limit 10 --older-than-minutes 240 --execute
 python -m duke_rates enqueue-profile-impact-nc --parser-profile progress_single_value_rider --limit 25 --requested-by targeted_llm_blocker_loop
 python -m duke_rates enqueue-profile-impact-nc --parser-profile generic_residential --limit 25 --requested-by targeted_llm_blocker_loop
 python -m duke_rates enqueue-profile-impact-nc --parser-profile zero_charge_program --limit 25 --requested-by targeted_llm_blocker_loop
