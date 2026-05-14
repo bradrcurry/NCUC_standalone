@@ -275,18 +275,69 @@ def test_build_parse_review_summary_groups_corrections_by_profile_and_family(tmp
     assert report["summary"]["total_corrections_applied"] == 3
     assert report["top_correction_categories"][0] == {"category": "other", "count": 2}
     assert report["top_correction_fields"][0] == {"field": "dummy", "count": 2}
+    assert report["top_root_causes"][0] == {"root_cause": "generic_fallback_selected", "count": 1}
 
     top_profiles = {row["parser_profile"]: row for row in report["top_profiles"]}
     assert top_profiles["generic_residential"]["needs_review"] == 1
     assert top_profiles["progress_residential_tou"]["corrected"] == 1
     assert top_profiles["progress_residential_tou"]["correction_count"] == 2
     assert top_profiles["progress_residential_tou"]["top_correction_categories"] == [{"category": "other", "count": 1}]
+    assert top_profiles["progress_residential_tou"]["top_root_causes"] == []
     assert top_profiles["carolinas_residential_flat"]["rejected"] == 1
 
     top_families = {row["family_key"]: row for row in report["top_families"]}
     assert top_families["nc-progress-leaf-502"]["corrected"] == 1
     assert top_families["nc-progress-leaf-500"]["needs_review"] == 1
     assert top_families["nc-carolinas-schedule-RS"]["rejected"] == 1
+    conn.close()
+
+
+def test_build_parse_review_summary_groups_needs_review_root_causes(tmp_path) -> None:
+    conn = connect(tmp_path / "root-causes.db")
+    attempts = [
+        _seed_parse_attempt(conn, review_flags=["no_charges_extracted"]),
+        _seed_parse_attempt(conn, review_flags=["generic_fallback_selected"]),
+        _seed_parse_attempt(conn, review_flags=["low_selector_confidence"]),
+        _seed_parse_attempt(conn, review_flags=["sparse_charge_set"]),
+        _seed_parse_attempt(conn, status="skipped_order", review_flags=["skipped_order"]),
+    ]
+
+    for index, attempt_id in enumerate(attempts, start=1):
+        conn.execute(
+            "UPDATE parse_attempt_logs SET source_pdf = ?, page_start = ?, page_end = ? WHERE id = ?",
+            (f"data/historical/ncuc/e-2-sub-1300/root-{index}.pdf", index, index, attempt_id),
+        )
+        conn.execute(
+            """
+            INSERT INTO parse_review_outcomes (
+                parse_attempt_id, source_pdf, docket_dir, page_start, page_end,
+                parser_stage, parser_profile, utility, review_source, outcome,
+                correction_count, notes_json, corrections_json, created_at
+            )
+            SELECT
+                id, source_pdf, docket_dir, page_start, page_end,
+                parser_stage, parser_profile, utility, 'rule', 'needs_review', 0, '{}', '{}', ?
+            FROM parse_attempt_logs
+            WHERE id = ?
+            """,
+            (
+                datetime(2026, 3, 26, tzinfo=UTC).isoformat(),
+                attempt_id,
+            ),
+        )
+    conn.commit()
+
+    report = build_parse_review_summary(conn, top_n=5)
+
+    root_causes = {row["root_cause"]: row["count"] for row in report["top_root_causes"]}
+    assert root_causes["no_charges_extracted"] == 1
+    assert root_causes["generic_fallback_selected"] == 1
+    assert root_causes["low_selector_confidence"] == 1
+    assert root_causes["sparse_charge_set"] == 1
+    assert root_causes["skipped_status"] == 1
+
+    top_profiles = {row["parser_profile"]: row for row in report["top_profiles"]}
+    assert top_profiles["generic_residential"]["top_root_causes"][0]["root_cause"] == "no_charges_extracted"
     conn.close()
 
 

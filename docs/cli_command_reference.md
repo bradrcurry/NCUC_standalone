@@ -291,7 +291,7 @@ surface over inventing your own command mapping.
 | `validate-extraction-nc` | Validate extraction results for anomalies |
 | `show-profile-impact-nc` | Show which documents would be affected by a specific parser profile |
 | `enqueue-profile-impact-nc` | Enqueue reprocessing for documents matching a parser profile |
-| `parse-review-summary` | Summary of parse review backlog (shows legacy `tiered_ingest` separately) |
+| `parse-review-summary` | Summary of parse review backlog with top profiles, families, and outstanding needs-review root causes (shows legacy `tiered_ingest` separately) |
 | `show-parser-selection-audit-nc` | Fast audit of latest parser-profile selection outcomes: generic-profile reliance, fallback transitions, and weak/empty latest runs |
 | `show-parser-improvement-candidates-nc` | Merge parser-selection and routing signals into one ranked family-level parser-improvement queue with a suggested next command |
 | `show-near-miss-profiles-nc` | Surfaces the `top_candidates` diagnostic from problem runs (empty/weak/missing). Aggregates by (a) top near-miss profile — fix or extend these to convert near-miss → parsed, (b) families with no near-miss — need a new profile family, (c) profiles emitting `parse_warnings` — harden float coercion. Use `--min-score N` to filter to higher-confidence near-misses, `--company` to scope, `--json` for machine-readable output |
@@ -323,7 +323,7 @@ surface over inventing your own command mapping.
 | `show-provenance-gaps-nc` | Summarize missing version provenance fields plus missing/path-only discovery linkage for NC historical rows |
 | `show-fingerprint-coverage-nc` | Summarize NC hash-backed coverage, path-only historical rows, document fingerprints, and reusable artifact coverage |
 | `show-document-classification-audit-nc` | Classify NC historical documents into routing buckets like `extractable_charge`, `formula_only`, `reference_only`, `redline_candidate`, `unrelated_but_keep`, and `unknown` |
-| `show-unknown-routing-audit-nc` | Collapse `unknown` and weak-routing NC rows into family-level recommendations like `new_profile_or_family_routing_review`, `evaluate_formula_or_program_lane`, or `reclassify_non_tariff_or_reference` |
+| `show-unknown-routing-audit-nc` | Collapse `unknown` and weak-routing NC rows into family-level recommendations like `new_profile_or_family_routing_review`, `evaluate_formula_or_program_lane`, or `reclassify_non_tariff_or_reference`, and surface synthesized profile candidates / next commands when the family is clearly routable |
 | `validate-lineage-nc` | Cross-check NC historical docs for family assignment, provenance debt, and extraction readiness |
 
 Targeted extraction diagnostics:
@@ -424,8 +424,10 @@ For scanned PDFs that pdfplumber cannot read — routes them through Docling or 
 | `enqueue-stale-reprocess-nc` | Add specifically stale documents to reprocess queue. Supports `--dry-run` for preview (default is `--execute` for backward compatibility) |
 | `enqueue-parser-improvement-reprocess-nc` | Enqueue the easy-win parser-improvement cohort (`recommended_action=enqueue_reprocess` from `show-parser-improvement-candidates-nc`). These already have usable text + a working profile but no latest run. Defaults to `--dry-run`; pass `--execute` to enqueue. Add `--process` to drain the queue immediately |
 | `show-reprocess-queue-nc` | Show pending reprocess queue |
+| `show-stale-reprocess-nc` | Show running reprocess queue rows that appear stale based on `started_at` age |
 | `show-reprocess-priority-nc` | Rank queued NC reprocess work by impact category with explanations |
 | `process-reprocess-queue-nc` | Execute the reprocess queue. Supports `--workers N` for bounded parallel local reparsing and `--until-empty` to drain the queue in one invocation. Default `--limit` is 500. Does not apply to portal/search workflows |
+| `recover-stale-reprocess-nc` | Return stale running reprocess rows to `pending` so they can be claimed again. Defaults to `--dry-run`; pass `--execute` to mutate queue state |
 | `show-stale-historical-nc` | Show historical docs with stale extraction stage |
 
 ---
@@ -864,14 +866,24 @@ For a reusable launcher, use
 [`scripts/overnight/targeted_llm_blocker_loop.ps1`](/c:/Python/Duke/Standalone/scripts/overnight/targeted_llm_blocker_loop.ps1).
 
 ```powershell
-# Baseline
+# Baseline and routing diagnostics
 python -m duke_rates show-workflow-status-nc
 python -m duke_rates show-parser-improvement-candidates-nc --limit 25
 python -m duke_rates show-near-miss-profiles-nc --limit 25
+python -m duke_rates show-unknown-routing-audit-nc --limit 25
+
+# Routing-impact enqueue and queue drain
+python -m duke_rates show-stale-reprocess-nc --limit 10
+python -m duke_rates recover-stale-reprocess-nc --limit 10 --older-than-minutes 240 --execute
+python -m duke_rates enqueue-profile-impact-nc --parser-profile progress_single_value_rider --limit 25 --requested-by targeted_llm_blocker_loop
+python -m duke_rates enqueue-profile-impact-nc --parser-profile generic_residential --limit 25 --requested-by targeted_llm_blocker_loop
+python -m duke_rates enqueue-profile-impact-nc --parser-profile zero_charge_program --limit 25 --requested-by targeted_llm_blocker_loop
+python -m duke_rates enqueue-profile-impact-nc --parser-profile progress_current_leaf_bridge --limit 25 --requested-by targeted_llm_blocker_loop
+python -m duke_rates process-reprocess-queue-nc --limit 25 --workers 4
 
 # Extraction passes
-python -m duke_rates run-overnight-parse-improvement-nc --task-kind extract_staged --max-runtime-minutes 15 --limit 10 --resume --auto-rediagnose-unknown --profile generic_residential
 python -m duke_rates run-overnight-parse-improvement-nc --task-kind extract_staged --max-runtime-minutes 15 --limit 10 --resume --auto-rediagnose-unknown --profile progress_single_value_rider
+python -m duke_rates run-overnight-parse-improvement-nc --task-kind extract_staged --max-runtime-minutes 15 --limit 10 --resume --auto-rediagnose-unknown --profile generic_residential
 
 # Deterministic cleanup
 python -m duke_rates validate-llm-rate-extractions-nc --limit 200 --execute
@@ -880,14 +892,40 @@ python -m duke_rates reclassify-llm-row-conflicts-nc --limit 50 --execute
 python -m duke_rates apply-deterministic-llm-row-repairs-nc --limit 200 --execute
 
 # Promotion refresh
-python -m duke_rates propose-llm-charge-promotions-nc --limit 10000 --refresh-existing --json
-python -m duke_rates promote-llm-charge-proposals-nc --limit 500 --json
+python -m duke_rates propose-llm-charge-promotions-nc --limit 10000 --refresh-existing --execute --json
+python -m duke_rates promote-llm-charge-proposals-nc --limit 500 --execute --json
 python -m duke_rates show-llm-row-effective-status-nc --json
 python -m duke_rates show-workflow-status-nc
 ```
 
-Stop early if the extraction passes are idle or the promotion dry-run is still
-fully blocked. This is a blocker-reduction test, not a full backlog sweep.
+Stop early if:
+- the routing diagnostics keep surfacing the same top families with no enqueue impact
+- the extraction passes are idle or filtered at stage 1
+- promotion still evaluates to `0 promotable` after cleanup
+
+This is a routing-first backlog-reduction test, not a full backlog sweep.
+
+### 15h1. Routing-First Overnight Loop Until 9am
+
+Use this when you want an overnight loop that spends most of its time on the
+highest-leverage backlog reduction path: routing unknown families into explicit
+profiles and draining the impacted reprocess queue.
+
+For the reusable launcher, use
+[`scripts/overnight/routing_first_until_9am.ps1`](/c:/Python/Duke/Standalone/scripts/overnight/routing_first_until_9am.ps1).
+
+```powershell
+pwsh scripts\overnight\routing_first_until_9am.ps1 -DeadlineTime "09:00"
+```
+
+This loop:
+- reads `show-unknown-routing-audit-nc --json` each cycle
+- enqueues profile-impact work for synthesized existing-profile candidates
+- drains `process-reprocess-queue-nc --until-empty`
+- re-checks workflow status before the next cycle
+
+Use this instead of the OCR-heavy backlog drain when the main bottleneck is
+still `unknown_profile` routing and reprocess backlog, not OCR throughput.
 
 ### 15i. Multi-Phase Backlog-Drain Wrapper
 

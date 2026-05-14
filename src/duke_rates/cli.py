@@ -785,6 +785,26 @@ def _build_fast_reprocess_priority_summary_nc(conn: sqlite3.Connection) -> dict[
     }
 
 
+def _build_fast_stale_reprocess_summary_nc(
+    conn: sqlite3.Connection,
+    *,
+    older_than_minutes: int = 240,
+) -> dict[str, Any]:
+    from duke_rates.db.reprocess import find_stale_running_historical_reprocess_queue
+
+    rows = find_stale_running_historical_reprocess_queue(
+        conn,
+        older_than_minutes=older_than_minutes,
+        limit=50,
+    )
+    top_row = rows[0] if rows else None
+    return {
+        "stale_running_count": len(rows),
+        "top_row": top_row,
+        "older_than_minutes": older_than_minutes,
+    }
+
+
 def _build_workflow_next_actions_nc_report(
     conn: sqlite3.Connection,
     *,
@@ -794,6 +814,7 @@ def _build_workflow_next_actions_nc_report(
     ocr_summary = _build_fast_ocr_remediation_summary_nc(conn)
     parser_summary = _build_fast_parser_problem_summary_nc(conn)
     reprocess_summary = _build_fast_reprocess_priority_summary_nc(conn)
+    stale_reprocess_summary = _build_fast_stale_reprocess_summary_nc(conn)
 
     actions: list[dict[str, Any]] = []
 
@@ -852,6 +873,32 @@ def _build_workflow_next_actions_nc_report(
                     "process_reprocess_queue",
                     recommended_command="python -m duke_rates process-reprocess-queue-nc --limit 1",
                     recommended_parallel_command="python -m duke_rates process-reprocess-queue-nc --limit 2 --workers 2",
+                ),
+            }
+        )
+
+    if stale_reprocess_summary["stale_running_count"] > 0:
+        top_row = stale_reprocess_summary["top_row"] or {}
+        actions.append(
+            {
+                "action_type": "recover_stale_reprocess",
+                "priority": 15,
+                "executable": True,
+                "count": int(stale_reprocess_summary["stale_running_count"]),
+                "summary": (
+                    f"{stale_reprocess_summary['stale_running_count']} running reprocess rows appear stale "
+                    f"(older than {stale_reprocess_summary['older_than_minutes']} minutes)"
+                ),
+                "failure_class": "stale_running_queue",
+                "source": "reprocess_queue",
+                "target_family_key": top_row.get("family_key"),
+                "target_note": top_row.get("queue_reason"),
+                **_policy(
+                    "recover_stale_reprocess",
+                    recommended_command=(
+                        f"python -m duke_rates recover-stale-reprocess-nc --limit 10 "
+                        f"--older-than-minutes {stale_reprocess_summary['older_than_minutes']} --execute"
+                    ),
                 ),
             }
         )
@@ -1949,6 +1996,15 @@ def show_unknown_routing_audit_nc(
             typer.echo(f"    normalization_lane={row.get('top_normalization_lane') or '-'}")
         typer.echo(f"    reason={row['reason']}")
         typer.echo(f"    title={(row['sample_title'] or '')[:100]}")
+        if row.get("synthesized_profile_name"):
+            typer.echo(
+                "    "
+                f"candidate_profile={row['synthesized_profile_name']} "
+                f"kind={row.get('synthesized_profile_kind') or '-'}"
+            )
+            typer.echo(f"    synthesis_reason={row.get('synthesized_profile_reason') or '-'}")
+            if row.get("synthesized_next_command"):
+                typer.echo(f"    next={row['synthesized_next_command']}")
 
 
 @app.command("validate-lineage-nc")
@@ -3793,6 +3849,104 @@ def show_reprocess_queue_nc(
         )
 
 
+@app.command("show-stale-reprocess-nc")
+def show_stale_reprocess_nc(
+    older_than_minutes: int = typer.Option(240, "--older-than-minutes", help="Minimum age for a running row to be considered stale."),
+    limit: int = typer.Option(50, "--limit", help="Max stale running rows to display."),
+) -> None:
+    """Show running historical reprocess queue items that appear stale."""
+    from duke_rates.db.reprocess import find_stale_running_historical_reprocess_queue
+    from duke_rates.db.sqlite import connect
+
+    settings, _ = _bootstrap()
+    conn = connect(settings.database_path)
+    try:
+        rows = find_stale_running_historical_reprocess_queue(
+            conn,
+            older_than_minutes=older_than_minutes,
+            limit=limit,
+        )
+    finally:
+        conn.close()
+
+    for row in rows:
+        typer.echo(
+            "\t".join(
+                [
+                    _safe_cli_text(row["queue_id"]),
+                    _safe_cli_text(row["historical_document_id"]),
+                    _safe_cli_text(row["status"]),
+                    _safe_cli_text(row["priority"]),
+                    _safe_cli_text(row.get("family_key") or "-"),
+                    _safe_cli_text(row.get("age_minutes") if row.get("age_minutes") is not None else "-"),
+                    _safe_cli_text(",".join(row.get("reasons") or [])),
+                    _safe_cli_text(row.get("queue_reason") or "-"),
+                ]
+            )
+        )
+
+
+@app.command("recover-stale-reprocess-nc")
+def recover_stale_reprocess_nc(
+    older_than_minutes: int = typer.Option(240, "--older-than-minutes", help="Minimum age for a running row to be considered stale."),
+    limit: int = typer.Option(50, "--limit", help="Max stale running rows to inspect or recover."),
+    requested_by: str = typer.Option("operator", "--requested-by", help="Queue recovery label."),
+    dry_run: bool = typer.Option(True, "--dry-run/--execute", help="Preview the recovery without committing. Defaults to dry-run."),
+) -> None:
+    """Recover stale running reprocess rows by returning them to pending."""
+    from duke_rates.db.reprocess import (
+        find_stale_running_historical_reprocess_queue,
+        recover_stale_running_historical_reprocess_queue,
+    )
+    from duke_rates.db.sqlite import connect
+
+    settings, _ = _bootstrap()
+    conn = connect(settings.database_path)
+    try:
+        preview_rows = find_stale_running_historical_reprocess_queue(
+            conn,
+            older_than_minutes=older_than_minutes,
+            limit=limit,
+        )
+        if dry_run:
+            conn.rollback()
+            report = {
+                "scanned": len(preview_rows),
+                "recovered": 0,
+                "queue_ids": [row["queue_id"] for row in preview_rows],
+                "rows": preview_rows,
+            }
+        else:
+            report = recover_stale_running_historical_reprocess_queue(
+                conn,
+                older_than_minutes=older_than_minutes,
+                limit=limit,
+                requested_by=requested_by,
+            )
+            conn.commit()
+    finally:
+        conn.close()
+
+    mode = "dry_run" if dry_run else "execute"
+    typer.echo(
+        f"Stale running reprocess recovery ({mode}): scanned={report['scanned']} recovered={report['recovered']}"
+    )
+    for row in report["rows"]:
+        typer.echo(
+            "\t".join(
+                [
+                    _safe_cli_text(row["queue_id"]),
+                    _safe_cli_text(row["historical_document_id"]),
+                    _safe_cli_text(row["priority"]),
+                    _safe_cli_text(row.get("family_key") or "-"),
+                    _safe_cli_text(row.get("age_minutes") if row.get("age_minutes") is not None else "-"),
+                    _safe_cli_text(",".join(row.get("reasons") or [])),
+                    _safe_cli_text(row.get("queue_reason") or "-"),
+                ]
+            )
+        )
+
+
 @app.command("show-reprocess-priority-nc")
 def show_reprocess_priority_nc(
     status: str | None = typer.Option("pending", "--status", help="pending | running | completed | failed | all"),
@@ -4814,9 +4968,14 @@ def parse_review_summary(
     for row in report["top_correction_categories"]:
         typer.echo(f"  {row['category']:<24} count={row['count']}")
 
+    typer.echo("\nTop Needs-Review Root Causes")
+    for row in report["top_root_causes"]:
+        typer.echo(f"  {row['root_cause']:<32} count={row['count']}")
+
     typer.echo("\nTop Parser Profiles")
     for row in report["top_profiles"]:
         top_categories = ",".join(item["category"] for item in row["top_correction_categories"]) or "-"
+        top_root_causes = ",".join(item["root_cause"] for item in row["top_root_causes"]) or "-"
         typer.echo(
             "  "
             f"{row['parser_profile']:<32} "
@@ -4826,12 +4985,14 @@ def parse_review_summary(
             f"rejected={row['rejected']:<3} "
             f"human={row['human_reviewed']:<3} "
             f"corrections={row['correction_count']:<3} "
-            f"categories={top_categories}"
+            f"categories={top_categories} "
+            f"root_causes={top_root_causes}"
         )
 
     typer.echo("\nTop Families")
     for row in report["top_families"]:
         top_categories = ",".join(item["category"] for item in row["top_correction_categories"]) or "-"
+        top_root_causes = ",".join(item["root_cause"] for item in row["top_root_causes"]) or "-"
         typer.echo(
             "  "
             f"{row['family_key']:<36} "
@@ -4840,7 +5001,8 @@ def parse_review_summary(
             f"needs_review={row['needs_review']:<3} "
             f"corrected={row['corrected']:<3} "
             f"rejected={row['rejected']:<3} "
-            f"categories={top_categories}"
+            f"categories={top_categories} "
+            f"root_causes={top_root_causes}"
         )
 
 
@@ -5534,6 +5696,14 @@ def show_workflow_capabilities_nc(
                 "recommended_parallel_command": "python -m duke_rates process-reprocess-queue-nc --limit 2 --workers 2",
             },
             {
+                "action_type": "recover_stale_reprocess",
+                "concurrency_policy": "sequential_only",
+                "workers_allowed": False,
+                "notes": "Safe queue recovery for running reprocess rows that appear stale; use before more extraction loops when the queue is stuck.",
+                "recommended_command": "python -m duke_rates recover-stale-reprocess-nc --limit 10 --older-than-minutes 240 --execute",
+                "recommended_parallel_command": None,
+            },
+            {
                 "action_type": "enqueue_ocr_remediation",
                 "concurrency_policy": "sequential_only",
                 "workers_allowed": False,
@@ -5611,6 +5781,11 @@ def execute_workflow_next_action_nc(
             f"python -m duke_rates process-reprocess-queue-nc --limit {limit}"
             + (f" --workers {selected_workers}" if selected_workers > 1 else "")
         )
+    elif action_type == "recover_stale_reprocess":
+        selected["recommended_command"] = (
+            f"python -m duke_rates recover-stale-reprocess-nc --limit {limit} "
+            f"--older-than-minutes 240 --execute"
+        )
     elif action_type == "enqueue_ocr_remediation":
         selected["recommended_command"] = f"python -m duke_rates ocr enqueue-remediation-nc --limit {limit} --execute"
     elif action_type == "enqueue_stale_reprocess":
@@ -5644,6 +5819,13 @@ def execute_workflow_next_action_nc(
             process_ocr_queue_nc(limit=limit, force=False, workers=selected_workers)
         elif action_type == "process_reprocess_queue":
             process_reprocess_queue_nc(limit=limit, workers=selected_workers)
+        elif action_type == "recover_stale_reprocess":
+            recover_stale_reprocess_nc(
+                limit=limit,
+                older_than_minutes=240,
+                requested_by="workflow_next_action",
+                dry_run=False,
+            )
         elif action_type == "enqueue_ocr_remediation":
             enqueue_ocr_remediation_nc(limit=limit, company=None, family_key=None, backend="pytesseract_cpu", requested_by="workflow_next_action", dry_run=False)
         elif action_type == "enqueue_stale_reprocess":
@@ -16290,6 +16472,197 @@ def remediate_nc_missing_doc_no_download_url_cmd(
         typer.echo(f"  updated_record_ids={report['updated_record_ids']}")
     if report["unresolved_record_ids"]:
         typer.echo(f"  unresolved_record_ids={report['unresolved_record_ids']}")
+
+
+@app.command("normalize-nc-effective-dates")
+def normalize_nc_effective_dates_cmd(
+    dry_run: bool = typer.Option(
+        False,
+        "--dry-run",
+        help="Print what would be changed without updating the database.",
+    ),
+    state: str = typer.Option(
+        "NC",
+        "--state",
+        help="State filter (default: NC).",
+    ),
+) -> None:
+    """Normalize malformed effective_start / effective_end values in historical_documents.
+
+    Converts 'Month D, YYYY' strings (and similar) that were stored without ISO
+    normalisation into 'YYYY-MM-DD' format.  Safe to re-run: rows already in
+    ISO format are skipped.
+    """
+    from duke_rates.db.ncuc_loader import _normalize_date
+
+    settings, repository = _bootstrap()
+    with repository._connect() as conn:
+        rows = conn.execute(
+            """
+            SELECT id, family_key, effective_start, effective_end
+            FROM historical_documents
+            WHERE state = ?
+              AND (
+                (effective_start IS NOT NULL AND effective_start NOT GLOB '????-??-??*')
+                OR
+                (effective_end IS NOT NULL AND effective_end NOT GLOB '????-??-??*')
+              )
+            ORDER BY id
+            """,
+            (state,),
+        ).fetchall()
+
+    updated = 0
+    skipped = 0
+    errors = []
+
+    for hd_id, family_key, raw_start, raw_end in rows:
+        norm_start = _normalize_date(raw_start or "") if raw_start else raw_start
+        norm_end = _normalize_date(raw_end or "") if raw_end else raw_end
+
+        changed = (norm_start != raw_start) or (norm_end != raw_end)
+        if not changed:
+            skipped += 1
+            continue
+
+        if dry_run:
+            typer.echo(
+                f"  [dry-run] hd={hd_id} {family_key}"
+                + (f"  start: {raw_start!r} -> {norm_start!r}" if norm_start != raw_start else "")
+                + (f"  end: {raw_end!r} -> {norm_end!r}" if norm_end != raw_end else "")
+            )
+            updated += 1
+            continue
+
+        try:
+            with repository._connect() as conn:
+                conn.execute(
+                    "UPDATE historical_documents SET effective_start = ?, effective_end = ? WHERE id = ?",
+                    (norm_start, norm_end, hd_id),
+                )
+            typer.echo(
+                f"  hd={hd_id} {family_key}"
+                + (f"  start: {raw_start!r} -> {norm_start!r}" if norm_start != raw_start else "")
+                + (f"  end: {raw_end!r} -> {norm_end!r}" if norm_end != raw_end else "")
+            )
+            updated += 1
+        except Exception as exc:
+            errors.append(f"hd={hd_id}: {exc}")
+
+    typer.echo(
+        f"normalize-nc-effective-dates: found={len(rows)} updated={updated} skipped={skipped} errors={len(errors)}"
+        + (" [dry-run]" if dry_run else "")
+    )
+    for e in errors:
+        typer.echo(f"  ERROR: {e}")
+
+
+@app.command("remediate-nc-null-effective-dates")
+def remediate_nc_null_effective_dates_cmd(
+    dry_run: bool = typer.Option(
+        False,
+        "--dry-run",
+        help="Print what would change without writing to the database.",
+    ),
+    family_key: str | None = typer.Option(
+        None,
+        "--family-key",
+        help="Restrict to a single family key.",
+    ),
+    limit: int = typer.Option(
+        500,
+        "--limit",
+        help="Maximum number of null-effective_start docs to process.",
+    ),
+    passes: str = typer.Option(
+        "1,2,3",
+        "--passes",
+        help="Comma-separated pass numbers to run (e.g. '1,2' skips docket fallback).",
+    ),
+    enable_llm: bool = typer.Option(
+        False,
+        "--enable-llm",
+        help=(
+            "Enable Pass 1C: LLM-assisted date extraction via local Ollama. "
+            "Runs qwen2.5:7b-instruct on docs where regex passes fail. "
+            "High-confidence effective dates are written; medium-confidence "
+            "dates are stored in metadata_json for review."
+        ),
+    ),
+    state: str = typer.Option(
+        "NC",
+        "--state",
+        help="State filter.",
+    ),
+) -> None:
+    """Remediate null effective_start on historical_documents via multi-pass strategy.
+
+    Pass 1  - Footer/header PDF scan: reads the span pages and regex-matches
+               the standard Duke 'Effective for ... on and after ...' footer.
+               Also handles garbled OCR years (e.g. 4996 -> 1996).
+
+    Pass 1B - Redline regex scan: detects concatenated redline date pairs
+               (e.g. 'September 30, 2024January 1, 2025'), stores the proposed
+               date as effective_start with superseded date in metadata.
+
+    Pass 1C - LLM extraction (--enable-llm): uses qwen2.5:7b-instruct to read
+               raw page text and identify effective dates in prose. High-confidence
+               results set effective_start; medium-confidence stored for review.
+
+    Pass 2  - Rider summary cross-reference: matches the doc's rider/leaf code
+               against the effective dates recorded in the leaf-600/602 Summary
+               of Rider Adjustments sheets already in tariff_charges.
+
+    Pass 3  - Docket filing-date proxy: falls back to the earliest filing_date
+               found in ncuc_discovery_records for the same docket directory.
+               Low confidence; stored with source=docket_filing_proxy in metadata.
+    """
+    from duke_rates.historical.ncuc.effective_date_remediation import (
+        remediate_null_effective_dates,
+    )
+
+    try:
+        pass_nums = tuple(int(p.strip()) for p in passes.split(",") if p.strip())
+    except ValueError:
+        typer.echo(f"ERROR: --passes must be comma-separated integers, got {passes!r}")
+        raise typer.Exit(1)
+
+    _, repository = _bootstrap()
+    result = remediate_null_effective_dates(
+        repository,
+        state=state,
+        family_key=family_key,
+        limit=limit,
+        dry_run=dry_run,
+        passes=pass_nums,
+        enable_llm=enable_llm,
+    )
+
+    suffix = " [dry-run]" if dry_run else ""
+    typer.echo(
+        f"remediate-nc-null-effective-dates{suffix}: "
+        f"total_null={result.total_null} "
+        f"pass1={result.pass1_resolved} "
+        f"pass1b={result.pass1b_resolved} "
+        f"pass1c={result.pass1c_resolved} "
+        f"pass1c_medium={result.pass1c_medium} "
+        f"pass2={result.pass2_resolved} "
+        f"pass3={result.pass3_resolved} "
+        f"unresolved={result.unresolved}"
+    )
+    if enable_llm and result.pass1c_medium > 0:
+        typer.echo(
+            f"  NOTE: {result.pass1c_medium} docs have medium-confidence LLM dates "
+            "stored in metadata_json (llm_medium_date) — review before promoting."
+        )
+    if result.updated_ids:
+        typer.echo(f"  updated ({len(result.updated_ids)}): {result.updated_ids[:20]}"
+                   + (" ..." if len(result.updated_ids) > 20 else ""))
+    if result.unresolved_ids:
+        typer.echo(f"  unresolved ({len(result.unresolved_ids)}): {result.unresolved_ids[:20]}"
+                   + (" ..." if len(result.unresolved_ids) > 20 else ""))
+    for e in result.errors:
+        typer.echo(f"  ERROR: {e}")
 
 
 @app.command("remediate-nc-missing-doc-effective-start")

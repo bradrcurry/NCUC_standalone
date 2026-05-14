@@ -362,6 +362,8 @@ def test_build_unknown_routing_audit_report_groups_families(tmp_path: Path) -> N
     assert report["summary"]["problem_family_count"] == 1
     assert report["rows"][0]["family_key"] == "nc-carolinas-rider-PROSPECTIVERIDER"
     assert report["rows"][0]["recommended_action"] == "evaluate_formula_or_program_lane"
+    assert report["rows"][0]["synthesized_profile_name"] == "carolinas_prospective_rider"
+    assert report["rows"][0]["synthesized_profile_kind"] == "new_profile_candidate"
 
 
 def test_unknown_routing_audit_prioritizes_no_text_as_ocr_remediation(tmp_path: Path) -> None:
@@ -445,3 +447,32 @@ def test_show_parser_improvement_candidates_nc_cli(monkeypatch, tmp_path: Path) 
     assert "Parser Improvement Candidates (NC)" in result.stdout
     assert "action=enqueue_ocr_remediation" in result.stdout
     assert "next=python -m duke_rates ocr enqueue-remediation-nc --limit 10 --family-key nc-carolinas-rider-PROSPECTIVERIDER" in result.stdout
+
+
+def test_show_unknown_routing_audit_nc_cli_prints_synthesized_profile(monkeypatch, tmp_path: Path) -> None:
+    db_path = tmp_path / "unknown-routing-cli.db"
+    conn = connect(db_path)
+    _seed_historical_document(
+        conn,
+        doc_id=1,
+        family_key="nc-carolinas-rider-PROSPECTIVERIDER",
+        title="Prospective Rider (Span 4-4)",
+        company="carolinas",
+        local_path=str(tmp_path / "1.pdf"),
+    )
+    _seed_processing_run(conn, doc_id=1, parser_profile="unknown", outcome_quality="empty")
+    conn.commit()
+    conn.close()
+
+    monkeypatch.setattr(
+        cli,
+        "_bootstrap",
+        lambda: (type("S", (), {"database_path": str(db_path)})(), Repository(db_path)),
+    )
+
+    runner = CliRunner()
+    result = runner.invoke(cli.app, ["show-unknown-routing-audit-nc", "--limit", "5"])
+
+    assert result.exit_code == 0
+    assert "candidate_profile=carolinas_prospective_rider" in result.stdout
+    assert "synthesis_reason=carolinas prospective rider language" in result.stdout

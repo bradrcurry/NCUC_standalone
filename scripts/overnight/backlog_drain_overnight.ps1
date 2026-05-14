@@ -139,7 +139,7 @@ Write-Both "OCR:        enqueue=$OcrEnqueueLimit workers=$OcrWorkers"
 Write-Both "Reprocess:  limit=$ReprocessLimit workers=$ReprocessWorkers"
 Write-Both "Bootstrap:  limit=$BootstrapLimit"
 Write-Both "LLM:        extract=$ExtractLimit grounded=$GroundedLimit"
-Write-Both "Promotions: $($DryRunPromotions ? 'dry-run only' : '--execute-safe')"
+Write-Both "Promotions: $($DryRunPromotions ? 'dry-run only' : '--execute')"
 Write-Both "Log file:   $LogFile"
 Write-Both ""
 
@@ -153,6 +153,16 @@ Write-Both ""
 Write-Both "=== Reconciling stuck queue items ==="
 $reconcile = & python -m duke_rates reconcile-workflow-action-receipts-nc --limit 100 2>&1
 $reconcile | Select-Object -First 5 | ForEach-Object { Write-Both "  $_" }
+Write-Both ""
+
+# ---- Recover stale-running reprocess rows once at the start ----
+Write-Both "=== Recovering stale-running reprocess rows ==="
+$staleRunning = & python -m duke_rates recover-stale-reprocess-nc `
+    --limit $ReprocessLimit `
+    --older-than-minutes 240 `
+    --requested-by overnight_backlog_drain `
+    --execute 2>&1
+$staleRunning | Select-Object -First 8 | ForEach-Object { Write-Both "  $_" }
 Write-Both ""
 
 # ---- Phase definitions ----
@@ -238,7 +248,7 @@ $phaseLlm = {
     } else {
         & python -m duke_rates run-llm-promotion-overnight-nc `
             --validation-limit 500 --repair-limit 1000 `
-            --proposal-limit 10000 --promotion-limit 500 --execute-safe --json 2>&1 |
+            --proposal-limit 10000 --promotion-limit 500 --execute --json 2>&1 |
                 Select-Object -Last 3 | ForEach-Object { Write-Both "  $_" }
     }
     # Cheap idle proxy: count pending llm_rate_charge_promotion_proposals

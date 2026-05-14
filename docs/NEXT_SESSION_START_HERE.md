@@ -65,7 +65,8 @@ Interpretation:
 - `null_effective_start=413` is not a bootstrap problem. Run
   `remediate-nc-missing-doc-effective-start`, then re-check promotion blockers.
 - The 5 `reprocess_running` rows are stale rows from 2026-05-01 through
-  2026-05-04. Inspect before resetting or requeueing.
+  2026-05-04. Inspect with `show-stale-reprocess-nc` and recover them with
+  `recover-stale-reprocess-nc --execute` if they are still stuck.
 - LLM extraction is currently idle because the remaining stage-1 candidate pool
   is dominated by parser/routing blockers (`regex_gap`, `wrong_profile`) rather
   than rows ready for extraction.
@@ -111,6 +112,7 @@ python -m duke_rates show-workflow-next-actions-nc
 python -m duke_rates ocr show-remediation-candidates-nc
 python -m duke_rates parse-review-summary
 python -m duke_rates show-reprocess-queue-nc
+python -m duke_rates show-stale-reprocess-nc
 python -m duke_rates show-stale-historical-nc
 ```
 
@@ -324,40 +326,77 @@ If you want a reusable launcher instead of manual copy/paste, use
 [`scripts/overnight/targeted_llm_blocker_loop.ps1`](/c:/Python/Duke/Standalone/scripts/overnight/targeted_llm_blocker_loop.ps1).
 
 ```powershell
-# 0. Baseline and target selection
+# 0. Baseline and routing diagnostics
 python -m duke_rates show-workflow-status-nc
 python -m duke_rates show-parser-improvement-candidates-nc --limit 25
 python -m duke_rates show-near-miss-profiles-nc --limit 25
+python -m duke_rates show-unknown-routing-audit-nc --limit 25
 
-# 1. Extract from the two highest-value near-miss profiles
-python -m duke_rates run-overnight-parse-improvement-nc --task-kind extract_staged --max-runtime-minutes 15 --limit 10 --resume --auto-rediagnose-unknown --profile generic_residential
+# 1. Requeue routing-impact docs and drain the queue
+python -m duke_rates show-stale-reprocess-nc --limit 10
+python -m duke_rates recover-stale-reprocess-nc --limit 10 --older-than-minutes 240 --execute
+python -m duke_rates enqueue-profile-impact-nc --parser-profile progress_single_value_rider --limit 25 --requested-by targeted_llm_blocker_loop
+python -m duke_rates enqueue-profile-impact-nc --parser-profile generic_residential --limit 25 --requested-by targeted_llm_blocker_loop
+python -m duke_rates enqueue-profile-impact-nc --parser-profile zero_charge_program --limit 25 --requested-by targeted_llm_blocker_loop
+python -m duke_rates enqueue-profile-impact-nc --parser-profile progress_current_leaf_bridge --limit 25 --requested-by targeted_llm_blocker_loop
+python -m duke_rates process-reprocess-queue-nc --limit 25 --workers 4
+
+# 2. Extract from the two highest-value near-miss profiles
 python -m duke_rates run-overnight-parse-improvement-nc --task-kind extract_staged --max-runtime-minutes 15 --limit 10 --resume --auto-rediagnose-unknown --profile progress_single_value_rider
+python -m duke_rates run-overnight-parse-improvement-nc --task-kind extract_staged --max-runtime-minutes 15 --limit 10 --resume --auto-rediagnose-unknown --profile generic_residential
 
-# 2. Convert candidate rows into actionable validation / repair state
+# 3. Convert candidate rows into actionable validation / repair state
 python -m duke_rates validate-llm-rate-extractions-nc --limit 200 --execute
 python -m duke_rates locate-llm-row-evidence-nc --issue unit_missing --limit 50 --execute
 python -m duke_rates reclassify-llm-row-conflicts-nc --limit 50 --execute
 python -m duke_rates apply-deterministic-llm-row-repairs-nc --limit 200 --execute
 
-# 3. Refresh promotion state and inspect whether anything became promotable
-python -m duke_rates propose-llm-charge-promotions-nc --limit 10000 --refresh-existing --json
-python -m duke_rates promote-llm-charge-proposals-nc --limit 500 --json
+# 4. Refresh promotion state and inspect whether anything became promotable
+python -m duke_rates propose-llm-charge-promotions-nc --limit 10000 --refresh-existing --execute --json
+python -m duke_rates promote-llm-charge-proposals-nc --limit 500 --execute --json
 python -m duke_rates show-llm-row-effective-status-nc --json
 python -m duke_rates show-workflow-status-nc
 ```
 
 Stop early if:
-- both extraction passes report only `skip` / `filtered_at_stage_1`
+- the routing diagnostics keep surfacing the same top families with no enqueue impact
+- the extraction passes report only `skip` / `filtered_at_stage_1`
 - validation mostly returns `no_rate_rows`
 - evidence-location mostly returns `unsupported_unit` or `evidence_quote_missing`
-- promotion dry-run still evaluates to `0 promotable`
+- promotion still evaluates to `0 promotable` after deterministic cleanup
 
 Interpretation:
 - If `generic_residential` or `progress_single_value_rider` produce new
   `validated` rows but promotions still block, the remaining problem is unit /
   charge-type / table-ambiguity cleanup, not extraction volume.
-- If both extraction passes are mostly idle, stop the LLM lane and switch to
-  parser-profile or routing work instead.
+- If both extraction passes are mostly idle, stop the extraction lane and stay
+  on routing / reprocess work instead.
+
+### C2. Routing-First Overnight Until 9am
+
+Use this when the backlog is still dominated by `unknown_profile` routing
+gaps and reprocess work. It is the best overnight loop when the main objective
+is to reduce backlog rather than to keep broad extraction lanes busy.
+
+For a reusable launcher, use
+[`scripts/overnight/routing_first_until_9am.ps1`](/c:/Python/Duke/Standalone/scripts/overnight/routing_first_until_9am.ps1).
+
+```powershell
+pwsh scripts\overnight\routing_first_until_9am.ps1 -DeadlineTime "09:00"
+```
+
+This loop:
+- inspects `show-unknown-routing-audit-nc` each cycle
+- enqueues impacted docs for synthesized existing profiles such as
+  `progress_recovery_rider`, `zero_charge_program`, and
+  `progress_billing_adjustments`
+- drains `process-reprocess-queue-nc --until-empty`
+- re-measures workflow status after each cycle
+
+Stop early if:
+- the unknown-routing audit keeps returning the same families with no new
+  profile-impact enqueues
+- the reprocess queue is empty and no new impacted profiles are being found
 
 ### C. Full Overnight Pattern
 

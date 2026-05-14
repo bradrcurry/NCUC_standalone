@@ -194,9 +194,10 @@ _RIDER_INLINE_DOLLAR_ROW_RE = re.compile(
     re.M | re.I,
 )
 
-# Rider sentence rate: "is X.XXX¢ per kilowatt-hour" (single-value riders like RDM, PIM)
+# Rider sentence rate: "is X.XXX¢ per kilowatt-hour" (single-value riders like RDM, PIM, ESM)
+# Also handles parenthetical negatives: "is (0.012)¢ per kilowatt-hour" (ESM decremental rate)
 _RIDER_SENTENCE_RATE_RE = re.compile(
-    r'is\s+([-\d.]+)(?:[¢\u00a2\ufffd]|[\s-]*cents?)\s*per\s+kilowatt.hour',
+    r'is\s+(\(?[-\d.]+\)?)(?:[¢\u00a2\ufffd]|[\s-]*cents?)\s*per\s+kilowatt.hour',
     re.I,
 )
 
@@ -934,7 +935,7 @@ def _extract_rider_rates(
     # --- Pattern 1: "is X.XXX¢ per kilowatt-hour" (sentence-style, all-class riders) ---
     m_sent = _RIDER_SENTENCE_RATE_RE.search(text)
     if m_sent:
-        rate_val = float(m_sent.group(1))
+        rate_val = _parse_paren_value(m_sent.group(1))  # handles (0.012) → -0.012
         snippet = text[max(0, m_sent.start() - 40): m_sent.end() + 40]
         _add("all", round((rate_val) / 100.0, 6), "$/kWh", snippet)
         return  # Sentence-style riders don't have per-class breakdown

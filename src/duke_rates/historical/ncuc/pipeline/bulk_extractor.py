@@ -1236,7 +1236,7 @@ class BulkExtractor:
                 ) or any(
                     marker in title_lower
                     for marker in ("leaf no.", "leaf ", "rider ", "schedule ")
-                )
+                ) or "leaf no." in text.lower()  # tariff body identifies itself as a Leaf sheet
                 has_rate_content = (
                     "monthly rate" in text.lower()
                     or "rider " in text.lower()
@@ -1247,6 +1247,10 @@ class BulkExtractor:
                     or "cents per kilowatt" in text.lower()
                     or "per kwh" in text.lower()
                     or "perkwh" in text.lower()
+                    # Fixed monthly charges (CEPS, flat-fee riders): "$/month" or "per month"
+                    or "$/month" in text
+                    or "monthly charge" in text.lower()
+                    or "per agreement per month" in text.lower()
                 )
                 if (
                     (is_progress_leaf or is_carolinas_rider)
