@@ -5015,24 +5015,25 @@ class CarolinasSmallCustomerGeneratorProfile:
     """Profile for DEC Rider SCG sheets with explicit monthly supplemental/standby charges."""
 
     name: str = "carolinas_small_customer_generator"
-    _SUPPORTED_FAMILIES = {"nc-carolinas-rider-scg"}
+    _SUPPORTED_FAMILIES = {"nc-carolinas-rider-SCG"}
+    # Value may appear on the same line or the next line after the label
     _SUPPLEMENTAL_CHARGE_RE = re.compile(
-        r"Supplemental Basic (?P<label>Customer|Facilities) Charge per month[:\s]+[$]?\s*(?P<value>[\d.]+)",
+        r"Supplemental Basic (?P<label>Customer|Facilities) Charge per month[:\s]+\n?[$]?\s*(?P<value>[\d.]+)",
         re.I,
     )
     # Standby charge is per KW for systems > 20 KW
     _STANDBY_KW_RE = re.compile(
-        r"For systems more than 20 KW\s+[$]\s*([\d.]+)\s+per\s+KW",
+        r"For systems more than 20 KW\s*\n?[$]\s*([\d.]+)\s+per\s+KW",
         re.I,
     )
     # Legacy: flat standby charge format
     _STANDBY_CHARGE_RE = re.compile(
-        r"Standby Charge per month(?:,\s*if applicable)?:\s*[$]?\s*([\d.]+)",
+        r"Standby Charge per month(?:,\s*if applicable)?:\s*\n?[$]?\s*([\d.]+)",
         re.I,
     )
 
     def supports(self, doc: dict, text: str) -> bool:
-        family_key = (doc.get("family_key") or "").lower()
+        family_key = doc.get("family_key") or ""
         if family_key not in self._SUPPORTED_FAMILIES:
             return False
         lowered = text.lower()
