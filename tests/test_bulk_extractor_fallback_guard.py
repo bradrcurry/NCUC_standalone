@@ -226,6 +226,81 @@ def test_insert_charges_force_clear_no_op_when_version_id_unset(tmp_path):
     assert count == 1, "force_clear with version_id=0 must not delete anything"
 
 
+def test_runtime_trace_flags_slicer_dropped_markers(tmp_path, monkeypatch):
+    """diagnose-document-nc --trace-runtime must detect when the page-bounded
+    text slice silently loses rate markers that the full-doc path has.
+    This is the diagnostic that would have caught the 2026-05-20 Docling
+    slicer bug in seconds instead of 30 minutes of replay-vs-runtime
+    reconciliation."""
+    from duke_rates.cli import _build_runtime_trace
+    from duke_rates.historical.ncuc.pipeline import bulk_extractor as be
+
+    pdf_path = tmp_path / "stub.pdf"
+    pdf_path.write_text("placeholder")
+
+    # Stub get_document_for_extraction so we don't need the full DB schema.
+    fake_doc = {
+        "id": 99,
+        "family_key": "nc-progress-leaf-500",
+        "title": "Residential",
+        "company": "progress",
+        "state": "NC",
+        "local_path": str(pdf_path),
+        "effective_start": "2024-10-01",
+        "start_page": 1,
+        "end_page": 3,
+        "leaf_no": "500",
+        "content_hash": None,
+        "revision_label": None,
+        "supersedes_label": None,
+        "discovery_record_id": None,
+        "docket_number": None,
+        "acquisition_method": None,
+        "discovery_doc_quality_tier": None,
+        "is_redline_candidate": 0,
+        "redline_confidence": 0.0,
+    }
+    monkeypatch.setattr(
+        be.BulkExtractor, "get_document_for_extraction",
+        lambda self, hd_id: fake_doc,
+    )
+
+    # Bounded slice drops "basic customer charge" / "per kwh" / etc.;
+    # full doc retains them. Simulates pre-fix slicer behavior.
+    def fake_extract(self, path, start_page=None, end_page=None):
+        if start_page is not None:
+            return (
+                "AVAILABILITY: Residential service. Schedule details below.",
+                "docling_artifact_sliced",
+            )
+        return (
+            "AVAILABILITY: Residential service. Basic Customer Charge: $14.00 "
+            "per month. Kilowatt-Hour Charge: 12.119 cents per kWh.",
+            "docling_artifact",
+        )
+    monkeypatch.setattr(be.BulkExtractor, "extract_text_from_pdf", fake_extract)
+
+    # Stub extract_charges_from_document so the trace doesn't try to run the
+    # full classifier/routing/fallback chain (needs more DB fixtures).
+    def fake_full_extract(self, doc):
+        return ([], None, [], "empty", None, {}, {
+            "initial_parser_profile": "unknown",
+            "final_parser_profile": "unknown",
+            "fallback_applied": False,
+            "fallback_attempts": [],
+        })
+    monkeypatch.setattr(
+        be.BulkExtractor, "extract_charges_from_document", fake_full_extract,
+    )
+
+    trace = _build_runtime_trace(str(tmp_path / "any.db"), 99)
+    dropped = trace.get("slicer_dropped_markers") or []
+    assert "basic customer charge" in dropped, (
+        f"trace should flag dropped markers; got: {dropped}"
+    )
+    assert "per kwh" in dropped
+
+
 def test_default_has_page_bounds_preserves_caller_compatibility(extractor):
     """has_page_bounds still defaults to True so existing call sites that
     don't pass the kwarg keep working; the kwarg is no longer load-bearing

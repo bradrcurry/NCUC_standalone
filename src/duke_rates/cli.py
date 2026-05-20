@@ -17545,6 +17545,18 @@ def diagnose_document_nc(
     text_lines: int = typer.Option(
         40, "--text-lines", help="Max lines of raw text to show with --show-text."
     ),
+    trace_runtime: bool = typer.Option(
+        False,
+        "--trace-runtime",
+        help=(
+            "Run a live extraction trace alongside the historical-run report. "
+            "Surfaces the text source actually used by the bulk extractor "
+            "(pdfplumber vs docling_artifact vs docling_artifact_sliced), "
+            "rate-marker presence per text stage, profile candidates, and "
+            "fallback decisions. Use this when latest_run reports `unknown` "
+            "or empty but a rate sheet is obvious from the PDF."
+        ),
+    ),
     json_out: bool = typer.Option(False, "--json", help="Output raw JSON."),
 ) -> None:
     """Diagnose why a document's extraction is empty, weak, or failing.
@@ -17643,6 +17655,12 @@ def diagnose_document_nc(
                 "requested_at": reprocess_queue["requested_at"],
             }
 
+        # --- Live runtime trace (optional) ---
+        if trace_runtime:
+            report["runtime_trace"] = _build_runtime_trace(
+                str(repository.database_path), historical_document_id
+            )
+
         # --- Recommendation ---
         rec = _build_diagnostic_recommendation(report)
         report["recommendation"] = rec
@@ -17655,9 +17673,223 @@ def diagnose_document_nc(
             return
 
         _print_diagnostic_report(report, show_text, text_lines)
+        if trace_runtime:
+            _print_runtime_trace(report.get("runtime_trace") or {})
 
     finally:
         conn.close()
+
+
+_RATE_MARKERS = (
+    "basic customer charge",
+    "per kwh",
+    "cents per kwh",
+    "¢/kwh",
+    "$/kwh",
+    "kilowatt-hour",
+    "monthly seller charge",
+    "monthly administrative charge",
+    "rider cpre",
+    "per luminaire",
+)
+
+
+def _scan_markers(text: str) -> dict[str, bool]:
+    """Return which canonical rate markers are present in ``text``."""
+    lowered = (text or "").lower()
+    return {m: (m in lowered) for m in _RATE_MARKERS}
+
+
+def _build_runtime_trace(database_path: str, hd_id: int) -> dict:
+    """Run a live extraction trace for ``hd_id`` and return a structured report.
+
+    Mirrors `BulkExtractor.extract_charges_from_document` step by step so the
+    operator can see exactly which text source was used, how normalization
+    changed the text, which rate markers survived each stage, and what the
+    routing tier picked. Designed to surface text-path divergences like the
+    2026-05-20 Docling slicer bug (where the bounded-slice path dropped
+    body.children-orphan rate texts and pushed the doc to `unknown`).
+    """
+    from duke_rates.historical.ncuc.pipeline.bulk_extractor import (
+        BulkExtractor,
+        normalize_docling_markdown,
+        normalize_ocr_text,
+    )
+    from duke_rates.historical.ncuc.pipeline.parser_profiles import (
+        HistoricalRateParserRegistry,
+    )
+
+    extractor = BulkExtractor(db_path=database_path)
+    doc = extractor.get_document_for_extraction(hd_id)
+    if not doc:
+        return {"error": f"document {hd_id} not loadable via get_document_for_extraction"}
+
+    trace: dict = {
+        "doc": {
+            "id": doc.get("id"),
+            "family_key": doc.get("family_key"),
+            "start_page": doc.get("start_page"),
+            "end_page": doc.get("end_page"),
+        },
+        "text_paths": [],
+    }
+
+    sp = doc.get("start_page")
+    ep = doc.get("end_page")
+
+    # Path A — page-bounded extraction (what the bulk extractor actually uses
+    # when start_page/end_page are set on the doc).
+    if sp is not None and ep is not None:
+        text_bounded, src_bounded = extractor.extract_text_from_pdf(
+            doc["local_path"], start_page=sp, end_page=ep
+        )
+        trace["text_paths"].append({
+            "name": "page_bounded (used by bulk_extractor)",
+            "source": src_bounded,
+            "raw_length": len(text_bounded),
+            "markers_raw": _scan_markers(text_bounded),
+        })
+        # Apply the same normalization the bulk extractor applies before routing.
+        normalized = text_bounded
+        if src_bounded in ("docling_artifact", "docling_artifact_sliced"):
+            normalized = normalize_docling_markdown(normalized)
+        normalized = normalize_ocr_text(normalized)
+        trace["text_paths"][-1]["normalized_length"] = len(normalized)
+        trace["text_paths"][-1]["markers_normalized"] = _scan_markers(normalized)
+        primary_text = normalized
+    else:
+        primary_text = None
+
+    # Path B — full-document extraction (no page bounds). Compared against the
+    # bounded path so the operator can see if the slicer dropped markers.
+    # Always normalize so the comparison is apples-to-apples with the bounded path.
+    text_full, src_full = extractor.extract_text_from_pdf(doc["local_path"])
+    normalized_full = text_full
+    if src_full in ("docling_artifact", "docling_artifact_sliced"):
+        normalized_full = normalize_docling_markdown(normalized_full)
+    normalized_full = normalize_ocr_text(normalized_full)
+    trace["text_paths"].append({
+        "name": "full_document (comparison)",
+        "source": src_full,
+        "raw_length": len(text_full),
+        "normalized_length": len(normalized_full),
+        "markers_normalized": _scan_markers(normalized_full),
+    })
+    if primary_text is None:
+        primary_text = normalized_full
+
+    # Detect text-path divergence: any marker present in the full-doc text but
+    # missing in the bounded text is a high-signal slicer drop.
+    if sp is not None and ep is not None:
+        bounded_markers = trace["text_paths"][0].get("markers_normalized", {})
+        full_markers = trace["text_paths"][1].get("markers_normalized", {})
+        dropped = [m for m in _RATE_MARKERS if full_markers.get(m) and not bounded_markers.get(m)]
+        trace["slicer_dropped_markers"] = dropped
+    else:
+        trace["slicer_dropped_markers"] = []
+
+    # Routing tier — what registry.rank_candidates says about the normalized text
+    registry = HistoricalRateParserRegistry()
+    candidates = registry.rank_candidates(doc, primary_text or "")
+    trace["candidates"] = [
+        {"name": c.name, "score": round(c.score, 3), "supports": c.supported}
+        for c in candidates if c.score > 0 or c.supported
+    ][:6]
+
+    # Full extract path — runs through _is_formula_only_document, classifier,
+    # routing tier, fallback logic. This is the ground truth of what would
+    # happen on a re-extract right now.
+    try:
+        result = extractor.extract_charges_from_document(doc)
+        charges, _vl, _cands, status, _signals, _metrics, selection_meta = result
+        trace["live_extract"] = {
+            "status": status,
+            "charge_count": len(charges),
+            "initial_profile": selection_meta.get("initial_parser_profile"),
+            "final_profile": selection_meta.get("final_parser_profile"),
+            "fallback_applied": selection_meta.get("fallback_applied"),
+            "fallback_reason": selection_meta.get("fallback_reason"),
+            "fallback_attempts": [
+                {
+                    "name": a.get("name"),
+                    "charge_count": a.get("charge_count"),
+                    "applied": a.get("applied"),
+                    "apply_reason": a.get("apply_reason"),
+                }
+                for a in (selection_meta.get("fallback_attempts") or [])[:3]
+            ],
+            "first_charges": [
+                {"label": c.charge_label, "value": c.rate_value, "unit": c.rate_unit}
+                for c in charges[:5]
+            ],
+        }
+    except Exception as exc:
+        trace["live_extract"] = {"error": repr(exc)}
+
+    return trace
+
+
+def _print_runtime_trace(trace: dict) -> None:
+    """Pretty-print the live trace report."""
+    if not trace or trace.get("error"):
+        typer.echo(f"\n  Runtime trace: {trace.get('error', 'unavailable')}")
+        return
+
+    typer.echo("\n  -- Runtime trace --")
+    for path in trace.get("text_paths", []):
+        typer.echo(
+            f"    text_path:  {path['name']}"
+        )
+        typer.echo(
+            f"      source={path['source']}  raw_len={path['raw_length']}  "
+            f"normalized_len={path.get('normalized_length', 'n/a')}"
+        )
+        markers = path.get("markers_normalized") or path.get("markers_raw") or {}
+        present = sorted(m for m, hit in markers.items() if hit)
+        absent = sorted(m for m, hit in markers.items() if not hit)
+        if present:
+            typer.echo(f"      markers_present: {', '.join(present)}")
+        if absent and len(absent) <= 3:
+            typer.echo(f"      markers_absent:  {', '.join(absent)}")
+
+    dropped = trace.get("slicer_dropped_markers") or []
+    if dropped:
+        typer.echo(
+            f"\n    [!] slicer_dropped_markers: {', '.join(dropped)}"
+        )
+        typer.echo(
+            "        These markers exist in the full-doc text but were silently"
+            " dropped by the page-bounded slice. Routing will likely fail."
+        )
+
+    typer.echo(f"\n    candidates (top 6):")
+    for c in trace.get("candidates", []):
+        typer.echo(
+            f"      {c['name']:<45} score={c['score']:.3f}  supports={c['supports']}"
+        )
+    if not trace.get("candidates"):
+        typer.echo("      (no candidates with score > 0)")
+
+    live = trace.get("live_extract") or {}
+    if "error" in live:
+        typer.echo(f"\n    live_extract: ERROR {live['error']}")
+        return
+    typer.echo(
+        f"\n    live_extract: status={live.get('status')}  "
+        f"charges={live.get('charge_count')}  "
+        f"initial={live.get('initial_profile')}  final={live.get('final_profile')}"
+    )
+    if live.get("fallback_applied"):
+        typer.echo(f"      fallback_reason: {live.get('fallback_reason')}")
+    for att in live.get("fallback_attempts") or []:
+        typer.echo(
+            f"      fallback_attempt: {att.get('name'):<40} "
+            f"cc={att.get('charge_count')} applied={att.get('applied')} "
+            f"reason={att.get('apply_reason')}"
+        )
+    for ch in live.get("first_charges") or []:
+        typer.echo(f"      extracted: {ch['label']!r:<50} {ch['value']} {ch['unit']}")
+    typer.echo("")
 
 
 def _build_diagnostic_recommendation(report: dict) -> dict:
