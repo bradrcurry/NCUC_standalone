@@ -158,3 +158,70 @@ def test_slice_docling_text_rejects_partial_coverage_artifact(tmp_path) -> None:
     # Request pages 1-2 — slicer must detect that artifact only covers 1/5 pages and refuse
     result = ext._slice_docling_text(str(pdf_path), 1, 2)
     assert result is None, f"expected None for partial-coverage artifact, got {result!r}"
+
+
+def test_slice_docling_text_includes_texts_unreferenced_from_body_children(tmp_path) -> None:
+    """2026-05-20 fix: some Docling artifacts (observed on hd_id=29 leaf-500
+    NC Residential) keep rate-content texts like 'Basic Customer Charge'
+    OUT of body.children entirely, so the children-walk silently drops them.
+    The slicer must also collect any in-range texts that weren't referenced
+    from body.children, otherwise the page-bounded slice loses the markers
+    parser profiles need to recognize the document."""
+    import json
+    import sqlite3
+    import fitz
+
+    pdf_path = tmp_path / "test_unref.pdf"
+    doc = fitz.open()
+    doc.new_page()
+    doc.new_page()
+    doc.save(str(pdf_path))
+    doc.close()
+
+    db_path = tmp_path / "duke.db"
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    conn.executescript("""
+        CREATE TABLE docling_artifacts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            source_pdf TEXT, status TEXT, page_count INTEGER,
+            doc_json_content TEXT, plain_text_content TEXT,
+            file_hash TEXT, backend_version TEXT, accelerator TEXT,
+            json_sidecar_path TEXT, text_sidecar_path TEXT, tables_sidecar_path TEXT,
+            tables_json_content TEXT, conversion_confidence REAL, table_count INTEGER,
+            metadata_json TEXT, created_at TEXT, updated_at TEXT, pipeline TEXT,
+            discovery_record_id INTEGER
+        );
+    """)
+    # body.children references only text[0] — text[1] (the rate content)
+    # is unreferenced. Both are on page 1, both are in range when slicing 1-2.
+    fake_doc = {
+        "body": {"children": [{"$ref": "#/texts/0"}]},
+        "texts": [
+            # First text — long enough that the children-walk alone exceeds
+            # _DOCLING_TEXT_MIN_CHARS, so we know the failure mode is content
+            # missing, not the artifact being rejected outright.
+            {"text": "AVAILABILITY: Residential service in NC. " * 5, "prov": [{"page_no": 1}]},
+            # Second text — same page, NOT referenced from body.children.
+            # This is the bug case: the rate-content text Docling left out
+            # of the reading-order graph.
+            {"text": "Basic Customer Charge: $14.00 per month", "prov": [{"page_no": 1}]},
+        ],
+        "tables": [],
+    }
+    conn.execute(
+        "INSERT INTO docling_artifacts(source_pdf, status, page_count, doc_json_content, plain_text_content) VALUES (?,?,?,?,?)",
+        (str(pdf_path), "success", 2, json.dumps(fake_doc), "x" * 200),
+    )
+    conn.commit()
+    conn.close()
+
+    from duke_rates.historical.ncuc.pipeline.bulk_extractor import BulkExtractor
+    ext = BulkExtractor(str(db_path))
+    result = ext._slice_docling_text(str(pdf_path), 1, 2)
+    assert result is not None, "expected sliced text, got None"
+    assert "AVAILABILITY" in result, "child-referenced text dropped"
+    assert "Basic Customer Charge" in result, (
+        "unreferenced-but-in-range text was silently dropped — this is the bug "
+        "that hid rate content from page-bounded slices for leaf-500 et al."
+    )

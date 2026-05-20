@@ -596,11 +596,14 @@ class BulkExtractor:
             return False
 
         parts: list[str] = []
+        used_text_idx: set[int] = set()
+        used_table_idx: set[int] = set()
         # Walk children in reading order. Items not in our target page range
         # are skipped (no ordering loss because we keep the rest in order).
         for child in children:
             ti = _ref_index(child, "texts")
             if ti is not None and 0 <= ti < len(texts):
+                used_text_idx.add(ti)
                 item = texts[ti]
                 if _in_range(item):
                     txt = str(item.get("text") or "").strip()
@@ -609,6 +612,7 @@ class BulkExtractor:
                 continue
             tbl_i = _ref_index(child, "tables")
             if tbl_i is not None and 0 <= tbl_i < len(tables):
+                used_table_idx.add(tbl_i)
                 item = tables[tbl_i]
                 if _in_range(item):
                     rendered = self._render_docling_table_as_markdown(item)
@@ -616,19 +620,32 @@ class BulkExtractor:
                         parts.append(rendered)
                 continue
 
-        # Fallback: if body.children walk produced nothing (some artifacts
-        # have empty body.children), filter texts/tables directly.
-        if not parts:
-            for item in texts:
-                if _in_range(item):
-                    txt = str(item.get("text") or "").strip()
-                    if txt:
-                        parts.append(txt)
-            for item in tables:
-                if _in_range(item):
-                    rendered = self._render_docling_table_as_markdown(item)
-                    if rendered:
-                        parts.append(rendered)
+        # Append any in-range texts/tables that weren't referenced from
+        # body.children. Some Docling artifacts (e.g. hd_id=29 leaf-500 NC
+        # Residential) keep rate-content items like "Basic Customer Charge"
+        # and "Kilowatt-Hour Charge" out of body.children entirely, causing
+        # them to be silently dropped by the children-walk above. Without
+        # this pass the sliced text loses the markers parser profiles need
+        # to recognize the doc (e.g. progress_residential_flat requires
+        # both "basic customer charge" and "per kwh" markers — both miss
+        # together when body.children doesn't reference them).
+        # Reading order isn't preserved for these items but it doesn't
+        # matter for regex-based supports()/extract() that look for
+        # markers and rate patterns rather than positional structure.
+        for ti, item in enumerate(texts):
+            if ti in used_text_idx:
+                continue
+            if _in_range(item):
+                txt = str(item.get("text") or "").strip()
+                if txt:
+                    parts.append(txt)
+        for tbl_i, item in enumerate(tables):
+            if tbl_i in used_table_idx:
+                continue
+            if _in_range(item):
+                rendered = self._render_docling_table_as_markdown(item)
+                if rendered:
+                    parts.append(rendered)
 
         if not parts:
             return None
@@ -1084,7 +1101,25 @@ class BulkExtractor:
         candidate_charge_count: int,
         candidate_outcome_quality: str,
         candidate_metrics: dict[str, int],
+        has_page_bounds: bool = True,
     ) -> tuple[bool, str | None]:
+        # Guard against cross-schedule rate attribution via the generic_residential
+        # fallback. When a family-specific profile (e.g. progress_jaa_rider,
+        # progress_traffic_signal_service) is the initial pick and produces 0
+        # charges, generic_residential's broad `$N.NN/unit` regex will harvest
+        # any rate-shaped text in the doc — including sentence fragments and
+        # rates from referenced-but-not-applicable schedules — and attribute
+        # them to the wrong family. This happens even on docs with bounded
+        # spans because narrative proposed-order text contains rate mentions.
+        # See session_embedding_model_benchmarks_2026_05_16.md (hd_id=14,
+        # hd_id=1847) for the unbounded cases and the 2026-05-20 hd_id=179
+        # JAA proposed-order regression that motivated broadening the guard.
+        _ = has_page_bounds  # kwarg retained for caller compatibility; no longer load-bearing
+        if (
+            candidate_name == "generic_residential"
+            and current_profile_name not in ("generic_residential", "unknown", None)
+        ):
+            return False, None
         if candidate_charge_count <= current_charge_count:
             if current_outcome_quality != "weak" or candidate_outcome_quality != "strong":
                 return False, None
@@ -1413,6 +1448,7 @@ class BulkExtractor:
                 candidate_charge_count=len(candidate_charges),
                 candidate_outcome_quality=candidate_outcome_quality,
                 candidate_metrics=candidate_metrics,
+                has_page_bounds=doc.get("start_page") is not None,
             )
             fallback_attempts.append(
                 self._serialize_candidate(candidate)
