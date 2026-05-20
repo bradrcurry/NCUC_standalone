@@ -138,6 +138,94 @@ def test_unknown_initial_profile_still_allows_generic_residential_fallback(extra
     assert reason == "empty_initial_parse"
 
 
+def test_insert_charges_force_clear_deletes_stale_when_no_new_charges(tmp_path):
+    """2026-05-20 force_clear: when re-extraction now produces 0 charges
+    (because the broadened guard refuses a previously-polluting fallback),
+    the old polluted charges must be deletable in the same run. Without
+    force_clear, insert_charges returns early on empty input and leaves
+    stale rows in tariff_charges. With force_clear=True, the DELETE runs
+    even when charges is empty."""
+    import sqlite3
+    from duke_rates.historical.ncuc.pipeline.bulk_extractor import BulkExtractor
+
+    db_path = tmp_path / "force_clear.db"
+    # Minimal schema for the test — just the table insert_charges writes to.
+    conn = sqlite3.connect(db_path)
+    conn.executescript(
+        """
+        CREATE TABLE tariff_charges (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            version_id INTEGER, family_key TEXT, charge_type TEXT, charge_label TEXT,
+            rate_value REAL, rate_unit TEXT, tier_min REAL, tier_max REAL,
+            tou_period TEXT, season TEXT, source_snippet TEXT,
+            confidence_score REAL, created_at TEXT
+        );
+        INSERT INTO tariff_charges (version_id, family_key, charge_label, rate_value)
+        VALUES (1, 'nc-progress-leaf-602', 'Polluted Energy Block', 0.005);
+        INSERT INTO tariff_charges (version_id, family_key, charge_label, rate_value)
+        VALUES (1, 'nc-progress-leaf-602', 'Polluted Energy Block', 0.007);
+        """
+    )
+    conn.commit()
+    conn.close()
+
+    extractor = BulkExtractor(db_path=str(db_path))
+
+    # Without force_clear: 0 new charges → no DELETE, old rows survive
+    inserted = extractor.insert_charges(version_id=1, family_key="nc-progress-leaf-602", charges=[])
+    assert inserted == 0
+    check = sqlite3.connect(db_path)
+    count = check.execute("SELECT COUNT(*) FROM tariff_charges WHERE version_id=1").fetchone()[0]
+    check.close()
+    assert count == 2, f"expected stale charges to survive without force_clear; got {count}"
+
+    # With force_clear=True: 0 new charges → DELETE still runs, old rows cleared
+    inserted = extractor.insert_charges(
+        version_id=1, family_key="nc-progress-leaf-602", charges=[], force_clear=True
+    )
+    assert inserted == 0
+    check = sqlite3.connect(db_path)
+    count = check.execute("SELECT COUNT(*) FROM tariff_charges WHERE version_id=1").fetchone()[0]
+    check.close()
+    assert count == 0, f"expected stale charges cleared with force_clear; got {count}"
+
+
+def test_insert_charges_force_clear_no_op_when_version_id_unset(tmp_path):
+    """force_clear must not bypass the version_id guard. Without a
+    version_id we don't know which rows to clear and a wildcard DELETE
+    would be catastrophic — must return 0 unchanged."""
+    import sqlite3
+    from duke_rates.historical.ncuc.pipeline.bulk_extractor import BulkExtractor
+
+    db_path = tmp_path / "force_clear_noversion.db"
+    conn = sqlite3.connect(db_path)
+    conn.executescript(
+        """
+        CREATE TABLE tariff_charges (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            version_id INTEGER, family_key TEXT, charge_type TEXT, charge_label TEXT,
+            rate_value REAL, rate_unit TEXT, tier_min REAL, tier_max REAL,
+            tou_period TEXT, season TEXT, source_snippet TEXT,
+            confidence_score REAL, created_at TEXT
+        );
+        INSERT INTO tariff_charges (version_id, family_key, charge_label, rate_value)
+        VALUES (1, 'some-family', 'Existing', 0.05);
+        """
+    )
+    conn.commit()
+    conn.close()
+
+    extractor = BulkExtractor(db_path=str(db_path))
+    inserted = extractor.insert_charges(
+        version_id=0, family_key="some-family", charges=[], force_clear=True
+    )
+    assert inserted == 0
+    check = sqlite3.connect(db_path)
+    count = check.execute("SELECT COUNT(*) FROM tariff_charges").fetchone()[0]
+    check.close()
+    assert count == 1, "force_clear with version_id=0 must not delete anything"
+
+
 def test_default_has_page_bounds_preserves_caller_compatibility(extractor):
     """has_page_bounds still defaults to True so existing call sites that
     don't pass the kwarg keep working; the kwarg is no longer load-bearing

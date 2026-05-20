@@ -1845,13 +1845,23 @@ class BulkExtractor:
         return False
 
     def insert_charges(self, version_id: int, family_key: str,
-                      charges: List[ExtractedCharge]) -> int:
+                      charges: List[ExtractedCharge],
+                      force_clear: bool = False) -> int:
         """Insert extracted charges into tariff_charges table.
 
         Clears existing charges for this (version_id, family_key) before inserting
         so that reprocessing replaces rather than appends.
+
+        When ``force_clear`` is True and ``version_id`` is set, the existing-
+        charges DELETE runs even when ``charges`` is empty. This is how
+        callers ask the extractor to *clear stale charges* on a re-extraction
+        that produced 0 results — e.g. when a cross-attribution-guard now
+        refuses the prior polluting fallback. Without this flag the old
+        rows would silently survive.
         """
-        if not charges or not version_id:
+        if not version_id:
+            return 0
+        if not charges and not force_clear:
             return 0
 
         conn = self._get_connection()
@@ -2378,10 +2388,16 @@ class BulkExtractor:
         finally:
             conn.close()
 
-    def process_document(self, doc: dict) -> Tuple[int, str, int, str, str | None]:
+    def process_document(self, doc: dict, force_clear: bool = False) -> Tuple[int, str, int, str, str | None]:
         """Process a single document: extract and insert charges.
 
         Returns: (doc_id, family_key, num_inserted, status, parser_profile)
+
+        When ``force_clear`` is True, stale charges from prior runs are
+        deleted even if this extraction produces 0 charges. Use this
+        for reprocess runs intended to clean up cross-attributed or
+        otherwise-stale rows that previously survived because
+        ``insert_charges`` skipped its DELETE when given an empty list.
         """
         # Get tariff_version for this document
         version_id = doc.get("version_id") or self.get_tariff_version_for_document(doc['id'])
@@ -2442,7 +2458,9 @@ class BulkExtractor:
         )
 
         # Insert into database
-        num_inserted = self.insert_charges(version_id, doc['family_key'], charges)
+        num_inserted = self.insert_charges(
+            version_id, doc['family_key'], charges, force_clear=force_clear
+        )
 
         return doc['id'], doc['family_key'], num_inserted, status, parser_profile
 
