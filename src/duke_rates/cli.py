@@ -17824,6 +17824,227 @@ def seed_document_type_gold_nc(
     conn.close()
 
 
+@app.command("promote-high-confidence-subset-nc")
+def promote_high_confidence_subset_nc(
+    state: str = typer.Option("NC", "--state", help="State filter."),
+    min_confidence: float = typer.Option(
+        0.9,
+        "--min-confidence",
+        help=(
+            "Minimum confidence each subset-agreeing classifier must reach. "
+            "0.9 is the recommended floor — LLM/qwen3:8b averages 0.96 and "
+            "v2 reaches 0.92+ on strong matches, so 0.9 selects only their "
+            "confident calls."
+        ),
+    ),
+    min_subset_size: int = typer.Option(
+        2,
+        "--min-subset",
+        help="Minimum classifiers agreeing on the same label at >= min_confidence.",
+    ),
+    exclude_classifiers: list[str] | None = typer.Option(
+        None,
+        "--exclude-classifier",
+        help="Repeatable. Skip these classifiers when computing subsets.",
+    ),
+    execute: bool = typer.Option(
+        False, "--execute",
+        help="Actually write gold rows. Without this flag, dry-run only.",
+    ),
+    json_out: bool = typer.Option(False, "--json", help="Emit summary as JSON."),
+) -> None:
+    """Promote subset-agreement docs to document_type_gold.
+
+    A subset-agreement is when N classifiers agree on a single label at
+    >= min_confidence, even if other classifiers vote differently at
+    lower confidence. Useful for growing gold on disagreement docs that
+    seed-document-type-gold-nc skips (because it requires *unanimous*
+    agreement across all running classifiers).
+
+    Concrete pattern this surfaces: LLM qwen3:8b at 1.0 confidence agrees
+    with v2 at 0.98 on CERTIFICATE_OF_SERVICE, while v1 and embedding
+    vote different labels at lower confidence. The two high-confidence
+    classifiers carry the signal; lower-confidence noise is ignored.
+
+    Rows are tagged with:
+      labeler  = 'subset:<classifier1>+<classifier2>+...'
+      source   = 'high_confidence_subset_agreement'
+      evidence = {classifiers, confidences, min_threshold, dissenters}
+
+    Idempotent: docs that already have an active gold row are skipped.
+
+    Recommended workflow:
+      1. promote-high-confidence-subset-nc                    (dry-run, review)
+      2. promote-high-confidence-subset-nc --execute          (write to gold)
+      3. audit-document-type-classifications-nc               (verify growth)
+    """
+    import sqlite3
+    from collections import Counter, defaultdict
+
+    settings, _ = _bootstrap()
+    conn = sqlite3.connect(settings.database_path)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+
+    exclude_set = set(exclude_classifiers or [])
+
+    c.execute(
+        """
+        SELECT dc.subject_id, dc.classifier, dc.label, dc.confidence
+        FROM document_classifications dc
+        JOIN historical_documents hd
+          ON CAST(hd.id AS TEXT) = dc.subject_id
+         AND dc.subject_kind = 'historical_document'
+        WHERE dc.stage = 'document_type' AND hd.state = ?
+        """,
+        (state,),
+    )
+
+    by_doc: dict[str, list[sqlite3.Row]] = defaultdict(list)
+    for r in c.fetchall():
+        if r["classifier"] in exclude_set:
+            continue
+        by_doc[r["subject_id"]].append(r)
+
+    c.execute(
+        """SELECT subject_id FROM document_type_gold
+           WHERE subject_kind='historical_document' AND superseded_by IS NULL"""
+    )
+    existing_gold = {r["subject_id"] for r in c.fetchall()}
+
+    promoted: list[dict] = []
+    skipped_already_gold = 0
+    skipped_no_subset = 0
+    skipped_subset_disagree = 0
+    label_counts: Counter = Counter()
+
+    for subj_id, rows in by_doc.items():
+        if subj_id in existing_gold:
+            skipped_already_gold += 1
+            continue
+
+        # Group HIGH-confidence votes by label
+        high_conf_by_label: dict[str, list[sqlite3.Row]] = defaultdict(list)
+        for r in rows:
+            if r["confidence"] >= min_confidence:
+                high_conf_by_label[r["label"]].append(r)
+
+        # Find the label with the largest high-confidence subset
+        if not high_conf_by_label:
+            skipped_no_subset += 1
+            continue
+
+        best_label = max(
+            high_conf_by_label,
+            key=lambda lab: len(high_conf_by_label[lab]),
+        )
+        subset = high_conf_by_label[best_label]
+        if len(subset) < min_subset_size:
+            skipped_no_subset += 1
+            continue
+
+        # Check that no OTHER label has an equally large high-conf subset
+        # (that would be a high-conf disagreement, not a clear winner)
+        other_max = max(
+            (len(v) for lab, v in high_conf_by_label.items() if lab != best_label),
+            default=0,
+        )
+        if other_max >= len(subset):
+            skipped_subset_disagree += 1
+            continue
+
+        # Build the row
+        agreeing_classifiers = sorted(r["classifier"] for r in subset)
+        agreeing_confs = [round(r["confidence"], 3) for r in subset]
+        dissenters = [
+            {
+                "classifier": r["classifier"],
+                "label": r["label"],
+                "confidence": round(r["confidence"], 3),
+            }
+            for r in rows
+            if r["label"] != best_label
+        ]
+        labeler = "subset:" + "+".join(agreeing_classifiers)
+        evidence = {
+            "classifiers": agreeing_classifiers,
+            "confidences": agreeing_confs,
+            "min_threshold": min_confidence,
+            "dissenters": dissenters,
+        }
+        promoted.append({
+            "subject_id": subj_id,
+            "label": best_label,
+            "labeler": labeler,
+            "evidence": evidence,
+            "subset_size": len(subset),
+        })
+        label_counts[best_label] += 1
+
+    if execute and promoted:
+        from datetime import UTC as _UTC
+        utc_now = datetime.now(_UTC).isoformat()
+        for row in promoted:
+            c.execute(
+                """
+                INSERT INTO document_type_gold (
+                    subject_kind, subject_id, label, labeler, source,
+                    evidence_json, superseded_by, notes, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, ?)
+                """,
+                (
+                    "historical_document",
+                    row["subject_id"],
+                    row["label"],
+                    row["labeler"],
+                    "high_confidence_subset_agreement",
+                    json.dumps(row["evidence"]),
+                    utc_now,
+                ),
+            )
+        conn.commit()
+
+    summary = {
+        "state": state,
+        "min_confidence": min_confidence,
+        "min_subset_size": min_subset_size,
+        "exclude_classifiers": sorted(exclude_set),
+        "candidates_considered": len(by_doc),
+        "promoted": len(promoted),
+        "skipped_already_gold": skipped_already_gold,
+        "skipped_no_subset": skipped_no_subset,
+        "skipped_subset_disagree": skipped_subset_disagree,
+        "label_distribution": dict(label_counts.most_common()),
+        "executed": execute,
+    }
+
+    if json_out:
+        typer.echo(json.dumps(summary, indent=2))
+        conn.close()
+        return
+
+    typer.echo(f"\nhigh-confidence subset promotion | state={state}\n")
+    typer.echo(f"  min_confidence:                 {min_confidence}")
+    typer.echo(f"  min subset size:                {min_subset_size}")
+    if exclude_set:
+        typer.echo(f"  excluded classifiers:           {sorted(exclude_set)}")
+    typer.echo(f"  docs considered:                {len(by_doc)}")
+    typer.echo(f"  -> already gold:                {skipped_already_gold}")
+    typer.echo(f"  -> no qualifying subset:        {skipped_no_subset}")
+    typer.echo(f"  -> high-conf disagreement:      {skipped_subset_disagree}")
+    typer.echo(f"  -> would promote:               {len(promoted)}")
+    if label_counts:
+        typer.echo("\n  Promoted label distribution:")
+        for label, n in label_counts.most_common():
+            typer.echo(f"    {label:<28} {n}")
+    if execute:
+        typer.echo(f"\n  Wrote {len(promoted)} new gold rows.")
+    else:
+        typer.echo("\n  Dry-run only. Pass --execute to write.")
+
+    conn.close()
+
+
 @app.command("triage-disagreements-nc")
 def triage_disagreements_nc(
     state: str = typer.Option("NC", "--state", help="State filter."),

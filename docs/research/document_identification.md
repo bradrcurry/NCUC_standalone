@@ -344,6 +344,56 @@ Tests: 5 in `tests/test_triage_disagreements.py` covering the agree-vs-
 disagree filter, priority order, label filter, no-weight tiebreaker,
 and the row schema.
 
+### 2026-05-21 update — high-confidence subset promotion
+
+`promote-high-confidence-subset-nc` grows gold from disagreement docs
+where a subset of classifiers agree at high confidence even when other
+classifiers vote differently at lower confidence.
+
+Rule: a doc promotes when N classifiers all vote the same label at
+≥ min_confidence, AND no other label has an equally large high-confidence
+subset. The lower-confidence dissenting votes are recorded as
+`dissenters` in `evidence_json` but don't block promotion.
+
+First corpus run (default `--min-confidence 0.9 --min-subset 2`):
+
+| Bucket | Count |
+|---|---|
+| docs considered | 927 |
+| skipped (already gold) | 345 |
+| no qualifying subset | 486 |
+| high-conf disagreement | 0 |
+| **promoted** | **96** |
+
+Label distribution of promoted rows:
+
+| Label | New rows |
+|---|---|
+| TARIFF_SHEET | 54 |
+| TESTIMONY | 16 |
+| APPLICATION | 7 |
+| ORDER_FINAL | 7 |
+| CERTIFICATE_OF_SERVICE | 3 |
+| RIDER | 3 |
+| COMPLIANCE_FILING | 2 |
+| ORDER_PROCEDURAL | 2 |
+| COVER_LETTER | 1 |
+| RATE_SCHEDULE | 1 |
+
+**6 of 9 previously-empty type buckets filled** in one pass:
+RIDER, APPLICATION, CERT_OF_SERVICE, COMPLIANCE_FILING,
+ORDER_PROCEDURAL, RATE_SCHEDULE.
+
+Gold table state: **441 rows** total, 10 of 14 types represented.
+
+Still empty: NOTICE_OF_HEARING (only 1 v2 vote corpus-wide),
+FERC_ORDER, EIA_REPORT (no docs of these types in NC corpus).
+
+### Tests
+`tests/test_promote_high_confidence_subset.py` — 6 tests covering the
+subset-size rule, min_confidence threshold, high-conf disagreement
+skip, already-gold skip, and dry-run no-write.
+
 ### Cover-letter bundle signal (intentional)
 
 Docs whose `family_key` says tariff/rider but whose body starts with a
