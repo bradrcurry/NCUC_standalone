@@ -17640,6 +17640,190 @@ def _write_gold_set_jsonl(path: Path, gold_candidates: list[dict], conn, setting
     return written
 
 
+@app.command("seed-document-type-gold-nc")
+def seed_document_type_gold_nc(
+    state: str = typer.Option("NC", "--state", help="State filter for historical_documents."),
+    min_classifiers: int = typer.Option(
+        2,
+        "--min-classifiers",
+        help=(
+            "Minimum number of classifiers that must have run AND agreed on "
+            "a single label for the doc to seed gold. 2 = relaxed (rule + "
+            "embedding agree), 3 = strict (rule + embedding + LLM all agree)."
+        ),
+    ),
+    exclude_classifiers: list[str] | None = typer.Option(
+        None,
+        "--exclude-classifier",
+        help=(
+            "Repeatable. Skip these classifiers when computing agreement. "
+            "Useful when seeding pre-v2 gold to establish a baseline before "
+            "the new classifier enters the vote."
+        ),
+    ),
+    execute: bool = typer.Option(
+        False,
+        "--execute",
+        help="Actually write gold rows. Without this flag, dry-run only.",
+    ),
+    json_out: bool = typer.Option(False, "--json", help="Emit summary as JSON."),
+) -> None:
+    """Seed document_type_gold from classifier agreement.
+
+    Default rule: a doc seeds gold when at least ``min_classifiers``
+    classifiers have run AND they all agree on a single label. The
+    inserted row carries:
+
+      label       = the agreed-upon label
+      labeler     = 'agreement:<classifier1>+<classifier2>+...'
+      source      = 'unanimous_classifier_agreement'
+      evidence    = {classifiers: [...], confidences: [...]}
+
+    Idempotent: docs that already have an active (non-superseded) gold
+    row are skipped. To force-rewrite, supersede the existing row first
+    via a follow-up command.
+
+    Use ``--exclude-classifier rule_document_type_v2`` to seed gold
+    based on the pre-v2 classifier stack — recommended for first
+    seeding so v2's known biases don't contaminate the baseline.
+    """
+    import sqlite3
+    from collections import Counter, defaultdict
+
+    settings, _ = _bootstrap()
+    conn = sqlite3.connect(settings.database_path)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+
+    exclude_set = set(exclude_classifiers or [])
+
+    # Pull all document_type classifications for the state
+    c.execute(
+        """
+        SELECT dc.subject_id, dc.classifier, dc.label, dc.confidence
+        FROM document_classifications dc
+        JOIN historical_documents hd
+          ON CAST(hd.id AS TEXT) = dc.subject_id
+         AND dc.subject_kind = 'historical_document'
+        WHERE dc.stage = 'document_type'
+          AND hd.state = ?
+        """,
+        (state,),
+    )
+
+    by_doc: dict[str, list[sqlite3.Row]] = defaultdict(list)
+    for r in c.fetchall():
+        if r["classifier"] in exclude_set:
+            continue
+        by_doc[r["subject_id"]].append(r)
+
+    # Find docs with existing active gold rows (to skip)
+    c.execute(
+        """
+        SELECT subject_id FROM document_type_gold
+        WHERE subject_kind = 'historical_document' AND superseded_by IS NULL
+        """
+    )
+    existing_gold = {r["subject_id"] for r in c.fetchall()}
+
+    seeded: list[dict] = []
+    skipped_already_gold = 0
+    skipped_too_few_classifiers = 0
+    skipped_disagreement = 0
+    label_counts: Counter = Counter()
+
+    for subj_id, rows in by_doc.items():
+        if subj_id in existing_gold:
+            skipped_already_gold += 1
+            continue
+        if len(rows) < min_classifiers:
+            skipped_too_few_classifiers += 1
+            continue
+        labels = [r["label"] for r in rows]
+        if len(set(labels)) != 1:
+            skipped_disagreement += 1
+            continue
+
+        agreed_label = labels[0]
+        classifiers = sorted(r["classifier"] for r in rows)
+        confidences = [round(r["confidence"], 3) for r in rows]
+        labeler = "agreement:" + "+".join(classifiers)
+        evidence = {
+            "classifiers": classifiers,
+            "confidences": confidences,
+            "avg_confidence": round(sum(confidences) / len(confidences), 3),
+        }
+        seeded.append({
+            "subject_id": subj_id,
+            "label": agreed_label,
+            "labeler": labeler,
+            "evidence": evidence,
+            "classifier_count": len(rows),
+        })
+        label_counts[agreed_label] += 1
+
+    if execute and seeded:
+        from datetime import UTC as _UTC
+        utc_now = datetime.now(_UTC).isoformat()
+        for row in seeded:
+            c.execute(
+                """
+                INSERT INTO document_type_gold (
+                    subject_kind, subject_id, label, labeler, source,
+                    evidence_json, superseded_by, notes, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, ?)
+                """,
+                (
+                    "historical_document",
+                    row["subject_id"],
+                    row["label"],
+                    row["labeler"],
+                    "unanimous_classifier_agreement",
+                    json.dumps(row["evidence"]),
+                    utc_now,
+                ),
+            )
+        conn.commit()
+
+    summary = {
+        "state": state,
+        "candidates_considered": len(by_doc),
+        "seeded": len(seeded),
+        "skipped_already_gold": skipped_already_gold,
+        "skipped_too_few_classifiers": skipped_too_few_classifiers,
+        "skipped_disagreement": skipped_disagreement,
+        "min_classifiers": min_classifiers,
+        "exclude_classifiers": sorted(exclude_set),
+        "label_distribution": dict(label_counts.most_common()),
+        "executed": execute,
+    }
+
+    if json_out:
+        typer.echo(json.dumps(summary, indent=2))
+        conn.close()
+        return
+
+    typer.echo(f"\ndocument_type_gold seeding | state={state}\n")
+    typer.echo(f"  min_classifiers required:       {min_classifiers}")
+    if exclude_set:
+        typer.echo(f"  excluded classifiers:           {sorted(exclude_set)}")
+    typer.echo(f"  docs considered:                {summary['candidates_considered']}")
+    typer.echo(f"  -> already gold (skipped):      {summary['skipped_already_gold']}")
+    typer.echo(f"  -> too few classifiers:         {summary['skipped_too_few_classifiers']}")
+    typer.echo(f"  -> classifier disagreement:     {summary['skipped_disagreement']}")
+    typer.echo(f"  -> would seed:                  {summary['seeded']}")
+    if label_counts:
+        typer.echo("\n  Seeded label distribution:")
+        for label, n in label_counts.most_common():
+            typer.echo(f"    {label:<28} {n}")
+    if execute:
+        typer.echo(f"\n  Wrote {len(seeded)} new gold rows to document_type_gold.")
+    else:
+        typer.echo("\n  Dry-run only. Pass --execute to write gold rows.")
+
+    conn.close()
+
+
 @app.command("classify-documents-v2-nc")
 def classify_documents_v2_nc(
     state: str = typer.Option("NC", "--state", help="State filter for historical_documents."),

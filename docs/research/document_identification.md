@@ -239,6 +239,45 @@ The 23 disagreements that resolved were almost entirely base-schedule
 docs (hd=3 LGS, hd=4 MGS, hd=5 RES, …) where v2 had previously
 over-claimed RIDER due to body-mention of applicable riders.
 
+### 2026-05-21 update — Stream A gold table seeded
+
+`seed-document-type-gold-nc` CLI populates `document_type_gold` from
+classifier-agreement signals. First run with `--execute` at the default
+`--min-classifiers 2` against the current NC classification matrix:
+
+| Bucket | Count |
+|---|---|
+| docs considered | 927 |
+| seeded as gold | **344** |
+| skipped (classifiers disagree) | 555 |
+| skipped (too few classifiers ran) | 28 |
+| skipped (already gold) | 0 (first run) |
+
+Seeded label distribution:
+
+| Label | Count |
+|---|---|
+| TARIFF_SHEET | 176 |
+| ORDER_FINAL | 93 |
+| TESTIMONY | 75 |
+
+`--min-classifiers 3` (strict mode requiring rule+embedding+LLM
+3-way agreement) yields 33 docs (15 TARIFF_SHEET / 12 TESTIMONY /
+6 ORDER_FINAL) — the gold-of-gold tier suitable for held-out test
+sets. Stored under the same `unanimous_classifier_agreement` source
+label; `evidence_json` carries the actual `classifiers` array so
+downstream tools can re-derive the tier without a separate column.
+
+Notable absences from the gold set: RIDER, RATE_SCHEDULE,
+COVER_LETTER, NOTICE_OF_HEARING, APPLICATION, COMPLIANCE_FILING,
+CERTIFICATE_OF_SERVICE, FERC_ORDER, EIA_REPORT — these types had
+either insufficient classifier coverage or classifier disagreement.
+Stream D fine-tuning needs balanced classes; getting these types
+into the gold set is the next concrete labeling target (Stream A
+continuation: build `triage-disagreements-nc` to drive human review
+on the 555 disagreement docs, weighted toward under-represented
+type buckets).
+
 ### Cover-letter bundle signal (intentional)
 
 Docs whose `family_key` says tariff/rider but whose body starts with a
