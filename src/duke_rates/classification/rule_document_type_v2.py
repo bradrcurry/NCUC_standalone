@@ -51,6 +51,21 @@ class TypePatterns:
     strong: tuple[str, ...] = ()
     weak: tuple[str, ...] = ()
     negative: tuple[str, ...] = ()
+    # Strong patterns that ONLY count when matched in the header region
+    # (title + first HEADER_REGION_CHARS of body). Prevents false positives
+    # from incidental body mentions — e.g. a base-schedule tariff that
+    # lists applicable riders in an "Applicable Riders" section should NOT
+    # be classified as RIDER just because the names appear in body text.
+    strong_header: tuple[str, ...] = ()
+
+
+# Header region size (title + first N chars of body) for strong_header patterns.
+# Tuned to the first ~2 visible lines of a typical tariff/rider sheet, which is
+# where legitimate headers like "RIDER BA-9 (NC)" or "First Revised Leaf No. 500"
+# live. Larger windows (e.g. 400 chars) accidentally include the
+# "Applicable Riders:" section of base-schedule docs, which lists rider names
+# in body text and inflates RIDER scoring on the wrong type.
+_HEADER_REGION_CHARS = 120
 
 
 _TYPE_PATTERNS: dict[str, TypePatterns] = {
@@ -58,6 +73,17 @@ _TYPE_PATTERNS: dict[str, TypePatterns] = {
         strong=(
             r"\bleaf\s+no\.?\s+\d+",
             r"\b(?:original|first|second|third|fourth|fifth|revised)\s+leaf\s+no\.?\s+\d+",
+        ),
+        strong_header=(
+            # Base-class service titles that are tariff sheets without
+            # explicit "Leaf No." in their title (common in legacy
+            # /pdfs/...-dep.pdf 2014-era docs). Each phrase is anchored to
+            # the header region so body mentions of the same phrases don't
+            # bump TARIFF_SHEET inappropriately.
+            r"\b(?:residential|large\s+general|medium\s+general|small\s+general|general)\s+service\b",
+            r"\bschedule\s+(?:res|lgs|mgs|sgs|gs|ig)\b",
+            r"\boutdoor\s+lighting\s+service\b",
+            r"\bstreet\s+lighting\s+service\b",
         ),
         weak=(
             r"\bschedule\s+[a-z]{1,4}\b",
@@ -79,11 +105,16 @@ _TYPE_PATTERNS: dict[str, TypePatterns] = {
         ),
     ),
     "RIDER": TypePatterns(
-        strong=(
+        # 'Rider X' moved to strong_header so an applicable-riders list in a
+        # base-schedule's body doesn't sweep RIDER. Legitimate rider docs
+        # have the rider name in the title or within the first ~400 chars
+        # (header region). Body-only mentions count as weak instead.
+        strong_header=(
             r"\brider\s+[a-z0-9\-]{1,12}\b",
-            r"\b(?:fuel|storm|reps|dsm|ee|ev|cpre|edit)\s+(?:and\s+fuel\s+related\s+)?(?:cost\s+(?:recovery|adjustment)\s+)?rider\b",
+            r"\b(?:fuel|storm|reps|dsm|ee|ev|cpre|edit|annual\s+billing)\s+(?:and\s+fuel\s+related\s+)?(?:cost\s+(?:recovery|adjustment)\s+)?rider\b",
         ),
         weak=(
+            r"\brider\s+[a-z0-9\-]{1,12}\b",  # body-only mentions are weak
             r"\badjustment\b",
             r"\bper\s+kWh\b",
             r"\bcomponent\b",
@@ -91,6 +122,9 @@ _TYPE_PATTERNS: dict[str, TypePatterns] = {
         negative=(
             r"\bcertify\s+that\b",
             r"\bredirect\s+examination\b",
+            # Base-class schedule titles signal the doc is the base tariff,
+            # not a rider — even if the body lists multiple applicable riders.
+            r"\b(?:residential|large\s+general|medium\s+general|small\s+general)\s+service\b",
         ),
     ),
     "RATE_SCHEDULE": TypePatterns(
@@ -297,6 +331,8 @@ def _compile_patterns() -> dict[str, list[tuple[str, re.Pattern[str], str]]]:
         rules: list[tuple[str, re.Pattern[str], str]] = []
         for raw in patterns.strong:
             rules.append(("strong", re.compile(raw, re.IGNORECASE | re.MULTILINE), raw))
+        for raw in patterns.strong_header:
+            rules.append(("strong_header", re.compile(raw, re.IGNORECASE | re.MULTILINE), raw))
         for raw in patterns.weak:
             rules.append(("weak", re.compile(raw, re.IGNORECASE | re.MULTILINE), raw))
         for raw in patterns.negative:
@@ -384,9 +420,14 @@ def classify_v2(signals: DocumentSignals) -> ClassificationResult:
       - ``evidence``: list of {kind, value, weight} pairs documenting hits
       - ``alternatives``: runner-up type codes with their raw scores
     """
-    combined_pattern_text = "\n".join(
-        [signals.title or "", signals.first_text or "", signals.last_text or ""]
-    )
+    title = signals.title or ""
+    first_text = signals.first_text or ""
+    last_text = signals.last_text or ""
+    combined_pattern_text = "\n".join([title, first_text, last_text])
+    # Header region for strong_header patterns: title + first N chars of body.
+    # Matching a strong_header pattern outside this slice is treated as a
+    # weak hit, not a strong one — keeps body-only mentions from dominating.
+    header_region_text = "\n".join([title, first_text[:_HEADER_REGION_CHARS]])
 
     raw_scores: dict[str, float] = {}
     type_evidence: dict[str, list[dict]] = {}
@@ -395,6 +436,20 @@ def classify_v2(signals: DocumentSignals) -> ClassificationResult:
         score = 0.0
         evidence_for_type: list[dict] = []
         for role, regex, raw in rules:
+            if role == "strong_header":
+                # Only count matches inside the header region. Matches in body
+                # are silently ignored here — the same pattern can be listed in
+                # `weak` to capture body mentions separately if desired.
+                hits = regex.findall(header_region_text)
+                if not hits:
+                    continue
+                weight = _STRONG_WEIGHT * len(hits)
+                score += weight
+                evidence_for_type.append({
+                    "kind": "strong_header_pattern", "value": raw,
+                    "hits": len(hits), "weight": weight,
+                })
+                continue
             hits = regex.findall(combined_pattern_text)
             if not hits:
                 continue
@@ -446,9 +501,10 @@ def classify_v2(signals: DocumentSignals) -> ClassificationResult:
             metadata={"raw_scores": raw_scores},
         )
 
-    # Confidence calibration
+    # Confidence calibration. Either strong-pattern role counts.
     strong_hits = sum(
-        1 for e in type_evidence[winner] if e.get("kind") == "strong_pattern"
+        1 for e in type_evidence[winner]
+        if e.get("kind") in ("strong_pattern", "strong_header_pattern")
     )
     margin = winner_score - max(
         (s for c, s in raw_scores.items() if c != winner), default=0.0

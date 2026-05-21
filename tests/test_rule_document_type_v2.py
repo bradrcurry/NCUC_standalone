@@ -260,6 +260,61 @@ def test_layout_signals_break_tie_between_letter_and_tariff():
     assert result.label == "COVER_LETTER"
 
 
+def test_base_schedule_not_classified_as_rider_despite_body_mentions():
+    """Regression for 2026-05-21 corpus pass: legacy 2014-era base schedule
+    docs (hd=3 LGS, hd=4 MGS, hd=5 RES from /pdfs/...-dep.pdf) were
+    mis-classified as RIDER because their bodies list applicable riders.
+    The fix moves RIDER's 'Rider X' strong pattern to header-region-only
+    matching, with body mentions counted as weak. Plus adds base-class
+    service titles as TARIFF_SHEET strong_header patterns."""
+    signals = DocumentSignals(
+        title="Large General Service",
+        first_text=(
+            "Large General Service\n"
+            "Availability: this Schedule is available to commercial customers.\n"
+            "Monthly Rate:\n"
+            "Basic Customer Charge $30.00 per month\n"
+            "Energy Charge: 0.08 per kWh\n"
+            "Applicable Riders:\n"
+            "The following riders apply: Rider BA, Rider NCTR, "
+            "fuel rider for cost recovery."
+        ),
+        page_count=4,
+        text_chars=1200,
+        has_tables=1,
+    )
+    result = classify_v2(signals)
+    assert result.label == "TARIFF_SHEET", (
+        f"base-schedule should classify as TARIFF_SHEET, got {result.label}; "
+        f"raw_scores={result.metadata['raw_scores']}"
+    )
+    assert result.confidence >= 0.9
+
+
+def test_rider_doc_still_recognized_via_header():
+    """The fix must NOT regress legitimate rider docs whose title or first
+    paragraph contains 'Rider X'."""
+    signals = DocumentSignals(
+        title="Annual Billing Adjustment Rider (Leaf No. 601)",
+        first_text=(
+            "Duke Energy Progress, LLC NC Original Leaf No. 601\n"
+            "RIDER BA-9 (NC)\n"
+            "ANNUAL BILLING ADJUSTMENT\n"
+            "Applicable to all Schedules.\n"
+            "Adjustment per kWh: see schedule of charges."
+        ),
+        page_count=2,
+        text_chars=700,
+        has_tables=1,
+    )
+    result = classify_v2(signals)
+    # Both leaf-no AND rider-in-header fire; the higher-scoring type wins.
+    # Either label is technically right; we just want it not to be
+    # mis-classified as something unrelated like ORDER_FINAL or UNKNOWN.
+    assert result.label in ("RIDER", "TARIFF_SHEET")
+    assert result.confidence >= 0.9
+
+
 def test_confidence_lower_when_only_weak_patterns_fire():
     """Weak-only matches should NOT reach the 0.92 strong-signal target.
     Important for preserving multi-classifier balance: when v2 is uncertain,

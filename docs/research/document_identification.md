@@ -218,6 +218,49 @@ Recommended Stream B iteration cycle:
    it skip low-confidence (<0.5) results, or write them all so the audit
    tool can see v2's UNKNOWN calls explicitly?
 
+### 2026-05-21 update — RIDER precision pass
+
+Tightened RIDER's `Rider X` pattern to header-region-only matching
+(first 120 chars of body + title). Body mentions count as weak, not
+strong. Added base-class service titles ("Residential Service", "Large
+General Service", "Medium General Service", "Small General Service") as
+TARIFF_SHEET `strong_header` patterns + as RIDER negative patterns.
+
+Same 200-doc sample result after fix:
+
+| Metric | Pre-fix | Post-fix |
+|---|---|---|
+| v1-vs-v2 disagreements | 127 / 200 | 104 / 200 |
+| TARIFF_SHEET label count | 128 | 155 |
+| RIDER label count | 59 | 22 |
+| High-confidence (>=0.9) | 197 | 193 |
+
+The 23 disagreements that resolved were almost entirely base-schedule
+docs (hd=3 LGS, hd=4 MGS, hd=5 RES, …) where v2 had previously
+over-claimed RIDER due to body-mention of applicable riders.
+
+### Cover-letter bundle signal (intentional)
+
+Docs whose `family_key` says tariff/rider but whose body starts with a
+cover-letter pattern (`VIA ELECTRONIC FILING`, "Jack Jirak / Molly
+Jagannathan / etc., Deputy General Counsel ...") classify as
+COVER_LETTER even though their family_key says they should be the
+schedule. This is **intended**: the v2 classifier reads the doc's
+*content*, not its `family_key` label. When the two disagree, it's a
+high-signal hint that the bundle metadata is wrong — the PDF wraps a
+transmittal letter that the importer mistakenly tagged with the
+schedule family-key.
+
+Examples surfaced on the 200-doc sample:
+- hd=176 family_key=nc-progress-leaf-572 ("Street Lighting Service"),
+  but body starts with cover letter + accounting tables.
+- hd=20 family_key=nc-progress-leaf-606 ("Demand Side Management
+  Rider"), but body starts with a Troutman Sanders cover letter.
+
+Future audit: cross-reference `v2_label='COVER_LETTER'` with
+`family_key LIKE 'nc-progress-leaf-%'` to surface these mismatches
+as a labeling/import-cleanup queue.
+
 ## Non-goals (for this branch)
 
 - Do not change `document_types` taxonomy until Stream C scope is settled.
