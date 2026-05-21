@@ -278,6 +278,72 @@ continuation: build `triage-disagreements-nc` to drive human review
 on the 555 disagreement docs, weighted toward under-represented
 type buckets).
 
+### 2026-05-21 update — v2 backfill + gold re-seed
+
+Ran `classify-documents-v2-nc --write-classifications` corpus-wide.
+927 v2 classifications persisted alongside v1/embedding/LLM. Result:
+
+v2 confidence distribution:
+- 670 docs at ≥0.9 (vs v1's **0**)
+- 135 docs at 0.5-0.9
+- 122 docs at <0.5
+
+v2 label distribution (much richer than v1's 5-type collapse):
+
+| Label | v1 | v2 |
+|---|---|---|
+| TARIFF_SHEET | 668 | 400 |
+| ORDER_FINAL | 536 | 186 |
+| RIDER | 38 | 121 |
+| COVER_LETTER | 161 | 89 |
+| TESTIMONY | 478 | 33 |
+| APPLICATION | 145 | 31 |
+| RATE_SCHEDULE | 16 | 23 |
+| CERTIFICATE_OF_SERVICE | 43 | 18 |
+| ORDER_PROCEDURAL | 25 | 17 |
+| COMPLIANCE_FILING | 123 | 8 |
+| NOTICE_OF_HEARING | 13 | 1 |
+
+v2 produces fewer of every type because its higher confidence threshold
+and per-type patterns push borderline cases into the explicit
+mid-confidence band rather than guessing.
+
+Re-seeded gold table with v2 in the vote: only **1 new row added**
+(a COVER_LETTER that v2 broke the tie on). 344 - 207 = **137 prior
+v0 gold rows are now stale** (v2 disagrees with the previous unanimous
+2-way agreement). Those rows aren't deleted — they remain in the gold
+table as point-in-time records but may need human re-review.
+
+Gold table state: 345 rows (344 v0 + 1 v1 from re-seed).
+
+### Stream A continued — triage-disagreements-nc
+
+`triage-disagreements-nc` exports classifier-disagreement docs as a
+labeling JSONL queue. Each row carries:
+
+- `hd_id`, `priority`, `family_key`, `title`
+- `votes`: per-classifier `{classifier, label, confidence}` array
+- `labels_voted`: distinct labels across classifiers
+- `majority_label`: most common vote (or first-tied)
+- `text_sample`: 2000 chars from the bulk extractor's text path
+- `text_source`: which text source the sample came from
+
+Priority weighting (default on): each disagreement doc gets a priority
+score equal to the **average** of underrepresented-bucket weights
+across its classifier votes. Labels not in gold weight 100;
+high-coverage labels (TARIFF_SHEET=176 in gold) weight ~0.6. The
+average (not sum) so a doc whose votes are *all* rare ranks above a
+doc with one rare + several common votes.
+
+Run with `--label COVER_LETTER --label RIDER` to focus the queue on
+specific under-represented types. Output is consumed by a notebook /
+Streamlit labeling UI; confirmed labels write back to
+`document_type_gold` with `source='human_review'`.
+
+Tests: 5 in `tests/test_triage_disagreements.py` covering the agree-vs-
+disagree filter, priority order, label filter, no-weight tiebreaker,
+and the row schema.
+
 ### Cover-letter bundle signal (intentional)
 
 Docs whose `family_key` says tariff/rider but whose body starts with a

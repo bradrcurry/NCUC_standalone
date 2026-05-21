@@ -17824,6 +17824,205 @@ def seed_document_type_gold_nc(
     conn.close()
 
 
+@app.command("triage-disagreements-nc")
+def triage_disagreements_nc(
+    state: str = typer.Option("NC", "--state", help="State filter."),
+    output_path: Path = typer.Option(
+        ...,
+        "--out",
+        help=(
+            "Output JSONL path for the labeling queue. Each line is one "
+            "disagreement doc with side-by-side classifier votes, layout "
+            "signals, and a text sample. Suitable for a notebook or "
+            "Streamlit label-fix UI."
+        ),
+    ),
+    limit: int = typer.Option(200, "--limit", help="Cap rows written."),
+    weight_underrepresented: bool = typer.Option(
+        True,
+        "--weight-underrepresented/--no-weight",
+        help=(
+            "Prioritize docs whose classifiers voted for type buckets that "
+            "are underrepresented in document_type_gold. Targets the "
+            "specific labels Stream D fine-tuning needs more examples of "
+            "(RIDER, COVER_LETTER, NOTICE_OF_HEARING, etc.)."
+        ),
+    ),
+    label_filter: list[str] | None = typer.Option(
+        None,
+        "--label",
+        help=(
+            "Repeatable. Only include docs where at least one classifier "
+            "voted one of these labels. Use to focus triage on specific "
+            "type buckets."
+        ),
+    ),
+) -> None:
+    """Export classifier-disagreement docs as a labeling JSONL queue.
+
+    Stream A continuation: the 555 disagreement docs in the corpus are
+    where ground-truth labels grow fastest. This CLI exports them as a
+    JSONL queue where each line carries side-by-side classifier votes,
+    layout signals, a 2000-char text sample, and a suggested label
+    (majority vote where one exists).
+
+    Workflow:
+      1. triage-disagreements-nc --out triage_v0.jsonl
+      2. open in a notebook / Streamlit UI, hand-confirm or fix labels
+      3. write back to document_type_gold via a follow-up insert
+         (use source='human_review', labeler='human:<your-id>')
+
+    Pass --label COVER_LETTER --label RIDER (etc.) to focus the queue on
+    specific types currently underrepresented in gold.
+    """
+    import sqlite3
+    from collections import Counter, defaultdict
+
+    settings, _ = _bootstrap()
+    conn = sqlite3.connect(settings.database_path)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+
+    # Current gold distribution → underrepresented-bucket weights
+    c.execute("""
+        SELECT label, COUNT(*) AS n FROM document_type_gold
+        WHERE superseded_by IS NULL GROUP BY label
+    """)
+    gold_counts: dict[str, int] = {r["label"]: r["n"] for r in c.fetchall()}
+    # Inverse-frequency weight per label — higher weight = bigger gold gap.
+    # Labels not in gold get the highest weight (infinity-ish via large constant).
+    all_known_labels = [
+        "TARIFF_SHEET", "RIDER", "RATE_SCHEDULE", "ORDER_FINAL", "ORDER_PROCEDURAL",
+        "TESTIMONY", "COVER_LETTER", "CERTIFICATE_OF_SERVICE", "NOTICE_OF_HEARING",
+        "APPLICATION", "COMPLIANCE_FILING", "FERC_ORDER", "EIA_REPORT",
+    ]
+    label_weights = {}
+    for lab in all_known_labels:
+        n = gold_counts.get(lab, 0)
+        label_weights[lab] = 100.0 / (n + 1)  # n=0 -> weight 100, n=176 -> ~0.6
+
+    # Pull all document_type classifications for state, joined with hd
+    c.execute(
+        """
+        SELECT dc.subject_id AS hd_id_str,
+               dc.classifier, dc.label, dc.confidence,
+               hd.family_key, hd.title, hd.local_path, hd.start_page, hd.end_page
+        FROM document_classifications dc
+        JOIN historical_documents hd
+          ON CAST(hd.id AS TEXT) = dc.subject_id
+         AND dc.subject_kind = 'historical_document'
+        WHERE dc.stage = 'document_type' AND hd.state = ?
+        """,
+        (state,),
+    )
+
+    by_doc: dict[str, dict] = defaultdict(lambda: {"votes": [], "meta": None})
+    for r in c.fetchall():
+        if by_doc[r["hd_id_str"]]["meta"] is None:
+            by_doc[r["hd_id_str"]]["meta"] = {
+                "family_key": r["family_key"],
+                "title": r["title"],
+                "local_path": r["local_path"],
+                "start_page": r["start_page"],
+                "end_page": r["end_page"],
+            }
+        by_doc[r["hd_id_str"]]["votes"].append({
+            "classifier": r["classifier"],
+            "label": r["label"],
+            "confidence": round(r["confidence"], 3),
+        })
+
+    # Skip docs that already have an active gold row — they're settled.
+    c.execute(
+        """SELECT subject_id FROM document_type_gold
+           WHERE subject_kind='historical_document' AND superseded_by IS NULL"""
+    )
+    settled = {r["subject_id"] for r in c.fetchall()}
+
+    label_filter_set = {lab.upper() for lab in (label_filter or [])}
+
+    candidates: list[dict] = []
+    for hd_id_str, payload in by_doc.items():
+        if hd_id_str in settled:
+            continue
+        votes = payload["votes"]
+        labels = [v["label"] for v in votes]
+        if len(set(labels)) < 2 or len(votes) < 2:
+            # Not a disagreement (either too few classifiers or unanimous)
+            continue
+        if label_filter_set and not (label_filter_set & set(labels)):
+            continue
+
+        # Priority score: average of underrepresented-bucket weights across
+        # votes. Average (not sum) so a doc with all-rare-label votes ranks
+        # above a doc with one rare + several common votes — the all-rare
+        # doc is more diagnostic for gold-set growth in those buckets.
+        priority = sum(label_weights.get(lab, 1.0) for lab in labels) / max(1, len(labels))
+        if weight_underrepresented is False:
+            priority = 1.0
+
+        candidates.append({
+            "hd_id": int(hd_id_str),
+            "priority": round(priority, 2),
+            "votes": votes,
+            "labels_voted": sorted(set(labels)),
+            "majority_label": Counter(labels).most_common(1)[0][0],
+            **payload["meta"],
+        })
+
+    # Sort by priority (high first), then hd_id for stability
+    candidates.sort(key=lambda c: (-c["priority"], c["hd_id"]))
+    candidates = candidates[:limit]
+
+    # Enrich with text sample (last because slow)
+    from duke_rates.historical.ncuc.pipeline.bulk_extractor import (
+        BulkExtractor, normalize_docling_markdown, normalize_ocr_text,
+    )
+    extractor = BulkExtractor(db_path=str(settings.database_path))
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    written = 0
+    with output_path.open("w", encoding="utf-8") as f:
+        for cand in candidates:
+            doc = extractor.get_document_for_extraction(cand["hd_id"])
+            text_sample = ""
+            text_source = "none"
+            if doc:
+                try:
+                    text, src = extractor.extract_text_from_pdf(
+                        doc["local_path"],
+                        start_page=doc.get("start_page"),
+                        end_page=doc.get("end_page"),
+                    )
+                    if src in ("docling_artifact", "docling_artifact_sliced"):
+                        text = normalize_docling_markdown(text)
+                    text_sample = normalize_ocr_text(text)[:2000]
+                    text_source = src
+                except Exception:
+                    pass
+            row = {
+                **cand,
+                "text_sample": text_sample,
+                "text_source": text_source,
+            }
+            # Remove non-JSON fields
+            row.pop("local_path", None)
+            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+            written += 1
+
+    conn.close()
+
+    typer.echo(f"\nTriage queue exported | state={state}")
+    typer.echo(f"  candidates considered:   {len(by_doc)}")
+    typer.echo(f"  disagreement docs:       {len(candidates) if not limit else 'capped at limit'}")
+    typer.echo(f"  written to {output_path}: {written}")
+    if weight_underrepresented:
+        typer.echo("\n  Underrepresented-bucket label weights (gold counts in parens):")
+        for lab, w in sorted(label_weights.items(), key=lambda kv: -kv[1]):
+            n = gold_counts.get(lab, 0)
+            typer.echo(f"    {lab:<28} weight={w:.2f}  gold_n={n}")
+
+
 @app.command("classify-documents-v2-nc")
 def classify_documents_v2_nc(
     state: str = typer.Option("NC", "--state", help="State filter for historical_documents."),
