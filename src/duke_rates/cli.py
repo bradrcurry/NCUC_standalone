@@ -18046,6 +18046,150 @@ def train_document_type_baseline_nc(
             )
 
 
+@app.command("audit-bundle-metadata-mismatch-nc")
+def audit_bundle_metadata_mismatch_nc(
+    state: str = typer.Option("NC", "--state", help="State filter."),
+    min_confidence: float = typer.Option(
+        0.9, "--min-confidence",
+        help="Minimum v2 confidence required to flag a mismatch.",
+    ),
+    out: Path | None = typer.Option(
+        None, "--out",
+        help=(
+            "Optional JSONL path. One row per mismatched doc with v2 label, "
+            "family_key, title, and the full v2 evidence so a reviewer can "
+            "decide whether to re-tag the family_key or accept that the "
+            "bundle wraps mixed content."
+        ),
+    ),
+    json_out: bool = typer.Option(False, "--json", help="Emit summary as JSON."),
+) -> None:
+    """Find docs where v2's content classification disagrees with the importer's family_key tag.
+
+    When v2 classifies a doc as a non-tariff type (COVER_LETTER, ORDER_FINAL,
+    APPLICATION, COMPLIANCE_FILING, CERTIFICATE_OF_SERVICE, NOTICE_OF_HEARING,
+    TESTIMONY) but its family_key implies a tariff family (nc-progress-leaf-*,
+    nc-carolinas-schedule-*, nc-carolinas-rider-*), that's a strong signal
+    the importer tagged the wrong family. The PDF body is the cover letter
+    or order transmitting the tariff, not the tariff itself.
+
+    See docs/research/document_identification.md "Cover-letter bundle signal"
+    section. This CLI quantifies the surface and exports a triage queue.
+    Read-only — no DB writes. Cleanup decisions are out of scope.
+    """
+    import sqlite3
+    from collections import Counter, defaultdict
+
+    settings, _ = _bootstrap()
+    conn = sqlite3.connect(settings.database_path)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+
+    ADMIN_TYPES = (
+        "COVER_LETTER", "ORDER_FINAL", "ORDER_PROCEDURAL",
+        "APPLICATION", "COMPLIANCE_FILING",
+        "CERTIFICATE_OF_SERVICE", "NOTICE_OF_HEARING", "TESTIMONY",
+    )
+    TARIFF_FAMILY_PREFIXES = (
+        "nc-progress-leaf-",
+        "nc-carolinas-schedule-",
+        "nc-carolinas-rider-",
+    )
+
+    placeholders = ",".join("?" for _ in ADMIN_TYPES)
+    family_clauses = " OR ".join(
+        "hd.family_key LIKE ?" for _ in TARIFF_FAMILY_PREFIXES
+    )
+    like_args = [p + "%" for p in TARIFF_FAMILY_PREFIXES]
+
+    c.execute(
+        f"""
+        SELECT
+            CAST(hd.id AS INTEGER) AS hd_id,
+            hd.family_key,
+            hd.title,
+            v2.label AS v2_label,
+            v2.confidence AS v2_confidence,
+            v2.evidence_json AS v2_evidence
+        FROM document_classifications v2
+        JOIN historical_documents hd
+          ON CAST(hd.id AS TEXT) = v2.subject_id
+         AND v2.subject_kind = 'historical_document'
+        WHERE v2.stage = 'document_type'
+          AND v2.classifier = 'rule_document_type_v2'
+          AND hd.state = ?
+          AND v2.confidence >= ?
+          AND v2.label IN ({placeholders})
+          AND ({family_clauses})
+        ORDER BY v2.confidence DESC, hd.id
+        """,
+        (state, min_confidence, *ADMIN_TYPES, *like_args),
+    )
+    rows = [dict(r) for r in c.fetchall()]
+    conn.close()
+
+    by_v2_label = Counter(r["v2_label"] for r in rows)
+    by_family_prefix: Counter = Counter()
+    for r in rows:
+        for prefix in TARIFF_FAMILY_PREFIXES:
+            if r["family_key"].startswith(prefix):
+                by_family_prefix[prefix] += 1
+                break
+
+    # Pairs (v2_label, family_prefix) — most-mismatched combinations
+    pairs: Counter = Counter()
+    for r in rows:
+        for prefix in TARIFF_FAMILY_PREFIXES:
+            if r["family_key"].startswith(prefix):
+                pairs[(r["v2_label"], prefix)] += 1
+                break
+
+    summary = {
+        "state": state,
+        "min_confidence": min_confidence,
+        "total_mismatches": len(rows),
+        "by_v2_label": dict(by_v2_label.most_common()),
+        "by_family_prefix": dict(by_family_prefix.most_common()),
+        "top_pairs": [
+            {"v2_label": lab, "family_prefix": pref, "count": n}
+            for (lab, pref), n in pairs.most_common(10)
+        ],
+    }
+
+    if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        with out.open("w", encoding="utf-8") as f:
+            for r in rows:
+                f.write(json.dumps(r, ensure_ascii=False, default=str) + "\n")
+        summary["written_to"] = str(out)
+
+    if json_out:
+        typer.echo(json.dumps(summary, indent=2))
+        return
+
+    typer.echo(f"\nBundle metadata mismatch audit | state={state}\n")
+    typer.echo(f"  v2 min confidence:           {min_confidence}")
+    typer.echo(f"  total mismatches:            {len(rows)}")
+
+    typer.echo("\n  By v2 (content) label:")
+    for label, n in by_v2_label.most_common():
+        typer.echo(f"    {label:<28} {n}")
+
+    typer.echo("\n  By family_key prefix:")
+    for prefix, n in by_family_prefix.most_common():
+        typer.echo(f"    {prefix:<32} {n}")
+
+    typer.echo("\n  Top mismatched pairs:")
+    typer.echo(f"    {'v2 label':<28} {'family prefix':<32} {'n':>4}")
+    for (lab, prefix), n in pairs.most_common(10):
+        typer.echo(f"    {lab:<28} {prefix:<32} {n:>4}")
+
+    if out:
+        typer.echo(f"\n  Per-doc JSONL written to: {out}")
+    else:
+        typer.echo("\n  Pass --out PATH.jsonl to export per-doc detail.")
+
+
 @app.command("promote-high-confidence-subset-nc")
 def promote_high_confidence_subset_nc(
     state: str = typer.Option("NC", "--state", help="State filter."),
