@@ -1035,6 +1035,8 @@ def _seed_historical_doc_with_version(
     local_path: str,
     effective_start: str,
     now: str,
+    start_page: int | None = None,
+    end_page: int | None = None,
 ) -> int:
     conn.execute(
         """
@@ -1060,8 +1062,9 @@ def _seed_historical_doc_with_version(
         INSERT INTO historical_documents (
             family_key, title, state, company, category, kind,
             canonical_url, archived_url, snapshot_timestamp,
-            local_path, content_hash, effective_start, retrieved_at
-        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+            local_path, content_hash, effective_start,
+            start_page, end_page, retrieved_at
+        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         """,
         (
             family_key,
@@ -1076,6 +1079,8 @@ def _seed_historical_doc_with_version(
             local_path,
             f"hash-{family_key}",
             effective_start,
+            start_page,
+            end_page,
             now,
         ),
     )
@@ -3382,6 +3387,11 @@ def test_bulk_extractor_uses_progress_billing_adjustments_profile_for_leaf_601(
 
 
 def test_bulk_extractor_marks_generic_fallback_parse_as_weak(tmp_path) -> None:
+    # Uses leaf-528 (residential family with no family-specific profile) so the
+    # generic_residential path is exercised without colliding with the new
+    # ProgressSellerChargeProfile or hitting `_is_reference_only_document`'s
+    # heuristic guards. Previously used leaf-590 (now covered by seller-charge
+    # profile) and briefly leaf-672 (heuristically classified as reference-only).
     db_path = tmp_path / "historical.db"
     conn = connect(db_path)
     now = datetime(2026, 3, 26, tzinfo=UTC).isoformat()
@@ -3396,10 +3406,10 @@ def test_bulk_extractor_marks_generic_fallback_parse_as_weak(tmp_path) -> None:
         ) VALUES (?,?,?,?,?,?,?,?,?)
         """,
             (
-                "nc-progress-leaf-590",
+                "nc-progress-leaf-528",
                 "NC",
                 "progress",
-                "leaf-590",
+                "leaf-528",
                 "RES",
                 "rate_schedule",
                 "Progress Residential",
@@ -3412,22 +3422,25 @@ def test_bulk_extractor_marks_generic_fallback_parse_as_weak(tmp_path) -> None:
         INSERT INTO historical_documents (
             family_key, title, state, company, category, kind,
             canonical_url, archived_url, snapshot_timestamp,
-            local_path, content_hash, effective_start, retrieved_at
-        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+            local_path, content_hash, effective_start,
+            start_page, end_page, retrieved_at
+        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         """,
             (
-                "nc-progress-leaf-590",
+                "nc-progress-leaf-528",
                 "Progress Residential",
                 "NC",
                 "progress",
             "rate",
             "pdf",
-            "https://example.test/progress-500.pdf",
-            "https://archive.test/progress-500",
+            "https://example.test/progress-528.pdf",
+            "https://archive.test/progress-528",
             "2026-03-26T00:00:00Z",
                 str(pdf_path),
-                "hash-progress-590",
+                "hash-progress-528",
                 "2024-01-01",
+                1,
+                3,
                 now,
             ),
     )
@@ -3440,7 +3453,7 @@ def test_bulk_extractor_marks_generic_fallback_parse_as_weak(tmp_path) -> None:
         ) VALUES (?,?,?,?,?,?)
         """,
             (
-                "nc-progress-leaf-590",
+                "nc-progress-leaf-528",
                 historical_id,
                 "2024-01-01",
                 "historical_ncuc",
@@ -3458,7 +3471,7 @@ def test_bulk_extractor_marks_generic_fallback_parse_as_weak(tmp_path) -> None:
     doc_id, family_key, inserted, _, _ = extractor.process_document(doc)
 
     assert doc_id == historical_id
-    assert family_key == "nc-progress-leaf-590"
+    assert family_key == "nc-progress-leaf-528"
     assert inserted >= 1
 
     check = connect(db_path)
@@ -3961,6 +3974,8 @@ def test_bulk_extractor_applies_fallback_when_initial_profile_extracts_nothing(t
         local_path=str(pdf_path),
         effective_start="2024-01-01",
         now=now,
+        start_page=1,
+        end_page=3,
     )
     conn.commit()
     conn.close()
@@ -3997,9 +4012,16 @@ def test_bulk_extractor_applies_fallback_when_initial_profile_extracts_nothing(t
     assert doc is not None
     doc_id, family_key, inserted, _, _ = extractor.process_document(doc)
 
+    # 2026-05-20 behavior change: when a family-specific profile
+    # (progress_residential_tou) extracts 0 charges, fallback to the broad
+    # generic_residential is refused because the broad regex tends to harvest
+    # narrative rate mentions and attribute them to the wrong family. The
+    # doc is left with the empty initial parse rather than polluted with
+    # cross-attributed charges. See test_bulk_extractor_fallback_guard.py for
+    # the regression context (hd_id=179 leaf-602 JAA proposed-order doc).
     assert doc_id == historical_id
     assert family_key == "nc-progress-leaf-502"
-    assert inserted == 1
+    assert inserted == 0
 
     check = connect(db_path)
     row = check.execute(
@@ -4011,19 +4033,20 @@ def test_bulk_extractor_applies_fallback_when_initial_profile_extracts_nothing(t
         """
     ).fetchone()
     assert row is not None
-    assert row["parser_profile"] == "generic_residential"
-    assert row["status"] == "parsed"
-    assert row["charge_count"] == 1
+    assert row["parser_profile"] == "progress_residential_tou"
+    assert row["status"] == "empty"
+    assert row["charge_count"] == 0
 
     metadata = json.loads(row["metadata_json"])
     selection = metadata["selection"]
     assert selection["initial_parser_profile"] == "progress_residential_tou"
-    assert selection["final_parser_profile"] == "generic_residential"
-    assert selection["fallback_applied"] is True
-    assert selection["fallback_triggered_by"] == "empty"
-    assert selection["fallback_reason"] == "empty_initial_parse"
+    assert selection["final_parser_profile"] == "progress_residential_tou"
+    assert selection["fallback_applied"] is False
+    # The candidate was considered (it's still in fallback_candidates) but the
+    # guard refused to apply it.
     assert selection["fallback_candidates"][0]["name"] == "generic_residential"
     assert selection["fallback_attempts"][0]["name"] == "generic_residential"
+    assert selection["fallback_attempts"][0]["applied"] is False
 
 
 def test_bulk_extractor_filters_to_versioned_documents_and_reports_missing_versions(tmp_path) -> None:
@@ -4198,6 +4221,8 @@ def test_bulk_extractor_applies_fallback_on_weak_parse_only_when_materially_bett
         local_path=str(pdf_path),
         effective_start="2024-01-01",
         now=now,
+        start_page=1,
+        end_page=3,
     )
     conn.commit()
     conn.close()
@@ -4274,7 +4299,11 @@ def test_bulk_extractor_applies_fallback_on_weak_parse_only_when_materially_bett
     doc = extractor.get_document_for_extraction(historical_id)
     assert doc is not None
     _, _, inserted, _, _ = extractor.process_document(doc)
-    assert inserted == 3
+    # 2026-05-20 behavior change: generic_residential fallback is refused even
+    # when it offers material-charge-gain, because the broad regex tends to
+    # cross-attribute. Initial weak parse (1 charge) is kept rather than
+    # replaced with potentially-polluted generic_residential output.
+    assert inserted == 1
 
     check = connect(db_path)
     row = check.execute(
@@ -4286,15 +4315,13 @@ def test_bulk_extractor_applies_fallback_on_weak_parse_only_when_materially_bett
         """
     ).fetchone()
     assert row is not None
-    assert row["parser_profile"] == "generic_residential"
-    assert row["charge_count"] == 3
+    assert row["parser_profile"] == "progress_residential_tou"
+    assert row["charge_count"] == 1
     selection = json.loads(row["metadata_json"])["selection"]
-    assert selection["fallback_applied"] is True
-    assert selection["fallback_triggered_by"] == "weak"
-    assert selection["fallback_reason"] == "material_charge_gain"
+    assert selection["fallback_applied"] is False
     assert selection["initial_outcome_quality"] == "weak"
     assert selection["final_outcome_quality"] == "weak"
-    assert selection["fallback_attempts"][0]["applied"] is True
+    assert selection["fallback_attempts"][0]["applied"] is False
     check.close()
 
 
@@ -4316,6 +4343,8 @@ def test_bulk_extractor_does_not_apply_fallback_for_marginal_weak_parse_gain(
         local_path=str(pdf_path),
         effective_start="2024-01-01",
         now=now,
+        start_page=1,
+        end_page=3,
     )
     conn.commit()
     conn.close()
@@ -4421,6 +4450,8 @@ def test_bulk_extractor_applies_fallback_for_same_count_but_better_charge_type_c
         local_path=str(pdf_path),
         effective_start="2024-01-01",
         now=now,
+        start_page=1,
+        end_page=3,
     )
     conn.commit()
     conn.close()

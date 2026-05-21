@@ -4144,7 +4144,10 @@ def enqueue_profile_impact_nc(
     )
 
 
-def _process_single_reprocess_queue_item(database_path: str | Path) -> dict[str, int | bool]:
+def _process_single_reprocess_queue_item(
+    database_path: str | Path,
+    force_clear: bool = False,
+) -> dict[str, int | bool]:
     from duke_rates.db.reprocess import (
         claim_next_historical_reprocess,
         complete_historical_reprocess,
@@ -4219,7 +4222,7 @@ def _process_single_reprocess_queue_item(database_path: str | Path) -> dict[str,
         version_bootstrapped = True
 
     try:
-        process_result = extractor.process_document(doc)
+        process_result = extractor.process_document(doc, force_clear=force_clear)
         _, family_key, inserted = process_result[:3]
         conn = connect(db_path)
         try:
@@ -4274,6 +4277,15 @@ def process_reprocess_queue_nc(
     limit: int = typer.Option(500, "--limit", help="Max queue items to process per invocation."),
     workers: int = typer.Option(1, "--workers", min=1, help="Parallel workers for local reprocess queue items."),
     until_empty: bool = typer.Option(False, "--until-empty", help="Keep processing until the queue is empty (overrides --limit)."),
+    enforce_cleanup: bool = typer.Option(
+        False,
+        "--enforce-cleanup",
+        help=(
+            "Delete stale tariff_charges for the version even when this reprocess "
+            "extracts 0 charges. Use after tightening routing/guard logic so "
+            "now-refused old extractions get cleared instead of surviving silently."
+        ),
+    ),
 ) -> None:
     """Process pending historical reparse queue items."""
     settings, _ = _bootstrap()
@@ -4286,7 +4298,9 @@ def process_reprocess_queue_nc(
     failed = 0
     if workers == 1:
         while processed < limit:
-            result = _process_single_reprocess_queue_item(settings.database_path)
+            result = _process_single_reprocess_queue_item(
+                settings.database_path, force_clear=enforce_cleanup
+            )
             if not result["processed"]:
                 break
             processed += 1
@@ -4301,7 +4315,11 @@ def process_reprocess_queue_nc(
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             while submitted < target and len(futures) < max_workers:
                 futures.add(
-                    executor.submit(_process_single_reprocess_queue_item, settings.database_path)
+                    executor.submit(
+                        _process_single_reprocess_queue_item,
+                        settings.database_path,
+                        force_clear=enforce_cleanup,
+                    )
                 )
                 submitted += 1
             while futures:
@@ -4319,12 +4337,14 @@ def process_reprocess_queue_nc(
                             executor.submit(
                                 _process_single_reprocess_queue_item,
                                 settings.database_path,
+                                force_clear=enforce_cleanup,
                             )
                         )
                         submitted += 1
 
     typer.echo(
         f"Historical reprocess queue processed={processed} completed={completed} failed={failed} workers={workers}"
+        + (" enforce_cleanup=True" if enforce_cleanup else "")
     )
 
 
@@ -5627,6 +5647,146 @@ def show_workflow_status_nc(
     typer.echo(f"  last_historical_run_at={report['last_historical_run_at'] or '-'}")
     top_profiles = ", ".join(report["top_needs_review_profiles"]) or "-"
     typer.echo(f"  top_needs_review_profiles={top_profiles}")
+
+
+@app.command("recommend-overnight-lane-nc")
+def recommend_overnight_lane_nc(
+    json_out: bool = typer.Option(False, "--json", help="Output raw JSON."),
+) -> None:
+    """Recommend which overnight loop to run based on current NC workflow state.
+
+    Advisory only — never executes anything. Reads `show-workflow-status-nc`
+    state and applies the prose decision rules from
+    `docs/NEXT_SESSION_START_HERE.md` §C to pick the highest-yield lane.
+
+    Lanes (v1, three-way):
+      - ``ocr_drain``     — OCR queue is non-trivial; drain it first because
+                             downstream profiles depend on the resulting text.
+                             Maps to `scripts/overnight/tonight_9am.ps1`.
+      - ``routing_first`` — Unknown-routing audit shows many problem families
+                             that haven't been mapped to profiles. Maps to
+                             `scripts/overnight/routing_first_until_9am.ps1`.
+      - ``extract_loop``  — Queues drained and routing reasonably mapped;
+                             extraction/promotion is the highest leverage.
+                             Maps to `scripts/overnight/backlog_drain_overnight.ps1`.
+      - ``idle``          — All queues empty and no clear next lane. Skip the
+                             overnight; pick a code-side improvement instead.
+    """
+    settings, _ = _bootstrap()
+    conn = connect_sqlite(Path(settings.database_path))
+    try:
+        status = _build_workflow_status_nc_report(conn)
+    finally:
+        conn.close()
+
+    # Inputs we score on
+    ocr_pending = int(status.get("ocr_pending_count") or 0)
+    ocr_running = int(status.get("ocr_running_count") or 0)
+    reprocess_pending = int(status.get("reprocess_pending_count") or 0)
+    reprocess_running = int(status.get("reprocess_running_count") or 0)
+    stale = int(status.get("stale_historical_count") or 0)
+    never_processed = int(status.get("never_processed_historical_count") or 0)
+    coverage_pct = float(status.get("extraction_coverage_pct") or 0.0)
+    active_needs_review = int(status.get("parse_review_active_needs_review_count") or 0)
+
+    # Lane decisions, in priority order. Each rule returns (lane, reason).
+    decisions: list[tuple[str, str]] = []
+
+    if ocr_pending + ocr_running >= 20:
+        decisions.append((
+            "ocr_drain",
+            f"OCR queue is non-trivial ({ocr_pending} pending + {ocr_running} "
+            f"running); downstream profiles depend on this text",
+        ))
+
+    if stale > 0 or never_processed > 0:
+        decisions.append((
+            "ocr_drain",
+            f"{stale} stale + {never_processed} never-processed docs need to "
+            f"be (re)processed before downstream lanes can use them",
+        ))
+
+    # Routing-first when many docs land on 'unknown' profile and reprocess
+    # queue is empty (no point routing what's already queued).
+    if active_needs_review >= 1000 and reprocess_pending == 0:
+        decisions.append((
+            "routing_first",
+            f"{active_needs_review} active needs-review rows with reprocess "
+            f"queue empty — routing/profile work is the leverage point",
+        ))
+
+    if reprocess_pending >= 25:
+        decisions.append((
+            "extract_loop",
+            f"{reprocess_pending} docs already queued for reprocessing — "
+            f"drain that before measuring routing again",
+        ))
+
+    if (
+        ocr_pending == 0
+        and ocr_running == 0
+        and stale == 0
+        and never_processed == 0
+        and reprocess_pending == 0
+        and active_needs_review > 0
+    ):
+        decisions.append((
+            "extract_loop",
+            f"Queues are clean; LLM extract + promote on {active_needs_review} "
+            f"active needs-review rows is the highest-yield work",
+        ))
+
+    if not decisions:
+        decisions.append((
+            "idle",
+            "All queues empty and no active needs-review work — no overnight "
+            "lane is justified right now. Pick code/profile work instead.",
+        ))
+
+    chosen_lane, chosen_reason = decisions[0]
+    lane_to_script = {
+        "ocr_drain":     "pwsh scripts\\overnight\\tonight_9am.ps1",
+        "routing_first": "pwsh scripts\\overnight\\routing_first_until_9am.ps1",
+        "extract_loop":  "pwsh scripts\\overnight\\backlog_drain_overnight.ps1",
+        "idle":          None,
+    }
+    report = {
+        "chosen_lane": chosen_lane,
+        "chosen_reason": chosen_reason,
+        "recommended_command": lane_to_script[chosen_lane],
+        "all_matched_rules": [
+            {"lane": lane, "reason": reason} for lane, reason in decisions
+        ],
+        "inputs": {
+            "ocr_pending": ocr_pending,
+            "ocr_running": ocr_running,
+            "reprocess_pending": reprocess_pending,
+            "reprocess_running": reprocess_running,
+            "stale_historical": stale,
+            "never_processed": never_processed,
+            "active_needs_review": active_needs_review,
+            "coverage_pct": coverage_pct,
+        },
+    }
+
+    if json_out:
+        typer.echo(json.dumps(report, indent=2, default=str))
+        return
+
+    typer.echo("Recommended overnight lane (NC)")
+    typer.echo(f"  lane:   {chosen_lane}")
+    typer.echo(f"  reason: {chosen_reason}")
+    if report["recommended_command"]:
+        typer.echo(f"  run:    {report['recommended_command']}")
+    else:
+        typer.echo("  run:    (nothing — see open items in NEXT_SESSION_START_HERE.md)")
+    if len(decisions) > 1:
+        typer.echo("  other matched rules:")
+        for lane, reason in decisions[1:]:
+            typer.echo(f"    [{lane}] {reason}")
+    typer.echo("  inputs:")
+    for key, value in report["inputs"].items():
+        typer.echo(f"    {key}={value}")
 
 
 @app.command("show-workflow-next-actions-nc")
@@ -17088,6 +17248,155 @@ def audit_tariff_null_scan(
     typer.echo("")
 
 
+@app.command("audit-cross-attributed-charges-nc")
+def audit_cross_attributed_charges_nc(
+    state: str = typer.Option("NC", "--state", help="State filter for historical_documents."),
+    delete: bool = typer.Option(
+        False,
+        "--delete",
+        help=(
+            "Actually delete the suspect charges. Default is dry-run "
+            "(list only). Always review the dry-run output first."
+        ),
+    ),
+    family_specific_only: bool = typer.Option(
+        True,
+        "--family-specific-only/--include-generic",
+        help=(
+            "When true (default), only flag charges where the prior processing "
+            "run shows a family-specific initial profile that fell back to "
+            "generic_residential. Set --include-generic to also flag "
+            "generic_residential->generic_residential runs."
+        ),
+    ),
+    limit: int = typer.Option(200, "--limit", help="Max docs to list."),
+    json_out: bool = typer.Option(False, "--json", help="Emit raw JSON."),
+) -> None:
+    """Find tariff_charges polluted by the family-specific -> generic_residential fallback.
+
+    Surfaces docs whose most recent processing run records a family-specific
+    initial profile (e.g. progress_jaa_rider) that fell back to
+    generic_residential, AND still has charges attached. After the 2026-05-20
+    fallback guard broadening, future re-extractions of these docs will
+    produce 0 charges; the old polluted rows survive only because
+    insert_charges skips its DELETE on empty input.
+
+    Recommended workflow:
+      1. python -m duke_rates audit-cross-attributed-charges-nc    # dry-run, review
+      2. Choose: --delete (direct cleanup) OR queue + process-reprocess-queue-nc --enforce-cleanup
+    """
+    import sqlite3
+    from collections import Counter
+
+    settings, _ = _bootstrap()
+    conn = sqlite3.connect(settings.database_path)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+
+    family_specific_filter = (
+        " AND json_extract(pr.metadata_json, '$.selection.initial_parser_profile') != 'generic_residential'"
+        if family_specific_only else ""
+    )
+
+    c.execute(
+        f"""
+        WITH latest AS (
+          SELECT historical_document_id, MAX(id) as mid
+          FROM historical_processing_runs
+          GROUP BY historical_document_id
+        ),
+        suspects AS (
+          SELECT pr.historical_document_id as hd,
+                 hd.family_key,
+                 json_extract(pr.metadata_json, '$.selection.initial_parser_profile') as initial_profile,
+                 pr.parser_profile as final_profile,
+                 pr.charge_count as run_charge_count
+          FROM historical_processing_runs pr
+          JOIN latest l ON pr.id = l.mid
+          JOIN historical_documents hd ON hd.id = pr.historical_document_id
+          WHERE hd.state = ?
+            AND pr.parser_profile = 'generic_residential'
+            AND json_extract(pr.metadata_json, '$.selection.fallback_applied') = 1
+            {family_specific_filter}
+        )
+        SELECT s.hd, s.family_key, s.initial_profile, s.final_profile, s.run_charge_count,
+               COUNT(tc.id) as alive_charges
+        FROM suspects s
+        LEFT JOIN tariff_versions tv ON tv.historical_document_id = s.hd
+        LEFT JOIN tariff_charges tc ON tc.version_id = tv.id
+        GROUP BY s.hd
+        HAVING alive_charges > 0
+        ORDER BY alive_charges DESC
+        LIMIT ?
+        """,
+        (state, limit),
+    )
+    rows = c.fetchall()
+    rows = [dict(r) for r in rows]
+
+    if json_out:
+        typer.echo(json.dumps(rows, indent=2))
+        if delete and rows:
+            _audit_cross_attr_delete(conn, rows)
+        conn.close()
+        return
+
+    total_alive = sum(r["alive_charges"] for r in rows)
+    typer.echo(
+        f"\nCross-attributed charge audit | {state} | "
+        f"{'family-specific only' if family_specific_only else 'all generic_residential fallbacks'}\n"
+    )
+    typer.echo(f"  {'hd':>5}  {'family':<35}  {'initial -> final':<55}  {'alive':>5}")
+    typer.echo("  " + "-" * 110)
+    by_initial = Counter()
+    for r in rows:
+        arrow = f"{r['initial_profile']} -> {r['final_profile']}"
+        typer.echo(
+            f"  {r['hd']:>5}  {r['family_key']:<35}  {arrow[:55]:<55}  {r['alive_charges']:>5}"
+        )
+        by_initial[r['initial_profile']] += r['alive_charges']
+
+    typer.echo(f"\n  {len(rows)} docs, {total_alive} alive charges total")
+    if by_initial:
+        typer.echo("  by initial profile:")
+        for profile, charge_count in by_initial.most_common():
+            typer.echo(f"    {profile:<45} {charge_count}")
+    typer.echo("")
+
+    if delete:
+        deleted = _audit_cross_attr_delete(conn, rows)
+        typer.echo(f"  DELETED {deleted} charges across {len(rows)} docs.")
+    elif rows:
+        typer.echo(
+            "  Dry-run only. To delete: rerun with --delete, or queue these hd_ids and run\n"
+            "  process-reprocess-queue-nc --enforce-cleanup to clean via the extractor.\n"
+        )
+    conn.close()
+
+
+def _audit_cross_attr_delete(conn, rows: list[dict]) -> int:
+    """Delete tariff_charges for the audit-flagged docs. Internal helper."""
+    if not rows:
+        return 0
+    hd_ids = [r["hd"] for r in rows]
+    placeholders = ",".join("?" for _ in hd_ids)
+    c = conn.cursor()
+    c.execute(
+        f"""
+        DELETE FROM tariff_charges
+        WHERE id IN (
+            SELECT tc.id FROM tariff_charges tc
+            JOIN tariff_versions tv ON tc.version_id = tv.id
+            WHERE tv.historical_document_id IN ({placeholders})
+        )
+        """,
+        hd_ids,
+    )
+    deleted = c.rowcount
+    conn.commit()
+    return deleted
+
+
 @app.command("audit-rider-map")
 def audit_rider_map(
     state: str = typer.Option("NC", "--state", help="State code"),
@@ -17236,6 +17545,18 @@ def diagnose_document_nc(
     text_lines: int = typer.Option(
         40, "--text-lines", help="Max lines of raw text to show with --show-text."
     ),
+    trace_runtime: bool = typer.Option(
+        False,
+        "--trace-runtime",
+        help=(
+            "Run a live extraction trace alongside the historical-run report. "
+            "Surfaces the text source actually used by the bulk extractor "
+            "(pdfplumber vs docling_artifact vs docling_artifact_sliced), "
+            "rate-marker presence per text stage, profile candidates, and "
+            "fallback decisions. Use this when latest_run reports `unknown` "
+            "or empty but a rate sheet is obvious from the PDF."
+        ),
+    ),
     json_out: bool = typer.Option(False, "--json", help="Output raw JSON."),
 ) -> None:
     """Diagnose why a document's extraction is empty, weak, or failing.
@@ -17334,6 +17655,12 @@ def diagnose_document_nc(
                 "requested_at": reprocess_queue["requested_at"],
             }
 
+        # --- Live runtime trace (optional) ---
+        if trace_runtime:
+            report["runtime_trace"] = _build_runtime_trace(
+                str(repository.database_path), historical_document_id
+            )
+
         # --- Recommendation ---
         rec = _build_diagnostic_recommendation(report)
         report["recommendation"] = rec
@@ -17346,9 +17673,223 @@ def diagnose_document_nc(
             return
 
         _print_diagnostic_report(report, show_text, text_lines)
+        if trace_runtime:
+            _print_runtime_trace(report.get("runtime_trace") or {})
 
     finally:
         conn.close()
+
+
+_RATE_MARKERS = (
+    "basic customer charge",
+    "per kwh",
+    "cents per kwh",
+    "¢/kwh",
+    "$/kwh",
+    "kilowatt-hour",
+    "monthly seller charge",
+    "monthly administrative charge",
+    "rider cpre",
+    "per luminaire",
+)
+
+
+def _scan_markers(text: str) -> dict[str, bool]:
+    """Return which canonical rate markers are present in ``text``."""
+    lowered = (text or "").lower()
+    return {m: (m in lowered) for m in _RATE_MARKERS}
+
+
+def _build_runtime_trace(database_path: str, hd_id: int) -> dict:
+    """Run a live extraction trace for ``hd_id`` and return a structured report.
+
+    Mirrors `BulkExtractor.extract_charges_from_document` step by step so the
+    operator can see exactly which text source was used, how normalization
+    changed the text, which rate markers survived each stage, and what the
+    routing tier picked. Designed to surface text-path divergences like the
+    2026-05-20 Docling slicer bug (where the bounded-slice path dropped
+    body.children-orphan rate texts and pushed the doc to `unknown`).
+    """
+    from duke_rates.historical.ncuc.pipeline.bulk_extractor import (
+        BulkExtractor,
+        normalize_docling_markdown,
+        normalize_ocr_text,
+    )
+    from duke_rates.historical.ncuc.pipeline.parser_profiles import (
+        HistoricalRateParserRegistry,
+    )
+
+    extractor = BulkExtractor(db_path=database_path)
+    doc = extractor.get_document_for_extraction(hd_id)
+    if not doc:
+        return {"error": f"document {hd_id} not loadable via get_document_for_extraction"}
+
+    trace: dict = {
+        "doc": {
+            "id": doc.get("id"),
+            "family_key": doc.get("family_key"),
+            "start_page": doc.get("start_page"),
+            "end_page": doc.get("end_page"),
+        },
+        "text_paths": [],
+    }
+
+    sp = doc.get("start_page")
+    ep = doc.get("end_page")
+
+    # Path A — page-bounded extraction (what the bulk extractor actually uses
+    # when start_page/end_page are set on the doc).
+    if sp is not None and ep is not None:
+        text_bounded, src_bounded = extractor.extract_text_from_pdf(
+            doc["local_path"], start_page=sp, end_page=ep
+        )
+        trace["text_paths"].append({
+            "name": "page_bounded (used by bulk_extractor)",
+            "source": src_bounded,
+            "raw_length": len(text_bounded),
+            "markers_raw": _scan_markers(text_bounded),
+        })
+        # Apply the same normalization the bulk extractor applies before routing.
+        normalized = text_bounded
+        if src_bounded in ("docling_artifact", "docling_artifact_sliced"):
+            normalized = normalize_docling_markdown(normalized)
+        normalized = normalize_ocr_text(normalized)
+        trace["text_paths"][-1]["normalized_length"] = len(normalized)
+        trace["text_paths"][-1]["markers_normalized"] = _scan_markers(normalized)
+        primary_text = normalized
+    else:
+        primary_text = None
+
+    # Path B — full-document extraction (no page bounds). Compared against the
+    # bounded path so the operator can see if the slicer dropped markers.
+    # Always normalize so the comparison is apples-to-apples with the bounded path.
+    text_full, src_full = extractor.extract_text_from_pdf(doc["local_path"])
+    normalized_full = text_full
+    if src_full in ("docling_artifact", "docling_artifact_sliced"):
+        normalized_full = normalize_docling_markdown(normalized_full)
+    normalized_full = normalize_ocr_text(normalized_full)
+    trace["text_paths"].append({
+        "name": "full_document (comparison)",
+        "source": src_full,
+        "raw_length": len(text_full),
+        "normalized_length": len(normalized_full),
+        "markers_normalized": _scan_markers(normalized_full),
+    })
+    if primary_text is None:
+        primary_text = normalized_full
+
+    # Detect text-path divergence: any marker present in the full-doc text but
+    # missing in the bounded text is a high-signal slicer drop.
+    if sp is not None and ep is not None:
+        bounded_markers = trace["text_paths"][0].get("markers_normalized", {})
+        full_markers = trace["text_paths"][1].get("markers_normalized", {})
+        dropped = [m for m in _RATE_MARKERS if full_markers.get(m) and not bounded_markers.get(m)]
+        trace["slicer_dropped_markers"] = dropped
+    else:
+        trace["slicer_dropped_markers"] = []
+
+    # Routing tier — what registry.rank_candidates says about the normalized text
+    registry = HistoricalRateParserRegistry()
+    candidates = registry.rank_candidates(doc, primary_text or "")
+    trace["candidates"] = [
+        {"name": c.name, "score": round(c.score, 3), "supports": c.supported}
+        for c in candidates if c.score > 0 or c.supported
+    ][:6]
+
+    # Full extract path — runs through _is_formula_only_document, classifier,
+    # routing tier, fallback logic. This is the ground truth of what would
+    # happen on a re-extract right now.
+    try:
+        result = extractor.extract_charges_from_document(doc)
+        charges, _vl, _cands, status, _signals, _metrics, selection_meta = result
+        trace["live_extract"] = {
+            "status": status,
+            "charge_count": len(charges),
+            "initial_profile": selection_meta.get("initial_parser_profile"),
+            "final_profile": selection_meta.get("final_parser_profile"),
+            "fallback_applied": selection_meta.get("fallback_applied"),
+            "fallback_reason": selection_meta.get("fallback_reason"),
+            "fallback_attempts": [
+                {
+                    "name": a.get("name"),
+                    "charge_count": a.get("charge_count"),
+                    "applied": a.get("applied"),
+                    "apply_reason": a.get("apply_reason"),
+                }
+                for a in (selection_meta.get("fallback_attempts") or [])[:3]
+            ],
+            "first_charges": [
+                {"label": c.charge_label, "value": c.rate_value, "unit": c.rate_unit}
+                for c in charges[:5]
+            ],
+        }
+    except Exception as exc:
+        trace["live_extract"] = {"error": repr(exc)}
+
+    return trace
+
+
+def _print_runtime_trace(trace: dict) -> None:
+    """Pretty-print the live trace report."""
+    if not trace or trace.get("error"):
+        typer.echo(f"\n  Runtime trace: {trace.get('error', 'unavailable')}")
+        return
+
+    typer.echo("\n  -- Runtime trace --")
+    for path in trace.get("text_paths", []):
+        typer.echo(
+            f"    text_path:  {path['name']}"
+        )
+        typer.echo(
+            f"      source={path['source']}  raw_len={path['raw_length']}  "
+            f"normalized_len={path.get('normalized_length', 'n/a')}"
+        )
+        markers = path.get("markers_normalized") or path.get("markers_raw") or {}
+        present = sorted(m for m, hit in markers.items() if hit)
+        absent = sorted(m for m, hit in markers.items() if not hit)
+        if present:
+            typer.echo(f"      markers_present: {', '.join(present)}")
+        if absent and len(absent) <= 3:
+            typer.echo(f"      markers_absent:  {', '.join(absent)}")
+
+    dropped = trace.get("slicer_dropped_markers") or []
+    if dropped:
+        typer.echo(
+            f"\n    [!] slicer_dropped_markers: {', '.join(dropped)}"
+        )
+        typer.echo(
+            "        These markers exist in the full-doc text but were silently"
+            " dropped by the page-bounded slice. Routing will likely fail."
+        )
+
+    typer.echo(f"\n    candidates (top 6):")
+    for c in trace.get("candidates", []):
+        typer.echo(
+            f"      {c['name']:<45} score={c['score']:.3f}  supports={c['supports']}"
+        )
+    if not trace.get("candidates"):
+        typer.echo("      (no candidates with score > 0)")
+
+    live = trace.get("live_extract") or {}
+    if "error" in live:
+        typer.echo(f"\n    live_extract: ERROR {live['error']}")
+        return
+    typer.echo(
+        f"\n    live_extract: status={live.get('status')}  "
+        f"charges={live.get('charge_count')}  "
+        f"initial={live.get('initial_profile')}  final={live.get('final_profile')}"
+    )
+    if live.get("fallback_applied"):
+        typer.echo(f"      fallback_reason: {live.get('fallback_reason')}")
+    for att in live.get("fallback_attempts") or []:
+        typer.echo(
+            f"      fallback_attempt: {att.get('name'):<40} "
+            f"cc={att.get('charge_count')} applied={att.get('applied')} "
+            f"reason={att.get('apply_reason')}"
+        )
+    for ch in live.get("first_charges") or []:
+        typer.echo(f"      extracted: {ch['label']!r:<50} {ch['value']} {ch['unit']}")
+    typer.echo("")
 
 
 def _build_diagnostic_recommendation(report: dict) -> dict:

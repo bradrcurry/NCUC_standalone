@@ -70,12 +70,13 @@ roles:
     description: "Primary embedding model (Phase 4)"
 
   embedding_secondary:
-    primary: "snowflake-arctic-embed2:latest"
-    fallback: []
+    primary: "bge-m3:latest"
+    fallback:
+      - "snowflake-arctic-embed2:latest"
     options: {}
     max_tokens: 0
     probe_kind: "embed"
-    description: "Secondary embedding model (Phase 4 second axis)"
+    description: "Secondary embedding model (Phase 4 second axis). 2026-05-16 swap: bge-m3 promoted from new candidate after benchmark (docs/reports/nc_document_gap_audit/embedding_benchmarks/). bge-m3 won Phase 1 boundary-detection F1 by recall margin (R=0.704 vs 0.578) and was within 2-3 pts on Phase 2 doc-type KNN (util_top1=0.862 vs 0.889 primary). Provides a more genuinely independent second axis than snowflake-arctic-embed2 which clustered tightly with the primary on both tasks. snowflake retained as fallback."
 
   legacy_embedding_baseline:
     primary: "nomic-embed-text:latest"
