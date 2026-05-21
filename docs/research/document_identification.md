@@ -394,6 +394,84 @@ FERC_ORDER, EIA_REPORT (no docs of these types in NC corpus).
 subset-size rule, min_confidence threshold, high-conf disagreement
 skip, already-gold skip, and dry-run no-write.
 
+### 2026-05-21 update — Stream D baseline shipped
+
+First Stream D deliverable: `train-document-type-baseline-nc` fits a
+TF-IDF + LogisticRegression baseline on the 441-row gold set. This is
+the intentionally-minimal first cut — its purpose is to put a number
+on the board that any later fine-tuned model (DistilBERT, qwen-fine-
+tuned) must beat to justify the added complexity.
+
+#### Architecture
+
+- `duke_rates.classification.baseline_classifier` module — pure-Python,
+  no DB access. Takes a `TrainingDataset(hd_ids, labels, texts)` and
+  returns a `TrainingResult` with the fitted vectorizer + model + per-
+  class metrics.
+- TF-IDF over the first 2000 chars of doc text. n-grams (1, 2), min_df=2,
+  max_df=0.95, max_features=20k.
+- `LogisticRegression(class_weight='balanced', solver='lbfgs',
+  max_iter=2000)`. Multinomial logistic over the 10 classes that have
+  any gold examples.
+- Stratified train/val split for classes with ≥5 gold samples; rare
+  classes (4 or fewer samples) are pinned to train-only. Per-class
+  metrics report n=0 for the rare classes — they need more gold before
+  they can be evaluated.
+
+#### Results (first run, 2026-05-21)
+
+```
+rows used:                 441  (0 skipped no-text)
+train rows:                355
+val rows:                   86
+classes:                    10
+train-only (rare):  ['CERTIFICATE_OF_SERVICE', 'COMPLIANCE_FILING',
+                     'COVER_LETTER', 'ORDER_PROCEDURAL',
+                     'RATE_SCHEDULE', 'RIDER']
+val accuracy:             0.884
+train accuracy (ref):     0.966
+```
+
+Per-class on the validation split:
+
+| Class | P | R | F1 | n |
+|---|---|---|---|---|
+| TARIFF_SHEET | 0.98 | 0.98 | 0.98 | 46 |
+| TESTIMONY | 0.89 | 0.89 | 0.89 | 18 |
+| ORDER_FINAL | 0.83 | 0.75 | 0.79 | 20 |
+| APPLICATION | 0.00 | 0.00 | 0.00 | 2 |
+| **weighted avg** | **0.90** | **0.88** | **0.89** | 86 |
+| macro avg | 0.54 | 0.52 | 0.53 | 86 |
+
+The macro F1 of 0.53 reflects rare-class undersampling, not classifier
+weakness. The 0.88 val accuracy + 0.89 weighted F1 is the number to
+beat. Train accuracy 0.966 with val 0.884 indicates modest overfitting
+— acceptable for a baseline; n-gram pruning or stronger regularization
+can shave the gap when needed.
+
+#### Artifact
+
+`models/baseline_document_type_v0.joblib` (gitignored; regenerate via
+the CLI). Contains: `{vectorizer, model, classes, metrics}`. Loadable
+in any sklearn-compatible environment for offline evaluation.
+
+#### Stream D next iterations (priority-ordered)
+
+1. **Grow gold to ≥20 samples per class.** APPLICATION, RIDER,
+   CERTIFICATE_OF_SERVICE, COMPLIANCE_FILING, ORDER_PROCEDURAL,
+   RATE_SCHEDULE, COVER_LETTER all currently have 1–7 gold rows.
+   Triage queue's underrepresented-bucket weighting is the right
+   feeder for this.
+2. **5-fold CV on the current gold set** as a more honest accuracy
+   number (single 80/20 split has high variance at n=441).
+3. **DistilBERT or qwen-finetuned alternative** once gold set hits
+   ~50/class. The baseline number above lets us say "beat 0.89
+   weighted F1" rather than "make it work."
+4. **Confusion-matrix-driven pattern tuning**: feed v2's misclassif-
+   ication patterns back into `rule_document_type_v2`. ORDER_FINAL
+   recall of 0.75 suggests it's losing ~5 val docs to a competitor
+   — likely APPLICATION or COMPLIANCE_FILING.
+
 ### Cover-letter bundle signal (intentional)
 
 Docs whose `family_key` says tariff/rider but whose body starts with a

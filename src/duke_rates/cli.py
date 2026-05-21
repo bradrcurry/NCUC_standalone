@@ -17824,6 +17824,179 @@ def seed_document_type_gold_nc(
     conn.close()
 
 
+@app.command("train-document-type-baseline-nc")
+def train_document_type_baseline_nc(
+    state: str = typer.Option("NC", "--state", help="State filter."),
+    val_fraction: float = typer.Option(
+        0.2, "--val-fraction",
+        help="Stratified val split fraction for classes with >=5 samples.",
+    ),
+    random_state: int = typer.Option(
+        13, "--random-state", help="Deterministic seed for the val split."
+    ),
+    save_path: Path | None = typer.Option(
+        None,
+        "--save",
+        help=(
+            "Optional path to joblib-dump the fitted (vectorizer, model) "
+            "tuple for reuse. Recommend models/baseline_document_type.joblib."
+        ),
+    ),
+    json_out: bool = typer.Option(False, "--json", help="Emit metrics as JSON."),
+) -> None:
+    """Stream D baseline: TF-IDF + LogisticRegression on document_type_gold.
+
+    Sets a measurable starting point for any later fine-tuned model
+    (DistilBERT, qwen-finetuned) to compare against. Pulls all active
+    gold rows for the given state, materializes their text samples via
+    the same path the bulk extractor uses, splits stratified train/val
+    (with rare classes pinned to train), and fits a multi-class logistic
+    regression with class_weight='balanced'.
+
+    Per docs/research/document_identification.md Stream D — this is the
+    intentionally-minimal first cut. See the module-level docstring of
+    duke_rates.classification.baseline_classifier for rationale.
+    """
+    import sqlite3
+    from duke_rates.classification.baseline_classifier import (
+        TrainingDataset, train_baseline,
+    )
+    from duke_rates.historical.ncuc.pipeline.bulk_extractor import (
+        BulkExtractor, normalize_docling_markdown, normalize_ocr_text,
+    )
+
+    settings, _ = _bootstrap()
+    conn = sqlite3.connect(settings.database_path)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+
+    c.execute(
+        """
+        SELECT dtg.subject_id, dtg.label
+        FROM document_type_gold dtg
+        JOIN historical_documents hd
+          ON CAST(hd.id AS TEXT) = dtg.subject_id
+         AND dtg.subject_kind = 'historical_document'
+        WHERE dtg.superseded_by IS NULL AND hd.state = ?
+        """,
+        (state,),
+    )
+    gold_rows = c.fetchall()
+    if not gold_rows:
+        typer.echo(f"No gold rows for state={state}. Seed gold first.", err=True)
+        raise typer.Exit(1)
+
+    typer.echo(f"Loading text for {len(gold_rows)} gold docs...")
+    extractor = BulkExtractor(db_path=str(settings.database_path))
+    hd_ids: list[int] = []
+    labels: list[str] = []
+    texts: list[str] = []
+    missing = 0
+    for r in gold_rows:
+        hd_id = int(r["subject_id"])
+        doc = extractor.get_document_for_extraction(hd_id)
+        if not doc:
+            missing += 1
+            continue
+        try:
+            text, src = extractor.extract_text_from_pdf(
+                doc["local_path"],
+                start_page=doc.get("start_page"),
+                end_page=doc.get("end_page"),
+            )
+            if src in ("docling_artifact", "docling_artifact_sliced"):
+                text = normalize_docling_markdown(text)
+            text = normalize_ocr_text(text)
+        except Exception:
+            text = ""
+        if not text:
+            missing += 1
+            continue
+        hd_ids.append(hd_id)
+        labels.append(r["label"])
+        texts.append(text[:2000])  # Match the text_sample slice the seeders use
+
+    conn.close()
+
+    if not texts:
+        typer.echo("No text recoverable for any gold doc.", err=True)
+        raise typer.Exit(1)
+
+    typer.echo(
+        f"Materialized {len(texts)} rows ({missing} skipped — no text). "
+        f"Training baseline..."
+    )
+
+    dataset = TrainingDataset(hd_ids=hd_ids, labels=labels, texts=texts)
+    result = train_baseline(
+        dataset, val_fraction=val_fraction, random_state=random_state
+    )
+
+    metrics = {
+        "state": state,
+        "gold_rows_loaded": len(gold_rows),
+        "rows_used": len(texts),
+        "skipped_no_text": missing,
+        "classes": result.classes,
+        "train_n": result.train_n,
+        "val_n": result.val_n,
+        "train_only_classes": result.train_only_classes,
+        "val_accuracy": round(result.val_accuracy, 4),
+        "overall_train_accuracy": round(result.overall_train_accuracy, 4),
+        "per_class": {
+            lab: {
+                "precision": round(stats.get("precision", 0.0), 3),
+                "recall": round(stats.get("recall", 0.0), 3),
+                "f1-score": round(stats.get("f1-score", 0.0), 3),
+                "support": int(stats.get("support", 0)),
+            }
+            for lab, stats in result.val_classification_report.items()
+            if isinstance(stats, dict) and lab not in ("accuracy",)
+        },
+    }
+
+    if save_path:
+        import joblib
+        save_path.parent.mkdir(parents=True, exist_ok=True)
+        joblib.dump(
+            {"vectorizer": result.vectorizer, "model": result.model,
+             "classes": result.classes, "metrics": metrics},
+            save_path,
+        )
+        metrics["saved_to"] = str(save_path)
+
+    if json_out:
+        typer.echo(json.dumps(metrics, indent=2))
+        return
+
+    typer.echo(f"\nbaseline trained | state={state}\n")
+    typer.echo(f"  rows used:                 {metrics['rows_used']}  ({missing} skipped no-text)")
+    typer.echo(f"  train rows:                {result.train_n}")
+    typer.echo(f"  val rows:                  {result.val_n}")
+    typer.echo(f"  classes:                   {len(result.classes)}")
+    typer.echo(f"  train-only classes (rare): {result.train_only_classes}")
+    typer.echo(f"  val accuracy:              {result.val_accuracy:.3f}")
+    typer.echo(f"  train accuracy (ref):      {result.overall_train_accuracy:.3f}")
+    typer.echo("\n  Per-class val metrics:")
+    typer.echo(f"    {'class':<28} {'P':>5}  {'R':>5}  {'F1':>5}  {'n':>4}")
+    per_class = metrics["per_class"]
+    # Sort: actual labels first (alphabetic), then macro/weighted averages
+    label_keys = sorted(
+        k for k in per_class
+        if k not in ("macro avg", "weighted avg")
+    )
+    for lab in label_keys + ["macro avg", "weighted avg"]:
+        if lab not in per_class:
+            continue
+        s = per_class[lab]
+        typer.echo(
+            f"    {lab:<28} {s['precision']:>5.2f}  {s['recall']:>5.2f}  "
+            f"{s['f1-score']:>5.2f}  {s['support']:>4}"
+        )
+    if save_path:
+        typer.echo(f"\n  Artifacts saved to: {save_path}")
+
+
 @app.command("promote-high-confidence-subset-nc")
 def promote_high_confidence_subset_nc(
     state: str = typer.Option("NC", "--state", help="State filter."),
