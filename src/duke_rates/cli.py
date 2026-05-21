@@ -17640,6 +17640,199 @@ def _write_gold_set_jsonl(path: Path, gold_candidates: list[dict], conn, setting
     return written
 
 
+@app.command("classify-documents-v2-nc")
+def classify_documents_v2_nc(
+    state: str = typer.Option("NC", "--state", help="State filter for historical_documents."),
+    limit: int | None = typer.Option(None, "--limit", help="Limit docs scored (default: all)."),
+    write_classifications: bool = typer.Option(
+        False,
+        "--write-classifications",
+        help=(
+            "Persist v2 classifications to document_classifications. Without "
+            "this flag the command only prints a comparison report against "
+            "v1 (rule_document_type_v1)."
+        ),
+    ),
+    show_disagreements: int = typer.Option(
+        15,
+        "--show-disagreements",
+        help="Show up to N v1 vs v2 disagreement examples.",
+    ),
+    json_out: bool = typer.Option(False, "--json", help="Emit summary as JSON."),
+) -> None:
+    """Run rule_document_type_v2 against NC docs and compare with v1.
+
+    Pulls a DocumentSignals snapshot for each doc (title, first 2k chars,
+    last 1k chars, layout features from document_fingerprints when
+    available), runs the new per-type classifier, and reports:
+
+      - confidence distribution (avg/min/max, hi/lo bands)
+      - label distribution
+      - per-doc disagreements with the v1 classifier
+      - optional persistence to document_classifications
+
+    Part of Stream B in docs/research/document_identification.md.
+    """
+    import sqlite3
+    from collections import Counter
+    from duke_rates.classification.rule_document_type_v2 import (
+        DocumentSignals,
+        classify_v2,
+        CLASSIFIER_NAME as V2_NAME,
+        CLASSIFIER_VERSION as V2_VERSION,
+    )
+    from duke_rates.historical.ncuc.pipeline.bulk_extractor import (
+        BulkExtractor, normalize_docling_markdown, normalize_ocr_text,
+    )
+
+    settings, _ = _bootstrap()
+    extractor = BulkExtractor(db_path=str(settings.database_path))
+    conn = sqlite3.connect(settings.database_path)
+    conn.row_factory = sqlite3.Row
+
+    sql = """
+        SELECT hd.id, hd.title, hd.family_key
+        FROM historical_documents hd
+        WHERE hd.state = ?
+        ORDER BY hd.id
+    """
+    if limit:
+        sql += f" LIMIT {int(limit)}"
+    rows = conn.execute(sql, (state,)).fetchall()
+    typer.echo(f"Scoring {len(rows)} docs with rule_document_type_v2...")
+
+    # Fingerprint lookup for layout signals
+    fp_by_pdf: dict[str, sqlite3.Row] = {}
+    for fp in conn.execute(
+        "SELECT source_pdf, page_count, text_chars, has_tables FROM document_fingerprints_v2"
+    ).fetchall():
+        fp_by_pdf[fp["source_pdf"]] = fp
+
+    # v1 label lookup for comparison
+    v1_by_hd: dict[int, str] = {}
+    for r in conn.execute(
+        """SELECT subject_id, label FROM document_classifications
+           WHERE classifier='rule_document_type_v1' AND stage='document_type'"""
+    ).fetchall():
+        try:
+            v1_by_hd[int(r["subject_id"])] = r["label"]
+        except (TypeError, ValueError):
+            continue
+
+    results: list[dict] = []
+    label_counts: Counter = Counter()
+    confidence_buckets = {"high": 0, "mid": 0, "low": 0}
+    disagreements: list[dict] = []
+
+    for r in rows:
+        hd_id = int(r["id"])
+        doc = extractor.get_document_for_extraction(hd_id)
+        if not doc:
+            continue
+        try:
+            text, src = extractor.extract_text_from_pdf(
+                doc["local_path"],
+                start_page=doc.get("start_page"),
+                end_page=doc.get("end_page"),
+            )
+            if src in ("docling_artifact", "docling_artifact_sliced"):
+                text = normalize_docling_markdown(text)
+            text = normalize_ocr_text(text)
+        except Exception:
+            text = ""
+        if not text:
+            continue
+        first_text = text[:2000]
+        last_text = text[-1000:] if len(text) > 2000 else ""
+
+        fp = fp_by_pdf.get(doc["local_path"])
+        signals = DocumentSignals(
+            title=r["title"] or "",
+            first_text=first_text,
+            last_text=last_text,
+            page_count=fp["page_count"] if fp else None,
+            text_chars=fp["text_chars"] if fp else len(text),
+            has_tables=fp["has_tables"] if fp else None,
+        )
+        result = classify_v2(signals)
+        label_counts[result.label] += 1
+        if result.confidence >= 0.9:
+            confidence_buckets["high"] += 1
+        elif result.confidence >= 0.5:
+            confidence_buckets["mid"] += 1
+        else:
+            confidence_buckets["low"] += 1
+
+        v1_label = v1_by_hd.get(hd_id)
+        if v1_label and v1_label != result.label:
+            disagreements.append({
+                "hd_id": hd_id,
+                "v1_label": v1_label,
+                "v2_label": result.label,
+                "v2_confidence": round(result.confidence, 3),
+                "title": (r["title"] or "")[:60],
+            })
+
+        if write_classifications:
+            from duke_rates.classification.persistence import record_classification
+            try:
+                record_classification(
+                    conn,
+                    subject_kind="historical_document",
+                    subject_id=str(hd_id),
+                    stage="document_type",
+                    result=result,
+                )
+            except Exception as exc:
+                logger.debug(f"v2 persist failed for hd={hd_id}: {exc}")
+
+        results.append({
+            "hd_id": hd_id, "label": result.label, "confidence": result.confidence,
+        })
+
+    if write_classifications:
+        conn.commit()
+
+    summary = {
+        "state": state,
+        "docs_scored": len(results),
+        "confidence_buckets": confidence_buckets,
+        "label_distribution": dict(label_counts.most_common()),
+        "disagreements_total": len(disagreements),
+    }
+
+    if json_out:
+        typer.echo(json.dumps(summary, indent=2))
+        conn.close()
+        return
+
+    typer.echo(f"\nrule_document_type_v2 scoring | state={state}")
+    typer.echo(f"  docs scored:                {summary['docs_scored']}")
+    typer.echo(f"  high-confidence (>=0.9):    {confidence_buckets['high']}")
+    typer.echo(f"  mid-confidence (0.5-0.9):   {confidence_buckets['mid']}")
+    typer.echo(f"  low-confidence (<0.5):      {confidence_buckets['low']}")
+    typer.echo("\n  Label distribution (v2):")
+    for label, n in label_counts.most_common():
+        typer.echo(f"    {label:<28} {n}")
+
+    typer.echo(f"\n  v1 vs v2 disagreements: {len(disagreements)}")
+    if disagreements and show_disagreements:
+        for d in disagreements[:show_disagreements]:
+            typer.echo(
+                f"    hd={d['hd_id']:<5} v1={d['v1_label']:<20} -> v2={d['v2_label']:<22} "
+                f"conf={d['v2_confidence']:.2f}  {d['title']!r}"
+            )
+
+    if write_classifications:
+        typer.echo(f"\n  Wrote {len(results)} v2 classifications to document_classifications.")
+    else:
+        typer.echo(
+            "\n  Dry-run only. Pass --write-classifications to persist v2 results."
+        )
+
+    conn.close()
+
+
 @app.command("audit-rider-map")
 def audit_rider_map(
     state: str = typer.Option("NC", "--state", help="State code"),

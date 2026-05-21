@@ -134,6 +134,90 @@ This is one new file, ~150 lines, no schema changes, no model dependencies.
 Output drives every other stream — gold-set for Stream A, hard-case labels
 for Stream B improvements, training data for Stream D.
 
+## 2026-05-21 progress (Stream B + taxonomy + storage)
+
+User direction locked:
+- **Taxonomy**: grow narrowly (added `FERC_ORDER` + `EIA_REPORT`).
+- **Next focus**: Stream B (better rule classifier with layout signals).
+- **Gold storage**: new `document_type_gold` table (append-only, edit-audited).
+
+### Schema additions
+- `document_types` seeded with two new terminal codes:
+  - `FERC_ORDER` (category `ORDERS_AND_DECISIONS`)
+  - `EIA_REPORT` (category `REPORTS_AND_COMPLIANCE`)
+- New `document_type_gold` table for human-confirmed ground truth.
+  Separate from `document_classifications` (machine outputs are
+  overwriteable, gold rows are append-only with edit audit).
+
+### rule_document_type_v2 shipped
+`src/duke_rates/classification/rule_document_type_v2.py` — per-type
+pattern classifier with first-class layout features.
+
+Differences from v1:
+- 14 type-specific pattern collections (strong / weak / negative) instead
+  of two giant TARIFF/PROCEDURAL lists.
+- Layout signals (page_count, text_chars, has_tables) from
+  `document_fingerprints_v2` are first-class scoring inputs.
+- Last-page text scanning for signature regions / certifications.
+- Confidence calibration that reaches ≥0.92 on clear cases (vs v1's
+  hard ceiling of 0.70).
+- Emits all 14 type codes, not just the 5 v1 collapses to.
+
+Initial corpus run (200-doc sample, dry-run, no persistence):
+
+| Metric | v1 | v2 |
+|---|---|---|
+| docs at ≥0.9 confidence | 0 (corpus-wide) | 197 / 200 |
+| docs at <0.5 confidence | most | 0 / 200 |
+| emits which terminal types | 5 of 14 | all 14 (in tests) |
+
+v2 disagrees with v1 on 127 / 200 docs. Spot-checks:
+- v2 correctly fixes v1 errors like hd=14 "Joint Agency Adjustment Rider"
+  (v1=ORDER_FINAL → v2=RIDER) and hd=10 Sykes Exhibit (v1=TESTIMONY →
+  v2=RIDER, more accurate).
+- v2 over-claims RIDER on base-schedule docs that list applicable riders
+  in body (hd=3 "Large General Service", hd=4 "Medium General Service",
+  hd=5 "Residential Service"). Needs:
+  1. Stronger title-anchored TARIFF_SHEET patterns for "Residential
+     Service" / "Large General Service" / "Medium General Service" /
+     similar base-class names.
+  2. RIDER's strong patterns to require "Rider" appears in title or
+     first 200 chars (header region), not anywhere in body.
+
+### Tests
+`tests/test_rule_document_type_v2.py` — 13 tests covering each of the
+14 types' canonical patterns + layout-signal tiebreaker + UNKNOWN floor
++ weak-only confidence band.
+
+### CLI for iteration
+`classify-documents-v2-nc` runs v2 against NC docs and either prints a
+v1-vs-v2 comparison report or (with `--write-classifications`) persists
+v2 results to `document_classifications` next to v1 so the multi-
+classifier agreement vote can incorporate the v2 signal.
+
+Recommended Stream B iteration cycle:
+1. `classify-documents-v2-nc --limit 200` (dry-run review)
+2. inspect disagreements; tune patterns in `rule_document_type_v2.py`
+3. `pytest tests/test_rule_document_type_v2.py`
+4. `classify-documents-v2-nc --write-classifications` once stable
+5. `audit-document-type-classifications-nc` — gold-set candidates
+   should grow as v2 votes are factored in.
+
+## Open Stream B questions
+
+1. **Pattern tuning**: should RIDER require "Rider" in title/header, or
+   keep loose body matching with a stronger negative for base-class
+   schedule titles? Recommend the latter — base-class titles ("Residential
+   Service", "Large General Service") are easier to enumerate than every
+   possible rider naming pattern.
+2. **Confidence calibration**: 0.92 target for clear strong-signal cases
+   currently sits below LLM (avg 0.96) — keep it lower so the LLM second
+   opinion still wins on tie-breakers, or bump to 0.95+ when v2 has
+   layout + multiple strong hits?
+3. **Persistence threshold**: when `--write-classifications` runs, should
+   it skip low-confidence (<0.5) results, or write them all so the audit
+   tool can see v2's UNKNOWN calls explicitly?
+
 ## Non-goals (for this branch)
 
 - Do not change `document_types` taxonomy until Stream C scope is settled.

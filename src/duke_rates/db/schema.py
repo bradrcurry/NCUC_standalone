@@ -452,6 +452,47 @@ CREATE INDEX IF NOT EXISTS idx_document_types_category
 ON document_types(primary_category);
 
 -- =========================================================================
+-- Document type gold labels — human-confirmed ground truth.
+--
+-- Separate from document_classifications because the access pattern differs:
+-- classifier rows are overwriteable (later runs replace earlier ones), gold
+-- rows are append-only with edit audit. When a human disagrees with an
+-- earlier gold label, a new row is inserted (superseding via timestamp),
+-- not edited in place. This lets the training pipeline reconstruct what
+-- ground truth looked like at any historical point.
+--
+-- Use cases:
+--  - Stream A: starter gold set exported from unanimous classifier agreement,
+--    then revised as humans review the disagreement queue.
+--  - Stream D: training data source for the fine-tuned classifier. The
+--    fine-tuner queries this table for (subject_id, label) pairs.
+--  - Audits: side-by-side compare any classifier vs. gold to compute
+--    precision/recall/F1 per type.
+-- =========================================================================
+
+CREATE TABLE IF NOT EXISTS document_type_gold (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    subject_kind TEXT NOT NULL,            -- 'historical_document' typically
+    subject_id TEXT NOT NULL,              -- str of the FK
+    label TEXT NOT NULL,                   -- a document_types.code
+    labeler TEXT NOT NULL,                 -- e.g. 'human:bradrcurry', 'agreement:rule+embedding+llm'
+    source TEXT NOT NULL,                  -- 'unanimous_classifier_agreement' | 'human_review' | 'imported' | 'corrected'
+    evidence_json TEXT,                    -- free-form: which classifiers agreed, what the reviewer saw, etc.
+    superseded_by INTEGER,                 -- self-FK when a later gold row overrides this one
+    notes TEXT,                            -- human comment, optional
+    created_at TEXT NOT NULL,
+    FOREIGN KEY(superseded_by) REFERENCES document_type_gold(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_document_type_gold_subject
+ON document_type_gold(subject_kind, subject_id);
+CREATE INDEX IF NOT EXISTS idx_document_type_gold_label
+ON document_type_gold(label);
+CREATE INDEX IF NOT EXISTS idx_document_type_gold_active
+ON document_type_gold(subject_kind, subject_id)
+WHERE superseded_by IS NULL;
+
+-- =========================================================================
 -- Document fingerprints v2.
 --
 -- A flat record of "we saw this PDF, here's what its observable signals
@@ -2166,6 +2207,11 @@ _DOCUMENT_TYPE_SEEDS: tuple[tuple[str, str, str], ...] = (
     ("NOTICE_OF_HEARING",       "PROCEDURAL_AND_ADMINISTRATIVE", "Hearing notices, public notices, scheduling notices."),
     ("APPLICATION",             "APPLICATIONS_AND_PETITIONS",    "An application or petition initiating a docket or seeking relief."),
     ("COMPLIANCE_FILING",       "REPORTS_AND_COMPLIANCE",        "A compliance filing made pursuant to a prior order."),
+    # 2026-05-21 federal regulatory extension. Narrow taxonomy growth to handle
+    # FERC orders + EIA reports that show up in cross-references. Both kept as
+    # terminal types so classifiers can emit them directly.
+    ("FERC_ORDER",              "ORDERS_AND_DECISIONS",          "A FERC order (federal energy regulatory) referenced in or filed alongside state proceedings."),
+    ("EIA_REPORT",              "REPORTS_AND_COMPLIANCE",        "A U.S. Energy Information Administration report (form 861, 860, monthly summaries, etc.)."),
     ("UNKNOWN",                 "NOISE_OR_DUPLICATES",           "Sentinel — used when no terminal type matches with sufficient confidence."),
 )
 
