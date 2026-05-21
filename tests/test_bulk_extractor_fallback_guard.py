@@ -301,6 +301,126 @@ def test_runtime_trace_flags_slicer_dropped_markers(tmp_path, monkeypatch):
     assert "per kwh" in dropped
 
 
+def test_record_document_type_v2_persists_v2_classification(tmp_path):
+    """Live ingest wiring: when extract_charges_from_document runs,
+    rule_document_type_v2 should fire alongside v1 and write a row to
+    document_classifications with classifier='rule_document_type_v2'.
+
+    Regression for the 2026-05-21 Stream B production wiring — without
+    it, only docs touched by classify-documents-v2-nc had v2 votes,
+    and newly-ingested docs were stuck at the v1-only agreement layer."""
+    import sqlite3
+    from duke_rates.historical.ncuc.pipeline.bulk_extractor import BulkExtractor
+
+    db_path = tmp_path / "v2_wiring.db"
+    conn = sqlite3.connect(db_path)
+    conn.executescript(
+        """
+        CREATE TABLE document_classifications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            subject_kind TEXT NOT NULL, subject_id TEXT NOT NULL,
+            stage TEXT NOT NULL, label TEXT NOT NULL, confidence REAL NOT NULL,
+            classifier TEXT NOT NULL, classifier_version TEXT NOT NULL DEFAULT '',
+            evidence_json TEXT, alternatives_json TEXT, metadata_json TEXT,
+            superseded_by INTEGER, created_at TEXT NOT NULL,
+            UNIQUE(subject_kind, subject_id, stage, classifier, classifier_version)
+        );
+        CREATE TABLE document_fingerprints_v2 (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            source_pdf TEXT NOT NULL, file_hash TEXT, page_count INTEGER,
+            text_chars INTEGER, has_tables INTEGER, has_scanned_pages INTEGER,
+            avg_chars_per_page REAL, token_signals_json TEXT,
+            first_page_signature TEXT, title_candidates_json TEXT
+        );
+        """
+    )
+    conn.commit()
+    conn.close()
+
+    extractor = BulkExtractor(db_path=str(db_path))
+    doc = {
+        "id": 42,
+        "title": "Residential Service (Leaf No. 500)",
+        "local_path": str(tmp_path / "stub.pdf"),
+    }
+    text = (
+        "Duke Energy Progress, LLC NC First Revised Leaf No. 500\n"
+        "AVAILABILITY: This Schedule is available for residential service.\n"
+        "Basic Customer Charge: $14.00 per month.\n"
+        "Kilowatt-Hour Charge: 12.119 cents per kWh."
+    )
+    extractor._record_document_type_v2_classification(doc, text)
+
+    conn = sqlite3.connect(db_path)
+    rows = conn.execute(
+        "SELECT classifier, label, confidence FROM document_classifications "
+        "WHERE subject_id = '42' AND stage = 'document_type'"
+    ).fetchall()
+    conn.close()
+
+    assert len(rows) == 1
+    classifier, label, conf = rows[0]
+    assert classifier == "rule_document_type_v2"
+    assert label == "TARIFF_SHEET"
+    assert conf >= 0.9
+
+
+def test_record_document_type_v2_does_not_raise_on_missing_fingerprint(tmp_path):
+    """If document_fingerprints_v2 has no row for the PDF, v2 should still
+    fire — just without layout signals. Production must not crash when
+    a doc bypassed the fingerprint pipeline."""
+    import sqlite3
+    from duke_rates.historical.ncuc.pipeline.bulk_extractor import BulkExtractor
+
+    db_path = tmp_path / "v2_no_fp.db"
+    conn = sqlite3.connect(db_path)
+    conn.executescript(
+        """
+        CREATE TABLE document_classifications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            subject_kind TEXT NOT NULL, subject_id TEXT NOT NULL,
+            stage TEXT NOT NULL, label TEXT NOT NULL, confidence REAL NOT NULL,
+            classifier TEXT NOT NULL, classifier_version TEXT NOT NULL DEFAULT '',
+            evidence_json TEXT, alternatives_json TEXT, metadata_json TEXT,
+            superseded_by INTEGER, created_at TEXT NOT NULL,
+            UNIQUE(subject_kind, subject_id, stage, classifier, classifier_version)
+        );
+        CREATE TABLE document_fingerprints_v2 (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            source_pdf TEXT NOT NULL, file_hash TEXT, page_count INTEGER,
+            text_chars INTEGER, has_tables INTEGER, has_scanned_pages INTEGER,
+            avg_chars_per_page REAL, token_signals_json TEXT,
+            first_page_signature TEXT, title_candidates_json TEXT
+        );
+        """
+    )
+    conn.commit()
+    conn.close()
+
+    extractor = BulkExtractor(db_path=str(db_path))
+    doc = {
+        "id": 99,
+        "title": "Direct Testimony of Jane Smith",
+        "local_path": "/no/such/path",
+    }
+    text = (
+        "DIRECT TESTIMONY OF JANE SMITH on behalf of Duke Energy.\n"
+        "Q. Please state your name and business address.\n"
+        "A. My name is Jane Smith."
+    )
+    extractor._record_document_type_v2_classification(doc, text)
+
+    conn = sqlite3.connect(db_path)
+    rows = conn.execute(
+        "SELECT classifier, label FROM document_classifications "
+        "WHERE subject_id = '99'"
+    ).fetchall()
+    conn.close()
+    assert len(rows) == 1
+    assert rows[0][0] == "rule_document_type_v2"
+    assert rows[0][1] == "TESTIMONY"
+
+
 def test_default_has_page_bounds_preserves_caller_compatibility(extractor):
     """has_page_bounds still defaults to True so existing call sites that
     don't pass the kwarg keep working; the kwarg is no longer load-bearing

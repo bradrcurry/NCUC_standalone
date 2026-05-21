@@ -11,6 +11,7 @@ import pytest
 from duke_rates.classification.baseline_classifier import (
     TrainingDataset,
     train_baseline,
+    cross_validate_baseline,
     _stratified_split,
     MIN_SAMPLES_FOR_VAL_SPLIT,
 )
@@ -136,3 +137,52 @@ def test_classes_field_is_sorted_and_complete():
     assert result.classes == sorted(set(dataset.labels))
     assert "TARIFF_SHEET" in result.classes
     assert "RIDER" in result.classes
+
+
+def test_cross_validate_returns_per_fold_and_aggregate_metrics():
+    """CV must report per-fold scores plus mean/std across folds."""
+    dataset = _make_dataset()
+    result = cross_validate_baseline(dataset, n_folds=3, random_state=13)
+
+    assert result.n_folds == 3
+    assert len(result.fold_accuracies) == 3
+    assert len(result.fold_weighted_f1) == 3
+    assert len(result.fold_macro_f1) == 3
+    # Synthetic corpus is easy → mean accuracy should be high
+    assert result.mean_accuracy >= 0.7
+    # Std is bounded [0, 0.5] in practice
+    assert 0 <= result.std_accuracy <= 0.5
+
+
+def test_cross_validate_excludes_rare_classes_from_eval():
+    """Classes with <n_folds samples should be train-only across all folds.
+    Their support in the eval set is 0; they don't drive accuracy."""
+    dataset = _make_dataset()
+    # CERTIFICATE_OF_SERVICE (n=2), RIDER (n=1), COVER_LETTER (n=2) all
+    # have <5 samples → train-only under 5-fold CV.
+    result = cross_validate_baseline(dataset, n_folds=5, random_state=13)
+    assert set(result.train_only_classes) == {
+        "CERTIFICATE_OF_SERVICE", "RIDER", "COVER_LETTER",
+    }
+    # Eligible rows = total - rare = 60 majority - 0 = 60 (rare are train-only)
+    assert result.eligible_n == 60
+
+
+def test_cross_validate_raises_when_no_eligible_classes():
+    """If every class has fewer than n_folds samples, CV cannot run."""
+    dataset = TrainingDataset(
+        hd_ids=[1, 2, 3],
+        labels=["A", "A", "B"],
+        texts=["x", "y", "z"],
+    )
+    with pytest.raises(ValueError, match="No classes have"):
+        cross_validate_baseline(dataset, n_folds=5)
+
+
+def test_cross_validate_lower_variance_than_single_split():
+    """The point of CV is that it gives a more stable accuracy number
+    than a single 80/20 split. Loose check: CV std should be <= 0.15 on
+    our synthetic corpus."""
+    dataset = _make_dataset()
+    result = cross_validate_baseline(dataset, n_folds=5, random_state=13)
+    assert result.std_accuracy <= 0.15

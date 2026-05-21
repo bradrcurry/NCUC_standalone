@@ -17842,6 +17842,17 @@ def train_document_type_baseline_nc(
             "tuple for reuse. Recommend models/baseline_document_type.joblib."
         ),
     ),
+    cv_folds: int = typer.Option(
+        0,
+        "--cv",
+        help=(
+            "If > 1, also run stratified k-fold CV with this many folds and "
+            "print mean/std accuracy + F1. Recommended k=5. CV is more honest "
+            "than the single train/val split when the gold set is small "
+            "(~441 rows produces 3-5 pts of accuracy drift between random "
+            "seeds on a single split)."
+        ),
+    ),
     json_out: bool = typer.Option(False, "--json", help="Emit metrics as JSON."),
 ) -> None:
     """Stream D baseline: TF-IDF + LogisticRegression on document_type_gold.
@@ -17859,7 +17870,7 @@ def train_document_type_baseline_nc(
     """
     import sqlite3
     from duke_rates.classification.baseline_classifier import (
-        TrainingDataset, train_baseline,
+        TrainingDataset, train_baseline, cross_validate_baseline,
     )
     from duke_rates.historical.ncuc.pipeline.bulk_extractor import (
         BulkExtractor, normalize_docling_markdown, normalize_ocr_text,
@@ -17965,6 +17976,28 @@ def train_document_type_baseline_nc(
         )
         metrics["saved_to"] = str(save_path)
 
+    # Optional cross-validation pass for a more honest accuracy number
+    cv_metrics: dict | None = None
+    if cv_folds and cv_folds >= 2:
+        cv_result = cross_validate_baseline(
+            dataset, n_folds=cv_folds, random_state=random_state
+        )
+        cv_metrics = {
+            "n_folds": cv_result.n_folds,
+            "eligible_rows": cv_result.eligible_n,
+            "train_only_classes": cv_result.train_only_classes,
+            "fold_accuracies": cv_result.fold_accuracies,
+            "fold_weighted_f1": cv_result.fold_weighted_f1,
+            "fold_macro_f1": cv_result.fold_macro_f1,
+            "mean_accuracy": cv_result.mean_accuracy,
+            "std_accuracy": cv_result.std_accuracy,
+            "mean_weighted_f1": cv_result.mean_weighted_f1,
+            "std_weighted_f1": cv_result.std_weighted_f1,
+            "mean_macro_f1": cv_result.mean_macro_f1,
+            "std_macro_f1": cv_result.std_macro_f1,
+        }
+        metrics["cross_validation"] = cv_metrics
+
     if json_out:
         typer.echo(json.dumps(metrics, indent=2))
         return
@@ -17995,6 +18028,22 @@ def train_document_type_baseline_nc(
         )
     if save_path:
         typer.echo(f"\n  Artifacts saved to: {save_path}")
+
+    if cv_metrics:
+        typer.echo(f"\n  Cross-validation ({cv_metrics['n_folds']}-fold, "
+                   f"{cv_metrics['eligible_rows']} eligible rows):")
+        typer.echo(f"    accuracy:    mean={cv_metrics['mean_accuracy']:.4f} "
+                   f"std={cv_metrics['std_accuracy']:.4f}  "
+                   f"folds={cv_metrics['fold_accuracies']}")
+        typer.echo(f"    weighted F1: mean={cv_metrics['mean_weighted_f1']:.4f} "
+                   f"std={cv_metrics['std_weighted_f1']:.4f}")
+        typer.echo(f"    macro F1:    mean={cv_metrics['mean_macro_f1']:.4f} "
+                   f"std={cv_metrics['std_macro_f1']:.4f}")
+        if cv_metrics['train_only_classes']:
+            typer.echo(
+                f"    train-only classes (n<{cv_metrics['n_folds']} samples): "
+                f"{cv_metrics['train_only_classes']}"
+            )
 
 
 @app.command("promote-high-confidence-subset-nc")

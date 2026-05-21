@@ -472,6 +472,53 @@ in any sklearn-compatible environment for offline evaluation.
    recall of 0.75 suggests it's losing ~5 val docs to a competitor
    — likely APPLICATION or COMPLIANCE_FILING.
 
+### 2026-05-21 update — CV + production wiring
+
+#### 5-fold cross-validation
+
+Added `cross_validate_baseline()` to `baseline_classifier` plus `--cv N`
+to the CLI. CV is more honest than a single 80/20 split at n=441 — a
+single split varies by ~3-5 pts of accuracy across random seeds.
+
+Results on the 441-row gold set (5 folds, eligible rows = 428):
+
+```
+accuracy:    mean=0.893  std=0.022  folds=[0.88, 0.90, 0.86, 0.89, 0.93]
+weighted F1: mean=0.899  std=0.020
+macro F1:    mean=0.446  std=0.089 (rare classes drag)
+```
+
+Single-split val 0.884 sits within 1σ of the CV mean. **0.893 ± 0.022
+accuracy / 0.899 ± 0.020 weighted F1 is the number to beat.**
+
+Six classes remain train-only across all folds: CERTIFICATE_OF_SERVICE,
+COMPLIANCE_FILING, COVER_LETTER, ORDER_PROCEDURAL, RATE_SCHEDULE, RIDER.
+Macro F1 will rise sharply once these reach n>=5 gold rows each.
+
+#### v2 wired into bulk_extractor live ingest
+
+`BulkExtractor.extract_charges_from_document` now runs
+`rule_document_type_v2` alongside the legacy v1 call. Both
+classifications persist to `document_classifications` so the
+multi-classifier agreement signal grows automatically as docs are
+ingested — no more bulk backfill required after the initial one.
+
+New method `_record_document_type_v2_classification` looks up layout
+signals from `document_fingerprints_v2` (best-effort), builds a
+`DocumentSignals`, runs `classify_v2`, and persists via the same
+recording path as v1. Side-effect only; failures log at debug level
+(observability loss must not break extraction).
+
+The legacy `doc_type` short-circuit downstream still uses v1's
+`classify_with_result` for backward compatibility with existing
+routing logic. v2's vote contributes to seed-document-type-gold-nc,
+promote-high-confidence-subset-nc, and triage-disagreements-nc but
+does not (yet) drive the parser-profile routing tier.
+
+Tests in `tests/test_bulk_extractor_fallback_guard.py`:
+- `test_record_document_type_v2_persists_v2_classification`
+- `test_record_document_type_v2_does_not_raise_on_missing_fingerprint`
+
 ### Cover-letter bundle signal (intentional)
 
 Docs whose `family_key` says tariff/rider but whose body starts with a
