@@ -21,6 +21,10 @@ data/
 .gitnexus/
 pipeline_index/
 
+# Gold-set training data exports (regenerate via audit-document-type-classifications-nc --export-gold-set)
+docs/research/gold_set_*.jsonl
+docs/research/triage_*.jsonl
+
 # Scratch data directories from iterative development runs
 data_api_fl/
 data_api_fl2/
