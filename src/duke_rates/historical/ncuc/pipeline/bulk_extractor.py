@@ -719,6 +719,67 @@ class BulkExtractor:
         """Classify document as tariff, procedural, etc."""
         return self.classifier.classify(filing_title, text_sample)
 
+    def _record_document_type_v2_classification(self, doc: dict, text: str) -> None:
+        """Run ``rule_document_type_v2`` on ``doc`` and persist the result.
+
+        Sister of ``_record_document_type_classification`` — same persistence
+        path, different classifier. Looks up layout signals from
+        ``document_fingerprints_v2`` when available so v2's strong_header
+        + has_tables + page_count features all fire. Side-effect only —
+        never raises.
+        """
+        doc_id = doc.get('id')
+        if not doc_id:
+            return
+        try:
+            from duke_rates.classification.rule_document_type_v2 import (
+                DocumentSignals, classify_v2,
+            )
+        except Exception:
+            return
+
+        first_text = text[:2000]
+        last_text = text[-1000:] if len(text) > 2000 else ""
+
+        # Best-effort layout signal lookup. Failures fall through to None
+        # so v2 still produces a result — just without layout discriminators.
+        page_count: int | None = None
+        text_chars: int | None = None
+        has_tables: int | None = None
+        try:
+            cls_conn = self._get_connection()
+            try:
+                fp = cls_conn.execute(
+                    "SELECT page_count, text_chars, has_tables "
+                    "FROM document_fingerprints_v2 WHERE source_pdf = ? "
+                    "ORDER BY id DESC LIMIT 1",
+                    (doc.get('local_path') or '',),
+                ).fetchone()
+                if fp:
+                    page_count = fp[0]
+                    text_chars = fp[1]
+                    has_tables = fp[2]
+            finally:
+                cls_conn.close()
+        except Exception:
+            pass
+
+        signals = DocumentSignals(
+            title=doc.get('title') or '',
+            first_text=first_text,
+            last_text=last_text,
+            page_count=page_count,
+            text_chars=text_chars if text_chars is not None else len(text),
+            has_tables=has_tables,
+        )
+        try:
+            result = classify_v2(signals)
+        except Exception as exc:
+            logger.debug("v2 classify_v2 failed for doc %s: %s", doc_id, exc)
+            return
+
+        self._record_document_type_classification(doc, result)
+
     def _record_document_type_classification(self, doc: dict, result) -> None:
         """Persist a ``document_type`` ClassificationResult for ``doc``.
 
@@ -1250,6 +1311,13 @@ class BulkExtractor:
             doc['title'], text_sample
         )
         self._record_document_type_classification(doc, _document_type_result)
+        # v2 rule classifier runs alongside v1 so live ingest populates
+        # both rule_document_type_v1 and rule_document_type_v2 rows. The
+        # routing tier still uses v1's legacy `doc_type` short-circuit
+        # below; v2 contributes via the multi-classifier agreement signal
+        # used by gold-set seeding and triage. See
+        # docs/research/document_identification.md Stream B.
+        self._record_document_type_v2_classification(doc, text)
         self._record_flag_classifications(doc, text)
         self._record_embedding_document_type(doc)
         self._record_llm_document_type(doc)

@@ -17397,6 +17397,1268 @@ def _audit_cross_attr_delete(conn, rows: list[dict]) -> int:
     return deleted
 
 
+@app.command("audit-document-type-classifications-nc")
+def audit_document_type_classifications_nc(
+    state: str = typer.Option("NC", "--state", help="State filter for historical_documents."),
+    export_gold_set: Path | None = typer.Option(
+        None,
+        "--export-gold-set",
+        help=(
+            "If set, write high-agreement docs as a JSONL gold-set candidate "
+            "file. One row per doc: {hd_id, label, confidence, classifiers, "
+            "title, text_sample, family_key, state}. The text_sample is the "
+            "first 2000 chars from the bulk extractor's text path."
+        ),
+    ),
+    min_classifiers: int = typer.Option(
+        2,
+        "--min-classifiers",
+        help="Minimum classifiers that must have run for a gold-set candidate.",
+    ),
+    require_unanimous: bool = typer.Option(
+        True,
+        "--require-unanimous/--allow-majority",
+        help=(
+            "Gold-set candidates require unanimous label agreement across "
+            "all running classifiers (default). With --allow-majority, "
+            "any doc whose >=50%% of classifiers agree qualifies."
+        ),
+    ),
+    json_out: bool = typer.Option(False, "--json", help="Emit raw JSON summary."),
+) -> None:
+    """Audit document_type classifier agreement and (optionally) export a gold set.
+
+    Surfaces three buckets:
+      - Gold-set candidates: docs where multiple classifiers agree on the
+        same label. The starter training set for fine-tuning a small
+        classifier or seeding human review.
+      - Disagreement docs: docs where classifiers split. The highest-
+        leverage targets for hand labeling — they're the cases the current
+        rule/embedding/LLM stack can't decide on its own.
+      - Coverage gaps: docs missing one or more classifiers (LLM never ran,
+        embedding never ran). Backfilling these improves the agreement
+        signal corpus-wide.
+
+    Per the Stream A direction in docs/research/document_identification.md.
+    """
+    import sqlite3
+    from collections import Counter, defaultdict
+
+    settings, _ = _bootstrap()
+    conn = sqlite3.connect(settings.database_path)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+
+    # Pull all document_type classifications for state-filtered hd's
+    c.execute(
+        """
+        SELECT dc.subject_id AS hd_id_str,
+               dc.classifier,
+               dc.label,
+               dc.confidence,
+               hd.family_key,
+               hd.title,
+               hd.state
+        FROM document_classifications dc
+        JOIN historical_documents hd
+          ON CAST(hd.id AS TEXT) = dc.subject_id
+         AND dc.subject_kind = 'historical_document'
+        WHERE dc.stage = 'document_type'
+          AND hd.state = ?
+        """,
+        (state,),
+    )
+    rows = c.fetchall()
+
+    # Group by doc
+    by_doc: dict[str, list[sqlite3.Row]] = defaultdict(list)
+    for r in rows:
+        by_doc[r["hd_id_str"]].append(r)
+
+    # Per-doc agreement analysis
+    gold_candidates: list[dict] = []
+    disagreement: list[dict] = []
+    coverage_gaps: list[dict] = []
+
+    classifier_universe = {"rule_document_type_v1", "embedding_knn_v1"}  # llm runs are spotty
+    for hd_id_str, doc_rows in by_doc.items():
+        classifiers_present = {r["classifier"] for r in doc_rows}
+        labels = [r["label"] for r in doc_rows]
+        label_counter = Counter(labels)
+        most_common_label, most_common_n = label_counter.most_common(1)[0]
+        n_classifiers = len(classifiers_present)
+        n_distinct_labels = len(label_counter)
+
+        title = doc_rows[0]["title"]
+        family_key = doc_rows[0]["family_key"]
+
+        # Gold-set membership rule
+        if n_classifiers >= min_classifiers:
+            unanimous = n_distinct_labels == 1
+            majority = most_common_n / n_classifiers >= 0.5
+            qualifies = unanimous if require_unanimous else majority
+            if qualifies:
+                # Average confidence of voters for the winning label
+                voters = [r for r in doc_rows if r["label"] == most_common_label]
+                avg_conf = sum(r["confidence"] for r in voters) / max(1, len(voters))
+                gold_candidates.append({
+                    "hd_id": int(hd_id_str),
+                    "label": most_common_label,
+                    "confidence": round(avg_conf, 3),
+                    "classifiers": sorted(classifiers_present),
+                    "votes_for_label": most_common_n,
+                    "total_classifiers": n_classifiers,
+                    "family_key": family_key,
+                    "title": title,
+                })
+
+        if n_distinct_labels >= 2 and n_classifiers >= 2:
+            disagreement.append({
+                "hd_id": int(hd_id_str),
+                "labels": dict(label_counter),
+                "classifiers": sorted(classifiers_present),
+                "family_key": family_key,
+                "title": title,
+            })
+
+        missing = classifier_universe - classifiers_present
+        if missing:
+            coverage_gaps.append({
+                "hd_id": int(hd_id_str),
+                "present": sorted(classifiers_present),
+                "missing": sorted(missing),
+                "family_key": family_key,
+            })
+
+    # Classifier-wide confidence stats
+    c.execute(
+        """
+        SELECT classifier,
+               COUNT(*) AS n,
+               AVG(confidence) AS avg_c,
+               MIN(confidence) AS min_c,
+               MAX(confidence) AS max_c,
+               SUM(CASE WHEN confidence >= 0.9 THEN 1 ELSE 0 END) AS hi,
+               SUM(CASE WHEN confidence < 0.5 THEN 1 ELSE 0 END) AS lo
+        FROM document_classifications dc
+        JOIN historical_documents hd
+          ON CAST(hd.id AS TEXT) = dc.subject_id
+         AND dc.subject_kind = 'historical_document'
+        WHERE dc.stage = 'document_type' AND hd.state = ?
+        GROUP BY classifier
+        """,
+        (state,),
+    )
+    classifier_stats = [dict(r) for r in c.fetchall()]
+
+    summary = {
+        "state": state,
+        "docs_with_any_classification": len(by_doc),
+        "gold_set_candidates": len(gold_candidates),
+        "disagreement_docs": len(disagreement),
+        "coverage_gaps": len(coverage_gaps),
+        "classifier_stats": classifier_stats,
+        "label_distribution": dict(Counter(
+            g["label"] for g in gold_candidates
+        ).most_common()),
+    }
+
+    if json_out:
+        typer.echo(json.dumps(summary, indent=2))
+        if export_gold_set:
+            _write_gold_set_jsonl(export_gold_set, gold_candidates, conn, settings)
+        conn.close()
+        return
+
+    typer.echo(f"\nDocument-type classification audit | state={state}\n")
+    typer.echo(f"  docs with any classification:  {summary['docs_with_any_classification']}")
+    typer.echo(f"  gold-set candidates:           {summary['gold_set_candidates']}")
+    typer.echo(f"  disagreement docs:             {summary['disagreement_docs']}")
+    typer.echo(f"  coverage gaps:                 {summary['coverage_gaps']}")
+
+    typer.echo("\n  Per-classifier confidence:")
+    typer.echo(f"    {'classifier':<35} {'n':>5} {'avg':>6} {'min':>6} {'max':>6} {'hi(>=0.9)':>10} {'lo(<0.5)':>9}")
+    for stat in classifier_stats:
+        typer.echo(
+            f"    {stat['classifier']:<35} {stat['n']:>5} "
+            f"{stat['avg_c']:>6.2f} {stat['min_c']:>6.2f} {stat['max_c']:>6.2f} "
+            f"{stat['hi']:>10} {stat['lo']:>9}"
+        )
+
+    typer.echo("\n  Gold-set candidates by label:")
+    for label, n in summary["label_distribution"].items():
+        typer.echo(f"    {label:<30} {n}")
+
+    if export_gold_set:
+        written = _write_gold_set_jsonl(export_gold_set, gold_candidates, conn, settings)
+        typer.echo(f"\n  Wrote {written} gold-set rows to {export_gold_set}")
+    else:
+        typer.echo(
+            "\n  Pass --export-gold-set PATH.jsonl to write a JSONL training "
+            "candidate file."
+        )
+
+    conn.close()
+
+
+def _write_gold_set_jsonl(path: Path, gold_candidates: list[dict], conn, settings) -> int:
+    """Write gold-set rows enriched with a text sample to ``path``. Returns count written.
+
+    The text sample is loaded the same way the bulk extractor sees text:
+    docling artifact (full or sliced) preferred, pdfplumber as fallback.
+    Truncated to 2000 chars to keep the file size reasonable for training.
+    """
+    from duke_rates.historical.ncuc.pipeline.bulk_extractor import (
+        BulkExtractor, normalize_docling_markdown, normalize_ocr_text,
+    )
+    extractor = BulkExtractor(db_path=str(settings.database_path))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    written = 0
+    with path.open("w", encoding="utf-8") as f:
+        for cand in gold_candidates:
+            doc = extractor.get_document_for_extraction(cand["hd_id"])
+            if not doc:
+                continue
+            try:
+                text, src = extractor.extract_text_from_pdf(
+                    doc["local_path"],
+                    start_page=doc.get("start_page"),
+                    end_page=doc.get("end_page"),
+                )
+                if src in ("docling_artifact", "docling_artifact_sliced"):
+                    text = normalize_docling_markdown(text)
+                text = normalize_ocr_text(text)
+            except Exception:
+                text = ""
+            row = {
+                **cand,
+                "text_sample": (text or "")[:2000],
+                "text_source": src if text else "none",
+            }
+            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+            written += 1
+    return written
+
+
+@app.command("seed-document-type-gold-nc")
+def seed_document_type_gold_nc(
+    state: str = typer.Option("NC", "--state", help="State filter for historical_documents."),
+    min_classifiers: int = typer.Option(
+        2,
+        "--min-classifiers",
+        help=(
+            "Minimum number of classifiers that must have run AND agreed on "
+            "a single label for the doc to seed gold. 2 = relaxed (rule + "
+            "embedding agree), 3 = strict (rule + embedding + LLM all agree)."
+        ),
+    ),
+    exclude_classifiers: list[str] | None = typer.Option(
+        None,
+        "--exclude-classifier",
+        help=(
+            "Repeatable. Skip these classifiers when computing agreement. "
+            "Useful when seeding pre-v2 gold to establish a baseline before "
+            "the new classifier enters the vote."
+        ),
+    ),
+    execute: bool = typer.Option(
+        False,
+        "--execute",
+        help="Actually write gold rows. Without this flag, dry-run only.",
+    ),
+    json_out: bool = typer.Option(False, "--json", help="Emit summary as JSON."),
+) -> None:
+    """Seed document_type_gold from classifier agreement.
+
+    Default rule: a doc seeds gold when at least ``min_classifiers``
+    classifiers have run AND they all agree on a single label. The
+    inserted row carries:
+
+      label       = the agreed-upon label
+      labeler     = 'agreement:<classifier1>+<classifier2>+...'
+      source      = 'unanimous_classifier_agreement'
+      evidence    = {classifiers: [...], confidences: [...]}
+
+    Idempotent: docs that already have an active (non-superseded) gold
+    row are skipped. To force-rewrite, supersede the existing row first
+    via a follow-up command.
+
+    Use ``--exclude-classifier rule_document_type_v2`` to seed gold
+    based on the pre-v2 classifier stack — recommended for first
+    seeding so v2's known biases don't contaminate the baseline.
+    """
+    import sqlite3
+    from collections import Counter, defaultdict
+
+    settings, _ = _bootstrap()
+    conn = sqlite3.connect(settings.database_path)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+
+    exclude_set = set(exclude_classifiers or [])
+
+    # Pull all document_type classifications for the state
+    c.execute(
+        """
+        SELECT dc.subject_id, dc.classifier, dc.label, dc.confidence
+        FROM document_classifications dc
+        JOIN historical_documents hd
+          ON CAST(hd.id AS TEXT) = dc.subject_id
+         AND dc.subject_kind = 'historical_document'
+        WHERE dc.stage = 'document_type'
+          AND hd.state = ?
+        """,
+        (state,),
+    )
+
+    by_doc: dict[str, list[sqlite3.Row]] = defaultdict(list)
+    for r in c.fetchall():
+        if r["classifier"] in exclude_set:
+            continue
+        by_doc[r["subject_id"]].append(r)
+
+    # Find docs with existing active gold rows (to skip)
+    c.execute(
+        """
+        SELECT subject_id FROM document_type_gold
+        WHERE subject_kind = 'historical_document' AND superseded_by IS NULL
+        """
+    )
+    existing_gold = {r["subject_id"] for r in c.fetchall()}
+
+    seeded: list[dict] = []
+    skipped_already_gold = 0
+    skipped_too_few_classifiers = 0
+    skipped_disagreement = 0
+    label_counts: Counter = Counter()
+
+    for subj_id, rows in by_doc.items():
+        if subj_id in existing_gold:
+            skipped_already_gold += 1
+            continue
+        if len(rows) < min_classifiers:
+            skipped_too_few_classifiers += 1
+            continue
+        labels = [r["label"] for r in rows]
+        if len(set(labels)) != 1:
+            skipped_disagreement += 1
+            continue
+
+        agreed_label = labels[0]
+        classifiers = sorted(r["classifier"] for r in rows)
+        confidences = [round(r["confidence"], 3) for r in rows]
+        labeler = "agreement:" + "+".join(classifiers)
+        evidence = {
+            "classifiers": classifiers,
+            "confidences": confidences,
+            "avg_confidence": round(sum(confidences) / len(confidences), 3),
+        }
+        seeded.append({
+            "subject_id": subj_id,
+            "label": agreed_label,
+            "labeler": labeler,
+            "evidence": evidence,
+            "classifier_count": len(rows),
+        })
+        label_counts[agreed_label] += 1
+
+    if execute and seeded:
+        from datetime import UTC as _UTC
+        utc_now = datetime.now(_UTC).isoformat()
+        for row in seeded:
+            c.execute(
+                """
+                INSERT INTO document_type_gold (
+                    subject_kind, subject_id, label, labeler, source,
+                    evidence_json, superseded_by, notes, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, ?)
+                """,
+                (
+                    "historical_document",
+                    row["subject_id"],
+                    row["label"],
+                    row["labeler"],
+                    "unanimous_classifier_agreement",
+                    json.dumps(row["evidence"]),
+                    utc_now,
+                ),
+            )
+        conn.commit()
+
+    summary = {
+        "state": state,
+        "candidates_considered": len(by_doc),
+        "seeded": len(seeded),
+        "skipped_already_gold": skipped_already_gold,
+        "skipped_too_few_classifiers": skipped_too_few_classifiers,
+        "skipped_disagreement": skipped_disagreement,
+        "min_classifiers": min_classifiers,
+        "exclude_classifiers": sorted(exclude_set),
+        "label_distribution": dict(label_counts.most_common()),
+        "executed": execute,
+    }
+
+    if json_out:
+        typer.echo(json.dumps(summary, indent=2))
+        conn.close()
+        return
+
+    typer.echo(f"\ndocument_type_gold seeding | state={state}\n")
+    typer.echo(f"  min_classifiers required:       {min_classifiers}")
+    if exclude_set:
+        typer.echo(f"  excluded classifiers:           {sorted(exclude_set)}")
+    typer.echo(f"  docs considered:                {summary['candidates_considered']}")
+    typer.echo(f"  -> already gold (skipped):      {summary['skipped_already_gold']}")
+    typer.echo(f"  -> too few classifiers:         {summary['skipped_too_few_classifiers']}")
+    typer.echo(f"  -> classifier disagreement:     {summary['skipped_disagreement']}")
+    typer.echo(f"  -> would seed:                  {summary['seeded']}")
+    if label_counts:
+        typer.echo("\n  Seeded label distribution:")
+        for label, n in label_counts.most_common():
+            typer.echo(f"    {label:<28} {n}")
+    if execute:
+        typer.echo(f"\n  Wrote {len(seeded)} new gold rows to document_type_gold.")
+    else:
+        typer.echo("\n  Dry-run only. Pass --execute to write gold rows.")
+
+    conn.close()
+
+
+@app.command("train-document-type-baseline-nc")
+def train_document_type_baseline_nc(
+    state: str = typer.Option("NC", "--state", help="State filter."),
+    val_fraction: float = typer.Option(
+        0.2, "--val-fraction",
+        help="Stratified val split fraction for classes with >=5 samples.",
+    ),
+    random_state: int = typer.Option(
+        13, "--random-state", help="Deterministic seed for the val split."
+    ),
+    save_path: Path | None = typer.Option(
+        None,
+        "--save",
+        help=(
+            "Optional path to joblib-dump the fitted (vectorizer, model) "
+            "tuple for reuse. Recommend models/baseline_document_type.joblib."
+        ),
+    ),
+    cv_folds: int = typer.Option(
+        0,
+        "--cv",
+        help=(
+            "If > 1, also run stratified k-fold CV with this many folds and "
+            "print mean/std accuracy + F1. Recommended k=5. CV is more honest "
+            "than the single train/val split when the gold set is small "
+            "(~441 rows produces 3-5 pts of accuracy drift between random "
+            "seeds on a single split)."
+        ),
+    ),
+    json_out: bool = typer.Option(False, "--json", help="Emit metrics as JSON."),
+) -> None:
+    """Stream D baseline: TF-IDF + LogisticRegression on document_type_gold.
+
+    Sets a measurable starting point for any later fine-tuned model
+    (DistilBERT, qwen-finetuned) to compare against. Pulls all active
+    gold rows for the given state, materializes their text samples via
+    the same path the bulk extractor uses, splits stratified train/val
+    (with rare classes pinned to train), and fits a multi-class logistic
+    regression with class_weight='balanced'.
+
+    Per docs/research/document_identification.md Stream D — this is the
+    intentionally-minimal first cut. See the module-level docstring of
+    duke_rates.classification.baseline_classifier for rationale.
+    """
+    import sqlite3
+    from duke_rates.classification.baseline_classifier import (
+        TrainingDataset, train_baseline, cross_validate_baseline,
+    )
+    from duke_rates.historical.ncuc.pipeline.bulk_extractor import (
+        BulkExtractor, normalize_docling_markdown, normalize_ocr_text,
+    )
+
+    settings, _ = _bootstrap()
+    conn = sqlite3.connect(settings.database_path)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+
+    c.execute(
+        """
+        SELECT dtg.subject_id, dtg.label
+        FROM document_type_gold dtg
+        JOIN historical_documents hd
+          ON CAST(hd.id AS TEXT) = dtg.subject_id
+         AND dtg.subject_kind = 'historical_document'
+        WHERE dtg.superseded_by IS NULL AND hd.state = ?
+        """,
+        (state,),
+    )
+    gold_rows = c.fetchall()
+    if not gold_rows:
+        typer.echo(f"No gold rows for state={state}. Seed gold first.", err=True)
+        raise typer.Exit(1)
+
+    typer.echo(f"Loading text for {len(gold_rows)} gold docs...")
+    extractor = BulkExtractor(db_path=str(settings.database_path))
+    hd_ids: list[int] = []
+    labels: list[str] = []
+    texts: list[str] = []
+    missing = 0
+    for r in gold_rows:
+        hd_id = int(r["subject_id"])
+        doc = extractor.get_document_for_extraction(hd_id)
+        if not doc:
+            missing += 1
+            continue
+        try:
+            text, src = extractor.extract_text_from_pdf(
+                doc["local_path"],
+                start_page=doc.get("start_page"),
+                end_page=doc.get("end_page"),
+            )
+            if src in ("docling_artifact", "docling_artifact_sliced"):
+                text = normalize_docling_markdown(text)
+            text = normalize_ocr_text(text)
+        except Exception:
+            text = ""
+        if not text:
+            missing += 1
+            continue
+        hd_ids.append(hd_id)
+        labels.append(r["label"])
+        texts.append(text[:2000])  # Match the text_sample slice the seeders use
+
+    conn.close()
+
+    if not texts:
+        typer.echo("No text recoverable for any gold doc.", err=True)
+        raise typer.Exit(1)
+
+    typer.echo(
+        f"Materialized {len(texts)} rows ({missing} skipped — no text). "
+        f"Training baseline..."
+    )
+
+    dataset = TrainingDataset(hd_ids=hd_ids, labels=labels, texts=texts)
+    result = train_baseline(
+        dataset, val_fraction=val_fraction, random_state=random_state
+    )
+
+    metrics = {
+        "state": state,
+        "gold_rows_loaded": len(gold_rows),
+        "rows_used": len(texts),
+        "skipped_no_text": missing,
+        "classes": result.classes,
+        "train_n": result.train_n,
+        "val_n": result.val_n,
+        "train_only_classes": result.train_only_classes,
+        "val_accuracy": round(result.val_accuracy, 4),
+        "overall_train_accuracy": round(result.overall_train_accuracy, 4),
+        "per_class": {
+            lab: {
+                "precision": round(stats.get("precision", 0.0), 3),
+                "recall": round(stats.get("recall", 0.0), 3),
+                "f1-score": round(stats.get("f1-score", 0.0), 3),
+                "support": int(stats.get("support", 0)),
+            }
+            for lab, stats in result.val_classification_report.items()
+            if isinstance(stats, dict) and lab not in ("accuracy",)
+        },
+    }
+
+    if save_path:
+        import joblib
+        save_path.parent.mkdir(parents=True, exist_ok=True)
+        joblib.dump(
+            {"vectorizer": result.vectorizer, "model": result.model,
+             "classes": result.classes, "metrics": metrics},
+            save_path,
+        )
+        metrics["saved_to"] = str(save_path)
+
+    # Optional cross-validation pass for a more honest accuracy number
+    cv_metrics: dict | None = None
+    if cv_folds and cv_folds >= 2:
+        cv_result = cross_validate_baseline(
+            dataset, n_folds=cv_folds, random_state=random_state
+        )
+        cv_metrics = {
+            "n_folds": cv_result.n_folds,
+            "eligible_rows": cv_result.eligible_n,
+            "train_only_classes": cv_result.train_only_classes,
+            "fold_accuracies": cv_result.fold_accuracies,
+            "fold_weighted_f1": cv_result.fold_weighted_f1,
+            "fold_macro_f1": cv_result.fold_macro_f1,
+            "mean_accuracy": cv_result.mean_accuracy,
+            "std_accuracy": cv_result.std_accuracy,
+            "mean_weighted_f1": cv_result.mean_weighted_f1,
+            "std_weighted_f1": cv_result.std_weighted_f1,
+            "mean_macro_f1": cv_result.mean_macro_f1,
+            "std_macro_f1": cv_result.std_macro_f1,
+        }
+        metrics["cross_validation"] = cv_metrics
+
+    if json_out:
+        typer.echo(json.dumps(metrics, indent=2))
+        return
+
+    typer.echo(f"\nbaseline trained | state={state}\n")
+    typer.echo(f"  rows used:                 {metrics['rows_used']}  ({missing} skipped no-text)")
+    typer.echo(f"  train rows:                {result.train_n}")
+    typer.echo(f"  val rows:                  {result.val_n}")
+    typer.echo(f"  classes:                   {len(result.classes)}")
+    typer.echo(f"  train-only classes (rare): {result.train_only_classes}")
+    typer.echo(f"  val accuracy:              {result.val_accuracy:.3f}")
+    typer.echo(f"  train accuracy (ref):      {result.overall_train_accuracy:.3f}")
+    typer.echo("\n  Per-class val metrics:")
+    typer.echo(f"    {'class':<28} {'P':>5}  {'R':>5}  {'F1':>5}  {'n':>4}")
+    per_class = metrics["per_class"]
+    # Sort: actual labels first (alphabetic), then macro/weighted averages
+    label_keys = sorted(
+        k for k in per_class
+        if k not in ("macro avg", "weighted avg")
+    )
+    for lab in label_keys + ["macro avg", "weighted avg"]:
+        if lab not in per_class:
+            continue
+        s = per_class[lab]
+        typer.echo(
+            f"    {lab:<28} {s['precision']:>5.2f}  {s['recall']:>5.2f}  "
+            f"{s['f1-score']:>5.2f}  {s['support']:>4}"
+        )
+    if save_path:
+        typer.echo(f"\n  Artifacts saved to: {save_path}")
+
+    if cv_metrics:
+        typer.echo(f"\n  Cross-validation ({cv_metrics['n_folds']}-fold, "
+                   f"{cv_metrics['eligible_rows']} eligible rows):")
+        typer.echo(f"    accuracy:    mean={cv_metrics['mean_accuracy']:.4f} "
+                   f"std={cv_metrics['std_accuracy']:.4f}  "
+                   f"folds={cv_metrics['fold_accuracies']}")
+        typer.echo(f"    weighted F1: mean={cv_metrics['mean_weighted_f1']:.4f} "
+                   f"std={cv_metrics['std_weighted_f1']:.4f}")
+        typer.echo(f"    macro F1:    mean={cv_metrics['mean_macro_f1']:.4f} "
+                   f"std={cv_metrics['std_macro_f1']:.4f}")
+        if cv_metrics['train_only_classes']:
+            typer.echo(
+                f"    train-only classes (n<{cv_metrics['n_folds']} samples): "
+                f"{cv_metrics['train_only_classes']}"
+            )
+
+
+@app.command("promote-high-confidence-subset-nc")
+def promote_high_confidence_subset_nc(
+    state: str = typer.Option("NC", "--state", help="State filter."),
+    min_confidence: float = typer.Option(
+        0.9,
+        "--min-confidence",
+        help=(
+            "Minimum confidence each subset-agreeing classifier must reach. "
+            "0.9 is the recommended floor — LLM/qwen3:8b averages 0.96 and "
+            "v2 reaches 0.92+ on strong matches, so 0.9 selects only their "
+            "confident calls."
+        ),
+    ),
+    min_subset_size: int = typer.Option(
+        2,
+        "--min-subset",
+        help="Minimum classifiers agreeing on the same label at >= min_confidence.",
+    ),
+    exclude_classifiers: list[str] | None = typer.Option(
+        None,
+        "--exclude-classifier",
+        help="Repeatable. Skip these classifiers when computing subsets.",
+    ),
+    execute: bool = typer.Option(
+        False, "--execute",
+        help="Actually write gold rows. Without this flag, dry-run only.",
+    ),
+    json_out: bool = typer.Option(False, "--json", help="Emit summary as JSON."),
+) -> None:
+    """Promote subset-agreement docs to document_type_gold.
+
+    A subset-agreement is when N classifiers agree on a single label at
+    >= min_confidence, even if other classifiers vote differently at
+    lower confidence. Useful for growing gold on disagreement docs that
+    seed-document-type-gold-nc skips (because it requires *unanimous*
+    agreement across all running classifiers).
+
+    Concrete pattern this surfaces: LLM qwen3:8b at 1.0 confidence agrees
+    with v2 at 0.98 on CERTIFICATE_OF_SERVICE, while v1 and embedding
+    vote different labels at lower confidence. The two high-confidence
+    classifiers carry the signal; lower-confidence noise is ignored.
+
+    Rows are tagged with:
+      labeler  = 'subset:<classifier1>+<classifier2>+...'
+      source   = 'high_confidence_subset_agreement'
+      evidence = {classifiers, confidences, min_threshold, dissenters}
+
+    Idempotent: docs that already have an active gold row are skipped.
+
+    Recommended workflow:
+      1. promote-high-confidence-subset-nc                    (dry-run, review)
+      2. promote-high-confidence-subset-nc --execute          (write to gold)
+      3. audit-document-type-classifications-nc               (verify growth)
+    """
+    import sqlite3
+    from collections import Counter, defaultdict
+
+    settings, _ = _bootstrap()
+    conn = sqlite3.connect(settings.database_path)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+
+    exclude_set = set(exclude_classifiers or [])
+
+    c.execute(
+        """
+        SELECT dc.subject_id, dc.classifier, dc.label, dc.confidence
+        FROM document_classifications dc
+        JOIN historical_documents hd
+          ON CAST(hd.id AS TEXT) = dc.subject_id
+         AND dc.subject_kind = 'historical_document'
+        WHERE dc.stage = 'document_type' AND hd.state = ?
+        """,
+        (state,),
+    )
+
+    by_doc: dict[str, list[sqlite3.Row]] = defaultdict(list)
+    for r in c.fetchall():
+        if r["classifier"] in exclude_set:
+            continue
+        by_doc[r["subject_id"]].append(r)
+
+    c.execute(
+        """SELECT subject_id FROM document_type_gold
+           WHERE subject_kind='historical_document' AND superseded_by IS NULL"""
+    )
+    existing_gold = {r["subject_id"] for r in c.fetchall()}
+
+    promoted: list[dict] = []
+    skipped_already_gold = 0
+    skipped_no_subset = 0
+    skipped_subset_disagree = 0
+    label_counts: Counter = Counter()
+
+    for subj_id, rows in by_doc.items():
+        if subj_id in existing_gold:
+            skipped_already_gold += 1
+            continue
+
+        # Group HIGH-confidence votes by label
+        high_conf_by_label: dict[str, list[sqlite3.Row]] = defaultdict(list)
+        for r in rows:
+            if r["confidence"] >= min_confidence:
+                high_conf_by_label[r["label"]].append(r)
+
+        # Find the label with the largest high-confidence subset
+        if not high_conf_by_label:
+            skipped_no_subset += 1
+            continue
+
+        best_label = max(
+            high_conf_by_label,
+            key=lambda lab: len(high_conf_by_label[lab]),
+        )
+        subset = high_conf_by_label[best_label]
+        if len(subset) < min_subset_size:
+            skipped_no_subset += 1
+            continue
+
+        # Check that no OTHER label has an equally large high-conf subset
+        # (that would be a high-conf disagreement, not a clear winner)
+        other_max = max(
+            (len(v) for lab, v in high_conf_by_label.items() if lab != best_label),
+            default=0,
+        )
+        if other_max >= len(subset):
+            skipped_subset_disagree += 1
+            continue
+
+        # Build the row
+        agreeing_classifiers = sorted(r["classifier"] for r in subset)
+        agreeing_confs = [round(r["confidence"], 3) for r in subset]
+        dissenters = [
+            {
+                "classifier": r["classifier"],
+                "label": r["label"],
+                "confidence": round(r["confidence"], 3),
+            }
+            for r in rows
+            if r["label"] != best_label
+        ]
+        labeler = "subset:" + "+".join(agreeing_classifiers)
+        evidence = {
+            "classifiers": agreeing_classifiers,
+            "confidences": agreeing_confs,
+            "min_threshold": min_confidence,
+            "dissenters": dissenters,
+        }
+        promoted.append({
+            "subject_id": subj_id,
+            "label": best_label,
+            "labeler": labeler,
+            "evidence": evidence,
+            "subset_size": len(subset),
+        })
+        label_counts[best_label] += 1
+
+    if execute and promoted:
+        from datetime import UTC as _UTC
+        utc_now = datetime.now(_UTC).isoformat()
+        for row in promoted:
+            c.execute(
+                """
+                INSERT INTO document_type_gold (
+                    subject_kind, subject_id, label, labeler, source,
+                    evidence_json, superseded_by, notes, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, ?)
+                """,
+                (
+                    "historical_document",
+                    row["subject_id"],
+                    row["label"],
+                    row["labeler"],
+                    "high_confidence_subset_agreement",
+                    json.dumps(row["evidence"]),
+                    utc_now,
+                ),
+            )
+        conn.commit()
+
+    summary = {
+        "state": state,
+        "min_confidence": min_confidence,
+        "min_subset_size": min_subset_size,
+        "exclude_classifiers": sorted(exclude_set),
+        "candidates_considered": len(by_doc),
+        "promoted": len(promoted),
+        "skipped_already_gold": skipped_already_gold,
+        "skipped_no_subset": skipped_no_subset,
+        "skipped_subset_disagree": skipped_subset_disagree,
+        "label_distribution": dict(label_counts.most_common()),
+        "executed": execute,
+    }
+
+    if json_out:
+        typer.echo(json.dumps(summary, indent=2))
+        conn.close()
+        return
+
+    typer.echo(f"\nhigh-confidence subset promotion | state={state}\n")
+    typer.echo(f"  min_confidence:                 {min_confidence}")
+    typer.echo(f"  min subset size:                {min_subset_size}")
+    if exclude_set:
+        typer.echo(f"  excluded classifiers:           {sorted(exclude_set)}")
+    typer.echo(f"  docs considered:                {len(by_doc)}")
+    typer.echo(f"  -> already gold:                {skipped_already_gold}")
+    typer.echo(f"  -> no qualifying subset:        {skipped_no_subset}")
+    typer.echo(f"  -> high-conf disagreement:      {skipped_subset_disagree}")
+    typer.echo(f"  -> would promote:               {len(promoted)}")
+    if label_counts:
+        typer.echo("\n  Promoted label distribution:")
+        for label, n in label_counts.most_common():
+            typer.echo(f"    {label:<28} {n}")
+    if execute:
+        typer.echo(f"\n  Wrote {len(promoted)} new gold rows.")
+    else:
+        typer.echo("\n  Dry-run only. Pass --execute to write.")
+
+    conn.close()
+
+
+@app.command("triage-disagreements-nc")
+def triage_disagreements_nc(
+    state: str = typer.Option("NC", "--state", help="State filter."),
+    output_path: Path = typer.Option(
+        ...,
+        "--out",
+        help=(
+            "Output JSONL path for the labeling queue. Each line is one "
+            "disagreement doc with side-by-side classifier votes, layout "
+            "signals, and a text sample. Suitable for a notebook or "
+            "Streamlit label-fix UI."
+        ),
+    ),
+    limit: int = typer.Option(200, "--limit", help="Cap rows written."),
+    weight_underrepresented: bool = typer.Option(
+        True,
+        "--weight-underrepresented/--no-weight",
+        help=(
+            "Prioritize docs whose classifiers voted for type buckets that "
+            "are underrepresented in document_type_gold. Targets the "
+            "specific labels Stream D fine-tuning needs more examples of "
+            "(RIDER, COVER_LETTER, NOTICE_OF_HEARING, etc.)."
+        ),
+    ),
+    label_filter: list[str] | None = typer.Option(
+        None,
+        "--label",
+        help=(
+            "Repeatable. Only include docs where at least one classifier "
+            "voted one of these labels. Use to focus triage on specific "
+            "type buckets."
+        ),
+    ),
+) -> None:
+    """Export classifier-disagreement docs as a labeling JSONL queue.
+
+    Stream A continuation: the 555 disagreement docs in the corpus are
+    where ground-truth labels grow fastest. This CLI exports them as a
+    JSONL queue where each line carries side-by-side classifier votes,
+    layout signals, a 2000-char text sample, and a suggested label
+    (majority vote where one exists).
+
+    Workflow:
+      1. triage-disagreements-nc --out triage_v0.jsonl
+      2. open in a notebook / Streamlit UI, hand-confirm or fix labels
+      3. write back to document_type_gold via a follow-up insert
+         (use source='human_review', labeler='human:<your-id>')
+
+    Pass --label COVER_LETTER --label RIDER (etc.) to focus the queue on
+    specific types currently underrepresented in gold.
+    """
+    import sqlite3
+    from collections import Counter, defaultdict
+
+    settings, _ = _bootstrap()
+    conn = sqlite3.connect(settings.database_path)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+
+    # Current gold distribution → underrepresented-bucket weights
+    c.execute("""
+        SELECT label, COUNT(*) AS n FROM document_type_gold
+        WHERE superseded_by IS NULL GROUP BY label
+    """)
+    gold_counts: dict[str, int] = {r["label"]: r["n"] for r in c.fetchall()}
+    # Inverse-frequency weight per label — higher weight = bigger gold gap.
+    # Labels not in gold get the highest weight (infinity-ish via large constant).
+    all_known_labels = [
+        "TARIFF_SHEET", "RIDER", "RATE_SCHEDULE", "ORDER_FINAL", "ORDER_PROCEDURAL",
+        "TESTIMONY", "COVER_LETTER", "CERTIFICATE_OF_SERVICE", "NOTICE_OF_HEARING",
+        "APPLICATION", "COMPLIANCE_FILING", "FERC_ORDER", "EIA_REPORT",
+    ]
+    label_weights = {}
+    for lab in all_known_labels:
+        n = gold_counts.get(lab, 0)
+        label_weights[lab] = 100.0 / (n + 1)  # n=0 -> weight 100, n=176 -> ~0.6
+
+    # Pull all document_type classifications for state, joined with hd
+    c.execute(
+        """
+        SELECT dc.subject_id AS hd_id_str,
+               dc.classifier, dc.label, dc.confidence,
+               hd.family_key, hd.title, hd.local_path, hd.start_page, hd.end_page
+        FROM document_classifications dc
+        JOIN historical_documents hd
+          ON CAST(hd.id AS TEXT) = dc.subject_id
+         AND dc.subject_kind = 'historical_document'
+        WHERE dc.stage = 'document_type' AND hd.state = ?
+        """,
+        (state,),
+    )
+
+    by_doc: dict[str, dict] = defaultdict(lambda: {"votes": [], "meta": None})
+    for r in c.fetchall():
+        if by_doc[r["hd_id_str"]]["meta"] is None:
+            by_doc[r["hd_id_str"]]["meta"] = {
+                "family_key": r["family_key"],
+                "title": r["title"],
+                "local_path": r["local_path"],
+                "start_page": r["start_page"],
+                "end_page": r["end_page"],
+            }
+        by_doc[r["hd_id_str"]]["votes"].append({
+            "classifier": r["classifier"],
+            "label": r["label"],
+            "confidence": round(r["confidence"], 3),
+        })
+
+    # Skip docs that already have an active gold row — they're settled.
+    c.execute(
+        """SELECT subject_id FROM document_type_gold
+           WHERE subject_kind='historical_document' AND superseded_by IS NULL"""
+    )
+    settled = {r["subject_id"] for r in c.fetchall()}
+
+    label_filter_set = {lab.upper() for lab in (label_filter or [])}
+
+    candidates: list[dict] = []
+    for hd_id_str, payload in by_doc.items():
+        if hd_id_str in settled:
+            continue
+        votes = payload["votes"]
+        labels = [v["label"] for v in votes]
+        if len(set(labels)) < 2 or len(votes) < 2:
+            # Not a disagreement (either too few classifiers or unanimous)
+            continue
+        if label_filter_set and not (label_filter_set & set(labels)):
+            continue
+
+        # Priority score: average of underrepresented-bucket weights across
+        # votes. Average (not sum) so a doc with all-rare-label votes ranks
+        # above a doc with one rare + several common votes — the all-rare
+        # doc is more diagnostic for gold-set growth in those buckets.
+        priority = sum(label_weights.get(lab, 1.0) for lab in labels) / max(1, len(labels))
+        if weight_underrepresented is False:
+            priority = 1.0
+
+        candidates.append({
+            "hd_id": int(hd_id_str),
+            "priority": round(priority, 2),
+            "votes": votes,
+            "labels_voted": sorted(set(labels)),
+            "majority_label": Counter(labels).most_common(1)[0][0],
+            **payload["meta"],
+        })
+
+    # Sort by priority (high first), then hd_id for stability
+    candidates.sort(key=lambda c: (-c["priority"], c["hd_id"]))
+    candidates = candidates[:limit]
+
+    # Enrich with text sample (last because slow)
+    from duke_rates.historical.ncuc.pipeline.bulk_extractor import (
+        BulkExtractor, normalize_docling_markdown, normalize_ocr_text,
+    )
+    extractor = BulkExtractor(db_path=str(settings.database_path))
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    written = 0
+    with output_path.open("w", encoding="utf-8") as f:
+        for cand in candidates:
+            doc = extractor.get_document_for_extraction(cand["hd_id"])
+            text_sample = ""
+            text_source = "none"
+            if doc:
+                try:
+                    text, src = extractor.extract_text_from_pdf(
+                        doc["local_path"],
+                        start_page=doc.get("start_page"),
+                        end_page=doc.get("end_page"),
+                    )
+                    if src in ("docling_artifact", "docling_artifact_sliced"):
+                        text = normalize_docling_markdown(text)
+                    text_sample = normalize_ocr_text(text)[:2000]
+                    text_source = src
+                except Exception:
+                    pass
+            row = {
+                **cand,
+                "text_sample": text_sample,
+                "text_source": text_source,
+            }
+            # Remove non-JSON fields
+            row.pop("local_path", None)
+            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+            written += 1
+
+    conn.close()
+
+    typer.echo(f"\nTriage queue exported | state={state}")
+    typer.echo(f"  candidates considered:   {len(by_doc)}")
+    typer.echo(f"  disagreement docs:       {len(candidates) if not limit else 'capped at limit'}")
+    typer.echo(f"  written to {output_path}: {written}")
+    if weight_underrepresented:
+        typer.echo("\n  Underrepresented-bucket label weights (gold counts in parens):")
+        for lab, w in sorted(label_weights.items(), key=lambda kv: -kv[1]):
+            n = gold_counts.get(lab, 0)
+            typer.echo(f"    {lab:<28} weight={w:.2f}  gold_n={n}")
+
+
+@app.command("classify-documents-v2-nc")
+def classify_documents_v2_nc(
+    state: str = typer.Option("NC", "--state", help="State filter for historical_documents."),
+    limit: int | None = typer.Option(None, "--limit", help="Limit docs scored (default: all)."),
+    write_classifications: bool = typer.Option(
+        False,
+        "--write-classifications",
+        help=(
+            "Persist v2 classifications to document_classifications. Without "
+            "this flag the command only prints a comparison report against "
+            "v1 (rule_document_type_v1)."
+        ),
+    ),
+    show_disagreements: int = typer.Option(
+        15,
+        "--show-disagreements",
+        help="Show up to N v1 vs v2 disagreement examples.",
+    ),
+    json_out: bool = typer.Option(False, "--json", help="Emit summary as JSON."),
+) -> None:
+    """Run rule_document_type_v2 against NC docs and compare with v1.
+
+    Pulls a DocumentSignals snapshot for each doc (title, first 2k chars,
+    last 1k chars, layout features from document_fingerprints when
+    available), runs the new per-type classifier, and reports:
+
+      - confidence distribution (avg/min/max, hi/lo bands)
+      - label distribution
+      - per-doc disagreements with the v1 classifier
+      - optional persistence to document_classifications
+
+    Part of Stream B in docs/research/document_identification.md.
+    """
+    import sqlite3
+    from collections import Counter
+    from duke_rates.classification.rule_document_type_v2 import (
+        DocumentSignals,
+        classify_v2,
+        CLASSIFIER_NAME as V2_NAME,
+        CLASSIFIER_VERSION as V2_VERSION,
+    )
+    from duke_rates.historical.ncuc.pipeline.bulk_extractor import (
+        BulkExtractor, normalize_docling_markdown, normalize_ocr_text,
+    )
+
+    settings, _ = _bootstrap()
+    extractor = BulkExtractor(db_path=str(settings.database_path))
+    conn = sqlite3.connect(settings.database_path)
+    conn.row_factory = sqlite3.Row
+
+    sql = """
+        SELECT hd.id, hd.title, hd.family_key
+        FROM historical_documents hd
+        WHERE hd.state = ?
+        ORDER BY hd.id
+    """
+    if limit:
+        sql += f" LIMIT {int(limit)}"
+    rows = conn.execute(sql, (state,)).fetchall()
+    typer.echo(f"Scoring {len(rows)} docs with rule_document_type_v2...")
+
+    # Fingerprint lookup for layout signals
+    fp_by_pdf: dict[str, sqlite3.Row] = {}
+    for fp in conn.execute(
+        "SELECT source_pdf, page_count, text_chars, has_tables FROM document_fingerprints_v2"
+    ).fetchall():
+        fp_by_pdf[fp["source_pdf"]] = fp
+
+    # v1 label lookup for comparison
+    v1_by_hd: dict[int, str] = {}
+    for r in conn.execute(
+        """SELECT subject_id, label FROM document_classifications
+           WHERE classifier='rule_document_type_v1' AND stage='document_type'"""
+    ).fetchall():
+        try:
+            v1_by_hd[int(r["subject_id"])] = r["label"]
+        except (TypeError, ValueError):
+            continue
+
+    results: list[dict] = []
+    label_counts: Counter = Counter()
+    confidence_buckets = {"high": 0, "mid": 0, "low": 0}
+    disagreements: list[dict] = []
+
+    for r in rows:
+        hd_id = int(r["id"])
+        doc = extractor.get_document_for_extraction(hd_id)
+        if not doc:
+            continue
+        try:
+            text, src = extractor.extract_text_from_pdf(
+                doc["local_path"],
+                start_page=doc.get("start_page"),
+                end_page=doc.get("end_page"),
+            )
+            if src in ("docling_artifact", "docling_artifact_sliced"):
+                text = normalize_docling_markdown(text)
+            text = normalize_ocr_text(text)
+        except Exception:
+            text = ""
+        if not text:
+            continue
+        first_text = text[:2000]
+        last_text = text[-1000:] if len(text) > 2000 else ""
+
+        fp = fp_by_pdf.get(doc["local_path"])
+        signals = DocumentSignals(
+            title=r["title"] or "",
+            first_text=first_text,
+            last_text=last_text,
+            page_count=fp["page_count"] if fp else None,
+            text_chars=fp["text_chars"] if fp else len(text),
+            has_tables=fp["has_tables"] if fp else None,
+        )
+        result = classify_v2(signals)
+        label_counts[result.label] += 1
+        if result.confidence >= 0.9:
+            confidence_buckets["high"] += 1
+        elif result.confidence >= 0.5:
+            confidence_buckets["mid"] += 1
+        else:
+            confidence_buckets["low"] += 1
+
+        v1_label = v1_by_hd.get(hd_id)
+        if v1_label and v1_label != result.label:
+            disagreements.append({
+                "hd_id": hd_id,
+                "v1_label": v1_label,
+                "v2_label": result.label,
+                "v2_confidence": round(result.confidence, 3),
+                "title": (r["title"] or "")[:60],
+            })
+
+        if write_classifications:
+            from duke_rates.classification.persistence import record_classification
+            try:
+                record_classification(
+                    conn,
+                    subject_kind="historical_document",
+                    subject_id=str(hd_id),
+                    stage="document_type",
+                    result=result,
+                )
+            except Exception as exc:
+                logger.debug(f"v2 persist failed for hd={hd_id}: {exc}")
+
+        results.append({
+            "hd_id": hd_id, "label": result.label, "confidence": result.confidence,
+        })
+
+    if write_classifications:
+        conn.commit()
+
+    summary = {
+        "state": state,
+        "docs_scored": len(results),
+        "confidence_buckets": confidence_buckets,
+        "label_distribution": dict(label_counts.most_common()),
+        "disagreements_total": len(disagreements),
+    }
+
+    if json_out:
+        typer.echo(json.dumps(summary, indent=2))
+        conn.close()
+        return
+
+    typer.echo(f"\nrule_document_type_v2 scoring | state={state}")
+    typer.echo(f"  docs scored:                {summary['docs_scored']}")
+    typer.echo(f"  high-confidence (>=0.9):    {confidence_buckets['high']}")
+    typer.echo(f"  mid-confidence (0.5-0.9):   {confidence_buckets['mid']}")
+    typer.echo(f"  low-confidence (<0.5):      {confidence_buckets['low']}")
+    typer.echo("\n  Label distribution (v2):")
+    for label, n in label_counts.most_common():
+        typer.echo(f"    {label:<28} {n}")
+
+    typer.echo(f"\n  v1 vs v2 disagreements: {len(disagreements)}")
+    if disagreements and show_disagreements:
+        for d in disagreements[:show_disagreements]:
+            typer.echo(
+                f"    hd={d['hd_id']:<5} v1={d['v1_label']:<20} -> v2={d['v2_label']:<22} "
+                f"conf={d['v2_confidence']:.2f}  {d['title']!r}"
+            )
+
+    if write_classifications:
+        typer.echo(f"\n  Wrote {len(results)} v2 classifications to document_classifications.")
+    else:
+        typer.echo(
+            "\n  Dry-run only. Pass --write-classifications to persist v2 results."
+        )
+
+    conn.close()
+
+
 @app.command("audit-rider-map")
 def audit_rider_map(
     state: str = typer.Option("NC", "--state", help="State code"),
