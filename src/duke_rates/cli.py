@@ -18046,6 +18046,175 @@ def train_document_type_baseline_nc(
             )
 
 
+@app.command("audit-stale-gold-nc")
+def audit_stale_gold_nc(
+    state: str = typer.Option("NC", "--state", help="State filter."),
+    min_v2_confidence: float = typer.Option(
+        0.9, "--min-v2-confidence",
+        help="Only flag rows where v2 disagrees at >= this confidence.",
+    ),
+    mark_for_review: bool = typer.Option(
+        False,
+        "--mark-for-review",
+        help=(
+            "Append a 'v2 disagrees: <label>@<conf>' annotation to the gold "
+            "row's notes field. Does NOT supersede the row — human review "
+            "decides whether to keep the original label, replace it, or "
+            "split (treat both as valid for a mixed-content bundle)."
+        ),
+    ),
+    out: Path | None = typer.Option(
+        None, "--out",
+        help=(
+            "Optional JSONL path. One row per stale gold doc with the "
+            "original gold label, v2's disagreement label, v2 confidence, "
+            "and all classifier votes for context."
+        ),
+    ),
+    json_out: bool = typer.Option(False, "--json", help="Emit summary as JSON."),
+) -> None:
+    """Find document_type_gold rows where the v2 classifier now disagrees.
+
+    The v0 gold set was seeded from rule_v1 + embedding (+ optional LLM)
+    agreement. After v2 backfilled corpus-wide, v2 disagrees with many
+    of those agreements. The gold rows weren't auto-superseded — they
+    remain as point-in-time labels — but those still-valid labels
+    should be sanity-checked given v2's higher confidence.
+
+    Common patterns the live corpus surfaces:
+    - TESTIMONY -> COVER_LETTER: PDF body opens with a transmittal
+      letter rather than direct testimony; the original label saw
+      the testimony content but rule_v1 didn't distinguish well.
+    - ORDER_FINAL -> TARIFF_SHEET / RIDER: leaf-revision orders that
+      include the new tariff body; v2 reads the tariff section.
+    - TESTIMONY/ORDER_FINAL -> RIDER: a rider's filing testimony or
+      approval order whose body content reads as the rider itself.
+
+    Read-only by default. --mark-for-review writes a notes annotation
+    so reviewers can pick the row up from a future label-fix UI. No
+    other DB writes; supersession requires an explicit follow-up.
+    """
+    import sqlite3
+    from collections import Counter, defaultdict
+
+    settings, _ = _bootstrap()
+    conn = sqlite3.connect(settings.database_path)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+
+    c.execute(
+        """
+        WITH v2 AS (
+          SELECT subject_id, label AS v2_label, confidence AS v2_confidence,
+                 evidence_json AS v2_evidence
+          FROM document_classifications
+          WHERE stage='document_type'
+            AND classifier='rule_document_type_v2'
+        )
+        SELECT
+            CAST(hd.id AS INTEGER) AS hd_id,
+            hd.family_key, hd.title,
+            dtg.id AS gold_id,
+            dtg.label AS gold_label,
+            dtg.labeler AS gold_labeler,
+            dtg.source AS gold_source,
+            dtg.notes AS gold_notes,
+            v2.v2_label, v2.v2_confidence, v2.v2_evidence
+        FROM document_type_gold dtg
+        JOIN historical_documents hd
+          ON CAST(hd.id AS TEXT) = dtg.subject_id
+        JOIN v2 ON v2.subject_id = dtg.subject_id
+        WHERE dtg.superseded_by IS NULL
+          AND dtg.subject_kind = 'historical_document'
+          AND hd.state = ?
+          AND v2.v2_label != dtg.label
+          AND v2.v2_confidence >= ?
+        ORDER BY v2.v2_confidence DESC, hd.id
+        """,
+        (state, min_v2_confidence),
+    )
+    rows = [dict(r) for r in c.fetchall()]
+
+    # Group by (gold_label, v2_label)
+    pairs: Counter = Counter()
+    by_gold: Counter = Counter()
+    by_v2: Counter = Counter()
+    for r in rows:
+        pairs[(r["gold_label"], r["v2_label"])] += 1
+        by_gold[r["gold_label"]] += 1
+        by_v2[r["v2_label"]] += 1
+
+    summary = {
+        "state": state,
+        "min_v2_confidence": min_v2_confidence,
+        "total_stale": len(rows),
+        "by_gold_label": dict(by_gold.most_common()),
+        "by_v2_label": dict(by_v2.most_common()),
+        "top_pairs": [
+            {"gold_label": g, "v2_label": v2, "count": n}
+            for (g, v2), n in pairs.most_common(15)
+        ],
+        "marked_for_review": 0,
+    }
+
+    if mark_for_review and rows:
+        from datetime import UTC as _UTC
+        utc_now = datetime.now(_UTC).isoformat()
+        for r in rows:
+            annotation = (
+                f"v2 disagrees: {r['v2_label']}@{r['v2_confidence']:.2f} "
+                f"(audited {utc_now[:10]})"
+            )
+            existing_notes = r["gold_notes"] or ""
+            # Idempotency — don't append if the annotation is already there
+            if annotation in existing_notes:
+                continue
+            new_notes = (existing_notes + "\n" + annotation).strip()
+            c.execute(
+                "UPDATE document_type_gold SET notes = ? WHERE id = ?",
+                (new_notes, r["gold_id"]),
+            )
+            summary["marked_for_review"] += 1
+        conn.commit()
+
+    if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        with out.open("w", encoding="utf-8") as f:
+            for r in rows:
+                f.write(json.dumps(r, ensure_ascii=False, default=str) + "\n")
+        summary["written_to"] = str(out)
+
+    conn.close()
+
+    if json_out:
+        typer.echo(json.dumps(summary, indent=2))
+        return
+
+    typer.echo(f"\nStale-gold audit | state={state}")
+    typer.echo(f"  v2 min confidence:        {min_v2_confidence}")
+    typer.echo(f"  total stale rows:         {len(rows)}")
+
+    typer.echo("\n  By gold label (what v0 said):")
+    for label, n in by_gold.most_common():
+        typer.echo(f"    {label:<28} {n}")
+
+    typer.echo("\n  By v2 label (what v2 says now):")
+    for label, n in by_v2.most_common():
+        typer.echo(f"    {label:<28} {n}")
+
+    typer.echo("\n  Top stale pairs (gold -> v2):")
+    typer.echo(f"    {'gold label':<26} -> {'v2 label':<26} {'n':>4}")
+    for (g, v2), n in pairs.most_common(10):
+        typer.echo(f"    {g:<26} -> {v2:<26} {n:>4}")
+
+    if mark_for_review:
+        typer.echo(f"\n  Marked {summary['marked_for_review']} gold rows for review (notes annotation).")
+    if out:
+        typer.echo(f"  Per-doc JSONL written to: {out}")
+    elif not mark_for_review:
+        typer.echo("\n  Dry-run only. Pass --mark-for-review to annotate notes, or --out to export JSONL.")
+
+
 @app.command("audit-bundle-metadata-mismatch-nc")
 def audit_bundle_metadata_mismatch_nc(
     state: str = typer.Option("NC", "--state", help="State filter."),
