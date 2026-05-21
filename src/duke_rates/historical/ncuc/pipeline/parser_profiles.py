@@ -2561,6 +2561,156 @@ class ProgressJaaRiderProfile:
 
 
 @dataclass
+class ProgressSellerChargeProfile:
+    """Profile for DEP riders/schedules with fixed `$N.NN/month` customer-class charges.
+
+    Targets a narrow set of docs whose rates are stated as flat monthly fees
+    rather than per-kWh adjustment values, which `progress_single_value_rider`
+    cannot extract because its delegated parser (parse_nc_progress_leaf) only
+    recognizes adjustment-style rates.
+
+    Confirmed candidates (2026-05-16 audit):
+      - leaf-590 (Purchased Power Schedule PP): "Monthly Seller Charge $23.06 ..."
+        with capacity-tiered amounts
+      - leaf-656 (Rider 68 Dispatched Power): "Basic Customer Charge ... $$5.00"
+      - leaf-662 (Rider EPPWP): "Residential Classification - $1.17/month"
+
+    Each pattern is matched independently so adding new families only requires
+    extending _SUPPORTED_FAMILIES + adding a regex if its phrasing differs.
+    """
+
+    name: str = "progress_seller_charge"
+    _SUPPORTED_FAMILIES = {
+        "nc-progress-leaf-590",   # PP — Purchased Power (Monthly Seller Charge)
+        "nc-progress-leaf-591",   # PP variant
+        "nc-progress-leaf-656",   # Rider 68 — Dispatched Power (Basic Customer Charge)
+        "nc-progress-leaf-662",   # EPPWP — REPS Adjustment
+    }
+
+    # Pattern A: each tier is `$N.NN for ... Eligible Qualifying Facilit...`.
+    # We anchor on the "Eligible Qualifying Facilit" phrase so we catch both
+    # the "Monthly Seller Charge $23.06 for ..." line AND the bare "$3.00 for ..."
+    # continuation that sits in a separate paragraph after blank lines. Anchor
+    # is mandatory so this regex doesn't grab unrelated dollar amounts elsewhere
+    # in the doc (e.g. kVAr penalties).
+    _SELLER_CHARGE_TIER_RE = re.compile(
+        r"\$\s*(\d+\.\d{2})\s+(?:for\s+)?([^$\n]{0,150}?Eligible\s+Qualifying\s+Facilit[^$\n]{0,150})",
+        re.I,
+    )
+    # Sentinel: only attempt Pattern A when "Monthly Seller Charge" appears
+    # in the text — keeps the per-tier regex from running on docs that
+    # happen to mention QFs in some other context.
+    _SELLER_CHARGE_HEADER_RE = re.compile(
+        r"Monthly\s+Seller\s+Charge", re.I,
+    )
+    # Pattern B: "Basic Customer Charge ... $N.NN" near a rate schedule reference (leaf-656)
+    # Allows whitespace between `$` and the digits (Docling markdown formatting).
+    _BASIC_CUSTOMER_RE = re.compile(
+        r"Basic\s+Customer\s+Charge[^\n$]*?\$\$?\s*(\d+\.\d{2})",
+        re.I,
+    )
+    # Pattern C: "<Class> Classification - $N.NN/month" (leaf-662)
+    _REPS_ADJ_RE = re.compile(
+        r"(\w[\w ]+?)\s+Classification\s*[-–]\s*\$(\d+\.\d{2})/month",
+        re.I,
+    )
+
+    def supports(self, doc: dict, text: str) -> bool:
+        family_key = (doc.get("family_key") or "").lower()
+        if family_key not in self._SUPPORTED_FAMILIES:
+            return False
+        return bool(
+            self._SELLER_CHARGE_HEADER_RE.search(text)
+            or self._BASIC_CUSTOMER_RE.search(text)
+            or self._REPS_ADJ_RE.search(text)
+        )
+
+    def score(self, doc: dict, text: str) -> float:
+        if not self.supports(doc, text):
+            return 0.0
+        # Score >0.94 (above progress_single_value_rider's 0.88) so this profile
+        # wins for its 4 supported families. The bounded family allowlist keeps
+        # it from poaching from other riders.
+        return 0.96
+
+    def extract(self, doc: dict, text: str) -> list[ExtractedCharge]:
+        family_key = (doc.get("family_key") or "").lower()
+        charges: list[ExtractedCharge] = []
+        # Pattern A — Monthly Seller Charge tiers (leaf-590/591)
+        # Gate on the "Monthly Seller Charge" header, then iterate per-tier
+        # rates anywhere in the doc that reference Eligible Qualifying
+        # Facilities. This handles both the inline first tier and the
+        # bare-dollar continuation tier on the next line / paragraph.
+        if self._SELLER_CHARGE_HEADER_RE.search(text):
+            for tier_match in self._SELLER_CHARGE_TIER_RE.finditer(text):
+                try:
+                    value = float(tier_match.group(1))
+                except (ValueError, IndexError):
+                    continue
+                qualifier = (tier_match.group(2) or "").strip().replace("\n", " ")[:80]
+                charges.append(ExtractedCharge(
+                    charge_type="fixed",
+                    charge_label=f"Monthly Seller Charge ({qualifier})" if qualifier else "Monthly Seller Charge",
+                    rate_value=value,
+                    rate_unit="$/month",
+                    season="all_year",
+                    tou_period=None,
+                    tier_min=None,
+                    tier_max=None,
+                    source_snippet=f"Monthly Seller Charge ${value:.2f} {qualifier}"[:120],
+                    confidence_score=0.90,
+                ))
+        # Pattern B — Basic Customer Charge from inline rate-schedule refs (leaf-656)
+        for m in self._BASIC_CUSTOMER_RE.finditer(text):
+            try:
+                value = float(m.group(1))
+            except (ValueError, IndexError):
+                continue
+            charges.append(ExtractedCharge(
+                charge_type="fixed",
+                charge_label="Basic Customer Charge",
+                rate_value=value,
+                rate_unit="$/month",
+                season="all_year",
+                tou_period=None,
+                tier_min=None,
+                tier_max=None,
+                source_snippet=f"Basic Customer Charge ${value:.2f}"[:120],
+                confidence_score=0.88,
+            ))
+        # Pattern C — Classification-based REPS adjustment (leaf-662)
+        for m in self._REPS_ADJ_RE.finditer(text):
+            classification = (m.group(1) or "").strip()[:30]
+            try:
+                value = float(m.group(2))
+            except (ValueError, IndexError):
+                continue
+            charges.append(ExtractedCharge(
+                charge_type="fixed",
+                charge_label=f"REPS Adjustment ({classification})" if classification else "REPS Adjustment",
+                rate_value=value,
+                rate_unit="$/month",
+                season="all_year",
+                tou_period=None,
+                tier_min=None,
+                tier_max=None,
+                source_snippet=f"{classification} - ${value:.2f}/month"[:120],
+                confidence_score=0.88,
+            ))
+        # Dedupe by (charge_label, rate_value) — Pattern A regex can run twice
+        # over the same multi-line span depending on whitespace.
+        seen: set[tuple[str, float]] = set()
+        deduped: list[ExtractedCharge] = []
+        for ch in charges:
+            key = (ch.charge_label or "", ch.rate_value)
+            if key in seen:
+                continue
+            seen.add(key)
+            deduped.append(ch)
+        return deduped
+
+
+@dataclass
 class ProgressSingleValueRiderProfile:
     """Profile for single-value Progress riders like RDM, ESM, PIM, STS, CPRE, RECD."""
 
@@ -4343,7 +4493,7 @@ class CarolinasLightingScheduleProfile:
         re.I,
     )
     _PL_ROW_RE = re.compile(
-        r"^(?:[\d,]+\s+\d+\s+)?(?P<label>.+?)\s+\$?\s*(?P<inside>[\d.]+|NA)\s+\$?\s*(?P<outside>[\d.]+|NA)$",
+        r"^(?P<lumens>[\d,]+\s+\d+\s+)?(?P<label>.+?)\s+\$?\s*(?P<inside>[\d.]+|NA)\s+\$?\s*(?P<outside>[\d.]+|NA)$",
         re.I,
     )
     _THREE_COLUMN_ROW_RE = re.compile(
@@ -4358,6 +4508,7 @@ class CarolinasLightingScheduleProfile:
         "high pressure sodium vapor": "High Pressure Sodium Vapor",
         "metal halide": "Metal Halide",
         "mercury vapor": "Mercury Vapor",
+        "mercury": "Mercury",
         "incandescent": "Incandescent",
     }
     _FL_CATEGORY_MAP = {
@@ -4367,17 +4518,28 @@ class CarolinasLightingScheduleProfile:
         "metal halide": "Metal Halide",
     }
 
+    # Matches `schedule fl` and `schedule "fl"` (legacy Nantahala docs quote
+    # the schedule code). Same form is reused for other lighting codes below.
+    _SCHEDULE_CODE_RES = {
+        code: re.compile(rf'schedule\s*"?{code}"?', re.IGNORECASE)
+        for code in ("ol", "pl", "fl", "yl", "gl")
+    }
+
     def supports(self, doc: dict, text: str) -> bool:
         family_key = (doc.get("family_key") or "").lower()
         if family_key not in self._SUPPORTED_FAMILIES:
             return False
         lowered = text.lower()
+
+        def _has_code(code: str) -> bool:
+            return bool(self._SCHEDULE_CODE_RES[code].search(text))
+
         return (
-            ("schedule ol" in lowered and "outdoor lighting service" in lowered)
-            or ("schedule yl" in lowered and "yard lighting service" in lowered)
-            or ("schedule gl" in lowered and "governmental lighting service" in lowered)
-            or ("schedule pl" in lowered and "per month per luminaire" in lowered)
-            or ("schedule fl" in lowered and "floodlighting service" in lowered)
+            (_has_code("ol") and "outdoor lighting service" in lowered)
+            or (_has_code("yl") and "yard lighting service" in lowered)
+            or (_has_code("gl") and "governmental lighting service" in lowered)
+            or (_has_code("pl") and "per month per luminaire" in lowered)
+            or (_has_code("fl") and "floodlighting service" in lowered)
         )
 
     def score(self, doc: dict, text: str) -> float:
@@ -4589,6 +4751,11 @@ class CarolinasLightingScheduleProfile:
             new_idx = lines.index("New Pole")
             underground_idx = lines.index("Underground")
         except ValueError:
+            # Modern DEC three-column structure not present. Try Nantahala
+            # legacy `SCHEDULE "FL"` format (per-luminaire single-value rows).
+            nantahala = self._extract_fl_nantahala(lines)
+            if nantahala:
+                return self._dedupe(nantahala)
             return []
 
         label_lines = [line for line in lines[hps_idx:existing_idx] if not self._is_money_or_na(line)]
@@ -4625,22 +4792,201 @@ class CarolinasLightingScheduleProfile:
         )
         return self._dedupe(charges)
 
+    # Matches a Nantahala-style luminaire rate row. Two forms are handled:
+    #   (a) Raw Docling markdown:
+    #       `| 27,500 | 114 | 250 Watt ... $ 10.12 |`
+    #   (b) Post-`normalize_docling_markdown` (production path) — pipes
+    #       and separators are flattened to whitespace:
+    #       `27,500  114  250 Watt ... $ 10.12`
+    #   Special rows can have empty lumens/kWh and start directly with the
+    #   description text (e.g. `Special floodlighting wood pole ... $ 5.25`).
+    # All forms end in `$ N.NN`. We anchor on the trailing dollar value plus
+    # a luminaire keyword in the description so unrelated dollar lines are
+    # rejected.
+    _NANTAHALA_TABLE_ROW_RE = re.compile(
+        r"(?P<full_line>"
+        r"(?:\|\s*[\d,.]*\s*\|\s*\d*\s*\|\s*)?"   # optional markdown table prefix
+        r"(?:[\d,.]+\s+\d+\s+)?"                    # or post-flatten lumens+kWh prefix
+        r"(?P<desc>[^|\n$]*?(?:Watt|floodlighting|luminaire|Sodium|Halide|Mercury)"
+        r"[^|\n$]*?)"
+        r"\s*\$\s*(?P<value>\d+\.\d{2})"
+        r"(?:\s*\|)?"                               # optional markdown table close
+        r"\s*$"
+        r")",
+        re.IGNORECASE | re.MULTILINE,
+    )
+
+    def _extract_fl_nantahala(self, lines: list[str]) -> list[ExtractedCharge]:
+        """Extract Nantahala Power and Light legacy `SCHEDULE "FL"` rates.
+
+        Format (Docling-rendered Markdown table):
+          | LUMENS | kWh | LUMINAIRE                                        |
+          |--------|-----|--------------------------------------------------|
+          | 27,500 | 114 | 250 Watt High Pressure Sodium, attached ... $10.12 |
+          |        |     | Special floodlighting wood pole ... served $ 5.25 |
+
+        Bounded to the FL section so we don't pick up YL/SL rates from the
+        same compliance book and mis-attribute them as Floodlighting.
+        """
+        # Locate the FL section bounds. The header may be `SCHEDULE "FL"
+        # FLOODLIGHTING SERVICE` or `SCHEDULE "FL" FLOODUGHTING SERVICE`
+        # (Nantahala OCR drops the L). The section's `MONTHLY RATE PER UNIT`
+        # table usually appears BEFORE the header line in the rendered text
+        # (Docling renders page headers after table bodies), so we anchor
+        # on the FIRST `MONTHLY RATE PER UNIT` that's adjacent to FL-flavored
+        # luminaire descriptions instead.
+        # Strategy: walk all lines; for each table row that matches our
+        # Nantahala pattern AND has floodlighting-style content, extract.
+        # The "is FL" check is by description keyword ("attached to existing
+        # pole" + presence of floodlighting/Wood pole text in adjacent rows).
+
+        # First pass: collect all candidate luminaire rows. Match against
+        # each line. Some lines contain the prefix+value on the same line
+        # (post-flatten form); others have the prefix on one line and the
+        # `attached to existing pole $ N.NN` continuation on the next. We
+        # try both single-line matches and merged adjacent-line text but
+        # dedupe by (value, line_idx) so the same physical row doesn't get
+        # captured twice.
+        candidates: list[tuple[int, str, float, str]] = []
+        seen_values_at_lines: set[tuple[int, float]] = set()
+        for i, line in enumerate(lines):
+            # Try single-line match first (most common after flattening)
+            m = self._NANTAHALA_TABLE_ROW_RE.search(line)
+            if m:
+                try:
+                    value = float(m.group("value"))
+                except ValueError:
+                    continue
+                desc = (m.group("desc") or "").strip()
+                candidates.append((i, line, value, desc))
+                seen_values_at_lines.add((i, value))
+                continue
+            # Fallback: merge this line + next line and try again. Catches
+            # cases where the rate value sits on a separate line from the
+            # luminaire description (raw pdfplumber output). Skip if we
+            # already captured this value at this or the next line.
+            if i + 1 < len(lines):
+                merged = f"{line} {lines[i+1]}"
+                m = self._NANTAHALA_TABLE_ROW_RE.search(merged)
+                if m:
+                    try:
+                        value = float(m.group("value"))
+                    except ValueError:
+                        continue
+                    if (i, value) in seen_values_at_lines or (i + 1, value) in seen_values_at_lines:
+                        continue
+                    desc = (m.group("desc") or "").strip()
+                    candidates.append((i, merged, value, desc))
+                    seen_values_at_lines.add((i, value))
+
+        if not candidates:
+            return []
+
+        # Second pass: identify which candidate rows are in the FL section.
+        # The FL section's luminaire rows include "Special floodlighting
+        # wood pole" markers; the YL/SL/OL sections do NOT mention
+        # "floodlighting". So we group candidates by proximity and keep only
+        # groups containing at least one floodlighting-marker row.
+        fl_charges: list[ExtractedCharge] = []
+        # Find run-groups (consecutive candidate lines within 3 lines of each other)
+        groups: list[list[int]] = []
+        current: list[int] = []
+        prev_idx: int | None = None
+        for cand_pos, cand in enumerate(candidates):
+            line_idx = cand[0]
+            if prev_idx is None or line_idx - prev_idx <= 3:
+                current.append(cand_pos)
+            else:
+                groups.append(current)
+                current = [cand_pos]
+            prev_idx = line_idx
+        if current:
+            groups.append(current)
+
+        for group in groups:
+            # Is this an FL group? At least one row in the group must mention
+            # floodlighting (Special floodlighting wood pole rows are the
+            # FL-distinctive marker).
+            is_fl = any(
+                "floodlighting" in candidates[cp][3].lower()
+                for cp in group
+            )
+            if not is_fl:
+                continue
+            for cp in group:
+                _line_idx, _line, value, desc = candidates[cp]
+                # Strip the table-header prefix when the merged-line fallback
+                # captured it ("LUMENS kWh LUMINAIRE 27,500 114 ...").
+                desc = re.sub(
+                    r"^\s*LUMENS\s+kWh\s+LUMINAIRE\s+[\d,.]+\s+\d+\s+",
+                    "",
+                    desc,
+                    flags=re.IGNORECASE,
+                )
+                # Strip the lumens/kWh leading digits in the post-flatten form
+                # ("27,500 114 250 Watt..." -> "250 Watt...").
+                desc = re.sub(r"^\s*[\d,.]+\s+\d+\s+", "", desc)
+                label = re.sub(r"\s+", " ", desc).strip(",. ")[:200]
+                if not label:
+                    label = "Floodlighting Luminaire"
+                fl_charges.append(self._make_fixed_charge(
+                    charge_label=f"Floodlighting - {label}",
+                    rate_value=value,
+                ))
+        return fl_charges
+
+    @staticmethod
+    def _collapse_repeated_phrase(heading: str) -> str:
+        """Collapse headings where Docling repeats the cell text for merged cells.
+
+        Works on already-normalized (single-space) headings.
+        E.g. "high pressure sodium vapor high pressure sodium vapor high pressure sodium vapor"
+             → "high pressure sodium vapor"
+        """
+        words = heading.split()
+        n = len(words)
+        for unit_len in range(1, n // 2 + 1):
+            unit = words[:unit_len]
+            repeats = n // unit_len
+            if repeats >= 2 and words == unit * repeats:
+                return " ".join(unit)
+        return heading
+
     def _extract_pl_line_rows(self, lines: list[str]) -> list[ExtractedCharge]:
         charges: list[ExtractedCharge] = []
         current_category: str | None = None
         for raw_line in lines:
             line = self._normalize_ocr_money_line(raw_line)
             normalized_heading = self._normalize_heading(line)
-            category = self._PL_CATEGORY_MAP.get(normalized_heading)
+            collapsed = self._collapse_repeated_phrase(normalized_heading)
+            category = self._PL_CATEGORY_MAP.get(collapsed)
             if category:
                 current_category = category
                 continue
-            if not current_category or "$" not in line:
+            # Old-format docs (pre-2010) have Mercury as the implicit first section
+            # under "(A) BRACKET-MOUNTED LUMINAIRES" with no explicit Mercury header.
+            if "bracket-mounted" in collapsed:
+                if current_category is None:
+                    current_category = "Mercury"
+                continue
+            # Stop accumulating charges when we hit non-luminaire sections.
+            if re.match(r"^\([b-z]\)", collapsed) or "underground charges" in collapsed:
+                break
+            if not current_category:
                 continue
             match = self._PL_ROW_RE.match(line)
             if not match:
                 continue
-            label = self._normalize_table_label(match.group("label"))
+            lumens_raw = match.group("lumens")
+            label_raw = self._normalize_table_label(match.group("label"))
+            # Only prepend lumens when the style label alone is non-unique
+            # (old-format docs use "Suburban"/"Urban" for all lamp types).
+            _GENERIC_STYLE_LABELS = {"suburban", "urban", "rural"}
+            if lumens_raw and label_raw.lower().split()[0] in _GENERIC_STYLE_LABELS:
+                lumens_str = lumens_raw.strip().split()[0]
+                label = f"{lumens_str} Lumens - {label_raw}"
+            else:
+                label = label_raw
             inside_value = self._parse_money_or_na(match.group("inside"))
             outside_value = self._parse_money_or_na(match.group("outside"))
             if inside_value is not None:
@@ -4665,11 +5011,15 @@ class CarolinasLightingScheduleProfile:
         for raw_line in lines:
             line = self._normalize_ocr_money_line(raw_line)
             normalized_heading = self._normalize_heading(line)
-            category = self._FL_CATEGORY_MAP.get(normalized_heading)
+            collapsed = self._collapse_repeated_phrase(normalized_heading)
+            category = self._FL_CATEGORY_MAP.get(collapsed)
             if category:
                 current_category = category
                 continue
-            if not current_category or "$" not in line:
+            if "bracket-mounted" in collapsed and current_category is None:
+                current_category = "High Pressure Sodium Vapor"
+                continue
+            if not current_category:
                 continue
             match = self._FL_ROW_RE.match(line)
             if not match:
@@ -5801,6 +6151,240 @@ class CarolinasFuelCostAdjRiderProfile:
 
 
 @dataclass
+class CarolinasPurchasedPowerScheduleProfile:
+    """Profile for DEC `SCHEDULE PP` Purchased Power (Qualifying Facility) docs.
+
+    DEC equivalent of Progress leaf-590 — same two-tier capacity-based charge
+    structure but uses "Monthly Administrative Charge" terminology instead of
+    "Monthly Seller Charge". Also extracts the Interconnection Facilities
+    Charge minimum monthly fee which is unique to the DEC version.
+
+    Confirmed candidate (2026-05-16 audit):
+      - nc-carolinas-schedule-pp (hd_id=480, eff 2021-10-11):
+          "Monthly Administrative Charge: $19.91 ... capacity greater than 15 kW"
+          "$3.00 ... capacity of 15 kW or less"
+          "$25 minimum monthly Interconnection Facilities Charge"
+    """
+
+    name: str = "carolinas_purchased_power_schedule"
+    _SUPPORTED_FAMILIES = {
+        "nc-carolinas-schedule-pp",
+    }
+
+    # Header that gates extraction — must appear for the profile to fire.
+    _ADMIN_CHARGE_HEADER_RE = re.compile(
+        r"Monthly\s+Administrative\s+Charge", re.I,
+    )
+    # Per-tier rate: `$N.NN for Eligible Qualifying Facilities ...`.
+    # Anchors on "Eligible Qualifying Facilit" to avoid picking up unrelated
+    # dollar amounts elsewhere in the doc (mirrors the leaf-590 approach).
+    _ADMIN_TIER_RE = re.compile(
+        r"\$\s*(\d+\.\d{2})\s+(?:for\s+)?([^$\n]{0,150}?Eligible\s+Qualifying\s+Facilit[^$\n]{0,150})",
+        re.I,
+    )
+    # Interconnection Facilities Charge minimum (DEC-specific):
+    # "the $25 minimum monthly Interconnection Facilities Charge".
+    # Match either with or without a decimal — `$25` is valid here.
+    _INTERCONNECTION_RE = re.compile(
+        r"\$\s*(\d+(?:\.\d{2})?)\s+minimum\s+monthly\s+Interconnection\s+Facilities\s+Charge",
+        re.I,
+    )
+
+    def supports(self, doc: dict, text: str) -> bool:
+        if (doc.get("family_key") or "").lower() not in self._SUPPORTED_FAMILIES:
+            return False
+        return bool(
+            self._ADMIN_CHARGE_HEADER_RE.search(text)
+            or self._INTERCONNECTION_RE.search(text)
+        )
+
+    def score(self, doc: dict, text: str) -> float:
+        return 0.96 if self.supports(doc, text) else 0.0
+
+    def extract(self, doc: dict, text: str) -> list[ExtractedCharge]:
+        charges: list[ExtractedCharge] = []
+        # Monthly Administrative Charge tiers
+        if self._ADMIN_CHARGE_HEADER_RE.search(text):
+            for tier in self._ADMIN_TIER_RE.finditer(text):
+                try:
+                    value = float(tier.group(1))
+                except (ValueError, IndexError):
+                    continue
+                qualifier = (tier.group(2) or "").strip().replace("\n", " ")[:80]
+                charges.append(ExtractedCharge(
+                    charge_type="fixed",
+                    charge_label=f"Monthly Administrative Charge ({qualifier})" if qualifier else "Monthly Administrative Charge",
+                    rate_value=value,
+                    rate_unit="$/month",
+                    season="all_year",
+                    tou_period=None,
+                    tier_min=None,
+                    tier_max=None,
+                    source_snippet=f"Monthly Administrative Charge ${value:.2f} {qualifier}"[:120],
+                    confidence_score=0.90,
+                ))
+        # Interconnection Facilities Charge minimum
+        for ic in self._INTERCONNECTION_RE.finditer(text):
+            try:
+                value = float(ic.group(1))
+            except (ValueError, IndexError):
+                continue
+            charges.append(ExtractedCharge(
+                charge_type="fixed",
+                charge_label="Interconnection Facilities Charge (minimum)",
+                rate_value=value,
+                rate_unit="$/month",
+                season="all_year",
+                tou_period=None,
+                tier_min=None,
+                tier_max=None,
+                source_snippet=f"${value:.2f} minimum monthly Interconnection Facilities Charge"[:120],
+                confidence_score=0.88,
+            ))
+        # Dedupe by (charge_label, rate_value)
+        seen: set[tuple[str, float]] = set()
+        out: list[ExtractedCharge] = []
+        for ch in charges:
+            key = (ch.charge_label or "", ch.rate_value)
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append(ch)
+        return out
+
+
+@dataclass
+class CarolinasCpreRiderProfile:
+    """Profile for DEC `RIDER CPRE` Competitive Procurement of Renewable Energy.
+
+    Multi-class adjustment rider — applies a per-kWh increment to each rate
+    class (Residential, General Service and Lighting, Industrial). Each class
+    block has the same 5-line structure:
+
+      Prospective Component of CPRE     N.NNNN ¢/kWh
+      Experience Modification Factor    (N.NNNN) ¢/kWh   <- parenthesized negative
+      Net CPRE Rider Factor             N.NNNN ¢/kWh
+      Regulatory Fee Multiplier         X 1.001703       <- not a $/kWh rate
+      CPRE Factor                       N.NNNN ¢/kWh     <- final billable rate
+
+    We extract all 4 ¢/kWh components per class (skipping the regulatory
+    fee multiplier which is a unitless multiplier, not a rate). 4 × 3
+    classes = up to 12 charges per doc.
+
+    Confirmed candidate (2026-05-16 audit):
+      - nc-carolinas-rider-ridercpre (hd_id=7211, eff 2024-09-01):
+          Residential / GS+Lighting / Industrial blocks with full 5-row tables
+    """
+
+    name: str = "carolinas_cpre_rider"
+    _SUPPORTED_FAMILIES = {
+        "nc-carolinas-rider-ridercpre",
+        "nc-carolinas-rider-cpre",  # alternate family-key form
+    }
+
+    # Gate: must mention "RIDER CPRE" or "Competitive Procurement of Renewable Energy"
+    _CPRE_GATE_RE = re.compile(
+        r"RIDER\s+CPRE|Competitive\s+Procurement\s+of\s+Renewable\s+Energy",
+        re.I,
+    )
+    # Class block headers as they appear in the source (uppercase per-line).
+    # Order matters — we use it to slice the text into per-class regions.
+    _CLASS_HEADERS = (
+        ("RESIDENTIAL SERVICE", "Residential"),
+        ("GENERAL SERVICE AND LIGHTING", "General Service and Lighting"),
+        ("INDUSTRIAL SERVICE", "Industrial"),
+    )
+    # Rate-line components within each class block. Each maps a label-prefix
+    # in the text to (charge_type, output_label_suffix). Untyped so dataclass
+    # treats it as a class-level constant, not a field with mutable default.
+    _RATE_COMPONENTS = (
+        ("Prospective Component of CPRE", "adjustment", "Prospective Component"),
+        ("Experience Modification Factor", "adjustment", "Experience Modification Factor"),
+        ("Net CPRE Rider Factor", "adjustment", "Net Rider Factor"),
+        ("CPRE Factor", "adjustment", "CPRE Factor"),
+    )
+    # Captures a ¢/kWh rate (with optional parenthesized negative wrapper).
+    # `0.0435 ¢/kWh`, `(0.0372) ¢/kWh`, `0.0063 �/kWh` (OCR variant).
+    _CENT_RATE_RE = re.compile(
+        r"(\(?)\s*(\d+\.\d{3,5})\s*\)?\s*[¢�]/k?wh",
+        re.I,
+    )
+
+    def supports(self, doc: dict, text: str) -> bool:
+        if (doc.get("family_key") or "").lower() not in self._SUPPORTED_FAMILIES:
+            return False
+        return bool(self._CPRE_GATE_RE.search(text))
+
+    def score(self, doc: dict, text: str) -> float:
+        return 0.96 if self.supports(doc, text) else 0.0
+
+    def extract(self, doc: dict, text: str) -> list[ExtractedCharge]:
+        # Find each class header's position. Slice text into per-class regions
+        # (header_i, header_i+1). Within each region, find each rate-component
+        # label and extract the ¢/kWh value that follows on the same or next line.
+        # We rebuild text with whitespace normalized so multi-space gaps from
+        # Docling's table flattening still match.
+        normalized = re.sub(r"[ \t]+", " ", text)
+        positions: list[tuple[int, str]] = []  # (start_pos, class_label)
+        for header_token, class_label in self._CLASS_HEADERS:
+            for m in re.finditer(re.escape(header_token), normalized, re.IGNORECASE):
+                positions.append((m.start(), class_label))
+        if not positions:
+            return []
+        positions.sort()
+        # Build regions: each header position to the next position (or end).
+        regions: list[tuple[str, str]] = []
+        for i, (pos, class_label) in enumerate(positions):
+            end = positions[i + 1][0] if i + 1 < len(positions) else len(normalized)
+            regions.append((class_label, normalized[pos:end]))
+
+        # Dedupe: same class_label may appear multiple times if the doc has
+        # repeated sections (e.g., redline before/after). Keep the FIRST
+        # occurrence per class — that's the "primary" rate table.
+        seen_classes: set[str] = set()
+        deduped_regions: list[tuple[str, str]] = []
+        for class_label, region in regions:
+            if class_label in seen_classes:
+                continue
+            seen_classes.add(class_label)
+            deduped_regions.append((class_label, region))
+
+        charges: list[ExtractedCharge] = []
+        for class_label, region in deduped_regions:
+            for component_token, charge_type, suffix in self._RATE_COMPONENTS:
+                m = re.search(re.escape(component_token), region, re.IGNORECASE)
+                if not m:
+                    continue
+                # Look at the next 80 chars for a ¢/kWh rate.
+                tail = region[m.end(): m.end() + 80]
+                rate_match = self._CENT_RATE_RE.search(tail)
+                if not rate_match:
+                    continue
+                try:
+                    value = float(rate_match.group(2))
+                except (ValueError, IndexError):
+                    continue
+                # Parenthesized = negative.
+                if "(" in rate_match.group(0):
+                    value = -value
+                # Convert ¢ -> $ for consistency with other profiles.
+                value_dollars = value / 100.0
+                charges.append(ExtractedCharge(
+                    charge_type=charge_type,
+                    charge_label=f"CPRE {suffix} - {class_label}",
+                    rate_value=value_dollars,
+                    rate_unit="$/kWh",
+                    season="all_year",
+                    tou_period=None,
+                    tier_min=None,
+                    tier_max=None,
+                    source_snippet=f"{class_label} - {component_token}: {rate_match.group(0)}"[:120],
+                    confidence_score=0.90,
+                ))
+        return charges
+
+
+@dataclass
 class CarolinasFlatFeeRiderProfile:
     """Profile for flat per-month or per-block riders for both DEC and DEP companies."""
 
@@ -6300,6 +6884,7 @@ class HistoricalRateParserRegistry:
             ProgressCurrentLeafBridgeProfile(),
             ProgressBillingAdjustmentsProfile(),
             ProgressJaaRiderProfile(),
+            ProgressSellerChargeProfile(),
             ProgressSingleValueRiderProfile(),
             ProgressRecoveryRiderProfile(),
             ProgressManagementEnergyEfficiencyCostRecoveryRiderProfile(),
@@ -6328,6 +6913,8 @@ class HistoricalRateParserRegistry:
             CarolinasResidentialTouProfile(),
             CarolinasResidentialFlatProfile(),
             CarolinasFuelCostAdjRiderProfile(),
+            CarolinasPurchasedPowerScheduleProfile(),
+            CarolinasCpreRiderProfile(),
             CarolinasFlatFeeRiderProfile(),
             GenericResidentialProfile(),
         ]
@@ -6413,6 +7000,42 @@ class HistoricalRateParserRegistry:
                 "nc-progress-program-appendixcprogram",
                 "nc-progress-leaf-700",
                 "nc-progress-leaf-723",
+                # 2026-05-16 audit additions: profile-gap families confirmed
+                # rate-free by two-scan check (no kWh patterns AND no
+                # customer-charge-with-dollar patterns). These docs are
+                # program descriptions, formula-only riders, or service
+                # regulations — by design no fixed value to extract. Without
+                # this allowlist entry they land on `unknown` and pollute
+                # the near-miss audit as "needs profile" when they don't.
+                "nc-progress-leaf-660",   # Premier Power Service PPS (formula rider)
+                "nc-progress-leaf-672",   # Clean Energy Impact Rider (formula)
+                "nc-progress-leaf-701",   # SBES program
+                "nc-progress-leaf-704",   # RSSEE Smart $aver Energy Efficiency
+                "nc-progress-leaf-709",   # EEE program
+                "nc-progress-leaf-710",   # MEE program
+                "nc-progress-leaf-711",   # REA program
+                "nc-progress-leaf-712",   # LWP Low-Income Weatherization Pay-for-Performance
+                "nc-progress-leaf-720",   # Prepaid Advantage Program PPA
+                "nc-progress-leaf-721",   # TOB Tariffed On-Bill Program
+                "nc-progress-leaf-740",   # EVSB program
+                "nc-progress-leaf-741",   # FCS program
+                "nc-progress-leaf-801",   # Outdoor Lighting Service Regulations
+                "nc-progress-leaf-802",   # Line Extension Plan LEP
+                "nc-progress-leaf-803",   # Standard Service Voltages
+                # 2026-05-16 Carolinas conservative additions. Each title and
+                # text inspected; confirmed as filing letters / service
+                # regulations / pilot tariff letters with no extractable
+                # rates. Skipped: EE (9 docs, sample too narrow); schedule-PP
+                # (Carolinas Purchased Power — likely has Seller Charge
+                # content downstream of the slice, needs a profile, not
+                # zero-classification); rider-CAR/PM/PIM/NL/FL/RIDERCPRE/
+                # RATECASE (rate-pattern scan flagged real rate content).
+                "nc-carolinas-rider-sbes",   # Small Business Energy Saver filing letter
+                "nc-carolinas-rider-us",     # Filing letter, 2 pages
+                "nc-carolinas-rider-ssr",    # ncriderssr.pdf
+                "nc-carolinas-rider-iqheu",  # IQ High-Energy Use Pilot Compliance Tariff filing
+                "nc-carolinas-rider-gs",     # Outdoor Lighting Service Regulations (mistagged as GS)
+                "nc-carolinas-rider-esm",    # ncresmultifamily.pdf
             }:
                 return 0.0, ()
             return 0.99, ("zero_charge_program_explicit_match",)
@@ -6953,6 +7576,63 @@ class HistoricalRateParserRegistry:
                 return 0.82, ("jaa_family",)
             return 0.0, ()
 
+        if profile_name == "progress_seller_charge":
+            _seller_charge_families = {
+                "nc-progress-leaf-590",
+                "nc-progress-leaf-591",
+                "nc-progress-leaf-656",
+                "nc-progress-leaf-662",
+            }
+            if signals.family_key not in _seller_charge_families:
+                return 0.0, ()
+            lowered = signals.text_lower
+            has_seller_charge = "monthly seller charge" in lowered
+            has_basic_customer = "basic customer charge" in lowered and "$" in lowered
+            has_reps_adj = "classification" in lowered and "/month" in lowered
+            if not (has_seller_charge or has_basic_customer or has_reps_adj):
+                return 0.0, ()
+            reasons_local: list[str] = ["seller_charge_family"]
+            if has_seller_charge:
+                reasons_local.append("monthly_seller_charge")
+            if has_basic_customer:
+                reasons_local.append("basic_customer_charge")
+            if has_reps_adj:
+                reasons_local.append("reps_classification")
+            return 0.96, tuple(reasons_local)
+
+        if profile_name == "carolinas_purchased_power_schedule":
+            if signals.family_key != "nc-carolinas-schedule-pp":
+                return 0.0, ()
+            lowered = signals.text_lower
+            has_admin = "monthly administrative charge" in lowered
+            has_ic = "interconnection facilities charge" in lowered
+            if not (has_admin or has_ic):
+                return 0.0, ()
+            reasons_local: list[str] = ["carolinas_pp_schedule"]
+            if has_admin:
+                reasons_local.append("monthly_administrative_charge")
+            if has_ic:
+                reasons_local.append("interconnection_facilities_charge")
+            return 0.96, tuple(reasons_local)
+
+        if profile_name == "carolinas_cpre_rider":
+            if signals.family_key not in {
+                "nc-carolinas-rider-ridercpre",
+                "nc-carolinas-rider-cpre",
+            }:
+                return 0.0, ()
+            lowered = signals.text_lower
+            has_rider_cpre = "rider cpre" in lowered
+            has_competitive = "competitive procurement of renewable energy" in lowered
+            if not (has_rider_cpre or has_competitive):
+                return 0.0, ()
+            reasons_local: list[str] = ["carolinas_cpre_rider"]
+            if has_rider_cpre:
+                reasons_local.append("rider_cpre")
+            if has_competitive:
+                reasons_local.append("competitive_procurement")
+            return 0.96, tuple(reasons_local)
+
         if profile_name == "progress_single_value_rider":
             _svr_families = {
                 # leaf-602 (JAA) handled by progress_jaa_rider
@@ -7287,23 +7967,29 @@ class HistoricalRateParserRegistry:
             }:
                 return 0.0, ()
             lowered = signals.text_lower
-            if "schedule ol" in lowered and "outdoor lighting service" in lowered:
+            # Match both `schedule X` and `schedule "X"` (legacy Nantahala docs
+            # quote the schedule code). Mirrors the regex in
+            # CarolinasLightingScheduleProfile._SCHEDULE_CODE_RES.
+            _code = lambda c: bool(
+                re.search(rf'schedule\s*"?{c}"?', signals.text_lower, re.IGNORECASE)
+            )
+            if _code("ol") and "outdoor lighting service" in lowered:
                 score = 0.93
                 reasons.extend(("lighting_schedule", "schedule_ol", "luminaire_rates"))
                 return score, tuple(reasons)
-            if "schedule pl" in lowered and "per month per luminaire" in lowered:
+            if _code("pl") and "per month per luminaire" in lowered:
                 score = 0.93
                 reasons.extend(("lighting_schedule", "schedule_pl", "luminaire_rates"))
                 return score, tuple(reasons)
-            if "schedule fl" in lowered and "floodlighting service" in lowered:
+            if _code("fl") and "floodlighting service" in lowered:
                 score = 0.93
                 reasons.extend(("lighting_schedule", "schedule_fl", "luminaire_rates"))
                 return score, tuple(reasons)
-            if "schedule yl" in lowered and "yard lighting service" in lowered:
+            if _code("yl") and "yard lighting service" in lowered:
                 score = 0.93
                 reasons.extend(("lighting_schedule", "schedule_yl", "per_unit_rates"))
                 return score, tuple(reasons)
-            if "schedule gl" in lowered and "governmental lighting service" in lowered:
+            if _code("gl") and "governmental lighting service" in lowered:
                 score = 0.93
                 reasons.extend(("lighting_schedule", "schedule_gl", "luminaire_rates"))
                 return score, tuple(reasons)
