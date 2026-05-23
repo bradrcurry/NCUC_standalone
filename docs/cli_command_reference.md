@@ -49,7 +49,7 @@ If you are unsure which command family to use, choose in this order:
 4. If the problem is lineage or version linkage: `lineage show-gaps-nc`, `lineage validate-nc`
 5. If the problem is document identity, routing, or reuse confidence: `lineage show-provenance-gaps-nc`, `lineage show-fingerprint-coverage-nc`, `show-document-classification-audit-nc`
 6. If the problem is missing clean historical PDFs: `workflow search-nc-missing-clean-docs`, `workflow run-nc-missing-doc`
-7. If the problem is new downloaded NCUC records: `ncuc-import-pipeline`, then `bootstrap-missing-versions-nc`, then `extract-rates-nc`
+7. If the problem is new downloaded NCUC records: `ncuc import-pipeline`, then `bootstrap-missing-versions-nc`, then `extract-rates-nc`
 
 ## Source-Of-Truth Docs
 
@@ -136,69 +136,69 @@ python -m duke_rates tariff-update --state NC --company carolinas --auto-parse
 
 | Command | What it does |
 |---|---|
-| `ncuc-seed-discover` | Seed the discovery queue with known NCUC docket anchors |
-| `ncuc-search` | Run a targeted NCUC portal text search |
-| `ncuc-smart-search` | Run a search with quality-filtered results (preferred over raw search) |
-| `ncuc-public-search` | Search the NCUC public filing index |
-| `ncuc-annual-orders-scan` | Scan annual NCUC order index for tariff filings |
-| `ncuc-docket-fetch` | Fetch all documents from a specific docket number |
-| `ncuc-resolve-docket-ids` | Resolve raw docket IDs to canonical NCUC document IDs |
-| `ncuc-playwright-discover` | Playwright-based portal scrape (requires Chrome + NCID auth) |
-| `ncuc-portal-scrape` | Low-level portal scrape |
-| `ncuc-wayback-discover` | Search Wayback Machine for archived Duke tariff URLs |
-| `ncuc-wayback-harvest` | Download and register found Wayback Machine documents |
-| `ncuc-fetch` | Fetch a document by URL and register it |
-| `ncuc-fetch-portal` | Fetch directly from NCUC portal URL |
-| `ncuc-ingest-url` | Ingest a single URL into the discovery queue |
-| `ncuc-list` | List discovery records with status filters |
-| `ncuc-show` | Show full detail on a discovery record |
-| `ncuc-pending-rates` | List discovery records pending rate extraction |
-| `ncuc-login-test` | Low-level auth probe for authenticated DocketDetails access |
-| `ncuc-portal-smoke-test` | Canonical authenticated portal smoke test: login, resolve, DocketDetails, docket inventory |
-| `ncuc-portal-search` | Canonical authenticated portal search: exact-docket with `--docket-number`, structured search otherwise |
-| `ncuc-family-query` | Query discovery records for a specific family key |
+| `ncuc seed-discover` | Seed the discovery queue with known NCUC docket anchors |
+| `ncuc search` | Run a targeted NCUC portal text search |
+| `ncuc smart-search` | Run a search with quality-filtered results (preferred over raw search) |
+| `ncuc public-search` | Search the NCUC public filing index |
+| `ncuc annual-orders-scan` | Scan annual NCUC order index for tariff filings |
+| `ncuc docket-fetch` | Fetch all documents from a specific docket number |
+| `ncuc resolve-docket-ids` | Resolve raw docket IDs to canonical NCUC document IDs |
+| `ncuc playwright-discover` | Playwright-based portal scrape (requires Chrome + NCID auth) |
+| `ncuc portal-scrape` | Low-level portal scrape |
+| `ncuc wayback-discover` | Search Wayback Machine for archived Duke tariff URLs |
+| `ncuc wayback-harvest` | Download and register found Wayback Machine documents |
+| `ncuc fetch` | Fetch a document by URL and register it |
+| `ncuc fetch-portal` | Fetch directly from NCUC portal URL |
+| `ncuc ingest-url` | Ingest a single URL into the discovery queue |
+| `ncuc list` | List discovery records with status filters |
+| `ncuc show` | Show full detail on a discovery record |
+| `ncuc pending-rates` | List discovery records pending rate extraction |
+| `ncuc login-test` | Low-level auth probe for authenticated DocketDetails access |
+| `ncuc portal-smoke-test` | Canonical authenticated portal smoke test: login, resolve, DocketDetails, docket inventory |
+| `ncuc portal-search` | Canonical authenticated portal search: exact-docket with `--docket-number`, structured search otherwise |
+| `ncuc family-query` | Query discovery records for a specific family key |
 
 **Authenticated portal workflow is canonical.** Use the public search only as a fallback when you are deliberately doing broad keyword hunting.
 
 **Tested on 2026-04-21:**
-- `python -m duke_rates ncuc-login-test` succeeded with Chrome and authenticated DocketDetails access.
-- `python -m duke_rates ncuc-resolve-docket-ids --docket-number "E-2, Sub 1354"` returned the expected exact match.
-- `python -m duke_rates ncuc-docket-fetch 9b3614b6-11d6-4703-8d18-5e2e2ef3d705 --docket-number "E-2, Sub 1354" --dry-run` listed 64 docket documents.
+- `python -m duke_rates ncuc login-test` succeeded with Chrome and authenticated DocketDetails access.
+- `python -m duke_rates ncuc resolve-docket-ids --docket-number "E-2, Sub 1354"` returned the expected exact match.
+- `python -m duke_rates ncuc docket-fetch 9b3614b6-11d6-4703-8d18-5e2e2ef3d705 --docket-number "E-2, Sub 1354" --dry-run` listed 64 docket documents.
 - `python -m duke_rates search doc-param --company "Duke Energy Progress" --types TARIFF,RATESCED --after 11/01/2025 --before 12/31/2025 --max 20 --top 10` returned 6 results.
 
 **Do not treat these commands as interchangeable:**
-- `ncuc-portal-smoke-test` is the preferred first check. It verifies login, resolve, DocketDetails access, and docket inventory in one run.
-- `ncuc-portal-search` is the preferred authenticated search surface.
-- `ncuc-login-test`, `search doc-param`, `ncuc-resolve-docket-ids`, and `ncuc-docket-fetch` remain lower-level commands for manual control.
-- `ncuc-public-search` is the weaker public fallback. Do not start there for normal portal work.
+- `ncuc portal-smoke-test` is the preferred first check. It verifies login, resolve, DocketDetails access, and docket inventory in one run.
+- `ncuc portal-search` is the preferred authenticated search surface.
+- `ncuc login-test`, `search doc-param`, `ncuc resolve-docket-ids`, and `ncuc docket-fetch` remain lower-level commands for manual control.
+- `ncuc public-search` is the weaker public fallback. Do not start there for normal portal work.
 
 **Canonical command sequence:**
 ```powershell
-python -m duke_rates ncuc-portal-smoke-test
-python -m duke_rates ncuc-portal-search --docket-number "E-2, Sub 1354"
-python -m duke_rates ncuc-portal-search --company "Duke Energy Progress" --types TARIFF,RATESCED --after 11/01/2025 --before 12/31/2025 --max 20 --top 10
+python -m duke_rates ncuc portal-smoke-test
+python -m duke_rates ncuc portal-search --docket-number "E-2, Sub 1354"
+python -m duke_rates ncuc portal-search --company "Duke Energy Progress" --types TARIFF,RATESCED --after 11/01/2025 --before 12/31/2025 --max 20 --top 10
 ```
 
-**Important limitation:** a zero-result `search doc-param --docket ...` query does not prove the docket is empty. Prefer `ncuc-portal-search --docket-number ...`, which uses exact-docket resolve + inventory instead of the brittle structured-docket path.
+**Important limitation:** a zero-result `search doc-param --docket ...` query does not prove the docket is empty. Prefer `ncuc portal-search --docket-number ...`, which uses exact-docket resolve + inventory instead of the brittle structured-docket path.
 
 ### 2b. Import and Mining
 
 | Command | What it does |
 |---|---|
-| `ncuc-import-pipeline` | **Primary intake command.** Import all pending downloads: mines page/span evidence, assigns family keys, creates provisional families. Alias: `mine-ncuc-pipeline`. Do NOT run both simultaneously. |
+| `ncuc import-pipeline` | **Primary intake command.** Import all pending downloads: mines page/span evidence, assigns family keys, creates provisional families. Alias: `mine-ncuc-pipeline`. Do NOT run both simultaneously. |
 | `lineage add-historical-document-nc` | Register one page-bounded NC historical PDF directly into `historical_documents` when you already know the correct family/date/page range |
 | `lineage rebind-historical-page-range` | Update the bounded page range for an existing historical row and optionally requeue it |
 | `mine-tariff-sheets-nc` | Mine tariff sheets specifically (narrower than full pipeline) |
-| `ncuc-mine-pdf-content` | Mine PDF content for a specific document |
-| `ncuc-import-exhibit-candidates` | Import candidate exhibit documents from NCUC filings |
-| `ncuc-list-exhibit-candidates` | List candidate exhibits pending import decision |
-| `bootstrap-missing-versions-nc` | Create minimal `tariff_version` rows for historical docs that have `effective_start` + `local_path` but no version link. Run after `ncuc-import-pipeline`. |
+| `ncuc mine-pdf-content` | Mine PDF content for a specific document |
+| `ncuc import-exhibit-candidates` | Import candidate exhibit documents from NCUC filings |
+| `ncuc list-exhibit-candidates` | List candidate exhibits pending import decision |
+| `bootstrap-missing-versions-nc` | Create minimal `tariff_version` rows for historical docs that have `effective_start` + `local_path` but no version link. Run after `ncuc import-pipeline`. |
 | `load-ncuc-ingest` | Load raw NCUC ingest records from a file |
 | `import-history-inbox-progress-nc` | Import documents from the history inbox |
 | `export-history-inbox-progress-nc` | Export history inbox contents |
 
 **Critical note:** `extract-rates-nc` requires both `effective_start IS NOT NULL` and a
-`tariff_versions.historical_document_id` link. Run `ncuc-import-pipeline` then
+`tariff_versions.historical_document_id` link. Run `ncuc import-pipeline` then
 `bootstrap-missing-versions-nc` before extraction.
 
 ### 2c. Missing-document recovery
@@ -371,7 +371,7 @@ These stale rows can break missing-doc triage and historical row loading unless 
 
 **Typical full pipeline sequence:**
 ```bash
-python -m duke_rates ncuc-import-pipeline --all-downloaded
+python -m duke_rates ncuc import-pipeline --all-downloaded
 python -m duke_rates bootstrap-missing-versions-nc
 python -m duke_rates extract-rates-nc
 python -m duke_rates parse-review-summary
@@ -1052,7 +1052,7 @@ Most commands support these patterns:
 --company carolinas    # filter to DEC (Duke Energy Carolinas)
 --dry-run              # show what would happen without writing
 --limit N              # cap output or processing count
---all-downloaded       # process all pending downloads (ncuc-import-pipeline)
+--all-downloaded       # process all pending downloads (ncuc import-pipeline)
 --auto-parse           # parse immediately after download (tariff-update)
 --parser-profile NAME  # target a specific profile (reprocess enqueue-profile-impact-nc)
 ```
@@ -1234,7 +1234,7 @@ Some commands require optional extras installed via `pip install -e ".[group]"`:
 
 | Group | Commands that need it |
 |---|---|
-| `browser` | `ncuc-playwright-discover`, `ncuc-portal-scrape`, portal download scripts |
+| `browser` | `ncuc playwright-discover`, `ncuc portal-scrape`, portal download scripts |
 | `pdf` | All PDF parsing and extraction commands |
 | `ocr` | `ocr process-queue-nc`, `ocr enqueue-nc` |
 | `docling` | `mine-docling-nc`, `run-docling-nc`, `run-docling-vlm`, `process-docling-batch` |

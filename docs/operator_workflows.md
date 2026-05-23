@@ -123,7 +123,7 @@ Read:
 Run:
 
 ```powershell
-python -m duke_rates ncuc-import-pipeline --all-downloaded
+python -m duke_rates ncuc import-pipeline --all-downloaded
 ```
 
 For a targeted authenticated-portal harvest that produced a specific manifest or
@@ -133,13 +133,13 @@ Use the narrow path instead:
 ```powershell
 python scripts/ingestion/register_harvest_manifest.py --manifest data/<targeted_manifest>.json --dry-run
 python scripts/ingestion/register_harvest_manifest.py --manifest data/<targeted_manifest>.json
-python -m duke_rates ncuc-import-pipeline --record-id <record_id>
+python -m duke_rates ncuc import-pipeline --record-id <record_id>
 ```
 
 Use `--record-id` for the freshly registered rows so you do not accidentally pull
 the entire historical download backlog into the importer.
 
-**Note:** `ncuc-import-pipeline` is the default intake entry point.
+**Note:** `ncuc import-pipeline` is the default intake entry point.
 `mine-ncuc-pipeline` is retained as a compatibility alias and should not be
 stacked on top of the import command in the same workflow. Both routes call
 `import_all_pending_downloads()` and already include page-aware span mining.
@@ -172,27 +172,27 @@ Use when:
 - you know a docket and want exact docket documents
 - you want structured company/date/type search inside the authenticated portal
 
-Do not start with `ncuc-public-search` unless you are intentionally doing broad fallback keyword hunting.
+Do not start with `ncuc public-search` unless you are intentionally doing broad fallback keyword hunting.
 
 Run the commands in this order:
 
 ```powershell
-python -m duke_rates ncuc-portal-smoke-test
-python -m duke_rates ncuc-portal-search --docket-number "E-2, Sub 1354"
-python -m duke_rates ncuc-portal-search --company "Duke Energy Progress" --types TARIFF,RATESCED --after 11/01/2025 --before 12/31/2025 --max 20 --top 10
+python -m duke_rates ncuc portal-smoke-test
+python -m duke_rates ncuc portal-search --docket-number "E-2, Sub 1354"
+python -m duke_rates ncuc portal-search --company "Duke Energy Progress" --types TARIFF,RATESCED --after 11/01/2025 --before 12/31/2025 --max 20 --top 10
 ```
 
 Interpretation:
-- `ncuc-portal-smoke-test` is the preferred health check for the authenticated portal path.
-- `ncuc-portal-search --docket-number ...` is the preferred exact-docket command.
-- `ncuc-portal-search` without `--docket-number` is the preferred structured authenticated search.
-- `ncuc-login-test`, `ncuc-resolve-docket-ids`, `ncuc-docket-fetch`, and `search doc-param` remain the low-level commands for manual control.
+- `ncuc portal-smoke-test` is the preferred health check for the authenticated portal path.
+- `ncuc portal-search --docket-number ...` is the preferred exact-docket command.
+- `ncuc portal-search` without `--docket-number` is the preferred structured authenticated search.
+- `ncuc login-test`, `ncuc resolve-docket-ids`, `ncuc docket-fetch`, and `search doc-param` remain the low-level commands for manual control.
 
 Rules that reduce confusion:
-- For `ncuc-resolve-docket-ids`, pass docket numbers as `E-2, Sub 1354`.
+- For `ncuc resolve-docket-ids`, pass docket numbers as `E-2, Sub 1354`.
 - For `search doc-param --docket`, pass docket numbers as `E-2 Sub 1354`.
-- Always pass `--docket-number` to `ncuc-docket-fetch`. Omitting it creates broken metadata downstream.
-- A zero-result `search doc-param --docket ...` query does not prove the docket is empty. Prefer `ncuc-portal-search --docket-number ...`, which uses exact-docket resolve + inventory instead.
+- Always pass `--docket-number` to `ncuc docket-fetch`. Omitting it creates broken metadata downstream.
+- A zero-result `search doc-param --docket ...` query does not prove the docket is empty. Prefer `ncuc portal-search --docket-number ...`, which uses exact-docket resolve + inventory instead.
 
 Tested locally on 2026-04-21:
 - authenticated login passed
@@ -407,11 +407,11 @@ Read:
 
 **Prerequisite:** `extract-rates-nc` only processes documents where
 `historical_documents.effective_start IS NOT NULL` AND `tariff_versions.historical_document_id`
-links to the doc. Run `ncuc-import-pipeline` first (which mines span dates), then bootstrap
+links to the doc. Run `ncuc import-pipeline` first (which mines span dates), then bootstrap
 any docs that still lack version links:
 
 ```powershell
-python -m duke_rates ncuc-import-pipeline --all-downloaded
+python -m duke_rates ncuc import-pipeline --all-downloaded
 python -m duke_rates bootstrap-missing-versions-nc
 ```
 

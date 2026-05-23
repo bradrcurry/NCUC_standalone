@@ -2,16 +2,16 @@
 
 > **PARTIAL — see [NCUC_PORTAL_WORKING_METHOD.md](NCUC_PORTAL_WORKING_METHOD.md)
 > for the canonical end-to-end portal process.** This doc covers ONE specific
-> rule (always pass `--docket-number` to `ncuc-docket-fetch`) and is still
+> rule (always pass `--docket-number` to `ncuc docket-fetch`) and is still
 > correct for that. The full preflight + login + resolve + fetch flow lives
 > in the working-method doc.
 
 **Date:** 2026-04-20  
-**Context:** Session 34-35 identified and cleaned up 397 broken discovery records created by `ncuc-docket-fetch` without the `--docket-number` parameter.
+**Context:** Session 34-35 identified and cleaned up 397 broken discovery records created by `ncuc docket-fetch` without the `--docket-number` parameter.
 
 ## Problem
 
-The `ncuc-docket-fetch` command creates discovery records with metadata populated from the `--docket-number` parameter:
+The `ncuc docket-fetch` command creates discovery records with metadata populated from the `--docket-number` parameter:
 
 ```python
 # From src/duke_rates/cli.py
@@ -43,9 +43,9 @@ rec = NcucDiscoveryRecord(
 ### 1. Resolve Docket IDs to GUIDs
 
 ```bash
-python -m duke_rates ncuc-resolve-docket-ids --docket-number "E-2, Sub 1076"
-python -m duke_rates ncuc-resolve-docket-ids --docket-number "E-2, Sub 1086"
-python -m duke_rates ncuc-resolve-docket-ids --docket-number "E-2, Sub 1094"
+python -m duke_rates ncuc resolve-docket-ids --docket-number "E-2, Sub 1076"
+python -m duke_rates ncuc resolve-docket-ids --docket-number "E-2, Sub 1086"
+python -m duke_rates ncuc resolve-docket-ids --docket-number "E-2, Sub 1094"
 # ... etc for each target docket
 ```
 
@@ -57,18 +57,18 @@ This outputs the GUID for each docket number.
 
 ```bash
 # CORRECT: With docket-number metadata
-python -m duke_rates ncuc-docket-fetch \
+python -m duke_rates ncuc docket-fetch \
   9b3614b6-11d6-4703-8d18-5e2e2ef3d705 \
   --docket-number "E-2, Sub 1076" \
   --download
 
-python -m duke_rates ncuc-docket-fetch \
+python -m duke_rates ncuc docket-fetch \
   a1234567-89ab-cdef-0123-456789abcdef \
   --docket-number "E-2, Sub 1086" \
   --download
 
 # WRONG: Without docket-number (creates NULL metadata)
-python -m duke_rates ncuc-docket-fetch \
+python -m duke_rates ncuc docket-fetch \
   9b3614b6-11d6-4703-8d18-5e2e2ef3d705 \
   --download
 ```
@@ -76,14 +76,14 @@ python -m duke_rates ncuc-docket-fetch \
 ### 3. Verify Discovery Records Have Metadata
 
 ```bash
-python -m duke_rates ncuc-list --state NC --limit 20
+python -m duke_rates ncuc list --state NC --limit 20
 # Verify docket_number and sub_number are populated
 ```
 
 ### 4. Run Import Pipeline
 
 ```bash
-python -m duke_rates ncuc-import-pipeline --all-downloaded
+python -m duke_rates ncuc import-pipeline --all-downloaded
 python -m duke_rates bootstrap-missing-versions-nc
 python -m duke_rates extract-rates-nc
 ```
@@ -107,13 +107,13 @@ for docket_entry in "${dockets[@]}"; do
   docket_num="${docket_entry#*:}"
   
   echo "Fetching $docket_num (GUID: $guid)"
-  python -m duke_rates ncuc-docket-fetch "$guid" \
+  python -m duke_rates ncuc docket-fetch "$guid" \
     --docket-number "$docket_num" \
     --download
 done
 
 # After all fetches complete:
-python -m duke_rates ncuc-import-pipeline --all-downloaded
+python -m duke_rates ncuc import-pipeline --all-downloaded
 python -m duke_rates bootstrap-missing-versions-nc
 python -m duke_rates extract-rates-nc
 ```

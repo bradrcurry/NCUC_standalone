@@ -54,7 +54,7 @@ def main():
     for docket_num, docket_desc in priority_dockets:
         query = f"docket:{docket_num}"
         cmd = (
-            f'python -m duke_rates ncuc-search '
+            f'python -m duke_rates ncuc search '
             f'"{query}" '
             f'--docket-hint "{docket_num}" '
             f'--max-results 100'
@@ -101,7 +101,7 @@ def main():
 Run these commands to fetch and extract:
 
   1. Fetch document details from portal:
-     python -m duke_rates ncuc-fetch-portal --limit 100 --dep-only
+     python -m duke_rates ncuc fetch-portal --limit 100 --dep-only
 
   2. Process documents with Docling:
      python -m duke_rates process-docling-batch --classification tariff_sheets

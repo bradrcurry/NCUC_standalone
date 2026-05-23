@@ -4,7 +4,7 @@ Register harvested authenticated NCUC portal PDFs into ncuc_discovery_records.
 
 This consumes the manifest produced by `harvest_target_ncuc_documents.py`,
 skips known non-tariff artifacts, and creates success-state discovery records
-that can be ingested by `ncuc-import-pipeline --all-downloaded`.
+that can be ingested by `ncuc import-pipeline --all-downloaded`.
 """
 
 from __future__ import annotations

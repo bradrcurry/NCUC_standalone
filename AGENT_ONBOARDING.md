@@ -170,7 +170,7 @@ Read:
 - For NCUC portal automation, use installed Chrome or Edge rather than bundled Playwright Chromium.
 - Keep reusable helpers under `scripts/` or promote recurring operator workflows into the CLI.
 - Keep new durable docs under `docs/`; keep new dated investigations under `docs/reports/`; avoid new root-level session markdown.
-- Do not treat `mine-ncuc-pipeline` as the primary intake command — it is a compatibility alias for `ncuc-import-pipeline`. Do not run both simultaneously.
+- Do not treat `mine-ncuc-pipeline` as the primary intake command — it is a compatibility alias for `ncuc import-pipeline`. Do not run both simultaneously.
 
 ## Knowledge Preservation Rules
 
@@ -192,7 +192,7 @@ python -m duke_rates --help
 python -m duke_rates show-workflow-status-nc
 python -m duke_rates lineage show-gaps-nc
 python -m duke_rates lineage show-fingerprint-coverage-nc
-python -m duke_rates ncuc-import-pipeline --all-downloaded
+python -m duke_rates ncuc import-pipeline --all-downloaded
 python -m duke_rates bootstrap-missing-versions-nc
 python -m duke_rates extract-rates-nc
 python -m duke_rates parse-review-summary

@@ -19,7 +19,7 @@ and prove the entire portal flow is operational.
 python -m duke_rates run-continuous-loop-nc --dry-run --max-cycles 0 2>&1 | head -15
 
 # 2. Live login + resolve + DocketDetails + inventory probe. ~30s.
-python -m duke_rates ncuc-portal-smoke-test
+python -m duke_rates ncuc portal-smoke-test
 ```
 
 Expected output of (1): `NCID auth: YES`, `Real browser: YES (path)`, `Portal fetch: YES`.
@@ -58,24 +58,24 @@ burn timeouts on a broken portal.
 Use these commands instead of reconstructing the process from scratch:
 
 ```powershell
-python -m duke_rates ncuc-portal-smoke-test
-python -m duke_rates ncuc-portal-search --docket-number "E-2, Sub 1354"
-python -m duke_rates ncuc-portal-search --company "Duke Energy Progress" --types TARIFF,RATESCED --after 11/01/2025 --before 12/31/2025 --max 20 --top 10
+python -m duke_rates ncuc portal-smoke-test
+python -m duke_rates ncuc portal-search --docket-number "E-2, Sub 1354"
+python -m duke_rates ncuc portal-search --company "Duke Energy Progress" --types TARIFF,RATESCED --after 11/01/2025 --before 12/31/2025 --max 20 --top 10
 ```
 
 What each command means:
-- `ncuc-portal-smoke-test`: canonical smoke test. Verifies login, resolve, authenticated DocketDetails access, and docket inventory.
-- `ncuc-portal-search --docket-number ...`: canonical exact-docket search. Resolves the docket and inventories documents through the authenticated portal.
-- `ncuc-portal-search` without `--docket-number`: canonical structured authenticated search for company/date/type filtering.
+- `ncuc portal-smoke-test`: canonical smoke test. Verifies login, resolve, authenticated DocketDetails access, and docket inventory.
+- `ncuc portal-search --docket-number ...`: canonical exact-docket search. Resolves the docket and inventories documents through the authenticated portal.
+- `ncuc portal-search` without `--docket-number`: canonical structured authenticated search for company/date/type filtering.
 
 Lower-level commands still available when exact control is needed:
-- `ncuc-login-test`
-- `ncuc-resolve-docket-ids`
-- `ncuc-docket-fetch`
+- `ncuc login-test`
+- `ncuc resolve-docket-ids`
+- `ncuc docket-fetch`
 - `search doc-param`
 
 Do not confuse the two docket formats:
-- `ncuc-resolve-docket-ids`: use `E-2, Sub 1354`
+- `ncuc resolve-docket-ids`: use `E-2, Sub 1354`
 - `search doc-param --docket`: use `E-2 Sub 1354`
 
 Do not confuse the search surfaces:
@@ -86,22 +86,22 @@ Do not confuse the search surfaces:
 ## Brief Validation On 2026-04-21
 
 The following live checks were run successfully in this workspace on 2026-04-21:
-- `python -m duke_rates ncuc-login-test`
+- `python -m duke_rates ncuc login-test`
   Result: authenticated access succeeded with Chrome; DocketDetails returned HTTP 200.
-- `python -m duke_rates ncuc-resolve-docket-ids --docket-number "E-2, Sub 1354"`
+- `python -m duke_rates ncuc resolve-docket-ids --docket-number "E-2, Sub 1354"`
   Result: returned the expected exact GUID `9b3614b6-11d6-4703-8d18-5e2e2ef3d705`.
-- `python -m duke_rates ncuc-docket-fetch 9b3614b6-11d6-4703-8d18-5e2e2ef3d705 --docket-number "E-2, Sub 1354" --dry-run`
+- `python -m duke_rates ncuc docket-fetch 9b3614b6-11d6-4703-8d18-5e2e2ef3d705 --docket-number "E-2, Sub 1354" --dry-run`
   Result: listed 64 docket documents.
 - `python -m duke_rates search doc-param --company "Duke Energy Progress" --types TARIFF,RATESCED --after 11/01/2025 --before 12/31/2025 --max 20 --top 10`
   Result: returned 6 authenticated portal results.
 
 Observed limitation:
-- docket-scoped `search doc-param` can return zero rows even when the docket is real and `ncuc-docket-fetch` lists documents
-- therefore exact docket work should use `ncuc-resolve-docket-ids` then `ncuc-docket-fetch`, not only `search doc-param`
+- docket-scoped `search doc-param` can return zero rows even when the docket is real and `ncuc docket-fetch` lists documents
+- therefore exact docket work should use `ncuc resolve-docket-ids` then `ncuc docket-fetch`, not only `search doc-param`
 
 New wrapper behavior:
-- `ncuc-portal-search --docket-number ...` avoids the brittle structured-docket search path and always uses authenticated exact-docket resolve + inventory.
-- `ncuc-portal-smoke-test` bundles the previously separate login + resolve + DocketDetails + inventory checks into one command.
+- `ncuc portal-search --docket-number ...` avoids the brittle structured-docket search path and always uses authenticated exact-docket resolve + inventory.
+- `ncuc portal-smoke-test` bundles the previously separate login + resolve + DocketDetails + inventory checks into one command.
 
 ---
 

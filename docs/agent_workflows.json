@@ -108,7 +108,7 @@
       "steps": [
         {
           "step_id": "import",
-          "tool_id": "ncuc-import-pipeline",
+          "tool_id": "ncuc import-pipeline",
           "purpose": "Run the primary page-aware intake path.",
           "mode": "required"
         },

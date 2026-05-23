@@ -98,12 +98,12 @@ promoted to documented CLI commands.
 Use these to populate `ncuc_discovery_records` and fetch PDFs:
 
 ```powershell
-python -m duke_rates ncuc-seed-discover
-python -m duke_rates ncuc-search "Duke Energy Progress rate schedule 605"
-python -m duke_rates ncuc-fetch --pending
-python -m duke_rates ncuc-fetch-portal --limit 50
-python -m duke_rates ncuc-list --status success --limit 20
-python -m duke_rates ncuc-show 1234
+python -m duke_rates ncuc seed-discover
+python -m duke_rates ncuc search "Duke Energy Progress rate schedule 605"
+python -m duke_rates ncuc fetch --pending
+python -m duke_rates ncuc fetch-portal --limit 50
+python -m duke_rates ncuc list --status success --limit 20
+python -m duke_rates ncuc show 1234
 ```
 
 ### Import and page-aware mining
@@ -111,11 +111,11 @@ python -m duke_rates ncuc-show 1234
 Use these to push downloaded records into the historical pipeline:
 
 ```powershell
-python -m duke_rates ncuc-import-pipeline --all-downloaded
-python -m duke_rates ncuc-import-pipeline --record-id 1234
+python -m duke_rates ncuc import-pipeline --all-downloaded
+python -m duke_rates ncuc import-pipeline --record-id 1234
 ```
 
-Default to `ncuc-import-pipeline`.
+Default to `ncuc import-pipeline`.
 `mine-ncuc-pipeline` is retained as a compatibility alias for the same
 page-aware intake path and is mainly useful when another workflow still refers
 to the older name.
@@ -777,8 +777,8 @@ If you are another AI agent:
 Use this when new discovery records or downloads have arrived.
 
 ```powershell
-python -m duke_rates ncuc-fetch --pending
-python -m duke_rates ncuc-import-pipeline --all-downloaded
+python -m duke_rates ncuc fetch --pending
+python -m duke_rates ncuc import-pipeline --all-downloaded
 python -m duke_rates extract-rates-nc
 python -m duke_rates validate-extraction-nc
 python -m duke_rates parse-review-summary

@@ -39,8 +39,8 @@
 |                                                   tariff_charges.           |
 | mine-ncuc-pipeline                                Compatibility alias for   |
 |                                                   the page-aware NCUC       |
-|                                                   intake path; prefer       |
-|                                                   ncuc-import-pipeline.     |
+|                                                   intake path; prefer ncuc  |
+|                                                   import-pipeline.          |
 | mine-docling-nc                                   Bridge stored Docling     |
 |                                                   artifacts into the NCUC   |
 |                                                   page-aware parsing        |
@@ -404,92 +404,10 @@
 |                                                   URDB (OpenEI Utility Rate |
 |                                                   Database) JSON format.    |
 | mcp                                                                         |
-| ncuc-seed-discover                                Discover NCUC documents   |
-|                                                   from seeded docket list   |
-|                                                   via eDocket portal.       |
-| ncuc-search                                       Search NCUC eDocket       |
-|                                                   portal by keyword and     |
-|                                                   persist discovered leads. |
-| ncuc-smart-search                                 Build and run             |
-|                                                   high-confidence NCUC      |
-|                                                   searches seeded from      |
-|                                                   known T1/T2 HQ documents. |
 | compare-version-rates                             Compare rate charges      |
 |                                                   between two tariff        |
 |                                                   versions of the same      |
 |                                                   family.                   |
-| ncuc-ingest-url                                   Ingest a single           |
-|                                                   externally-discovered     |
-|                                                   NCUC document URL as a    |
-|                                                   discovery lead.           |
-| ncuc-fetch                                        Download NCUC documents:  |
-|                                                   fetch specific record,    |
-|                                                   all pending, or retry     |
-|                                                   failed.                   |
-| ncuc-fetch-portal                                 Fetch pending NCUC portal |
-|                                                   document-detail records   |
-|                                                   using authenticated       |
-|                                                   Playwright.               |
-| ncuc-list                                         List NCUC discovery       |
-|                                                   records.                  |
-| ncuc-show                                         Show full detail for one  |
-|                                                   NCUC discovery record.    |
-| ncuc-import-pipeline                              Import NCUC               |
-|                                                   downloads/discoveries     |
-|                                                   into the historical lead  |
-|                                                   and docket pipeline.      |
-| ncuc-mine-pdf-content                             Mine downloaded NCUC PDFs |
-|                                                   for                       |
-|                                                   schedule/rider/leaf/effe… |
-|                                                   signals.                  |
-| ncuc-list-exhibit-candidates                      Rank downloaded NCUC PDFs |
-|                                                   as likely tariff exhibits |
-|                                                   for one family.           |
-| ncuc-import-exhibit-candidates                    Import top-ranked NCUC    |
-|                                                   exhibit candidates into   |
-|                                                   historical documents.     |
-| ncuc-family-query                                 Show all NCUC discovery   |
-|                                                   results for a target      |
-|                                                   family/schedule.          |
-| ncuc-playwright-discover                          Use Playwright browser to |
-|                                                   discover NCUC documents   |
-|                                                   from a portal page.       |
-| ncuc-public-search                                Search NCUC public        |
-|                                                   website (ncuc.gov) -      |
-|                                                   accessible without        |
-|                                                   Cloudflare restriction.   |
-| ncuc-wayback-discover                             Discover NCUC docket      |
-|                                                   pages via Wayback Machine |
-|                                                   CDX index.                |
-| ncuc-annual-orders-scan                           Mine NCUC annual orders   |
-|                                                   PDFs for E-2 Duke Energy  |
-|                                                   Progress sub-docket       |
-|                                                   entries.                  |
-| ncuc-login-test                                   Test NCUC portal login    |
-|                                                   and verify authenticated  |
-|                                                   document access.          |
-| ncuc-portal-smoke-test                            Canonical authenticated   |
-|                                                   NCUC portal smoke test.   |
-| ncuc-resolve-docket-ids                           Resolve NCUC DocketId     |
-|                                                   GUIDs through the         |
-|                                                   authenticated portal      |
-|                                                   search.                   |
-| ncuc-portal-search                                Canonical authenticated   |
-|                                                   NCUC portal search        |
-|                                                   surface.                  |
-| ncuc-docket-fetch                                 Fetch all documents for   |
-|                                                   an NCUC docket using      |
-|                                                   authenticated session.    |
-| ncuc-portal-scrape                                Scrape NCUC portal.aspx   |
-|                                                   recent orders via         |
-|                                                   Playwright.               |
-| ncuc-wayback-harvest                              Harvest NCUC docket GUIDs |
-|                                                   from Wayback Machine CDX  |
-|                                                   index.                    |
-| ncuc-pending-rates                                Scan NCUC discovery       |
-|                                                   records for pending or    |
-|                                                   recent rate cases and     |
-|                                                   rider filings.            |
 | report-database-intelligence-nc                   Run deterministic corpus  |
 |                                                   analytics across the NCUC |
 |                                                   database.                 |
@@ -654,5 +572,8 @@
 |                                                   lifecycle: list, repair,  |
 |                                                   dedup, canonicalize,      |
 |                                                   retire.                   |
+| ncuc                                              NCUC                      |
+|                                                   portal/search/wayback/do… |
+|                                                   pipeline.                 |
 +-----------------------------------------------------------------------------+
 

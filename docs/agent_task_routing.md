@@ -27,8 +27,8 @@ Read:
 - [ncuc_pipeline_overview.md](/c:/Python/Duke/Standalone/docs/ncuc_pipeline_overview.md)
 
 Use:
-- `ncuc-import-pipeline`
-- `mine-ncuc-pipeline` (compatibility alias; prefer `ncuc-import-pipeline`)
+- `ncuc import-pipeline`
+- `mine-ncuc-pipeline` (compatibility alias; prefer `ncuc import-pipeline`)
 - `bootstrap-missing-versions-nc`
 - `extract-rates-nc`
 - `validate-extraction-nc`

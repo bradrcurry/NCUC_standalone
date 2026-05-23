@@ -300,7 +300,7 @@ class NcucPipelineImporter:
 
         results["family_keys_matched"] = family_keys
 
-        # Write resolved family keys back to the discovery record so ncuc-family-query works
+        # Write resolved family keys back to the discovery record so ncuc family-query works
         real_keys = [fk for fk in family_keys if fk != "ncuc-unlinked"]
         if real_keys and record.id and set(real_keys) != set(record.family_keys):
             updated = record.model_copy(update={"family_keys": real_keys})

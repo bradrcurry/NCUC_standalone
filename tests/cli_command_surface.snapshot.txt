@@ -145,31 +145,31 @@ mine-ncuc-pipeline
 mine-tariff-sheets-nc
 nc-rate-context
 nc-redline-portal-queue
-ncuc-annual-orders-scan
-ncuc-docket-fetch
-ncuc-family-query
-ncuc-fetch
-ncuc-fetch-portal
-ncuc-import-exhibit-candidates
-ncuc-import-pipeline
-ncuc-ingest-url
-ncuc-list
-ncuc-list-exhibit-candidates
-ncuc-login-test
-ncuc-mine-pdf-content
-ncuc-pending-rates
-ncuc-playwright-discover
-ncuc-portal-scrape
-ncuc-portal-search
-ncuc-portal-smoke-test
-ncuc-public-search
-ncuc-resolve-docket-ids
-ncuc-search
-ncuc-seed-discover
-ncuc-show
-ncuc-smart-search
-ncuc-wayback-discover
-ncuc-wayback-harvest
+ncuc annual-orders-scan
+ncuc docket-fetch
+ncuc family-query
+ncuc fetch
+ncuc fetch-portal
+ncuc import-exhibit-candidates
+ncuc import-pipeline
+ncuc ingest-url
+ncuc list
+ncuc list-exhibit-candidates
+ncuc login-test
+ncuc mine-pdf-content
+ncuc pending-rates
+ncuc playwright-discover
+ncuc portal-scrape
+ncuc portal-search
+ncuc portal-smoke-test
+ncuc public-search
+ncuc resolve-docket-ids
+ncuc search
+ncuc seed-discover
+ncuc show
+ncuc smart-search
+ncuc wayback-discover
+ncuc wayback-harvest
 normalize-nc-effective-dates
 ocr enqueue-nc
 ocr enqueue-remediation-nc

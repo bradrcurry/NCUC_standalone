@@ -16,7 +16,7 @@
 The enhanced search system successfully identified **11 high-quality DEP documents** with 96% accuracy. However, the automated download from the NCUC portal is failing:
 
 ```
-python -m duke_rates ncuc-fetch --pending --limit 20
+python -m duke_rates ncuc fetch --pending --limit 20
 
 Result: Fetched 20 pending records: 0 succeeded
 

@@ -234,7 +234,7 @@ def check_acquisition_capabilities() -> dict[str, Any]:
 def run_portal_smoke_test(timeout_s: int = 120) -> dict[str, Any]:
     """Run the canonical NCUC portal smoke test in-process.
 
-    Mirrors what ``ncuc-portal-smoke-test`` does on the CLI but
+    Mirrors what ``ncuc portal-smoke-test`` does on the CLI but
     returns a structured dict instead of printing. The autonomous
     loop calls this once at startup (when ``--portal-precheck`` is
     on) so we fail fast if the credentials are valid but the live
@@ -392,7 +392,7 @@ def acquire_dockets(
     For each docket with ``recommended_action='fetch'``:
         1. Resolve docket number → NCUC UUID (requires portal auth)
         2. Fetch docket documents with ``--download``
-        3. Import via ``ncuc-import-pipeline --all-downloaded``
+        3. Import via ``ncuc import-pipeline --all-downloaded``
         4. Bootstrap versions via ``bootstrap-missing-versions-nc``
         5. Extract rates via ``extract-rates-nc``
 
@@ -508,7 +508,7 @@ def acquire_dockets(
 
     # ── Lane 2: Import (local-only, runs ONCE for all import-recs) ────
     # Previously each import-recommended docket spawned its own
-    # ncuc-import-pipeline --all-downloaded -- but that command scans
+    # ncuc import-pipeline --all-downloaded -- but that command scans
     # *every* pending download regardless of which docket triggered it.
     # Running it 4x in series is pure waste. Run it once, then count
     # the budget against all import-recs.
@@ -1349,7 +1349,7 @@ def _resolve_docket_uuid(docket_number: str, timeout_s: int = 120) -> str | None
         proc = subprocess.run(
             [
                 sys.executable, "-m", "duke_rates",
-                "ncuc-resolve-docket-ids",
+                "ncuc resolve-docket-ids",
                 "--docket-number", docket_number,
             ],
             capture_output=True,
@@ -1358,7 +1358,7 @@ def _resolve_docket_uuid(docket_number: str, timeout_s: int = 120) -> str | None
             check=False,
         )
         if proc.returncode != 0:
-            logger.warning("ncuc-resolve-docket-ids failed: %s", proc.stderr[:500])
+            logger.warning("ncuc resolve-docket-ids failed: %s", proc.stderr[:500])
             return None
 
         # Parse output like: "E-2, Sub 1354: abc123-def456...  /docket/..."
@@ -1371,7 +1371,7 @@ def _resolve_docket_uuid(docket_number: str, timeout_s: int = 120) -> str | None
                         return uuid_candidate
         return None
     except subprocess.TimeoutExpired:
-        logger.warning("ncuc-resolve-docket-ids timed out for %s", docket_number)
+        logger.warning("ncuc resolve-docket-ids timed out for %s", docket_number)
         return None
     except Exception:
         logger.debug("Failed to resolve docket UUID", exc_info=True)
@@ -1418,13 +1418,13 @@ def _acquire_one(
         # Step 1: Fetch (if needed)
         if action == "fetch" and docket_uuid:
             _heartbeat(
-                f"      ncuc-docket-fetch {docket_number} (deadline {timeout_per_stage_s}s)..."
+                f"      ncuc docket-fetch {docket_number} (deadline {timeout_per_stage_s}s)..."
             )
             stage_t0 = time.perf_counter()
             proc = subprocess.run(
                 [
                     sys.executable, "-m", "duke_rates",
-                    "ncuc-docket-fetch", docket_uuid,
+                    "ncuc docket-fetch", docket_uuid,
                     "--docket-number", docket_number,
                     "--download",
                 ],
@@ -1438,7 +1438,7 @@ def _acquire_one(
             )
             if not _record_stage("fetch", proc):
                 ar.outcome = "failed"
-                ar.error = f"ncuc-docket-fetch failed: {proc.stderr[:300]}"
+                ar.error = f"ncuc docket-fetch failed: {proc.stderr[:300]}"
                 return ar
             # Count discovered docs from stdout
             for line in proc.stdout.splitlines():
@@ -1540,12 +1540,12 @@ def _run_global_post_steps(
         # "Playwright not installed".
         import_timeout = max(timeout_per_stage_s, 1800)
         proc = _run(
-            ["ncuc-import-pipeline", "--all-downloaded"],
+            ["ncuc import-pipeline", "--all-downloaded"],
             import_timeout, "import",
         )
         if not _record("import", proc):
             ar.outcome = "failed"
-            ar.error = f"ncuc-import-pipeline rc={proc.returncode}"
+            ar.error = f"ncuc import-pipeline rc={proc.returncode}"
             ar.duration_ms = int((time.perf_counter() - t0) * 1000)
             return ar
 
@@ -1701,7 +1701,7 @@ def fetch_record_level_dockets(
     those stragglers are real portal work.
 
     Resolves each docket number to a portal UUID (60s timeout), then
-    runs ``ncuc-docket-fetch GUID --docket-number "X" --download`` to
+    runs ``ncuc docket-fetch GUID --docket-number "X" --download`` to
     pull missing records. Results are reported per-docket.
     """
     t0 = time.perf_counter()

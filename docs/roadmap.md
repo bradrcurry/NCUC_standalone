@@ -662,11 +662,11 @@ Current test count: **472 passing**.
   only; `--auto-parse` chains into `parse-tariff-versions` automatically for
   any companies with new or changed documents.
 
-- `duke-rates ncuc-pending-rates` CLI command: reads the local
+- `duke-rates ncuc pending-rates` CLI command: reads the local
   `ncuc_discovery_records` table and surfaces filings by category:
   APPLICATION/SETTLEMENT (proposed rate changes not yet approved), recent
   ORDERs (approved changes that may need re-parsing), TARIFF_SHEETS, and
-  rider-related filings.  Requires `ncuc-seed-discover` or `ncuc-search` to
+  rider-related filings.  Requires `ncuc seed-discover` or `ncuc search` to
   have populated the table first.  `--json` output for scripting.
 
 - Streamlit rate comparison app: new "Data Updates" section in sidebar showing

@@ -342,7 +342,7 @@ def search_ingest(
         typer.echo(f"Dry run complete: would ingest {ingested} records (skipped {skipped})")
     else:
         typer.echo(f"Done: ingested {ingested} records (skipped {skipped} with no URL)")
-        typer.echo("Run 'ncuc-fetch --pending' to download the documents.")
+        typer.echo("Run 'ncuc fetch --pending' to download the documents.")
 
 
 @search_app.command("doc-param")
@@ -371,7 +371,7 @@ def search_doc_param(
     This is the authenticated structured-search surface. It is useful for
     company/date/type filtering, but a zero-result docket query does not prove
     that a docket has no documents. For exact docket listings, prefer
-    ``ncuc-resolve-docket-ids`` followed by ``ncuc-docket-fetch``.
+    ``ncuc resolve-docket-ids`` followed by ``ncuc docket-fetch``.
     """
     settings, _ = _bootstrap()
     from duke_rates.historical.ncuc.document_param_search import (
@@ -415,11 +415,11 @@ def search_doc_param(
         docket_hint = docket if "," in docket else docket.replace(" Sub ", ", Sub ")
         typer.echo("Note: zero structured-search results for a docket does not mean the docket is empty.")
         typer.echo(
-            "Use: python -m duke_rates ncuc-resolve-docket-ids --docket-number "
+            "Use: python -m duke_rates ncuc resolve-docket-ids --docket-number "
             f"\"{docket_hint}\""
         )
         typer.echo(
-            "Then: python -m duke_rates ncuc-docket-fetch <docket-id> "
+            "Then: python -m duke_rates ncuc docket-fetch <docket-id> "
             f"--docket-number \"{docket_hint}\" --dry-run"
         )
     print_doc_param_results(results, top_n=top_n, only_tariff_related=tariff_only)

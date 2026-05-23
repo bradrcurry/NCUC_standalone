@@ -5,6 +5,7 @@ from types import SimpleNamespace
 from typer.testing import CliRunner
 
 from duke_rates import cli
+from duke_rates.cli_commands import ncuc as ncuc_module
 
 
 def test_ncuc_portal_smoke_test_success(monkeypatch) -> None:
@@ -12,6 +13,11 @@ def test_ncuc_portal_smoke_test_success(monkeypatch) -> None:
 
     monkeypatch.setattr(
         cli,
+        "_bootstrap",
+        lambda: (SimpleNamespace(ncid_username="tester"), None),
+    )
+    monkeypatch.setattr(
+        ncuc_module,
         "_bootstrap",
         lambda: (SimpleNamespace(ncid_username="tester"), None),
     )
@@ -55,7 +61,7 @@ def test_ncuc_portal_smoke_test_success(monkeypatch) -> None:
         ],
     )
 
-    result = runner.invoke(cli.app, ["ncuc-portal-smoke-test"])
+    result = runner.invoke(cli.app, ["ncuc", "portal-smoke-test"])
 
     assert result.exit_code == 0
     assert "Smoke test SUCCESS" in result.stdout
@@ -67,6 +73,11 @@ def test_ncuc_portal_search_exact_docket_branch(monkeypatch) -> None:
 
     monkeypatch.setattr(
         cli,
+        "_bootstrap",
+        lambda: (SimpleNamespace(ncid_username="tester"), None),
+    )
+    monkeypatch.setattr(
+        ncuc_module,
         "_bootstrap",
         lambda: (SimpleNamespace(ncid_username="tester"), None),
     )
@@ -101,12 +112,12 @@ def test_ncuc_portal_search_exact_docket_branch(monkeypatch) -> None:
         ],
     )
 
-    result = runner.invoke(cli.app, ["ncuc-portal-search", "--docket-number", "E-2, Sub 1354"])
+    result = runner.invoke(cli.app, ["ncuc", "portal-search", "--docket-number", "E-2, Sub 1354"])
 
     assert result.exit_code == 0
     assert "Search mode: authenticated exact-docket" in result.stdout
     assert "Found 1 docket documents." in result.stdout
-    assert "ncuc-docket-fetch 9b3614b6-11d6-4703-8d18-5e2e2ef3d705" in result.stdout
+    assert "ncuc docket-fetch 9b3614b6-11d6-4703-8d18-5e2e2ef3d705" in result.stdout
 
 
 def test_ncuc_portal_search_structured_branch(monkeypatch, tmp_path) -> None:
@@ -115,6 +126,11 @@ def test_ncuc_portal_search_structured_branch(monkeypatch, tmp_path) -> None:
 
     monkeypatch.setattr(
         cli,
+        "_bootstrap",
+        lambda: (SimpleNamespace(ncid_username="tester"), None),
+    )
+    monkeypatch.setattr(
+        ncuc_module,
         "_bootstrap",
         lambda: (SimpleNamespace(ncid_username="tester"), None),
     )
@@ -156,7 +172,7 @@ def test_ncuc_portal_search_structured_branch(monkeypatch, tmp_path) -> None:
     result = runner.invoke(
         cli.app,
         [
-            "ncuc-portal-search",
+            "ncuc", "portal-search",
             "--company",
             "Duke Energy Progress",
             "--after",
@@ -214,6 +230,11 @@ def test_ncuc_docket_fetch_classifies_inventory_failure(monkeypatch) -> None:
         "_bootstrap",
         lambda: (SimpleNamespace(ncid_username="tester", historical_dir="C:/tmp"), None),
     )
+    monkeypatch.setattr(
+        ncuc_module,
+        "_bootstrap",
+        lambda: (SimpleNamespace(ncid_username="tester", historical_dir="C:/tmp"), None),
+    )
 
     import duke_rates.historical.ncuc.session as session
 
@@ -225,7 +246,7 @@ def test_ncuc_docket_fetch_classifies_inventory_failure(monkeypatch) -> None:
         lambda page, docket_id: (_ for _ in ()).throw(RuntimeError("403 Forbidden on docket docs")),
     )
 
-    result = runner.invoke(cli.app, ["ncuc-docket-fetch", "9b3614b6-11d6-4703-8d18-5e2e2ef3d705"])
+    result = runner.invoke(cli.app, ["ncuc", "docket-fetch", "9b3614b6-11d6-4703-8d18-5e2e2ef3d705"])
 
     assert result.exit_code == 1
     assert "Classification: cloudflare_or_forbidden" in result.stdout

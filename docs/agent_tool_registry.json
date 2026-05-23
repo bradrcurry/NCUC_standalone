@@ -206,11 +206,11 @@
       ]
     },
     {
-      "tool_id": "ncuc-import-pipeline",
+      "tool_id": "ncuc import-pipeline",
       "surface": "cli",
       "status": "supported",
       "category": "extract",
-      "command": "python -m duke_rates ncuc-import-pipeline --all-downloaded",
+      "command": "python -m duke_rates ncuc import-pipeline --all-downloaded",
       "goal": "Primary historical intake command: mine page/span evidence, assign family keys, and create candidate historical rows.",
       "use_when": [
         "Downloaded NCUC records need to enter the pipeline",
@@ -248,10 +248,10 @@
       ],
       "avoid_when": [
         "You are choosing a command name for new work",
-        "You already ran ncuc-import-pipeline"
+        "You already ran ncuc import-pipeline"
       ],
       "prerequisites": [
-        "Same intake prerequisites as ncuc-import-pipeline"
+        "Same intake prerequisites as ncuc import-pipeline"
       ],
       "next_tools": [
         "bootstrap-missing-versions-nc",
@@ -661,7 +661,7 @@
         "Use --apply only after reviewing suggested matches"
       ],
       "next_tools": [
-        "ncuc-import-pipeline",
+        "ncuc import-pipeline",
         "lineage show-gaps-nc"
       ],
       "mutates_state": true,

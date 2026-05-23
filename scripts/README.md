@@ -39,7 +39,7 @@ This is a narrow enhanced-search downloader, not the default sanctioned intake p
 **Note:** Most ingestion workflows are now CLI-first. Prefer:
 ```bash
 python -m duke_rates show-workflow-status-nc
-python -m duke_rates ncuc-import-pipeline --all-downloaded
+python -m duke_rates ncuc import-pipeline --all-downloaded
 python -m duke_rates eia-backfill --states NC SC VA
 ```
 
@@ -163,7 +163,7 @@ These helpers are not the default operator path. Prefer the CLI and canonical wo
 
 ```bash
 # 1. Import any pending downloads
-python -m duke_rates ncuc-import-pipeline --all-downloaded
+python -m duke_rates ncuc import-pipeline --all-downloaded
 
 # 2. Bootstrap docs that still lack version links
 python -m duke_rates bootstrap-missing-versions-nc
@@ -183,10 +183,10 @@ you only want to intake those specific discoveries.
 ```bash
 python scripts/ingestion/register_harvest_manifest.py --manifest data/<targeted_manifest>.json --dry-run
 python scripts/ingestion/register_harvest_manifest.py --manifest data/<targeted_manifest>.json
-python -m duke_rates ncuc-import-pipeline --record-id <record_id>
+python -m duke_rates ncuc import-pipeline --record-id <record_id>
 ```
 
-Do not follow a targeted harvest with `python -m duke_rates ncuc-import-pipeline --all-downloaded`
+Do not follow a targeted harvest with `python -m duke_rates ncuc import-pipeline --all-downloaded`
 unless you explicitly want to process the full pending download backlog.
 
 ### Find and Fix Stranded Records
@@ -199,7 +199,7 @@ python scripts/maintenance/audit_stranded_ncuc_family_clues.py --limit 50
 python scripts/maintenance/audit_stranded_ncuc_family_clues.py --apply
 
 # Re-run import to pick up newly linked records
-python -m duke_rates ncuc-import-pipeline --all-downloaded
+python -m duke_rates ncuc import-pipeline --all-downloaded
 ```
 
 ### Portal Download (NCUC)
@@ -212,7 +212,7 @@ python scripts/ingestion/download_ncuc_portal_documents.py
 python scripts/ingestion/register_downloads.py
 
 # 3. Import
-python -m duke_rates ncuc-import-pipeline --all-downloaded
+python -m duke_rates ncuc import-pipeline --all-downloaded
 ```
 
 ### Post-Extraction Validation

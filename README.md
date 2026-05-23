@@ -239,9 +239,9 @@ python -m duke_rates ocr show-queue-nc
 Discovery, intake, and extraction:
 
 ```powershell
-python -m duke_rates ncuc-smart-search --family-key nc-progress-leaf-602
-python -m duke_rates ncuc-fetch-portal --limit 50
-python -m duke_rates ncuc-import-pipeline --all-downloaded
+python -m duke_rates ncuc smart-search --family-key nc-progress-leaf-602
+python -m duke_rates ncuc fetch-portal --limit 50
+python -m duke_rates ncuc import-pipeline --all-downloaded
 python -m duke_rates bootstrap-missing-versions-nc
 python -m duke_rates extract-rates-nc
 ```
@@ -369,9 +369,9 @@ Authenticated NCUC access is still important for source acquisition, but it is n
 Useful commands:
 
 ```powershell
-duke-rates ncuc-login-test
-duke-rates ncuc-resolve-docket-ids --all-seeded
-duke-rates ncuc-docket-fetch <GUID> --download
+duke-rates ncuc login-test
+duke-rates ncuc resolve-docket-ids --all-seeded
+duke-rates ncuc docket-fetch <GUID> --download
 duke-rates search run --utility progress --schedules 602 --portal
 duke-rates audit-local-raw-nc --company progress
 duke-rates audit-local-raw-nc --company carolinas

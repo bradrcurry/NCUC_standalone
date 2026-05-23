@@ -185,7 +185,7 @@ Key docket anchors:
 5. After the harvest pass:
 
 ```powershell
-python -m duke_rates ncuc-import-pipeline --all-downloaded
+python -m duke_rates ncuc import-pipeline --all-downloaded
 python -m duke_rates bootstrap-missing-versions-nc
 python -m duke_rates extract-rates-nc
 python -m duke_rates export nc-anomaly-audit
