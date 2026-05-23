@@ -35,7 +35,7 @@ rec = NcucDiscoveryRecord(
 
 - Deleted 397 broken discovery records with NULL docket_number/sub_number
 - Deleted 14,697 dependent artifact rows (span, page, docling artifacts)
-- Ran `retire-provisional-garbage-nc --execute` to clean up 449 garbage provisional families
+- Ran `lineage retire-provisional-garbage-nc --execute` to clean up 449 garbage provisional families
 - System regression fixed: provisional_families 462 → 14, null_effective_start 433 → 146
 
 ## Correct Procedure Going Forward

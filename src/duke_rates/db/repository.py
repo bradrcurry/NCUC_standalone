@@ -2119,7 +2119,7 @@ class Repository:
                 promotion_command = None
                 if suggested_title and suggested_schedule_code and suggested_family_type:
                     promotion_command = (
-                        "python -m duke_rates promote-provisional-family "
+                        "python -m duke_rates lineage promote-provisional-family "
                         f"{key} --title \"{suggested_title}\" "
                         f"--schedule-code {suggested_schedule_code} "
                         f"--family-type {suggested_family_type}"

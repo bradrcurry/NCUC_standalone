@@ -46,8 +46,8 @@ If you are unsure which command family to use, choose in this order:
 1. `show-workflow-status-nc`
 2. If the problem is weak parses or reruns: `parse-review-summary`, `reprocess show-queue-nc`, `reprocess show-priority-nc`
 3. If the problem is stale artifacts: `reprocess show-stale-historical-nc`
-4. If the problem is lineage or version linkage: `show-lineage-gaps-nc`, `validate-lineage-nc`
-5. If the problem is document identity, routing, or reuse confidence: `show-provenance-gaps-nc`, `show-fingerprint-coverage-nc`, `show-document-classification-audit-nc`
+4. If the problem is lineage or version linkage: `lineage show-gaps-nc`, `lineage validate-nc`
+5. If the problem is document identity, routing, or reuse confidence: `lineage show-provenance-gaps-nc`, `lineage show-fingerprint-coverage-nc`, `show-document-classification-audit-nc`
 6. If the problem is missing clean historical PDFs: `workflow search-nc-missing-clean-docs`, `workflow run-nc-missing-doc`
 7. If the problem is new downloaded NCUC records: `ncuc-import-pipeline`, then `bootstrap-missing-versions-nc`, then `extract-rates-nc`
 
@@ -84,7 +84,7 @@ python -m duke_rates parse-review-summary          # review backlog overview (le
 python -m duke_rates reprocess show-queue-nc       # pending reprocess jobs
 python -m duke_rates reprocess show-stale-historical-nc      # historical docs with stale or missing stage
 python -m duke_rates ocr show-queue-nc             # OCR queue depth (sub-app)
-python -m duke_rates list-provisional-families --state NC   # provisional families needing review
+python -m duke_rates lineage list-provisional-families --state NC   # provisional families needing review
 ```
 
 For document intelligence state (classification, embeddings, LLM):
@@ -114,13 +114,13 @@ Commands that manage the live-site tariff documents (non-historical).
 | `classify-docs` | Classify documents by type (tariff sheet, rider, etc.) |
 | `show-doc` | Show metadata and parsed state for a single document |
 | `list-docs` | List documents with optional filters |
-| `attach-current-document-to-family` | Link a current document to a tariff family |
-| `sync-family-metadata-from-current-anchor` | Pull metadata from the current anchor into the family record |
-| `list-current-anchor-mismatches` | Show families where the current anchor doesn't match expected |
-| `repair-historical-current-snapshot` | Repair a historical document's link to its current snapshot |
-| `repair-legacy-ncuc-data` | Audit and repair legacy NCUC rows that break modern workflow tooling |
-| `show-lineage-gaps-nc` | Summarize NC lineage gaps across unlinked discovery records, historical docs, versions, and no-charge families |
-| `suggest-family-links-nc` | Suggest likely family assignments for stranded NC discovery records using span clues; optional `--apply` persists them |
+| `lineage attach-current-document-to-family` | Link a current document to a tariff family |
+| `lineage sync-family-metadata-from-current-anchor` | Pull metadata from the current anchor into the family record |
+| `lineage list-current-anchor-mismatches` | Show families where the current anchor doesn't match expected |
+| `lineage repair-historical-current-snapshot` | Repair a historical document's link to its current snapshot |
+| `lineage repair-legacy-ncuc-data` | Audit and repair legacy NCUC rows that break modern workflow tooling |
+| `lineage show-gaps-nc` | Summarize NC lineage gaps across unlinked discovery records, historical docs, versions, and no-charge families |
+| `lineage suggest-family-links-nc` | Suggest likely family assignments for stranded NC discovery records using span clues; optional `--apply` persists them |
 
 **Typical workflow:**
 ```bash
@@ -186,8 +186,8 @@ python -m duke_rates ncuc-portal-search --company "Duke Energy Progress" --types
 | Command | What it does |
 |---|---|
 | `ncuc-import-pipeline` | **Primary intake command.** Import all pending downloads: mines page/span evidence, assigns family keys, creates provisional families. Alias: `mine-ncuc-pipeline`. Do NOT run both simultaneously. |
-| `add-historical-document-nc` | Register one page-bounded NC historical PDF directly into `historical_documents` when you already know the correct family/date/page range |
-| `rebind-historical-page-range` | Update the bounded page range for an existing historical row and optionally requeue it |
+| `lineage add-historical-document-nc` | Register one page-bounded NC historical PDF directly into `historical_documents` when you already know the correct family/date/page range |
+| `lineage rebind-historical-page-range` | Update the bounded page range for an existing historical row and optionally requeue it |
 | `mine-tariff-sheets-nc` | Mine tariff sheets specifically (narrower than full pipeline) |
 | `ncuc-mine-pdf-content` | Mine PDF content for a specific document |
 | `ncuc-import-exhibit-candidates` | Import candidate exhibit documents from NCUC filings |
@@ -310,7 +310,7 @@ surface over inventing your own command mapping.
 | `export nc-redline-lead-audit` | Generate a ranked redline-hunt queue for families where redline clues can help locate or validate clean companion tariffs |
 | `export nc-redline-parse-audit` | Audit parsed NC tariff versions whose linked source PDFs may be redlines; now uses page-bounded slice detection and can distinguish clean exact-date companions |
 | `refresh-nc-redline-fingerprints` | Refresh `document_fingerprints.is_redline_candidate/redline_confidence` for NC DEP/DEC PDFs using the corrected redline detector |
-| `canonicalize-historical-family-key` | Move a malformed historical family into a canonical family key, updating linked historical lineage tables and repairing orphaned version rows |
+| `lineage canonicalize-historical-family-key` | Move a malformed historical family into a canonical family key, updating linked historical lineage tables and repairing orphaned version rows |
 | `export dep-leaf-503-audit` | Generate a focused DEP `leaf-503` (`R-TOU-CPP`) version/rider-linkage audit under `docs/reports/dep_leaf_503_audit/` |
 | `seed-dep-residential-rider-applicability` | Seed mandatory DEP residential rider-family links for schedules `leaf-500` through `leaf-504` |
 | `export dep-residential-rider-gap-audit` | Generate rider-family charge coverage gaps for DEP residential schedules `leaf-500` through `leaf-504` |
@@ -320,11 +320,11 @@ surface over inventing your own command mapping.
 | `export dep-storm-rider-audit` | Generate a DEP storm-rider family audit showing canonical candidates, legacy duplicates, residual parse debt, and missing applicability links |
 | `export dep-storm-history-inventory` | Generate a DEP storm-history inventory showing current canonical storm families plus older docket candidates that may contain predecessor storm leaves |
 | `seed-dep-storm-rider-applicability` | Seed DEP storm-rider applicability links for residential schedules using the current `Leaf 607` and `Leaf 613` applicability text |
-| `show-provenance-gaps-nc` | Summarize missing version provenance fields plus missing/path-only discovery linkage for NC historical rows |
-| `show-fingerprint-coverage-nc` | Summarize NC hash-backed coverage, path-only historical rows, document fingerprints, and reusable artifact coverage |
+| `lineage show-provenance-gaps-nc` | Summarize missing version provenance fields plus missing/path-only discovery linkage for NC historical rows |
+| `lineage show-fingerprint-coverage-nc` | Summarize NC hash-backed coverage, path-only historical rows, document fingerprints, and reusable artifact coverage |
 | `show-document-classification-audit-nc` | Classify NC historical documents into routing buckets like `extractable_charge`, `formula_only`, `reference_only`, `redline_candidate`, `unrelated_but_keep`, and `unknown` |
 | `show-unknown-routing-audit-nc` | Collapse `unknown` and weak-routing NC rows into family-level recommendations like `new_profile_or_family_routing_review`, `evaluate_formula_or_program_lane`, or `reclassify_non_tariff_or_reference`, and surface synthesized profile candidates / next commands when the family is clearly routable |
-| `validate-lineage-nc` | Cross-check NC historical docs for family assignment, provenance debt, and extraction readiness |
+| `lineage validate-nc` | Cross-check NC historical docs for family assignment, provenance debt, and extraction readiness |
 
 Targeted extraction diagnostics:
 ```powershell
@@ -359,8 +359,8 @@ Use this before changing parser profiles. It shows:
 
 Legacy-state repair:
 ```powershell
-python -m duke_rates repair-legacy-ncuc-data --dry-run
-python -m duke_rates repair-legacy-ncuc-data --execute
+python -m duke_rates lineage repair-legacy-ncuc-data --dry-run
+python -m duke_rates lineage repair-legacy-ncuc-data --execute
 ```
 
 Use this when older rows contain:
@@ -437,18 +437,18 @@ For scanned PDFs that pdfplumber cannot read — routes them through Docling or 
 | Command | What it does |
 |---|---|
 | `build-tariff-families` | Rebuild tariff family index from canonical sources |
-| `list-tariff-families` | List all tariff families with optional state/company filters |
-| `list-provisional-families` | List provisional (auto-generated) families pending review |
-| `show-provisional-review-candidates-nc` | Rank charged NC provisional families by likely-garbage / reclassification signals and print inferred promotion fields |
-| `promote-provisional-family` | Promote a provisional family to curated status |
-| `retire-historical-document` | Retire/delete a historical document record |
-| `deduplicate-tariff-charges` | Deduplicate repeated `tariff_charges` rows inside one or more specific version ids using the natural charge signature |
-| `retire-provisional-garbage-nc` | Bulk-retire provisional NC families with no charged content. Use `--execute` to apply; default is `--dry-run`. Preserves families with real charges. |
-| `list-historical-only-families` | Families that have no current active tariff (historical only) |
-| `list-weak-unbounded-historical-nc` | Historical families with weak or missing version bounds |
-| `list-placeholder-heading-historical-nc` | Documents with placeholder section headings |
-| `list-redundant-legacy-raw-historical-nc` | Redundant legacy raw entries in historical table |
-| `list-bundle-reference-legacy-raw-historical-nc` | Bundle-reference legacy entries |
+| `lineage list-tariff-families` | List all tariff families with optional state/company filters |
+| `lineage list-provisional-families` | List provisional (auto-generated) families pending review |
+| `lineage show-provisional-review-candidates-nc` | Rank charged NC provisional families by likely-garbage / reclassification signals and print inferred promotion fields |
+| `lineage promote-provisional-family` | Promote a provisional family to curated status |
+| `lineage retire-historical-document` | Retire/delete a historical document record |
+| `lineage deduplicate-tariff-charges` | Deduplicate repeated `tariff_charges` rows inside one or more specific version ids using the natural charge signature |
+| `lineage retire-provisional-garbage-nc` | Bulk-retire provisional NC families with no charged content. Use `--execute` to apply; default is `--dry-run`. Preserves families with real charges. |
+| `lineage list-historical-only-families` | Families that have no current active tariff (historical only) |
+| `lineage list-weak-unbounded-historical-nc` | Historical families with weak or missing version bounds |
+| `lineage list-placeholder-heading-historical-nc` | Documents with placeholder section headings |
+| `lineage list-redundant-legacy-raw-historical-nc` | Redundant legacy raw entries in historical table |
+| `lineage list-bundle-reference-legacy-raw-historical-nc` | Bundle-reference legacy entries |
 | `load-dep-provisional-riders` | Load DEP provisional rider definitions |
 
 ---
@@ -504,8 +504,8 @@ domain archives, and public notice citations.
 | `probe-archive-today-progress-nc` | Probe archive.today for historical versions |
 | `preview-history-family-crosswalk-progress-nc` | Preview family crosswalk mapping |
 | `apply-history-family-crosswalk-progress-nc` | Apply crosswalk (remap family assignments) |
-| `migrate-historical-family-lineage` | Migrate lineage from legacy to new schema |
-| `canonicalize-historical-family-key` | Promote malformed `doc-*`/legacy historical families into canonical keys; prefer this over one-off DB edits when the target family already exists |
+| `lineage migrate-historical-family` | Migrate lineage from legacy to new schema |
+| `lineage canonicalize-historical-family-key` | Promote malformed `doc-*`/legacy historical families into canonical keys; prefer this over one-off DB edits when the target family already exists |
 
 ---
 
@@ -1066,7 +1066,7 @@ They represent the highest-leverage additions for future agents to build.
 
 ### P2 — Fingerprint Coverage
 
-Implemented: `show-fingerprint-coverage-nc`
+Implemented: `lineage show-fingerprint-coverage-nc`
 
 ### P2 — Ranked Reprocess Priority
 
@@ -1074,7 +1074,7 @@ Implemented: `reprocess show-priority-nc`
 
 ### P3 — Provisional Family Auto-Scoring
 
-**Implemented:** `show-provisional-review-candidates-nc`  
+**Implemented:** `lineage show-provisional-review-candidates-nc`  
 
 Scores charged provisional NC families by key length, known-garbage title patterns, charge quality, and span-fragment signals. The command is read-only and also prints inferred promotion fields so agents can promote reviewed families without inventing titles or schedule codes.
 
@@ -1092,13 +1092,13 @@ Shows the full pipeline path for one historical document: profile selection reas
 
 ### P3 — Family-Level Deduplication
 
-**Implemented:** `deduplicate-family-nc --family-key X`
+**Implemented:** `lineage deduplicate-family-nc --family-key X`
 
 Deduplicates tariff charges across all versions in a family using the natural charge signature. Supports `--dry-run` / `--execute`.
 
 ### P2 — Bulk doc-* Family Canonicalization
 
-**Implemented:** `canonicalize-doc-families-nc`
+**Implemented:** `lineage canonicalize-doc-families-nc`
 
 Scans remaining doc-* families, infers canonical schedule/rider keys from document titles, and supports bulk `--execute` to promote all eligible families at once. Shows the proposed mapping in dry-run mode.
 
@@ -1145,28 +1145,28 @@ python -m duke_rates summarize-database-intelligence-nc --report-path docs/repor
 
 | Command | What it does | Risk |
 |---|---|---|
-| `deduplicate-documents-nc` | Consolidate historical documents that share the same `content_hash`. Keeps best survivor (most charges, has local_path, newest retrieved_at) and remaps all FK references. `--dry-run`/`--execute`, `--file-hash`, `--limit`, `--json`. | Low |
-| `backfill-evidence-nc` | Regenerate `evidence_json` for documents where it's null/empty. Extracts best family-match score breakdown from existing `ncuc_span_artifacts.evidence_score_breakdown_json`. `--dry-run`/`--execute`, `--limit`, `--family`, `--json`. | Low |
-| `backfill-content-hash-nc` | Calculate SHA-1 checksums for `historical_documents` where `content_hash` is null or empty (prerequisite for span-artifact matching and evidence backfill). Skips docs whose files are missing on disk. `--dry-run`/`--execute`, `--limit`, `--json`. | Low |
+| `lineage deduplicate-documents-nc` | Consolidate historical documents that share the same `content_hash`. Keeps best survivor (most charges, has local_path, newest retrieved_at) and remaps all FK references. `--dry-run`/`--execute`, `--file-hash`, `--limit`, `--json`. | Low |
+| `lineage backfill-evidence-nc` | Regenerate `evidence_json` for documents where it's null/empty. Extracts best family-match score breakdown from existing `ncuc_span_artifacts.evidence_score_breakdown_json`. `--dry-run`/`--execute`, `--limit`, `--family`, `--json`. | Low |
+| `lineage backfill-content-hash-nc` | Calculate SHA-1 checksums for `historical_documents` where `content_hash` is null or empty (prerequisite for span-artifact matching and evidence backfill). Skips docs whose files are missing on disk. `--dry-run`/`--execute`, `--limit`, `--json`. | Low |
 | `recommend-missing-dockets-nc` | Rank dockets with low or zero processed coverage for targeted fetching. Cross-references `ncuc_discovery_records` against `tariff_versions` and `historical_documents` by docket number. Also surfaces `regulatory_docket_leads` with no discovery records. `--utility`, `--min-year`, `--docket`, `--json`. | Read-only |
 
 Typical corrective sequence:
 ```bash
 # 1. Ensure all docs have content_hash (prerequisite)
-python -m duke_rates backfill-content-hash-nc --dry-run
-python -m duke_rates backfill-content-hash-nc --execute
+python -m duke_rates lineage backfill-content-hash-nc --dry-run
+python -m duke_rates lineage backfill-content-hash-nc --execute
 
 # 2. Enqueue and process stale docs (regenerates span artifacts with classification)
 python -m duke_rates reprocess enqueue-stale-nc --limit 200
 python -m duke_rates reprocess process-queue-nc --limit 200
 
 # 3. Backfill evidence from fresh span artifacts
-python -m duke_rates backfill-evidence-nc --dry-run
-python -m duke_rates backfill-evidence-nc --execute
+python -m duke_rates lineage backfill-evidence-nc --dry-run
+python -m duke_rates lineage backfill-evidence-nc --execute
 
 # 4. Deduplicate identical documents
-python -m duke_rates deduplicate-documents-nc --dry-run
-python -m duke_rates deduplicate-documents-nc --execute --limit 50
+python -m duke_rates lineage deduplicate-documents-nc --dry-run
+python -m duke_rates lineage deduplicate-documents-nc --execute --limit 50
 
 # 5. Identify docket gaps
 python -m duke_rates recommend-missing-dockets-nc --json
@@ -1219,7 +1219,7 @@ For scripts that are not yet promoted to CLI commands, see [scripts/README.md](.
 
 | Script | Purpose |
 |---|---|
-| `scripts/maintenance/audit_stranded_ncuc_family_clues.py` | Wrapper around `suggest-family-links-nc`; kept for compatibility with older workflows |
+| `scripts/maintenance/audit_stranded_ncuc_family_clues.py` | Wrapper around `lineage suggest-family-links-nc`; kept for compatibility with older workflows |
 | `scripts/maintenance/audit_historical_family_mismatches.py` | Find historical doc / family assignment inconsistencies |
 | `scripts/debug/check_new_charges.py` | Quick count of charges by family after extraction |
 | `scripts/debug/final_charge_summary.py` | Full charge summary by family |

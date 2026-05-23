@@ -126,7 +126,7 @@ Export tariff and analysis data in various formats.
 Database and system maintenance tasks.
 
 - `audit_historical_family_mismatches.py` — Find inconsistencies in family assignments. Detects docs where family_key inference from path disagrees with explicit assignment.
-- `audit_stranded_ncuc_family_clues.py` — Compatibility wrapper around `python -m duke_rates suggest-family-links-nc`
+- `audit_stranded_ncuc_family_clues.py` — Compatibility wrapper around `python -m duke_rates lineage suggest-family-links-nc`
 - `check_docs.py` — Verify document availability and accessibility
 - `verify_pdfs.py` — Verify local PDF files are readable and complete
 - `deduplicate_downloads.py` — Remove duplicate downloaded files by hash
@@ -139,11 +139,11 @@ Database and system maintenance tasks.
 **Most useful maintenance commands for agents:**
 ```bash
 # Find and fix stranded discovery records (run before extraction)
-python -m duke_rates suggest-family-links-nc --limit 50
-python -m duke_rates suggest-family-links-nc --apply
+python -m duke_rates lineage suggest-family-links-nc --limit 50
+python -m duke_rates lineage suggest-family-links-nc --apply
 
 # Find family assignment inconsistencies
-python -m duke_rates show-lineage-gaps-nc
+python -m duke_rates lineage show-gaps-nc
 python scripts/maintenance/audit_historical_family_mismatches.py
 ```
 

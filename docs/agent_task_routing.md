@@ -88,9 +88,9 @@ Touch:
 - [family_mismatch_audit.py](/c:/Python/Duke/Standalone/src/duke_rates/historical/family_mismatch_audit.py)
 
 Use:
-- `show-lineage-gaps-nc`
-- `validate-lineage-nc`
-- `suggest-family-links-nc`
+- `lineage show-gaps-nc`
+- `lineage validate-nc`
+- `lineage suggest-family-links-nc`
 - `scripts/maintenance/audit_historical_family_mismatches.py`
 
 ### Missing clean-document recovery
@@ -123,9 +123,9 @@ Touch:
 - [fingerprint_coverage.py](/c:/Python/Duke/Standalone/src/duke_rates/historical/ncuc/fingerprint_coverage.py)
 
 Use:
-- `show-provenance-gaps-nc`
-- `show-fingerprint-coverage-nc`
-- `validate-lineage-nc`
+- `lineage show-provenance-gaps-nc`
+- `lineage show-fingerprint-coverage-nc`
+- `lineage validate-nc`
 
 ### Data model / schema work
 

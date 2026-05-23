@@ -1,6 +1,5 @@
 # CLI command surface snapshot. Generated; update deliberately.
 # See tests/test_cli_command_surface.py for update procedure.
-add-historical-document-nc
 adjudicate-classifications-nc
 aggregate-overnight-reports-nc
 analyze-document-structure-nc
@@ -8,7 +7,6 @@ analyze-parse-failures-nc
 apply-deterministic-llm-row-repairs-nc
 apply-history-family-crosswalk-progress-nc
 ask-ncuc-db
-attach-current-document-to-family
 audit cross-attributed-charges-nc
 audit tariff-coverage
 audit tariff-null-scan
@@ -20,9 +18,7 @@ audit-rider-map
 audit-search-worklist
 audit-stale-gold-nc
 backfill-classifications-nc
-backfill-content-hash-nc
 backfill-embedding-classifications-nc
-backfill-evidence-nc
 backfill-flag-classifications-nc
 benchmark-docling
 benchmark-document-normalization
@@ -34,22 +30,16 @@ bootstrap-missing-versions-nc
 build-openei-export
 build-tariff-families
 calculate-bill
-canonicalize-doc-families-nc
-canonicalize-historical-family-key
 check-ollama-models-nc
 classify-docs
 classify-documents-v2-nc
 cleanup-nc-residential-history
-clear-redline-fingerprint
 compare-document-page-text
 compare-rates
 compare-schedules
 compare-tariff-rates
 compare-version-rates
 crawl
-deduplicate-documents-nc
-deduplicate-family-nc
-deduplicate-tariff-charges
 derive-bill-observations
 detect-rule-promotions-nc
 diagnose-document-nc
@@ -93,28 +83,54 @@ import-root-url-lists-progress-nc
 ingest-manual-lead-progress-nc
 ingest-ncuc
 inspect-history-gaps-progress-nc
+lineage add-historical-document-nc
+lineage attach-current-document-to-family
+lineage backfill-content-hash-nc
+lineage backfill-evidence-nc
+lineage canonicalize-doc-families-nc
+lineage canonicalize-historical-family-key
+lineage clear-redline-fingerprint
+lineage deduplicate-documents-nc
+lineage deduplicate-family-nc
+lineage deduplicate-tariff-charges
+lineage list-bundle-reference-legacy-raw-historical-nc
+lineage list-current-anchor-mismatches
+lineage list-historical-only-families
+lineage list-placeholder-heading-historical-nc
+lineage list-provisional-families
+lineage list-redundant-legacy-raw-historical-nc
+lineage list-tariff-families
+lineage list-weak-unbounded-historical-nc
+lineage migrate-historical-family
+lineage promote-provisional-family
+lineage rebind-historical-page-range
+lineage repair-anomaly-nc
+lineage repair-historical-current-snapshot
+lineage repair-legacy-ncuc-data
+lineage retire-historical-document
+lineage retire-provisional-garbage-nc
+lineage retire-tariff-version
+lineage show-fingerprint-coverage-nc
+lineage show-gaps-nc
+lineage show-provenance-gaps-nc
+lineage show-provisional-review-candidates-nc
+lineage suggest-family-links-nc
+lineage sync-family-metadata-from-current-anchor
+lineage validate-nc
 list-bill-observations
 list-bill-relevant-gaps-progress-nc
 list-bills
-list-bundle-reference-legacy-raw-historical-nc
-list-current-anchor-mismatches
 list-docs
 list-document-types-nc
 list-historical-leads-progress-nc
-list-historical-only-families
 list-history-chains-progress-nc
 list-history-notice-links-progress-nc
 list-history-progress-nc
 list-history-sources-progress-nc
 list-observed-component-history-progress-nc
-list-placeholder-heading-historical-nc
-list-provisional-families
-list-redundant-legacy-raw-historical-nc
 list-regulator-gaps-progress-nc
 list-search-packs-progress-nc
-list-tariff-families
 list-unresolved-historical-families-progress-nc
-list-weak-unbounded-historical-nc
 load-dep-provisional-riders
 load-eia-rates
 load-local-rates-nc
@@ -123,7 +139,6 @@ load-ncuc-ingest
 locate-llm-row-evidence-nc
 lookup-openei-rates
 mcp
-migrate-historical-family-lineage
 mine-docling-nc
 mine-historical-leads-progress-nc
 mine-ncuc-pipeline
@@ -185,9 +200,7 @@ probe-archive-today-progress-nc
 process-docling-batch
 promote-high-confidence-subset-nc
 promote-llm-charge-proposals-nc
-promote-provisional-family
 propose-llm-charge-promotions-nc
-rebind-historical-page-range
 reclassify-llm-row-conflicts-nc
 recommend-missing-dockets-nc
 recommend-overnight-lane-nc
@@ -204,9 +217,6 @@ recover-predecessor-domain-progress-nc
 recover-public-notices-progress-nc
 refresh-nc-redline-fingerprints
 remediate-nc-null-effective-dates
-repair-anomaly-nc
-repair-historical-current-snapshot
-repair-legacy-ncuc-data
 report-classification-disagreements-nc
 report-database-intelligence-nc
 report-docling-skipped-pages-nc
@@ -237,9 +247,6 @@ reprocess show-profile-impact-nc
 reprocess show-queue-nc
 reprocess show-stale-historical-nc
 reprocess show-stale-nc
-retire-historical-document
-retire-provisional-garbage-nc
-retire-tariff-version
 review-queue
 run-autonomous-cycle-nc
 run-continuous-loop-nc
@@ -275,18 +282,14 @@ show-docket-leads-progress-nc
 show-document-classification-audit-nc
 show-extraction-coverage-nc
 show-family-mismatch-audit-nc
-show-fingerprint-coverage-nc
 show-history-chain-progress-nc
 show-history-coverage-progress-nc
 show-history-tariff-progress-nc
-show-lineage-gaps-nc
 show-llm-row-effective-status-nc
 show-near-miss-profiles-nc
 show-observed-component-history-progress-nc
 show-parser-improvement-candidates-nc
 show-parser-selection-audit-nc
-show-provenance-gaps-nc
-show-provisional-review-candidates-nc
 show-regulator-gaps-progress-nc
 show-review-impact-nc
 show-search-pack-progress-nc
@@ -295,17 +298,14 @@ show-workflow-action-receipts-nc
 show-workflow-capabilities-nc
 show-workflow-next-actions-nc
 show-workflow-status-nc
-suggest-family-links-nc
 suggest-regex-fixes-nc
 summarize-database-intelligence-nc
-sync-family-metadata-from-current-anchor
 tariff-update
 test-bill-reconstruction-nc
 train-document-type-baseline-nc
 triage-disagreements-nc
 validate-document-diagnostics
 validate-extraction-nc
-validate-lineage-nc
 validate-llm-rate-extractions-nc
 validate-parser-change-nc
 validate-regex-suggestions-nc

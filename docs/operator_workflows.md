@@ -98,8 +98,8 @@ Use when:
 Run:
 
 ```powershell
-python -m duke_rates repair-legacy-ncuc-data --dry-run
-python -m duke_rates repair-legacy-ncuc-data --execute
+python -m duke_rates lineage repair-legacy-ncuc-data --dry-run
+python -m duke_rates lineage repair-legacy-ncuc-data --execute
 ```
 
 What it repairs:
@@ -210,7 +210,7 @@ Use when:
 Run:
 
 ```powershell
-python -m duke_rates add-historical-document-nc `
+python -m duke_rates lineage add-historical-document-nc `
   --family-key nc-progress-leaf-501 `
   --company progress `
   --local-path data/downloads/<file>.pdf `
@@ -229,7 +229,7 @@ python -m duke_rates reprocess process-queue-nc
 ```
 
 Notes:
-- `add-historical-document-nc` is the sanctioned replacement for the previously documented but missing manual registration step.
+- `lineage add-historical-document-nc` is the sanctioned replacement for the previously documented but missing manual registration step.
 - Prefer this command over ad hoc SQL or one-off registration scripts when the PDF/slice is already known.
 - Keep `--archived-url` pointed at the regulator/archive source, not the local file path.
 
@@ -242,7 +242,7 @@ Outcome:
 
 Use when:
 - the import pipeline has run and created new provisional families
-- `list-provisional-families` shows families pending review
+- `lineage list-provisional-families` shows families pending review
 - you need to retire garbage auto-key families or promote real ones
 
 Provisional families fall into three categories:
@@ -253,25 +253,25 @@ Provisional families fall into three categories:
 2. **Duplicate** — title matches a curated family in another state/company. Retire
    after confirming no NC-specific versions link to it.
 3. **Real orphan** — a genuine schedule or rider name that has no curated NC family yet.
-   Accumulate versions via the import pipeline, then promote via `promote-provisional-family`.
+   Accumulate versions via the import pipeline, then promote via `lineage promote-provisional-family`.
 
 Run:
 
 ```powershell
 # Bulk-retire all provisional families with no charged content (dry-run first):
-python -m duke_rates retire-provisional-garbage-nc --dry-run
-python -m duke_rates retire-provisional-garbage-nc --execute
+python -m duke_rates lineage retire-provisional-garbage-nc --dry-run
+python -m duke_rates lineage retire-provisional-garbage-nc --execute
 
 # For individual families with real content that need promotion or single-doc retirement:
-python -m duke_rates list-provisional-families --state NC
-python -m duke_rates promote-provisional-family FAMILY_KEY
-python -m duke_rates retire-historical-document HISTORICAL_DOCUMENT_ID
+python -m duke_rates lineage list-provisional-families --state NC
+python -m duke_rates lineage promote-provisional-family FAMILY_KEY
+python -m duke_rates lineage retire-historical-document HISTORICAL_DOCUMENT_ID
 ```
 
 **Caution:** Do not retire provisional families or historical docs while the import
 pipeline is still running — the pipeline may be actively writing to those rows.
 
-`retire-provisional-garbage-nc` always preserves families that have at least one charged
+`lineage retire-provisional-garbage-nc` always preserves families that have at least one charged
 tariff version — only zero-charge families are deleted. Run `--dry-run` first to see the
 count and re-run `show-workflow-status-nc` after `--execute` to confirm metrics improved.
 
@@ -282,7 +282,7 @@ Outcome:
 
 Improvement trigger:
 - if provisional family triage still requires manual SQL to distinguish garbage from
-  real among charge-bearing families, add a `show-provisional-review-candidates-nc`
+  real among charge-bearing families, add a `lineage show-provisional-review-candidates-nc`
   command with auto-scoring
 
 ### 3. Lineage And Family-Link Audit
@@ -299,9 +299,9 @@ Read:
 Preferred current tools:
 
 ```powershell
-python -m duke_rates show-lineage-gaps-nc
-python -m duke_rates validate-lineage-nc
-python -m duke_rates suggest-family-links-nc --limit 50
+python -m duke_rates lineage show-gaps-nc
+python -m duke_rates lineage validate-nc
+python -m duke_rates lineage suggest-family-links-nc --limit 50
 python scripts/maintenance/audit_historical_family_mismatches.py
 ```
 
@@ -570,8 +570,8 @@ Read:
 - [source_of_truth_and_legacy_paths.md](/c:/Python/Duke/Standalone/docs/source_of_truth_and_legacy_paths.md)
 
 Current practical surface:
-- `show-provenance-gaps-nc`
-- `show-fingerprint-coverage-nc`
+- `lineage show-provenance-gaps-nc`
+- `lineage show-fingerprint-coverage-nc`
 - `document_fingerprints`
 - `parse_attempt_logs`
 - `parse_review_outcomes`

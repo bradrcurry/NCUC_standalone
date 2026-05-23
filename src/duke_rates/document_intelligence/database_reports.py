@@ -486,7 +486,7 @@ def find_duplicate_documents(
     """Detect actually-duplicate historical documents.
 
     Counts groups of ``historical_documents`` rows that share a
-    ``content_hash`` -- the SAME field that ``deduplicate-documents-nc``
+    ``content_hash`` -- the SAME field that ``lineage deduplicate-documents-nc``
     operates on. The previous implementation queried
     ``document_fingerprints_v2.file_hash``, which is a many-to-one
     fingerprint index (one PDF can have multiple fingerprint rows),

@@ -294,7 +294,7 @@ def main():
         print("  1. Review downloads in:", DOWNLOAD_DIR)
         print("  2. Find the 'Schedule R' / 'Residential Service' pages in each PDF")
         print("  3. Register the specific pages:")
-        print("     python -m duke_rates add-historical-document-nc \\")
+        print("     python -m duke_rates lineage add-historical-document-nc \\")
         print("       --family-key nc-progress-leaf-500 \\")
         print("       --local-path <pdf_path> \\")
         print("       --start-page <n> --end-page <n> \\")

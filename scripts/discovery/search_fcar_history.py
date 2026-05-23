@@ -277,7 +277,7 @@ def main():
         print("\nNext steps:")
         print("  1. Review downloads in:", DOWNLOAD_DIR)
         print("  2. For each FCAR tariff sheet: find the 'Fuel Cost Adjustment Rider' page")
-        print("  3. Register: python -m duke_rates add-historical-document-nc --family-key nc-carolinas-rider-FCAR ...")
+        print("  3. Register: python -m duke_rates lineage add-historical-document-nc --family-key nc-carolinas-rider-FCAR ...")
         print("  4. Enqueue: python -m duke_rates reprocess enqueue-nc --hd-id <id>")
         print("  5. Process: python -m duke_rates reprocess process-queue-nc")
 

@@ -190,8 +190,8 @@ See [knowledge_capture_workflow.md](/c:/Python/Duke/Standalone/docs/knowledge_ca
 ```powershell
 python -m duke_rates --help
 python -m duke_rates show-workflow-status-nc
-python -m duke_rates show-lineage-gaps-nc
-python -m duke_rates show-fingerprint-coverage-nc
+python -m duke_rates lineage show-gaps-nc
+python -m duke_rates lineage show-fingerprint-coverage-nc
 python -m duke_rates ncuc-import-pipeline --all-downloaded
 python -m duke_rates bootstrap-missing-versions-nc
 python -m duke_rates extract-rates-nc

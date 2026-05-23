@@ -21,7 +21,7 @@ Use [agent_workflows.json](/c:/Python/Duke/Standalone/docs/agent_workflows.json)
 as the default command/workflow source of truth.
 
 - **Session 46+ (2026-05-01):** Phase 6.5 autonomous loop implemented:
-  - 5 new CLI commands: `deduplicate-documents-nc`, `backfill-evidence-nc`, `backfill-content-hash-nc`, `recommend-missing-dockets-nc`, `run-autonomous-cycle-nc`
+  - 5 new CLI commands: `lineage deduplicate-documents-nc`, `lineage backfill-evidence-nc`, `lineage backfill-content-hash-nc`, `recommend-missing-dockets-nc`, `run-autonomous-cycle-nc`
   - New module: `action_registry.py` — maps 7 finding categories to corrective commands with severity thresholds, risk assessment, safety caps
   - `run-autonomous-cycle-nc` — full detect→decide→act→measure loop. Safe by default (`--dry-run`).
   - Reprocess pipeline fix: `_refresh_historical_artifacts_for_reprocess` now runs `classify_span_against_families()` between segment and save (was root cause of 290 docs without evidence_json)
@@ -193,9 +193,9 @@ For database intelligence / autonomous loop (Phase 6.5+):
 python -m duke_rates report-database-intelligence-nc --limit 50 --json
 python -m duke_rates run-autonomous-cycle-nc --dry-run --json
 python -m duke_rates run-continuous-loop-nc --dry-run --max-cycles 3 --sleep 1
-python -m duke_rates backfill-content-hash-nc --dry-run
-python -m duke_rates deduplicate-documents-nc --dry-run
-python -m duke_rates backfill-evidence-nc --dry-run
+python -m duke_rates lineage backfill-content-hash-nc --dry-run
+python -m duke_rates lineage deduplicate-documents-nc --dry-run
+python -m duke_rates lineage backfill-evidence-nc --dry-run
 python -m duke_rates recommend-missing-dockets-nc --json
 ```
 1
@@ -238,7 +238,7 @@ python -m duke_rates export dep-storm-history-inventory
 - **Corpus maintenance (autonomous):** `python -m duke_rates run-autonomous-cycle-nc --execute --max-actions 2` — detect duplicates, missing versions, stale artifacts and apply corrective actions.
 - **Continuous loop (8-24h unattended):** `python -m duke_rates run-continuous-loop-nc --execute --max-runtime 480 --max-cycles 20` — runs the full detect→decide→act→acquire→measure loop with docket fetching. Stops when runtime expires, cycles exhausted, or no improvement for 2 cycles. Dry-run first: `run-continuous-loop-nc --dry-run --max-cycles 3 --sleep 1`.
 - **Overnight report + action:** `python -m duke_rates run-overnight-db-intelligence-nc --limit 100 --max-runtime 120` then `python -m duke_rates run-autonomous-cycle-nc --execute --max-actions 3`. Morning report JSON at `docs/reports/database_intelligence/<date>_morning.json`.
-- **Deduplication:** `python -m duke_rates deduplicate-documents-nc --dry-run` first. There are 50+ duplicate groups (max 42 copies of one hash). Consolidation preserves charges via FK remapping.
+- **Deduplication:** `python -m duke_rates lineage deduplicate-documents-nc --dry-run` first. There are 50+ duplicate groups (max 42 copies of one hash). Consolidation preserves charges via FK remapping.
 - **Docket coverage:** `python -m duke_rates recommend-missing-dockets-nc --json` shows highest-value dockets to fetch next.
 - **Phase 5.6 fresh diagnosis run:** `python -m duke_rates run-overnight-parse-improvement-nc --task-kind diagnose --limit 25 --max-runtime-minutes 120 --resume`
 - **Phase 5.6 re-diagnose prior unknowns:** `python -m duke_rates run-overnight-parse-improvement-nc --task-kind diagnose --rediagnose-unknown --limit 25 --max-runtime-minutes 120`

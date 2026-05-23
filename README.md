@@ -249,8 +249,8 @@ python -m duke_rates extract-rates-nc
 Manual registration and targeted repair:
 
 ```powershell
-python -m duke_rates add-historical-document-nc --help
-python -m duke_rates rebind-historical-page-range --help
+python -m duke_rates lineage add-historical-document-nc --help
+python -m duke_rates lineage rebind-historical-page-range --help
 python -m duke_rates reprocess enqueue-nc --hd-id <historical_document_id>
 python -m duke_rates reprocess process-queue-nc
 ```
@@ -258,10 +258,10 @@ python -m duke_rates reprocess process-queue-nc
 Lineage, provenance, and fingerprint audit:
 
 ```powershell
-python -m duke_rates show-lineage-gaps-nc
-python -m duke_rates validate-lineage-nc
-python -m duke_rates show-provenance-gaps-nc
-python -m duke_rates show-fingerprint-coverage-nc
+python -m duke_rates lineage show-gaps-nc
+python -m duke_rates lineage validate-nc
+python -m duke_rates lineage show-provenance-gaps-nc
+python -m duke_rates lineage show-fingerprint-coverage-nc
 ```
 
 Missing-document recovery loop:

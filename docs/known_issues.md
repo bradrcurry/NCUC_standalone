@@ -85,7 +85,7 @@
   The current bottleneck is intake quality after import:
   stale stage debt, provisional `doc-*` / `program-*` families, null-effective rows,
   and canonicalization of misclassified historical spans.
-- `retire-provisional-garbage-nc --execute` is now a standard session-start command.
+- `lineage retire-provisional-garbage-nc --execute` is now a standard session-start command.
   It safely bulk-retires provisional families with no charged content.
   Families with real charge rows are always preserved. Run `--dry-run` first to preview.
   351 families were retired on 2026-04-08; `provisional_families` is now `0` in live workflow metrics.
@@ -97,7 +97,7 @@
     and
     [nc_document_intelligence_audit.md](/c:/Python/Duke/Standalone/docs/reports/nc_document_intelligence_audit/nc_document_intelligence_audit.md)
   - First operational follow-through is now in place:
-    `canonicalize-historical-family-key` provides a reusable way to move malformed historical families
+    `lineage canonicalize-historical-family-key` provides a reusable way to move malformed historical families
     into canonical keys without one-off DB edits.
 
 ## Documentation / handoff caveats
@@ -153,7 +153,7 @@ The canonical per-schedule matrix is now generated from SQLite instead of mainta
   and `python -m duke_rates export nc-anomaly-audit`
   and `python -m duke_rates export nc-schedule-inventory-audit`
   and `python -m duke_rates export nc-document-intelligence-audit --limit 60`
-  and use `python -m duke_rates canonicalize-historical-family-key <source> <target> --all-historical --dry-run`
+  and use `python -m duke_rates lineage canonicalize-historical-family-key <source> <target> --all-historical --dry-run`
   before executing canonical family cleanup
 
 Interpretation notes:
@@ -222,7 +222,7 @@ Open coverage caveats still worth tracking:
   - fourth canonicalization pass already completed:
     `SCHEDULEFLFLOODLIGHTINGSERVICE -> nc-carolinas-schedule-FL`
   - reusable duplicate cleanup is now available:
-    `deduplicate-tariff-charges` was used to reduce `FL` version duplicates
+    `lineage deduplicate-tariff-charges` was used to reduce `FL` version duplicates
     (`4410: 529 -> 19`, `4344: 36 -> 18`, `4395: 29 -> 20`)
   - strongest DEC candidates now include `GOVERNMENTALLIGHTINGSERVICE` and
     `SCHEDULEPLSTREETANDPUBLICLIGHTINGSERVICE`, followed by the zero-charge rider cluster

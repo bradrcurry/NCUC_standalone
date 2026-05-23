@@ -41,8 +41,8 @@
         "reprocess show-queue-nc",
         "reprocess show-stale-historical-nc",
         "ocr show-queue-nc",
-        "show-lineage-gaps-nc",
-        "list-provisional-families"
+        "lineage show-gaps-nc",
+        "lineage list-provisional-families"
       ],
       "mutates_state": false,
       "docs": [
@@ -181,11 +181,11 @@
       ]
     },
     {
-      "tool_id": "list-provisional-families",
+      "tool_id": "lineage list-provisional-families",
       "surface": "cli",
       "status": "supported",
       "category": "inspect",
-      "command": "python -m duke_rates list-provisional-families --state NC",
+      "command": "python -m duke_rates lineage list-provisional-families --state NC",
       "goal": "List provisional tariff families that still need review or promotion.",
       "use_when": [
         "Checking whether intake created new provisional families",
@@ -196,8 +196,8 @@
       ],
       "prerequisites": [],
       "next_tools": [
-        "suggest-family-links-nc",
-        "promote-provisional-family"
+        "lineage suggest-family-links-nc",
+        "lineage promote-provisional-family"
       ],
       "mutates_state": false,
       "docs": [
@@ -227,7 +227,7 @@
       "next_tools": [
         "bootstrap-missing-versions-nc",
         "extract-rates-nc",
-        "list-provisional-families"
+        "lineage list-provisional-families"
       ],
       "mutates_state": true,
       "docs": [
@@ -282,7 +282,7 @@
       ],
       "next_tools": [
         "extract-rates-nc",
-        "validate-lineage-nc"
+        "lineage validate-nc"
       ],
       "mutates_state": true,
       "docs": [
@@ -306,7 +306,7 @@
         "The current bottleneck is stale extraction or parser-profile debt"
       ],
       "prerequisites": [
-        "Prefer show-lineage-gaps-nc or a missing-doc audit first when the target family is unclear"
+        "Prefer lineage show-gaps-nc or a missing-doc audit first when the target family is unclear"
       ],
       "next_tools": [
         "workflow run-nc-missing-doc",
@@ -590,11 +590,11 @@
       ]
     },
     {
-      "tool_id": "show-lineage-gaps-nc",
+      "tool_id": "lineage show-gaps-nc",
       "surface": "cli",
       "status": "supported",
       "category": "diagnose",
-      "command": "python -m duke_rates show-lineage-gaps-nc",
+      "command": "python -m duke_rates lineage show-gaps-nc",
       "goal": "Summarize NC family-link, version-link, effective-date, and no-charge lineage gaps.",
       "use_when": [
         "Auditing family linkage quality",
@@ -605,8 +605,8 @@
       ],
       "prerequisites": [],
       "next_tools": [
-        "validate-lineage-nc",
-        "suggest-family-links-nc",
+        "lineage validate-nc",
+        "lineage suggest-family-links-nc",
         "bootstrap-missing-versions-nc"
       ],
       "mutates_state": false,
@@ -617,11 +617,11 @@
       ]
     },
     {
-      "tool_id": "validate-lineage-nc",
+      "tool_id": "lineage validate-nc",
       "surface": "cli",
       "status": "supported",
       "category": "diagnose",
-      "command": "python -m duke_rates validate-lineage-nc",
+      "command": "python -m duke_rates lineage validate-nc",
       "goal": "Separate lineage blockers from warnings for each NC historical document.",
       "use_when": [
         "You need document-level extraction readiness checks",
@@ -632,9 +632,9 @@
       ],
       "prerequisites": [],
       "next_tools": [
-        "suggest-family-links-nc",
+        "lineage suggest-family-links-nc",
         "bootstrap-missing-versions-nc",
-        "show-provenance-gaps-nc"
+        "lineage show-provenance-gaps-nc"
       ],
       "mutates_state": false,
       "docs": [
@@ -643,11 +643,11 @@
       ]
     },
     {
-      "tool_id": "suggest-family-links-nc",
+      "tool_id": "lineage suggest-family-links-nc",
       "surface": "cli",
       "status": "supported",
       "category": "repair",
-      "command": "python -m duke_rates suggest-family-links-nc",
+      "command": "python -m duke_rates lineage suggest-family-links-nc",
       "goal": "Suggest likely family assignments for stranded NC discovery rows; optional --apply persists recoverable matches.",
       "use_when": [
         "Stranded discovery rows have enough clues for likely family matches",
@@ -657,12 +657,12 @@
         "You have not reviewed the suggestions or are not prepared to mutate state"
       ],
       "prerequisites": [
-        "Inspect show-lineage-gaps-nc or validate-lineage-nc first",
+        "Inspect lineage show-gaps-nc or lineage validate-nc first",
         "Use --apply only after reviewing suggested matches"
       ],
       "next_tools": [
         "ncuc-import-pipeline",
-        "show-lineage-gaps-nc"
+        "lineage show-gaps-nc"
       ],
       "mutates_state": true,
       "docs": [
@@ -672,11 +672,11 @@
       ]
     },
     {
-      "tool_id": "show-provenance-gaps-nc",
+      "tool_id": "lineage show-provenance-gaps-nc",
       "surface": "cli",
       "status": "supported",
       "category": "diagnose",
-      "command": "python -m duke_rates show-provenance-gaps-nc",
+      "command": "python -m duke_rates lineage show-provenance-gaps-nc",
       "goal": "Audit missing version provenance fields and weak discovery linkage across NC historical rows.",
       "use_when": [
         "Auditing provenance debt",
@@ -687,8 +687,8 @@
       ],
       "prerequisites": [],
       "next_tools": [
-        "show-fingerprint-coverage-nc",
-        "validate-lineage-nc"
+        "lineage show-fingerprint-coverage-nc",
+        "lineage validate-nc"
       ],
       "mutates_state": false,
       "docs": [
@@ -698,11 +698,11 @@
       ]
     },
     {
-      "tool_id": "show-fingerprint-coverage-nc",
+      "tool_id": "lineage show-fingerprint-coverage-nc",
       "surface": "cli",
       "status": "supported",
       "category": "diagnose",
-      "command": "python -m duke_rates show-fingerprint-coverage-nc",
+      "command": "python -m duke_rates lineage show-fingerprint-coverage-nc",
       "goal": "Show hash-backed vs path-only coverage, fingerprint presence, and artifact reuse coverage for NC historical docs.",
       "use_when": [
         "Assessing historical document fingerprint coverage",
@@ -713,8 +713,8 @@
       ],
       "prerequisites": [],
       "next_tools": [
-        "show-provenance-gaps-nc",
-        "show-lineage-gaps-nc"
+        "lineage show-provenance-gaps-nc",
+        "lineage show-gaps-nc"
       ],
       "mutates_state": false,
       "docs": [
@@ -910,11 +910,11 @@
       ]
     },
     {
-      "tool_id": "promote-provisional-family",
+      "tool_id": "lineage promote-provisional-family",
       "surface": "cli",
       "status": "supported",
       "category": "repair",
-      "command": "python -m duke_rates promote-provisional-family",
+      "command": "python -m duke_rates lineage promote-provisional-family",
       "goal": "Promote a provisional family into a curated family record when the auto-linking result is correct.",
       "use_when": [
         "A provisional family has been reviewed and should become curated"
@@ -923,10 +923,10 @@
         "The family remains ambiguous or looks like garbage auto-key output"
       ],
       "prerequisites": [
-        "Inspect with list-provisional-families first"
+        "Inspect with lineage list-provisional-families first"
       ],
       "next_tools": [
-        "show-lineage-gaps-nc",
+        "lineage show-gaps-nc",
         "extract-rates-nc"
       ],
       "mutates_state": true,
@@ -936,26 +936,26 @@
       ]
     },
     {
-      "tool_id": "show-provisional-review-candidates-nc",
+      "tool_id": "lineage show-provisional-review-candidates-nc",
       "surface": "cli",
       "status": "supported",
       "category": "inspect",
-      "command": "python -m duke_rates show-provisional-review-candidates-nc --state NC",
+      "command": "python -m duke_rates lineage show-provisional-review-candidates-nc --state NC",
       "goal": "Rank charged provisional NC families for cleanup or promotion using sanctioned review heuristics.",
       "use_when": [
-        "Provisional families still have charges so retire-provisional-garbage-nc cannot help",
+        "Provisional families still have charges so lineage retire-provisional-garbage-nc cannot help",
         "An agent needs inferred promotion fields instead of guessing title or schedule overrides"
       ],
       "avoid_when": [
         "You need to mutate state directly",
-        "The problem is zero-charge provisional sprawl better handled by retire-provisional-garbage-nc"
+        "The problem is zero-charge provisional sprawl better handled by lineage retire-provisional-garbage-nc"
       ],
       "prerequisites": [
-        "Inspect with list-provisional-families first when you need the full backlog"
+        "Inspect with lineage list-provisional-families first when you need the full backlog"
       ],
       "next_tools": [
-        "promote-provisional-family",
-        "show-lineage-gaps-nc"
+        "lineage promote-provisional-family",
+        "lineage show-gaps-nc"
       ],
       "mutates_state": false,
       "docs": [
@@ -964,11 +964,11 @@
       ]
     },
     {
-      "tool_id": "retire-historical-document",
+      "tool_id": "lineage retire-historical-document",
       "surface": "cli",
       "status": "narrow_helper",
       "category": "repair",
-      "command": "python -m duke_rates retire-historical-document",
+      "command": "python -m duke_rates lineage retire-historical-document",
       "goal": "Retire a bad historical document row while preserving reviewable audit intent.",
       "use_when": [
         "A specific historical document is known to be garbage or duplicate and should be removed from the active pipeline"
@@ -981,7 +981,7 @@
         "Use only after bounded investigation"
       ],
       "next_tools": [
-        "show-lineage-gaps-nc",
+        "lineage show-gaps-nc",
         "show-workflow-status-nc"
       ],
       "mutates_state": true,
@@ -1007,8 +1007,8 @@
       ],
       "prerequisites": [],
       "next_tools": [
-        "show-lineage-gaps-nc",
-        "validate-lineage-nc"
+        "lineage show-gaps-nc",
+        "lineage validate-nc"
       ],
       "mutates_state": false,
       "docs": [

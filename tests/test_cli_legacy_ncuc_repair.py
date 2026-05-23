@@ -6,6 +6,7 @@ from types import SimpleNamespace
 from typer.testing import CliRunner
 
 from duke_rates import cli
+from duke_rates.cli_commands import lineage as lineage_module
 from duke_rates.db.repository import Repository
 
 
@@ -94,14 +95,19 @@ def test_repair_legacy_ncuc_data_cli_dry_run_and_execute(tmp_path, monkeypatch) 
         "_bootstrap",
         lambda: (SimpleNamespace(database_path=str(db_path)), Repository(db_path)),
     )
+    monkeypatch.setattr(
+        lineage_module,
+        "_bootstrap",
+        lambda: (SimpleNamespace(database_path=str(db_path)), Repository(db_path)),
+    )
     runner = CliRunner()
 
-    dry_run = runner.invoke(cli.app, ["repair-legacy-ncuc-data", "--dry-run"])
+    dry_run = runner.invoke(cli.app, ["lineage", "repair-legacy-ncuc-data", "--dry-run"])
     assert dry_run.exit_code == 0
     assert "legacy_portal_harvest=1" in dry_run.stdout
     assert "malformed_historical_current_document_id=1" in dry_run.stdout
 
-    execute = runner.invoke(cli.app, ["repair-legacy-ncuc-data", "--execute"])
+    execute = runner.invoke(cli.app, ["lineage", "repair-legacy-ncuc-data", "--execute"])
     assert execute.exit_code == 0
     assert "portal_harvest->playwright=1" in execute.stdout
     assert "cleared_historical_current_document_id=1" in execute.stdout

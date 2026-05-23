@@ -26,27 +26,6 @@
 | build-tariff-families                             Build tariff_families     |
 |                                                   rows from classified      |
 |                                                   documents (Phase 2c).     |
-| list-tariff-families                              List tariff families in   |
-|                                                   the database.             |
-| list-provisional-families                         List provisional          |
-|                                                   historical tariff         |
-|                                                   families awaiting         |
-|                                                   review/promotion.         |
-| show-provisional-review-candidates-nc             Rank provisional NC       |
-|                                                   families that still need  |
-|                                                   manual review despite     |
-|                                                   having charges.           |
-| show-lineage-gaps-nc                              Show compact NC lineage   |
-|                                                   gaps across discovery     |
-|                                                   records, historical docs, |
-|                                                   versions, and families.   |
-| show-provenance-gaps-nc                           Show NC provenance gaps   |
-|                                                   across tariff versions    |
-|                                                   and discovery linkage.    |
-| show-fingerprint-coverage-nc                      Show NC fingerprint/hash  |
-|                                                   coverage across           |
-|                                                   historical docs and       |
-|                                                   reusable artifacts.       |
 | show-document-classification-audit-nc             Show NC document buckets  |
 |                                                   for routing beyond simple |
 |                                                   tariff-charge extraction. |
@@ -54,89 +33,6 @@
 |                                                   landing in `unknown` or   |
 |                                                   weak fallback routing     |
 |                                                   buckets.                  |
-| validate-lineage-nc                               Cross-check NC historical |
-|                                                   docs for family           |
-|                                                   assignment, provenance    |
-|                                                   debt, and extraction      |
-|                                                   readiness.                |
-| suggest-family-links-nc                           Suggest likely NC family  |
-|                                                   links for stranded        |
-|                                                   discovery records using   |
-|                                                   span clues.               |
-| promote-provisional-family                        Promote a provisional     |
-|                                                   historical family into a  |
-|                                                   curated tariff family.    |
-| list-historical-only-families                     List tariff families      |
-|                                                   backed only by historical |
-|                                                   documents and no          |
-|                                                   current-document anchor.  |
-| list-weak-unbounded-historical-nc                 List weak historical docs |
-|                                                   that still point at whole |
-|                                                   PDFs instead of bounded   |
-|                                                   spans.                    |
-| list-redundant-legacy-raw-historical-nc           List weak legacy raw rows |
-|                                                   that already have bounded |
-|                                                   same-family regulator     |
-|                                                   replacements.             |
-| list-bundle-reference-legacy-raw-historical-nc    List weak legacy raw rows |
-|                                                   that appear to be bundle  |
-|                                                   rider references inside   |
-|                                                   bounded spans.            |
-| list-placeholder-heading-historical-nc            List bounded placeholder  |
-|                                                   heading spans that can be |
-|                                                   retired as residue.       |
-| retire-historical-document                        Delete a historical       |
-|                                                   document row and its      |
-|                                                   attached parse/extraction |
-|                                                   state.                    |
-| add-historical-document-nc                        Register one page-bounded |
-|                                                   NC historical PDF         |
-|                                                   directly into             |
-|                                                   historical_documents.     |
-| rebind-historical-page-range                      Update an existing        |
-|                                                   historical document's     |
-|                                                   page bounds and           |
-|                                                   optionally requeue it.    |
-| clear-redline-fingerprint                         Clear a stored redline    |
-|                                                   verdict for a             |
-|                                                   historical-document       |
-|                                                   slice.                    |
-| retire-tariff-version                             Delete one tariff_version |
-|                                                   and its charges while     |
-|                                                   leaving the historical    |
-|                                                   document intact.          |
-| deduplicate-tariff-charges                        Deduplicate repeated      |
-|                                                   tariff_charges rows for   |
-|                                                   one or more versions.     |
-| retire-provisional-garbage-nc                     Retire provisional NC     |
-|                                                   families that have no     |
-|                                                   charged tariff content.   |
-| repair-historical-current-snapshot                Repair a historical row   |
-|                                                   that still points at a    |
-|                                                   stale current-document    |
-|                                                   snapshot.                 |
-| repair-legacy-ncuc-data                           Audit and repair legacy   |
-|                                                   NCUC rows that break      |
-|                                                   modern workflow tooling.  |
-| attach-current-document-to-family                 Attach a current document |
-|                                                   anchor to an existing     |
-|                                                   tariff family.            |
-| list-current-anchor-mismatches                    List tariff families      |
-|                                                   whose current document    |
-|                                                   anchor contradicts family |
-|                                                   metadata.                 |
-| sync-family-metadata-from-current-anchor          Sync a family's           |
-|                                                   title/schedule metadata   |
-|                                                   from its anchored current |
-|                                                   document.                 |
-| migrate-historical-family-lineage                 Move selected historical  |
-|                                                   documents into a new      |
-|                                                   historical-only family    |
-|                                                   lineage.                  |
-| canonicalize-historical-family-key                Move malformed            |
-|                                                   historical-family lineage |
-|                                                   into a canonical family   |
-|                                                   key.                      |
 | parse-tariff-versions                             Parse Duke tariff leaf    |
 |                                                   PDFs and populate         |
 |                                                   tariff_versions and       |
@@ -714,23 +610,6 @@
 | diagnose-document-nc                              Diagnose why a document's |
 |                                                   extraction is empty,      |
 |                                                   weak, or failing.         |
-| canonicalize-doc-families-nc                      Scan remaining doc-*      |
-|                                                   families and canonicalize |
-|                                                   them to schedule/rider    |
-|                                                   keys.                     |
-| deduplicate-family-nc                             Deduplicate charges       |
-|                                                   across all versions in a  |
-|                                                   tariff family.            |
-| deduplicate-documents-nc                          Consolidate historical    |
-|                                                   documents that share the  |
-|                                                   same content_hash.        |
-| backfill-evidence-nc                              Backfill evidence_json    |
-|                                                   for historical documents  |
-|                                                   where it is missing.      |
-| backfill-content-hash-nc                          Backfill content_hash for |
-|                                                   historical_documents      |
-|                                                   where it is null or       |
-|                                                   empty.                    |
 | recommend-missing-dockets-nc                      Recommend dockets with    |
 |                                                   low or zero processed     |
 |                                                   coverage for targeted     |
@@ -749,9 +628,6 @@
 |                                                   review impact: where      |
 |                                                   review work would yield   |
 |                                                   the most charges.         |
-| repair-anomaly-nc                                 Apply a known repair      |
-|                                                   pattern to an anomalous   |
-|                                                   document.                 |
 | ocr                                               OCR queue management,     |
 |                                                   remediation, batch        |
 |                                                   processing, and           |
@@ -773,5 +649,10 @@
 | search                                            Multi-stage NCUC search:  |
 |                                                   probe, query, run,        |
 |                                                   ingest, doc-param.        |
+| lineage                                           Tariff family +           |
+|                                                   historical document       |
+|                                                   lifecycle: list, repair,  |
+|                                                   dedup, canonicalize,      |
+|                                                   retire.                   |
 +-----------------------------------------------------------------------------+
 

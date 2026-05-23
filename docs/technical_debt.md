@@ -56,7 +56,7 @@ so this register can stay focused on work that is still open.
 **Risk type:** Data quality / maintainability
 
 **Current state (as of 2026-04-08):**
-- `retire-provisional-garbage-nc --execute` retired 351 provisional families; only 7 remain (all have real charges)
+- `lineage retire-provisional-garbage-nc --execute` retired 351 provisional families; only 7 remain (all have real charges)
 - `show-workflow-status-nc` now reports:
   - `stale_historical=236` (was 513)
   - `provisional_families=7` (was 351)
@@ -64,7 +64,7 @@ so this register can stay focused on work that is still open.
 - `export nc-schedule-inventory-audit` reports:
   - `105` NC `rate_schedule` families in SQLite (was 264 — the reduction is because most provisionals lacked `rate_schedule` classification)
   - `23` legacy / malformed `doc-*` families (was 182)
-- The 7 remaining provisional families with real charges need `promote-provisional-family` calls.
+- The 7 remaining provisional families with real charges need `lineage promote-provisional-family` calls.
 - The 23 `doc-*` families need canonical key promotion (e.g. `nc-carolinas-doc-SCHEDULEFLFLOODLIGHTINGSERVICE` → `nc-carolinas-schedule-FL`).
 - Two large `doc-*` families also have duplicate charges (`SCHEDULEFLFLOODLIGHTINGSERVICE` 529 charges at 35x duplication; `SCHEDULEWC` 534 charges at 33x duplication) — deduplication needed before promotion.
 
@@ -74,8 +74,8 @@ so this register can stay focused on work that is still open.
 - Historical schedule rows can remain stranded under bad lineage even when the underlying PDF is real tariff content.
 
 **What to do:**
-1. Run `retire-provisional-garbage-nc --execute` at the start of each session (pipeline adds new ones).
-2. Promote the 7 remaining provisional families with `promote-provisional-family FAMILY_KEY`.
+1. Run `lineage retire-provisional-garbage-nc --execute` at the start of each session (pipeline adds new ones).
+2. Promote the 7 remaining provisional families with `lineage promote-provisional-family FAMILY_KEY`.
 3. Deduplicate charges in the large `doc-*` families, then promote them to canonical keys.
 4. Continue the recover-vs-retire pass on high-signal zero-charge historical rows.
 5. Re-run:

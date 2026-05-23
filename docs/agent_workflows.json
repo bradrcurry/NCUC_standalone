@@ -50,7 +50,7 @@
         },
         {
           "step_id": "family_detail",
-          "tool_id": "list-provisional-families",
+          "tool_id": "lineage list-provisional-families",
           "purpose": "Inspect provisional-family load when intake produced unresolved families.",
           "mode": "optional"
         }
@@ -173,19 +173,19 @@
       "steps": [
         {
           "step_id": "gap_summary",
-          "tool_id": "show-lineage-gaps-nc",
+          "tool_id": "lineage show-gaps-nc",
           "purpose": "Get aggregate gap counts and categories.",
           "mode": "required"
         },
         {
           "step_id": "doc_validation",
-          "tool_id": "validate-lineage-nc",
+          "tool_id": "lineage validate-nc",
           "purpose": "Separate blockers from warnings at document level.",
           "mode": "required"
         },
         {
           "step_id": "link_suggestions",
-          "tool_id": "suggest-family-links-nc",
+          "tool_id": "lineage suggest-family-links-nc",
           "purpose": "Review likely family-link recoveries before optional apply.",
           "mode": "optional"
         },
@@ -231,19 +231,19 @@
       "steps": [
         {
           "step_id": "provenance",
-          "tool_id": "show-provenance-gaps-nc",
+          "tool_id": "lineage show-provenance-gaps-nc",
           "purpose": "Audit missing provenance fields and weak discovery linkage.",
           "mode": "required"
         },
         {
           "step_id": "fingerprints",
-          "tool_id": "show-fingerprint-coverage-nc",
+          "tool_id": "lineage show-fingerprint-coverage-nc",
           "purpose": "Measure hash-backed coverage, fingerprint presence, and artifact reuse.",
           "mode": "required"
         },
         {
           "step_id": "lineage_context",
-          "tool_id": "validate-lineage-nc",
+          "tool_id": "lineage validate-nc",
           "purpose": "Use blocker-vs-warning context when provenance debt overlaps extraction readiness.",
           "mode": "optional"
         }
@@ -447,31 +447,31 @@
       "steps": [
         {
           "step_id": "list_families",
-          "tool_id": "list-provisional-families",
+          "tool_id": "lineage list-provisional-families",
           "purpose": "Inspect the current provisional-family backlog.",
           "mode": "required"
         },
         {
           "step_id": "suggestions",
-          "tool_id": "suggest-family-links-nc",
+          "tool_id": "lineage suggest-family-links-nc",
           "purpose": "Review likely family-link recoveries when provisional families came from weak clues.",
           "mode": "optional"
         },
         {
           "step_id": "score_review_candidates",
-          "tool_id": "show-provisional-review-candidates-nc",
+          "tool_id": "lineage show-provisional-review-candidates-nc",
           "purpose": "Rank charged provisional families and surface inferred promotion fields before manual promotion.",
           "mode": "optional"
         },
         {
           "step_id": "promote",
-          "tool_id": "promote-provisional-family",
+          "tool_id": "lineage promote-provisional-family",
           "purpose": "Promote a reviewed provisional family to curated state.",
           "mode": "optional"
         },
         {
           "step_id": "validate_after",
-          "tool_id": "show-lineage-gaps-nc",
+          "tool_id": "lineage show-gaps-nc",
           "purpose": "Recheck lineage after promotion or cleanup.",
           "mode": "required"
         }

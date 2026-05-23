@@ -412,11 +412,11 @@ Use these when the importer preserved a strong unmatched tariff span as a
 provisional historical family:
 
 ```powershell
-python -m duke_rates list-provisional-families
-python -m duke_rates promote-provisional-family nc-carolinas-program-SMARTENERGYNOWPROGRAM --alias "SMART ENERGY NOW PROGRAM"
-python -m duke_rates list-historical-only-families --state NC --company carolinas
-python -m duke_rates list-historical-only-families --state NC --company carolinas --only-unresolved
-python -m duke_rates attach-current-document-to-family nc-carolinas-program-SMARTENERGYNOWPROGRAM 96
+python -m duke_rates lineage list-provisional-families
+python -m duke_rates lineage promote-provisional-family nc-carolinas-program-SMARTENERGYNOWPROGRAM --alias "SMART ENERGY NOW PROGRAM"
+python -m duke_rates lineage list-historical-only-families --state NC --company carolinas
+python -m duke_rates lineage list-historical-only-families --state NC --company carolinas --only-unresolved
+python -m duke_rates lineage attach-current-document-to-family nc-carolinas-program-SMARTENERGYNOWPROGRAM 96
 ```
 
 The historical-only command now includes candidate current-document suggestions
@@ -427,7 +427,7 @@ leaf numbers when that evidence exists. Treat those as review hints, not
 automatic matches.
 Use `--only-unresolved` when you want the shorter queue of historical families
 that still have no plausible current anchor at all.
-Use `attach-current-document-to-family` only after a reviewer decides the
+Use `lineage attach-current-document-to-family` only after a reviewer decides the
 candidate is actually the right anchor.
 
 ### Current anchor mismatch audit
@@ -436,15 +436,15 @@ Use this when a tariff family has a current `documents.id` anchor, but the
 family metadata may contradict the anchored current PDF:
 
 ```powershell
-python -m duke_rates list-current-anchor-mismatches --state NC --company progress
-python -m duke_rates sync-family-metadata-from-current-anchor nc-progress-leaf-501
+python -m duke_rates lineage list-current-anchor-mismatches --state NC --company progress
+python -m duke_rates lineage sync-family-metadata-from-current-anchor nc-progress-leaf-501
 ```
 
 This compares family metadata against the anchored current document's
 `schedule_code`, `tariff_identifier`, and first-page mined headings/leaf
 numbers. It is useful for surfacing catalog contradictions such as an older
 family model still labeling a leaf as `FUEL` while the anchored current PDF is
-clearly `R-TOUD`. Use `sync-family-metadata-from-current-anchor` only when the
+clearly `R-TOUD`. Use `lineage sync-family-metadata-from-current-anchor` only when the
 current document anchor itself is already trusted and the problem is stale
 family metadata rather than a bad current-document linkage.
 That low-risk sync path has already been used successfully on:
@@ -465,10 +465,10 @@ Use this when historical documents appear to be attached to the wrong family
 even though the parser itself is behaving correctly:
 
 ```powershell
-python -m duke_rates show-lineage-gaps-nc
-python -m duke_rates validate-lineage-nc
-python -m duke_rates show-provenance-gaps-nc
-python -m duke_rates suggest-family-links-nc --limit 25
+python -m duke_rates lineage show-gaps-nc
+python -m duke_rates lineage validate-nc
+python -m duke_rates lineage show-provenance-gaps-nc
+python -m duke_rates lineage suggest-family-links-nc --limit 25
 python scripts/maintenance/audit_historical_family_mismatches.py --family-key nc-progress-leaf-500
 python scripts/maintenance/audit_historical_family_mismatches.py --family-key nc-progress-leaf-500 --apply-purge
 ```
@@ -568,9 +568,9 @@ python -m duke_rates reprocess show-priority-nc
 python -m duke_rates reprocess show-stale-historical-nc
 python -m duke_rates reprocess show-profile-impact-nc --parser-profile progress_residential_tou
 python -m duke_rates ocr show-queue-nc
-python -m duke_rates list-provisional-families
-python -m duke_rates list-historical-only-families
-python -m duke_rates list-current-anchor-mismatches
+python -m duke_rates lineage list-provisional-families
+python -m duke_rates lineage list-historical-only-families
+python -m duke_rates lineage list-current-anchor-mismatches
 ```
 
 ### 3. OCR/cache/reprocess state in SQLite
@@ -590,8 +590,8 @@ Important tables include:
 
 Useful summary commands:
 
-- `python -m duke_rates show-provenance-gaps-nc`
-- `python -m duke_rates show-fingerprint-coverage-nc`
+- `python -m duke_rates lineage show-provenance-gaps-nc`
+- `python -m duke_rates lineage show-fingerprint-coverage-nc`
 - `python -m duke_rates show-document-classification-audit-nc`
 
 These are better operator anchors than broad rescans, because they tell you what
@@ -925,7 +925,7 @@ Selection note:
 - unsupported documents now land on parser profile `unknown` instead of being mislabeled as `generic_residential`
 - treat large `generic_residential` cohorts as true residential-style fallback usage, not as the generic “no profile matched” bucket
 
-Use `list-weak-unbounded-historical-nc` when:
+Use `lineage list-weak-unbounded-historical-nc` when:
 
 - weak historical rows still point at whole PDFs instead of bounded spans
 - you need to separate parser-profile work on current PDFs from legacy lineage cleanup
@@ -936,14 +936,14 @@ Use `list-weak-unbounded-historical-nc` when:
   - `retire_bundle_reference_residue`
   - `manual_lineage_review`
 
-Use `list-redundant-legacy-raw-historical-nc` when:
+Use `lineage list-redundant-legacy-raw-historical-nc` when:
 
 - a legacy raw whole-PDF row already has a bounded regulator-PDF replacement
 - you want to purge obsolete residue instead of writing another parser for it
 - you are trying to reduce the weak-unbounded queue without over-purging rows
   that still need a real remine
 
-Use `list-placeholder-heading-historical-nc` when:
+Use `lineage list-placeholder-heading-historical-nc` when:
 
 - bounded Carolinas book spans look like `TYPE OF SERVICE` or
   `Effective for service` instead of a real schedule/rider family
@@ -951,7 +951,7 @@ Use `list-placeholder-heading-historical-nc` when:
   rather than parsed further
 - you want a reversible review surface before deleting those rows
 
-Use `retire-historical-document` when:
+Use `lineage retire-historical-document` when:
 
 - a historical row has been confirmed as residue or contamination
 - you need to delete the row and its attached parse/review/version state
@@ -990,7 +990,7 @@ Use OCR queue commands when:
 - The remaining weak backlog now includes a distinct legacy-unbounded cohort.
   Many of those rows come from `data\\historical\\raw\\...` attachments that
   predate the bounded-span pipeline. Work them through
-  `list-weak-unbounded-historical-nc` before adding new parser profiles.
+  `lineage list-weak-unbounded-historical-nc` before adding new parser profiles.
 - Weak legacy raw rows now infer `discovery_record_id` from their stored
   `local_file` metadata when possible, so many rows that used to look like
   `manual_lineage_review` now surface correctly as
@@ -1011,7 +1011,7 @@ Use OCR queue commands when:
   transitions even when they lack clean leaf headers. This was required to turn
   large DEP tariff books like `E-2, Sub 1142` from one giant span into bounded
   schedule sections.
-- `list-weak-unbounded-historical-nc` is now bundle-aware:
+- `lineage list-weak-unbounded-historical-nc` is now bundle-aware:
   - rows like discovery `957` can surface as
     `retire_legacy_raw_attachment` when the regulator PDF has no real tariff
     structure and the old raw rows are just false-positive residue
@@ -1019,7 +1019,7 @@ Use OCR queue commands when:
     `retire_bundle_reference_residue` when cached span evidence shows the old
     raw rider rows appear only as rider-application references inside already
     bounded host spans
-- Use `list-bundle-reference-legacy-raw-historical-nc` before purging those
+- Use `lineage list-bundle-reference-legacy-raw-historical-nc` before purging those
   rows. It prints the host bounded documents and page ranges that justify the
   retirement decision.
 - The remaining Progress legacy weak-unbounded backlog from `1124`
@@ -1034,10 +1034,10 @@ Use OCR queue commands when:
 - The current-PDF Carolinas branch now also has two dedicated profiles:
   - `carolinas_current_leaf_bridge` for `nc-carolinas-schedule-HLF`
   - `carolinas_solar_choice_rider` for `nc-carolinas-rider-NMB` and `nc-carolinas-rider-NSC`
-- `repair-historical-current-snapshot` has now been used to fix the remaining
+- `lineage repair-historical-current-snapshot` has now been used to fix the remaining
   Carolinas weak-unbounded current-PDF row (`nc-carolinas-schedule-PP`), so
   both the Progress and Carolinas weak-unbounded queues are currently `0`.
-- `list-placeholder-heading-historical-nc` has now been used to retire `19`
+- `lineage list-placeholder-heading-historical-nc` has now been used to retire `19`
   Carolinas heading-residue rows (`TYPE OF SERVICE` / `Effective for service`)
   from the live DB.
 - After the latest live cleanup cycle:

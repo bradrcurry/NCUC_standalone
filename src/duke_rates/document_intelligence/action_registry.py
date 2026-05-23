@@ -81,7 +81,7 @@ ACTION_REGISTRY: dict[str, CorrectiveAction] = {
     "duplicate_documents": CorrectiveAction(
         finding_category="duplicate_documents",
         label="Duplicate Documents",
-        cli_command="deduplicate-documents-nc",
+        cli_command="lineage deduplicate-documents-nc",
         args=["--execute", "--limit", "50"],
         estimated_impact="Removes duplicate rows, consolidates charges under one survivor per hash group.",
         risk="low",

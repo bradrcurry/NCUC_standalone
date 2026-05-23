@@ -230,7 +230,7 @@ Success condition:
      - `manual_lineage_review` for the smaller remainder that still needs true
        lineage investigation
    - the redundant Progress legacy raw queue has been driven back to `0`
- - added `python -m duke_rates list-bundle-reference-legacy-raw-historical-nc`
+ - added `python -m duke_rates lineage list-bundle-reference-legacy-raw-historical-nc`
      to surface the host bounded documents behind those bundle-reference rows
   - the remaining Progress weak-unbounded legacy backlog from `1124`
      (`602`, `605`, `610`, `718`) has now been retired from the live DB
@@ -246,10 +246,10 @@ Success condition:
    - the only remaining current-PDF Carolinas weak-unbounded row is
      `nc-carolinas-schedule-PP`
    - that final Carolinas row has now been repaired through
-     `python -m duke_rates repair-historical-current-snapshot`, so both the
+     `python -m duke_rates lineage repair-historical-current-snapshot`, so both the
      Progress and Carolinas weak-unbounded queues are currently `0`
-   - added `python -m duke_rates list-placeholder-heading-historical-nc`
-     plus `python -m duke_rates retire-historical-document` to remove bounded
+   - added `python -m duke_rates lineage list-placeholder-heading-historical-nc`
+     plus `python -m duke_rates lineage retire-historical-document` to remove bounded
      heading residue such as `TYPE OF SERVICE` / `Effective for service`
    - used live to retire `19` Carolinas placeholder heading rows that were
      inflating the generic review backlog without representing real tariff
@@ -367,8 +367,8 @@ Success condition:
     `leaf-649`, and `leaf-674`, preserving the true Carolinas HP / Rider US /
     Rider PS history under Carolinas family keys
 - Added current-anchor mismatch review tooling:
-  - `python -m duke_rates list-current-anchor-mismatches`
-  - `python -m duke_rates sync-family-metadata-from-current-anchor`
+  - `python -m duke_rates lineage list-current-anchor-mismatches`
+  - `python -m duke_rates lineage sync-family-metadata-from-current-anchor`
   - compares `tariff_families` metadata against anchored current-document
     metadata plus mined first-page headings/leaf numbers
   - intended to surface catalog contradictions separately from parser failures
@@ -378,7 +378,7 @@ Success condition:
     - `nc-progress-leaf-609`
     - `nc-progress-leaf-662`
     - `nc-progress-leaf-670`
-  - added `python -m duke_rates migrate-historical-family-lineage` so current
+  - added `python -m duke_rates lineage migrate-historical-family` so current
     leaf keys can be separated from older historical meanings without ad hoc
     DB edits
   - used live to split the remaining DEP migration-review cases into distinct
@@ -418,7 +418,7 @@ Success condition:
     family creation when they lack leaf numbers and schedule/rider markers,
     which prevents broad reports from reappearing as tariff documents based
     only on weak topic overlap
-  - added `python -m duke_rates list-weak-unbounded-historical-nc` so weak
+  - added `python -m duke_rates lineage list-weak-unbounded-historical-nc` so weak
     whole-PDF historical rows can be reviewed as a separate operator queue
     instead of being mixed into ordinary bounded-span parser work
   - the queue now classifies rows into:
@@ -429,7 +429,7 @@ Success condition:
     regulator `local_file` metadata, which converts a meaningful share of the
     old whole-PDF backlog into a concrete `remine_from_discovery_record`
     operator path
-  - added `python -m duke_rates list-redundant-legacy-raw-historical-nc` so
+  - added `python -m duke_rates lineage list-redundant-legacy-raw-historical-nc` so
     operators can identify legacy raw whole-PDF rows that already have bounded
     same-family regulator replacements and safely retire obsolete residue
   - historical-document upserts are more rerun-safe when the same archived URL
@@ -472,10 +472,10 @@ Next implementation items:
   - this now looks like the next matching/lineage cleanup target after the
     Rider BA parser-profile work
 - provisional-family review tooling is now available:
-  - `list-provisional-families`
-  - `promote-provisional-family`
+  - `lineage list-provisional-families`
+  - `lineage promote-provisional-family`
   - historical-only family review tooling is now available:
-  - `list-historical-only-families`
+  - `lineage list-historical-only-families`
   - current-document candidate suggestions are now included for historical-only
     families so review work can start from likely anchors instead of manual scans
   - candidate scoring now also uses first-page mined current-document evidence
@@ -487,7 +487,7 @@ Next implementation items:
     - `review_candidates` for families with plausible anchors
     - `unresolved` for families with no current candidates
     - `--only-unresolved` filtering in the operator CLI
-  - `attach-current-document-to-family` now exists for confirmed anchor linkage
+  - `lineage attach-current-document-to-family` now exists for confirmed anchor linkage
 - live follow-through completed:
   - `nc-carolinas-program-SMARTENERGYNOWPROGRAM` has already been promoted from
     provisional placeholder status into the curated family catalog

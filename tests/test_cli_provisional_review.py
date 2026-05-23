@@ -6,6 +6,7 @@ from types import SimpleNamespace
 from typer.testing import CliRunner
 
 from duke_rates import cli
+from duke_rates.cli_commands import lineage as lineage_module
 from duke_rates.db.repository import Repository
 from duke_rates.models.historical import HistoricalDocumentRecord
 from duke_rates.models.tariff import TariffChargeRecord, TariffFamilyRecord, TariffVersionRecord
@@ -73,10 +74,15 @@ def test_show_provisional_review_candidates_cli_lists_scored_rows(tmp_path, monk
         "_bootstrap",
         lambda: (SimpleNamespace(database_path=str(db_path)), Repository(db_path)),
     )
+    monkeypatch.setattr(
+        lineage_module,
+        "_bootstrap",
+        lambda: (SimpleNamespace(database_path=str(db_path)), Repository(db_path)),
+    )
     runner = CliRunner()
     result = runner.invoke(
         cli.app,
-        ["show-provisional-review-candidates-nc", "--company", "progress", "--limit", "5"],
+        ["lineage", "show-provisional-review-candidates-nc", "--company", "progress", "--limit", "5"],
     )
 
     assert result.exit_code == 0

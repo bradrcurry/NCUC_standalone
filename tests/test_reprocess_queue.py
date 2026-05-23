@@ -8,6 +8,7 @@ from typer.testing import CliRunner
 
 from duke_rates import cli
 from duke_rates.cli_commands import reprocess as reprocess_module
+from duke_rates.cli_commands import lineage as lineage_module
 from duke_rates.db.reprocess import (
     claim_next_historical_reprocess,
     complete_historical_reprocess,
@@ -615,12 +616,17 @@ def test_add_historical_document_nc_cli_registers_bounded_slice(tmp_path, monkey
         "_bootstrap",
         lambda: (SimpleNamespace(database_path=str(db_path)), cli.Repository(db_path)),
     )
+    monkeypatch.setattr(
+        lineage_module,
+        "_bootstrap",
+        lambda: (SimpleNamespace(database_path=str(db_path)), cli.Repository(db_path)),
+    )
     runner = CliRunner()
 
     result = runner.invoke(
         cli.app,
         [
-            "add-historical-document-nc",
+            "lineage", "add-historical-document-nc",
             "--family-key",
             "nc-progress-leaf-501",
             "--company",

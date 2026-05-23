@@ -167,10 +167,10 @@ Because descriptive heading mining now recognizes `PROGRAM` headings, those
 documents can be retained and revisited later instead of disappearing from the
 historical archive.
 Those provisional families are now surfaced through explicit review tooling:
-- `list-provisional-families`
-- `promote-provisional-family`
-- `list-historical-only-families`
-- `attach-current-document-to-family`
+- `lineage list-provisional-families`
+- `lineage promote-provisional-family`
+- `lineage list-historical-only-families`
+- `lineage attach-current-document-to-family`
 
 Recent Progress rider hardening also added a dedicated
 `progress_single_value_rider` profile for one-value rider leaves such as
@@ -223,7 +223,7 @@ parser failure.
 The latest backlog review also exposed a distinct operator queue for weak
 historical rows that still point at whole PDFs instead of bounded page spans.
 Those rows now have a dedicated review surface:
-- `python -m duke_rates list-weak-unbounded-historical-nc`
+- `python -m duke_rates lineage list-weak-unbounded-historical-nc`
 
 That command classifies each row into a simple next action:
 - `add_profile_or_current_parser_bridge`
@@ -239,13 +239,13 @@ as opaque manual review.
 
 A second operator surface now lists the subset of those legacy raw rows that
 already have bounded same-family regulator replacements:
-- `python -m duke_rates list-redundant-legacy-raw-historical-nc`
+- `python -m duke_rates lineage list-redundant-legacy-raw-historical-nc`
 
 That makes it possible to retire obsolete whole-PDF residue after successful
 remine work instead of leaving duplicate weak rows in the backlog.
 
 A third operator surface now isolates the harder bundle leftovers:
-- `python -m duke_rates list-bundle-reference-legacy-raw-historical-nc`
+- `python -m duke_rates lineage list-bundle-reference-legacy-raw-historical-nc`
 
 That report is for cases like discovery `1124`, where old raw rider
 attachments survive only because their leaf numbers appear inside rider
@@ -275,7 +275,7 @@ weak-unbounded current-PDF queue is now down to one remaining row:
 `nc-carolinas-schedule-PP`.
 
 That last Carolinas row has now also been repaired through the new
-`repair-historical-current-snapshot` path, so both the Progress and Carolinas
+`lineage repair-historical-current-snapshot` path, so both the Progress and Carolinas
 weak-unbounded queues are currently `0`.
 
 The review backlog is also now measured more honestly:
@@ -317,8 +317,8 @@ The review backlog is also now measured more honestly:
 The Carolinas compliance-book cleanup also now has a dedicated residue path for
 heading-only bounded spans such as `TYPE OF SERVICE` and
 `Effective for service`. Those rows can now be surfaced with
-`list-placeholder-heading-historical-nc` and removed with
-`retire-historical-document`. That path has already been used live to retire
+`lineage list-placeholder-heading-historical-nc` and removed with
+`lineage retire-historical-document`. That path has already been used live to retire
 `19` placeholder heading rows that were inflating `generic_residential`
 review volume without representing real tariff families.
 Recent bounded-profile cleanup also added:
