@@ -28,7 +28,7 @@ Done condition:
 3. **DEP pre-2014 residential gap (accepted caveat, low priority)**
 RES-24/25/26 for leaf-500 not found in local Sub 1023 data. Gap 2012-12-01 → 2014-06-01 remains as accepted caveat unless portal search yields new evidence.
 
-4. **Docling structure lane blocked — `process-docling-batch --ocr-remediation` finds 0 matches**
+4. **Docling structure lane blocked — `doc-intel process-docling-batch --ocr-remediation` finds 0 matches**
 Docs flagged for `run_docling_or_paddle_structure` have page artifacts from prior CPU Docling runs, so the cache filter excludes them. Their `raw_text_path` is still NULL. Need to investigate the filter logic or force-reprocess.
 
 ## Session 43 Completed

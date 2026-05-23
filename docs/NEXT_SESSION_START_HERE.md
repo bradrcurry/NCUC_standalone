@@ -29,11 +29,11 @@ as the default command/workflow source of truth.
   - Evidence coverage: 39.1% → 75.6% (+174 docs) after pipeline fix + queue drain
   - All corrective commands follow `--dry-run`/`--execute` pattern for autonomous safety
 - **Session 45 (2026-05-01):** Phases 2.5–5.5 of document_intelligence_roadmap completed:
-  - Phase 2.5: Ollama orchestration layer (check-ollama-models-nc, run-llm-doc-probe-nc)
-  - Phase 3: 11 multi-dimensional flag classifiers (backfill-flag-classifications-nc)
-  - Phase 4: Embedding similarity classifier with KNN cosine similarity (embed-corpus-nc, backfill-embedding-classifications-nc)
-  - Phase 5: LLM adjudication for rule/embedding disagreements (adjudicate-classifications-nc)
-  - Phase 5.5: Overnight document intelligence loop (run-overnight-doc-intelligence-nc)
+  - Phase 2.5: Ollama orchestration layer (doc-intel check-ollama-models, doc-intel run-llm-doc-probe)
+  - Phase 3: 11 multi-dimensional flag classifiers (doc-intel backfill-flag-classifications)
+  - Phase 4: Embedding similarity classifier with KNN cosine similarity (doc-intel embed-corpus, doc-intel backfill-embedding-classifications)
+  - Phase 5: LLM adjudication for rule/embedding disagreements (doc-intel adjudicate-classifications)
+  - Phase 5.5: Overnight document intelligence loop (doc-intel run-overnight)
   - DB now has: 100 document_embeddings rows, 20 embedding_knn_v1 classifications, 5 llm_qwen3:8b_v1 adjudications
   - 3-way classification comparison works: rule → embedding → LLM for document_type stage
 
@@ -91,7 +91,7 @@ Recent short-loop observations:
 ## Immediate Focus
 
 1. **Priority 30 (OCR):** 132 Tesseract candidates processed ✓. Remaining: 94 Docling structure lane + 16 GLM review.
-   - Next: `OLLAMA_HOST="http://127.0.0.1:1" python -m duke_rates process-docling-batch --ocr-remediation --source historical --workers 1`
+   - Next: `OLLAMA_HOST="http://127.0.0.1:1" python -m duke_rates doc-intel process-docling-batch --ocr-remediation --source historical --workers 1`
    
 2. **Priority 35 (Bootstrap):** 21 never-processed docs. Previous run was a no-op (all already had versions).
 
@@ -118,19 +118,19 @@ python -m duke_rates reprocess show-stale-historical-nc
 
 For document intelligence state (Phases 2.5–6.5):
 ```powershell
-python -m duke_rates check-ollama-models-nc
-python -m duke_rates list-document-types-nc
-python -m duke_rates report-document-types-nc
-python -m duke_rates report-classification-disagreements-nc --cross-stage document_type
-python -m duke_rates report-flag-classifications-nc
+python -m duke_rates doc-intel check-ollama-models
+python -m duke_rates doc-intel list-document-types
+python -m duke_rates doc-intel report-document-types
+python -m duke_rates doc-intel report-classification-disagreements --cross-stage document_type
+python -m duke_rates doc-intel report-flag-classifications
 python -m duke_rates analyze-parse-failures-nc --dry-run --limit 10
-python -m duke_rates benchmark-ollama-roles-nc --task parse_diagnosis --limit 5 --max-runtime-minutes 60
+python -m duke_rates doc-intel benchmark-ollama-roles --task parse_diagnosis --limit 5 --max-runtime-minutes 60
 python -m duke_rates run-overnight-parse-improvement-nc --dry-run --task-kind diagnose,extract_staged --limit 10
 ```
 
 Parse-improvement model note:
 - `parse_failure_triage` now uses `mistral:7b-instruct` as primary after the
-  2026-05-05 fixture-backed `benchmark-ollama-roles-nc --task all` run. It was
+  2026-05-05 fixture-backed `doc-intel benchmark-ollama-roles --task all` run. It was
   the only tested model with nonzero parse-diagnosis gold accuracy on the first
   9 labeled cases. `gemma4:e4b-it-q4_K_M`, `qwen3:8b`, and `phi3.5:latest`
   remain fallbacks for schema-valid complementary behavior.
@@ -173,7 +173,7 @@ Parse-improvement model note:
   page-artifact or `raw_text_path` text, and both fall back to
   `historical_documents.raw_text_path`. A 2-doc live diagnosis after the fix
   produced actionable `regex_gap` and `no_rate_table` results.
-- `benchmark-ollama-roles-nc` is the sanctioned replacement for
+- `doc-intel benchmark-ollama-roles` is the sanctioned replacement for
   `tmp_model_benchmark.py`. It benchmarks configured or explicit local Ollama
   models against production-style prompts/schemas for parse diagnosis, hard
   diagnosis, regex suggestion, structured extraction, and document
@@ -205,7 +205,7 @@ python -m duke_rates ocr process-backlog-nc --workers 4
 ```
 The super-command runs enqueue → drain (`--until-empty`) → extract in sequence. Use
 `--skip-enqueue` or `--skip-extract` to run partial phases. For the structure-sensitive
-lane, follow up with `process-docling-batch --ocr-remediation --source historical`.
+lane, follow up with `doc-intel process-docling-batch --ocr-remediation --source historical`.
 
 For other priorities:
 ```powershell
@@ -242,8 +242,8 @@ python -m duke_rates export dep-storm-history-inventory
 - **Docket coverage:** `python -m duke_rates recommend-missing-dockets-nc --json` shows highest-value dockets to fetch next.
 - **Phase 5.6 fresh diagnosis run:** `python -m duke_rates run-overnight-parse-improvement-nc --task-kind diagnose --limit 25 --max-runtime-minutes 120 --resume`
 - **Phase 5.6 re-diagnose prior unknowns:** `python -m duke_rates run-overnight-parse-improvement-nc --task-kind diagnose --rediagnose-unknown --limit 25 --max-runtime-minutes 120`
-- **Phase 5.6 model benchmark:** `python -m duke_rates benchmark-ollama-roles-nc --task parse_diagnosis --models gemma4:e4b-it-q4_K_M,qwen3:8b,mistral:7b-instruct,phi3.5:latest --limit 10 --max-runtime-minutes 90`
-- **Phase 5.6 specialization benchmark:** `python -m duke_rates benchmark-ollama-roles-nc --task all --models gemma4:e4b-it-q4_K_M,qwen3:8b,mistral:7b-instruct,phi3.5:latest --limit 5 --timeout-s 120 --max-runtime-minutes 360`
+- **Phase 5.6 model benchmark:** `python -m duke_rates doc-intel benchmark-ollama-roles --task parse_diagnosis --models gemma4:e4b-it-q4_K_M,qwen3:8b,mistral:7b-instruct,phi3.5:latest --limit 10 --max-runtime-minutes 90`
+- **Phase 5.6 specialization benchmark:** `python -m duke_rates doc-intel benchmark-ollama-roles --task all --models gemma4:e4b-it-q4_K_M,qwen3:8b,mistral:7b-instruct,phi3.5:latest --limit 5 --timeout-s 120 --max-runtime-minutes 360`
 - **Phase 5.6 staged follow-up:** use regex suggestion/validation selectively for parser research, not as the main production backlog reducer. Default to `extract_staged` plus the deterministic promotion loop below.
 - **Phase 6 (review queue):** New `classification_reviews` table, `review-queue-nc` CLI, `export-training-dataset-nc`. Turns reviewed labels into training data for future ML classifiers.
 
@@ -330,7 +330,7 @@ If you want a reusable launcher instead of manual copy/paste, use
 python -m duke_rates show-workflow-status-nc
 python -m duke_rates show-parser-improvement-candidates-nc --limit 25
 python -m duke_rates show-near-miss-profiles-nc --limit 25
-python -m duke_rates show-unknown-routing-audit-nc --limit 25
+python -m duke_rates doc-intel show-unknown-routing-audit --limit 25
 
 # 1. Requeue routing-impact docs and drain the queue
 python -m duke_rates reprocess show-stale-nc --limit 10
@@ -386,7 +386,7 @@ pwsh scripts\overnight\routing_first_until_9am.ps1 -DeadlineTime "09:00"
 ```
 
 This loop:
-- inspects `show-unknown-routing-audit-nc` each cycle
+- inspects `doc-intel show-unknown-routing-audit` each cycle
 - enqueues impacted docs for synthesized existing profiles such as
   `progress_recovery_rider`, `zero_charge_program`, and
   `progress_billing_adjustments`

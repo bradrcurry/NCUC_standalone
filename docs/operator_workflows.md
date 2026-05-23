@@ -443,7 +443,7 @@ three-step sequence (remediation enqueue, queue drain via `--until-empty`, rate
 extraction) in one command. Use the individual commands only when you need to
 inspect intermediate state or operate on a subset. For structure-sensitive
 documents (the `run_docling_or_paddle_structure` lane), follow the super-command
-with `process-docling-batch --ocr-remediation --source historical`.
+with `doc-intel process-docling-batch --ocr-remediation --source historical`.
 
 For a focused diagnostic pass on one family:
 
@@ -462,7 +462,7 @@ Outcome:
   new span-pipeline profiles — do not confuse the two
 - `show-parser-selection-audit-nc` highlights whether weak/empty latest runs are
   concentrated in one profile or one initial->fallback transition
-- `show-document-classification-audit-nc` should be the next check when the
+- `doc-intel show-document-classification-audit` should be the next check when the
   question is whether the corpus needs better parser routing versus a different
   document lane entirely such as formula/reference/redline/unrelated-but-keep
 - `needs_normalization` rows in the classification audit are not parser-profile
@@ -472,7 +472,7 @@ Outcome:
 - `needs_processing` rows have usable text but no latest historical processing
   run; queue the concrete `--hd-id` values suggested by
   `show-parser-improvement-candidates-nc` before writing parser-profile code
-- `show-unknown-routing-audit-nc` should follow when you want a ranked family
+- `doc-intel show-unknown-routing-audit` should follow when you want a ranked family
   list for targeted parser work instead of another broad sweep across all
   `unknown` rows
 - `show-parser-improvement-candidates-nc` is the compressed handoff surface for

@@ -1,6 +1,5 @@
 # CLI command surface snapshot. Generated; update deliberately.
 # See tests/test_cli_command_surface.py for update procedure.
-adjudicate-classifications-nc
 aggregate-overnight-reports-nc
 analyze-document-structure-nc
 analyze-parse-failures-nc
@@ -10,19 +9,9 @@ audit cross-attributed-charges-nc
 audit tariff-coverage
 audit tariff-null-scan
 audit tariff-timeline
-audit-bundle-metadata-mismatch-nc
-audit-document-type-classifications-nc
 audit-local-raw-nc
 audit-rider-map
 audit-search-worklist
-audit-stale-gold-nc
-backfill-classifications-nc
-backfill-embedding-classifications-nc
-backfill-flag-classifications-nc
-benchmark-docling
-benchmark-document-normalization
-benchmark-ollama-roles-nc
-benchmark-redline-analysis
 billing calculate
 billing calculator
 billing compare-rates
@@ -42,11 +31,8 @@ billing show-observed-component-history-progress-nc
 bind-tier1-proposals-nc
 bootstrap-missing-versions-nc
 build-tariff-families
-check-ollama-models-nc
 classify-docs
-classify-documents-v2-nc
 cleanup-nc-residential-history
-compare-document-page-text
 crawl
 data build-openei-export
 data eia-backfill
@@ -60,7 +46,39 @@ data nc-rate-context
 detect-rule-promotions-nc
 diagnose-document-nc
 diagnose-empty-nc
-embed-corpus-nc
+doc-intel adjudicate-classifications
+doc-intel audit-bundle-metadata-mismatch
+doc-intel audit-document-type-classifications
+doc-intel audit-stale-gold
+doc-intel backfill-classifications
+doc-intel backfill-embedding-classifications
+doc-intel backfill-flag-classifications
+doc-intel benchmark-docling
+doc-intel benchmark-document-normalization
+doc-intel benchmark-ollama-roles
+doc-intel benchmark-redline-analysis
+doc-intel check-ollama-models
+doc-intel classify-documents-v2
+doc-intel compare-document-page-text
+doc-intel embed-corpus
+doc-intel fingerprint-corpus
+doc-intel list-document-types
+doc-intel mine-docling
+doc-intel process-docling-batch
+doc-intel promote-high-confidence-subset
+doc-intel report-classification-disagreements
+doc-intel report-docling-skipped-pages
+doc-intel report-document-types
+doc-intel report-flag-classifications
+doc-intel run-docling
+doc-intel run-docling-vlm
+doc-intel run-llm-doc-probe
+doc-intel run-overnight
+doc-intel seed-document-type-gold
+doc-intel show-document-classification-audit
+doc-intel show-unknown-routing-audit
+doc-intel train-document-type-baseline
+doc-intel triage-disagreements
 execute-workflow-next-action-nc
 export dep-compliance-bundle-audit
 export dep-leaf-503-audit
@@ -79,7 +97,6 @@ export nc-redline-lead-audit
 export nc-redline-parse-audit
 export nc-schedule-inventory-audit
 extract-rates-nc
-fingerprint-corpus-nc
 generate-per-doc-rules-nc
 gpu-status
 ingest-ncuc
@@ -118,14 +135,12 @@ lineage suggest-family-links-nc
 lineage sync-family-metadata-from-current-anchor
 lineage validate-nc
 list-docs
-list-document-types-nc
 load-dep-provisional-riders
 load-local-rates-nc
 load-local-rider-summaries-nc
 load-ncuc-ingest
 locate-llm-row-evidence-nc
 mcp
-mine-docling-nc
 mine-ncuc-pipeline
 mine-tariff-sheets-nc
 nc-redline-portal-queue
@@ -170,7 +185,6 @@ parse-tariff-versions
 populate-document-identity-nc
 populate-document-sections-nc
 populate-routing-tier-nc
-process-docling-batch
 progress apply-history-family-crosswalk
 progress estimate-history-bill
 progress export-google-dorks
@@ -218,7 +232,6 @@ progress show-history-coverage
 progress show-history-tariff
 progress show-regulator-gaps
 progress show-search-pack
-promote-high-confidence-subset-nc
 promote-llm-charge-proposals-nc
 propose-llm-charge-promotions-nc
 reclassify-llm-row-conflicts-nc
@@ -229,17 +242,13 @@ reconcile-workflow-action-receipts-nc
 record-parse-review
 refresh-nc-redline-fingerprints
 remediate-nc-null-effective-dates
-report-classification-disagreements-nc
 report-database-intelligence-nc
-report-docling-skipped-pages-nc
 report-document-fingerprint-clusters-nc
 report-document-identity-nc
 report-document-identity-quality-nc
 report-document-identity-summary-nc
 report-document-sections-nc
 report-document-sections-summary-nc
-report-document-types-nc
-report-flag-classifications-nc
 report-per-doc-rules-nc
 report-profile-recommendations-nc
 report-routing-tier-nc
@@ -262,13 +271,9 @@ reprocess show-stale-nc
 review-queue
 run-autonomous-cycle-nc
 run-continuous-loop-nc
-run-docling-nc
-run-docling-vlm
-run-llm-doc-probe-nc
 run-llm-parse-fallback-nc
 run-llm-promotion-overnight-nc
 run-overnight-db-intelligence-nc
-run-overnight-doc-intelligence-nc
 run-overnight-parse-improvement-nc
 search doc-param
 search download-doc-param
@@ -283,9 +288,7 @@ search show-compat
 search show-results
 seed-dep-residential-rider-applicability
 seed-dep-storm-rider-applicability
-seed-document-type-gold-nc
 show-doc
-show-document-classification-audit-nc
 show-extraction-coverage-nc
 show-family-mismatch-audit-nc
 show-llm-row-effective-status-nc
@@ -293,7 +296,6 @@ show-near-miss-profiles-nc
 show-parser-improvement-candidates-nc
 show-parser-selection-audit-nc
 show-review-impact-nc
-show-unknown-routing-audit-nc
 show-workflow-action-receipts-nc
 show-workflow-capabilities-nc
 show-workflow-next-actions-nc
@@ -302,8 +304,6 @@ suggest-regex-fixes-nc
 summarize-database-intelligence-nc
 tariff-update
 test-bill-reconstruction-nc
-train-document-type-baseline-nc
-triage-disagreements-nc
 validate-document-diagnostics
 validate-extraction-nc
 validate-llm-rate-extractions-nc

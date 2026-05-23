@@ -18,6 +18,7 @@ import pytest
 from typer.testing import CliRunner
 
 from duke_rates.cli import app
+from duke_rates.cli_commands import doc_intel as doc_intel_module
 
 
 @pytest.fixture
@@ -87,6 +88,7 @@ def seeded_db(tmp_path, monkeypatch):
         database_path = str(db_path)
 
     monkeypatch.setattr(cli_module, "_bootstrap", lambda: (StubSettings(), None))
+    monkeypatch.setattr(doc_intel_module, "_bootstrap", lambda: (StubSettings(), None))
     return tmp_path
 
 
@@ -94,7 +96,7 @@ def test_audit_flags_admin_content_with_tariff_family(seeded_db):
     """Only hd=1 satisfies all criteria: admin-type v2 label + tariff family
     + NC state + confidence >= 0.9."""
     runner = CliRunner()
-    result = runner.invoke(app, ["audit-bundle-metadata-mismatch-nc", "--json"])
+    result = runner.invoke(app, ["doc-intel", "audit-bundle-metadata-mismatch", "--json"])
     assert result.exit_code == 0, result.output
     summary = json.loads(result.output)
     assert summary["total_mismatches"] == 1
@@ -106,7 +108,7 @@ def test_audit_respects_state_filter(seeded_db):
     state. Default state=NC excludes it."""
     runner = CliRunner()
     result = runner.invoke(
-        app, ["audit-bundle-metadata-mismatch-nc", "--state", "SC", "--json"]
+        app, ["doc-intel", "audit-bundle-metadata-mismatch", "--state", "SC", "--json"]
     )
     summary = json.loads(result.output)
     assert summary["total_mismatches"] == 1  # only hd=5 in SC
@@ -117,7 +119,7 @@ def test_audit_min_confidence_filters_low_conf(seeded_db):
     """Lowering --min-confidence to 0.5 should pick up hd=4 as well."""
     runner = CliRunner()
     result = runner.invoke(
-        app, ["audit-bundle-metadata-mismatch-nc",
+        app, ["doc-intel", "audit-bundle-metadata-mismatch",
               "--min-confidence", "0.5", "--json"]
     )
     summary = json.loads(result.output)
@@ -132,7 +134,7 @@ def test_audit_jsonl_export_carries_per_doc_detail(seeded_db, tmp_path):
     out_path = tmp_path / "mismatches.jsonl"
     runner = CliRunner()
     result = runner.invoke(
-        app, ["audit-bundle-metadata-mismatch-nc",
+        app, ["doc-intel", "audit-bundle-metadata-mismatch",
               "--out", str(out_path)]
     )
     assert result.exit_code == 0, result.output
@@ -148,7 +150,7 @@ def test_audit_jsonl_export_carries_per_doc_detail(seeded_db, tmp_path):
 def test_audit_top_pairs_reflects_label_family_combinations(seeded_db):
     """Top pairs should list (COVER_LETTER, nc-progress-leaf-)."""
     runner = CliRunner()
-    result = runner.invoke(app, ["audit-bundle-metadata-mismatch-nc", "--json"])
+    result = runner.invoke(app, ["doc-intel", "audit-bundle-metadata-mismatch", "--json"])
     summary = json.loads(result.output)
     assert len(summary["top_pairs"]) == 1
     top = summary["top_pairs"][0]

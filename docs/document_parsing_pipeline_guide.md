@@ -390,8 +390,8 @@ Docling artifacts are stored in the database with deterministic JSON and plain-t
 Bridge workflow:
 
 ```powershell
-python -m duke_rates mine-docling-nc --limit 50 --accelerator cuda
-python -m duke_rates mine-docling-nc --dry-run --limit 10     # Preview first
+python -m duke_rates doc-intel mine-docling --limit 50 --accelerator cuda
+python -m duke_rates doc-intel mine-docling --dry-run --limit 10     # Preview first
 ```
 
 The bridge:
@@ -592,12 +592,12 @@ Useful summary commands:
 
 - `python -m duke_rates lineage show-provenance-gaps-nc`
 - `python -m duke_rates lineage show-fingerprint-coverage-nc`
-- `python -m duke_rates show-document-classification-audit-nc`
+- `python -m duke_rates doc-intel show-document-classification-audit`
 
 These are better operator anchors than broad rescans, because they tell you what
 the pipeline already knows and what it thinks is weak or stale.
 
-Use `show-document-classification-audit-nc` when the bigger question is not
+Use `doc-intel show-document-classification-audit` when the bigger question is not
 "which parser profile fired?" but "what kind of document is this really?".
 That audit is the current best surface for splitting the corpus into:
 
@@ -608,7 +608,7 @@ That audit is the current best surface for splitting the corpus into:
 - unrelated-but-keep documents that may matter later
 - true unknowns that still need better routing
 
-Use `show-unknown-routing-audit-nc` after that when the problem is specifically
+Use `doc-intel show-unknown-routing-audit` after that when the problem is specifically
 which unsupported families deserve:
 
 - a new parser profile

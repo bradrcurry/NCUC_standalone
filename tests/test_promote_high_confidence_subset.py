@@ -18,6 +18,7 @@ import pytest
 from typer.testing import CliRunner
 
 from duke_rates.cli import app
+from duke_rates.cli_commands import doc_intel as doc_intel_module
 
 
 @pytest.fixture
@@ -106,13 +107,14 @@ def seeded_db(tmp_path, monkeypatch):
         database_path = str(db_path)
 
     monkeypatch.setattr(cli_module, "_bootstrap", lambda: (StubSettings(), None))
+    monkeypatch.setattr(doc_intel_module, "_bootstrap", lambda: (StubSettings(), None))
     return db_path
 
 
 def test_promotes_2plus_high_conf_subset(seeded_db):
     """Default min_confidence=0.9, min_subset=2. hd=1 and hd=4 qualify."""
     runner = CliRunner()
-    result = runner.invoke(app, ["promote-high-confidence-subset-nc", "--execute", "--json"])
+    result = runner.invoke(app, ["doc-intel", "promote-high-confidence-subset", "--execute", "--json"])
     assert result.exit_code == 0, result.output
     summary = json.loads(result.output)
     assert summary["promoted"] == 2
@@ -133,7 +135,7 @@ def test_promotes_2plus_high_conf_subset(seeded_db):
 def test_skips_already_gold(seeded_db):
     """hd=5 has 2 high-conf voters but is pre-seeded; the promoter must skip."""
     runner = CliRunner()
-    result = runner.invoke(app, ["promote-high-confidence-subset-nc", "--execute", "--json"])
+    result = runner.invoke(app, ["doc-intel", "promote-high-confidence-subset", "--execute", "--json"])
     summary = json.loads(result.output)
     assert summary["skipped_already_gold"] >= 1
 
@@ -143,7 +145,7 @@ def test_skips_high_conf_disagreement(seeded_db):
     'best' subset (any single label) has size 1, which fails min_subset=2.
     Skipped under 'no_subset' since neither label has >=2 high-conf voters."""
     runner = CliRunner()
-    result = runner.invoke(app, ["promote-high-confidence-subset-nc", "--execute", "--json"])
+    result = runner.invoke(app, ["doc-intel", "promote-high-confidence-subset", "--execute", "--json"])
     summary = json.loads(result.output)
     # hd=3 falls into no_subset (neither CR_FINAL nor TESTIMONY has 2 voters at >=0.9)
     # hd=2 also falls into no_subset (only 1 high-conf voter)
@@ -155,7 +157,7 @@ def test_higher_min_confidence_reduces_yield(seeded_db):
     vote is 0.92). hd=1 still qualifies (both voters >=0.95)."""
     runner = CliRunner()
     result = runner.invoke(
-        app, ["promote-high-confidence-subset-nc", "--min-confidence", "0.96",
+        app, ["doc-intel", "promote-high-confidence-subset", "--min-confidence", "0.96",
               "--execute", "--json"]
     )
     summary = json.loads(result.output)
@@ -171,7 +173,7 @@ def test_min_subset_3_demands_three_classifiers(seeded_db):
     hd=4 still qualifies (3 voters at >=0.9)."""
     runner = CliRunner()
     result = runner.invoke(
-        app, ["promote-high-confidence-subset-nc", "--min-subset", "3",
+        app, ["doc-intel", "promote-high-confidence-subset", "--min-subset", "3",
               "--execute", "--json"]
     )
     summary = json.loads(result.output)
@@ -181,7 +183,7 @@ def test_min_subset_3_demands_three_classifiers(seeded_db):
 
 def test_dry_run_does_not_write(seeded_db):
     runner = CliRunner()
-    result = runner.invoke(app, ["promote-high-confidence-subset-nc", "--json"])
+    result = runner.invoke(app, ["doc-intel", "promote-high-confidence-subset", "--json"])
     summary = json.loads(result.output)
     assert summary["executed"] is False
     assert summary["promoted"] == 2  # would promote

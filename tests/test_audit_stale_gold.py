@@ -8,6 +8,7 @@ import pytest
 from typer.testing import CliRunner
 
 from duke_rates.cli import app
+from duke_rates.cli_commands import doc_intel as doc_intel_module
 
 
 @pytest.fixture
@@ -91,6 +92,7 @@ def seeded_db(tmp_path, monkeypatch):
         database_path = str(db_path)
 
     monkeypatch.setattr(cli_module, "_bootstrap", lambda: (StubSettings(), None))
+    monkeypatch.setattr(doc_intel_module, "_bootstrap", lambda: (StubSettings(), None))
     return db_path
 
 
@@ -98,7 +100,7 @@ def test_audit_flags_disagreement_with_high_confidence(seeded_db):
     """hd=1 and hd=4 qualify — v2 disagrees with gold at >=0.9. hd=3's v2
     confidence is too low, hd=5 is superseded, hd=2 agrees."""
     runner = CliRunner()
-    result = runner.invoke(app, ["audit-stale-gold-nc", "--json"])
+    result = runner.invoke(app, ["doc-intel", "audit-stale-gold", "--json"])
     assert result.exit_code == 0, result.output
     summary = json.loads(result.output)
     assert summary["total_stale"] == 2
@@ -110,7 +112,7 @@ def test_min_confidence_threshold_changes_yield(seeded_db):
     """Lower threshold picks up hd=3's low-conf disagreement."""
     runner = CliRunner()
     result = runner.invoke(
-        app, ["audit-stale-gold-nc", "--min-v2-confidence", "0.5", "--json"]
+        app, ["doc-intel", "audit-stale-gold", "--min-v2-confidence", "0.5", "--json"]
     )
     summary = json.loads(result.output)
     assert summary["total_stale"] == 3
@@ -120,7 +122,7 @@ def test_mark_for_review_annotates_notes(seeded_db):
     """--mark-for-review appends a v2-disagreement note to each flagged
     row's notes field, preserving any existing notes."""
     runner = CliRunner()
-    result = runner.invoke(app, ["audit-stale-gold-nc", "--mark-for-review", "--json"])
+    result = runner.invoke(app, ["doc-intel", "audit-stale-gold", "--mark-for-review", "--json"])
     summary = json.loads(result.output)
     assert summary["marked_for_review"] == 2
 
@@ -141,8 +143,8 @@ def test_mark_for_review_annotates_notes(seeded_db):
 def test_mark_for_review_is_idempotent(seeded_db):
     """Running --mark-for-review twice shouldn't duplicate the annotation."""
     runner = CliRunner()
-    runner.invoke(app, ["audit-stale-gold-nc", "--mark-for-review"])
-    runner.invoke(app, ["audit-stale-gold-nc", "--mark-for-review", "--json"])
+    runner.invoke(app, ["doc-intel", "audit-stale-gold", "--mark-for-review"])
+    runner.invoke(app, ["doc-intel", "audit-stale-gold", "--mark-for-review", "--json"])
     # Re-read state — annotation appears exactly once per row
     conn = sqlite3.connect(seeded_db)
     notes = conn.execute(
@@ -155,7 +157,7 @@ def test_mark_for_review_is_idempotent(seeded_db):
 def test_jsonl_export_carries_per_doc_detail(seeded_db, tmp_path):
     out_path = tmp_path / "stale.jsonl"
     runner = CliRunner()
-    result = runner.invoke(app, ["audit-stale-gold-nc", "--out", str(out_path)])
+    result = runner.invoke(app, ["doc-intel", "audit-stale-gold", "--out", str(out_path)])
     assert result.exit_code == 0
     lines = out_path.read_text().splitlines()
     assert len(lines) == 2
@@ -171,7 +173,7 @@ def test_excludes_superseded_gold_rows(seeded_db):
     """hd=5 has superseded_by set, so it must be excluded even though v2
     disagrees with the original label."""
     runner = CliRunner()
-    result = runner.invoke(app, ["audit-stale-gold-nc", "--json"])
+    result = runner.invoke(app, ["doc-intel", "audit-stale-gold", "--json"])
     summary = json.loads(result.output)
     # If hd=5 leaked, total_stale would be 3 not 2
     assert summary["total_stale"] == 2

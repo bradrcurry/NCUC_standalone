@@ -102,7 +102,7 @@ raw file
 | Document fingerprints (redline detection) | `document_fingerprints` table | Used by redline analysis. **Don't reuse for general classification.** |
 | Document fingerprints v2 (general) | `document_fingerprints_v2` table — Phase 1 | New, broader feature set. |
 | Classification observability | `document_classifications` table — Phase 1 | New polymorphic record per classifier decision. |
-| Reporting CLIs | `ocr report-benchmark-nc`, `report-docling-skipped-pages-nc`, `report-classification-disagreements-nc`, `report-document-fingerprint-clusters-nc`, `report-database-intelligence-nc`, `summarize-database-intelligence-nc`, `ask-ncuc-db`, `run-overnight-db-intelligence-nc` | Existing + Phase 1, 6.5 additions. |
+| Reporting CLIs | `ocr report-benchmark-nc`, `doc-intel report-docling-skipped-pages`, `doc-intel report-classification-disagreements`, `report-document-fingerprint-clusters-nc`, `report-database-intelligence-nc`, `summarize-database-intelligence-nc`, `ask-ncuc-db`, `run-overnight-db-intelligence-nc` | Existing + Phase 1, 6.5 additions. |
 | Database intelligence | `database_reports.py`, `db_llm_analysis.py`, `database_intelligence_runs` table — Phase 6.5 | Deterministic SQL reports, LLM summarization, safe NL querying. |
 
 ## Phased plan
@@ -142,21 +142,21 @@ inspectable.
   [importer.py:838](src/duke_rates/historical/ncuc/importer.py#L838)
   persist family-mapping classifications and record legacy-hint overrides.
 - CLIs:
-  - `report-classification-disagreements-nc` — low-margin and override rows
-  - `fingerprint-corpus-nc` — bootstrap fingerprints for existing PDFs
+  - `doc-intel report-classification-disagreements` — low-margin and override rows
+  - `doc-intel fingerprint-corpus` — bootstrap fingerprints for existing PDFs
   - `report-document-fingerprint-clusters-nc` — group fingerprints by
     cluster signature
 
 **Validation results (2026-04-30):**
 
-- `fingerprint-corpus-nc` ran over the corpus: **8,812 fingerprints across
+- `doc-intel fingerprint-corpus` ran over the corpus: **8,812 fingerprints across
   4,406 distinct PDFs, 40 clusters with size ≥2.** Top clusters split
   cleanly into three tiers — regulatory boilerplate (DOCKET_HEADER,
   STATE_OF_NC_UC, VIA_ELECTRONIC_FILING; 34–220 docs each), tariff content
   (LEAF_HEADER and tariff-vocab variants; 40–84 docs each), and
   unknown/minimal (scanned-only or text-extraction failures; 36–92 each).
   This cluster output is the seed input for the Phase 2 taxonomy.
-- `report-classification-disagreements-nc` runs cleanly and returns 0
+- `doc-intel report-classification-disagreements` runs cleanly and returns 0
   findings — expected, since `family_matcher_v1` is currently the only
   classifier writing rows. The report is wired and will start producing
   signal as soon as Phase 2 adds a second `document_type` classifier.
@@ -234,8 +234,8 @@ classifier branches.
    existing `classify_document` rule (currently produces
    `tariff/procedural/order/unknown`) to emit a `ClassificationResult` with
    a `document_type` label from the taxonomy.
-4. CLI `list-document-types-nc` to show the taxonomy.
-5. CLI `report-document-types-nc` to show classification distribution.
+4. CLI `doc-intel list-document-types` to show the taxonomy.
+5. CLI `doc-intel report-document-types` to show classification distribution.
 
 **Constraints:**
 
@@ -253,7 +253,7 @@ classifier branches.
 
 - Running ingest populates `document_classifications` rows with stage
   `document_type` for every new document.
-- Running `report-document-types-nc` shows a non-trivial distribution
+- Running `doc-intel report-document-types` shows a non-trivial distribution
   across the seeded types (i.e. not 100% UNKNOWN).
 - The disagreement report flags cases where rule-based document_type and
   the existing `tariff`/`procedural`/`order` legacy field disagree.
@@ -261,7 +261,7 @@ classifier branches.
 **Validation results (2026-04-30):**
 
 - Seeded `document_types` table with 12 terminal types across 6 primary
-  categories. `list-document-types-nc` confirms.
+  categories. `doc-intel list-document-types` confirms.
 - `DocumentClassifier.classify_with_result()` added in
   [pipeline/document_prep.py](/c:/Python/Duke/Standalone/src/duke_rates/historical/ncuc/pipeline/document_prep.py) —
   preserves the legacy string label byte-for-byte and returns a
@@ -273,7 +273,7 @@ classifier branches.
   [bulk_extractor.py:875](src/duke_rates/historical/ncuc/pipeline/bulk_extractor.py#L875)
   via the new `_record_document_type_classification` helper — side-effect
   only, never raises, never blocks extraction.
-- New CLIs: `list-document-types-nc`, `report-document-types-nc`.
+- New CLIs: `doc-intel list-document-types`, `doc-intel report-document-types`.
 - Backfilled the existing 879 historical_documents one-shot via the new
   classifier; result distribution: ORDER_FINAL 50.3%, TARIFF_SHEET 31.4%,
   COVER_LETTER 9.7%, UNKNOWN 5.1%, TESTIMONY 3.5%. **Not 100% UNKNOWN —
@@ -424,14 +424,14 @@ and 6 consume it.
    Indexed on `(subject_kind, subject_id, stage)` and `(role, status,
    created_at)` for the overnight loop's resume/skip logic.
 
-4. New CLI `check-ollama-models-nc`:
+4. New CLI `doc-intel check-ollama-models`:
    - For each role in `ollama_models.yaml`, probe primary + fallbacks,
      run a tiny canned prompt, validate JSON shape (where applicable),
      print a status table.
    - Exits non-zero if any required role has no working model — used as
-     a precondition by `run-overnight-doc-intelligence-nc`.
+     a precondition by `doc-intel run-overnight`.
 
-5. New CLI `run-llm-doc-probe-nc`:
+5. New CLI `doc-intel run-llm-doc-probe`:
    - Take one document (by id or path) and run the structured-extractor
      role against it with the canonical rate-row schema (Phase 5 schema).
    - Prints the model output, validation result, and the row that would
@@ -460,8 +460,8 @@ and 6 consume it.
 
 **Definition of done:**
 
-- `check-ollama-models-nc` reports green on a fresh dev box.
-- `run-llm-doc-probe-nc` produces a validated JSON output for at least
+- `doc-intel check-ollama-models` reports green on a fresh dev box.
+- `doc-intel run-llm-doc-probe` produces a validated JSON output for at least
   one real corpus document.
 - `ollama_model_runs` rows exist for the probe runs.
 - No existing extraction or OCR path has been altered (the orchestrator
@@ -548,7 +548,7 @@ similarity, not just rules.
    secondary) is the cheapest way to catch model-specific failure modes
    before they bias the classifier; if disk pressure becomes real, drop
    the secondary first.
-3. CLI `embed-corpus-nc` — generate embeddings for the corpus. Idempotent
+3. CLI `doc-intel embed-corpus` — generate embeddings for the corpus. Idempotent
    on `(source_pdf, file_hash, embedding_kind, embedding_model,
    embedding_version)`.
 4. New classifier in `document_intelligence/embedding_classifier.py`:
@@ -601,7 +601,7 @@ classification source.
      returned label against the taxonomy table; on mismatch, store as
      `UNKNOWN` with a metadata note rather than accepting an invented
      label.
-2. CLI `adjudicate-classifications-nc` — runs the LLM on rows where:
+2. CLI `doc-intel adjudicate-classifications` — runs the LLM on rows where:
    - rule and embedding classifiers disagree, OR
    - max(rule_conf, embedding_conf) < 0.6, OR
    - any classifier returned `UNKNOWN`.
@@ -661,7 +661,7 @@ Start with `balanced_classifier` text-only; only add `vision_layout` or
   - Label validation against taxonomy: invented labels become UNKNOWN
   - Never raises — returns UNKNOWN with confidence 0.0 on any failure (no_text, no_taxonomy, model_unavailable, orchestrator_error, JSON parse/validation failure)
   - Evidence captures LLM reasoning, key signals, input results, and orchestrator status
-- `adjudicate-classifications-nc` CLI command:
+- `doc-intel adjudicate-classifications` CLI command:
   - Queries `document_classifications` for rule+embedding pairs with disagreements, UNKNOWN labels, or low confidence (<0.5)
   - Excludes documents that already have an `llm_%` classification (idempotent)
   - `--dry-run` previews candidates without calling the LLM
@@ -674,7 +674,7 @@ Start with `balanced_classifier` text-only; only add `vision_layout` or
   - Lazy-init pattern: health-probes `balanced_classifier` once, caches the adjudicator
   - Called in `extract_charges_from_document` after `_record_embedding_document_type`
   - Side-effect only, never raises — failures are logged at DEBUG level
-- Cross-stage report in `report-classification-disagreements-nc` already supports 3-way comparison — LLM rows (`llm_%`) appear alongside rule and embedding rows
+- Cross-stage report in `doc-intel report-classification-disagreements` already supports 3-way comparison — LLM rows (`llm_%`) appear alongside rule and embedding rows
 - Known limitation: no few-shot examples yet (Phase 6 review queue will supply confirmed examples; prompt cache is deferred to Phase 5.5 overnight loop)
 
 ### Phase 5.5 — Overnight document intelligence loop ✅ complete (2026-04-30)
@@ -688,7 +688,7 @@ at least one of Phase 4 / Phase 5 wired into a callable pass.
 
 **Deliverables:**
 
-1. New CLI `run-overnight-doc-intelligence-nc`. Flags:
+1. New CLI `doc-intel run-overnight`. Flags:
 
    ```
    --max-documents N            (default: unlimited)
@@ -711,7 +711,7 @@ at least one of Phase 4 / Phase 5 wired into a callable pass.
    - `--max-documents` reached
    - `--max-runtime-minutes` reached
    - `--max-consecutive-failures` consecutive failed model calls
-   - `check-ollama-models-nc` health probe stops returning ok mid-run
+   - `doc-intel check-ollama-models` health probe stops returning ok mid-run
      (re-probed every N documents; default 50)
    - SIGINT / SIGTERM (writes the current row, then exits)
 
@@ -759,7 +759,7 @@ at least one of Phase 4 / Phase 5 wired into a callable pass.
 
 **Implementation results (2026-04-30):**
 
-- `run-overnight-doc-intelligence-nc` CLI command in `cli.py`:
+- `doc-intel run-overnight` CLI command in `cli.py`:
   - Two stages: `embed` (embeddings via `embedding_primary`) and `llm_adjudicate` (LLM via `balanced_classifier`)
   - Safety controls: `--max-documents`, `--max-runtime-minutes`, `--max-consecutive-failures` (default 5)
   - `--resume` checks `ollama_model_runs` for completed `(subject, stage, role, model, prompt_version, status='ok')` tuples — skips already-done work
@@ -794,7 +794,7 @@ LLM outputs are advisory unless validated by deterministic tests or human review
      (qwen2.5-coder:7b after the 2026-05 local benchmark).
    - 2026-05 local benchmarks: `smallthinker:latest` returned valid JSON but
      mostly punted to `unknown` / low-confidence labels. The first
-     fixture-backed `benchmark-ollama-roles-nc --task all` run moved
+     fixture-backed `doc-intel benchmark-ollama-roles --task all` run moved
      `parse_failure_triage` to `mistral:7b-instruct` primary because it was the
      only tested model with nonzero parse-diagnosis gold accuracy. Keep
      expanding fixtures; the current sample is still small and mistral is
@@ -878,7 +878,7 @@ LLM outputs are advisory unless validated by deterministic tests or human review
 **Model benchmark update (2026-05-05):**
 - `parse_failure_triage` primary changed from `smallthinker:latest` to
   `qwen3:8b` after the first benchmark, then to `gemma4:e4b-it-q4_K_M` after
-  the 8-model `benchmark-ollama-roles-nc --task parse_diagnosis` run, then to
+  the 8-model `doc-intel benchmark-ollama-roles --task parse_diagnosis` run, then to
   `mistral:7b-instruct` after the first fixture-backed multi-task run.
 - Fallback order is now `gemma4:e4b-it-q4_K_M`, `qwen3:8b`, `phi3.5:latest`.
   `smallthinker:latest` was removed from this role because it mostly produced
@@ -908,14 +908,14 @@ LLM outputs are advisory unless validated by deterministic tests or human review
   `gemma4:e4b-it-q4_K_M` primary because gemma was the only viable tested
   extraction model, with 100% gold accuracy on valid fixture returns and no
   timeouts.
-- 2026-05-05 model-benchmark follow-up: `benchmark-ollama-roles-nc` replaces
+- 2026-05-05 model-benchmark follow-up: `doc-intel benchmark-ollama-roles` replaces
   the scratch `tmp_model_benchmark.py` workflow with a non-mutating benchmark
   surface for `parse_diagnosis`, `hard_parse_diagnosis`, `regex_suggestion`,
   `structured_rate_extraction`, and `document_classification`. It uses
   production-style prompts/Pydantic schemas, supports explicit model lists,
   runtime/request bounds, and writes timestamped JSON reports to
   `docs/reports/ollama_model_benchmarks/`.
-- 2026-05-05 specialization benchmark update: `benchmark-ollama-roles-nc` now
+- 2026-05-05 specialization benchmark update: `doc-intel benchmark-ollama-roles` now
   accepts `--task all` and comma-separated task lists. Multi-task reports add
   per-task rankings, label-bias scores, diversity counts, and model-pair
   disagreement rates so future layered model routing can be based on
@@ -1164,11 +1164,11 @@ encounters, regardless of whether we know how to classify it yet.
 |---|---|---|
 | 1. Classification observability | ✅ complete (2026-04-30) | Fingerprints: 8,812 / 4,406 PDFs / 40 clusters. Disagreement report wired (0 findings — only one classifier writing). 390/879 family_mapping coverage; 489-doc gap accepted as a Phase 2 side-effect close, not a dedicated backfill. All existing rows are `backfill_v1` at confidence 1.0 — disagreement signal will come from Phase 2's new classifier, not retro-scoring. |
 | 2. Document type taxonomy | ✅ complete (2026-04-30) | 12 types seeded across 6 categories. 879/879 historical_documents classified. Distribution: ORDER_FINAL 50%, TARIFF_SHEET 31%, COVER_LETTER 10%, UNKNOWN 5%, TESTIMONY 4%. Confidence spans 0.0–0.7. ORDER_FINAL over-count is a pre-existing legacy-classifier issue, deferred to Phase 3 flag classifiers. |
-| 2.5. Ollama model orchestration layer | ✅ complete (2026-04-30) | All 10 roles green on `check-ollama-models-nc`. `run-llm-doc-probe-nc` smoke test passed (validation_error on missing classifier field — model returned valid JSON, orchestrator correctly validated). `ollama_model_runs` persistence confirmed. Per-role `probe_kind` (generate/embed/tags_only) and `timeout_s` overrides added to handle embedding models, vision models, and slow-loading MoE models. |
-| 3. Multi-dimensional flags | ✅ complete (2026-04-30) | 11 flag classifiers in `flag_classifiers.py`. 879/879 docs backfilled (10,938 total rows). Stages: `flag_is_final` (37% true), `flag_is_proposed` (6% true), `flag_is_redline` (2.5% true), `flag_is_confidential` (2% true), `flag_has_rate_tables` (34% true), `flag_has_leaf_numbers` (93% true), `flag_is_compliance_filing` (16% true), `utility` (DEP 48%/DEC 44%), `docket_number` (2% matched), `effective_date` (89% found), `tariff_family` (100% via metadata). Redline skip in extract-rates now prefers `document_classifications.flag_is_redline` over `document_fingerprints.is_redline_candidate`. Disagreement report supports flag stages via `--stage`. `backfill-flag-classifications-nc` CLI added for reprocessing. |
-| 4. Embedding classifier | ✅ complete (2026-04-30) | `document_embeddings` table (OL-002), `text_slicer.py` (5 slice kinds), `embed-corpus-nc` CLI (idempotent, dual-model), `EmbeddingKNNClassifier` (cosine similarity, weighted voting, self-match exclusion), wired into `bulk_extractor._record_embedding_document_type()` as second document_type row with `classifier="embedding_knn_v1"`. Cross-stage report (`--cross-stage document_type`) shows rule vs embedding comparison with agreement/disagreement/overrule_candidate status. 100-doc validation: 13/20 agreements, 7 overrule candidates (rule=UNKNOWN, embedding=high-confidence). `backfill-embedding-classifications-nc` CLI added for reprocessing. Both 1024-dim models working via Ollama. |
-| 5. LLM adjudication | ✅ complete (2026-04-30) | `LLMAdjudicator` class, `adjudicate-classifications-nc` CLI, 3-way disagreement support in cross-stage report, wired into `bulk_extractor._record_llm_document_type()`. Known limitation: no few-shot examples yet (deferred to Phase 6 review queue). |
-| 5.5. Overnight document intelligence loop | ✅ complete (2026-04-30) | `run-overnight-doc-intelligence-nc` CLI with resume, dry-run, wall-clock cap, consecutive failure abort, SIGINT/SIGTERM handling, end-of-run JSON reports. Verified: 879-doc dry run, 5-doc live test with LLM adjudication. |
+| 2.5. Ollama model orchestration layer | ✅ complete (2026-04-30) | All 10 roles green on `doc-intel check-ollama-models`. `doc-intel run-llm-doc-probe` smoke test passed (validation_error on missing classifier field — model returned valid JSON, orchestrator correctly validated). `ollama_model_runs` persistence confirmed. Per-role `probe_kind` (generate/embed/tags_only) and `timeout_s` overrides added to handle embedding models, vision models, and slow-loading MoE models. |
+| 3. Multi-dimensional flags | ✅ complete (2026-04-30) | 11 flag classifiers in `flag_classifiers.py`. 879/879 docs backfilled (10,938 total rows). Stages: `flag_is_final` (37% true), `flag_is_proposed` (6% true), `flag_is_redline` (2.5% true), `flag_is_confidential` (2% true), `flag_has_rate_tables` (34% true), `flag_has_leaf_numbers` (93% true), `flag_is_compliance_filing` (16% true), `utility` (DEP 48%/DEC 44%), `docket_number` (2% matched), `effective_date` (89% found), `tariff_family` (100% via metadata). Redline skip in extract-rates now prefers `document_classifications.flag_is_redline` over `document_fingerprints.is_redline_candidate`. Disagreement report supports flag stages via `--stage`. `doc-intel backfill-flag-classifications` CLI added for reprocessing. |
+| 4. Embedding classifier | ✅ complete (2026-04-30) | `document_embeddings` table (OL-002), `text_slicer.py` (5 slice kinds), `doc-intel embed-corpus` CLI (idempotent, dual-model), `EmbeddingKNNClassifier` (cosine similarity, weighted voting, self-match exclusion), wired into `bulk_extractor._record_embedding_document_type()` as second document_type row with `classifier="embedding_knn_v1"`. Cross-stage report (`--cross-stage document_type`) shows rule vs embedding comparison with agreement/disagreement/overrule_candidate status. 100-doc validation: 13/20 agreements, 7 overrule candidates (rule=UNKNOWN, embedding=high-confidence). `doc-intel backfill-embedding-classifications` CLI added for reprocessing. Both 1024-dim models working via Ollama. |
+| 5. LLM adjudication | ✅ complete (2026-04-30) | `LLMAdjudicator` class, `doc-intel adjudicate-classifications` CLI, 3-way disagreement support in cross-stage report, wired into `bulk_extractor._record_llm_document_type()`. Known limitation: no few-shot examples yet (deferred to Phase 6 review queue). |
+| 5.5. Overnight document intelligence loop | ✅ complete (2026-04-30) | `doc-intel run-overnight` CLI with resume, dry-run, wall-clock cap, consecutive failure abort, SIGINT/SIGTERM handling, end-of-run JSON reports. Verified: 879-doc dry run, 5-doc live test with LLM adjudication. |
 | 5.6. LLM-assisted parse diagnosis | ✅ complete (2026-05-01) | Four new modules: `parse_diagnosis.py` (failure classification), `regex_suggestions.py` (regex/normalization candidate generation), `regex_validation.py` (deterministic validation harness), `schema_extraction.py` (schema-guided LLM fallback extraction). Five new CLIs: `analyze-parse-failures-nc`, `suggest-regex-fixes-nc`, `validate-regex-suggestions-nc`, `run-llm-parse-fallback-nc`, `run-overnight-parse-improvement-nc`. Four new DB tables (OL-003 migration). Seven new Ollama roles. All LLM outputs are advisory — no parser code is auto-modified. |
 | 6.5. Database Intelligence | ✅ complete (2026-05-01) | `database_reports.py` (7 deterministic SQL reports), `db_llm_analysis.py` (LLM summarization + SQL safety validator), 4 new CLIs (`report-database-intelligence-nc`, `summarize-database-intelligence-nc`, `ask-ncuc-db`, `run-overnight-db-intelligence-nc`), `database_intelligence_runs` table (DB_INTEL-001), MCP design doc. All read-only. |
 | 6. Review queue + training export | ⏳ not started | |

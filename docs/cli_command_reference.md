@@ -47,7 +47,7 @@ If you are unsure which command family to use, choose in this order:
 2. If the problem is weak parses or reruns: `parse-review-summary`, `reprocess show-queue-nc`, `reprocess show-priority-nc`
 3. If the problem is stale artifacts: `reprocess show-stale-historical-nc`
 4. If the problem is lineage or version linkage: `lineage show-gaps-nc`, `lineage validate-nc`
-5. If the problem is document identity, routing, or reuse confidence: `lineage show-provenance-gaps-nc`, `lineage show-fingerprint-coverage-nc`, `show-document-classification-audit-nc`
+5. If the problem is document identity, routing, or reuse confidence: `lineage show-provenance-gaps-nc`, `lineage show-fingerprint-coverage-nc`, `doc-intel show-document-classification-audit`
 6. If the problem is missing clean historical PDFs: `workflow search-nc-missing-clean-docs`, `workflow run-nc-missing-doc`
 7. If the problem is new downloaded NCUC records: `ncuc import-pipeline`, then `bootstrap-missing-versions-nc`, then `extract-rates-nc`
 
@@ -89,11 +89,11 @@ python -m duke_rates lineage list-provisional-families --state NC   # provisiona
 
 For document intelligence state (classification, embeddings, LLM):
 ```bash
-python -m duke_rates check-ollama-models-nc                     # Ollama model availability
-python -m duke_rates list-document-types-nc                     # taxonomy
-python -m duke_rates report-document-types-nc                   # classification distribution
-python -m duke_rates report-classification-disagreements-nc --cross-stage document_type  # rule vs embedding
-python -m duke_rates report-flag-classifications-nc             # flag classifier audit
+python -m duke_rates doc-intel check-ollama-models                     # Ollama model availability
+python -m duke_rates doc-intel list-document-types                     # taxonomy
+python -m duke_rates doc-intel report-document-types                   # classification distribution
+python -m duke_rates doc-intel report-classification-disagreements --cross-stage document_type  # rule vs embedding
+python -m duke_rates doc-intel report-flag-classifications             # flag classifier audit
 ```
 
 Do not skip this orientation step unless you already know the exact bounded task
@@ -322,8 +322,8 @@ surface over inventing your own command mapping.
 | `seed-dep-storm-rider-applicability` | Seed DEP storm-rider applicability links for residential schedules using the current `Leaf 607` and `Leaf 613` applicability text |
 | `lineage show-provenance-gaps-nc` | Summarize missing version provenance fields plus missing/path-only discovery linkage for NC historical rows |
 | `lineage show-fingerprint-coverage-nc` | Summarize NC hash-backed coverage, path-only historical rows, document fingerprints, and reusable artifact coverage |
-| `show-document-classification-audit-nc` | Classify NC historical documents into routing buckets like `extractable_charge`, `formula_only`, `reference_only`, `redline_candidate`, `unrelated_but_keep`, and `unknown` |
-| `show-unknown-routing-audit-nc` | Collapse `unknown` and weak-routing NC rows into family-level recommendations like `new_profile_or_family_routing_review`, `evaluate_formula_or_program_lane`, or `reclassify_non_tariff_or_reference`, and surface synthesized profile candidates / next commands when the family is clearly routable |
+| `doc-intel show-document-classification-audit` | Classify NC historical documents into routing buckets like `extractable_charge`, `formula_only`, `reference_only`, `redline_candidate`, `unrelated_but_keep`, and `unknown` |
+| `doc-intel show-unknown-routing-audit` | Collapse `unknown` and weak-routing NC rows into family-level recommendations like `new_profile_or_family_routing_review`, `evaluate_formula_or_program_lane`, or `reclassify_non_tariff_or_reference`, and surface synthesized profile candidates / next commands when the family is clearly routable |
 | `lineage validate-nc` | Cross-check NC historical docs for family assignment, provenance debt, and extraction readiness |
 
 Targeted extraction diagnostics:
@@ -340,8 +340,8 @@ Parser-selection diagnostics:
 ```powershell
 python -m duke_rates show-parser-selection-audit-nc --limit 25
 python -m duke_rates show-parser-improvement-candidates-nc --limit 25
-python -m duke_rates show-document-classification-audit-nc --limit 25
-python -m duke_rates show-unknown-routing-audit-nc --limit 25
+python -m duke_rates doc-intel show-document-classification-audit --limit 25
+python -m duke_rates doc-intel show-unknown-routing-audit --limit 25
 ```
 
 Use this before changing parser profiles. It shows:
@@ -406,14 +406,14 @@ For scanned PDFs that pdfplumber cannot read — routes them through Docling or 
 | `ocr process-queue-nc` | Process OCR queue (Tesseract-based). Supports `--workers N` for bounded parallel local OCR and `--until-empty` to drain the queue in one invocation. Default `--limit` is 500. Does not apply to portal/search workflows (was `process-ocr-queue-nc`) |
 | `ocr process-backlog-nc` | **Canonical OCR backlog workflow.** One-shot: enqueue remediation candidates → drain the Tesseract queue with `--until-empty` → extract rates. Replaces the hand-written `enqueue` + `process` loop + `extract-rates` sequence. Flags: `--workers N`, `--skip-enqueue`, `--skip-extract`, `--company`, `--family-key`, `--enqueue-limit` (was `process-ocr-backlog-nc`) |
 | `ocr report-benchmark-nc` | Summarize OCR-backed historical docs, downstream parse outcomes, and recommended remediation lanes when OCR artifacts already exist (was `report-ocr-benchmark-nc`) |
-| `mine-docling-nc` | Process documents via Docling (GPU-accelerated layout+text) |
-| `run-docling-nc` | Run Docling on NC documents |
-| `run-docling-vlm` | Run Docling VLM (vision-language model) mode |
-| `process-docling-batch` | Process a batch via Docling |
-| `benchmark-docling` | Benchmark Docling throughput |
-| `benchmark-document-normalization` | Compare native text extraction, Paddle/PP-Structure normalization, GLM-OCR fallback, and the router on representative PDFs |
-| `compare-document-page-text` | Compare native vs Paddle vs GLM text on specific PDF pages, including suspicious-symbol heuristics and expected-token checks for OCR problem cases |
-| `benchmark-redline-analysis` | Use GLM image analysis on clean/redline tariff pages to test whether tracked-change evidence, visual redline cues, and before/after relationships are recoverable |
+| `doc-intel mine-docling` | Process documents via Docling (GPU-accelerated layout+text) |
+| `doc-intel run-docling` | Run Docling on NC documents |
+| `doc-intel run-docling-vlm` | Run Docling VLM (vision-language model) mode |
+| `doc-intel process-docling-batch` | Process a batch via Docling |
+| `doc-intel benchmark-docling` | Benchmark Docling throughput |
+| `doc-intel benchmark-document-normalization` | Compare native text extraction, Paddle/PP-Structure normalization, GLM-OCR fallback, and the router on representative PDFs |
+| `doc-intel compare-document-page-text` | Compare native vs Paddle vs GLM text on specific PDF pages, including suspicious-symbol heuristics and expected-token checks for OCR problem cases |
+| `doc-intel benchmark-redline-analysis` | Use GLM image analysis on clean/redline tariff pages to test whether tracked-change evidence, visual redline cues, and before/after relationships are recoverable |
 | `gpu-status` | Check GPU and CUDA availability |
 
 ### 2f. Reprocessing Queue
@@ -649,16 +649,16 @@ Built in Phases 2–5.5 of [document_intelligence_roadmap.md](/c:/Python/Duke/St
 
 | Command | What it does |
 |---|---|
-| `list-document-types-nc` | List the document_type taxonomy (code, category, description, is_terminal) |
-| `report-document-types-nc` | Show document_type classification distribution across the corpus |
-| `report-classification-disagreements-nc` | Surface low-margin, override, and cross-classifier disagreements. `--cross-stage document_type` compares rule vs embedding. `--stage flag_is_final` etc. for flag-stage low-confidence rows |
-| `report-flag-classifications-nc` | Show flag classification distribution across all 11 flag stages |
+| `doc-intel list-document-types` | List the document_type taxonomy (code, category, description, is_terminal) |
+| `doc-intel report-document-types` | Show document_type classification distribution across the corpus |
+| `doc-intel report-classification-disagreements` | Surface low-margin, override, and cross-classifier disagreements. `--cross-stage document_type` compares rule vs embedding. `--stage flag_is_final` etc. for flag-stage low-confidence rows |
+| `doc-intel report-flag-classifications` | Show flag classification distribution across all 11 flag stages |
 
 ### 15b. Flag Classifiers (Phase 3)
 
 | Command | What it does |
 |---|---|
-| `backfill-flag-classifications-nc` | Run all 11 flag classifiers against existing historical_documents. `--limit`, `--dry-run`, `--progress/--no-progress` |
+| `doc-intel backfill-flag-classifications` | Run all 11 flag classifiers against existing historical_documents. `--limit`, `--dry-run`, `--progress/--no-progress` |
 
 Flag stages: `flag_is_final`, `flag_is_proposed`, `flag_is_redline`, `flag_is_confidential`, `flag_has_rate_tables`, `flag_has_leaf_numbers`, `flag_is_compliance_filing`, `utility`, `docket_number`, `effective_date`, `tariff_family`.
 
@@ -666,24 +666,24 @@ Flag stages: `flag_is_final`, `flag_is_proposed`, `flag_is_redline`, `flag_is_co
 
 | Command | What it does |
 |---|---|
-| `check-ollama-models-nc` | Health-probe all configured Ollama roles and report availability |
-| `benchmark-ollama-roles-nc` | Compare explicit local Ollama models against production-style document-intelligence prompts/schemas without mutating DB rows. Initial tasks: `parse_diagnosis`, `hard_parse_diagnosis`, `regex_suggestion`, `structured_rate_extraction`, `document_classification`. Writes JSON reports to `docs/reports/ollama_model_benchmarks/`. |
-| `run-llm-doc-probe-nc` | Smoke-test a role against a document or ad-hoc text; validates prompt+JSON schema. `--persist` writes to `document_classifications` |
+| `doc-intel check-ollama-models` | Health-probe all configured Ollama roles and report availability |
+| `doc-intel benchmark-ollama-roles` | Compare explicit local Ollama models against production-style document-intelligence prompts/schemas without mutating DB rows. Initial tasks: `parse_diagnosis`, `hard_parse_diagnosis`, `regex_suggestion`, `structured_rate_extraction`, `document_classification`. Writes JSON reports to `docs/reports/ollama_model_benchmarks/`. |
+| `doc-intel run-llm-doc-probe` | Smoke-test a role against a document or ad-hoc text; validates prompt+JSON schema. `--persist` writes to `document_classifications` |
 
 Benchmark examples:
 ```bash
-python -m duke_rates benchmark-ollama-roles-nc --task parse_diagnosis --models gemma4:e4b-it-q4_K_M,qwen3:8b,mistral:7b-instruct,phi3.5:latest --limit 10 --max-runtime-minutes 90
-python -m duke_rates benchmark-ollama-roles-nc --task all --models gemma4:e4b-it-q4_K_M,qwen3:8b,mistral:7b-instruct,phi3.5:latest --limit 5 --timeout-s 120 --max-runtime-minutes 360
-python -m duke_rates benchmark-ollama-roles-nc --task parse_diagnosis,regex_suggestion,structured_rate_extraction --models gemma4:e4b-it-q4_K_M,qwen3:8b,phi3.5:latest --limit 5 --max-runtime-minutes 240
-python -m duke_rates benchmark-ollama-roles-nc --task regex_suggestion --limit 5 --max-runtime-minutes 90
-python -m duke_rates benchmark-ollama-roles-nc --task structured_rate_extraction --limit 5 --timeout-s 90 --max-runtime-minutes 120
-python -m duke_rates benchmark-ollama-roles-nc --task document_classification --limit 20 --max-runtime-minutes 90
+python -m duke_rates doc-intel benchmark-ollama-roles --task parse_diagnosis --models gemma4:e4b-it-q4_K_M,qwen3:8b,mistral:7b-instruct,phi3.5:latest --limit 10 --max-runtime-minutes 90
+python -m duke_rates doc-intel benchmark-ollama-roles --task all --models gemma4:e4b-it-q4_K_M,qwen3:8b,mistral:7b-instruct,phi3.5:latest --limit 5 --timeout-s 120 --max-runtime-minutes 360
+python -m duke_rates doc-intel benchmark-ollama-roles --task parse_diagnosis,regex_suggestion,structured_rate_extraction --models gemma4:e4b-it-q4_K_M,qwen3:8b,phi3.5:latest --limit 5 --max-runtime-minutes 240
+python -m duke_rates doc-intel benchmark-ollama-roles --task regex_suggestion --limit 5 --max-runtime-minutes 90
+python -m duke_rates doc-intel benchmark-ollama-roles --task structured_rate_extraction --limit 5 --timeout-s 90 --max-runtime-minutes 120
+python -m duke_rates doc-intel benchmark-ollama-roles --task document_classification --limit 20 --max-runtime-minutes 90
 ```
 
 Gold-fixture scoring:
 ```bash
-python -m duke_rates benchmark-ollama-roles-nc --task parse_diagnosis --models gemma4:e4b-it-q4_K_M,qwen3:8b --limit 10 --fixtures docs/reports/ollama_model_benchmarks/gold_fixtures.json
-python -m duke_rates benchmark-ollama-roles-nc --task all --models gemma4:e4b-it-q4_K_M,qwen3:8b,mistral:7b-instruct,phi3.5:latest --limit 10 --timeout-s 120 --max-runtime-minutes 360 --fixtures docs/reports/ollama_model_benchmarks/gold_fixtures.json
+python -m duke_rates doc-intel benchmark-ollama-roles --task parse_diagnosis --models gemma4:e4b-it-q4_K_M,qwen3:8b --limit 10 --fixtures docs/reports/ollama_model_benchmarks/gold_fixtures.json
+python -m duke_rates doc-intel benchmark-ollama-roles --task all --models gemma4:e4b-it-q4_K_M,qwen3:8b,mistral:7b-instruct,phi3.5:latest --limit 10 --timeout-s 120 --max-runtime-minutes 360 --fixtures docs/reports/ollama_model_benchmarks/gold_fixtures.json
 ```
 
 Fixture shape:
@@ -707,27 +707,27 @@ Fixture shape:
 
 | Command | What it does |
 |---|---|
-| `embed-corpus-nc` | Generate embeddings for all historical_documents (embedding_primary + embedding_secondary roles). Populates `document_embeddings`. Idempotent. `--limit`, `--refresh`, `--kind` (full_text/first_3_pages/title_block/rate_table_text/order_conclusion_section), `--max-chars` (default 2000) |
-| `backfill-embedding-classifications-nc` | Run embedding KNN classifier on docs with reference embeddings; persists `embedding_knn_v1` row. `--limit`, `--dry-run` |
+| `doc-intel embed-corpus` | Generate embeddings for all historical_documents (embedding_primary + embedding_secondary roles). Populates `document_embeddings`. Idempotent. `--limit`, `--refresh`, `--kind` (full_text/first_3_pages/title_block/rate_table_text/order_conclusion_section), `--max-chars` (default 2000) |
+| `doc-intel backfill-embedding-classifications` | Run embedding KNN classifier on docs with reference embeddings; persists `embedding_knn_v1` row. `--limit`, `--dry-run` |
 
 Typical embedding workflow:
 ```bash
-python -m duke_rates embed-corpus-nc --limit 100
-python -m duke_rates backfill-embedding-classifications-nc --limit 20
-python -m duke_rates report-classification-disagreements-nc --cross-stage document_type
+python -m duke_rates doc-intel embed-corpus --limit 100
+python -m duke_rates doc-intel backfill-embedding-classifications --limit 20
+python -m duke_rates doc-intel report-classification-disagreements --cross-stage document_type
 ```
 
 ### 15e. LLM Adjudication (Phase 5)
 
 | Command | What it does |
 |---|---|
-| `adjudicate-classifications-nc` | Run LLM (balanced_classifier role) on document_type disagreements. Persists `llm_<model>_v1` row. Does NOT auto-supersede. `--limit` (default 10), `--dry-run`, `--json` |
+| `doc-intel adjudicate-classifications` | Run LLM (balanced_classifier role) on document_type disagreements. Persists `llm_<model>_v1` row. Does NOT auto-supersede. `--limit` (default 10), `--dry-run`, `--json` |
 
 ### 15f. Overnight Document Intelligence Loop (Phase 5.5)
 
 | Command | What it does |
 |---|---|
-| `run-overnight-doc-intelligence-nc` | Resumable unattended batch: embed + LLM adjudication in sequence per document. Safety: no destructive writes, bounded by wall-clock cap, `--resume` skips completed tuples, stops on health probe degradation / consecutive failures. End-of-run JSON at `docs/reports/overnight_doc_intelligence/<ts>.json`. |
+| `doc-intel run-overnight` | Resumable unattended batch: embed + LLM adjudication in sequence per document. Safety: no destructive writes, bounded by wall-clock cap, `--resume` skips completed tuples, stops on health probe degradation / consecutive failures. End-of-run JSON at `docs/reports/overnight_doc_intelligence/<ts>.json`. |
 
 Flags:
 ```
@@ -744,9 +744,9 @@ Flags:
 
 Overnight workflow:
 ```bash
-python -m duke_rates run-overnight-doc-intelligence-nc --dry-run
-python -m duke_rates run-overnight-doc-intelligence-nc --max-runtime-minutes 120 --resume
-python -m duke_rates run-overnight-doc-intelligence-nc --stages llm_adjudicate --max-documents 20
+python -m duke_rates doc-intel run-overnight --dry-run
+python -m duke_rates doc-intel run-overnight --max-runtime-minutes 120 --resume
+python -m duke_rates doc-intel run-overnight --stages llm_adjudicate --max-documents 20
 ```
 
 ### 15g. LLM-Assisted Parse Diagnosis & Improvement (Phase 5.6)
@@ -870,7 +870,7 @@ For a reusable launcher, use
 python -m duke_rates show-workflow-status-nc
 python -m duke_rates show-parser-improvement-candidates-nc --limit 25
 python -m duke_rates show-near-miss-profiles-nc --limit 25
-python -m duke_rates show-unknown-routing-audit-nc --limit 25
+python -m duke_rates doc-intel show-unknown-routing-audit --limit 25
 
 # Routing-impact enqueue and queue drain
 python -m duke_rates reprocess show-stale-nc --limit 10
@@ -919,7 +919,7 @@ pwsh scripts\overnight\routing_first_until_9am.ps1 -DeadlineTime "09:00"
 ```
 
 This loop:
-- reads `show-unknown-routing-audit-nc --json` each cycle
+- reads `doc-intel show-unknown-routing-audit --json` each cycle
 - enqueues profile-impact work for synthesized existing-profile candidates
 - drains `reprocess process-queue-nc --until-empty`
 - re-checks workflow status before the next cycle
@@ -1018,7 +1018,7 @@ Model note:
   `--rediagnose-unknown` first, then `suggest`, then `validate`. Run `extract`
   separately after diagnosis/suggestion quality is understood, because schema
   extraction is the heaviest Ollama stage.
-- Use `benchmark-ollama-roles-nc` before changing role mappings when adding a
+- Use `doc-intel benchmark-ollama-roles` before changing role mappings when adding a
   new local model. The benchmark reports JSON validity, latency, tokens/sec,
   confidence, and task-specific actionable-output rates without inserting
   diagnostic, suggestion, classification, or extraction rows.
@@ -1237,8 +1237,8 @@ Some commands require optional extras installed via `pip install -e ".[group]"`:
 | `browser` | `ncuc playwright-discover`, `ncuc portal-scrape`, portal download scripts |
 | `pdf` | All PDF parsing and extraction commands |
 | `ocr` | `ocr process-queue-nc`, `ocr enqueue-nc` |
-| `docling` | `mine-docling-nc`, `run-docling-nc`, `run-docling-vlm`, `process-docling-batch` |
-| `ai` | `run-docling-vlm`, LLM-based classification commands |
+| `docling` | `doc-intel mine-docling`, `doc-intel run-docling`, `doc-intel run-docling-vlm`, `doc-intel process-docling-batch` |
+| `ai` | `doc-intel run-docling-vlm`, LLM-based classification commands |
 | `viz` | `app/streamlit_*.py` apps |
 | `mcp` | `mcp` server command |
 

@@ -932,7 +932,7 @@ parsing architecture.
 ### Docling Artifact Conversion Status
 
 **Phase 1 (complete):** Tariff sheets on GPU
-- Command: `process-docling-batch --accelerator cuda --classification tariff_sheets`
+- Command: `doc-intel process-docling-batch --accelerator cuda --classification tariff_sheets`
 - Result: 546/585 documents processed (93.3%)
   - 466 successful (79.5%)
   - 80 partial success with fallback (13.7%)
@@ -942,10 +942,10 @@ parsing architecture.
 
 **Phase 2 (active):** Remaining oversized tariff sheets on CPU
 - Processing 39 documents that caused GPU OOM
-- Command: `process-docling-batch --accelerator cpu --classification tariff_sheets --limit 39`
+- Command: `doc-intel process-docling-batch --accelerator cpu --classification tariff_sheets --limit 39`
 
 **Bridging Docling artifacts into page-aware pipeline (new):**
-- Command: `mine-docling-nc --limit 50 --accelerator cuda` (or cpu)
+- Command: `doc-intel mine-docling --limit 50 --accelerator cuda` (or cpu)
 - Reconstructs `PageEvidence` from stored Docling JSON
 - Segments into `TariffSpan`s using existing `segment_document()`
 - Matches to families using existing `find_best_family_for_span()`
@@ -983,7 +983,7 @@ conn.close()
 
 1. Complete Phase 2 CPU batch for oversized tariff sheets (39 docs)
 2. Bridge Phase 1 + 2 artifacts into page-aware pipeline:
-   - `python -m duke_rates mine-docling-nc --limit 50 --accelerator cuda`
+   - `python -m duke_rates doc-intel mine-docling --limit 50 --accelerator cuda`
    - Monitor historical document creation: `python -m duke_rates parse-review-summary`
 3. Evaluate extraction quality and family matching accuracy
 4. (Future) Phase 3 + 4: Process orders (467) and sample "other" (1,777) documents

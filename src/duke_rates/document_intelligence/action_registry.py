@@ -134,8 +134,8 @@ ACTION_REGISTRY: dict[str, CorrectiveAction] = {
     "unknown_documents": CorrectiveAction(
         finding_category="unknown_documents",
         label="Unknown Documents",
-        cli_command="adjudicate-classifications-nc",
-        # adjudicate-classifications-nc has NO --execute flag; it
+        cli_command="doc-intel adjudicate-classifications",
+        # doc-intel adjudicate-classifications has NO --execute flag; it
         # operates in live mode by default (only --dry-run inverts it).
         args=["--limit", "50"],
         estimated_impact="Re-runs classification on UNKNOWN documents to assign family and type.",

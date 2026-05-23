@@ -23,21 +23,12 @@
 |                                            URL patterns.                    |
 | build-tariff-families                      Build tariff_families rows from  |
 |                                            classified documents (Phase 2c). |
-| show-document-classification-audit-nc      Show NC document buckets for     |
-|                                            routing beyond simple            |
-|                                            tariff-charge extraction.        |
-| show-unknown-routing-audit-nc              Rank NC families still landing   |
-|                                            in `unknown` or weak fallback    |
-|                                            routing buckets.                 |
 | parse-tariff-versions                      Parse Duke tariff leaf PDFs and  |
 |                                            populate tariff_versions and     |
 |                                            tariff_charges.                  |
 | mine-ncuc-pipeline                         Compatibility alias for the      |
 |                                            page-aware NCUC intake path;     |
 |                                            prefer ncuc import-pipeline.     |
-| mine-docling-nc                            Bridge stored Docling artifacts  |
-|                                            into the NCUC page-aware parsing |
-|                                            pipeline.                        |
 | mine-tariff-sheets-nc                      Mine standalone tariff sheet     |
 |                                            PDFs that are in                 |
 |                                            historical_documents but have no |
@@ -102,62 +93,8 @@
 |                                            v_document_diagnostics view      |
 |                                            against the Python remediation   |
 |                                            report.                          |
-| run-docling-nc                             Convert a single PDF with        |
-|                                            Docling (standard pipeline) and  |
-|                                            cache the structured artifacts.  |
-| run-docling-vlm                            Convert a hard scanned PDF using |
-|                                            the SmolDocling/GraniteDocling   |
-|                                            VLM pipeline.                    |
-| benchmark-docling                          Benchmark Docling CPU vs GPU     |
-|                                            conversion on representative     |
-|                                            NCUC documents.                  |
-| benchmark-document-normalization           Benchmark native vs Paddle vs    |
-|                                            GLM document normalization on    |
-|                                            representative PDFs.             |
-| compare-document-page-text                 Compare page-level text accuracy |
-|                                            across native, Paddle, and GLM   |
-|                                            OCR backends.                    |
-| benchmark-redline-analysis                 Benchmark GLM image analysis on  |
-|                                            candidate clean/redline tariff   |
-|                                            pages.                           |
 | gpu-status                                 Show current GPU availability    |
 |                                            and VRAM budget.                 |
-| report-docling-skipped-pages-nc            List Docling artifacts where     |
-|                                            pages were skipped or degraded   |
-|                                            during chunked conversion.       |
-| list-document-types-nc                     List the seeded                  |
-|                                            ``document_types`` taxonomy.     |
-| report-document-types-nc                   Report the distribution of       |
-|                                            ``document_type``                |
-|                                            classifications.                 |
-| report-flag-classifications-nc             Report the distribution of Phase |
-|                                            3 flag classifications.          |
-| backfill-flag-classifications-nc           Backfill Phase 3 flag            |
-|                                            classifications for existing     |
-|                                            historical_documents.            |
-| check-ollama-models-nc                     Probe every configured Ollama    |
-|                                            role and report availability.    |
-| benchmark-ollama-roles-nc                  Benchmark local Ollama models    |
-|                                            against document-intelligence    |
-|                                            tasks.                           |
-| run-llm-doc-probe-nc                       Run an LLM probe against one     |
-|                                            historical document.             |
-| report-classification-disagreements-nc     Surface low-confidence and       |
-|                                            runner-up-close classifications. |
-| adjudicate-classifications-nc              Run LLM adjudication on          |
-|                                            document_type disagreements.     |
-| fingerprint-corpus-nc                      Fingerprint every PDF referenced |
-|                                            by ``historical_documents`` and  |
-|                                            ``ncuc_discovery_records``.      |
-| embed-corpus-nc                            Generate embeddings for every    |
-|                                            PDF referenced by                |
-|                                            ``historical_documents``.        |
-| backfill-embedding-classifications-nc      Backfill embedding-based         |
-|                                            document_type classifications    |
-|                                            for existing documents.          |
-| run-overnight-doc-intelligence-nc          Run embedding generation + LLM   |
-|                                            adjudication as a resumable      |
-|                                            overnight batch.                 |
 | analyze-parse-failures-nc                  Analyze weak/empty parse         |
 |                                            attempts with LLM root-cause     |
 |                                            diagnosis.                       |
@@ -246,13 +183,6 @@
 | analyze-document-structure-nc              Use a local LLM to review and    |
 |                                            refine deterministic section     |
 |                                            boundaries (Phase 6C).           |
-| backfill-classifications-nc                Backfill                         |
-|                                            document_classifications rows    |
-|                                            for existing historical          |
-|                                            documents.                       |
-| process-docling-batch                      Process a batch of NCUC          |
-|                                            documents through Docling in a   |
-|                                            single long-running process.     |
 | audit-local-raw-nc                                                          |
 | load-local-rider-summaries-nc                                               |
 | load-local-rates-nc                                                         |
@@ -303,27 +233,6 @@
 | seed-dep-storm-rider-applicability         Seed DEP storm-rider             |
 |                                            applicability links for          |
 |                                            residential schedules.           |
-| audit-document-type-classifications-nc     Audit document_type classifier   |
-|                                            agreement and (optionally)       |
-|                                            export a gold set.               |
-| seed-document-type-gold-nc                 Seed document_type_gold from     |
-|                                            classifier agreement.            |
-| train-document-type-baseline-nc            Stream D baseline: TF-IDF +      |
-|                                            LogisticRegression on            |
-|                                            document_type_gold.              |
-| audit-stale-gold-nc                        Find document_type_gold rows     |
-|                                            where the v2 classifier now      |
-|                                            disagrees.                       |
-| audit-bundle-metadata-mismatch-nc          Find docs where v2's content     |
-|                                            classification disagrees with    |
-|                                            the importer's family_key tag.   |
-| promote-high-confidence-subset-nc          Promote subset-agreement docs to |
-|                                            document_type_gold.              |
-| triage-disagreements-nc                    Export classifier-disagreement   |
-|                                            docs as a labeling JSONL queue.  |
-| classify-documents-v2-nc                   Run rule_document_type_v2        |
-|                                            against NC docs and compare with |
-|                                            v1.                              |
 | audit-rider-map                            Show the static rider map: which |
 |                                            riders apply to which schedules. |
 | audit-search-worklist                      List tariff families that need   |
@@ -377,5 +286,8 @@
 |                                            search, leads,                   |
 |                                            regulator/openei/archive         |
 |                                            pipelines.                       |
+| doc-intel                                  Document intelligence: Docling,  |
+|                                            classification, embedding, LLM   |
+|                                            probe, gold-set training.        |
 +-----------------------------------------------------------------------------+
 

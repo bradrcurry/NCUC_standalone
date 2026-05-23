@@ -6,6 +6,7 @@ from pathlib import Path
 from typer.testing import CliRunner
 
 from duke_rates import cli
+from duke_rates.cli_commands import doc_intel as doc_intel_module
 from duke_rates.db.repository import Repository
 from duke_rates.db.sqlite import connect
 from duke_rates.historical.ncuc.document_classification_audit import (
@@ -281,9 +282,14 @@ def test_show_document_classification_audit_nc_cli(monkeypatch, tmp_path: Path) 
         "_bootstrap",
         lambda: (type("S", (), {"database_path": str(db_path)})(), Repository(db_path)),
     )
+    monkeypatch.setattr(
+        doc_intel_module,
+        "_bootstrap",
+        lambda: (type("S", (), {"database_path": str(db_path)})(), Repository(db_path)),
+    )
 
     runner = CliRunner()
-    result = runner.invoke(cli.app, ["show-document-classification-audit-nc", "--limit", "5"])
+    result = runner.invoke(cli.app, ["doc-intel", "show-document-classification-audit", "--limit", "5"])
 
     assert result.exit_code == 0
     assert "Document Classification Audit (NC)" in result.stdout
@@ -439,6 +445,11 @@ def test_show_parser_improvement_candidates_nc_cli(monkeypatch, tmp_path: Path) 
         "_bootstrap",
         lambda: (type("S", (), {"database_path": str(db_path)})(), Repository(db_path)),
     )
+    monkeypatch.setattr(
+        doc_intel_module,
+        "_bootstrap",
+        lambda: (type("S", (), {"database_path": str(db_path)})(), Repository(db_path)),
+    )
 
     runner = CliRunner()
     result = runner.invoke(cli.app, ["show-parser-improvement-candidates-nc", "--limit", "5"])
@@ -469,9 +480,14 @@ def test_show_unknown_routing_audit_nc_cli_prints_synthesized_profile(monkeypatc
         "_bootstrap",
         lambda: (type("S", (), {"database_path": str(db_path)})(), Repository(db_path)),
     )
+    monkeypatch.setattr(
+        doc_intel_module,
+        "_bootstrap",
+        lambda: (type("S", (), {"database_path": str(db_path)})(), Repository(db_path)),
+    )
 
     runner = CliRunner()
-    result = runner.invoke(cli.app, ["show-unknown-routing-audit-nc", "--limit", "5"])
+    result = runner.invoke(cli.app, ["doc-intel", "show-unknown-routing-audit", "--limit", "5"])
 
     assert result.exit_code == 0
     assert "candidate_profile=carolinas_prospective_rider" in result.stdout

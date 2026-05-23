@@ -14,6 +14,7 @@ import pytest
 from typer.testing import CliRunner
 
 from duke_rates.cli import app
+from duke_rates.cli_commands import doc_intel as doc_intel_module
 
 
 @pytest.fixture
@@ -121,6 +122,7 @@ def seeded_db(tmp_path, monkeypatch):
         return StubSettings(), None
 
     monkeypatch.setattr(cli_module, "_bootstrap", fake_bootstrap)
+    monkeypatch.setattr(doc_intel_module, "_bootstrap", fake_bootstrap)
     # Stub BulkExtractor methods so the text-sample enrichment doesn't try
     # to read real PDFs.
     from duke_rates.historical.ncuc.pipeline import bulk_extractor as be
@@ -139,7 +141,7 @@ def test_triage_includes_disagreements_skips_unanimous_and_singleton(seeded_db):
     """Only docs with >=2 classifiers AND >=2 distinct labels qualify."""
     runner = CliRunner()
     out = seeded_db / "triage.jsonl"
-    result = runner.invoke(app, ["triage-disagreements-nc", "--out", str(out)])
+    result = runner.invoke(app, ["doc-intel", "triage-disagreements", "--out", str(out)])
     assert result.exit_code == 0, result.output
 
     rows = [json.loads(line) for line in out.read_text().splitlines()]
@@ -156,7 +158,7 @@ def test_triage_priority_orders_underrepresented_first(seeded_db):
     well-represented (TARIFF_SHEET + TESTIMONY) → lowest priority."""
     runner = CliRunner()
     out = seeded_db / "triage_priority.jsonl"
-    result = runner.invoke(app, ["triage-disagreements-nc", "--out", str(out)])
+    result = runner.invoke(app, ["doc-intel", "triage-disagreements", "--out", str(out)])
     assert result.exit_code == 0
     rows = [json.loads(line) for line in out.read_text().splitlines()]
     ordered_ids = [r["hd_id"] for r in rows]
@@ -172,7 +174,7 @@ def test_triage_label_filter_restricts_to_specified_buckets(seeded_db):
     out = seeded_db / "triage_cl.jsonl"
     result = runner.invoke(
         app,
-        ["triage-disagreements-nc", "--out", str(out), "--label", "COVER_LETTER"],
+        ["doc-intel", "triage-disagreements", "--out", str(out), "--label", "COVER_LETTER"],
     )
     assert result.exit_code == 0, result.output
     rows = [json.loads(line) for line in out.read_text().splitlines()]
@@ -185,7 +187,7 @@ def test_triage_no_weight_falls_back_to_id_order(seeded_db):
     out = seeded_db / "triage_noweight.jsonl"
     result = runner.invoke(
         app,
-        ["triage-disagreements-nc", "--out", str(out), "--no-weight"],
+        ["doc-intel", "triage-disagreements", "--out", str(out), "--no-weight"],
     )
     assert result.exit_code == 0
     rows = [json.loads(line) for line in out.read_text().splitlines()]
@@ -197,7 +199,7 @@ def test_triage_row_carries_votes_majority_text_sample(seeded_db):
     """Each row must have the structured fields the labeling UI needs."""
     runner = CliRunner()
     out = seeded_db / "triage_schema.jsonl"
-    result = runner.invoke(app, ["triage-disagreements-nc", "--out", str(out)])
+    result = runner.invoke(app, ["doc-intel", "triage-disagreements", "--out", str(out)])
     assert result.exit_code == 0
     row = json.loads(out.read_text().splitlines()[0])
     for k in (

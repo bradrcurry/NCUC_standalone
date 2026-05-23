@@ -14,6 +14,7 @@ import pytest
 from typer.testing import CliRunner
 
 from duke_rates.cli import app
+from duke_rates.cli_commands import doc_intel as doc_intel_module
 
 
 @pytest.fixture
@@ -93,6 +94,7 @@ def seeded_db(tmp_path, monkeypatch):
         return StubSettings(), None
 
     monkeypatch.setattr(cli_module, "_bootstrap", fake_bootstrap)
+    monkeypatch.setattr(doc_intel_module, "_bootstrap", fake_bootstrap)
     return db_path
 
 
@@ -100,7 +102,7 @@ def test_seed_default_min_classifiers_seeds_unanimous_2plus(seeded_db):
     """At default min_classifiers=2, all three unanimous docs (hd=1, 2, 5)
     seed gold. hd=3 is disagreement, hd=4 has too few classifiers."""
     runner = CliRunner()
-    result = runner.invoke(app, ["seed-document-type-gold-nc", "--execute", "--json"])
+    result = runner.invoke(app, ["doc-intel", "seed-document-type-gold", "--execute", "--json"])
     assert result.exit_code == 0, result.output
     summary = json.loads(result.output)
     assert summary["seeded"] == 3
@@ -131,7 +133,7 @@ def test_seed_strict_min_classifiers_3_filters_to_three_way_agreement(seeded_db)
     classifiers agreeing) qualify. hd=2 (only 2 classifiers) drops out."""
     runner = CliRunner()
     result = runner.invoke(
-        app, ["seed-document-type-gold-nc", "--min-classifiers", "3", "--execute", "--json"]
+        app, ["doc-intel", "seed-document-type-gold", "--min-classifiers", "3", "--execute", "--json"]
     )
     assert result.exit_code == 0, result.output
     summary = json.loads(result.output)
@@ -143,12 +145,12 @@ def test_seed_is_idempotent_on_rerun(seeded_db):
     """Re-running the seeder should skip docs that already have an active
     gold row — no duplicate inserts."""
     runner = CliRunner()
-    result1 = runner.invoke(app, ["seed-document-type-gold-nc", "--execute", "--json"])
+    result1 = runner.invoke(app, ["doc-intel", "seed-document-type-gold", "--execute", "--json"])
     assert result1.exit_code == 0
     summary1 = json.loads(result1.output)
     assert summary1["seeded"] == 3
 
-    result2 = runner.invoke(app, ["seed-document-type-gold-nc", "--execute", "--json"])
+    result2 = runner.invoke(app, ["doc-intel", "seed-document-type-gold", "--execute", "--json"])
     assert result2.exit_code == 0
     summary2 = json.loads(result2.output)
     assert summary2["seeded"] == 0
@@ -163,7 +165,7 @@ def test_seed_exclude_classifier_recomputes_agreement(seeded_db):
     result = runner.invoke(
         app,
         [
-            "seed-document-type-gold-nc",
+            "doc-intel", "seed-document-type-gold",
             "--exclude-classifier", "rule_document_type_v1",
             "--execute", "--json",
         ],
@@ -182,7 +184,7 @@ def test_seed_exclude_classifier_recomputes_agreement(seeded_db):
 def test_dry_run_does_not_write(seeded_db):
     """Without --execute, the seeder must not insert any rows."""
     runner = CliRunner()
-    result = runner.invoke(app, ["seed-document-type-gold-nc", "--json"])
+    result = runner.invoke(app, ["doc-intel", "seed-document-type-gold", "--json"])
     assert result.exit_code == 0, result.output
     summary = json.loads(result.output)
     assert summary["executed"] is False
