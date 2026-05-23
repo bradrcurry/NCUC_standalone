@@ -1,6 +1,6 @@
 # CLI Refactor Plan — Typer Sub-Apps
 
-**Status:** In progress (1 of 10 phases complete)
+**Status:** ✅ Phases 0–9 complete (228 commands moved; `cli.py` 20,932 → 6,672 lines, 68% reduction)
 **Branch:** `refactor/cli-sub-apps`
 **Started:** 2026-05-12
 **Plan origin:** This document captures the in-flight refactor of `src/duke_rates/cli.py` (~19k lines, ~275 commands) into Typer sub-apps organized by domain.
@@ -111,3 +111,127 @@ After all phases:
 # GitNexus should now index cli.py in the main pass.
 pwsh scripts/update-gitnexus-index.ps1
 ```
+
+## Addendum — Methodology Lessons (Phases 1–9)
+
+These are the gotchas that bit us during execution. Future agents picking up Phase 10+ or doing a similar split should read this before writing any bulk-edit script.
+
+### 1. Helper-overlap delete ranges (Phase 5)
+
+Symptom: in lineage, `canonicalize-doc-families-nc` lived at lines 16659–16868, and `_apply_canonicalization` (a private helper used only by that command) lived at 16819–16868 — **inside** the command's range. My initial delete script listed both ranges and processed deletes high-to-low, double-deleting and overshooting.
+
+Rule: when a private helper is defined between a command's `@app.command` line and the next `@app.command` (or column-0 `def`), it's **already contained** in the command's extent. Don't add it as a separate delete range. Build ranges from a single boundary pass, never union ranges from independent scans.
+
+### 2. Interleaved helpers between commands (Phase 6)
+
+Symptom: in ncuc, several private helpers (`_pick_best_ncuc_docket_match`, `_print_ncuc_docket_documents`, `_classify_ncuc_access_failure`, `_build_parser_selection_audit_nc_report`, `_build_parser_improvement_candidates_nc_report`) sat between two `@app.command` decorators. My naive boundary detector ("body ends at the next `@app.command`") pulled all of them into the prior command's body.
+
+Rule: a command body ends at the first of:
+- the next `@app.command` line at column 0
+- the next `def` at column 0 (i.e. a sibling top-level function)
+
+And — when extracting — skip the *first* `def cmd_name(` line after the decorator (that's the command itself, not a foreign def).
+
+### 3. Bulk-rename argv form (Phase 6)
+
+Symptom: a sweep `data.replace('ncuc-portal-smoke-test', 'ncuc portal-smoke-test')` rewrote test argvs:
+
+```python
+runner.invoke(cli.app, ["ncuc-portal-smoke-test", ...])
+# became
+runner.invoke(cli.app, ["ncuc portal-smoke-test", ...])   # INVALID — single arg
+```
+
+Typer parses this as one literal arg, not two. The fix is to rewrite argv list elements specifically:
+
+```python
+re.sub(r'"(ncuc) ([a-z-]+)"', r'"\1", "\2"', src)
+```
+
+Rule: bulk command renames need *two* substitution passes — one for prose/suggestion strings (`"ncuc portal-smoke-test"`) and one for argv literals (`"ncuc", "portal-smoke-test"`). Don't conflate them.
+
+### 4. CRLF/LF mixing breaks line numbers (Phase 7)
+
+Symptom: a Python edit script that wrote `"\n".join(lines)` to a CRLF file produced a hybrid where 3 lines were LF-only. After that, `grep -n` and `text.split("\r\n")` disagreed by progressively-growing offsets, and subsequent line-range deletes hit wrong content.
+
+Rule: when programmatically editing Windows-CRLF source files, always normalize on write:
+
+```python
+text = text.replace("\r\n", "\n").replace("\n", "\r\n")
+```
+
+…or read/write in binary mode and never let Python's universal-newline translation touch the buffer.
+
+### 5. Prefix-overlap rename collisions + decorator self-rewrite (Phase 7)
+
+Two related hazards from running a flat `(old, new)` table through `str.replace`:
+
+**Prefix overlap.** Rule `('parse-bill', 'billing parse')` matched inside `parse-bill-relevant-progress-nc` (a Phase 8 command) and produced the nonsense `billing parse-relevant-progress-nc`. Sort renames longest-first, or anchor on word boundaries / quotes: `re.sub(r'"parse-bill"', '"billing", "parse"', src)`.
+
+**Decorator self-rewrite.** The bulk-rename also ran over the new sub-app module itself, turning `@billing_app.command("compare-tariff-rates")` into `@billing_app.command("billing compare-tariff-rates")`. Fix:
+
+```python
+re.compile(r'(@(billing|data)_app\.command\(")\2 ([^"]+)("\))').subn(r'\1\3\4', text)
+```
+
+Rule: bulk-rename scripts must exclude the new sub-app modules from their input set, *or* re-strip the group prefix from `@<group>_app.command("…")` decorators as a final cleanup pass.
+
+### 6. Multi-line def signatures and column-0 boundary detection (Phase 9)
+
+Symptom: in doc-intel, several commands had multi-line type-annotated signatures where the closing `) -> None:` sat at column 0:
+
+```python
+@app.command("foo")
+def cmd_foo(
+    arg1: str,
+    arg2: int,
+) -> None:
+    ...
+```
+
+My "stop at column-0 statement" heuristic treated `) -> None:` as a sibling top-level statement and truncated the body to ~13 lines (just the signature).
+
+Rule: regex/line-based boundary detection is fundamentally unreliable for Python. Switch to AST:
+
+```python
+import ast
+tree = ast.parse(text)
+for node in tree.body:
+    if isinstance(node, ast.FunctionDef) and _has_app_command_decorator(node):
+        start, end = node.lineno, node.end_lineno   # ast already knows
+```
+
+`node.end_lineno` gives the exact end including the body, regardless of signature formatting. We adopted this for Phase 9 and would use it from the start in any redo.
+
+### Recommended skeleton for future phases
+
+```python
+# 1. Parse with ast; collect (name, decorator_arg, start_line, end_line) for every command.
+# 2. Build delete ranges from a single ordered scan — no manual range unions.
+# 3. Extract command bodies + any helpers that sit BEFORE the first command
+#    (helpers between commands are inside the prior command's range; don't double-count).
+# 4. Write the new sub-app module with the right imports (smoke-import it; fix NameErrors).
+# 5. Apply renames as TWO passes:
+#       - argv literals:        '"<old>"'  →  '"<group>", "<sub>"'
+#       - prose/suggestions:    "<old>"   →  "<group> <sub>"
+#    Sort longest-first to avoid prefix overlap. Exclude the new sub-app file from the input.
+# 6. Delete from cli.py in a single high-to-low pass over the ranges from step 2.
+# 7. Normalize line endings on write.
+# 8. Snapshot test: tests/test_cli_command_surface.py asserts the full command tree
+#    against cli_command_surface.snapshot.txt. Update the snapshot in the same commit.
+```
+
+### Test infrastructure that paid off
+
+`tests/test_cli_command_surface.py` + `cli_command_surface.snapshot.txt` caught every accidental drop or rename. Strongly recommended for any future split — it converts "did I move every command?" from a vibes question into a single failing diff.
+
+### Pre-existing failures (baseline, unchanged by refactor)
+
+The 23 test failures observed at the end of each phase match `main` HEAD and are unrelated to the refactor. Clusters:
+
+- `tests/test_tariff_engine_live.py` — live tariff engine, depends on extracted data state.
+- `tests/test_ncuc_pipeline.py` — page miner / OCR reintegration tests.
+- `tests/test_historical_parser_profiles.py` — bulk extractor profile selection.
+- `tests/test_document_classification_audit.py`, `tests/test_seed_document_type_gold.py` — gold-set seeding pipeline.
+
+Don't get distracted chasing these during a refactor phase; compare against the HEAD baseline before assuming a regression.
