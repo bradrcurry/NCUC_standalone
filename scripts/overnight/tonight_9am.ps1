@@ -11,8 +11,8 @@
       Both run concurrently; Phase 2 starts once BOTH finish or deadline nears.
 
     Phase 2 — Reprocess newly unblocked docs
-      • enqueue-stale-reprocess-nc : queue docs whose Docling artifact just appeared
-      • process-reprocess-queue-nc : drain the queue (extracts charges from newly
+      • reprocess enqueue-stale-nc : queue docs whose Docling artifact just appeared
+      • reprocess process-queue-nc : drain the queue (extracts charges from newly
         processed docs using deterministic parser profiles)
       Also promotes the 41 pending LLM proposals at the start of this phase.
 
@@ -123,7 +123,7 @@ Write-Log ""
 
 # ── Housekeeping: clear stuck queues ────────────────────────────────────────
 Write-Log "=== Housekeeping: recover stale-running items ==="
-python -m duke_rates recover-stale-reprocess-nc `
+python -m duke_rates reprocess recover-stale-nc `
     --older-than-minutes 60 --limit 50 --execute 2>&1 |
     Select-Object -Last 4 | ForEach-Object { Write-Log "  $_" }
 python -m duke_rates reconcile-workflow-action-receipts-nc --limit 100 2>&1 |
@@ -241,7 +241,7 @@ while ($phase2Round -lt $phase2MaxRounds -and -not (Deadline-Near)) {
     Write-Log "--- Phase 2 round $phase2Round ---"
 
     # Enqueue stale (catches docs with new Docling artifacts since last run)
-    python -m duke_rates enqueue-stale-reprocess-nc `
+    python -m duke_rates reprocess enqueue-stale-nc `
         --limit $ReprocessLimit `
         --requested-by tonight_9am 2>&1 |
         Select-Object -Last 5 | ForEach-Object { Write-Log "  $_" }
@@ -255,7 +255,7 @@ while ($phase2Round -lt $phase2MaxRounds -and -not (Deadline-Near)) {
     }
 
     # Drain queue
-    python -m duke_rates process-reprocess-queue-nc `
+    python -m duke_rates reprocess process-queue-nc `
         --workers $ReprocessWorkers `
         --limit ($ReprocessLimit * 2) 2>&1 |
         Select-Object -Last 5 | ForEach-Object { Write-Log "  $_" }
@@ -270,7 +270,7 @@ Write-Log "--- Phase 2: profile-impact reprocess (generic_residential, unknown) 
 foreach ($profile in @("generic_residential", "unknown", "carolinas_flat_fee_rider")) {
     if (Deadline-Near) { break }
     Write-Log "  Enqueuing profile-impact: $profile"
-    python -m duke_rates enqueue-profile-impact-nc `
+    python -m duke_rates reprocess enqueue-profile-impact-nc `
         --parser-profile $profile `
         --limit 30 2>&1 |
         Select-Object -Last 3 | ForEach-Object { Write-Log "  $_" }
@@ -278,7 +278,7 @@ foreach ($profile in @("generic_residential", "unknown", "carolinas_flat_fee_rid
 $impactPending = Get-DbScalar "SELECT COUNT(*) FROM historical_reprocess_queue WHERE status='pending'"
 if ($impactPending -gt 0) {
     Write-Log "  Draining $impactPending profile-impact items..."
-    python -m duke_rates process-reprocess-queue-nc `
+    python -m duke_rates reprocess process-queue-nc `
         --workers $ReprocessWorkers `
         --limit ($impactPending + 20) 2>&1 |
         Select-Object -Last 5 | ForEach-Object { Write-Log "  $_" }

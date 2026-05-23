@@ -509,15 +509,15 @@ Planned additions:
 - correction summaries now track recurring correction categories such as
   charge-value, date, tariff-identity, and rate-structure fixes
 - targeted reprocessing support now exists through:
-  - `enqueue-reprocess-nc`
-  - `show-reprocess-queue-nc`
-  - `process-reprocess-queue-nc`
+  - `reprocess enqueue-nc`
+  - `reprocess show-queue-nc`
+  - `reprocess process-queue-nc`
 - stale-stage support now exists through:
-  - `show-stale-historical-nc`
-  - `enqueue-stale-reprocess-nc`
+  - `reprocess show-stale-historical-nc`
+  - `reprocess enqueue-stale-nc`
 - parser-profile impact support now exists through:
-  - `show-profile-impact-nc`
-  - `enqueue-profile-impact-nc`
+  - `reprocess show-profile-impact-nc`
+  - `reprocess enqueue-profile-impact-nc`
   - impact targeting now consults persisted candidate-profile reasons and
     document signals from the latest historical parse attempt
 - parser fallback sequencing now exists in the historical bulk extractor:

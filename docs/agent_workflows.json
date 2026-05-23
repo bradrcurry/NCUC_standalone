@@ -32,13 +32,13 @@
         },
         {
           "step_id": "reprocess_detail",
-          "tool_id": "show-reprocess-queue-nc",
+          "tool_id": "reprocess show-queue-nc",
           "purpose": "Inspect the current reprocess queue when targeted reruns are active.",
           "mode": "optional"
         },
         {
           "step_id": "stale_detail",
-          "tool_id": "show-stale-historical-nc",
+          "tool_id": "reprocess show-stale-historical-nc",
           "purpose": "Confirm stale-stage debt when stage freshness is the suspected issue.",
           "mode": "optional"
         },
@@ -368,25 +368,25 @@
       "steps": [
         {
           "step_id": "priority",
-          "tool_id": "show-reprocess-priority-nc",
+          "tool_id": "reprocess show-priority-nc",
           "purpose": "Rank the next highest-value reprocess targets.",
           "mode": "required"
         },
         {
           "step_id": "queue",
-          "tool_id": "enqueue-reprocess-nc",
+          "tool_id": "reprocess enqueue-nc",
           "purpose": "Queue targeted reruns using the supported filters.",
           "mode": "required"
         },
         {
           "step_id": "inspect_queue",
-          "tool_id": "show-reprocess-queue-nc",
+          "tool_id": "reprocess show-queue-nc",
           "purpose": "Verify the queued work before execution.",
           "mode": "required"
         },
         {
           "step_id": "run_queue",
-          "tool_id": "process-reprocess-queue-nc",
+          "tool_id": "reprocess process-queue-nc",
           "purpose": "Execute the queued repair pass.",
           "mode": "required"
         },
@@ -398,19 +398,19 @@
         },
         {
           "step_id": "profile_scope",
-          "tool_id": "show-profile-impact-nc",
+          "tool_id": "reprocess show-profile-impact-nc",
           "purpose": "Scope parser-profile reruns before queueing profile-specific work.",
           "mode": "optional"
         },
         {
           "step_id": "profile_queue",
-          "tool_id": "enqueue-profile-impact-nc",
+          "tool_id": "reprocess enqueue-profile-impact-nc",
           "purpose": "Queue reruns caused by a profile change.",
           "mode": "optional"
         },
         {
           "step_id": "stale_queue",
-          "tool_id": "enqueue-stale-reprocess-nc",
+          "tool_id": "reprocess enqueue-stale-nc",
           "purpose": "Queue specifically stale-stage reruns when that is the dominant issue.",
           "mode": "optional"
         }

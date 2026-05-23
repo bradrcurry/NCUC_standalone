@@ -38,8 +38,8 @@
       ],
       "next_tools": [
         "parse-review-summary",
-        "show-reprocess-queue-nc",
-        "show-stale-historical-nc",
+        "reprocess show-queue-nc",
+        "reprocess show-stale-historical-nc",
         "ocr show-queue-nc",
         "show-lineage-gaps-nc",
         "list-provisional-families"
@@ -67,9 +67,9 @@
       ],
       "prerequisites": [],
       "next_tools": [
-        "enqueue-reprocess-nc",
-        "show-reprocess-priority-nc",
-        "process-reprocess-queue-nc"
+        "reprocess enqueue-nc",
+        "reprocess show-priority-nc",
+        "reprocess process-queue-nc"
       ],
       "mutates_state": false,
       "docs": [
@@ -79,11 +79,11 @@
       ]
     },
     {
-      "tool_id": "show-reprocess-queue-nc",
+      "tool_id": "reprocess show-queue-nc",
       "surface": "cli",
       "status": "supported",
       "category": "inspect",
-      "command": "python -m duke_rates show-reprocess-queue-nc",
+      "command": "python -m duke_rates reprocess show-queue-nc",
       "goal": "Inspect the current targeted reprocess queue.",
       "use_when": [
         "Checking what is already queued before adding more work",
@@ -94,8 +94,8 @@
       ],
       "prerequisites": [],
       "next_tools": [
-        "show-reprocess-priority-nc",
-        "process-reprocess-queue-nc"
+        "reprocess show-priority-nc",
+        "reprocess process-queue-nc"
       ],
       "mutates_state": false,
       "docs": [
@@ -104,11 +104,11 @@
       ]
     },
     {
-      "tool_id": "show-reprocess-priority-nc",
+      "tool_id": "reprocess show-priority-nc",
       "surface": "cli",
       "status": "supported",
       "category": "diagnose",
-      "command": "python -m duke_rates show-reprocess-priority-nc",
+      "command": "python -m duke_rates reprocess show-priority-nc",
       "goal": "Rank NC documents that should be reprocessed based on queue, parse, stage, OCR, and linkage signals.",
       "use_when": [
         "Choosing the highest-value reprocess targets",
@@ -119,9 +119,9 @@
       ],
       "prerequisites": [],
       "next_tools": [
-        "enqueue-reprocess-nc",
-        "enqueue-stale-reprocess-nc",
-        "enqueue-profile-impact-nc"
+        "reprocess enqueue-nc",
+        "reprocess enqueue-stale-nc",
+        "reprocess enqueue-profile-impact-nc"
       ],
       "mutates_state": false,
       "docs": [
@@ -131,11 +131,11 @@
       ]
     },
     {
-      "tool_id": "show-stale-historical-nc",
+      "tool_id": "reprocess show-stale-historical-nc",
       "surface": "cli",
       "status": "supported",
       "category": "diagnose",
-      "command": "python -m duke_rates show-stale-historical-nc",
+      "command": "python -m duke_rates reprocess show-stale-historical-nc",
       "goal": "Show historical docs with stale or missing page/span stage artifacts.",
       "use_when": [
         "Investigating stage freshness issues",
@@ -146,8 +146,8 @@
       ],
       "prerequisites": [],
       "next_tools": [
-        "enqueue-stale-reprocess-nc",
-        "process-reprocess-queue-nc"
+        "reprocess enqueue-stale-nc",
+        "reprocess process-queue-nc"
       ],
       "mutates_state": false,
       "docs": [
@@ -553,7 +553,7 @@
       "next_tools": [
         "validate-extraction-nc",
         "parse-review-summary",
-        "show-reprocess-priority-nc"
+        "reprocess show-priority-nc"
       ],
       "mutates_state": true,
       "docs": [
@@ -581,7 +581,7 @@
       ],
       "next_tools": [
         "parse-review-summary",
-        "show-reprocess-priority-nc"
+        "reprocess show-priority-nc"
       ],
       "mutates_state": false,
       "docs": [
@@ -723,11 +723,11 @@
       ]
     },
     {
-      "tool_id": "enqueue-reprocess-nc",
+      "tool_id": "reprocess enqueue-nc",
       "surface": "cli",
       "status": "supported",
       "category": "repair",
-      "command": "python -m duke_rates enqueue-reprocess-nc",
+      "command": "python -m duke_rates reprocess enqueue-nc",
       "goal": "Add targeted historical documents to the reprocess queue using workflow-aware filters.",
       "use_when": [
         "The review backlog or extraction validation points to specific rerun candidates",
@@ -737,11 +737,11 @@
         "You have not inspected the current queue or priority signals"
       ],
       "prerequisites": [
-        "Prefer show-reprocess-priority-nc first when the next action is unclear"
+        "Prefer reprocess show-priority-nc first when the next action is unclear"
       ],
       "next_tools": [
-        "show-reprocess-queue-nc",
-        "process-reprocess-queue-nc"
+        "reprocess show-queue-nc",
+        "reprocess process-queue-nc"
       ],
       "mutates_state": true,
       "docs": [
@@ -750,11 +750,11 @@
       ]
     },
     {
-      "tool_id": "enqueue-stale-reprocess-nc",
+      "tool_id": "reprocess enqueue-stale-nc",
       "surface": "cli",
       "status": "supported",
       "category": "repair",
-      "command": "python -m duke_rates enqueue-stale-reprocess-nc",
+      "command": "python -m duke_rates reprocess enqueue-stale-nc",
       "goal": "Queue reprocessing specifically for stale or missing page/span stages.",
       "use_when": [
         "Stage artifacts are stale or absent and blocking extraction quality"
@@ -763,11 +763,11 @@
         "Reprocess priority is driven by profile or review issues instead"
       ],
       "prerequisites": [
-        "Confirm stale-stage debt with show-stale-historical-nc"
+        "Confirm stale-stage debt with reprocess show-stale-historical-nc"
       ],
       "next_tools": [
-        "show-reprocess-queue-nc",
-        "process-reprocess-queue-nc"
+        "reprocess show-queue-nc",
+        "reprocess process-queue-nc"
       ],
       "mutates_state": true,
       "docs": [
@@ -776,11 +776,11 @@
       ]
     },
     {
-      "tool_id": "show-profile-impact-nc",
+      "tool_id": "reprocess show-profile-impact-nc",
       "surface": "cli",
       "status": "supported",
       "category": "diagnose",
-      "command": "python -m duke_rates show-profile-impact-nc",
+      "command": "python -m duke_rates reprocess show-profile-impact-nc",
       "goal": "Estimate which documents would be affected by a specific parser profile change.",
       "use_when": [
         "Assessing blast radius before profile-driven reprocessing",
@@ -791,8 +791,8 @@
       ],
       "prerequisites": [],
       "next_tools": [
-        "enqueue-profile-impact-nc",
-        "process-reprocess-queue-nc"
+        "reprocess enqueue-profile-impact-nc",
+        "reprocess process-queue-nc"
       ],
       "mutates_state": false,
       "docs": [
@@ -801,11 +801,11 @@
       ]
     },
     {
-      "tool_id": "enqueue-profile-impact-nc",
+      "tool_id": "reprocess enqueue-profile-impact-nc",
       "surface": "cli",
       "status": "supported",
       "category": "repair",
-      "command": "python -m duke_rates enqueue-profile-impact-nc",
+      "command": "python -m duke_rates reprocess enqueue-profile-impact-nc",
       "goal": "Queue reprocessing for documents affected by a specific parser profile.",
       "use_when": [
         "A profile change needs targeted reruns"
@@ -814,11 +814,11 @@
         "You have not reviewed profile impact first"
       ],
       "prerequisites": [
-        "Prefer show-profile-impact-nc before mutating the queue"
+        "Prefer reprocess show-profile-impact-nc before mutating the queue"
       ],
       "next_tools": [
-        "show-reprocess-queue-nc",
-        "process-reprocess-queue-nc"
+        "reprocess show-queue-nc",
+        "reprocess process-queue-nc"
       ],
       "mutates_state": true,
       "docs": [
@@ -827,11 +827,11 @@
       ]
     },
     {
-      "tool_id": "process-reprocess-queue-nc",
+      "tool_id": "reprocess process-queue-nc",
       "surface": "cli",
       "status": "supported",
       "category": "repair",
-      "command": "python -m duke_rates process-reprocess-queue-nc",
+      "command": "python -m duke_rates reprocess process-queue-nc",
       "goal": "Process queued historical rework, including stage refresh and extraction reruns.",
       "use_when": [
         "The queue is populated and ready to run",
@@ -842,7 +842,7 @@
         "The task is only to inspect queue contents"
       ],
       "prerequisites": [
-        "Confirm queue contents with show-reprocess-queue-nc when the next action is uncertain"
+        "Confirm queue contents with reprocess show-queue-nc when the next action is uncertain"
       ],
       "next_tools": [
         "parse-review-summary",

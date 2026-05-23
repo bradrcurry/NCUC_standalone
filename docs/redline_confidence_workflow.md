@@ -25,8 +25,8 @@ These are the main operational commands for fixing bounded historical rows witho
 
 ```bash
 python -m duke_rates rebind-historical-page-range <hd-id> --start-page X --end-page Y --requeue
-python -m duke_rates enqueue-reprocess-nc --hd-id <hd-id>
-python -m duke_rates enqueue-reprocess-nc --from-needs-review
+python -m duke_rates reprocess enqueue-nc --hd-id <hd-id>
+python -m duke_rates reprocess enqueue-nc --from-needs-review
 python -m duke_rates clear-redline-fingerprint --hd-id <hd-id> --force
 python -m duke_rates retire-tariff-version --version-id <version-id> --execute
 ```

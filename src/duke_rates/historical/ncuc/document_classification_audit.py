@@ -443,7 +443,7 @@ def _synthesize_routing_profile(
     next_command = None
     if candidate_profile and synthesis_kind == "existing_profile":
         next_command = (
-            "python -m duke_rates enqueue-profile-impact-nc "
+            "python -m duke_rates reprocess enqueue-profile-impact-nc "
             f"--parser-profile {candidate_profile} --limit 25 --requested-by unknown_routing_audit"
         )
 

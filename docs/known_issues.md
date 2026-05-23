@@ -233,8 +233,8 @@ Open coverage caveats still worth tracking:
 **Immediate:**
 - Use queue-driven workflow summaries and the anomaly/inventory audits for the next cleanup pass:
   - `show-workflow-status-nc`
-  - `show-stale-historical-nc`
-  - `show-reprocess-queue-nc`
+  - `reprocess show-stale-historical-nc`
+  - `reprocess show-queue-nc`
   - `parse-review-summary`
 - Clean the remaining high-signal zero-charge historical rows from the late-session stale pass.
 - Decide whether `TD-DQ-007` remains an active debt item or should be downgraded to a known partial-coverage caveat.

@@ -157,7 +157,7 @@ Write-Both ""
 
 # ---- Recover stale-running reprocess rows once at the start ----
 Write-Both "=== Recovering stale-running reprocess rows ==="
-$staleRunning = & python -m duke_rates recover-stale-reprocess-nc `
+$staleRunning = & python -m duke_rates reprocess recover-stale-nc `
     --limit $ReprocessLimit `
     --older-than-minutes 240 `
     --requested-by overnight_backlog_drain `
@@ -189,10 +189,10 @@ $phaseOcr = {
 
 $phaseStale = {
     Write-Both "--- Phase: Stale reprocess ---"
-    & python -m duke_rates enqueue-stale-reprocess-nc `
+    & python -m duke_rates reprocess enqueue-stale-nc `
         --limit $ReprocessLimit `
         --requested-by overnight_backlog_drain 2>&1 | Select-Object -Last 5 | ForEach-Object { Write-Both "  $_" }
-    & python -m duke_rates process-reprocess-queue-nc `
+    & python -m duke_rates reprocess process-queue-nc `
         --workers $ReprocessWorkers `
         --limit ($ReprocessLimit * 2) 2>&1 | Select-Object -Last 5 | ForEach-Object { Write-Both "  $_" }
     # Cheap proxy: count pending+running items in historical_reprocess_queue

@@ -869,7 +869,7 @@ def acquire_and_cycle(
 
         # 3.5. DRAIN — close the loop on redirect-semantic actions.
         #
-        # Actions like ``enqueue-parser-improvement-reprocess-nc`` are
+        # Actions like ``reprocess enqueue-parser-improvement-nc`` are
         # "redirect" semantic: they populate ``historical_reprocess_queue``
         # but their own category in summary_counts doesn't shrink and
         # the outcome metrics (charges, evidence) don't move until
@@ -895,12 +895,12 @@ def acquire_and_cycle(
             # +14 charges + 2 versions in a cycle that timed out).
             drain_deadline = 1800
             _heartbeat(
-                f"  [4/5] DRAIN: process-reprocess-queue-nc --limit {drain_limit} "
+                f"  [4/5] DRAIN: reprocess process-queue-nc --limit {drain_limit} "
                 f"(consumes the queue our redirect actions just populated, deadline {drain_deadline}s)..."
             )
             drain_t0 = time.perf_counter()
             try:
-                # Use process-reprocess-queue-nc, NOT extract-rates-nc.
+                # Use `reprocess process-queue-nc`, NOT extract-rates-nc.
                 #
                 # The previous implementation called ``extract-rates-nc
                 # --limit 250`` -- but that walks the extractor's default
@@ -910,7 +910,7 @@ def acquire_and_cycle(
                 # the loop look "stuck". Other-agent feedback observed
                 # OL doc 2525 extracted 8+ times in one drain pass.
                 #
-                # process-reprocess-queue-nc consumes from the actual
+                # `reprocess process-queue-nc` consumes from the actual
                 # ``historical_reprocess_queue`` table -- the queue the
                 # redirect-action just enqueued. Each item is dequeued
                 # on success, so we never re-process the same item
@@ -919,7 +919,7 @@ def acquire_and_cycle(
                 drain_rc, drain_stderr = _run_subprocess_streaming(
                     [
                         sys.executable, "-m", "duke_rates",
-                        "process-reprocess-queue-nc",
+                        "reprocess", "process-queue-nc",
                         "--limit", str(drain_limit),
                         "--workers", "2",
                     ],
@@ -927,7 +927,7 @@ def acquire_and_cycle(
                     timeout_s=drain_deadline,
                 )
                 drain_result = {
-                    "command": "process-reprocess-queue-nc",
+                    "command": "reprocess process-queue-nc",
                     "limit": drain_limit,
                     "return_code": drain_rc,
                     "success": drain_rc == 0,
@@ -940,7 +940,7 @@ def acquire_and_cycle(
                 )
                 if drain_rc != 0:
                     logger.warning(
-                        "Drain stage process-reprocess-queue-nc exited %d: %s",
+                        "Drain stage `reprocess process-queue-nc` exited %d: %s",
                         drain_rc, drain_result["stderr_tail"][:200],
                     )
             except subprocess.TimeoutExpired:
@@ -951,7 +951,7 @@ def acquire_and_cycle(
                 # failure; the next cycle's measurement will reflect
                 # whatever did finish.
                 drain_result = {
-                    "command": "process-reprocess-queue-nc",
+                    "command": "reprocess process-queue-nc",
                     "limit": drain_limit,
                     "return_code": None,
                     "success": False,
@@ -966,7 +966,7 @@ def acquire_and_cycle(
                 )
             except Exception as exc:
                 drain_result = {
-                    "command": "process-reprocess-queue-nc",
+                    "command": "reprocess process-queue-nc",
                     "limit": drain_limit,
                     "return_code": None,
                     "success": False,

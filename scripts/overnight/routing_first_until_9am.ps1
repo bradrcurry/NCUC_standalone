@@ -121,7 +121,7 @@ function Get-CandidateProfilesFromAudit {
 }
 
 function Test-ReprocessQueueEmpty {
-    $pending = & python -m duke_rates show-reprocess-queue-nc --status pending --limit 1 2>&1
+    $pending = & python -m duke_rates reprocess show-queue-nc --status pending --limit 1 2>&1
     $text = ($pending | Out-String).Trim()
     return [string]::IsNullOrWhiteSpace($text)
 }
@@ -153,8 +153,8 @@ foreach ($item in ($baselineAudit.summary.recommended_action_counts | Select-Obj
 Write-Both ""
 
 Write-Both "=== Reconcile stale queue items ==="
-& python -m duke_rates show-stale-reprocess-nc --limit 10 2>&1 | ForEach-Object { Write-Both "  $_" }
-& python -m duke_rates recover-stale-reprocess-nc `
+& python -m duke_rates reprocess show-stale-nc --limit 10 2>&1 | ForEach-Object { Write-Both "  $_" }
+& python -m duke_rates reprocess recover-stale-nc `
     --limit $ReprocessLimit `
     --older-than-minutes 240 `
     --requested-by routing_first_until_9am `
@@ -181,7 +181,7 @@ while ((Get-Date) -lt $deadline) {
                 continue
             }
             Write-Both "  enqueue_profile_impact=$profile"
-            & python -m duke_rates enqueue-profile-impact-nc `
+            & python -m duke_rates reprocess enqueue-profile-impact-nc `
                 --parser-profile $profile `
                 --limit $ImpactLimit `
                 --requested-by routing_first_until_9am 2>&1 |
@@ -192,7 +192,7 @@ while ((Get-Date) -lt $deadline) {
     }
 
     Write-Both "  reprocess_drain"
-    & python -m duke_rates process-reprocess-queue-nc `
+    & python -m duke_rates reprocess process-queue-nc `
         --workers $ReprocessWorkers `
         --limit $ReprocessLimit `
         --until-empty 2>&1 | Select-Object -Last 12 | ForEach-Object { Write-Both "    $_" }

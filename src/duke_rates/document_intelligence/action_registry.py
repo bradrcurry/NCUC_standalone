@@ -106,7 +106,7 @@ ACTION_REGISTRY: dict[str, CorrectiveAction] = {
     "stale_artifacts": CorrectiveAction(
         finding_category="stale_artifacts",
         label="Stale Artifacts",
-        cli_command="enqueue-stale-reprocess-nc",
+        cli_command="reprocess enqueue-stale-nc",
         args=["--execute", "--limit", "100"],
         estimated_impact="Enqueues documents with missing/outdated artifacts for reprocessing.",
         risk="low",
@@ -122,7 +122,7 @@ ACTION_REGISTRY: dict[str, CorrectiveAction] = {
     "low_quality_parses": CorrectiveAction(
         finding_category="low_quality_parses",
         label="Low Quality Parses",
-        cli_command="enqueue-parser-improvement-reprocess-nc",
+        cli_command="reprocess enqueue-parser-improvement-nc",
         args=["--execute", "--limit", "50"],
         estimated_impact="Re-enqueues documents where extraction produced zero or few charges.",
         risk="low",
@@ -442,7 +442,7 @@ def run_cycle(
         )
         try:
             proc = subprocess.run(
-                [sys.executable, "-m", "duke_rates", cmd, *args],
+                [sys.executable, "-m", "duke_rates", *cmd.split(), *args],
                 capture_output=True,
                 text=True,
                 timeout=600,

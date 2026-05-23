@@ -193,9 +193,9 @@ def _priority_band(priority_score: int) -> str:
 
 def _command_hint(recommended_action: str, parser_profile: str, rider_family_key: str) -> str:
     if recommended_action == "identify_or_link_missing_rider_documents":
-        return f"python -m duke_rates show-profile-impact-nc --parser-profile {parser_profile} --family-key {rider_family_key}"
+        return f"python -m duke_rates reprocess show-profile-impact-nc --parser-profile {parser_profile} --family-key {rider_family_key}"
     return (
-        f"python -m duke_rates enqueue-profile-impact-nc --parser-profile {parser_profile} "
+        f"python -m duke_rates reprocess enqueue-profile-impact-nc --parser-profile {parser_profile} "
         f"--family-key {rider_family_key}"
     )
 

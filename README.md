@@ -231,8 +231,8 @@ Session orientation:
 ```powershell
 python -m duke_rates show-workflow-status-nc
 python -m duke_rates parse-review-summary
-python -m duke_rates show-reprocess-queue-nc
-python -m duke_rates show-stale-historical-nc
+python -m duke_rates reprocess show-queue-nc
+python -m duke_rates reprocess show-stale-historical-nc
 python -m duke_rates ocr show-queue-nc
 ```
 
@@ -251,8 +251,8 @@ Manual registration and targeted repair:
 ```powershell
 python -m duke_rates add-historical-document-nc --help
 python -m duke_rates rebind-historical-page-range --help
-python -m duke_rates enqueue-reprocess-nc --hd-id <historical_document_id>
-python -m duke_rates process-reprocess-queue-nc
+python -m duke_rates reprocess enqueue-nc --hd-id <historical_document_id>
+python -m duke_rates reprocess process-queue-nc
 ```
 
 Lineage, provenance, and fingerprint audit:

@@ -73,9 +73,9 @@ Touch:
 
 Use:
 - `parse-review-summary`
-- `enqueue-reprocess-nc`
-- `show-stale-historical-nc`
-- `show-profile-impact-nc`
+- `reprocess enqueue-nc`
+- `reprocess show-stale-historical-nc`
+- `reprocess show-profile-impact-nc`
 
 ### Lineage or family-link audit
 

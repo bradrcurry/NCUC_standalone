@@ -232,7 +232,7 @@ Current behavior:
 - `parse-review-queue` and `parse-review-summary` now count only the latest
   parse attempt per `source_pdf + page range + parser_stage`, which makes the
   backlog operational instead of cumulative over every historical rerun.
-- `enqueue-reprocess-nc --family-key ...` and other targeted requeue filters
+- `reprocess enqueue-nc --family-key ...` and other targeted requeue filters
   now apply the filter before truncating to the queue limit. Use a high limit
   for family-specific cleanup passes, but the command no longer silently misses
   a family just because unrelated weak rows ranked ahead of it.
@@ -245,9 +245,9 @@ Current behavior:
 Use these instead of rerunning everything:
 
 ```powershell
-python -m duke_rates enqueue-reprocess-nc
-python -m duke_rates show-reprocess-queue-nc
-python -m duke_rates process-reprocess-queue-nc
+python -m duke_rates reprocess enqueue-nc
+python -m duke_rates reprocess show-queue-nc
+python -m duke_rates reprocess process-queue-nc
 ```
 
 Current behavior:
@@ -274,17 +274,17 @@ Current behavior:
 Use these when the pipeline changed and you want selective invalidation:
 
 ```powershell
-python -m duke_rates show-stale-historical-nc
-python -m duke_rates enqueue-stale-reprocess-nc
-python -m duke_rates show-profile-impact-nc --parser-profile progress_residential_tou
-python -m duke_rates enqueue-profile-impact-nc --parser-profile progress_residential_tou
-python -m duke_rates show-profile-impact-nc --parser-profile progress_billing_adjustments
-python -m duke_rates enqueue-profile-impact-nc --parser-profile progress_billing_adjustments
+python -m duke_rates reprocess show-stale-historical-nc
+python -m duke_rates reprocess enqueue-stale-nc
+python -m duke_rates reprocess show-profile-impact-nc --parser-profile progress_residential_tou
+python -m duke_rates reprocess enqueue-profile-impact-nc --parser-profile progress_residential_tou
+python -m duke_rates reprocess show-profile-impact-nc --parser-profile progress_billing_adjustments
+python -m duke_rates reprocess enqueue-profile-impact-nc --parser-profile progress_billing_adjustments
 ```
 
 Practical note:
 
-- `show-stale-historical-nc` is now expected to fall to `0` after a successful
+- `reprocess show-stale-historical-nc` is now expected to fall to `0` after a successful
   stale reprocess cycle under the current stage versions
 - if it does not, treat that as a real bug or unsupported stage dependency, not
   as expected noise
@@ -327,7 +327,7 @@ Triage surfaces:
   want backend/outcome cohort reporting
 - `process-ocr-queue-nc --workers N` is safe for bounded parallel local OCR;
   do not generalize that concurrency to authenticated portal/search work
-- `process-reprocess-queue-nc --workers N` is also safe for bounded parallel
+- `reprocess process-queue-nc --workers N` is also safe for bounded parallel
   local reparsing; keep remote portal/search steps sequential
 
 ### Document-intelligence normalization path
@@ -487,8 +487,8 @@ Preferred repair sequence:
 python scripts/maintenance/audit_historical_family_mismatches.py --family-key nc-progress-leaf-601
 python scripts/maintenance/audit_historical_family_mismatches.py --family-key nc-progress-leaf-601 --apply-purge
 python -m duke_rates mine-ncuc-pipeline --record-id 1245
-python -m duke_rates enqueue-profile-impact-nc --parser-profile progress_rider_adjustment_matrix --family-key nc-progress-leaf-600
-python -m duke_rates process-reprocess-queue-nc --limit 5
+python -m duke_rates reprocess enqueue-profile-impact-nc --parser-profile progress_rider_adjustment_matrix --family-key nc-progress-leaf-600
+python -m duke_rates reprocess process-queue-nc --limit 5
 ```
 
 ### Reference-only historical documents
@@ -514,9 +514,9 @@ Use profile-impact reprocessing if you change that parser or its selection
 rules:
 
 ```powershell
-python -m duke_rates show-profile-impact-nc --parser-profile progress_billing_adjustments
-python -m duke_rates enqueue-profile-impact-nc --parser-profile progress_billing_adjustments
-python -m duke_rates process-reprocess-queue-nc
+python -m duke_rates reprocess show-profile-impact-nc --parser-profile progress_billing_adjustments
+python -m duke_rates reprocess enqueue-profile-impact-nc --parser-profile progress_billing_adjustments
+python -m duke_rates reprocess process-queue-nc
 ```
 
 Current practical note:
@@ -563,10 +563,10 @@ The most useful commands are:
 ```powershell
 python -m duke_rates parse-review-summary
 python -m duke_rates parse-review-queue
-python -m duke_rates show-reprocess-queue-nc
-python -m duke_rates show-reprocess-priority-nc
-python -m duke_rates show-stale-historical-nc
-python -m duke_rates show-profile-impact-nc --parser-profile progress_residential_tou
+python -m duke_rates reprocess show-queue-nc
+python -m duke_rates reprocess show-priority-nc
+python -m duke_rates reprocess show-stale-historical-nc
+python -m duke_rates reprocess show-profile-impact-nc --parser-profile progress_residential_tou
 python -m duke_rates ocr show-queue-nc
 python -m duke_rates list-provisional-families
 python -m duke_rates list-historical-only-families
@@ -797,9 +797,9 @@ without sweeping the full archive.
 
 ```powershell
 python -m duke_rates parse-review-summary
-python -m duke_rates enqueue-reprocess-nc
-python -m duke_rates show-reprocess-queue-nc
-python -m duke_rates process-reprocess-queue-nc
+python -m duke_rates reprocess enqueue-nc
+python -m duke_rates reprocess show-queue-nc
+python -m duke_rates reprocess process-queue-nc
 python -m duke_rates parse-review-summary
 ```
 
@@ -816,17 +816,17 @@ Use this after changing OCR/page/span/parser stages or specific parser profiles.
 For stage-version changes:
 
 ```powershell
-python -m duke_rates show-stale-historical-nc
-python -m duke_rates enqueue-stale-reprocess-nc
-python -m duke_rates process-reprocess-queue-nc
+python -m duke_rates reprocess show-stale-historical-nc
+python -m duke_rates reprocess enqueue-stale-nc
+python -m duke_rates reprocess process-queue-nc
 ```
 
 For parser-profile-specific changes:
 
 ```powershell
-python -m duke_rates show-profile-impact-nc --parser-profile carolinas_rider_adjustment_matrix
-python -m duke_rates enqueue-profile-impact-nc --parser-profile carolinas_rider_adjustment_matrix
-python -m duke_rates process-reprocess-queue-nc
+python -m duke_rates reprocess show-profile-impact-nc --parser-profile carolinas_rider_adjustment_matrix
+python -m duke_rates reprocess enqueue-profile-impact-nc --parser-profile carolinas_rider_adjustment_matrix
+python -m duke_rates reprocess process-queue-nc
 ```
 
 When to use:
@@ -844,8 +844,8 @@ Use this when many records are `OCR_REQUIRED` or low-text.
 python -m duke_rates ocr enqueue-nc
 python -m duke_rates ocr show-queue-nc
 python -m duke_rates ocr process-queue-nc
-python -m duke_rates enqueue-stale-reprocess-nc
-python -m duke_rates process-reprocess-queue-nc
+python -m duke_rates reprocess enqueue-stale-nc
+python -m duke_rates reprocess process-queue-nc
 ```
 
 Important:
@@ -862,9 +862,9 @@ Suggested sequence:
 
 ```powershell
 python -m duke_rates parse-review-summary
-python -m duke_rates show-profile-impact-nc --parser-profile progress_rider_adjustment_matrix
-python -m duke_rates enqueue-profile-impact-nc --parser-profile progress_rider_adjustment_matrix --family-key nc-progress-leaf-600
-python -m duke_rates process-reprocess-queue-nc
+python -m duke_rates reprocess show-profile-impact-nc --parser-profile progress_rider_adjustment_matrix
+python -m duke_rates reprocess enqueue-profile-impact-nc --parser-profile progress_rider_adjustment_matrix --family-key nc-progress-leaf-600
+python -m duke_rates reprocess process-queue-nc
 ```
 
 Then inspect:
@@ -904,12 +904,12 @@ Use `enqueue-reprocess-*` when:
 - the goal is to improve existing weak results
 - a parser or rule change landed
 
-Use `show-stale-historical-nc` / `enqueue-stale-reprocess-nc` when:
+Use `reprocess show-stale-historical-nc` / `reprocess enqueue-stale-nc` when:
 
 - a stage version changed
 - OCR/page/span/parser artifacts may now be outdated
 
-Use `show-profile-impact-nc` / `enqueue-profile-impact-nc` when:
+Use `reprocess show-profile-impact-nc` / `reprocess enqueue-profile-impact-nc` when:
 
 - a specific parser profile changed
 - you want the narrowest possible rerun scope

@@ -279,8 +279,8 @@ def main():
             print("       --start-page <n> --end-page <n> \\")
             print("       --effective-start YYYY-MM-DD")
             print("  4. python -m duke_rates bootstrap-missing-versions-nc")
-            print("  5. python -m duke_rates enqueue-reprocess-nc --hd-id <id>")
-            print("  6. python -m duke_rates process-reprocess-queue-nc")
+            print("  5. python -m duke_rates reprocess enqueue-nc --hd-id <id>")
+            print("  6. python -m duke_rates reprocess process-queue-nc")
 
     finally:
         close_authenticated_context(pw, ctx)

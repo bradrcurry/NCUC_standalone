@@ -65,8 +65,8 @@ Interpretation:
 - `null_effective_start=413` is not a bootstrap problem. Run
   `remediate-nc-missing-doc-effective-start`, then re-check promotion blockers.
 - The 5 `reprocess_running` rows are stale rows from 2026-05-01 through
-  2026-05-04. Inspect with `show-stale-reprocess-nc` and recover them with
-  `recover-stale-reprocess-nc --execute` if they are still stuck.
+  2026-05-04. Inspect with `reprocess show-stale-nc` and recover them with
+  `reprocess recover-stale-nc --execute` if they are still stuck.
 - LLM extraction is currently idle because the remaining stage-1 candidate pool
   is dominated by parser/routing blockers (`regex_gap`, `wrong_profile`) rather
   than rows ready for extraction.
@@ -111,9 +111,9 @@ python -m duke_rates show-workflow-status-nc
 python -m duke_rates show-workflow-next-actions-nc
 python -m duke_rates ocr show-remediation-candidates-nc
 python -m duke_rates parse-review-summary
-python -m duke_rates show-reprocess-queue-nc
-python -m duke_rates show-stale-reprocess-nc
-python -m duke_rates show-stale-historical-nc
+python -m duke_rates reprocess show-queue-nc
+python -m duke_rates reprocess show-stale-nc
+python -m duke_rates reprocess show-stale-historical-nc
 ```
 
 For document intelligence state (Phases 2.5–6.5):
@@ -210,7 +210,7 @@ lane, follow up with `process-docling-batch --ocr-remediation --source historica
 For other priorities:
 ```powershell
 python -m duke_rates bootstrap-missing-versions-nc && python -m duke_rates extract-rates-nc
-python -m duke_rates enqueue-stale-reprocess-nc --limit 23
+python -m duke_rates reprocess enqueue-stale-nc --limit 23
 ```
 
 If reports need regeneration:
@@ -259,7 +259,7 @@ Run this before a long overnight loop:
 python -m duke_rates show-workflow-status-nc
 python -m duke_rates ocr show-queue-nc --status all --limit 10
 python -m duke_rates ocr show-remediation-candidates-nc --limit 25
-python -m duke_rates show-reprocess-queue-nc --status running --limit 10
+python -m duke_rates reprocess show-queue-nc --status running --limit 10
 python -m duke_rates show-llm-row-effective-status-nc --json
 python -m duke_rates propose-llm-charge-promotions-nc --limit 10000 --refresh-existing --json
 ```
@@ -333,13 +333,13 @@ python -m duke_rates show-near-miss-profiles-nc --limit 25
 python -m duke_rates show-unknown-routing-audit-nc --limit 25
 
 # 1. Requeue routing-impact docs and drain the queue
-python -m duke_rates show-stale-reprocess-nc --limit 10
-python -m duke_rates recover-stale-reprocess-nc --limit 10 --older-than-minutes 240 --execute
-python -m duke_rates enqueue-profile-impact-nc --parser-profile progress_single_value_rider --limit 25 --requested-by targeted_llm_blocker_loop
-python -m duke_rates enqueue-profile-impact-nc --parser-profile generic_residential --limit 25 --requested-by targeted_llm_blocker_loop
-python -m duke_rates enqueue-profile-impact-nc --parser-profile zero_charge_program --limit 25 --requested-by targeted_llm_blocker_loop
-python -m duke_rates enqueue-profile-impact-nc --parser-profile progress_current_leaf_bridge --limit 25 --requested-by targeted_llm_blocker_loop
-python -m duke_rates process-reprocess-queue-nc --limit 25 --workers 4
+python -m duke_rates reprocess show-stale-nc --limit 10
+python -m duke_rates reprocess recover-stale-nc --limit 10 --older-than-minutes 240 --execute
+python -m duke_rates reprocess enqueue-profile-impact-nc --parser-profile progress_single_value_rider --limit 25 --requested-by targeted_llm_blocker_loop
+python -m duke_rates reprocess enqueue-profile-impact-nc --parser-profile generic_residential --limit 25 --requested-by targeted_llm_blocker_loop
+python -m duke_rates reprocess enqueue-profile-impact-nc --parser-profile zero_charge_program --limit 25 --requested-by targeted_llm_blocker_loop
+python -m duke_rates reprocess enqueue-profile-impact-nc --parser-profile progress_current_leaf_bridge --limit 25 --requested-by targeted_llm_blocker_loop
+python -m duke_rates reprocess process-queue-nc --limit 25 --workers 4
 
 # 2. Extract from the two highest-value near-miss profiles
 python -m duke_rates run-overnight-parse-improvement-nc --task-kind extract_staged --max-runtime-minutes 15 --limit 10 --resume --auto-rediagnose-unknown --profile progress_single_value_rider
@@ -390,7 +390,7 @@ This loop:
 - enqueues impacted docs for synthesized existing profiles such as
   `progress_recovery_rider`, `zero_charge_program`, and
   `progress_billing_adjustments`
-- drains `process-reprocess-queue-nc --until-empty`
+- drains `reprocess process-queue-nc --until-empty`
 - re-measures workflow status after each cycle
 
 Stop early if:
@@ -447,7 +447,7 @@ Morning checks:
 python -m duke_rates show-workflow-status-nc
 python -m duke_rates ocr show-remediation-candidates-nc --limit 25
 python -m duke_rates ocr report-benchmark-nc --limit 50
-python -m duke_rates show-reprocess-queue-nc --status running --limit 10
+python -m duke_rates reprocess show-queue-nc --status running --limit 10
 python -m duke_rates propose-llm-charge-promotions-nc --limit 10000 --refresh-existing --json
 python -m duke_rates promote-llm-charge-proposals-nc --limit 500 --json
 ```

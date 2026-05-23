@@ -7,6 +7,7 @@ from typer.testing import CliRunner
 
 from duke_rates import cli
 from duke_rates.cli_commands import ocr as ocr_module
+from duke_rates.cli_commands import reprocess as reprocess_module
 from duke_rates.db.sqlite import connect
 
 
@@ -316,7 +317,7 @@ def test_process_reprocess_queue_nc_workers(monkeypatch, tmp_path) -> None:
     state = {"calls": 0}
     lock = threading.Lock()
 
-    def _fake_process(_database_path):
+    def _fake_process(_database_path, force_clear=False):
         with lock:
             state["calls"] += 1
             call_no = state["calls"]
@@ -325,11 +326,12 @@ def test_process_reprocess_queue_nc_workers(monkeypatch, tmp_path) -> None:
         return {"processed": False, "completed": 0, "failed": 0}
 
     monkeypatch.setattr(cli, "_process_single_reprocess_queue_item", _fake_process)
+    monkeypatch.setattr(reprocess_module, "_process_single_reprocess_queue_item", _fake_process)
 
     runner = CliRunner()
     result = runner.invoke(
         cli.app,
-        ["process-reprocess-queue-nc", "--limit", "3", "--workers", "2"],
+        ["reprocess", "process-queue-nc", "--limit", "3", "--workers", "2"],
     )
 
     assert result.exit_code == 0

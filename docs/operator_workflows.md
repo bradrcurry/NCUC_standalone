@@ -60,8 +60,8 @@ If you need detail after the compact summary, follow with:
 
 ```powershell
 python -m duke_rates parse-review-summary
-python -m duke_rates show-reprocess-queue-nc
-python -m duke_rates show-stale-historical-nc
+python -m duke_rates reprocess show-queue-nc
+python -m duke_rates reprocess show-stale-historical-nc
 python -m duke_rates ocr show-queue-nc
 ```
 
@@ -224,8 +224,8 @@ python -m duke_rates add-historical-document-nc `
   --leaf-no 501
 
 python -m duke_rates bootstrap-missing-versions-nc
-python -m duke_rates enqueue-reprocess-nc --hd-id <historical_document_id> --priority 90
-python -m duke_rates process-reprocess-queue-nc
+python -m duke_rates reprocess enqueue-nc --hd-id <historical_document_id> --priority 90
+python -m duke_rates reprocess process-queue-nc
 ```
 
 Notes:
@@ -478,7 +478,7 @@ Outcome:
 - `show-parser-improvement-candidates-nc` is the compressed handoff surface for
   weaker agents: it ranks family-level parser/routing work and prints the next
   sanctioned command to run for each family
-- `enqueue-parser-improvement-reprocess-nc` drains the easy-win cohort
+- `reprocess enqueue-parser-improvement-nc` drains the easy-win cohort
   (`recommended_action=enqueue_reprocess`) without per-family hd-id wrangling.
   These are documents flagged with usable text plus a working profile but no
   latest pipeline run — pure operational debt, no parser changes required.
@@ -494,7 +494,7 @@ OCR triage note:
   ranked list
 - `show-workflow-capabilities-nc` is the policy surface for sanctioned
   concurrency:
-  `ocr process-queue-nc` and `process-reprocess-queue-nc` are local-only
+  `ocr process-queue-nc` and `reprocess process-queue-nc` are local-only
   `workers_allowed`; portal/search and queue-enqueue actions remain
   `sequential_only`
 - `execute-workflow-next-action-nc --limit N --workers M` now honors that
@@ -536,17 +536,17 @@ Read:
 Run:
 
 ```powershell
-python -m duke_rates enqueue-reprocess-nc --from-needs-review
-python -m duke_rates enqueue-reprocess-nc --hd-id 401 --hd-id 2595
-python -m duke_rates show-reprocess-queue-nc
-python -m duke_rates show-reprocess-priority-nc
-python -m duke_rates process-reprocess-queue-nc
-python -m duke_rates show-profile-impact-nc --parser-profile progress_residential_tou
-python -m duke_rates enqueue-profile-impact-nc --parser-profile progress_residential_tou
+python -m duke_rates reprocess enqueue-nc --from-needs-review
+python -m duke_rates reprocess enqueue-nc --hd-id 401 --hd-id 2595
+python -m duke_rates reprocess show-queue-nc
+python -m duke_rates reprocess show-priority-nc
+python -m duke_rates reprocess process-queue-nc
+python -m duke_rates reprocess show-profile-impact-nc --parser-profile progress_residential_tou
+python -m duke_rates reprocess enqueue-profile-impact-nc --parser-profile progress_residential_tou
 ```
 
 Notes:
-- `enqueue-reprocess-nc` no longer pulls the needs-review backlog by default.
+- `reprocess enqueue-nc` no longer pulls the needs-review backlog by default.
 - Use `--from-needs-review` for backlog-driven reparsing.
 - Use `--hd-id` for surgical reruns after a parser/profile fix.
 
@@ -663,7 +663,7 @@ The registry's `rank_candidates()` calls the static `_score_profile()` function 
 
 ### Profile Impact CLI: Stale Profile List
 
-`show-profile-impact-nc --parser-profile <name>` validates against `_PROFILE_IMPACT_RULES` in `profile_dependencies.py`. Profiles added to `parser_profiles.py` but not listed here will be rejected as “Unknown parser profile.”
+`reprocess show-profile-impact-nc --parser-profile <name>` validates against `_PROFILE_IMPACT_RULES` in `profile_dependencies.py`. Profiles added to `parser_profiles.py` but not listed here will be rejected as “Unknown parser profile.”
 
 **When adding a profile**, add a `ParserProfileImpactRule` entry to `_PROFILE_IMPACT_RULES` in `profile_dependencies.py`.
 
@@ -671,11 +671,11 @@ The registry's `rank_candidates()` calls the static `_score_profile()` function 
 
 Documents in stage `ocr_normalization_version` complete OCR normalization but do NOT auto-advance to extraction. They sit in a “stale” state requiring manual reprocess enqueue. This is why `stale_historical` can contain docs that were OCR'd but not extracted.
 
-**Workaround:** Run `enqueue-stale-reprocess-nc` regularly after OCR remediation batches to advance normalized docs through extraction.
+**Workaround:** Run `reprocess enqueue-stale-nc` regularly after OCR remediation batches to advance normalized docs through extraction.
 
 ### Enqueue Reprocess: --family-key Is Not Standalone
 
-`enqueue-reprocess-nc --family-key X` does NOT enqueue all docs for family X. The `--family-key` flag is only a filter modifier for `--from-needs-review`. To extract a specific family directly, use `extract-rates-nc --family-key X`.
+`reprocess enqueue-nc --family-key X` does NOT enqueue all docs for family X. The `--family-key` flag is only a filter modifier for `--from-needs-review`. To extract a specific family directly, use `extract-rates-nc --family-key X`.
 
 ### Extraction Family Filter: OR Semantics
 

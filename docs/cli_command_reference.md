@@ -44,8 +44,8 @@ Agent operating rules:
 If you are unsure which command family to use, choose in this order:
 
 1. `show-workflow-status-nc`
-2. If the problem is weak parses or reruns: `parse-review-summary`, `show-reprocess-queue-nc`, `show-reprocess-priority-nc`
-3. If the problem is stale artifacts: `show-stale-historical-nc`
+2. If the problem is weak parses or reruns: `parse-review-summary`, `reprocess show-queue-nc`, `reprocess show-priority-nc`
+3. If the problem is stale artifacts: `reprocess show-stale-historical-nc`
 4. If the problem is lineage or version linkage: `show-lineage-gaps-nc`, `validate-lineage-nc`
 5. If the problem is document identity, routing, or reuse confidence: `show-provenance-gaps-nc`, `show-fingerprint-coverage-nc`, `show-document-classification-audit-nc`
 6. If the problem is missing clean historical PDFs: `search-nc-missing-clean-docs`, `run-nc-missing-doc-workflow`
@@ -81,8 +81,8 @@ Run these at the start of any session to understand current pipeline state:
 ```bash
 python -m duke_rates show-workflow-status-nc      # compact NC workflow summary
 python -m duke_rates parse-review-summary          # review backlog overview (legacy vs new pipeline)
-python -m duke_rates show-reprocess-queue-nc       # pending reprocess jobs
-python -m duke_rates show-stale-historical-nc      # historical docs with stale or missing stage
+python -m duke_rates reprocess show-queue-nc       # pending reprocess jobs
+python -m duke_rates reprocess show-stale-historical-nc      # historical docs with stale or missing stage
 python -m duke_rates ocr show-queue-nc             # OCR queue depth (sub-app)
 python -m duke_rates list-provisional-families --state NC   # provisional families needing review
 ```
@@ -289,8 +289,8 @@ surface over inventing your own command mapping.
 |---|---|
 | `extract-rates-nc` | **Primary extraction command.** Run all parser profiles against linked historical documents. Produces `tariff_charges` rows. Documents flagged `is_redline_candidate=1` in `document_fingerprints` are skipped early with outcome `skipped_redline`. Float-conversion errors (e.g. OCR-malformed `'1.631.88'`) are caught per-profile, recorded as `parse_warnings` in run metadata, and let the fallback chain continue instead of failing the whole document. Each run also persists `top_candidates` (top 5 ranked profiles + scores + reasons) so `unknown` outcomes show what almost matched. A family-vs-content mismatch heuristic detects rider docs whose page-bounded slice landed on a different schedule's text and classifies them as `skipped_reference` (currently covers EDPR, BPMPROSPECTIVERIDER, BPMPPTTRUEUP). Schedule NL and HP are classified as `skipped_formula` due to per-customer formula structure. Schedule S extracts via the `carolinas_residential_flat` profile. Pass `--progress` for a periodic stderr status line during long runs (`--progress-interval N` controls cadence, default 30s). |
 | `validate-extraction-nc` | Validate extraction results for anomalies |
-| `show-profile-impact-nc` | Show which documents would be affected by a specific parser profile |
-| `enqueue-profile-impact-nc` | Enqueue reprocessing for documents matching a parser profile |
+| `reprocess show-profile-impact-nc` | Show which documents would be affected by a specific parser profile |
+| `reprocess enqueue-profile-impact-nc` | Enqueue reprocessing for documents matching a parser profile |
 | `parse-review-summary` | Summary of parse review backlog with top profiles, families, and outstanding needs-review root causes (shows legacy `tiered_ingest` separately) |
 | `show-parser-selection-audit-nc` | Fast audit of latest parser-profile selection outcomes: generic-profile reliance, fallback transitions, and weak/empty latest runs |
 | `show-parser-improvement-candidates-nc` | Merge parser-selection and routing signals into one ranked family-level parser-improvement queue with a suggested next command |
@@ -420,15 +420,15 @@ For scanned PDFs that pdfplumber cannot read — routes them through Docling or 
 
 | Command | What it does |
 |---|---|
-| `enqueue-reprocess-nc` | Add documents to the reprocess queue based on stale/weak parse signal |
-| `enqueue-stale-reprocess-nc` | Add specifically stale documents to reprocess queue. Supports `--dry-run` for preview (default is `--execute` for backward compatibility) |
-| `enqueue-parser-improvement-reprocess-nc` | Enqueue the easy-win parser-improvement cohort (`recommended_action=enqueue_reprocess` from `show-parser-improvement-candidates-nc`). These already have usable text + a working profile but no latest run. Defaults to `--dry-run`; pass `--execute` to enqueue. Add `--process` to drain the queue immediately |
-| `show-reprocess-queue-nc` | Show pending reprocess queue |
-| `show-stale-reprocess-nc` | Show running reprocess queue rows that appear stale based on `started_at` age |
-| `show-reprocess-priority-nc` | Rank queued NC reprocess work by impact category with explanations |
-| `process-reprocess-queue-nc` | Execute the reprocess queue. Supports `--workers N` for bounded parallel local reparsing and `--until-empty` to drain the queue in one invocation. Default `--limit` is 500. Does not apply to portal/search workflows |
-| `recover-stale-reprocess-nc` | Return stale running reprocess rows to `pending` so they can be claimed again. Defaults to `--dry-run`; pass `--execute` to mutate queue state |
-| `show-stale-historical-nc` | Show historical docs with stale extraction stage |
+| `reprocess enqueue-nc` | Add documents to the reprocess queue based on stale/weak parse signal |
+| `reprocess enqueue-stale-nc` | Add specifically stale documents to reprocess queue. Supports `--dry-run` for preview (default is `--execute` for backward compatibility) |
+| `reprocess enqueue-parser-improvement-nc` | Enqueue the easy-win parser-improvement cohort (`recommended_action=enqueue_reprocess` from `show-parser-improvement-candidates-nc`). These already have usable text + a working profile but no latest run. Defaults to `--dry-run`; pass `--execute` to enqueue. Add `--process` to drain the queue immediately |
+| `reprocess show-queue-nc` | Show pending reprocess queue |
+| `reprocess show-stale-nc` | Show running reprocess queue rows that appear stale based on `started_at` age |
+| `reprocess show-priority-nc` | Rank queued NC reprocess work by impact category with explanations |
+| `reprocess process-queue-nc` | Execute the reprocess queue. Supports `--workers N` for bounded parallel local reparsing and `--until-empty` to drain the queue in one invocation. Default `--limit` is 500. Does not apply to portal/search workflows |
+| `reprocess recover-stale-nc` | Return stale running reprocess rows to `pending` so they can be claimed again. Defaults to `--dry-run`; pass `--execute` to mutate queue state |
+| `reprocess show-stale-historical-nc` | Show historical docs with stale extraction stage |
 
 ---
 
@@ -873,13 +873,13 @@ python -m duke_rates show-near-miss-profiles-nc --limit 25
 python -m duke_rates show-unknown-routing-audit-nc --limit 25
 
 # Routing-impact enqueue and queue drain
-python -m duke_rates show-stale-reprocess-nc --limit 10
-python -m duke_rates recover-stale-reprocess-nc --limit 10 --older-than-minutes 240 --execute
-python -m duke_rates enqueue-profile-impact-nc --parser-profile progress_single_value_rider --limit 25 --requested-by targeted_llm_blocker_loop
-python -m duke_rates enqueue-profile-impact-nc --parser-profile generic_residential --limit 25 --requested-by targeted_llm_blocker_loop
-python -m duke_rates enqueue-profile-impact-nc --parser-profile zero_charge_program --limit 25 --requested-by targeted_llm_blocker_loop
-python -m duke_rates enqueue-profile-impact-nc --parser-profile progress_current_leaf_bridge --limit 25 --requested-by targeted_llm_blocker_loop
-python -m duke_rates process-reprocess-queue-nc --limit 25 --workers 4
+python -m duke_rates reprocess show-stale-nc --limit 10
+python -m duke_rates reprocess recover-stale-nc --limit 10 --older-than-minutes 240 --execute
+python -m duke_rates reprocess enqueue-profile-impact-nc --parser-profile progress_single_value_rider --limit 25 --requested-by targeted_llm_blocker_loop
+python -m duke_rates reprocess enqueue-profile-impact-nc --parser-profile generic_residential --limit 25 --requested-by targeted_llm_blocker_loop
+python -m duke_rates reprocess enqueue-profile-impact-nc --parser-profile zero_charge_program --limit 25 --requested-by targeted_llm_blocker_loop
+python -m duke_rates reprocess enqueue-profile-impact-nc --parser-profile progress_current_leaf_bridge --limit 25 --requested-by targeted_llm_blocker_loop
+python -m duke_rates reprocess process-queue-nc --limit 25 --workers 4
 
 # Extraction passes
 python -m duke_rates run-overnight-parse-improvement-nc --task-kind extract_staged --max-runtime-minutes 15 --limit 10 --resume --auto-rediagnose-unknown --profile progress_single_value_rider
@@ -921,7 +921,7 @@ pwsh scripts\overnight\routing_first_until_9am.ps1 -DeadlineTime "09:00"
 This loop:
 - reads `show-unknown-routing-audit-nc --json` each cycle
 - enqueues profile-impact work for synthesized existing-profile candidates
-- drains `process-reprocess-queue-nc --until-empty`
+- drains `reprocess process-queue-nc --until-empty`
 - re-checks workflow status before the next cycle
 
 Use this instead of the OCR-heavy backlog drain when the main bottleneck is
@@ -952,7 +952,7 @@ Preflight:
 python -m duke_rates show-workflow-status-nc
 python -m duke_rates ocr show-queue-nc --status all --limit 10
 python -m duke_rates ocr show-remediation-candidates-nc --limit 25
-python -m duke_rates show-reprocess-queue-nc --status running --limit 10
+python -m duke_rates reprocess show-queue-nc --status running --limit 10
 python -m duke_rates propose-llm-charge-promotions-nc --limit 10000 --refresh-existing --json
 ```
 
@@ -962,7 +962,7 @@ Morning readout:
 python -m duke_rates show-workflow-status-nc
 python -m duke_rates ocr report-benchmark-nc --limit 50
 python -m duke_rates ocr show-remediation-candidates-nc --limit 25
-python -m duke_rates show-reprocess-queue-nc --status running --limit 10
+python -m duke_rates reprocess show-queue-nc --status running --limit 10
 python -m duke_rates promote-llm-charge-proposals-nc --limit 500 --json
 ```
 
@@ -1054,7 +1054,7 @@ Most commands support these patterns:
 --limit N              # cap output or processing count
 --all-downloaded       # process all pending downloads (ncuc-import-pipeline)
 --auto-parse           # parse immediately after download (tariff-update)
---parser-profile NAME  # target a specific profile (enqueue-profile-impact-nc)
+--parser-profile NAME  # target a specific profile (reprocess enqueue-profile-impact-nc)
 ```
 
 ---
@@ -1070,7 +1070,7 @@ Implemented: `show-fingerprint-coverage-nc`
 
 ### P2 — Ranked Reprocess Priority
 
-Implemented: `show-reprocess-priority-nc`
+Implemented: `reprocess show-priority-nc`
 
 ### P3 — Provisional Family Auto-Scoring
 
@@ -1157,8 +1157,8 @@ python -m duke_rates backfill-content-hash-nc --dry-run
 python -m duke_rates backfill-content-hash-nc --execute
 
 # 2. Enqueue and process stale docs (regenerates span artifacts with classification)
-python -m duke_rates enqueue-stale-reprocess-nc --limit 200
-python -m duke_rates process-reprocess-queue-nc --limit 200
+python -m duke_rates reprocess enqueue-stale-nc --limit 200
+python -m duke_rates reprocess process-queue-nc --limit 200
 
 # 3. Backfill evidence from fresh span artifacts
 python -m duke_rates backfill-evidence-nc --dry-run

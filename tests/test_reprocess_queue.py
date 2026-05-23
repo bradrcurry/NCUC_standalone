@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 from typer.testing import CliRunner
 
 from duke_rates import cli
+from duke_rates.cli_commands import reprocess as reprocess_module
 from duke_rates.db.reprocess import (
     claim_next_historical_reprocess,
     complete_historical_reprocess,
@@ -340,11 +341,16 @@ def test_enqueue_reprocess_cli_hd_id_does_not_pull_needs_review_by_default(tmp_p
         "_bootstrap",
         lambda: (SimpleNamespace(database_path=str(db_path)), None),
     )
+    monkeypatch.setattr(
+        reprocess_module,
+        "_bootstrap",
+        lambda: (SimpleNamespace(database_path=str(db_path)), None),
+    )
     runner = CliRunner()
 
     result = runner.invoke(
         cli.app,
-        ["enqueue-reprocess-nc", "--hd-id", str(target_historical_id), "--requested-by", "test-suite"],
+        ["reprocess", "enqueue-nc", "--hd-id", str(target_historical_id), "--requested-by", "test-suite"],
     )
 
     assert result.exit_code == 0
@@ -410,13 +416,18 @@ def test_show_reprocess_queue_cli_tolerates_non_console_source_pdf(tmp_path, mon
         lambda: (SimpleNamespace(database_path=str(db_path)), None),
     )
     monkeypatch.setattr(
+        reprocess_module,
+        "_bootstrap",
+        lambda: (SimpleNamespace(database_path=str(db_path)), None),
+    )
+    monkeypatch.setattr(
         cli,
         "sys",
         SimpleNamespace(stdout=SimpleNamespace(encoding="cp1252")),
     )
     runner = CliRunner()
 
-    result = runner.invoke(cli.app, ["show-reprocess-queue-nc", "--status", "all", "--limit", "10"])
+    result = runner.invoke(cli.app, ["reprocess", "show-queue-nc", "--status", "all", "--limit", "10"])
 
     assert result.exit_code == 0
     assert "manual_recheck" in result.stdout
@@ -564,13 +575,18 @@ def test_recover_stale_reprocess_cli_requeues_stale_running_rows(tmp_path, monke
         "_bootstrap",
         lambda: (SimpleNamespace(database_path=str(db_path)), None),
     )
+    monkeypatch.setattr(
+        reprocess_module,
+        "_bootstrap",
+        lambda: (SimpleNamespace(database_path=str(db_path)), None),
+    )
     runner = CliRunner()
 
-    dry_run = runner.invoke(cli.app, ["recover-stale-reprocess-nc", "--limit", "10"])
+    dry_run = runner.invoke(cli.app, ["reprocess", "recover-stale-nc", "--limit", "10"])
     assert dry_run.exit_code == 0
     assert "dry_run" in dry_run.stdout
 
-    execute = runner.invoke(cli.app, ["recover-stale-reprocess-nc", "--limit", "10", "--execute"])
+    execute = runner.invoke(cli.app, ["reprocess", "recover-stale-nc", "--limit", "10", "--execute"])
     assert execute.exit_code == 0
     assert "execute" in execute.stdout
 
@@ -591,6 +607,11 @@ def test_add_historical_document_nc_cli_registers_bounded_slice(tmp_path, monkey
 
     monkeypatch.setattr(
         cli,
+        "_bootstrap",
+        lambda: (SimpleNamespace(database_path=str(db_path)), cli.Repository(db_path)),
+    )
+    monkeypatch.setattr(
+        reprocess_module,
         "_bootstrap",
         lambda: (SimpleNamespace(database_path=str(db_path)), cli.Repository(db_path)),
     )
@@ -967,6 +988,11 @@ def test_process_reprocess_queue_bootstraps_missing_tariff_version(tmp_path, mon
         "_bootstrap",
         lambda: (SimpleNamespace(database_path=db_path), None),
     )
+    monkeypatch.setattr(
+        reprocess_module,
+        "_bootstrap",
+        lambda: (SimpleNamespace(database_path=db_path), None),
+    )
 
     def _fake_process_document(self, doc: dict) -> tuple[int, str, int, str, str | None]:
         return int(doc["id"]), str(doc["family_key"]), 0, "parsed", None
@@ -1029,6 +1055,15 @@ def test_refresh_historical_artifacts_for_reprocess_rebuilds_page_and_span_cache
         ),
     )
     monkeypatch.setattr(
+        reprocess_module,
+        "triage_pdf",
+        lambda _path: SimpleNamespace(
+            route_recommendation=PipelineRoute.TEXT_PARSE,
+            ocr_confidence_score=0.0,
+            gpu_ocr_candidate=False,
+        ),
+    )
+    monkeypatch.setattr(
         cli,
         "mine_document_pages",
         lambda _path: [
@@ -1041,7 +1076,31 @@ def test_refresh_historical_artifacts_for_reprocess_rebuilds_page_and_span_cache
         ],
     )
     monkeypatch.setattr(
+        reprocess_module,
+        "mine_document_pages",
+        lambda _path: [
+            PageEvidence(
+                page_number=1,
+                text_length=42,
+                text_content="Schedule RES Customer Charge $14.00 per month",
+                has_schedule_heading=True,
+            )
+        ],
+    )
+    monkeypatch.setattr(
         cli,
+        "segment_document",
+        lambda pages, parent_discovery_id=None: [
+            TariffSpan(
+                start_page=1,
+                end_page=1,
+                doc_type="tariff",
+                confidence=0.9,
+            )
+        ],
+    )
+    monkeypatch.setattr(
+        reprocess_module,
         "segment_document",
         lambda pages, parent_discovery_id=None: [
             TariffSpan(
@@ -1190,7 +1249,27 @@ def test_refresh_historical_artifacts_for_reprocess_reacts_to_ocr_normalization_
         ),
     )
     monkeypatch.setattr(
+        reprocess_module,
+        "triage_pdf",
+        lambda _path: SimpleNamespace(
+            route_recommendation=PipelineRoute.OCR_REQUIRED,
+            confidence_score=0.9,
+            ocr_confidence_score=0.95,
+            native_text_quality_score=0.1,
+            reading_order_risk_score=0.0,
+            gpu_ocr_candidate=False,
+            table_mode_candidate="scanned_text",
+            document_archetype_candidate="scanned_bundle",
+            native_text_backend="pymupdf",
+        ),
+    )
+    monkeypatch.setattr(
         cli,
+        "extract_ocr_document_pages",
+        lambda _path: [PageEvidence(page_number=1, text_length=8, text_content="OCR text")],
+    )
+    monkeypatch.setattr(
+        reprocess_module,
         "extract_ocr_document_pages",
         lambda _path: [PageEvidence(page_number=1, text_length=8, text_content="OCR text")],
     )
@@ -1207,7 +1286,24 @@ def test_refresh_historical_artifacts_for_reprocess_reacts_to_ocr_normalization_
         },
     )
     monkeypatch.setattr(
+        reprocess_module,
+        "load_ocr_sidecar_payload",
+        lambda _path: {
+            "backend": "ocrmypdf_tesseract",
+            "backend_version": "backend-v",
+            "ocr_normalization_version": OCR_NORMALIZATION_VERSION,
+            "page_count": 1,
+            "metadata": {"attempted_backends": ["ocrmypdf_tesseract"]},
+            "pages": [{"page_number": 1, "text_length": 8, "text_content": "OCR text"}],
+        },
+    )
+    monkeypatch.setattr(
         cli,
+        "segment_document",
+        lambda pages, parent_discovery_id=None: [TariffSpan(start_page=1, end_page=1, doc_type="tariff")],
+    )
+    monkeypatch.setattr(
+        reprocess_module,
         "segment_document",
         lambda pages, parent_discovery_id=None: [TariffSpan(start_page=1, end_page=1, doc_type="tariff")],
     )

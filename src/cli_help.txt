@@ -166,36 +166,6 @@
 |                                                   docs that have a          |
 |                                                   date+path but no version  |
 |                                                   link.                     |
-| enqueue-reprocess-nc                              Enqueue targeted          |
-|                                                   historical documents for  |
-|                                                   reparsing.                |
-| enqueue-parser-improvement-reprocess-nc           Enqueue the easy-win      |
-|                                                   parser-improvement cohort |
-|                                                   (recommended_action=enqu… |
-| show-reprocess-queue-nc                           Show the targeted         |
-|                                                   historical reprocess      |
-|                                                   queue.                    |
-| show-reprocess-priority-nc                        Show ranked historical    |
-|                                                   reprocess priorities with |
-|                                                   impact explanations.      |
-| show-stale-historical-nc                          Show historical documents |
-|                                                   whose cached stages are   |
-|                                                   stale vs current          |
-|                                                   versions.                 |
-| enqueue-stale-reprocess-nc                        Queue historical          |
-|                                                   documents whose cached    |
-|                                                   stages are stale.         |
-| show-profile-impact-nc                            Show historical documents |
-|                                                   targeted by               |
-|                                                   parser-profile dependency |
-|                                                   rules.                    |
-| enqueue-profile-impact-nc                         Queue historical          |
-|                                                   documents targeted by     |
-|                                                   parser-profile dependency |
-|                                                   rules.                    |
-| process-reprocess-queue-nc                        Process pending           |
-|                                                   historical reparse queue  |
-|                                                   items.                    |
 | calculate-bill                                    Calculate a bill from     |
 |                                                   tariff_charges tables     |
 |                                                   (Phase 4a engine).        |
@@ -245,6 +215,10 @@
 |                                                   historical workflow       |
 |                                                   status summary for        |
 |                                                   session orientation.      |
+| recommend-overnight-lane-nc                       Recommend which overnight |
+|                                                   loop to run based on      |
+|                                                   current NC workflow       |
+|                                                   state.                    |
 | show-workflow-next-actions-nc                     Show ranked next actions  |
 |                                                   across OCR, reprocess,    |
 |                                                   and parser workflow       |
@@ -824,6 +798,14 @@
 |                                                   missing download URLs and |
 |                                                   try to recover ViewFile   |
 |                                                   links.                    |
+| normalize-nc-effective-dates                      Normalize malformed       |
+|                                                   effective_start /         |
+|                                                   effective_end values in   |
+|                                                   historical_documents.     |
+| remediate-nc-null-effective-dates                 Remediate null            |
+|                                                   effective_start on        |
+|                                                   historical_documents via  |
+|                                                   multi-pass strategy.      |
 | remediate-nc-missing-doc-effective-start          Re-open deferred imported |
 |                                                   historical docs blocked   |
 |                                                   on missing                |
@@ -883,6 +865,39 @@
 | audit-tariff-null-scan                            Batch coverage scan for   |
 |                                                   all rate schedules of a   |
 |                                                   state/company.            |
+| audit-cross-attributed-charges-nc                 Find tariff_charges       |
+|                                                   polluted by the           |
+|                                                   family-specific ->        |
+|                                                   generic_residential       |
+|                                                   fallback.                 |
+| audit-document-type-classifications-nc            Audit document_type       |
+|                                                   classifier agreement and  |
+|                                                   (optionally) export a     |
+|                                                   gold set.                 |
+| seed-document-type-gold-nc                        Seed document_type_gold   |
+|                                                   from classifier           |
+|                                                   agreement.                |
+| train-document-type-baseline-nc                   Stream D baseline: TF-IDF |
+|                                                   + LogisticRegression on   |
+|                                                   document_type_gold.       |
+| audit-stale-gold-nc                               Find document_type_gold   |
+|                                                   rows where the v2         |
+|                                                   classifier now disagrees. |
+| audit-bundle-metadata-mismatch-nc                 Find docs where v2's      |
+|                                                   content classification    |
+|                                                   disagrees with the        |
+|                                                   importer's family_key     |
+|                                                   tag.                      |
+| promote-high-confidence-subset-nc                 Promote subset-agreement  |
+|                                                   docs to                   |
+|                                                   document_type_gold.       |
+| triage-disagreements-nc                           Export                    |
+|                                                   classifier-disagreement   |
+|                                                   docs as a labeling JSONL  |
+|                                                   queue.                    |
+| classify-documents-v2-nc                          Run rule_document_type_v2 |
+|                                                   against NC docs and       |
+|                                                   compare with v1.          |
 | audit-rider-map                                   Show the static rider     |
 |                                                   map: which riders apply   |
 |                                                   to which schedules.       |
@@ -934,5 +949,9 @@
 |                                                   remediation, batch        |
 |                                                   processing, and           |
 |                                                   benchmarks.               |
+| reprocess                                         Historical reprocess      |
+|                                                   queue management, stale   |
+|                                                   recovery, and queue       |
+|                                                   drain.                    |
 +-----------------------------------------------------------------------------+
 
