@@ -12,6 +12,8 @@ from pathlib import Path
 
 import typer
 
+from duke_rates.billing.calculators import UsageInput
+from duke_rates.billing.usage_io import read_usage_file
 from duke_rates.config import get_settings
 from duke_rates.db.repository import Repository
 from duke_rates.logging_config import configure_logging
@@ -36,6 +38,13 @@ def _bootstrap():
     settings = get_settings()
     configure_logging(settings.log_level)
     return settings, Repository(settings.database_path)
+
+
+def _read_usage_file(path: Path) -> UsageInput:
+    try:
+        return read_usage_file(path)
+    except ValueError as exc:
+        raise typer.BadParameter(str(exc)) from exc
 
 
 def _count_rows(

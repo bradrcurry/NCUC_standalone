@@ -329,8 +329,8 @@ The app now loads from the cached canonical CSV by default and exposes:
 ### Parse actual bills and validate billing accuracy
 
 ```powershell
-duke-rates parse-bills "..\version_3\Actual Duke Bills"
-duke-rates derive-bill-observations
+duke-rates billing parse-batch "..\version_3\Actual Duke Bills"
+duke-rates billing derive-observations
 python scripts/exports/export_actual_bill_accuracy.py
 ```
 

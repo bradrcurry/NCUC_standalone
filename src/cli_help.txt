@@ -62,23 +62,6 @@
 |                                                   docs that have a          |
 |                                                   date+path but no version  |
 |                                                   link.                     |
-| calculate-bill                                    Calculate a bill from     |
-|                                                   tariff_charges tables     |
-|                                                   (Phase 4a engine).        |
-| compare-tariff-rates                              Compare bill amounts      |
-|                                                   across rate schedules for |
-|                                                   given usage.              |
-| estimate-bill                                                               |
-| compare-rates                                                               |
-| parse-bill                                                                  |
-| parse-bills                                                                 |
-| list-bills                                                                  |
-| show-bill                                                                   |
-| derive-bill-observations                                                    |
-| list-bill-observations                                                      |
-| list-observed-component-history-progress-nc                                 |
-| show-observed-component-history-progress-nc                                 |
-| reconcile-bill-progress-nc                                                  |
 | review-queue                                      Legacy current-document   |
 |                                                   parse queue; prefer       |
 |                                                   parse-review-queue for    |
@@ -398,16 +381,7 @@
 | preview-openei-history-progress-nc                                          |
 | recover-openei-history-progress-nc                                          |
 | probe-archive-today-progress-nc                                             |
-| lookup-openei-rates                                                         |
-| build-openei-export                                                         |
-| export-urdb                                       Export tariff data to     |
-|                                                   URDB (OpenEI Utility Rate |
-|                                                   Database) JSON format.    |
 | mcp                                                                         |
-| compare-version-rates                             Compare rate charges      |
-|                                                   between two tariff        |
-|                                                   versions of the same      |
-|                                                   family.                   |
 | report-database-intelligence-nc                   Run deterministic corpus  |
 |                                                   analytics across the NCUC |
 |                                                   database.                 |
@@ -441,33 +415,6 @@
 | cleanup-nc-residential-history                    Preview or apply cleanup  |
 |                                                   for noisy residential NC  |
 |                                                   history rows.             |
-| bill-calculator                                   Reconstruct a Duke Energy |
-|                                                   NC bill for any rate      |
-|                                                   schedule and usage        |
-|                                                   period.                   |
-| compare-schedules                                 Compare estimated bills   |
-|                                                   across multiple Duke NC   |
-|                                                   rate schedules.           |
-| load-eia-rates                                    Load EIA Form 861 state   |
-|                                                   average retail            |
-|                                                   electricity rates into    |
-|                                                   the database.             |
-| nc-rate-context                                   Show NC average retail    |
-|                                                   electricity rate vs.      |
-|                                                   Southeast neighbors and   |
-|                                                   US average.               |
-| eia-backfill                                      Fetch full EIA historical |
-|                                                   data for all states       |
-|                                                   (one-time backfill).      |
-| eia-update                                        Incrementally update EIA  |
-|                                                   tables with the latest    |
-|                                                   data.                     |
-| eia-state-price                                   Show EIA retail price     |
-|                                                   history for a state.      |
-| eia-national-comparison                           Show national price       |
-|                                                   comparison: cheapest,     |
-|                                                   most expensive, and NC    |
-|                                                   context.                  |
 | nc-redline-portal-queue                           Show NCUC dockets found   |
 |                                                   in redline crossrefs that |
 |                                                   have not yet been fetched |
@@ -575,5 +522,12 @@
 | ncuc                                              NCUC                      |
 |                                                   portal/search/wayback/do… |
 |                                                   pipeline.                 |
+| billing                                           Bill calculation,         |
+|                                                   parsing, estimation,      |
+|                                                   comparison, and           |
+|                                                   reconciliation.           |
+| data                                              External rate-data        |
+|                                                   sources: EIA API v2,      |
+|                                                   OpenEI, URDB.             |
 +-----------------------------------------------------------------------------+
 

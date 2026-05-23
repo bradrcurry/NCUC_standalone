@@ -534,20 +534,20 @@ Structured multi-stage search for documents on external portals.
 
 | Command | What it does |
 |---|---|
-| `calculate-bill` | Calculate a bill for a usage profile + tariff combination |
-| `estimate-bill` | Estimate a bill (less precise than calculate-bill) |
-| `compare-rates` | Compare rates across two tariff versions |
-| `compare-tariff-rates` | Compare charges across tariff families |
-| `compare-schedules` | Compare rate schedules side-by-side |
-| `compare-version-rates` | Compare two specific version IDs |
+| `billing calculate` | Calculate a bill for a usage profile + tariff combination |
+| `billing estimate` | Estimate a bill (less precise than billing calculate) |
+| `billing compare-rates` | Compare rates across two tariff versions |
+| `billing compare-tariff-rates` | Compare charges across tariff families |
+| `billing compare-schedules` | Compare rate schedules side-by-side |
+| `billing compare-version-rates` | Compare two specific version IDs |
 | `test-bill-reconstruction-nc` | Test bill reconstruction accuracy against actual bills |
-| `reconcile-bill-progress-nc` | Reconcile a bill against DEP rate data |
-| `parse-bill` | Parse a single bill document (ESPI/Green Button or PDF) |
-| `parse-bills` | Parse a batch of bills |
-| `list-bills` | List parsed bills |
-| `show-bill` | Show detail on a parsed bill |
-| `bill-calculator` | Interactive bill calculator |
-| `nc-rate-context` | Show NC-specific rate context for a given date |
+| `billing reconcile-progress-nc` | Reconcile a bill against DEP rate data |
+| `billing parse` | Parse a single bill document (ESPI/Green Button or PDF) |
+| `billing parse-batch` | Parse a batch of bills |
+| `billing list` | List parsed bills |
+| `billing show` | Show detail on a parsed bill |
+| `billing calculator` | Interactive bill calculator |
+| `data nc-rate-context` | Show NC-specific rate context for a given date |
 
 ---
 
@@ -555,10 +555,10 @@ Structured multi-stage search for documents on external portals.
 
 | Command | What it does |
 |---|---|
-| `derive-bill-observations` | Extract structured observations from parsed bills |
-| `list-bill-observations` | List bill observations |
-| `list-observed-component-history-progress-nc` | Component history derived from bill observations |
-| `show-observed-component-history-progress-nc` | Detail for a specific component |
+| `billing derive-observations` | Extract structured observations from parsed bills |
+| `billing list-observations` | List bill observations |
+| `billing list-observed-component-history-progress-nc` | Component history derived from bill observations |
+| `billing show-observed-component-history-progress-nc` | Detail for a specific component |
 
 ---
 
@@ -578,11 +578,11 @@ Structured multi-stage search for documents on external portals.
 
 | Command | What it does |
 |---|---|
-| `eia-backfill` | Backfill EIA state electricity price history |
-| `eia-update` | Incremental EIA data update |
-| `eia-state-price` | Look up EIA state average price |
-| `eia-national-comparison` | Compare NC rates against national EIA averages |
-| `load-eia-rates` | Load EIA reference rates into DB |
+| `data eia-backfill` | Backfill EIA state electricity price history |
+| `data eia-update` | Incremental EIA data update |
+| `data eia-state-price` | Look up EIA state average price |
+| `data eia-national-comparison` | Compare NC rates against national EIA averages |
+| `data load-eia-rates` | Load EIA reference rates into DB |
 
 ---
 
@@ -590,9 +590,9 @@ Structured multi-stage search for documents on external portals.
 
 | Command | What it does |
 |---|---|
-| `lookup-openei-rates` | Query OpenEI URDB for matching rates |
-| `build-openei-export` | Build an export candidate for OpenEI contribution |
-| `export-urdb` | Export tariff data in URDB format |
+| `data lookup-openei` | Query OpenEI URDB for matching rates |
+| `data build-openei-export` | Build an export candidate for OpenEI contribution |
+| `data export-urdb` | Export tariff data in URDB format |
 
 ---
 

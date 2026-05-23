@@ -24,32 +24,44 @@ benchmark-docling
 benchmark-document-normalization
 benchmark-ollama-roles-nc
 benchmark-redline-analysis
-bill-calculator
+billing calculate
+billing calculator
+billing compare-rates
+billing compare-schedules
+billing compare-tariff-rates
+billing compare-version-rates
+billing derive-observations
+billing estimate
+billing list
+billing list-observations
+billing list-observed-component-history-progress-nc
+billing parse
+billing parse-batch
+billing reconcile-progress-nc
+billing show
+billing show-observed-component-history-progress-nc
 bind-tier1-proposals-nc
 bootstrap-missing-versions-nc
-build-openei-export
 build-tariff-families
-calculate-bill
 check-ollama-models-nc
 classify-docs
 classify-documents-v2-nc
 cleanup-nc-residential-history
 compare-document-page-text
-compare-rates
-compare-schedules
-compare-tariff-rates
-compare-version-rates
 crawl
-derive-bill-observations
+data build-openei-export
+data eia-backfill
+data eia-national-comparison
+data eia-state-price
+data eia-update
+data export-urdb
+data load-eia-rates
+data lookup-openei
+data nc-rate-context
 detect-rule-promotions-nc
 diagnose-document-nc
 diagnose-empty-nc
-eia-backfill
-eia-national-comparison
-eia-state-price
-eia-update
 embed-corpus-nc
-estimate-bill
 estimate-history-bill-progress-nc
 execute-workflow-next-action-nc
 export dep-compliance-bundle-audit
@@ -70,7 +82,6 @@ export nc-redline-parse-audit
 export nc-schedule-inventory-audit
 export-google-dorks-progress-nc
 export-history-inbox-progress-nc
-export-urdb
 extract-rates-nc
 fingerprint-corpus-nc
 generate-per-doc-rules-nc
@@ -117,9 +128,7 @@ lineage show-provisional-review-candidates-nc
 lineage suggest-family-links-nc
 lineage sync-family-metadata-from-current-anchor
 lineage validate-nc
-list-bill-observations
 list-bill-relevant-gaps-progress-nc
-list-bills
 list-docs
 list-document-types-nc
 list-historical-leads-progress-nc
@@ -127,23 +136,19 @@ list-history-chains-progress-nc
 list-history-notice-links-progress-nc
 list-history-progress-nc
 list-history-sources-progress-nc
-list-observed-component-history-progress-nc
 list-regulator-gaps-progress-nc
 list-search-packs-progress-nc
 list-unresolved-historical-families-progress-nc
 load-dep-provisional-riders
-load-eia-rates
 load-local-rates-nc
 load-local-rider-summaries-nc
 load-ncuc-ingest
 locate-llm-row-evidence-nc
-lookup-openei-rates
 mcp
 mine-docling-nc
 mine-historical-leads-progress-nc
 mine-ncuc-pipeline
 mine-tariff-sheets-nc
-nc-rate-context
 nc-redline-portal-queue
 ncuc annual-orders-scan
 ncuc docket-fetch
@@ -180,9 +185,7 @@ ocr show-queue-nc
 ocr show-remediation-candidates-nc
 parse
 parse-batch
-parse-bill
 parse-bill-relevant-progress-nc
-parse-bills
 parse-review-queue
 parse-review-summary
 parse-tariff-versions
@@ -204,7 +207,6 @@ propose-llm-charge-promotions-nc
 reclassify-llm-row-conflicts-nc
 recommend-missing-dockets-nc
 recommend-overnight-lane-nc
-reconcile-bill-progress-nc
 reconcile-skipped-parse-reviews
 reconcile-workflow-action-receipts-nc
 record-parse-review
@@ -275,7 +277,6 @@ seed-dep-residential-rider-applicability
 seed-dep-storm-rider-applicability
 seed-document-type-gold-nc
 seed-family-documents-progress-nc
-show-bill
 show-bill-relevant-gaps-progress-nc
 show-doc
 show-docket-leads-progress-nc
@@ -287,7 +288,6 @@ show-history-coverage-progress-nc
 show-history-tariff-progress-nc
 show-llm-row-effective-status-nc
 show-near-miss-profiles-nc
-show-observed-component-history-progress-nc
 show-parser-improvement-candidates-nc
 show-parser-selection-audit-nc
 show-regulator-gaps-progress-nc
