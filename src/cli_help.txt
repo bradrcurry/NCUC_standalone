@@ -702,53 +702,6 @@
 |                                                   in redline crossrefs that |
 |                                                   have not yet been fetched |
 |                                                   from portal.              |
-| search-nc-missing-clean-docs                      Search NCUC for likely    |
-|                                                   missing clean historical  |
-|                                                   documents and persist     |
-|                                                   candidates for            |
-|                                                   fetch/import.             |
-| run-nc-missing-doc-workflow                       Run the resumable NC      |
-|                                                   missing-document workflow |
-|                                                   from discovery through    |
-|                                                   queueing and parsing.     |
-| promote-nc-missing-doc-targets                    Re-evaluate already found |
-|                                                   missing-doc targets and   |
-|                                                   advance only the items    |
-|                                                   that now qualify.         |
-| show-nc-missing-doc-status                        Show workflow status and  |
-|                                                   provenance for one        |
-|                                                   missing-document target.  |
-| report-nc-missing-doc-deferred                    Report deferred           |
-|                                                   missing-doc targets and   |
-|                                                   group them by reason.     |
-| report-nc-missing-doc-triage                      Report persisted          |
-|                                                   missing-doc triage        |
-|                                                   guidance for resumable    |
-|                                                   agent work.               |
-| execute-top-nc-missing-doc-triage                 Execute the top ranked    |
-|                                                   actionable missing-doc    |
-|                                                   triage target and report  |
-|                                                   before/after state.       |
-| execute-batch-nc-missing-doc-triage               Execute up to N ranked    |
-|                                                   actionable missing-doc    |
-|                                                   triage targets with stop  |
-|                                                   conditions.               |
-| plan-nc-missing-doc-remediation                   Rank supported            |
-|                                                   missing-doc remediations  |
-|                                                   by likely payoff and      |
-|                                                   frequency.                |
-| execute-top-nc-missing-doc-remediation            Execute the top ranked    |
-|                                                   supported remediation     |
-|                                                   step and report           |
-|                                                   before/after plan state.  |
-| report-nc-missing-doc-remediation-history         Show persisted            |
-|                                                   missing-doc remediation   |
-|                                                   execution history.        |
-| remediate-nc-missing-doc-no-download-url          Re-open deferred          |
-|                                                   discovery rows blocked on |
-|                                                   missing download URLs and |
-|                                                   try to recover ViewFile   |
-|                                                   links.                    |
 | normalize-nc-effective-dates                      Normalize malformed       |
 |                                                   effective_start /         |
 |                                                   effective_end values in   |
@@ -757,20 +710,6 @@
 |                                                   effective_start on        |
 |                                                   historical_documents via  |
 |                                                   multi-pass strategy.      |
-| remediate-nc-missing-doc-effective-start          Re-open deferred imported |
-|                                                   historical docs blocked   |
-|                                                   on missing                |
-|                                                   effective_start and try   |
-|                                                   to recover footer dates.  |
-| remediate-nc-missing-doc-confidence               Re-run missing-doc search |
-|                                                   with broader breadth for  |
-|                                                   discovery rows deferred   |
-|                                                   on confidence.            |
-| remediate-and-promote-nc-missing-docs             Run supported missing-doc |
-|                                                   remediations and          |
-|                                                   immediately re-promote    |
-|                                                   any rows that become      |
-|                                                   eligible.                 |
 | refresh-nc-redline-fingerprints                   Refresh NC                |
 |                                                   document_fingerprints     |
 |                                                   redline flags using the   |
@@ -871,5 +810,9 @@
 | export                                            NC and DEP                |
 |                                                   audit/inventory report    |
 |                                                   exports.                  |
+| workflow                                          NC missing-document       |
+|                                                   workflow: search, fetch,  |
+|                                                   import, bootstrap,        |
+|                                                   reprocess, validate.      |
 +-----------------------------------------------------------------------------+
 

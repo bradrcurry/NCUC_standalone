@@ -267,12 +267,12 @@ python -m duke_rates show-fingerprint-coverage-nc
 Missing-document recovery loop:
 
 ```powershell
-python -m duke_rates search-nc-missing-clean-docs --family-key nc-progress-leaf-602
-python -m duke_rates run-nc-missing-doc-workflow --family-key nc-progress-leaf-602
-python -m duke_rates show-nc-missing-doc-status --family-key nc-progress-leaf-602
-python -m duke_rates report-nc-missing-doc-deferred
-python -m duke_rates plan-nc-missing-doc-remediation
-python -m duke_rates remediate-and-promote-nc-missing-docs
+python -m duke_rates workflow search-nc-missing-clean-docs --family-key nc-progress-leaf-602
+python -m duke_rates workflow run-nc-missing-doc --family-key nc-progress-leaf-602
+python -m duke_rates workflow show-nc-missing-doc-status --family-key nc-progress-leaf-602
+python -m duke_rates workflow report-nc-missing-doc-deferred
+python -m duke_rates workflow plan-nc-missing-doc-remediation
+python -m duke_rates workflow remediate-and-promote-nc-missing-docs
 ```
 
 ### Export DEP residential history

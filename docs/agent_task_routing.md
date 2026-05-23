@@ -106,11 +106,11 @@ Touch:
 - [missing_doc_remediation.py](/c:/Python/Duke/Standalone/src/duke_rates/historical/ncuc/missing_doc_remediation.py)
 
 Use:
-- `search-nc-missing-clean-docs`
-- `run-nc-missing-doc-workflow`
-- `show-nc-missing-doc-status`
-- `report-nc-missing-doc-deferred`
-- `remediate-and-promote-nc-missing-docs`
+- `workflow search-nc-missing-clean-docs`
+- `workflow run-nc-missing-doc`
+- `workflow show-nc-missing-doc-status`
+- `workflow report-nc-missing-doc-deferred`
+- `workflow remediate-and-promote-nc-missing-docs`
 
 ### Provenance or fingerprint coverage audit
 

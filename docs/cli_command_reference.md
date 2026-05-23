@@ -48,7 +48,7 @@ If you are unsure which command family to use, choose in this order:
 3. If the problem is stale artifacts: `reprocess show-stale-historical-nc`
 4. If the problem is lineage or version linkage: `show-lineage-gaps-nc`, `validate-lineage-nc`
 5. If the problem is document identity, routing, or reuse confidence: `show-provenance-gaps-nc`, `show-fingerprint-coverage-nc`, `show-document-classification-audit-nc`
-6. If the problem is missing clean historical PDFs: `search-nc-missing-clean-docs`, `run-nc-missing-doc-workflow`
+6. If the problem is missing clean historical PDFs: `workflow search-nc-missing-clean-docs`, `workflow run-nc-missing-doc`
 7. If the problem is new downloaded NCUC records: `ncuc-import-pipeline`, then `bootstrap-missing-versions-nc`, then `extract-rates-nc`
 
 ## Source-Of-Truth Docs
@@ -205,32 +205,32 @@ python -m duke_rates ncuc-portal-search --company "Duke Energy Progress" --types
 
 | Command | What it does |
 |---|---|
-| `search-nc-missing-clean-docs` | Search NCUC for likely clean historical tariff/rider documents tied to known family gaps |
-| `run-nc-missing-doc-workflow` | Run the resumable end-to-end missing-document loop: search, fetch, import, bootstrap, and queue |
-| `promote-nc-missing-doc-targets` | Re-evaluate already-found missing-doc targets and advance only the rows that now qualify |
-| `show-nc-missing-doc-status` | Show workflow/provenance state for one missing-document family or target |
-| `report-nc-missing-doc-triage` | Show persisted next-action / blocker triage for resumable missing-document work; supports ranked actionable output and exact next-command suggestions |
-| `execute-top-nc-missing-doc-triage` | Execute the top ranked actionable triage target through its sanctioned underlying workflow |
-| `execute-batch-nc-missing-doc-triage` | Execute up to `N` ranked actionable triage targets with guarded stop conditions |
-| `report-nc-missing-doc-deferred` | Summarize deferred missing-document targets by blocking reason |
-| `plan-nc-missing-doc-remediation` | Rank supported remediation actions by likely payoff and frequency |
-| `report-nc-missing-doc-remediation-history` | Show persisted remediation execution history |
-| `execute-top-nc-missing-doc-remediation` | Execute the highest-ranked supported missing-doc remediation step |
-| `remediate-nc-missing-doc-no-download-url` | Re-open deferred discovery rows blocked on missing download URLs and try to recover them |
-| `remediate-nc-missing-doc-effective-start` | Re-open imported historical docs blocked on missing `effective_start` and try to recover dates |
-| `remediate-nc-missing-doc-confidence` | Broaden search for targets deferred on confidence/ideality thresholds |
-| `remediate-and-promote-nc-missing-docs` | Run supported remediations and immediately promote rows that become eligible |
+| `workflow search-nc-missing-clean-docs` | Search NCUC for likely clean historical tariff/rider documents tied to known family gaps |
+| `workflow run-nc-missing-doc` | Run the resumable end-to-end missing-document loop: search, fetch, import, bootstrap, and queue |
+| `workflow promote-nc-missing-doc-targets` | Re-evaluate already-found missing-doc targets and advance only the rows that now qualify |
+| `workflow show-nc-missing-doc-status` | Show workflow/provenance state for one missing-document family or target |
+| `workflow report-nc-missing-doc-triage` | Show persisted next-action / blocker triage for resumable missing-document work; supports ranked actionable output and exact next-command suggestions |
+| `workflow execute-top-nc-missing-doc-triage` | Execute the top ranked actionable triage target through its sanctioned underlying workflow |
+| `workflow execute-batch-nc-missing-doc-triage` | Execute up to `N` ranked actionable triage targets with guarded stop conditions |
+| `workflow report-nc-missing-doc-deferred` | Summarize deferred missing-document targets by blocking reason |
+| `workflow plan-nc-missing-doc-remediation` | Rank supported remediation actions by likely payoff and frequency |
+| `workflow report-nc-missing-doc-remediation-history` | Show persisted remediation execution history |
+| `workflow execute-top-nc-missing-doc-remediation` | Execute the highest-ranked supported missing-doc remediation step |
+| `workflow remediate-nc-missing-doc-no-download-url` | Re-open deferred discovery rows blocked on missing download URLs and try to recover them |
+| `workflow remediate-nc-missing-doc-effective-start` | Re-open imported historical docs blocked on missing `effective_start` and try to recover dates |
+| `workflow remediate-nc-missing-doc-confidence` | Broaden search for targets deferred on confidence/ideality thresholds |
+| `workflow remediate-and-promote-nc-missing-docs` | Run supported remediations and immediately promote rows that become eligible |
 
 **Typical missing-document sequence:**
 ```bash
-python -m duke_rates search-nc-missing-clean-docs --family-key nc-progress-leaf-602
-python -m duke_rates run-nc-missing-doc-workflow --family-key nc-progress-leaf-602
-python -m duke_rates report-nc-missing-doc-triage --family-key nc-progress-leaf-602 --actionable-only --top 10
-python -m duke_rates execute-top-nc-missing-doc-triage --family-key nc-progress-leaf-602
-python -m duke_rates execute-batch-nc-missing-doc-triage --family-key nc-progress-leaf-602 --max-actions 3
-python -m duke_rates show-nc-missing-doc-status --family-key nc-progress-leaf-602
-python -m duke_rates report-nc-missing-doc-deferred
-python -m duke_rates remediate-and-promote-nc-missing-docs
+python -m duke_rates workflow search-nc-missing-clean-docs --family-key nc-progress-leaf-602
+python -m duke_rates workflow run-nc-missing-doc --family-key nc-progress-leaf-602
+python -m duke_rates workflow report-nc-missing-doc-triage --family-key nc-progress-leaf-602 --actionable-only --top 10
+python -m duke_rates workflow execute-top-nc-missing-doc-triage --family-key nc-progress-leaf-602
+python -m duke_rates workflow execute-batch-nc-missing-doc-triage --family-key nc-progress-leaf-602 --max-actions 3
+python -m duke_rates workflow show-nc-missing-doc-status --family-key nc-progress-leaf-602
+python -m duke_rates workflow report-nc-missing-doc-deferred
+python -m duke_rates workflow remediate-and-promote-nc-missing-docs
 ```
 
 Use this loop when the main problem is document acquisition and lineage closure,
@@ -238,7 +238,7 @@ not parser behavior. The workflow is resumable and is the preferred replacement
 for handwritten gap-tracking notes.
 
 Generic hard-case search behavior:
-- `search-nc-missing-clean-docs` no longer relies on only one exact docket form.
+- `workflow search-nc-missing-clean-docs` no longer relies on only one exact docket form.
   It escalates through exact docket search, nearby docket expansion, and a
   docketless broad structured search when the direct query is weak.
 - Keyword search now fans out across richer family clues such as schedule code,
@@ -250,17 +250,17 @@ Generic hard-case search behavior:
 - When the direct portal path is noisy, prefer the sanctioned triage and
   remediation surfaces over inventing speculative one-off docket hunts.
 
-Use `report-nc-missing-doc-triage --actionable-only --top 10` when an agent needs
+Use `workflow report-nc-missing-doc-triage --actionable-only --top 10` when an agent needs
 the narrowest ready-made work queue. It ranks persisted `next_action` /
 `blocked_reason` metadata from earlier validate passes and prints the exact
 sanctioned command for each target, so weaker agents can resume from explicit
 guidance instead of recomputing target triage from scratch.
 
-Use `execute-top-nc-missing-doc-triage` when you want the tool to take the next
+Use `workflow execute-top-nc-missing-doc-triage` when you want the tool to take the next
 sanctioned step automatically for the highest-ranked actionable target instead of
 just suggesting the command.
 
-Use `execute-batch-nc-missing-doc-triage` for bounded automation across multiple
+Use `workflow execute-batch-nc-missing-doc-triage` for bounded automation across multiple
 targets. It stops when it hits `--max-actions`, finds no more actionable targets,
 detects a repeated top target, or sees no ranked-queue progress after a step.
 
@@ -268,17 +268,17 @@ detects a repeated top target, or sees no ranked-queue progress after a step.
 
 | `next_action` | Meaning | Preferred command | Mutates state |
 |---|---|---|---|
-| `fetch_document` | Discovery row is ready to fetch | `run-nc-missing-doc-workflow --from-stage fetch --to-stage fetch ...` | Yes |
-| `retry_fetch_or_manual_portal_review` | Discovery fetch failed or needs another fetch attempt | `run-nc-missing-doc-workflow --from-stage fetch --to-stage fetch --retry-failed-fetch ...` | Yes |
-| `import_and_mine_document` | Downloaded discovery row should be imported into historical/span state | `run-nc-missing-doc-workflow --from-stage import --to-stage import ...` | Yes |
-| `bootstrap_tariff_version` | Historical doc exists but lacks a usable `tariff_version` link | `run-nc-missing-doc-workflow --from-stage bootstrap_versions --to-stage bootstrap_versions ...` | Yes |
-| `process_document` | Historical doc is ready for queue/process execution | `run-nc-missing-doc-workflow --from-stage queue_reprocess --to-stage process_reprocess ...` | Yes |
-| `retry_with_better_parser_context` | Historical doc parsed weakly/empty and should be rerun through the bounded reprocess path | `run-nc-missing-doc-workflow --from-stage queue_reprocess --to-stage process_reprocess ...` | Yes |
-| `review_family_assignment` | Family assignment still needs inspection before mutation | `show-nc-missing-doc-status ...` | No |
-| `review_parse_output` | Parse output needs review before accepting or promoting further | `show-nc-missing-doc-status ...` | No |
-| `ready_for_acceptance` | Target looks stable; inspect before any manual acceptance/review action | `show-nc-missing-doc-status ...` | No |
-| `wait_for_reprocess_completion` | Work is already queued/running; inspect only | `show-nc-missing-doc-status ...` | No |
-| `monitor_linked_document` | Target is linked and not currently actionable | `show-nc-missing-doc-status ...` | No |
+| `fetch_document` | Discovery row is ready to fetch | `workflow run-nc-missing-doc --from-stage fetch --to-stage fetch ...` | Yes |
+| `retry_fetch_or_manual_portal_review` | Discovery fetch failed or needs another fetch attempt | `workflow run-nc-missing-doc --from-stage fetch --to-stage fetch --retry-failed-fetch ...` | Yes |
+| `import_and_mine_document` | Downloaded discovery row should be imported into historical/span state | `workflow run-nc-missing-doc --from-stage import --to-stage import ...` | Yes |
+| `bootstrap_tariff_version` | Historical doc exists but lacks a usable `tariff_version` link | `workflow run-nc-missing-doc --from-stage bootstrap_versions --to-stage bootstrap_versions ...` | Yes |
+| `process_document` | Historical doc is ready for queue/process execution | `workflow run-nc-missing-doc --from-stage queue_reprocess --to-stage process_reprocess ...` | Yes |
+| `retry_with_better_parser_context` | Historical doc parsed weakly/empty and should be rerun through the bounded reprocess path | `workflow run-nc-missing-doc --from-stage queue_reprocess --to-stage process_reprocess ...` | Yes |
+| `review_family_assignment` | Family assignment still needs inspection before mutation | `workflow show-nc-missing-doc-status ...` | No |
+| `review_parse_output` | Parse output needs review before accepting or promoting further | `workflow show-nc-missing-doc-status ...` | No |
+| `ready_for_acceptance` | Target looks stable; inspect before any manual acceptance/review action | `workflow show-nc-missing-doc-status ...` | No |
+| `wait_for_reprocess_completion` | Work is already queued/running; inspect only | `workflow show-nc-missing-doc-status ...` | No |
+| `monitor_linked_document` | Target is linked and not currently actionable | `workflow show-nc-missing-doc-status ...` | No |
 
 The triage executor commands use this same mapping internally. Prefer the queue
 surface over inventing your own command mapping.
@@ -972,7 +972,7 @@ Wrapper behavior notes:
 - Bootstrap now skips the expensive full `extract-rates-nc` call when
   `bootstrap-missing-versions-nc` creates no new linked versions.
 - `null_effective_start` is reported as a separate blocker. Use
-  `remediate-nc-missing-doc-effective-start`; bootstrap cannot fix historical
+  `workflow remediate-nc-missing-doc-effective-start`; bootstrap cannot fix historical
   docs that already have versions but lack effective dates.
 - If OCR remediation keeps cycling the same families, inspect
   `ocr show-remediation-candidates-nc` and `ocr report-benchmark-nc`. Completed

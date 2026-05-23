@@ -107,7 +107,7 @@ What it repairs:
 - clears malformed `historical_documents.current_document_id` text values that cannot be parsed as integers
 
 Outcome:
-- `report-nc-missing-doc-triage` and other repository-backed workflows stop failing on these stale rows
+- `workflow report-nc-missing-doc-triage` and other repository-backed workflows stop failing on these stale rows
 - operators get a sanctioned recovery path instead of ad hoc SQL cleanup
 
 ### 2. Historical Intake And Mining
@@ -328,30 +328,30 @@ Read:
 Run:
 
 ```powershell
-python -m duke_rates search-nc-missing-clean-docs --family-key nc-progress-leaf-602
-python -m duke_rates run-nc-missing-doc-workflow --family-key nc-progress-leaf-602
-python -m duke_rates report-nc-missing-doc-triage --family-key nc-progress-leaf-602 --actionable-only --top 10
-python -m duke_rates execute-top-nc-missing-doc-triage --family-key nc-progress-leaf-602
-python -m duke_rates execute-batch-nc-missing-doc-triage --family-key nc-progress-leaf-602 --max-actions 3
-python -m duke_rates show-nc-missing-doc-status --family-key nc-progress-leaf-602
-python -m duke_rates report-nc-missing-doc-deferred
-python -m duke_rates plan-nc-missing-doc-remediation
+python -m duke_rates workflow search-nc-missing-clean-docs --family-key nc-progress-leaf-602
+python -m duke_rates workflow run-nc-missing-doc --family-key nc-progress-leaf-602
+python -m duke_rates workflow report-nc-missing-doc-triage --family-key nc-progress-leaf-602 --actionable-only --top 10
+python -m duke_rates workflow execute-top-nc-missing-doc-triage --family-key nc-progress-leaf-602
+python -m duke_rates workflow execute-batch-nc-missing-doc-triage --family-key nc-progress-leaf-602 --max-actions 3
+python -m duke_rates workflow show-nc-missing-doc-status --family-key nc-progress-leaf-602
+python -m duke_rates workflow report-nc-missing-doc-deferred
+python -m duke_rates workflow plan-nc-missing-doc-remediation
 ```
 
 When a deferred reason has an implemented repair path, use:
 
 ```powershell
-python -m duke_rates remediate-nc-missing-doc-no-download-url
-python -m duke_rates remediate-nc-missing-doc-effective-start
-python -m duke_rates remediate-nc-missing-doc-confidence
-python -m duke_rates remediate-and-promote-nc-missing-docs
-python -m duke_rates promote-nc-missing-doc-targets
+python -m duke_rates workflow remediate-nc-missing-doc-no-download-url
+python -m duke_rates workflow remediate-nc-missing-doc-effective-start
+python -m duke_rates workflow remediate-nc-missing-doc-confidence
+python -m duke_rates workflow remediate-and-promote-nc-missing-docs
+python -m duke_rates workflow promote-nc-missing-doc-targets
 ```
 
 Notes:
-- `run-nc-missing-doc-workflow` is the sanctioned end-to-end loop. It can resume
+- `workflow run-nc-missing-doc` is the sanctioned end-to-end loop. It can resume
   from intermediate stages instead of forcing a restart.
-- `search-nc-missing-clean-docs` now applies generic search escalation for
+- `workflow search-nc-missing-clean-docs` now applies generic search escalation for
   difficult targets. It starts with exact docket structured queries, expands to
   nearby docket variants, then falls back to a docketless broad structured
   search before relying on richer keyword fan-out.
@@ -362,19 +362,19 @@ Notes:
   returned with `normalized_exact`, `same_base_and_sub`, or `partial`
   `match_type` values so the workflow can continue without brittle label
   formatting assumptions.
-- `report-nc-missing-doc-triage` is the preferred queue surface for weaker
+- `workflow report-nc-missing-doc-triage` is the preferred queue surface for weaker
   agents. It reads persisted `next_action` / `blocked_reason` metadata from prior
   validate passes, ranks actionable targets, and prints the sanctioned command
   for each one.
-- `execute-top-nc-missing-doc-triage` is the preferred bounded auto-advance path
+- `workflow execute-top-nc-missing-doc-triage` is the preferred bounded auto-advance path
   when the top actionable target should be executed directly instead of only
   suggested.
-- `execute-batch-nc-missing-doc-triage` is the bounded multi-step path. Use a
+- `workflow execute-batch-nc-missing-doc-triage` is the bounded multi-step path. Use a
   conservative `--max-actions` and rely on its stop conditions instead of
   open-ended loops.
-- Use `show-nc-missing-doc-status` to inspect one family/target before doing
+- Use `workflow show-nc-missing-doc-status` to inspect one family/target before doing
   manual intervention.
-- Treat `report-nc-missing-doc-deferred` as the queue of still-blocked targets,
+- Treat `workflow report-nc-missing-doc-deferred` as the queue of still-blocked targets,
   not as a final failure state.
 
 Triage action mapping:
@@ -383,7 +383,7 @@ Triage action mapping:
 - `import_and_mine_document`: run the workflow import stage for the targeted discovery row.
 - `bootstrap_tariff_version`: run the workflow bootstrap stage for the targeted historical doc.
 - `process_document` or `retry_with_better_parser_context`: run the workflow from `queue_reprocess` through `process_reprocess`.
-- `review_family_assignment`, `review_parse_output`, `ready_for_acceptance`, `wait_for_reprocess_completion`, `monitor_linked_document`: inspect with `show-nc-missing-doc-status` before taking any manual action.
+- `review_family_assignment`, `review_parse_output`, `ready_for_acceptance`, `wait_for_reprocess_completion`, `monitor_linked_document`: inspect with `workflow show-nc-missing-doc-status` before taking any manual action.
 
 Outcome:
 - missing clean-document candidates are searched, fetched, imported, versioned,

@@ -217,7 +217,7 @@ $phaseBootstrap = {
     Write-Both "  missing_versions_remaining=$missingVersionsAfter"
     Write-Both "  null_effective_start_remaining=$nullEffectiveStart"
     if ($nullEffectiveStart -gt 0) {
-        Write-Both "  note: null effective-start rows need remediate-nc-missing-doc-effective-start, not bootstrap"
+        Write-Both "  note: null effective-start rows need workflow remediate-nc-missing-doc-effective-start, not bootstrap"
     }
     return [int]$missingVersionsAfter
 }

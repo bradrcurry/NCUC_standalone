@@ -285,49 +285,49 @@
       "steps": [
         {
           "step_id": "search",
-          "tool_id": "search-nc-missing-clean-docs",
+          "tool_id": "workflow search-nc-missing-clean-docs",
           "purpose": "Search NCUC for likely clean historical document candidates.",
           "mode": "required"
         },
         {
           "step_id": "run_workflow",
-          "tool_id": "run-nc-missing-doc-workflow",
+          "tool_id": "workflow run-nc-missing-doc",
           "purpose": "Advance the target through fetch, import, bootstrap, and queue stages.",
           "mode": "required"
         },
         {
           "step_id": "status",
-          "tool_id": "show-nc-missing-doc-status",
+          "tool_id": "workflow show-nc-missing-doc-status",
           "purpose": "Inspect target-level workflow state and provenance after advancement.",
           "mode": "required"
         },
         {
           "step_id": "triage_queue",
-          "tool_id": "report-nc-missing-doc-triage",
+          "tool_id": "workflow report-nc-missing-doc-triage",
           "purpose": "Read the persisted next-action queue, preferably with actionable-only/top filters, and use the included sanctioned command suggestions to resume from durable guidance.",
           "mode": "required"
         },
         {
           "step_id": "triage_execute",
-          "tool_id": "execute-top-nc-missing-doc-triage",
+          "tool_id": "workflow execute-top-nc-missing-doc-triage",
           "purpose": "Optionally let the tool execute the single highest-ranked actionable target through its sanctioned workflow.",
           "mode": "optional"
         },
         {
           "step_id": "triage_batch_execute",
-          "tool_id": "execute-batch-nc-missing-doc-triage",
+          "tool_id": "workflow execute-batch-nc-missing-doc-triage",
           "purpose": "Optionally execute a bounded batch of top actionable targets when repeated single-step execution would be noisy.",
           "mode": "optional"
         },
         {
           "step_id": "deferred",
-          "tool_id": "report-nc-missing-doc-deferred",
+          "tool_id": "workflow report-nc-missing-doc-deferred",
           "purpose": "Group still-blocked targets by repairable reason.",
           "mode": "optional"
         },
         {
           "step_id": "remediate",
-          "tool_id": "remediate-and-promote-nc-missing-docs",
+          "tool_id": "workflow remediate-and-promote-nc-missing-docs",
           "purpose": "Run supported remediations and promote targets that become eligible.",
           "mode": "optional"
         }

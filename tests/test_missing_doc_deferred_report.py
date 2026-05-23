@@ -234,7 +234,7 @@ def test_execute_top_nc_missing_doc_remediation_step_runs_selected_reason(monkey
                     "weighted_score": 3.0,
                     "family_keys": ["fk1"],
                     "example_ids": [7],
-                    "recommended_command": "python -m duke_rates remediate-and-promote-nc-missing-docs --reason no_downloadable_url --family-key fk1",
+                    "recommended_command": "python -m duke_rates workflow remediate-and-promote-nc-missing-docs --reason no_downloadable_url --family-key fk1",
                 }
             ],
         },

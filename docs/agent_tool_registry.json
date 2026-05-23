@@ -291,11 +291,11 @@
       ]
     },
     {
-      "tool_id": "search-nc-missing-clean-docs",
+      "tool_id": "workflow search-nc-missing-clean-docs",
       "surface": "cli",
       "status": "supported",
       "category": "diagnose",
-      "command": "python -m duke_rates search-nc-missing-clean-docs",
+      "command": "python -m duke_rates workflow search-nc-missing-clean-docs",
       "goal": "Search NCUC for likely clean historical tariff/rider documents tied to known family gaps.",
       "use_when": [
         "A family has lineage continuity but is still missing the clean historical document",
@@ -309,10 +309,10 @@
         "Prefer show-lineage-gaps-nc or a missing-doc audit first when the target family is unclear"
       ],
       "next_tools": [
-        "run-nc-missing-doc-workflow",
-        "show-nc-missing-doc-status",
-        "report-nc-missing-doc-triage",
-        "report-nc-missing-doc-deferred"
+        "workflow run-nc-missing-doc",
+        "workflow show-nc-missing-doc-status",
+        "workflow report-nc-missing-doc-triage",
+        "workflow report-nc-missing-doc-deferred"
       ],
       "mutates_state": true,
       "docs": [
@@ -322,11 +322,11 @@
       ]
     },
     {
-      "tool_id": "run-nc-missing-doc-workflow",
+      "tool_id": "workflow run-nc-missing-doc",
       "surface": "cli",
       "status": "supported",
       "category": "repair",
-      "command": "python -m duke_rates run-nc-missing-doc-workflow",
+      "command": "python -m duke_rates workflow run-nc-missing-doc",
       "goal": "Run the resumable missing-document loop from search through fetch/import/bootstrap/reprocess.",
       "use_when": [
         "You want the sanctioned end-to-end clean-document recovery loop",
@@ -340,8 +340,8 @@
         "Prefer this workflow over handwritten multi-command recovery loops"
       ],
       "next_tools": [
-        "show-nc-missing-doc-status",
-        "report-nc-missing-doc-deferred",
+        "workflow show-nc-missing-doc-status",
+        "workflow report-nc-missing-doc-deferred",
         "parse-review-summary"
       ],
       "mutates_state": true,
@@ -352,11 +352,11 @@
       ]
     },
     {
-      "tool_id": "show-nc-missing-doc-status",
+      "tool_id": "workflow show-nc-missing-doc-status",
       "surface": "cli",
       "status": "supported",
       "category": "inspect",
-      "command": "python -m duke_rates show-nc-missing-doc-status",
+      "command": "python -m duke_rates workflow show-nc-missing-doc-status",
       "goal": "Explain workflow state and provenance for one missing-document family or target.",
       "use_when": [
         "You need to inspect why one target stalled",
@@ -367,10 +367,10 @@
       ],
       "prerequisites": [],
       "next_tools": [
-        "report-nc-missing-doc-triage",
-        "report-nc-missing-doc-deferred",
-        "remediate-and-promote-nc-missing-docs",
-        "run-nc-missing-doc-workflow"
+        "workflow report-nc-missing-doc-triage",
+        "workflow report-nc-missing-doc-deferred",
+        "workflow remediate-and-promote-nc-missing-docs",
+        "workflow run-nc-missing-doc"
       ],
       "mutates_state": false,
       "docs": [
@@ -380,11 +380,11 @@
       ]
     },
     {
-      "tool_id": "report-nc-missing-doc-triage",
+      "tool_id": "workflow report-nc-missing-doc-triage",
       "surface": "cli",
       "status": "supported",
       "category": "diagnose",
-      "command": "python -m duke_rates report-nc-missing-doc-triage",
+      "command": "python -m duke_rates workflow report-nc-missing-doc-triage",
       "goal": "Show persisted next-action and blocker guidance for resumable missing-document work, including a ranked actionable queue and exact next-command suggestions.",
       "use_when": [
         "A future agent should resume missing-document recovery from persisted guidance instead of recomputing triage",
@@ -395,15 +395,15 @@
         "You need full provenance detail for exactly one target"
       ],
       "prerequisites": [
-        "A prior validate pass from run-nc-missing-doc-workflow should have persisted triage metadata"
+        "A prior validate pass from workflow run-nc-missing-doc should have persisted triage metadata"
       ],
       "next_tools": [
-        "execute-batch-nc-missing-doc-triage",
-        "execute-top-nc-missing-doc-triage",
-        "show-nc-missing-doc-status",
-        "report-nc-missing-doc-deferred",
-        "remediate-and-promote-nc-missing-docs",
-        "run-nc-missing-doc-workflow"
+        "workflow execute-batch-nc-missing-doc-triage",
+        "workflow execute-top-nc-missing-doc-triage",
+        "workflow show-nc-missing-doc-status",
+        "workflow report-nc-missing-doc-deferred",
+        "workflow remediate-and-promote-nc-missing-docs",
+        "workflow run-nc-missing-doc"
       ],
       "mutates_state": false,
       "docs": [
@@ -413,11 +413,11 @@
       ]
     },
     {
-      "tool_id": "execute-top-nc-missing-doc-triage",
+      "tool_id": "workflow execute-top-nc-missing-doc-triage",
       "surface": "cli",
       "status": "supported",
       "category": "repair",
-      "command": "python -m duke_rates execute-top-nc-missing-doc-triage",
+      "command": "python -m duke_rates workflow execute-top-nc-missing-doc-triage",
       "goal": "Execute the top ranked actionable missing-document triage target through its sanctioned underlying workflow.",
       "use_when": [
         "A weaker agent should let the tool take the next sanctioned step automatically",
@@ -428,13 +428,13 @@
         "No persisted triage metadata exists yet"
       ],
       "prerequisites": [
-        "A prior validate pass from run-nc-missing-doc-workflow should have persisted triage metadata",
-        "Prefer report-nc-missing-doc-triage first when human review of the queue is still needed"
+        "A prior validate pass from workflow run-nc-missing-doc should have persisted triage metadata",
+        "Prefer workflow report-nc-missing-doc-triage first when human review of the queue is still needed"
       ],
       "next_tools": [
-        "report-nc-missing-doc-triage",
-        "show-nc-missing-doc-status",
-        "run-nc-missing-doc-workflow"
+        "workflow report-nc-missing-doc-triage",
+        "workflow show-nc-missing-doc-status",
+        "workflow run-nc-missing-doc"
       ],
       "mutates_state": true,
       "docs": [
@@ -444,11 +444,11 @@
       ]
     },
     {
-      "tool_id": "execute-batch-nc-missing-doc-triage",
+      "tool_id": "workflow execute-batch-nc-missing-doc-triage",
       "surface": "cli",
       "status": "supported",
       "category": "repair",
-      "command": "python -m duke_rates execute-batch-nc-missing-doc-triage",
+      "command": "python -m duke_rates workflow execute-batch-nc-missing-doc-triage",
       "goal": "Execute multiple ranked actionable missing-document triage targets with bounded stop conditions.",
       "use_when": [
         "You want bounded forward progress across several top actionable targets",
@@ -459,13 +459,13 @@
         "The queue is not yet persisted from a validate pass"
       ],
       "prerequisites": [
-        "A prior validate pass from run-nc-missing-doc-workflow should have persisted triage metadata",
+        "A prior validate pass from workflow run-nc-missing-doc should have persisted triage metadata",
         "Choose a conservative --max-actions value so the run stays bounded and reviewable"
       ],
       "next_tools": [
-        "report-nc-missing-doc-triage",
-        "show-nc-missing-doc-status",
-        "run-nc-missing-doc-workflow"
+        "workflow report-nc-missing-doc-triage",
+        "workflow show-nc-missing-doc-status",
+        "workflow run-nc-missing-doc"
       ],
       "mutates_state": true,
       "docs": [
@@ -475,11 +475,11 @@
       ]
     },
     {
-      "tool_id": "report-nc-missing-doc-deferred",
+      "tool_id": "workflow report-nc-missing-doc-deferred",
       "surface": "cli",
       "status": "supported",
       "category": "diagnose",
-      "command": "python -m duke_rates report-nc-missing-doc-deferred",
+      "command": "python -m duke_rates workflow report-nc-missing-doc-deferred",
       "goal": "Group deferred missing-document targets by blocking reason so remediation work stays queue-driven.",
       "use_when": [
         "You need to understand why missing-document targets are stalled",
@@ -490,10 +490,10 @@
       ],
       "prerequisites": [],
       "next_tools": [
-        "report-nc-missing-doc-triage",
-        "show-nc-missing-doc-status",
-        "remediate-and-promote-nc-missing-docs",
-        "search-nc-missing-clean-docs"
+        "workflow report-nc-missing-doc-triage",
+        "workflow show-nc-missing-doc-status",
+        "workflow remediate-and-promote-nc-missing-docs",
+        "workflow search-nc-missing-clean-docs"
       ],
       "mutates_state": false,
       "docs": [
@@ -503,11 +503,11 @@
       ]
     },
     {
-      "tool_id": "remediate-and-promote-nc-missing-docs",
+      "tool_id": "workflow remediate-and-promote-nc-missing-docs",
       "surface": "cli",
       "status": "supported",
       "category": "repair",
-      "command": "python -m duke_rates remediate-and-promote-nc-missing-docs",
+      "command": "python -m duke_rates workflow remediate-and-promote-nc-missing-docs",
       "goal": "Run supported missing-document remediations and immediately promote targets that become eligible.",
       "use_when": [
         "Deferred missing-document targets are blocked on supported repairable reasons",
@@ -517,11 +517,11 @@
         "You have not reviewed deferred reasons yet"
       ],
       "prerequisites": [
-        "Inspect report-nc-missing-doc-deferred first when the blocked reasons are not already known"
+        "Inspect workflow report-nc-missing-doc-deferred first when the blocked reasons are not already known"
       ],
       "next_tools": [
-        "show-nc-missing-doc-status",
-        "run-nc-missing-doc-workflow",
+        "workflow show-nc-missing-doc-status",
+        "workflow run-nc-missing-doc",
         "parse-review-summary"
       ],
       "mutates_state": true,

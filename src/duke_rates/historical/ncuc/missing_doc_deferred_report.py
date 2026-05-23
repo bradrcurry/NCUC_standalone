@@ -276,11 +276,11 @@ def _normalize_reason(reason: str) -> str:
 def _recommended_command(reason: str, *, family_key: str | None) -> str:
     family_arg = f" --family-key {family_key}" if family_key else ""
     if reason == "no_downloadable_url":
-        return f"python -m duke_rates remediate-and-promote-nc-missing-docs --reason no_downloadable_url{family_arg}"
+        return f"python -m duke_rates workflow remediate-and-promote-nc-missing-docs --reason no_downloadable_url{family_arg}"
     if reason == "missing_effective_start_for_weak_match":
-        return f"python -m duke_rates remediate-and-promote-nc-missing-docs --reason missing_effective_start_for_weak_match{family_arg}"
+        return f"python -m duke_rates workflow remediate-and-promote-nc-missing-docs --reason missing_effective_start_for_weak_match{family_arg}"
     if reason == "confidence_below_threshold":
-        return f"python -m duke_rates remediate-and-promote-nc-missing-docs --reason confidence_below_threshold{family_arg}"
+        return f"python -m duke_rates workflow remediate-and-promote-nc-missing-docs --reason confidence_below_threshold{family_arg}"
     return ""
 
 

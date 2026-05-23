@@ -323,17 +323,17 @@ def _suggested_command_for_target(row: dict[str, Any]) -> str | None:
         target_arg = ""
 
     command_map = {
-        "fetch_document": f"python -m duke_rates run-nc-missing-doc-workflow --from-stage fetch --to-stage fetch{target_arg}{family_arg}",
-        "retry_fetch_or_manual_portal_review": f"python -m duke_rates run-nc-missing-doc-workflow --from-stage fetch --to-stage fetch --retry-failed-fetch{target_arg}{family_arg}",
-        "import_and_mine_document": f"python -m duke_rates run-nc-missing-doc-workflow --from-stage import --to-stage import{target_arg}{family_arg}",
-        "bootstrap_tariff_version": f"python -m duke_rates run-nc-missing-doc-workflow --from-stage bootstrap_versions --to-stage bootstrap_versions{target_arg}{family_arg}",
-        "review_family_assignment": f"python -m duke_rates show-nc-missing-doc-status{target_arg}{family_arg}",
-        "process_document": f"python -m duke_rates run-nc-missing-doc-workflow --from-stage queue_reprocess --to-stage process_reprocess{target_arg}{family_arg}",
-        "retry_with_better_parser_context": f"python -m duke_rates run-nc-missing-doc-workflow --from-stage queue_reprocess --to-stage process_reprocess{target_arg}{family_arg}",
-        "review_parse_output": f"python -m duke_rates show-nc-missing-doc-status{target_arg}{family_arg}",
-        "ready_for_acceptance": f"python -m duke_rates show-nc-missing-doc-status{target_arg}{family_arg}",
-        "wait_for_reprocess_completion": f"python -m duke_rates show-nc-missing-doc-status{target_arg}{family_arg}",
-        "monitor_linked_document": f"python -m duke_rates show-nc-missing-doc-status{target_arg}{family_arg}",
+        "fetch_document": f"python -m duke_rates workflow run-nc-missing-doc --from-stage fetch --to-stage fetch{target_arg}{family_arg}",
+        "retry_fetch_or_manual_portal_review": f"python -m duke_rates workflow run-nc-missing-doc --from-stage fetch --to-stage fetch --retry-failed-fetch{target_arg}{family_arg}",
+        "import_and_mine_document": f"python -m duke_rates workflow run-nc-missing-doc --from-stage import --to-stage import{target_arg}{family_arg}",
+        "bootstrap_tariff_version": f"python -m duke_rates workflow run-nc-missing-doc --from-stage bootstrap_versions --to-stage bootstrap_versions{target_arg}{family_arg}",
+        "review_family_assignment": f"python -m duke_rates workflow show-nc-missing-doc-status{target_arg}{family_arg}",
+        "process_document": f"python -m duke_rates workflow run-nc-missing-doc --from-stage queue_reprocess --to-stage process_reprocess{target_arg}{family_arg}",
+        "retry_with_better_parser_context": f"python -m duke_rates workflow run-nc-missing-doc --from-stage queue_reprocess --to-stage process_reprocess{target_arg}{family_arg}",
+        "review_parse_output": f"python -m duke_rates workflow show-nc-missing-doc-status{target_arg}{family_arg}",
+        "ready_for_acceptance": f"python -m duke_rates workflow show-nc-missing-doc-status{target_arg}{family_arg}",
+        "wait_for_reprocess_completion": f"python -m duke_rates workflow show-nc-missing-doc-status{target_arg}{family_arg}",
+        "monitor_linked_document": f"python -m duke_rates workflow show-nc-missing-doc-status{target_arg}{family_arg}",
     }
     command = command_map.get(next_action)
     return " ".join(str(command or "").split()) or None

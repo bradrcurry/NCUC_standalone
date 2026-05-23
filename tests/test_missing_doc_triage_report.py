@@ -276,10 +276,10 @@ def test_build_nc_missing_doc_triage_report_ranks_actionable_targets(tmp_path: P
     assert all(row["next_action"] != "ready_for_acceptance" for row in report["ranked_targets"])
     assert report["ranked_targets"][0]["priority_score"] > report["ranked_targets"][1]["priority_score"]
     assert report["ranked_targets"][0]["suggested_command"] == (
-        "python -m duke_rates show-nc-missing-doc-status --historical-document-id 21 --family-key fk1"
+        "python -m duke_rates workflow show-nc-missing-doc-status --historical-document-id 21 --family-key fk1"
     )
     assert report["ranked_targets"][1]["suggested_command"] == (
-        "python -m duke_rates run-nc-missing-doc-workflow --from-stage fetch --to-stage fetch --record-id 7 --family-key fk1"
+        "python -m duke_rates workflow run-nc-missing-doc --from-stage fetch --to-stage fetch --record-id 7 --family-key fk1"
     )
 
 
@@ -317,7 +317,7 @@ def test_build_nc_missing_doc_triage_report_suggests_reprocess_retry_command(tmp
     report = build_nc_missing_doc_triage_report(repo, family_key="fk2", actionable_only=True)
 
     assert report["ranked_targets"][0]["suggested_command"] == (
-        "python -m duke_rates run-nc-missing-doc-workflow --from-stage queue_reprocess --to-stage process_reprocess --historical-document-id 31 --family-key fk2"
+        "python -m duke_rates workflow run-nc-missing-doc --from-stage queue_reprocess --to-stage process_reprocess --historical-document-id 31 --family-key fk2"
     )
 
 

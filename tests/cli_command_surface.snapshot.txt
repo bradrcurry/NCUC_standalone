@@ -61,9 +61,6 @@ eia-update
 embed-corpus-nc
 estimate-bill
 estimate-history-bill-progress-nc
-execute-batch-nc-missing-doc-triage
-execute-top-nc-missing-doc-remediation
-execute-top-nc-missing-doc-triage
 execute-workflow-next-action-nc
 export dep-compliance-bundle-audit
 export dep-leaf-503-audit
@@ -174,7 +171,6 @@ parse-bills
 parse-review-queue
 parse-review-summary
 parse-tariff-versions
-plan-nc-missing-doc-remediation
 populate-document-identity-nc
 populate-document-sections-nc
 populate-routing-tier-nc
@@ -189,7 +185,6 @@ probe-archive-today-progress-nc
 process-docling-batch
 promote-high-confidence-subset-nc
 promote-llm-charge-proposals-nc
-promote-nc-missing-doc-targets
 promote-provisional-family
 propose-llm-charge-promotions-nc
 rebind-historical-page-range
@@ -208,10 +203,6 @@ recover-openei-history-progress-nc
 recover-predecessor-domain-progress-nc
 recover-public-notices-progress-nc
 refresh-nc-redline-fingerprints
-remediate-and-promote-nc-missing-docs
-remediate-nc-missing-doc-confidence
-remediate-nc-missing-doc-effective-start
-remediate-nc-missing-doc-no-download-url
 remediate-nc-null-effective-dates
 repair-anomaly-nc
 repair-historical-current-snapshot
@@ -227,9 +218,6 @@ report-document-sections-nc
 report-document-sections-summary-nc
 report-document-types-nc
 report-flag-classifications-nc
-report-nc-missing-doc-deferred
-report-nc-missing-doc-remediation-history
-report-nc-missing-doc-triage
 report-per-doc-rules-nc
 report-profile-recommendations-nc
 report-routing-tier-nc
@@ -261,7 +249,6 @@ run-google-dorks-progress-nc
 run-llm-doc-probe-nc
 run-llm-parse-fallback-nc
 run-llm-promotion-overnight-nc
-run-nc-missing-doc-workflow
 run-overnight-db-intelligence-nc
 run-overnight-doc-intelligence-nc
 run-overnight-parse-improvement-nc
@@ -271,7 +258,6 @@ search-download-doc-param
 search-enrich-doc-param
 search-export
 search-ingest
-search-nc-missing-clean-docs
 search-probe-compat
 search-probe-query
 search-query-report
@@ -295,7 +281,6 @@ show-history-coverage-progress-nc
 show-history-tariff-progress-nc
 show-lineage-gaps-nc
 show-llm-row-effective-status-nc
-show-nc-missing-doc-status
 show-near-miss-profiles-nc
 show-observed-component-history-progress-nc
 show-parser-improvement-candidates-nc
@@ -324,3 +309,18 @@ validate-lineage-nc
 validate-llm-rate-extractions-nc
 validate-parser-change-nc
 validate-regex-suggestions-nc
+workflow execute-batch-nc-missing-doc-triage
+workflow execute-top-nc-missing-doc-remediation
+workflow execute-top-nc-missing-doc-triage
+workflow plan-nc-missing-doc-remediation
+workflow promote-nc-missing-doc-targets
+workflow remediate-and-promote-nc-missing-docs
+workflow remediate-nc-missing-doc-confidence
+workflow remediate-nc-missing-doc-effective-start
+workflow remediate-nc-missing-doc-no-download-url
+workflow report-nc-missing-doc-deferred
+workflow report-nc-missing-doc-remediation-history
+workflow report-nc-missing-doc-triage
+workflow run-nc-missing-doc
+workflow search-nc-missing-clean-docs
+workflow show-nc-missing-doc-status

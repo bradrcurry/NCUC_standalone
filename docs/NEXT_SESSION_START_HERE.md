@@ -63,7 +63,7 @@ Interpretation:
   by `source_pdf`, so completed OCR should not be re-enqueued just because the
   stored hash differs.
 - `null_effective_start=413` is not a bootstrap problem. Run
-  `remediate-nc-missing-doc-effective-start`, then re-check promotion blockers.
+  `workflow remediate-nc-missing-doc-effective-start`, then re-check promotion blockers.
 - The 5 `reprocess_running` rows are stale rows from 2026-05-01 through
   2026-05-04. Inspect with `reprocess show-stale-nc` and recover them with
   `reprocess recover-stale-nc --execute` if they are still stuck.

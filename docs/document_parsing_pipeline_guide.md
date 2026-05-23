@@ -126,13 +126,13 @@ Use these when the family is known but the clean historical tariff/rider PDF is
 still missing or weakly represented:
 
 ```powershell
-python -m duke_rates search-nc-missing-clean-docs --family-key nc-progress-leaf-602
-python -m duke_rates run-nc-missing-doc-workflow --family-key nc-progress-leaf-602
-python -m duke_rates report-nc-missing-doc-triage --family-key nc-progress-leaf-602 --actionable-only --top 10
-python -m duke_rates execute-top-nc-missing-doc-triage --family-key nc-progress-leaf-602
-python -m duke_rates show-nc-missing-doc-status --family-key nc-progress-leaf-602
-python -m duke_rates report-nc-missing-doc-deferred
-python -m duke_rates plan-nc-missing-doc-remediation
+python -m duke_rates workflow search-nc-missing-clean-docs --family-key nc-progress-leaf-602
+python -m duke_rates workflow run-nc-missing-doc --family-key nc-progress-leaf-602
+python -m duke_rates workflow report-nc-missing-doc-triage --family-key nc-progress-leaf-602 --actionable-only --top 10
+python -m duke_rates workflow execute-top-nc-missing-doc-triage --family-key nc-progress-leaf-602
+python -m duke_rates workflow show-nc-missing-doc-status --family-key nc-progress-leaf-602
+python -m duke_rates workflow report-nc-missing-doc-deferred
+python -m duke_rates workflow plan-nc-missing-doc-remediation
 ```
 
 The workflow command is resumable. It is intended to close the loop from:
@@ -156,24 +156,24 @@ Search escalation for difficult missing documents:
 
 For weaker agents, the preferred recovery loop is:
 
-1. run `run-nc-missing-doc-workflow`
-2. read `report-nc-missing-doc-triage --actionable-only --top 10`
-3. either execute one step with `execute-top-nc-missing-doc-triage`
-4. or execute a bounded batch with `execute-batch-nc-missing-doc-triage --max-actions N`
+1. run `workflow run-nc-missing-doc`
+2. read `workflow report-nc-missing-doc-triage --actionable-only --top 10`
+3. either execute one step with `workflow execute-top-nc-missing-doc-triage`
+4. or execute a bounded batch with `workflow execute-batch-nc-missing-doc-triage --max-actions N`
 
 When a target stalls for a supported reason, use:
 
 ```powershell
-python -m duke_rates remediate-nc-missing-doc-no-download-url
-python -m duke_rates remediate-nc-missing-doc-effective-start
-python -m duke_rates remediate-nc-missing-doc-confidence
-python -m duke_rates remediate-and-promote-nc-missing-docs
-python -m duke_rates promote-nc-missing-doc-targets
+python -m duke_rates workflow remediate-nc-missing-doc-no-download-url
+python -m duke_rates workflow remediate-nc-missing-doc-effective-start
+python -m duke_rates workflow remediate-nc-missing-doc-confidence
+python -m duke_rates workflow remediate-and-promote-nc-missing-docs
+python -m duke_rates workflow promote-nc-missing-doc-targets
 ```
 
-Use `show-nc-missing-doc-status` before manual intervention so the family-level
+Use `workflow show-nc-missing-doc-status` before manual intervention so the family-level
 state, provenance, and deferred reason are all visible in one place.
-Use `report-nc-missing-doc-triage` when you need the persisted queue of what to
+Use `workflow report-nc-missing-doc-triage` when you need the persisted queue of what to
 do next, and prefer its ranked actionable view over reconstructing triage from
 raw status output.
 
@@ -181,12 +181,12 @@ Compact `next_action` guide:
 
 | `next_action` | Use this |
 |---|---|
-| `fetch_document` | `run-nc-missing-doc-workflow --from-stage fetch --to-stage fetch ...` |
-| `retry_fetch_or_manual_portal_review` | `run-nc-missing-doc-workflow --from-stage fetch --to-stage fetch --retry-failed-fetch ...` |
-| `import_and_mine_document` | `run-nc-missing-doc-workflow --from-stage import --to-stage import ...` |
-| `bootstrap_tariff_version` | `run-nc-missing-doc-workflow --from-stage bootstrap_versions --to-stage bootstrap_versions ...` |
-| `process_document` / `retry_with_better_parser_context` | `run-nc-missing-doc-workflow --from-stage queue_reprocess --to-stage process_reprocess ...` |
-| `review_*`, `ready_for_acceptance`, `wait_for_reprocess_completion`, `monitor_linked_document` | `show-nc-missing-doc-status ...` |
+| `fetch_document` | `workflow run-nc-missing-doc --from-stage fetch --to-stage fetch ...` |
+| `retry_fetch_or_manual_portal_review` | `workflow run-nc-missing-doc --from-stage fetch --to-stage fetch --retry-failed-fetch ...` |
+| `import_and_mine_document` | `workflow run-nc-missing-doc --from-stage import --to-stage import ...` |
+| `bootstrap_tariff_version` | `workflow run-nc-missing-doc --from-stage bootstrap_versions --to-stage bootstrap_versions ...` |
+| `process_document` / `retry_with_better_parser_context` | `workflow run-nc-missing-doc --from-stage queue_reprocess --to-stage process_reprocess ...` |
+| `review_*`, `ready_for_acceptance`, `wait_for_reprocess_completion`, `monitor_linked_document` | `workflow show-nc-missing-doc-status ...` |
 
 The ranked triage report and both triage executor commands already follow this
 mapping. Use them instead of re-deriving it in ad hoc session logic.

@@ -116,20 +116,20 @@ Read:
 - [cli_command_reference.md](/c:/Python/Duke/Standalone/docs/cli_command_reference.md)
 
 Use:
-- `search-nc-missing-clean-docs`
-- `run-nc-missing-doc-workflow`
-- `report-nc-missing-doc-triage`
-- `execute-top-nc-missing-doc-triage`
-- `execute-batch-nc-missing-doc-triage`
-- `show-nc-missing-doc-status`
-- `report-nc-missing-doc-deferred`
-- `remediate-and-promote-nc-missing-docs`
+- `workflow search-nc-missing-clean-docs`
+- `workflow run-nc-missing-doc`
+- `workflow report-nc-missing-doc-triage`
+- `workflow execute-top-nc-missing-doc-triage`
+- `workflow execute-batch-nc-missing-doc-triage`
+- `workflow show-nc-missing-doc-status`
+- `workflow report-nc-missing-doc-deferred`
+- `workflow remediate-and-promote-nc-missing-docs`
 
 Preferred weak-agent loop:
-1. `run-nc-missing-doc-workflow`
-2. `report-nc-missing-doc-triage --actionable-only --top 10`
-3. `execute-top-nc-missing-doc-triage` for one bounded step
-4. `execute-batch-nc-missing-doc-triage --max-actions N` only when bounded multi-step progress is appropriate
+1. `workflow run-nc-missing-doc`
+2. `workflow report-nc-missing-doc-triage --actionable-only --top 10`
+3. `workflow execute-top-nc-missing-doc-triage` for one bounded step
+4. `workflow execute-batch-nc-missing-doc-triage --max-actions N` only when bounded multi-step progress is appropriate
 
 Search behavior note:
 - difficult missing-document searches now broaden automatically from exact
