@@ -194,8 +194,8 @@ python -m duke_rates ncuc portal-search --company "Duke Energy Progress" --types
 | `ncuc list-exhibit-candidates` | List candidate exhibits pending import decision |
 | `bootstrap-missing-versions-nc` | Create minimal `tariff_version` rows for historical docs that have `effective_start` + `local_path` but no version link. Run after `ncuc import-pipeline`. |
 | `load-ncuc-ingest` | Load raw NCUC ingest records from a file |
-| `import-history-inbox-progress-nc` | Import documents from the history inbox |
-| `export-history-inbox-progress-nc` | Export history inbox contents |
+| `progress import-history-inbox` | Import documents from the history inbox |
+| `progress export-history-inbox` | Export history inbox contents |
 
 **Critical note:** `extract-rates-nc` requires both `effective_start IS NOT NULL` and a
 `tariff_versions.historical_document_id` link. Run `ncuc import-pipeline` then
@@ -460,50 +460,50 @@ domain archives, and public notice citations.
 
 | Command | What it does |
 |---|---|
-| `list-history-progress-nc` | List historical tariff versions for DEP NC |
-| `recover-history-progress-nc` | Recover missing historical versions |
-| `list-history-chains-progress-nc` | Show version succession chains |
-| `show-history-chain-progress-nc` | Show detail for a specific chain |
-| `show-history-tariff-progress-nc` | Show tariff details for a version |
-| `show-history-coverage-progress-nc` | Coverage summary for a family |
-| `list-history-sources-progress-nc` | Sources available for history recovery |
-| `inspect-history-gaps-progress-nc` | Detailed gap analysis |
-| `recover-history-gaps-progress-nc` | Attempt to fill identified gaps |
-| `list-history-notice-links-progress-nc` | Notice citations linking to tariff versions |
-| `import-history-progress-nc` | Import recovered history into DB |
-| `estimate-history-bill-progress-nc` | Estimate bills using historical rates |
-| `list-regulator-gaps-progress-nc` | Regulatory filing gaps |
-| `show-regulator-gaps-progress-nc` | Detailed regulatory gap view |
-| `generate-regulator-inbox-progress-nc` | Generate inbox entries for regulatory filings |
-| `list-bill-relevant-gaps-progress-nc` | Families missing bill-relevant rate data |
-| `show-bill-relevant-gaps-progress-nc` | Detail view of bill-relevant gaps |
-| `parse-bill-relevant-progress-nc` | Parse bill-relevant historical documents |
-| `preview-bill-relevant-history-progress-nc` | Preview what history recovery would yield |
-| `recover-bill-relevant-history-progress-nc` | Run history recovery for bill-relevant families |
-| `preview-bill-relevant-openei-progress-nc` | Preview OpenEI-sourced history |
-| `recover-bill-relevant-openei-progress-nc` | Import OpenEI-sourced history |
-| `mine-historical-leads-progress-nc` | Mine citation/docket leads for historical versions |
-| `list-historical-leads-progress-nc` | List mined leads |
-| `score-historical-leads-progress-nc` | Score leads by quality |
-| `ingest-manual-lead-progress-nc` | Manually ingest a lead record |
-| `seed-family-documents-progress-nc` | Seed document links for a family |
-| `list-unresolved-historical-families-progress-nc` | Families with no linked history docs |
-| `preview-root-url-lists-progress-nc` | Preview URL list sources |
-| `import-root-url-lists-progress-nc` | Import URL lists as history candidates |
-| `generate-search-packs-progress-nc` | Generate search packs for gap families |
-| `list-search-packs-progress-nc` | List generated search packs |
-| `show-search-pack-progress-nc` | Show detail on a search pack |
-| `preview-google-dorks-progress-nc` | Preview Google dork queries |
-| `run-google-dorks-progress-nc` | Execute Google dork queries |
-| `export-google-dorks-progress-nc` | Export dork results |
-| `show-docket-leads-progress-nc` | Show docket-sourced leads |
-| `preview-predecessor-domain-progress-nc` | Preview predecessor domain archives |
-| `recover-predecessor-domain-progress-nc` | Import from predecessor domain |
-| `preview-openei-history-progress-nc` | Preview OpenEI history candidates |
-| `recover-openei-history-progress-nc` | Import OpenEI historical records |
-| `probe-archive-today-progress-nc` | Probe archive.today for historical versions |
-| `preview-history-family-crosswalk-progress-nc` | Preview family crosswalk mapping |
-| `apply-history-family-crosswalk-progress-nc` | Apply crosswalk (remap family assignments) |
+| `progress list-history` | List historical tariff versions for DEP NC |
+| `progress recover-history` | Recover missing historical versions |
+| `progress list-history-chains` | Show version succession chains |
+| `progress show-history-chain` | Show detail for a specific chain |
+| `progress show-history-tariff` | Show tariff details for a version |
+| `progress show-history-coverage` | Coverage summary for a family |
+| `progress list-history-sources` | Sources available for history recovery |
+| `progress inspect-history-gaps` | Detailed gap analysis |
+| `progress recover-history-gaps` | Attempt to fill identified gaps |
+| `progress list-history-notice-links` | Notice citations linking to tariff versions |
+| `progress import-history` | Import recovered history into DB |
+| `progress estimate-history-bill` | Estimate bills using historical rates |
+| `progress list-regulator-gaps` | Regulatory filing gaps |
+| `progress show-regulator-gaps` | Detailed regulatory gap view |
+| `progress generate-regulator-inbox` | Generate inbox entries for regulatory filings |
+| `progress list-bill-relevant-gaps` | Families missing bill-relevant rate data |
+| `progress show-bill-relevant-gaps` | Detail view of bill-relevant gaps |
+| `progress parse-bill-relevant` | Parse bill-relevant historical documents |
+| `progress preview-bill-relevant-history` | Preview what history recovery would yield |
+| `progress recover-bill-relevant-history` | Run history recovery for bill-relevant families |
+| `progress preview-bill-relevant-openei` | Preview OpenEI-sourced history |
+| `progress recover-bill-relevant-openei` | Import OpenEI-sourced history |
+| `progress mine-historical-leads` | Mine citation/docket leads for historical versions |
+| `progress list-historical-leads` | List mined leads |
+| `progress score-historical-leads` | Score leads by quality |
+| `progress ingest-manual-lead` | Manually ingest a lead record |
+| `progress seed-family-documents` | Seed document links for a family |
+| `progress list-unresolved-historical-families` | Families with no linked history docs |
+| `progress preview-root-url-lists` | Preview URL list sources |
+| `progress import-root-url-lists` | Import URL lists as history candidates |
+| `progress generate-search-packs` | Generate search packs for gap families |
+| `progress list-search-packs` | List generated search packs |
+| `progress show-search-pack` | Show detail on a search pack |
+| `progress preview-google-dorks` | Preview Google dork queries |
+| `progress run-google-dorks` | Execute Google dork queries |
+| `progress export-google-dorks` | Export dork results |
+| `progress show-docket-leads` | Show docket-sourced leads |
+| `progress preview-predecessor-domain` | Preview predecessor domain archives |
+| `progress recover-predecessor-domain` | Import from predecessor domain |
+| `progress preview-openei-history` | Preview OpenEI history candidates |
+| `progress recover-openei-history` | Import OpenEI historical records |
+| `progress probe-archive-today` | Probe archive.today for historical versions |
+| `progress preview-history-family-crosswalk` | Preview family crosswalk mapping |
+| `progress apply-history-family-crosswalk` | Apply crosswalk (remap family assignments) |
 | `lineage migrate-historical-family` | Migrate lineage from legacy to new schema |
 | `lineage canonicalize-historical-family-key` | Promote malformed `doc-*`/legacy historical families into canonical keys; prefer this over one-off DB edits when the target family already exists |
 
@@ -606,7 +606,7 @@ Structured multi-stage search for documents on external portals.
 | `audit tariff-timeline` | Timeline integrity audit for version succession |
 | `audit-rider-map` | Audit the rider-to-family mapping |
 | `cleanup-nc-residential-history` | Remove stale/orphaned residential history artifacts |
-| `show-bill-relevant-gaps-progress-nc` | (see §4) |
+| `progress show-bill-relevant-gaps` | (see §4) |
 
 ---
 

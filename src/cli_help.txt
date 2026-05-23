@@ -11,523 +11,371 @@
 +-----------------------------------------------------------------------------+
 +- Commands ------------------------------------------------------------------+
 | crawl                                                                       |
-| tariff-update                                     Check Duke Energy website |
-|                                                   for new or updated tariff |
-|                                                   documents.                |
+| tariff-update                              Check Duke Energy website for    |
+|                                            new or updated tariff documents. |
 | list-docs                                                                   |
 | show-doc                                                                    |
 | parse                                                                       |
 | parse-batch                                                                 |
-| classify-docs                                     Classify PDF documents:   |
-|                                                   extract                   |
-|                                                   tariff_identifier,        |
-|                                                   schedule_code, rev_token  |
-|                                                   from URL patterns.        |
-| build-tariff-families                             Build tariff_families     |
-|                                                   rows from classified      |
-|                                                   documents (Phase 2c).     |
-| show-document-classification-audit-nc             Show NC document buckets  |
-|                                                   for routing beyond simple |
-|                                                   tariff-charge extraction. |
-| show-unknown-routing-audit-nc                     Rank NC families still    |
-|                                                   landing in `unknown` or   |
-|                                                   weak fallback routing     |
-|                                                   buckets.                  |
-| parse-tariff-versions                             Parse Duke tariff leaf    |
-|                                                   PDFs and populate         |
-|                                                   tariff_versions and       |
-|                                                   tariff_charges.           |
-| mine-ncuc-pipeline                                Compatibility alias for   |
-|                                                   the page-aware NCUC       |
-|                                                   intake path; prefer ncuc  |
-|                                                   import-pipeline.          |
-| mine-docling-nc                                   Bridge stored Docling     |
-|                                                   artifacts into the NCUC   |
-|                                                   page-aware parsing        |
-|                                                   pipeline.                 |
-| mine-tariff-sheets-nc                             Mine standalone tariff    |
-|                                                   sheet PDFs that are in    |
-|                                                   historical_documents but  |
-|                                                   have no page artifacts.   |
-| extract-rates-nc                                  Extract rate charges from |
-|                                                   historical NC documents.  |
-| validate-extraction-nc                            Validate extracted rate   |
-|                                                   charges for quality and   |
-|                                                   outliers.                 |
-| test-bill-reconstruction-nc                       Test bill reconstruction  |
-|                                                   capability with extracted |
-|                                                   rates.                    |
-| bootstrap-missing-versions-nc                     Create tariff_version     |
-|                                                   rows for NC historical    |
-|                                                   docs that have a          |
-|                                                   date+path but no version  |
-|                                                   link.                     |
-| review-queue                                      Legacy current-document   |
-|                                                   parse queue; prefer       |
-|                                                   parse-review-queue for    |
-|                                                   historical pipeline work. |
-| parse-review-queue                                List parse attempts whose |
-|                                                   latest review outcome     |
-|                                                   still needs review.       |
-| record-parse-review                               Attach a manual review    |
-|                                                   outcome to an existing    |
-|                                                   parse attempt.            |
-| parse-review-summary                              Summarize parse-review    |
-|                                                   outcomes by profile and   |
-|                                                   family.                   |
-| show-parser-selection-audit-nc                    Summarize latest NC       |
-|                                                   parser-profile selection  |
-|                                                   outcomes and fallback     |
-|                                                   behavior.                 |
-| show-parser-improvement-candidates-nc             Rank parser/routing       |
-|                                                   improvement candidates    |
-|                                                   with a suggested next     |
-|                                                   command.                  |
-| show-near-miss-profiles-nc                        Surface the               |
-|                                                   top_candidates diagnostic |
-|                                                   from problem parser runs. |
-| show-family-mismatch-audit-nc                     Walk every linked NC      |
-|                                                   historical doc and        |
-|                                                   surface family-vs-content |
-|                                                   mismatches.               |
-| show-workflow-status-nc                           Show a compact NC         |
-|                                                   historical workflow       |
-|                                                   status summary for        |
-|                                                   session orientation.      |
-| recommend-overnight-lane-nc                       Recommend which overnight |
-|                                                   loop to run based on      |
-|                                                   current NC workflow       |
-|                                                   state.                    |
-| show-workflow-next-actions-nc                     Show ranked next actions  |
-|                                                   across OCR, reprocess,    |
-|                                                   and parser workflow       |
-|                                                   surfaces.                 |
-| show-workflow-capabilities-nc                     Show sanctioned           |
-|                                                   concurrency policy for    |
-|                                                   the guided NC workflow    |
-|                                                   actions.                  |
-| execute-workflow-next-action-nc                   Execute the               |
-|                                                   highest-priority bounded  |
-|                                                   workflow action that is   |
-|                                                   marked executable.        |
-| show-workflow-action-receipts-nc                  Show recent guided        |
-|                                                   workflow action receipts  |
-|                                                   for resumable NC          |
-|                                                   execution.                |
-| reconcile-workflow-action-receipts-nc             Reconcile guided workflow |
-|                                                   receipts against          |
-|                                                   OCR/reprocess queue       |
-|                                                   state.                    |
-| reconcile-skipped-parse-reviews                   Backfill accepted review  |
-|                                                   outcomes for skipped      |
-|                                                   parse attempts still      |
-|                                                   marked needs_review.      |
-| validate-document-diagnostics                     Validate the              |
-|                                                   v_document_diagnostics    |
-|                                                   view against the Python   |
-|                                                   remediation report.       |
-| run-docling-nc                                    Convert a single PDF with |
-|                                                   Docling (standard         |
-|                                                   pipeline) and cache the   |
-|                                                   structured artifacts.     |
-| run-docling-vlm                                   Convert a hard scanned    |
-|                                                   PDF using the             |
-|                                                   SmolDocling/GraniteDocli… |
-|                                                   VLM pipeline.             |
-| benchmark-docling                                 Benchmark Docling CPU vs  |
-|                                                   GPU conversion on         |
-|                                                   representative NCUC       |
-|                                                   documents.                |
-| benchmark-document-normalization                  Benchmark native vs       |
-|                                                   Paddle vs GLM document    |
-|                                                   normalization on          |
-|                                                   representative PDFs.      |
-| compare-document-page-text                        Compare page-level text   |
-|                                                   accuracy across native,   |
-|                                                   Paddle, and GLM OCR       |
-|                                                   backends.                 |
-| benchmark-redline-analysis                        Benchmark GLM image       |
-|                                                   analysis on candidate     |
-|                                                   clean/redline tariff      |
-|                                                   pages.                    |
-| gpu-status                                        Show current GPU          |
-|                                                   availability and VRAM     |
-|                                                   budget.                   |
-| report-docling-skipped-pages-nc                   List Docling artifacts    |
-|                                                   where pages were skipped  |
-|                                                   or degraded during        |
-|                                                   chunked conversion.       |
-| list-document-types-nc                            List the seeded           |
-|                                                   ``document_types``        |
-|                                                   taxonomy.                 |
-| report-document-types-nc                          Report the distribution   |
-|                                                   of ``document_type``      |
-|                                                   classifications.          |
-| report-flag-classifications-nc                    Report the distribution   |
-|                                                   of Phase 3 flag           |
-|                                                   classifications.          |
-| backfill-flag-classifications-nc                  Backfill Phase 3 flag     |
-|                                                   classifications for       |
-|                                                   existing                  |
-|                                                   historical_documents.     |
-| check-ollama-models-nc                            Probe every configured    |
-|                                                   Ollama role and report    |
-|                                                   availability.             |
-| benchmark-ollama-roles-nc                         Benchmark local Ollama    |
-|                                                   models against            |
-|                                                   document-intelligence     |
-|                                                   tasks.                    |
-| run-llm-doc-probe-nc                              Run an LLM probe against  |
-|                                                   one historical document.  |
-| report-classification-disagreements-nc            Surface low-confidence    |
-|                                                   and runner-up-close       |
-|                                                   classifications.          |
-| adjudicate-classifications-nc                     Run LLM adjudication on   |
-|                                                   document_type             |
-|                                                   disagreements.            |
-| fingerprint-corpus-nc                             Fingerprint every PDF     |
-|                                                   referenced by             |
-|                                                   ``historical_documents``  |
-|                                                   and                       |
-|                                                   ``ncuc_discovery_records… |
-| embed-corpus-nc                                   Generate embeddings for   |
-|                                                   every PDF referenced by   |
-|                                                   ``historical_documents``. |
-| backfill-embedding-classifications-nc             Backfill embedding-based  |
-|                                                   document_type             |
-|                                                   classifications for       |
-|                                                   existing documents.       |
-| run-overnight-doc-intelligence-nc                 Run embedding generation  |
-|                                                   + LLM adjudication as a   |
-|                                                   resumable overnight       |
-|                                                   batch.                    |
-| analyze-parse-failures-nc                         Analyze weak/empty parse  |
-|                                                   attempts with LLM         |
-|                                                   root-cause diagnosis.     |
-| suggest-regex-fixes-nc                            Generate                  |
-|                                                   regex/normalization       |
-|                                                   suggestions for diagnosed |
-|                                                   parse failures.           |
-| validate-regex-suggestions-nc                     Deterministically         |
-|                                                   validate pending          |
-|                                                   regex/normalization       |
-|                                                   suggestions.              |
-| run-llm-parse-fallback-nc                         Run schema-guided LLM     |
-|                                                   fallback extraction on    |
-|                                                   weak/empty parses.        |
-| validate-llm-rate-extractions-nc                  Validate LLM-extracted    |
-|                                                   candidate rate rows       |
-|                                                   against source evidence.  |
-| locate-llm-row-evidence-nc                        Use a focused LLM pass to |
-|                                                   locate missing row-level  |
-|                                                   evidence.                 |
-| reclassify-llm-row-conflicts-nc                   Use a focused LLM pass to |
-|                                                   propose row               |
-|                                                   charge-type/unit repairs. |
-| apply-deterministic-llm-row-repairs-nc            Create advisory repairs   |
-|                                                   for repeated              |
-|                                                   deterministic             |
-|                                                   row-validation patterns.  |
-| show-llm-row-effective-status-nc                  Show row-level validation |
-|                                                   status after accounting   |
-|                                                   for accepted repairs.     |
-| propose-llm-charge-promotions-nc                  Build safe promotion      |
-|                                                   proposals from            |
-|                                                   validated/effective LLM   |
-|                                                   rows.                     |
-| promote-llm-charge-proposals-nc                   Promote eligible LLM      |
-|                                                   charge proposals into     |
-|                                                   tariff_charges.           |
-| run-llm-promotion-overnight-nc                    Run the guarded           |
-|                                                   deterministic             |
-|                                                   LLM-promotion overnight   |
-|                                                   loop.                     |
-| run-overnight-parse-improvement-nc                Run parse-improvement     |
-|                                                   tasks as a resumable      |
-|                                                   overnight batch.          |
-| aggregate-overnight-reports-nc                    Roll up overnight-loop    |
-|                                                   JSON reports into a       |
-|                                                   single deltas summary.    |
-| report-wrong-profile-diagnostics-nc               Group wrong_profile       |
-|                                                   parse-failure diagnoses   |
-|                                                   by current parser_profile |
-|                                                   + source directory.       |
-| report-profile-recommendations-nc                 List parser-profile       |
-|                                                   reassignment              |
-|                                                   recommendations from the  |
-|                                                   consensus engine.         |
-| populate-document-identity-nc                     Aggregate evidence from   |
-|                                                   existing tables into      |
-|                                                   ``document_identity``.    |
-| report-document-identity-nc                       Print the persisted       |
-|                                                   identity bundle for one   |
-|                                                   document.                 |
-| report-document-identity-summary-nc               Print confidence          |
-|                                                   distribution and signal   |
-|                                                   coverage across all       |
-|                                                   identity bundles.         |
-| report-document-identity-quality-nc               Cross-check identity      |
-|                                                   confidence against actual |
-|                                                   parse outcomes (Phase     |
-|                                                   1D).                      |
-| report-document-fingerprint-clusters-nc           Group fingerprinted       |
-|                                                   documents by their coarse |
-|                                                   cluster signature.        |
-| populate-routing-tier-nc                          Label every               |
-|                                                   ``document_identity`` row |
-|                                                   with a routing tier.      |
-| report-routing-tier-nc                            Show tier distribution    |
-|                                                   and a few example         |
-|                                                   rationales per tier.      |
-| report-routing-tier-validation-nc                 Cross-check tier          |
-|                                                   predictions against       |
-|                                                   actual parse outcomes.    |
-| bind-tier1-proposals-nc                           Record Tier 1 binding     |
-|                                                   proposals (Phase 3B,      |
-|                                                   dry-run).                 |
-| report-tier1-binding-nc                           Print Tier 1 binding      |
-|                                                   summary.                  |
-| report-tier1-binding-comparison-nc                Run the Phase 3C          |
-|                                                   comparison report.        |
-| generate-per-doc-rules-nc                         Generate and validate     |
-|                                                   per-document rules for    |
-|                                                   Tier 3 docs (Phase 4B).   |
-| report-per-doc-rules-nc                           Status distribution for   |
-|                                                   ``document_specific_rule… |
-| detect-rule-promotions-nc                         Run the Phase 4C          |
-|                                                   promotion-candidate       |
-|                                                   detector.                 |
-| report-rule-promotions-nc                         Show promotion-candidate  |
-|                                                   summary for human review. |
-| populate-document-sections-nc                     Build sub-document        |
-|                                                   section bundles from span |
-|                                                   + page-level evidence     |
-|                                                   (Phase 6AB).              |
-| report-document-sections-nc                       Print the persisted       |
-|                                                   section bundles for one   |
-|                                                   document.                 |
-| report-document-sections-summary-nc               Print aggregate           |
-|                                                   statistics for the        |
-|                                                   document_sections table.  |
-| analyze-document-structure-nc                     Use a local LLM to review |
-|                                                   and refine deterministic  |
-|                                                   section boundaries (Phase |
-|                                                   6C).                      |
-| backfill-classifications-nc                       Backfill                  |
-|                                                   document_classifications  |
-|                                                   rows for existing         |
-|                                                   historical documents.     |
-| process-docling-batch                             Process a batch of NCUC   |
-|                                                   documents through Docling |
-|                                                   in a single long-running  |
-|                                                   process.                  |
-| recover-history-progress-nc                                                 |
-| list-history-progress-nc                                                    |
-| recover-public-notices-progress-nc                                          |
-| list-history-chains-progress-nc                                             |
-| preview-history-family-crosswalk-progress-nc                                |
-| apply-history-family-crosswalk-progress-nc                                  |
-| show-history-chain-progress-nc                                              |
-| list-history-notice-links-progress-nc                                       |
-| show-history-tariff-progress-nc                                             |
-| estimate-history-bill-progress-nc                                           |
-| recover-history-gaps-progress-nc                                            |
-| inspect-history-gaps-progress-nc                                            |
-| import-history-progress-nc                                                  |
-| list-history-sources-progress-nc                                            |
-| show-history-coverage-progress-nc                                           |
-| list-regulator-gaps-progress-nc                                             |
-| show-regulator-gaps-progress-nc                                             |
-| parse-bill-relevant-progress-nc                                             |
+| classify-docs                              Classify PDF documents: extract  |
+|                                            tariff_identifier,               |
+|                                            schedule_code, rev_token from    |
+|                                            URL patterns.                    |
+| build-tariff-families                      Build tariff_families rows from  |
+|                                            classified documents (Phase 2c). |
+| show-document-classification-audit-nc      Show NC document buckets for     |
+|                                            routing beyond simple            |
+|                                            tariff-charge extraction.        |
+| show-unknown-routing-audit-nc              Rank NC families still landing   |
+|                                            in `unknown` or weak fallback    |
+|                                            routing buckets.                 |
+| parse-tariff-versions                      Parse Duke tariff leaf PDFs and  |
+|                                            populate tariff_versions and     |
+|                                            tariff_charges.                  |
+| mine-ncuc-pipeline                         Compatibility alias for the      |
+|                                            page-aware NCUC intake path;     |
+|                                            prefer ncuc import-pipeline.     |
+| mine-docling-nc                            Bridge stored Docling artifacts  |
+|                                            into the NCUC page-aware parsing |
+|                                            pipeline.                        |
+| mine-tariff-sheets-nc                      Mine standalone tariff sheet     |
+|                                            PDFs that are in                 |
+|                                            historical_documents but have no |
+|                                            page artifacts.                  |
+| extract-rates-nc                           Extract rate charges from        |
+|                                            historical NC documents.         |
+| validate-extraction-nc                     Validate extracted rate charges  |
+|                                            for quality and outliers.        |
+| test-bill-reconstruction-nc                Test bill reconstruction         |
+|                                            capability with extracted rates. |
+| bootstrap-missing-versions-nc              Create tariff_version rows for   |
+|                                            NC historical docs that have a   |
+|                                            date+path but no version link.   |
+| review-queue                               Legacy current-document parse    |
+|                                            queue; prefer parse-review-queue |
+|                                            for historical pipeline work.    |
+| parse-review-queue                         List parse attempts whose latest |
+|                                            review outcome still needs       |
+|                                            review.                          |
+| record-parse-review                        Attach a manual review outcome   |
+|                                            to an existing parse attempt.    |
+| parse-review-summary                       Summarize parse-review outcomes  |
+|                                            by profile and family.           |
+| show-parser-selection-audit-nc             Summarize latest NC              |
+|                                            parser-profile selection         |
+|                                            outcomes and fallback behavior.  |
+| show-parser-improvement-candidates-nc      Rank parser/routing improvement  |
+|                                            candidates with a suggested next |
+|                                            command.                         |
+| show-near-miss-profiles-nc                 Surface the top_candidates       |
+|                                            diagnostic from problem parser   |
+|                                            runs.                            |
+| show-family-mismatch-audit-nc              Walk every linked NC historical  |
+|                                            doc and surface                  |
+|                                            family-vs-content mismatches.    |
+| show-workflow-status-nc                    Show a compact NC historical     |
+|                                            workflow status summary for      |
+|                                            session orientation.             |
+| recommend-overnight-lane-nc                Recommend which overnight loop   |
+|                                            to run based on current NC       |
+|                                            workflow state.                  |
+| show-workflow-next-actions-nc              Show ranked next actions across  |
+|                                            OCR, reprocess, and parser       |
+|                                            workflow surfaces.               |
+| show-workflow-capabilities-nc              Show sanctioned concurrency      |
+|                                            policy for the guided NC         |
+|                                            workflow actions.                |
+| execute-workflow-next-action-nc            Execute the highest-priority     |
+|                                            bounded workflow action that is  |
+|                                            marked executable.               |
+| show-workflow-action-receipts-nc           Show recent guided workflow      |
+|                                            action receipts for resumable NC |
+|                                            execution.                       |
+| reconcile-workflow-action-receipts-nc      Reconcile guided workflow        |
+|                                            receipts against OCR/reprocess   |
+|                                            queue state.                     |
+| reconcile-skipped-parse-reviews            Backfill accepted review         |
+|                                            outcomes for skipped parse       |
+|                                            attempts still marked            |
+|                                            needs_review.                    |
+| validate-document-diagnostics              Validate the                     |
+|                                            v_document_diagnostics view      |
+|                                            against the Python remediation   |
+|                                            report.                          |
+| run-docling-nc                             Convert a single PDF with        |
+|                                            Docling (standard pipeline) and  |
+|                                            cache the structured artifacts.  |
+| run-docling-vlm                            Convert a hard scanned PDF using |
+|                                            the SmolDocling/GraniteDocling   |
+|                                            VLM pipeline.                    |
+| benchmark-docling                          Benchmark Docling CPU vs GPU     |
+|                                            conversion on representative     |
+|                                            NCUC documents.                  |
+| benchmark-document-normalization           Benchmark native vs Paddle vs    |
+|                                            GLM document normalization on    |
+|                                            representative PDFs.             |
+| compare-document-page-text                 Compare page-level text accuracy |
+|                                            across native, Paddle, and GLM   |
+|                                            OCR backends.                    |
+| benchmark-redline-analysis                 Benchmark GLM image analysis on  |
+|                                            candidate clean/redline tariff   |
+|                                            pages.                           |
+| gpu-status                                 Show current GPU availability    |
+|                                            and VRAM budget.                 |
+| report-docling-skipped-pages-nc            List Docling artifacts where     |
+|                                            pages were skipped or degraded   |
+|                                            during chunked conversion.       |
+| list-document-types-nc                     List the seeded                  |
+|                                            ``document_types`` taxonomy.     |
+| report-document-types-nc                   Report the distribution of       |
+|                                            ``document_type``                |
+|                                            classifications.                 |
+| report-flag-classifications-nc             Report the distribution of Phase |
+|                                            3 flag classifications.          |
+| backfill-flag-classifications-nc           Backfill Phase 3 flag            |
+|                                            classifications for existing     |
+|                                            historical_documents.            |
+| check-ollama-models-nc                     Probe every configured Ollama    |
+|                                            role and report availability.    |
+| benchmark-ollama-roles-nc                  Benchmark local Ollama models    |
+|                                            against document-intelligence    |
+|                                            tasks.                           |
+| run-llm-doc-probe-nc                       Run an LLM probe against one     |
+|                                            historical document.             |
+| report-classification-disagreements-nc     Surface low-confidence and       |
+|                                            runner-up-close classifications. |
+| adjudicate-classifications-nc              Run LLM adjudication on          |
+|                                            document_type disagreements.     |
+| fingerprint-corpus-nc                      Fingerprint every PDF referenced |
+|                                            by ``historical_documents`` and  |
+|                                            ``ncuc_discovery_records``.      |
+| embed-corpus-nc                            Generate embeddings for every    |
+|                                            PDF referenced by                |
+|                                            ``historical_documents``.        |
+| backfill-embedding-classifications-nc      Backfill embedding-based         |
+|                                            document_type classifications    |
+|                                            for existing documents.          |
+| run-overnight-doc-intelligence-nc          Run embedding generation + LLM   |
+|                                            adjudication as a resumable      |
+|                                            overnight batch.                 |
+| analyze-parse-failures-nc                  Analyze weak/empty parse         |
+|                                            attempts with LLM root-cause     |
+|                                            diagnosis.                       |
+| suggest-regex-fixes-nc                     Generate regex/normalization     |
+|                                            suggestions for diagnosed parse  |
+|                                            failures.                        |
+| validate-regex-suggestions-nc              Deterministically validate       |
+|                                            pending regex/normalization      |
+|                                            suggestions.                     |
+| run-llm-parse-fallback-nc                  Run schema-guided LLM fallback   |
+|                                            extraction on weak/empty parses. |
+| validate-llm-rate-extractions-nc           Validate LLM-extracted candidate |
+|                                            rate rows against source         |
+|                                            evidence.                        |
+| locate-llm-row-evidence-nc                 Use a focused LLM pass to locate |
+|                                            missing row-level evidence.      |
+| reclassify-llm-row-conflicts-nc            Use a focused LLM pass to        |
+|                                            propose row charge-type/unit     |
+|                                            repairs.                         |
+| apply-deterministic-llm-row-repairs-nc     Create advisory repairs for      |
+|                                            repeated deterministic           |
+|                                            row-validation patterns.         |
+| show-llm-row-effective-status-nc           Show row-level validation status |
+|                                            after accounting for accepted    |
+|                                            repairs.                         |
+| propose-llm-charge-promotions-nc           Build safe promotion proposals   |
+|                                            from validated/effective LLM     |
+|                                            rows.                            |
+| promote-llm-charge-proposals-nc            Promote eligible LLM charge      |
+|                                            proposals into tariff_charges.   |
+| run-llm-promotion-overnight-nc             Run the guarded deterministic    |
+|                                            LLM-promotion overnight loop.    |
+| run-overnight-parse-improvement-nc         Run parse-improvement tasks as a |
+|                                            resumable overnight batch.       |
+| aggregate-overnight-reports-nc             Roll up overnight-loop JSON      |
+|                                            reports into a single deltas     |
+|                                            summary.                         |
+| report-wrong-profile-diagnostics-nc        Group wrong_profile              |
+|                                            parse-failure diagnoses by       |
+|                                            current parser_profile + source  |
+|                                            directory.                       |
+| report-profile-recommendations-nc          List parser-profile reassignment |
+|                                            recommendations from the         |
+|                                            consensus engine.                |
+| populate-document-identity-nc              Aggregate evidence from existing |
+|                                            tables into                      |
+|                                            ``document_identity``.           |
+| report-document-identity-nc                Print the persisted identity     |
+|                                            bundle for one document.         |
+| report-document-identity-summary-nc        Print confidence distribution    |
+|                                            and signal coverage across all   |
+|                                            identity bundles.                |
+| report-document-identity-quality-nc        Cross-check identity confidence  |
+|                                            against actual parse outcomes    |
+|                                            (Phase 1D).                      |
+| report-document-fingerprint-clusters-nc    Group fingerprinted documents by |
+|                                            their coarse cluster signature.  |
+| populate-routing-tier-nc                   Label every                      |
+|                                            ``document_identity`` row with a |
+|                                            routing tier.                    |
+| report-routing-tier-nc                     Show tier distribution and a few |
+|                                            example rationales per tier.     |
+| report-routing-tier-validation-nc          Cross-check tier predictions     |
+|                                            against actual parse outcomes.   |
+| bind-tier1-proposals-nc                    Record Tier 1 binding proposals  |
+|                                            (Phase 3B, dry-run).             |
+| report-tier1-binding-nc                    Print Tier 1 binding summary.    |
+| report-tier1-binding-comparison-nc         Run the Phase 3C comparison      |
+|                                            report.                          |
+| generate-per-doc-rules-nc                  Generate and validate            |
+|                                            per-document rules for Tier 3    |
+|                                            docs (Phase 4B).                 |
+| report-per-doc-rules-nc                    Status distribution for          |
+|                                            ``document_specific_rules``.     |
+| detect-rule-promotions-nc                  Run the Phase 4C                 |
+|                                            promotion-candidate detector.    |
+| report-rule-promotions-nc                  Show promotion-candidate summary |
+|                                            for human review.                |
+| populate-document-sections-nc              Build sub-document section       |
+|                                            bundles from span + page-level   |
+|                                            evidence (Phase 6AB).            |
+| report-document-sections-nc                Print the persisted section      |
+|                                            bundles for one document.        |
+| report-document-sections-summary-nc        Print aggregate statistics for   |
+|                                            the document_sections table.     |
+| analyze-document-structure-nc              Use a local LLM to review and    |
+|                                            refine deterministic section     |
+|                                            boundaries (Phase 6C).           |
+| backfill-classifications-nc                Backfill                         |
+|                                            document_classifications rows    |
+|                                            for existing historical          |
+|                                            documents.                       |
+| process-docling-batch                      Process a batch of NCUC          |
+|                                            documents through Docling in a   |
+|                                            single long-running process.     |
 | audit-local-raw-nc                                                          |
 | load-local-rider-summaries-nc                                               |
 | load-local-rates-nc                                                         |
-| list-bill-relevant-gaps-progress-nc                                         |
-| show-bill-relevant-gaps-progress-nc                                         |
-| mine-historical-leads-progress-nc                                           |
-| ingest-manual-lead-progress-nc                                              |
-| score-historical-leads-progress-nc                                          |
-| list-historical-leads-progress-nc                                           |
-| preview-root-url-lists-progress-nc                                          |
-| import-root-url-lists-progress-nc                                           |
-| generate-search-packs-progress-nc                                           |
-| list-search-packs-progress-nc                                               |
-| show-search-pack-progress-nc                                                |
-| preview-google-dorks-progress-nc                  Preview Google Dork       |
-|                                                   queries without executing |
-|                                                   them.                     |
-| run-google-dorks-progress-nc                      Execute Google Dork       |
-|                                                   queries via Custom Search |
-|                                                   API and store results as  |
-|                                                   historical leads.         |
-| export-google-dorks-progress-nc                   Export all Google Dork    |
-|                                                   query strings as a JSON   |
-|                                                   array.                    |
-| show-docket-leads-progress-nc                                               |
-| list-unresolved-historical-families-progress-nc                             |
-| seed-family-documents-progress-nc                 Insert placeholder        |
-|                                                   documents rows for        |
-|                                                   Progress NC families that |
-|                                                   have no current document. |
-| preview-predecessor-domain-progress-nc                                      |
-| recover-predecessor-domain-progress-nc                                      |
-| preview-bill-relevant-history-progress-nc                                   |
-| recover-bill-relevant-history-progress-nc                                   |
-| preview-bill-relevant-openei-progress-nc                                    |
-| recover-bill-relevant-openei-progress-nc                                    |
-| generate-regulator-inbox-progress-nc                                        |
-| import-history-inbox-progress-nc                                            |
-| export-history-inbox-progress-nc                                            |
-| preview-openei-history-progress-nc                                          |
-| recover-openei-history-progress-nc                                          |
-| probe-archive-today-progress-nc                                             |
 | mcp                                                                         |
-| report-database-intelligence-nc                   Run deterministic corpus  |
-|                                                   analytics across the NCUC |
-|                                                   database.                 |
-| summarize-database-intelligence-nc                Feed the database         |
-|                                                   intelligence report to an |
-|                                                   LLM for summarization.    |
-| ask-ncuc-db                                       Ask a natural-language    |
-|                                                   question about the NCUC   |
-|                                                   database.                 |
-| run-overnight-db-intelligence-nc                  Run the full database     |
-|                                                   intelligence pipeline     |
-|                                                   overnight.                |
-| run-autonomous-cycle-nc                           Run one autonomous loop   |
-|                                                   cycle: detect -> decide   |
-|                                                   -> act -> measure.        |
-| run-continuous-loop-nc                            Run the continuous        |
-|                                                   autonomous loop with      |
-|                                                   acquisition.              |
-| ingest-ncuc                                       Legacy JSON ingest path   |
-|                                                   for older compliance-book |
-|                                                   workflows; not the        |
-|                                                   default historical        |
-|                                                   pipeline.                 |
-| load-ncuc-ingest                                  Load NCUC ingest results  |
-|                                                   and rider summaries into  |
-|                                                   the database.             |
-| load-dep-provisional-riders                       Load derived DEP          |
-|                                                   provisional rider history |
-|                                                   into dedicated SQLite     |
-|                                                   tables.                   |
-| cleanup-nc-residential-history                    Preview or apply cleanup  |
-|                                                   for noisy residential NC  |
-|                                                   history rows.             |
-| nc-redline-portal-queue                           Show NCUC dockets found   |
-|                                                   in redline crossrefs that |
-|                                                   have not yet been fetched |
-|                                                   from portal.              |
-| normalize-nc-effective-dates                      Normalize malformed       |
-|                                                   effective_start /         |
-|                                                   effective_end values in   |
-|                                                   historical_documents.     |
-| remediate-nc-null-effective-dates                 Remediate null            |
-|                                                   effective_start on        |
-|                                                   historical_documents via  |
-|                                                   multi-pass strategy.      |
-| refresh-nc-redline-fingerprints                   Refresh NC                |
-|                                                   document_fingerprints     |
-|                                                   redline flags using the   |
-|                                                   corrected detector.       |
-| seed-dep-residential-rider-applicability          Seed mandatory DEP        |
-|                                                   residential rider-family  |
-|                                                   applicability links for   |
-|                                                   leafs 500-504.            |
-| seed-dep-storm-rider-applicability                Seed DEP storm-rider      |
-|                                                   applicability links for   |
-|                                                   residential schedules.    |
-| audit-document-type-classifications-nc            Audit document_type       |
-|                                                   classifier agreement and  |
-|                                                   (optionally) export a     |
-|                                                   gold set.                 |
-| seed-document-type-gold-nc                        Seed document_type_gold   |
-|                                                   from classifier           |
-|                                                   agreement.                |
-| train-document-type-baseline-nc                   Stream D baseline: TF-IDF |
-|                                                   + LogisticRegression on   |
-|                                                   document_type_gold.       |
-| audit-stale-gold-nc                               Find document_type_gold   |
-|                                                   rows where the v2         |
-|                                                   classifier now disagrees. |
-| audit-bundle-metadata-mismatch-nc                 Find docs where v2's      |
-|                                                   content classification    |
-|                                                   disagrees with the        |
-|                                                   importer's family_key     |
-|                                                   tag.                      |
-| promote-high-confidence-subset-nc                 Promote subset-agreement  |
-|                                                   docs to                   |
-|                                                   document_type_gold.       |
-| triage-disagreements-nc                           Export                    |
-|                                                   classifier-disagreement   |
-|                                                   docs as a labeling JSONL  |
-|                                                   queue.                    |
-| classify-documents-v2-nc                          Run rule_document_type_v2 |
-|                                                   against NC docs and       |
-|                                                   compare with v1.          |
-| audit-rider-map                                   Show the static rider     |
-|                                                   map: which riders apply   |
-|                                                   to which schedules.       |
-| audit-search-worklist                             List tariff families that |
-|                                                   need NCUC searches, with  |
-|                                                   suggested queries.        |
-| diagnose-document-nc                              Diagnose why a document's |
-|                                                   extraction is empty,      |
-|                                                   weak, or failing.         |
-| recommend-missing-dockets-nc                      Recommend dockets with    |
-|                                                   low or zero processed     |
-|                                                   coverage for targeted     |
-|                                                   fetching.                 |
-| show-extraction-coverage-nc                       Show per-family           |
-|                                                   extraction coverage       |
-|                                                   ranked by gap size.       |
-| validate-parser-change-nc                         Validate a parser profile |
-|                                                   change by comparing       |
-|                                                   before/after charge       |
-|                                                   counts.                   |
-| diagnose-empty-nc                                 Batch-diagnose all        |
-|                                                   empty/weak documents,     |
-|                                                   grouped by root cause.    |
-| show-review-impact-nc                             Rank NC families by       |
-|                                                   review impact: where      |
-|                                                   review work would yield   |
-|                                                   the most charges.         |
-| ocr                                               OCR queue management,     |
-|                                                   remediation, batch        |
-|                                                   processing, and           |
-|                                                   benchmarks.               |
-| reprocess                                         Historical reprocess      |
-|                                                   queue management, stale   |
-|                                                   recovery, and queue       |
-|                                                   drain.                    |
-| audit                                             Tariff completeness,      |
-|                                                   coverage, and             |
-|                                                   cross-attribution audits. |
-| export                                            NC and DEP                |
-|                                                   audit/inventory report    |
-|                                                   exports.                  |
-| workflow                                          NC missing-document       |
-|                                                   workflow: search, fetch,  |
-|                                                   import, bootstrap,        |
-|                                                   reprocess, validate.      |
-| search                                            Multi-stage NCUC search:  |
-|                                                   probe, query, run,        |
-|                                                   ingest, doc-param.        |
-| lineage                                           Tariff family +           |
-|                                                   historical document       |
-|                                                   lifecycle: list, repair,  |
-|                                                   dedup, canonicalize,      |
-|                                                   retire.                   |
-| ncuc                                              NCUC                      |
-|                                                   portal/search/wayback/do… |
-|                                                   pipeline.                 |
-| billing                                           Bill calculation,         |
-|                                                   parsing, estimation,      |
-|                                                   comparison, and           |
-|                                                   reconciliation.           |
-| data                                              External rate-data        |
-|                                                   sources: EIA API v2,      |
-|                                                   OpenEI, URDB.             |
+| report-database-intelligence-nc            Run deterministic corpus         |
+|                                            analytics across the NCUC        |
+|                                            database.                        |
+| summarize-database-intelligence-nc         Feed the database intelligence   |
+|                                            report to an LLM for             |
+|                                            summarization.                   |
+| ask-ncuc-db                                Ask a natural-language question  |
+|                                            about the NCUC database.         |
+| run-overnight-db-intelligence-nc           Run the full database            |
+|                                            intelligence pipeline overnight. |
+| run-autonomous-cycle-nc                    Run one autonomous loop cycle:   |
+|                                            detect -> decide -> act ->       |
+|                                            measure.                         |
+| run-continuous-loop-nc                     Run the continuous autonomous    |
+|                                            loop with acquisition.           |
+| ingest-ncuc                                Legacy JSON ingest path for      |
+|                                            older compliance-book workflows; |
+|                                            not the default historical       |
+|                                            pipeline.                        |
+| load-ncuc-ingest                           Load NCUC ingest results and     |
+|                                            rider summaries into the         |
+|                                            database.                        |
+| load-dep-provisional-riders                Load derived DEP provisional     |
+|                                            rider history into dedicated     |
+|                                            SQLite tables.                   |
+| cleanup-nc-residential-history             Preview or apply cleanup for     |
+|                                            noisy residential NC history     |
+|                                            rows.                            |
+| nc-redline-portal-queue                    Show NCUC dockets found in       |
+|                                            redline crossrefs that have not  |
+|                                            yet been fetched from portal.    |
+| normalize-nc-effective-dates               Normalize malformed              |
+|                                            effective_start / effective_end  |
+|                                            values in historical_documents.  |
+| remediate-nc-null-effective-dates          Remediate null effective_start   |
+|                                            on historical_documents via      |
+|                                            multi-pass strategy.             |
+| refresh-nc-redline-fingerprints            Refresh NC document_fingerprints |
+|                                            redline flags using the          |
+|                                            corrected detector.              |
+| seed-dep-residential-rider-applicability   Seed mandatory DEP residential   |
+|                                            rider-family applicability links |
+|                                            for leafs 500-504.               |
+| seed-dep-storm-rider-applicability         Seed DEP storm-rider             |
+|                                            applicability links for          |
+|                                            residential schedules.           |
+| audit-document-type-classifications-nc     Audit document_type classifier   |
+|                                            agreement and (optionally)       |
+|                                            export a gold set.               |
+| seed-document-type-gold-nc                 Seed document_type_gold from     |
+|                                            classifier agreement.            |
+| train-document-type-baseline-nc            Stream D baseline: TF-IDF +      |
+|                                            LogisticRegression on            |
+|                                            document_type_gold.              |
+| audit-stale-gold-nc                        Find document_type_gold rows     |
+|                                            where the v2 classifier now      |
+|                                            disagrees.                       |
+| audit-bundle-metadata-mismatch-nc          Find docs where v2's content     |
+|                                            classification disagrees with    |
+|                                            the importer's family_key tag.   |
+| promote-high-confidence-subset-nc          Promote subset-agreement docs to |
+|                                            document_type_gold.              |
+| triage-disagreements-nc                    Export classifier-disagreement   |
+|                                            docs as a labeling JSONL queue.  |
+| classify-documents-v2-nc                   Run rule_document_type_v2        |
+|                                            against NC docs and compare with |
+|                                            v1.                              |
+| audit-rider-map                            Show the static rider map: which |
+|                                            riders apply to which schedules. |
+| audit-search-worklist                      List tariff families that need   |
+|                                            NCUC searches, with suggested    |
+|                                            queries.                         |
+| diagnose-document-nc                       Diagnose why a document's        |
+|                                            extraction is empty, weak, or    |
+|                                            failing.                         |
+| recommend-missing-dockets-nc               Recommend dockets with low or    |
+|                                            zero processed coverage for      |
+|                                            targeted fetching.               |
+| show-extraction-coverage-nc                Show per-family extraction       |
+|                                            coverage ranked by gap size.     |
+| validate-parser-change-nc                  Validate a parser profile change |
+|                                            by comparing before/after charge |
+|                                            counts.                          |
+| diagnose-empty-nc                          Batch-diagnose all empty/weak    |
+|                                            documents, grouped by root       |
+|                                            cause.                           |
+| show-review-impact-nc                      Rank NC families by review       |
+|                                            impact: where review work would  |
+|                                            yield the most charges.          |
+| ocr                                        OCR queue management,            |
+|                                            remediation, batch processing,   |
+|                                            and benchmarks.                  |
+| reprocess                                  Historical reprocess queue       |
+|                                            management, stale recovery, and  |
+|                                            queue drain.                     |
+| audit                                      Tariff completeness, coverage,   |
+|                                            and cross-attribution audits.    |
+| export                                     NC and DEP audit/inventory       |
+|                                            report exports.                  |
+| workflow                                   NC missing-document workflow:    |
+|                                            search, fetch, import,           |
+|                                            bootstrap, reprocess, validate.  |
+| search                                     Multi-stage NCUC search: probe,  |
+|                                            query, run, ingest, doc-param.   |
+| lineage                                    Tariff family + historical       |
+|                                            document lifecycle: list,        |
+|                                            repair, dedup, canonicalize,     |
+|                                            retire.                          |
+| ncuc                                       NCUC                             |
+|                                            portal/search/wayback/docket     |
+|                                            pipeline.                        |
+| billing                                    Bill calculation, parsing,       |
+|                                            estimation, comparison, and      |
+|                                            reconciliation.                  |
+| data                                       External rate-data sources: EIA  |
+|                                            API v2, OpenEI, URDB.            |
+| progress                                   Progress NC historical recovery, |
+|                                            search, leads,                   |
+|                                            regulator/openei/archive         |
+|                                            pipelines.                       |
 +-----------------------------------------------------------------------------+
 
