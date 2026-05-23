@@ -698,59 +698,10 @@
 |                                                   comparison: cheapest,     |
 |                                                   most expensive, and NC    |
 |                                                   context.                  |
-| audit-tariff-timeline                             Show version timeline,    |
-|                                                   date gaps, and            |
-|                                                   supersession chain for    |
-|                                                   one tariff family.        |
-| audit-tariff-coverage                             Audit rider coverage for  |
-|                                                   one rate schedule at a    |
-|                                                   given date.               |
-| export-nc-coverage-assessment                     Export DB-driven NC       |
-|                                                   schedule coverage         |
-|                                                   matrices for DEP and DEC. |
-| export-nc-anomaly-audit                           Export a ranked NC tariff |
-|                                                   anomaly audit to drive    |
-|                                                   reparse and backfill      |
-|                                                   work.                     |
-| export-nc-schedule-inventory-audit                Export a full NC          |
-|                                                   rate_schedule inventory   |
-|                                                   audit against the focused |
-|                                                   matrix scope.             |
-| export-nc-document-intelligence-audit             Apply the                 |
-|                                                   document-intelligence     |
-|                                                   layer to NC zero-charge   |
-|                                                   and malformed historical  |
-|                                                   rows.                     |
-| export-nc-document-gap-audit                      Identify temporal gaps,   |
-|                                                   ordinal gaps, and         |
-|                                                   thin-source versions      |
-|                                                   where a higher-quality    |
-|                                                   NCUC document (compliance |
-|                                                   bundle or targeted leaf)  |
-|                                                   would improve coverage.   |
-| export-nc-confidence-audit                        Export a family-level NC  |
-|                                                   confidence audit          |
-|                                                   combining lineage,        |
-|                                                   redline, and parse        |
-|                                                   signals.                  |
-| export-nc-redline-lead-audit                      Export a ranked queue of  |
-|                                                   NC families where redline |
-|                                                   documents can help locate |
-|                                                   or validate clean         |
-|                                                   tariffs.                  |
 | nc-redline-portal-queue                           Show NCUC dockets found   |
 |                                                   in redline crossrefs that |
 |                                                   have not yet been fetched |
 |                                                   from portal.              |
-| export-nc-redline-parse-audit                     Audit NC parsed tariff    |
-|                                                   versions whose source     |
-|                                                   PDFs may be redlines,     |
-|                                                   using the corrected       |
-|                                                   detector.                 |
-| export-nc-missing-clean-doc-audit                 Export ranked NC leads    |
-|                                                   for missing clean         |
-|                                                   historical tariff/rider   |
-|                                                   documents.                |
 | search-nc-missing-clean-docs                      Search NCUC for likely    |
 |                                                   missing clean historical  |
 |                                                   documents and persist     |
@@ -824,52 +775,13 @@
 |                                                   document_fingerprints     |
 |                                                   redline flags using the   |
 |                                                   corrected detector.       |
-| export-dep-leaf-503-audit                         Export a focused audit    |
-|                                                   for DEP leaf-503          |
-|                                                   (R-TOU-CPP) versions and  |
-|                                                   rider linkage.            |
 | seed-dep-residential-rider-applicability          Seed mandatory DEP        |
 |                                                   residential rider-family  |
 |                                                   applicability links for   |
 |                                                   leafs 500-504.            |
-| export-dep-residential-rider-gap-audit            Export rider-family       |
-|                                                   charge coverage gaps for  |
-|                                                   DEP residential schedules |
-|                                                   500-504.                  |
-| export-dep-residential-rider-action-queue         Export a ranked DEP       |
-|                                                   residential rider repair  |
-|                                                   queue derived from the    |
-|                                                   gap audit.                |
-| export-dep-residential-rider-repair-plan          Export an operational DEP |
-|                                                   residential rider repair  |
-|                                                   plan with                 |
-|                                                   parser/discovery          |
-|                                                   guidance.                 |
-| export-dep-compliance-bundle-audit                Export a DEP rider-family |
-|                                                   compliance bundle audit   |
-|                                                   for discovery/import/span |
-|                                                   triage.                   |
-| export-dep-storm-rider-audit                      Export a DEP storm-rider  |
-|                                                   audit for                 |
-|                                                   canonical-family,         |
-|                                                   residue, and              |
-|                                                   applicability triage.     |
-| export-dep-storm-history-inventory                Export a DEP              |
-|                                                   storm-history inventory   |
-|                                                   separating canonical      |
-|                                                   families from older       |
-|                                                   docket candidates.        |
 | seed-dep-storm-rider-applicability                Seed DEP storm-rider      |
 |                                                   applicability links for   |
 |                                                   residential schedules.    |
-| audit-tariff-null-scan                            Batch coverage scan for   |
-|                                                   all rate schedules of a   |
-|                                                   state/company.            |
-| audit-cross-attributed-charges-nc                 Find tariff_charges       |
-|                                                   polluted by the           |
-|                                                   family-specific ->        |
-|                                                   generic_residential       |
-|                                                   fallback.                 |
 | audit-document-type-classifications-nc            Audit document_type       |
 |                                                   classifier agreement and  |
 |                                                   (optionally) export a     |
@@ -953,5 +865,11 @@
 |                                                   queue management, stale   |
 |                                                   recovery, and queue       |
 |                                                   drain.                    |
+| audit                                             Tariff completeness,      |
+|                                                   coverage, and             |
+|                                                   cross-attribution audits. |
+| export                                            NC and DEP                |
+|                                                   audit/inventory report    |
+|                                                   exports.                  |
 +-----------------------------------------------------------------------------+
 

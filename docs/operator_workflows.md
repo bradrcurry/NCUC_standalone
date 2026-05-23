@@ -68,13 +68,13 @@ python -m duke_rates ocr show-queue-nc
 To regenerate all DB-driven audit reports (do this at session end to keep reports current):
 
 ```powershell
-python -m duke_rates export-nc-coverage-assessment
-python -m duke_rates export-nc-anomaly-audit
-python -m duke_rates export-nc-schedule-inventory-audit
-python -m duke_rates export-dep-residential-rider-gap-audit
-python -m duke_rates export-dep-residential-rider-action-queue
-python -m duke_rates export-dep-compliance-bundle-audit
-python -m duke_rates export-dep-storm-history-inventory
+python -m duke_rates export nc-coverage-assessment
+python -m duke_rates export nc-anomaly-audit
+python -m duke_rates export nc-schedule-inventory-audit
+python -m duke_rates export dep-residential-rider-gap-audit
+python -m duke_rates export dep-residential-rider-action-queue
+python -m duke_rates export dep-compliance-bundle-audit
+python -m duke_rates export dep-storm-history-inventory
 ```
 
 Reports land in `docs/reports/<report-name>/`. The `.md` file in each subfolder is the human-readable summary.

@@ -395,7 +395,7 @@ def _render_markdown(report: dict[str, object]) -> str:
         "",
         _render_inventory_list(inventory_scope["legacy_schedule_families"], limit=12),  # type: ignore[arg-type]
         "",
-        "For the full classification and CSV export, use `python -m duke_rates export-nc-schedule-inventory-audit`.",
+        "For the full classification and CSV export, use `python -m duke_rates export nc-schedule-inventory-audit`.",
         "",
     ]
     return "\n".join(lines)

@@ -188,8 +188,8 @@ Key docket anchors:
 python -m duke_rates ncuc-import-pipeline --all-downloaded
 python -m duke_rates bootstrap-missing-versions-nc
 python -m duke_rates extract-rates-nc
-python -m duke_rates export-nc-anomaly-audit
-python -m duke_rates export-nc-schedule-inventory-audit
+python -m duke_rates export nc-anomaly-audit
+python -m duke_rates export nc-schedule-inventory-audit
 ```
 
 ---

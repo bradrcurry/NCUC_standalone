@@ -301,24 +301,24 @@ surface over inventing your own command mapping.
 | `show-workflow-capabilities-nc` | Show the sanctioned concurrency policy for guided NC workflow actions, including which ones are `workers_allowed` versus `sequential_only` |
 | `show-workflow-action-receipts-nc` | Show durable receipts for guided workflow actions so interrupted or timed-out runs can be resumed or audited |
 | `reconcile-workflow-action-receipts-nc` | Reconcile guided workflow receipts against OCR/reprocess queue state and promote `started` receipts to `running`, `completed`, or `failed` when downstream evidence exists |
-| `export-nc-coverage-assessment` | Generate DB-driven DEP/DEC NC schedule coverage matrices and export Markdown/CSV/JSON under `docs/reports/nc_coverage_assessment/` |
-| `export-nc-anomaly-audit` | Generate a ranked NC anomaly audit with recommended next actions under `docs/reports/nc_anomaly_audit/` |
-| `export-nc-schedule-inventory-audit` | Generate a full NC `rate_schedule` family inventory showing what is missing from the focused matrix and what looks legacy/malformed |
-| `export-nc-document-intelligence-audit` | Apply the new document-intelligence layer to zero-charge and malformed NC historical rows, producing a canonicalization / retire-vs-reclassify queue |
-| `export-nc-document-gap-audit` | Generate temporal / ordinal / quality-floor gap opportunities for NC DEP/DEC families |
-| `export-nc-confidence-audit` | Generate a family-level confidence scorecard combining continuity, gap pressure, parse anomalies, quality tier mix, and redline corroboration |
-| `export-nc-redline-lead-audit` | Generate a ranked redline-hunt queue for families where redline clues can help locate or validate clean companion tariffs |
-| `export-nc-redline-parse-audit` | Audit parsed NC tariff versions whose linked source PDFs may be redlines; now uses page-bounded slice detection and can distinguish clean exact-date companions |
+| `export nc-coverage-assessment` | Generate DB-driven DEP/DEC NC schedule coverage matrices and export Markdown/CSV/JSON under `docs/reports/nc_coverage_assessment/` |
+| `export nc-anomaly-audit` | Generate a ranked NC anomaly audit with recommended next actions under `docs/reports/nc_anomaly_audit/` |
+| `export nc-schedule-inventory-audit` | Generate a full NC `rate_schedule` family inventory showing what is missing from the focused matrix and what looks legacy/malformed |
+| `export nc-document-intelligence-audit` | Apply the new document-intelligence layer to zero-charge and malformed NC historical rows, producing a canonicalization / retire-vs-reclassify queue |
+| `export nc-document-gap-audit` | Generate temporal / ordinal / quality-floor gap opportunities for NC DEP/DEC families |
+| `export nc-confidence-audit` | Generate a family-level confidence scorecard combining continuity, gap pressure, parse anomalies, quality tier mix, and redline corroboration |
+| `export nc-redline-lead-audit` | Generate a ranked redline-hunt queue for families where redline clues can help locate or validate clean companion tariffs |
+| `export nc-redline-parse-audit` | Audit parsed NC tariff versions whose linked source PDFs may be redlines; now uses page-bounded slice detection and can distinguish clean exact-date companions |
 | `refresh-nc-redline-fingerprints` | Refresh `document_fingerprints.is_redline_candidate/redline_confidence` for NC DEP/DEC PDFs using the corrected redline detector |
 | `canonicalize-historical-family-key` | Move a malformed historical family into a canonical family key, updating linked historical lineage tables and repairing orphaned version rows |
-| `export-dep-leaf-503-audit` | Generate a focused DEP `leaf-503` (`R-TOU-CPP`) version/rider-linkage audit under `docs/reports/dep_leaf_503_audit/` |
+| `export dep-leaf-503-audit` | Generate a focused DEP `leaf-503` (`R-TOU-CPP`) version/rider-linkage audit under `docs/reports/dep_leaf_503_audit/` |
 | `seed-dep-residential-rider-applicability` | Seed mandatory DEP residential rider-family links for schedules `leaf-500` through `leaf-504` |
-| `export-dep-residential-rider-gap-audit` | Generate rider-family charge coverage gaps for DEP residential schedules `leaf-500` through `leaf-504` |
-| `export-dep-residential-rider-action-queue` | Generate a ranked DEP residential rider repair queue derived from the rider-gap audit |
-| `export-dep-residential-rider-repair-plan` | Generate an operational DEP residential rider repair plan with parser-profile and discovery guidance |
-| `export-dep-compliance-bundle-audit` | Generate a DEP rider-family bundle audit that distinguishes missing discovery, downloaded-not-imported, unbounded, and under-parsed compliance bundles |
-| `export-dep-storm-rider-audit` | Generate a DEP storm-rider family audit showing canonical candidates, legacy duplicates, residual parse debt, and missing applicability links |
-| `export-dep-storm-history-inventory` | Generate a DEP storm-history inventory showing current canonical storm families plus older docket candidates that may contain predecessor storm leaves |
+| `export dep-residential-rider-gap-audit` | Generate rider-family charge coverage gaps for DEP residential schedules `leaf-500` through `leaf-504` |
+| `export dep-residential-rider-action-queue` | Generate a ranked DEP residential rider repair queue derived from the rider-gap audit |
+| `export dep-residential-rider-repair-plan` | Generate an operational DEP residential rider repair plan with parser-profile and discovery guidance |
+| `export dep-compliance-bundle-audit` | Generate a DEP rider-family bundle audit that distinguishes missing discovery, downloaded-not-imported, unbounded, and under-parsed compliance bundles |
+| `export dep-storm-rider-audit` | Generate a DEP storm-rider family audit showing canonical candidates, legacy duplicates, residual parse debt, and missing applicability links |
+| `export dep-storm-history-inventory` | Generate a DEP storm-history inventory showing current canonical storm families plus older docket candidates that may contain predecessor storm leaves |
 | `seed-dep-storm-rider-applicability` | Seed DEP storm-rider applicability links for residential schedules using the current `Leaf 607` and `Leaf 613` applicability text |
 | `show-provenance-gaps-nc` | Summarize missing version provenance fields plus missing/path-only discovery linkage for NC historical rows |
 | `show-fingerprint-coverage-nc` | Summarize NC hash-backed coverage, path-only historical rows, document fingerprints, and reusable artifact coverage |
@@ -380,9 +380,9 @@ python -m duke_rates parse-review-summary
 **Confidence / redline follow-up sequence:**
 ```bash
 python -m duke_rates refresh-nc-redline-fingerprints
-python -m duke_rates export-nc-confidence-audit
-python -m duke_rates export-nc-redline-lead-audit
-python -m duke_rates export-nc-redline-parse-audit
+python -m duke_rates export nc-confidence-audit
+python -m duke_rates export nc-redline-lead-audit
+python -m duke_rates export nc-redline-parse-audit
 ```
 
 Use this stack when the question is not just "what extracted?" but:
@@ -601,9 +601,9 @@ Structured multi-stage search for documents on external portals.
 | Command | What it does |
 |---|---|
 | `audit-local-raw-nc` | Audit locally stored raw NC documents |
-| `audit-tariff-coverage` | Coverage audit across families and versions |
-| `audit-tariff-null-scan` | Find null/missing fields in tariff data |
-| `audit-tariff-timeline` | Timeline integrity audit for version succession |
+| `audit tariff-coverage` | Coverage audit across families and versions |
+| `audit tariff-null-scan` | Find null/missing fields in tariff data |
+| `audit tariff-timeline` | Timeline integrity audit for version succession |
 | `audit-rider-map` | Audit the rider-to-family mapping |
 | `cleanup-nc-residential-history` | Remove stale/orphaned residential history artifacts |
 | `show-bill-relevant-gaps-progress-nc` | (see §4) |

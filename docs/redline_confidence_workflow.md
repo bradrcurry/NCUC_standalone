@@ -14,9 +14,9 @@ This workflow exists because "did we find the right tariff documents and parse t
 
 ```bash
 python -m duke_rates refresh-nc-redline-fingerprints
-python -m duke_rates export-nc-confidence-audit
-python -m duke_rates export-nc-redline-lead-audit
-python -m duke_rates export-nc-redline-parse-audit
+python -m duke_rates export nc-confidence-audit
+python -m duke_rates export nc-redline-lead-audit
+python -m duke_rates export nc-redline-parse-audit
 ```
 
 ## Operator Repair Commands
@@ -40,7 +40,7 @@ Use them when:
 
 ## What Each Report Answers
 
-### `export-nc-confidence-audit`
+### `export nc-confidence-audit`
 
 Backed by:
 - [nc_confidence_audit.py](/c:/Python/Duke/Standalone/src/duke_rates/analytics/nc_confidence_audit.py)
@@ -58,7 +58,7 @@ Primary outputs:
 - `confidence_tier`
 - `recommended_action`
 
-### `export-nc-redline-lead-audit`
+### `export nc-redline-lead-audit`
 
 Backed by:
 - [nc_redline_lead_audit.py](/c:/Python/Duke/Standalone/src/duke_rates/analytics/nc_redline_lead_audit.py)
@@ -70,7 +70,7 @@ Use it for:
 Primary outputs:
 - [nc_redline_lead_audit.md](/c:/Python/Duke/Standalone/docs/reports/nc_redline_lead_audit/nc_redline_lead_audit.md)
 
-### `export-nc-redline-parse-audit`
+### `export nc-redline-parse-audit`
 
 Backed by:
 - [nc_redline_parse_audit.py](/c:/Python/Duke/Standalone/src/duke_rates/analytics/nc_redline_parse_audit.py)
@@ -120,9 +120,9 @@ Example:
 ## When To Hunt New Documents vs Repair Existing Ones
 
 Hunt new clean documents when:
-- `export-nc-redline-lead-audit` shows clue-bearing redlines with no clean companion
-- `export-nc-redline-parse-audit` shows `review_parsed_redline_version` and no clean companion
-- `export-nc-confidence-audit` still shows continuity gaps or unpaired redlines
+- `export nc-redline-lead-audit` shows clue-bearing redlines with no clean companion
+- `export nc-redline-parse-audit` shows `review_parsed_redline_version` and no clean companion
+- `export nc-confidence-audit` still shows continuity gaps or unpaired redlines
 
 Repair existing rows when:
 - the clean PDF is already on disk

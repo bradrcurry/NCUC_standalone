@@ -45,7 +45,7 @@ so this register can stay focused on work that is still open.
 1. Compare one bundle-era sheet against the later standalone leaf layout.
 2. Add parser branches for the bundle table shapes.
 3. Re-extract affected versions.
-4. Re-run `python -m duke_rates export-nc-coverage-assessment`.
+4. Re-run `python -m duke_rates export nc-coverage-assessment`.
 
 ---
 
@@ -61,7 +61,7 @@ so this register can stay focused on work that is still open.
   - `stale_historical=236` (was 513)
   - `provisional_families=7` (was 351)
   - `null_effective_start=286` (was 565)
-- `export-nc-schedule-inventory-audit` reports:
+- `export nc-schedule-inventory-audit` reports:
   - `105` NC `rate_schedule` families in SQLite (was 264 — the reduction is because most provisionals lacked `rate_schedule` classification)
   - `23` legacy / malformed `doc-*` families (was 182)
 - The 7 remaining provisional families with real charges need `promote-provisional-family` calls.
@@ -80,8 +80,8 @@ so this register can stay focused on work that is still open.
 4. Continue the recover-vs-retire pass on high-signal zero-charge historical rows.
 5. Re-run:
    - `python -m duke_rates show-workflow-status-nc`
-   - `python -m duke_rates export-nc-anomaly-audit`
-   - `python -m duke_rates export-nc-schedule-inventory-audit`
+   - `python -m duke_rates export nc-anomaly-audit`
+   - `python -m duke_rates export nc-schedule-inventory-audit`
 
 ---
 
@@ -172,4 +172,4 @@ Notable recent closures:
 After changing any active item above, update:
 - [known_issues.md](/c:/Python/Duke/Standalone/docs/known_issues.md)
 - [NEXT_SESSION_START_HERE.md](/c:/Python/Duke/Standalone/docs/NEXT_SESSION_START_HERE.md)
-- `python -m duke_rates export-nc-coverage-assessment`
+- `python -m duke_rates export nc-coverage-assessment`

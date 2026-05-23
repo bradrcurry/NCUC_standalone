@@ -131,13 +131,13 @@ Confirmed parsing bugs and coverage gaps in the DB. Active follow-up lives in
 ## Historical coverage gaps (identified 2026-04-02, updated 2026-04-08)
 
 Full gap analysis with quality heatmaps: `docs/reports/GAP_ANALYSIS_REPORT_2026_04_06.md`
-Regenerated DB-driven matrix export: `python -m duke_rates export-nc-coverage-assessment`
+Regenerated DB-driven matrix export: `python -m duke_rates export nc-coverage-assessment`
 Outputs land in `docs/reports/nc_coverage_assessment/`.
-Ranked anomaly audit export: `python -m duke_rates export-nc-anomaly-audit`
+Ranked anomaly audit export: `python -m duke_rates export nc-anomaly-audit`
 Outputs land in `docs/reports/nc_anomaly_audit/`.
-Schedule inventory audit export: `python -m duke_rates export-nc-schedule-inventory-audit`
+Schedule inventory audit export: `python -m duke_rates export nc-schedule-inventory-audit`
 Outputs land in `docs/reports/nc_schedule_inventory_audit/`.
-Focused leaf-503 audit export: `python -m duke_rates export-dep-leaf-503-audit`
+Focused leaf-503 audit export: `python -m duke_rates export dep-leaf-503-audit`
 Outputs land in `docs/reports/dep_leaf_503_audit/`.
 Use [docs/reports/README.md](/c:/Python/Duke/Standalone/docs/reports/README.md) when navigating older reports; March 2026 session-status snapshots and older analysis/action-plan reports were archived because they contain projected, superseded, or historically scoped status text.
 
@@ -149,10 +149,10 @@ The canonical per-schedule matrix is now generated from SQLite instead of mainta
 - Ranked anomaly queue: [nc_anomaly_audit.md](/c:/Python/Duke/Standalone/docs/reports/nc_anomaly_audit/nc_anomaly_audit.md) and [nc_anomaly_audit_rows.csv](/c:/Python/Duke/Standalone/docs/reports/nc_anomaly_audit/nc_anomaly_audit_rows.csv)
 - Full schedule inventory: [nc_schedule_inventory_audit.md](/c:/Python/Duke/Standalone/docs/reports/nc_schedule_inventory_audit/nc_schedule_inventory_audit.md) and [nc_schedule_inventory_rows.csv](/c:/Python/Duke/Standalone/docs/reports/nc_schedule_inventory_audit/nc_schedule_inventory_rows.csv)
 - Document-intelligence canonicalization queue: [nc_document_intelligence_audit.md](/c:/Python/Duke/Standalone/docs/reports/nc_document_intelligence_audit/nc_document_intelligence_audit.md) and [nc_document_intelligence_audit_rows.csv](/c:/Python/Duke/Standalone/docs/reports/nc_document_intelligence_audit/nc_document_intelligence_audit_rows.csv)
-- Regenerate with `python -m duke_rates export-nc-coverage-assessment`
-  and `python -m duke_rates export-nc-anomaly-audit`
-  and `python -m duke_rates export-nc-schedule-inventory-audit`
-  and `python -m duke_rates export-nc-document-intelligence-audit --limit 60`
+- Regenerate with `python -m duke_rates export nc-coverage-assessment`
+  and `python -m duke_rates export nc-anomaly-audit`
+  and `python -m duke_rates export nc-schedule-inventory-audit`
+  and `python -m duke_rates export nc-document-intelligence-audit --limit 60`
   and use `python -m duke_rates canonicalize-historical-family-key <source> <target> --all-historical --dry-run`
   before executing canonical family cleanup
 

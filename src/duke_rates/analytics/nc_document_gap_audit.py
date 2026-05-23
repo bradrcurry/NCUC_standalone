@@ -23,7 +23,7 @@ Outputs:
     nc_document_gap_audit.md        — human-readable ranked summary
     nc_document_gap_audit.json      — full structured report
 
-CLI: ``python -m duke_rates export-nc-document-gap-audit``
+CLI: ``python -m duke_rates export nc-document-gap-audit``
 """
 from __future__ import annotations
 

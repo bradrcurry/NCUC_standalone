@@ -216,11 +216,11 @@ python -m duke_rates reprocess enqueue-stale-nc --limit 23
 If reports need regeneration:
 
 ```powershell
-python -m duke_rates export-nc-coverage-assessment
-python -m duke_rates export-nc-anomaly-audit
-python -m duke_rates export-nc-schedule-inventory-audit
-python -m duke_rates export-dep-compliance-bundle-audit
-python -m duke_rates export-dep-storm-history-inventory
+python -m duke_rates export nc-coverage-assessment
+python -m duke_rates export nc-anomaly-audit
+python -m duke_rates export nc-schedule-inventory-audit
+python -m duke_rates export dep-compliance-bundle-audit
+python -m duke_rates export dep-storm-history-inventory
 ```
 
 ## Current Guardrails
