@@ -186,13 +186,13 @@ Interpretation:
 - `ncuc-portal-smoke-test` is the preferred health check for the authenticated portal path.
 - `ncuc-portal-search --docket-number ...` is the preferred exact-docket command.
 - `ncuc-portal-search` without `--docket-number` is the preferred structured authenticated search.
-- `ncuc-login-test`, `ncuc-resolve-docket-ids`, `ncuc-docket-fetch`, and `search-doc-param` remain the low-level commands for manual control.
+- `ncuc-login-test`, `ncuc-resolve-docket-ids`, `ncuc-docket-fetch`, and `search doc-param` remain the low-level commands for manual control.
 
 Rules that reduce confusion:
 - For `ncuc-resolve-docket-ids`, pass docket numbers as `E-2, Sub 1354`.
-- For `search-doc-param --docket`, pass docket numbers as `E-2 Sub 1354`.
+- For `search doc-param --docket`, pass docket numbers as `E-2 Sub 1354`.
 - Always pass `--docket-number` to `ncuc-docket-fetch`. Omitting it creates broken metadata downstream.
-- A zero-result `search-doc-param --docket ...` query does not prove the docket is empty. Prefer `ncuc-portal-search --docket-number ...`, which uses exact-docket resolve + inventory instead.
+- A zero-result `search doc-param --docket ...` query does not prove the docket is empty. Prefer `ncuc-portal-search --docket-number ...`, which uses exact-docket resolve + inventory instead.
 
 Tested locally on 2026-04-21:
 - authenticated login passed

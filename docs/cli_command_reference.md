@@ -164,12 +164,12 @@ python -m duke_rates tariff-update --state NC --company carolinas --auto-parse
 - `python -m duke_rates ncuc-login-test` succeeded with Chrome and authenticated DocketDetails access.
 - `python -m duke_rates ncuc-resolve-docket-ids --docket-number "E-2, Sub 1354"` returned the expected exact match.
 - `python -m duke_rates ncuc-docket-fetch 9b3614b6-11d6-4703-8d18-5e2e2ef3d705 --docket-number "E-2, Sub 1354" --dry-run` listed 64 docket documents.
-- `python -m duke_rates search-doc-param --company "Duke Energy Progress" --types TARIFF,RATESCED --after 11/01/2025 --before 12/31/2025 --max 20 --top 10` returned 6 results.
+- `python -m duke_rates search doc-param --company "Duke Energy Progress" --types TARIFF,RATESCED --after 11/01/2025 --before 12/31/2025 --max 20 --top 10` returned 6 results.
 
 **Do not treat these commands as interchangeable:**
 - `ncuc-portal-smoke-test` is the preferred first check. It verifies login, resolve, DocketDetails access, and docket inventory in one run.
 - `ncuc-portal-search` is the preferred authenticated search surface.
-- `ncuc-login-test`, `search-doc-param`, `ncuc-resolve-docket-ids`, and `ncuc-docket-fetch` remain lower-level commands for manual control.
+- `ncuc-login-test`, `search doc-param`, `ncuc-resolve-docket-ids`, and `ncuc-docket-fetch` remain lower-level commands for manual control.
 - `ncuc-public-search` is the weaker public fallback. Do not start there for normal portal work.
 
 **Canonical command sequence:**
@@ -179,7 +179,7 @@ python -m duke_rates ncuc-portal-search --docket-number "E-2, Sub 1354"
 python -m duke_rates ncuc-portal-search --company "Duke Energy Progress" --types TARIFF,RATESCED --after 11/01/2025 --before 12/31/2025 --max 20 --top 10
 ```
 
-**Important limitation:** a zero-result `search-doc-param --docket ...` query does not prove the docket is empty. Prefer `ncuc-portal-search --docket-number ...`, which uses exact-docket resolve + inventory instead of the brittle structured-docket path.
+**Important limitation:** a zero-result `search doc-param --docket ...` query does not prove the docket is empty. Prefer `ncuc-portal-search --docket-number ...`, which uses exact-docket resolve + inventory instead of the brittle structured-docket path.
 
 ### 2b. Import and Mining
 
@@ -515,17 +515,17 @@ Structured multi-stage search for documents on external portals.
 
 | Command | What it does |
 |---|---|
-| `search-probe-compat` | Check compatibility of a search strategy with available sources |
-| `search-show-compat` | Show compatibility results |
-| `search-probe-query` | Probe a candidate query for result quality |
-| `search-show-results` | Show staged search results |
-| `search-query-report` | Report on query quality and coverage |
-| `search-run` | Execute a full search run |
-| `search-ingest` | Ingest search results into the pipeline |
-| `search-export` | Export search results |
-| `search-doc-param` | Parameterized document search |
-| `search-download-doc-param` | Parameterized download after search |
-| `search-enrich-doc-param` | Enrich search result with additional metadata |
+| `search probe-compat` | Check compatibility of a search strategy with available sources |
+| `search show-compat` | Show compatibility results |
+| `search probe-query` | Probe a candidate query for result quality |
+| `search show-results` | Show staged search results |
+| `search query-report` | Report on query quality and coverage |
+| `search run` | Execute a full search run |
+| `search ingest` | Ingest search results into the pipeline |
+| `search export` | Export search results |
+| `search doc-param` | Parameterized document search |
+| `search download-doc-param` | Parameterized download after search |
+| `search enrich-doc-param` | Enrich search result with additional metadata |
 | `audit-search-worklist` | Audit the active search worklist |
 
 ---

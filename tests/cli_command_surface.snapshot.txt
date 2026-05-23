@@ -253,17 +253,17 @@ run-overnight-db-intelligence-nc
 run-overnight-doc-intelligence-nc
 run-overnight-parse-improvement-nc
 score-historical-leads-progress-nc
-search-doc-param
-search-download-doc-param
-search-enrich-doc-param
-search-export
-search-ingest
-search-probe-compat
-search-probe-query
-search-query-report
-search-run
-search-show-compat
-search-show-results
+search doc-param
+search download-doc-param
+search enrich-doc-param
+search export
+search ingest
+search probe-compat
+search probe-query
+search query-report
+search run
+search show-compat
+search show-results
 seed-dep-residential-rider-applicability
 seed-dep-storm-rider-applicability
 seed-document-type-gold-nc

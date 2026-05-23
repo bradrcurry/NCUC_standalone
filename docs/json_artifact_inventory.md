@@ -161,7 +161,7 @@ Location:
 
 Observed status:
 - no direct code references to these exact filenames were found
-- likely exported from `search-doc-param` or related CLI workflows
+- likely exported from `search doc-param` or related CLI workflows
 
 Recommendation:
 - archive or delete unless you still use them as manual research snapshots

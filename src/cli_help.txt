@@ -612,50 +612,6 @@
 | run-continuous-loop-nc                            Run the continuous        |
 |                                                   autonomous loop with      |
 |                                                   acquisition.              |
-| search-probe-compat                               Stage 1: Test which NCUC  |
-|                                                   full-text search query    |
-|                                                   syntax patterns are       |
-|                                                   accepted                  |
-|                                                   without SQL/parse errors. |
-|                                                   Run this before the first |
-|                                                   search to discover safe   |
-|                                                   query patterns. Results   |
-|                                                   are saved and reused      |
-|                                                   automatically by          |
-|                                                   subsequent commands.      |
-| search-show-compat                                Show the most recently    |
-|                                                   saved search              |
-|                                                   compatibility report      |
-|                                                   summary.                  |
-| search-probe-query                                Probe one query after     |
-|                                                   NCUC-safe normalization   |
-|                                                   and show the live result. |
-| search-run                                        Run the full multi-stage  |
-|                                                   NCUC tariff document      |
-|                                                   search pipeline.          |
-| search-query-report                               Show the query optimizer  |
-|                                                   performance report (which |
-|                                                   queries are most useful). |
-| search-show-results                               Show the most recently    |
-|                                                   saved ranked search       |
-|                                                   results.                  |
-| search-export                                     Export the most recent    |
-|                                                   search results to JSON or |
-|                                                   CSV.                      |
-| search-ingest                                     Bulk-ingest top scored    |
-|                                                   search pipeline results   |
-|                                                   into NCUC discovery       |
-|                                                   records.                  |
-| search-doc-param                                  Search NCUC               |
-|                                                   DocumentsParameterSearch  |
-|                                                   for tariff/rate filings.  |
-| search-enrich-doc-param                           Resolve document detail   |
-|                                                   pages into ViewFile URLs  |
-|                                                   and filenames (requires   |
-|                                                   authenticated session).   |
-| search-download-doc-param                         Download ViewFile PDFs    |
-|                                                   referenced by enriched    |
-|                                                   portal search results.    |
 | ingest-ncuc                                       Legacy JSON ingest path   |
 |                                                   for older compliance-book |
 |                                                   workflows; not the        |
@@ -814,5 +770,8 @@
 |                                                   workflow: search, fetch,  |
 |                                                   import, bootstrap,        |
 |                                                   reprocess, validate.      |
+| search                                            Multi-stage NCUC search:  |
+|                                                   probe, query, run,        |
+|                                                   ingest, doc-param.        |
 +-----------------------------------------------------------------------------+
 

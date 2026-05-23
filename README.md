@@ -372,7 +372,7 @@ Useful commands:
 duke-rates ncuc-login-test
 duke-rates ncuc-resolve-docket-ids --all-seeded
 duke-rates ncuc-docket-fetch <GUID> --download
-duke-rates search-run --utility progress --schedules 602 --portal
+duke-rates search run --utility progress --schedules 602 --portal
 duke-rates audit-local-raw-nc --company progress
 duke-rates audit-local-raw-nc --company carolinas
 duke-rates load-local-rider-summaries-nc --company progress

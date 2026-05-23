@@ -178,11 +178,11 @@ def test_ncuc_portal_search_structured_branch(monkeypatch, tmp_path) -> None:
 def test_search_doc_param_classifies_structured_search_failure(monkeypatch) -> None:
     runner = CliRunner()
 
-    monkeypatch.setattr(
-        cli,
-        "_bootstrap",
-        lambda: (SimpleNamespace(ncid_username="tester"), None),
-    )
+    from duke_rates.cli_commands import search as search_module
+
+    fake_bootstrap = lambda: (SimpleNamespace(ncid_username="tester"), None)
+    monkeypatch.setattr(cli, "_bootstrap", fake_bootstrap)
+    monkeypatch.setattr(search_module, "_bootstrap", fake_bootstrap)
 
     import duke_rates.historical.ncuc.session as session
     import duke_rates.historical.ncuc.document_param_search as doc_search
@@ -199,7 +199,7 @@ def test_search_doc_param_classifies_structured_search_failure(monkeypatch) -> N
 
     monkeypatch.setattr(doc_search, "DocumentParamSearcher", FailingSearcher)
 
-    result = runner.invoke(cli.app, ["search-doc-param"])
+    result = runner.invoke(cli.app, ["search", "doc-param"])
 
     assert result.exit_code == 1
     assert "Classification: cloudflare_or_forbidden" in result.stdout

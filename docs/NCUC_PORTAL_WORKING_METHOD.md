@@ -72,16 +72,16 @@ Lower-level commands still available when exact control is needed:
 - `ncuc-login-test`
 - `ncuc-resolve-docket-ids`
 - `ncuc-docket-fetch`
-- `search-doc-param`
+- `search doc-param`
 
 Do not confuse the two docket formats:
 - `ncuc-resolve-docket-ids`: use `E-2, Sub 1354`
-- `search-doc-param --docket`: use `E-2 Sub 1354`
+- `search doc-param --docket`: use `E-2 Sub 1354`
 
 Do not confuse the search surfaces:
 - authenticated portal is canonical
 - public Zoom search is fallback only
-- a zero-result `search-doc-param --docket ...` query does not prove the docket is empty
+- a zero-result `search doc-param --docket ...` query does not prove the docket is empty
 
 ## Brief Validation On 2026-04-21
 
@@ -92,12 +92,12 @@ The following live checks were run successfully in this workspace on 2026-04-21:
   Result: returned the expected exact GUID `9b3614b6-11d6-4703-8d18-5e2e2ef3d705`.
 - `python -m duke_rates ncuc-docket-fetch 9b3614b6-11d6-4703-8d18-5e2e2ef3d705 --docket-number "E-2, Sub 1354" --dry-run`
   Result: listed 64 docket documents.
-- `python -m duke_rates search-doc-param --company "Duke Energy Progress" --types TARIFF,RATESCED --after 11/01/2025 --before 12/31/2025 --max 20 --top 10`
+- `python -m duke_rates search doc-param --company "Duke Energy Progress" --types TARIFF,RATESCED --after 11/01/2025 --before 12/31/2025 --max 20 --top 10`
   Result: returned 6 authenticated portal results.
 
 Observed limitation:
-- docket-scoped `search-doc-param` can return zero rows even when the docket is real and `ncuc-docket-fetch` lists documents
-- therefore exact docket work should use `ncuc-resolve-docket-ids` then `ncuc-docket-fetch`, not only `search-doc-param`
+- docket-scoped `search doc-param` can return zero rows even when the docket is real and `ncuc-docket-fetch` lists documents
+- therefore exact docket work should use `ncuc-resolve-docket-ids` then `ncuc-docket-fetch`, not only `search doc-param`
 
 New wrapper behavior:
 - `ncuc-portal-search --docket-number ...` avoids the brittle structured-docket search path and always uses authenticated exact-docket resolve + inventory.
