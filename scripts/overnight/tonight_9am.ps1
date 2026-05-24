@@ -6,7 +6,7 @@
   Structured in three sequential phases optimised for tonight's specific backlog:
 
     Phase 1 — Docling + OCR (parallel on GPU/CPU)
-      • process-docling-batch  : 171 NC docs with no Docling artifact (GPU/CUDA)
+      • doc-intel process-docling-batch : 171 NC docs with no Docling artifact (GPU/CUDA)
       • ocr enqueue + drain    : 179 NC docs missing txt sidecars (Tesseract/CPU)
       Both run concurrently; Phase 2 starts once BOTH finish or deadline nears.
 
@@ -152,7 +152,7 @@ Write-Log "=================================================================="
 $doclingJob = Start-Job -ScriptBlock {
     param($limit, $logFile)
     Set-Location "c:\Python\Duke\Standalone"
-    $out = python -m duke_rates process-docling-batch `
+    $out = python -m duke_rates doc-intel process-docling-batch `
         --limit $limit `
         --source historical `
         --accelerator cuda 2>&1

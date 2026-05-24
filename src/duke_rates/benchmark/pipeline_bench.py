@@ -13,7 +13,7 @@ Document categories:
 
 Usage::
 
-    python -m duke_rates benchmark-docling \\
+    python -m duke_rates doc-intel benchmark-docling \\
         --pdf path/to/a.pdf --category A \\
         --pdf path/to/b.pdf --category B
 """

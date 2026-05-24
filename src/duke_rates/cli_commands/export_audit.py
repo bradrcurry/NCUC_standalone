@@ -232,7 +232,7 @@ def audit_cross_attributed_charges_nc(
     insert_charges skips its DELETE on empty input.
 
     Recommended workflow:
-      1. python -m duke_rates audit-cross-attributed-charges-nc    # dry-run, review
+      1. python -m duke_rates audit cross-attributed-charges-nc    # dry-run, review
       2. Choose: --delete (direct cleanup) OR queue + reprocess process-queue-nc --enforce-cleanup
     """
     import sqlite3

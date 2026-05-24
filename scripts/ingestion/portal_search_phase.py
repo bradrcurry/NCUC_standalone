@@ -104,10 +104,10 @@ Run these commands to fetch and extract:
      python -m duke_rates ncuc fetch-portal --limit 100 --dep-only
 
   2. Process documents with Docling:
-     python -m duke_rates process-docling-batch --classification tariff_sheets
+     python -m duke_rates doc-intel process-docling-batch --classification tariff_sheets
 
   3. Mine Docling artifacts:
-     python -m duke_rates mine-docling-nc --accelerator cuda
+     python -m duke_rates doc-intel mine-docling --accelerator cuda
 
   4. Extract charges:
      python -m duke_rates extract-rates-nc

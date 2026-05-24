@@ -59,7 +59,7 @@ Write-Both "=== Baseline near-miss profiles ==="
 python -m duke_rates show-near-miss-profiles-nc --limit 10 2>&1 | ForEach-Object { Write-Both "  $_" }
 Write-Both ""
 Write-Both "=== Baseline unknown routing audit ==="
-python -m duke_rates show-unknown-routing-audit-nc --limit 10 2>&1 | ForEach-Object { Write-Both "  $_" }
+python -m duke_rates doc-intel show-unknown-routing-audit --limit 10 2>&1 | ForEach-Object { Write-Both "  $_" }
 Write-Both ""
 Write-Both "=== Baseline LLM effective status ==="
 python -m duke_rates show-llm-row-effective-status-nc --json 2>&1 | ForEach-Object { Write-Both "  $_" }
@@ -74,7 +74,7 @@ while ((Get-Date) -lt $deadline) {
     Write-Both "Routing diagnostics"
     python -m duke_rates show-parser-improvement-candidates-nc --limit 10 2>&1 | ForEach-Object { Write-Both "  $_" }
     python -m duke_rates show-near-miss-profiles-nc --limit 10 2>&1 | ForEach-Object { Write-Both "  $_" }
-    python -m duke_rates show-unknown-routing-audit-nc --limit 10 2>&1 | ForEach-Object { Write-Both "  $_" }
+    python -m duke_rates doc-intel show-unknown-routing-audit --limit 10 2>&1 | ForEach-Object { Write-Both "  $_" }
 
     Write-Both "Stale reprocess recovery"
     python -m duke_rates reprocess show-stale-nc --limit 10 2>&1 | ForEach-Object { Write-Both "  $_" }

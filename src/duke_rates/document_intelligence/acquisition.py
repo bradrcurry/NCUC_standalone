@@ -1349,7 +1349,7 @@ def _resolve_docket_uuid(docket_number: str, timeout_s: int = 120) -> str | None
         proc = subprocess.run(
             [
                 sys.executable, "-m", "duke_rates",
-                "ncuc resolve-docket-ids",
+                "ncuc", "resolve-docket-ids",
                 "--docket-number", docket_number,
             ],
             capture_output=True,
@@ -1424,7 +1424,7 @@ def _acquire_one(
             proc = subprocess.run(
                 [
                     sys.executable, "-m", "duke_rates",
-                    "ncuc docket-fetch", docket_uuid,
+                    "ncuc", "docket-fetch", docket_uuid,
                     "--docket-number", docket_number,
                     "--download",
                 ],
@@ -1540,7 +1540,7 @@ def _run_global_post_steps(
         # "Playwright not installed".
         import_timeout = max(timeout_per_stage_s, 1800)
         proc = _run(
-            ["ncuc import-pipeline", "--all-downloaded"],
+            ["ncuc", "import-pipeline", "--all-downloaded"],
             import_timeout, "import",
         )
         if not _record("import", proc):

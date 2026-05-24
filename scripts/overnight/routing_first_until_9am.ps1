@@ -91,7 +91,7 @@ function Get-WorkflowStatusSnapshot {
 }
 
 function Get-UnknownRoutingAuditJson {
-    $raw = & python -m duke_rates show-unknown-routing-audit-nc --limit $RoutingAuditLimit --json 2>&1
+    $raw = & python -m duke_rates doc-intel show-unknown-routing-audit --limit $RoutingAuditLimit --json 2>&1
     $jsonText = ($raw | Out-String)
     return $jsonText | ConvertFrom-Json
 }
