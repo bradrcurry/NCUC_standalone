@@ -974,6 +974,82 @@ def acquire_and_cycle(
                     "error": str(exc),
                 }
 
+        # 3.6. POST-BOOTSTRAP EXTRACT — close the loop on bootstrap actions.
+        #
+        # `bootstrap-missing-versions-nc` creates new tariff_version rows
+        # but does NOT enqueue them in historical_reprocess_queue, so the
+        # preceding drain step (which consumes that queue) doesn't help.
+        # Without this step, bootstrap closes the missing_versions gap
+        # but the new versions stay at 0 charges indefinitely. Fire
+        # extract-rates-nc with a bounded --limit so newly-linked
+        # versions get charges materialized this cycle.
+        extract_drain_result: dict[str, Any] | None = None
+        bootstrap_succeeded = any(
+            o.success and o.return_code == 0
+            and o.cli_command == "bootstrap-missing-versions-nc"
+            for o in cycle_result.outcomes
+        )
+        if bootstrap_succeeded and not dry_run:
+            extract_limit = action_batch_limit or 200
+            extract_deadline = 1800
+            _heartbeat(
+                f"  [4.5/5] EXTRACT: extract-rates-nc --limit {extract_limit} "
+                f"(materializes charges for versions bootstrap just created, "
+                f"deadline {extract_deadline}s)..."
+            )
+            extract_t0 = time.perf_counter()
+            try:
+                extract_rc, extract_stderr = _run_subprocess_streaming(
+                    [
+                        sys.executable, "-m", "duke_rates",
+                        "extract-rates-nc",
+                        "--limit", str(extract_limit),
+                        "--progress",
+                    ],
+                    label="extract",
+                    timeout_s=extract_deadline,
+                )
+                extract_drain_result = {
+                    "command": "extract-rates-nc",
+                    "limit": extract_limit,
+                    "return_code": extract_rc,
+                    "success": extract_rc == 0,
+                    "duration_ms": int((time.perf_counter() - extract_t0) * 1000),
+                    "stderr_tail": extract_stderr[-300:] if extract_rc != 0 else "",
+                }
+                _heartbeat(
+                    f"        EXTRACT done in {time.perf_counter() - extract_t0:.1f}s "
+                    f"(rc={extract_rc})"
+                )
+                if extract_rc != 0:
+                    logger.warning(
+                        "Post-bootstrap extract `extract-rates-nc` exited %d: %s",
+                        extract_rc, extract_drain_result["stderr_tail"][:200],
+                    )
+            except subprocess.TimeoutExpired:
+                extract_drain_result = {
+                    "command": "extract-rates-nc",
+                    "limit": extract_limit,
+                    "return_code": None,
+                    "success": False,
+                    "partial_progress": True,
+                    "duration_ms": int((time.perf_counter() - extract_t0) * 1000),
+                    "error": f"timeout ({extract_deadline}s) -- partial extract",
+                }
+                _heartbeat(
+                    f"        EXTRACT timed out at {extract_deadline}s -- "
+                    f"partial extract. Outcome metrics will reflect partial progress."
+                )
+            except Exception as exc:
+                extract_drain_result = {
+                    "command": "extract-rates-nc",
+                    "limit": extract_limit,
+                    "return_code": None,
+                    "success": False,
+                    "duration_ms": int((time.perf_counter() - extract_t0) * 1000),
+                    "error": str(exc),
+                }
+
         # 4. MEASURE — only re-query when work was attempted. If
         # nothing ran (skipped / dry-run / no findings), the "after"
         # state is identical to the "before" we just measured. Saves
@@ -990,6 +1066,7 @@ def acquire_and_cycle(
                 )
             )
             or bool(drain_result and drain_result.get("success"))
+            or bool(extract_drain_result and extract_drain_result.get("success"))
             or bool(
                 record_level_result and record_level_result.total_docs_imported > 0
             )
@@ -1180,6 +1257,7 @@ def acquire_and_cycle(
             ],
             "corrective_errors": cycle_result.errors,
             "drain": drain_result,
+            "extract_drain": extract_drain_result,
             "acquisition_skip_reason": acquisition_skip_reason,
             "fetch_inventory": fetch_inventory,
             "record_level_fetch": (

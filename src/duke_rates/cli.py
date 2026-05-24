@@ -4597,12 +4597,15 @@ def run_continuous_loop_nc(
     max_dockets: int = typer.Option(2, "--max-dockets", help="Max dockets to acquire per cycle."),
     limit: int = typer.Option(50, "--limit", help="Max rows per sub-report (preview only)."),
     action_batch_limit: int | None = typer.Option(
-        None,
+        200,
         "--action-batch-limit",
         help=(
-            "Override --limit for corrective actions (e.g. 200 to drain "
-            "duplicates 200/cycle instead of 50). Each action is still "
-            "capped by its own max_per_cycle. Default: registry-defined."
+            "Per-cycle --limit for corrective actions and drain steps. "
+            "Each action is still capped by its own max_per_cycle. "
+            "Bumped from 50 to 200 (2026-05-23) so an 8h run can drain "
+            "thousand-row backlogs (e.g. 3,100 low_quality_parses in "
+            "~16 cycles instead of 62). Pass a smaller value if you "
+            "want shorter per-cycle drain times."
         ),
     ),
     reset_state: bool = typer.Option(
@@ -4668,7 +4671,7 @@ def run_continuous_loop_nc(
             f"Pass --action-batch-limit 250 to drain larger backlogs faster."
         )
     else:
-        typer.echo(f"Action batch limit: {action_batch_limit} (overrides registry default)")
+        typer.echo(f"Action batch limit: {action_batch_limit}")
     typer.echo(f"")
     details = caps.get("details", {}) if isinstance(caps, dict) else {}
     typer.echo(f"Capabilities:")
