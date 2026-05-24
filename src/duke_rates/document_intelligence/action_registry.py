@@ -180,6 +180,48 @@ SEVERITY_THRESHOLDS: dict[str, int] = {
 }
 
 
+# M1: parse the "items actually moved" count from action stdout.
+# Each enqueue/dedup/bootstrap command prints its own progress line.
+# When we can't match any pattern we return None (unknown) so callers
+# can fall back to other signals.
+_EFFECTIVE_COUNT_PATTERNS = [
+    # enqueue_specific_historical_documents -> "enqueued inserted=N skipped=M"
+    (r"\benqueued\s+inserted=(\d+)\b", 1),
+    # bootstrap-missing-versions-nc -> "Done: created=N skipped=M"
+    (r"\bcreated=(\d+)\s+skipped=", 1),
+    # lineage deduplicate -> "Removed N duplicate rows" or "Deleted N rows"
+    (r"\bRemoved\s+(\d+)\s+duplicate", 1),
+    (r"\bDeleted\s+(\d+)\s+rows\b", 1),
+    # doc-intel adjudicate-classifications -> "Adjudicated N docs"
+    (r"\bAdjudicated\s+(\d+)\s+docs?\b", 1),
+    # generic fallback: any "processed N" / "extracted N" leading line
+    (r"^Processed\s+(\d+)\b", 1),
+]
+
+
+def _parse_effective_count(stdout: str) -> int | None:
+    """Return the number of items the action actually moved, or None.
+
+    Multiple patterns are tried; the first match wins. Returning 0 is
+    meaningful — it means the action ran but accomplished nothing
+    (typically because the candidate pool was already drained).
+    Returning None means we couldn't tell, so the caller should fall
+    back to other signals (cycle-level outcome_delta, return_code).
+    """
+    if not stdout:
+        return None
+    import re
+    for pattern, group_idx in _EFFECTIVE_COUNT_PATTERNS:
+        for line in stdout.splitlines():
+            m = re.search(pattern, line)
+            if m:
+                try:
+                    return int(m.group(group_idx))
+                except (ValueError, IndexError):
+                    pass
+    return None
+
+
 # ---------------------------------------------------------------------------
 # Decision layer
 # ---------------------------------------------------------------------------
@@ -391,6 +433,16 @@ class ActionOutcome:
     stderr_tail: str = ""  # last ~500 chars of stderr on failure
     error: str | None = None  # python-side exception (timeout etc.)
     delta_semantics: str = "drain"  # see CorrectiveAction.delta_semantics
+    # M1: parsed from subprocess stdout. Number of items this action
+    # actually moved (queue inserts, dedups performed, versions
+    # created). None when we can't parse the output; 0 when the
+    # action ran but did nothing meaningful (e.g. "inserted=0
+    # skipped=N"). Used to detect exhaustion separately from the
+    # raw findings_count (which can be inflated by report dedup).
+    effective_count: int | None = None
+    # M3: True if subprocess.TimeoutExpired was raised. Used to
+    # increment per-category timeout_counter for downgrade logic.
+    timed_out: bool = False
 
 
 @dataclass
@@ -415,6 +467,7 @@ def run_cycle(
     include_categories: set[str] | None = None,
     exclude_categories: set[str] | None = None,
     category_yield: dict[str, float] | None = None,
+    timeout_counter: dict[str, int] | None = None,
 ) -> CycleResult:
     """Run one autonomous loop cycle: detect -> decide -> act -> measure.
 
@@ -463,9 +516,25 @@ def run_cycle(
     errors: list[str] = []
     outcomes: list[ActionOutcome] = []
 
+    timeout_table = timeout_counter or {}
+
     for rec in recommendations:
         cmd = rec.action.cli_command
-        args = rec.action.build_args(batch_limit=action_batch_limit)
+        effective_batch_limit = action_batch_limit
+        # M3: if this category has timed out twice in a row, halve the
+        # batch limit so the next attempt is more likely to finish.
+        # A third timeout takes the category to cooldown (handled in
+        # acquire_and_cycle); we never get here in that case.
+        prior_timeouts = timeout_table.get(rec.action.finding_category, 0)
+        if prior_timeouts >= 2 and effective_batch_limit and effective_batch_limit > 25:
+            halved = max(25, effective_batch_limit // 2)
+            logger.info(
+                "Category %r had %d prior timeouts -- halving batch_limit %d -> %d",
+                rec.action.finding_category, prior_timeouts,
+                effective_batch_limit, halved,
+            )
+            effective_batch_limit = halved
+        args = rec.action.build_args(batch_limit=effective_batch_limit)
 
         if dry_run or not rec.action.requires_execute:
             actions_skipped.append(
@@ -511,17 +580,25 @@ def run_cycle(
             )
             outcome.return_code = proc.returncode
             outcome.success = proc.returncode == 0
+            # M1: parse "items moved" from stdout regardless of rc;
+            # even partial-success runs may have done useful work.
+            outcome.effective_count = _parse_effective_count(proc.stdout or "")
             if proc.returncode != 0:
                 outcome.stderr_tail = (proc.stderr or "")[-500:]
                 errors.append(
                     f"{cmd} exited {proc.returncode}: {outcome.stderr_tail[:200]}"
                 )
-            actions_taken.append(
+            taken_msg = (
                 f"{cmd} {' '.join(args)} "
-                f"(targeted {rec.finding_count} findings, rc={proc.returncode})"
+                f"(targeted {rec.finding_count} findings, rc={proc.returncode}"
             )
+            if outcome.effective_count is not None:
+                taken_msg += f", moved={outcome.effective_count}"
+            taken_msg += ")"
+            actions_taken.append(taken_msg)
         except subprocess.TimeoutExpired:
             outcome.error = f"timeout ({action_timeout}s)"
+            outcome.timed_out = True  # M3: feed timeout_counter
             errors.append(f"{cmd}: timeout ({action_timeout}s)")
         except Exception as exc:
             outcome.error = str(exc)

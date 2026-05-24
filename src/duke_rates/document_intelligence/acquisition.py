@@ -23,6 +23,9 @@ from pathlib import Path
 from typing import Any
 
 from duke_rates.document_intelligence.action_registry import CorrectiveAction
+from duke_rates.document_intelligence.idle_work import IDLE_REGISTRY
+
+IDLE_REGISTRY_NAMES = [a.name for a in IDLE_REGISTRY]
 
 
 def _heartbeat(msg: str) -> None:
@@ -135,6 +138,9 @@ def _save_loop_state(
     last_run_at: str,
     last_outcomes: dict[str, Any] | None = None,
     category_yield: dict[str, float] | None = None,
+    exhaustion_counter: dict[str, int] | None = None,
+    timeout_counter: dict[str, int] | None = None,
+    idle_yield: dict[str, float] | None = None,
 ) -> None:
     """Atomically persist loop state. Best-effort — never raise."""
     try:
@@ -146,6 +152,9 @@ def _save_loop_state(
             "last_run_at": last_run_at,
             "last_outcomes": last_outcomes or {},
             "category_yield": category_yield or {},
+            "exhaustion_counter": exhaustion_counter or {},
+            "timeout_counter": timeout_counter or {},
+            "idle_yield": idle_yield or {},
         }
         tmp = path.with_suffix(".json.tmp")
         tmp.write_text(json.dumps(payload, indent=2), encoding="utf-8")
@@ -626,6 +635,29 @@ def acquire_and_cycle(
         persisted.get("category_yield") or {}
     ) if dynamic_routing else {}
     YIELD_EMA_ALPHA = 0.3
+    # M1: per-category consecutive-exhaustion counter. Increments when
+    # an action ran successfully (rc=0) but moved 0 items (parsed from
+    # stdout). Reset on any successful move. After EXHAUSTION_THRESHOLD
+    # consecutive 0-move cycles, the category goes into cooldown.
+    exhaustion_counter: dict[str, int] = dict(
+        persisted.get("exhaustion_counter") or {}
+    )
+    EXHAUSTION_THRESHOLD = 2
+    # M3: per-category consecutive-timeout counter. Increments on
+    # subprocess.TimeoutExpired. After 2, --limit halves; after 3,
+    # cooldown like a stuck category.
+    timeout_counter: dict[str, int] = dict(
+        persisted.get("timeout_counter") or {}
+    )
+    TIMEOUT_HALVE_THRESHOLD = 2
+    TIMEOUT_COOLDOWN_THRESHOLD = 3
+    # M2: idle-work yield EMA. Mirrors category_yield but for the
+    # idle-work pool (run-overnight-parse-improvement-nc, etc.).
+    # Updated when an idle action runs and produces effective_count > 0.
+    idle_yield: dict[str, float] = dict(
+        persisted.get("idle_yield") or {}
+    ) if dynamic_routing else {}
+    idle_skip_counter: dict[str, int] = {}  # in-memory: round-robin among zero-yield
     if persisted:
         logger.info(
             "Loaded loop state from %s (stuck=%s cooldown=%s yield=%s)",
@@ -760,6 +792,7 @@ def acquire_and_cycle(
             include_categories=include_categories,
             exclude_categories=exclude_categories,
             category_yield=category_yield if dynamic_routing else None,
+            timeout_counter=timeout_counter,
         )
         _heartbeat(
             f"        ACT done in {time.perf_counter() - act_t0:.1f}s "
@@ -1068,6 +1101,70 @@ def acquire_and_cycle(
                     "error": str(exc),
                 }
 
+        # 3.7. IDLE WORK — productive LLM/maintenance fallback.
+        #
+        # When corrective actions all reported effective_count=0 (or
+        # didn't run), AND acquisition imported nothing, AND drain
+        # made no progress, run one idle-work action instead of
+        # letting the cycle be wasted. Idle actions are self-bounded
+        # (own --limit), independent of the reprocess queue, and
+        # produce future-cycle benefits (parser fixes) or direct
+        # charge growth (LLM promotion).
+        idle_result: dict[str, Any] | None = None
+        corrective_did_real_work = any(
+            o.success and o.effective_count and o.effective_count > 0
+            for o in cycle_result.outcomes
+        )
+        # Acquisition counts as real work only when it actually
+        # imported docs or added charges (dry-run results don't).
+        acquisition_did_real_work_so_far = bool(
+            (acquisition_result and (
+                acquisition_result.total_docs_imported > 0
+                or acquisition_result.total_charges_added > 0
+            ))
+            or (record_level_result and record_level_result.total_docs_imported > 0)
+        )
+        drain_did_real_work = bool(
+            (drain_result and drain_result.get("success"))
+            or (extract_drain_result and extract_drain_result.get("success"))
+        )
+        cycle_was_unproductive = (
+            not corrective_did_real_work
+            and not acquisition_did_real_work_so_far
+            and not drain_did_real_work
+        )
+        if cycle_was_unproductive and not dry_run:
+            from duke_rates.document_intelligence.idle_work import (
+                select_idle_action,
+                run_idle_action,
+            )
+            idle_action = select_idle_action(
+                database_path=database_path,
+                idle_yield=idle_yield,
+                consecutive_skipped=idle_skip_counter,
+            )
+            if idle_action is not None:
+                _heartbeat(
+                    f"  [3.7/5] IDLE WORK: corrective cycle unproductive "
+                    f"-- running {idle_action.name} ({idle_action.description[:60]})"
+                )
+                idle_result = run_idle_action(
+                    idle_action,
+                    dry_run=False,
+                    heartbeat=_heartbeat,
+                )
+                # Track skips of OTHER idle actions for round-robin
+                for other in IDLE_REGISTRY_NAMES:
+                    if other != idle_action.name:
+                        idle_skip_counter[other] = idle_skip_counter.get(other, 0) + 1
+                # Reset this action's skip counter since we ran it
+                idle_skip_counter[idle_action.name] = 0
+            else:
+                _heartbeat(
+                    f"  [3.7/5] IDLE WORK: skipped -- no eligible idle "
+                    f"actions (all pools empty)"
+                )
+
         # 4. MEASURE — only re-query when work was attempted. If
         # nothing ran (skipped / dry-run / no findings), the "after"
         # state is identical to the "before" we just measured. Saves
@@ -1088,6 +1185,7 @@ def acquire_and_cycle(
             or bool(
                 record_level_result and record_level_result.total_docs_imported > 0
             )
+            or bool(idle_result and idle_result.get("success"))
         )
         if any_work:
             _heartbeat(f"  [5/5] MEASURE: re-running intelligence report (~10-30s)...")
@@ -1215,6 +1313,46 @@ def acquire_and_cycle(
                     )
             else:
                 stuck_counter[cat] = 0
+
+        # M1: exhaustion detection. For each action whose stdout
+        # parsed to a concrete effective_count, increment or reset
+        # the per-category counter. effective_count=0 with rc=0 means
+        # the action ran successfully but moved nothing — typically
+        # the candidate pool is drained for this run.
+        for o in cycle_result.outcomes:
+            if o.effective_count is None:
+                continue  # can't tell — leave counter alone
+            cat = o.category
+            if o.success and o.effective_count == 0:
+                exhaustion_counter[cat] = exhaustion_counter.get(cat, 0) + 1
+                if exhaustion_counter[cat] >= EXHAUSTION_THRESHOLD:
+                    cooldown_remaining[cat] = COOLDOWN_DURATION
+                    exhaustion_counter[cat] = 0
+                    logger.info(
+                        "Category %r exhausted (effective_count=0 for "
+                        "%d cycles) -- cooldown for %d cycles",
+                        cat, EXHAUSTION_THRESHOLD, COOLDOWN_DURATION,
+                    )
+            elif o.effective_count > 0:
+                exhaustion_counter[cat] = 0
+
+        # M3: timeout detection. Track per-category consecutive
+        # timeouts. At 2, halve --limit next time. At 3, cooldown.
+        for o in cycle_result.outcomes:
+            cat = o.category
+            if o.timed_out:
+                timeout_counter[cat] = timeout_counter.get(cat, 0) + 1
+                if timeout_counter[cat] >= TIMEOUT_COOLDOWN_THRESHOLD:
+                    cooldown_remaining[cat] = COOLDOWN_DURATION
+                    timeout_counter[cat] = 0
+                    logger.info(
+                        "Category %r timed out %d times consecutively "
+                        "-- cooldown for %d cycles",
+                        cat, TIMEOUT_COOLDOWN_THRESHOLD, COOLDOWN_DURATION,
+                    )
+            elif o.success:
+                timeout_counter[cat] = 0
+
         # Decay existing cooldown counters by 1 cycle
         cooldown_remaining = {
             cat: n - 1 for cat, n in cooldown_remaining.items() if n - 1 > 0
@@ -1238,6 +1376,28 @@ def acquire_and_cycle(
                         YIELD_EMA_ALPHA * cat_yield_observation
                         + (1.0 - YIELD_EMA_ALPHA) * prior
                     )
+
+            # M2: idle-work yield EMA. When an idle action ran AND
+            # the cycle saw charge growth that wasn't attributable
+            # to corrective actions, attribute to idle. Use the
+            # action's own effective_count as a secondary signal.
+            if idle_result and idle_result.get("success"):
+                idle_name = idle_result.get("name") or "unknown"
+                # Charge growth not attributable to corrective work
+                idle_attributable_delta = (
+                    cycle_charge_delta if not corrective_did_real_work else 0
+                )
+                ec = idle_result.get("effective_count") or 0
+                # Combine: prefer charge_delta (direct signal); fall
+                # back to effective_count (e.g., proposals staged)
+                observation = float(
+                    idle_attributable_delta if idle_attributable_delta > 0 else ec
+                )
+                prior = idle_yield.get(idle_name, 0.0)
+                idle_yield[idle_name] = (
+                    YIELD_EMA_ALPHA * observation
+                    + (1.0 - YIELD_EMA_ALPHA) * prior
+                )
 
         # Adaptive sleep target for the *next* cycle. Three signals:
         #   - Acquisition ran -> portal politeness floor (>=60s).
@@ -1273,6 +1433,9 @@ def acquire_and_cycle(
             "cooldown_remaining": dict(cooldown_remaining),
             "active_cooldown": sorted(active_cooldown),
             "category_yield": {k: round(v, 2) for k, v in category_yield.items()},
+            "exhaustion_counter": dict(exhaustion_counter),
+            "timeout_counter": dict(timeout_counter),
+            "idle_yield": {k: round(v, 2) for k, v in idle_yield.items()},
             "sleep_s_used": sleep_s,
             "sleep_s_next": next_sleep,
             "corrective_actions": cycle_result.actions_taken,
@@ -1296,6 +1459,7 @@ def acquire_and_cycle(
             "corrective_errors": cycle_result.errors,
             "drain": drain_result,
             "extract_drain": extract_drain_result,
+            "idle_work": idle_result,
             "acquisition_skip_reason": acquisition_skip_reason,
             "fetch_inventory": fetch_inventory,
             "record_level_fetch": (
@@ -1360,6 +1524,9 @@ def acquire_and_cycle(
             last_run_at=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             last_outcomes=after_outcomes,
             category_yield=category_yield,
+            exhaustion_counter=exhaustion_counter,
+            timeout_counter=timeout_counter,
+            idle_yield=idle_yield,
         )
 
         sleep_s = next_sleep
@@ -1457,6 +1624,9 @@ def acquire_and_cycle(
         "final_stuck_counter": dict(stuck_counter),
         "final_cooldown_remaining": dict(cooldown_remaining),
         "final_category_yield": {k: round(v, 2) for k, v in category_yield.items()},
+        "final_exhaustion_counter": dict(exhaustion_counter),
+        "final_timeout_counter": dict(timeout_counter),
+        "final_idle_yield": {k: round(v, 2) for k, v in idle_yield.items()},
         "portal_precheck": portal_precheck_result,
         "capabilities": caps,
         "history": history,
