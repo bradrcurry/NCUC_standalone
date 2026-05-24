@@ -1124,9 +1124,18 @@ def acquire_and_cycle(
             ))
             or (record_level_result and record_level_result.total_docs_imported > 0)
         )
+        # A drain/extract that exited rc=0 in <5s means the queue was
+        # empty and the subprocess did nothing — don't count it as
+        # real work. Only treat success+duration>=5s as productive.
+        # Better long-term fix: parse "processed=N" from the drain's
+        # stdout, but the duration heuristic is reliable enough now
+        # (real drains take 5-30 min; empty drains finish in 1-2s).
+        MIN_DRAIN_DURATION_MS = 5000
         drain_did_real_work = bool(
-            (drain_result and drain_result.get("success"))
-            or (extract_drain_result and extract_drain_result.get("success"))
+            (drain_result and drain_result.get("success")
+                and (drain_result.get("duration_ms") or 0) >= MIN_DRAIN_DURATION_MS)
+            or (extract_drain_result and extract_drain_result.get("success")
+                and (extract_drain_result.get("duration_ms") or 0) >= MIN_DRAIN_DURATION_MS)
         )
         cycle_was_unproductive = (
             not corrective_did_real_work
