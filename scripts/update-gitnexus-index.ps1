@@ -65,7 +65,9 @@ function Invoke-GitNexusAnalyze {
 
     Write-Host ""
     Write-Host "==> Indexing $Name..."
-    npx gitnexus@latest analyze --skip-git --max-file-size 4096 --name $Name $Directory
+    # Pin to 1.6.4: npm 11.6.2 arborist trips a destructure bug installing 1.6.5
+    # (see C:\Users\bradr\AppData\Local\npm-cache\_logs\*.log). 1.6.4 installs cleanly.
+    npx -y gitnexus@1.6.4 analyze --skip-git --max-file-size 4096 --name $Name $Directory
 }
 
 $Mirrors = @(
@@ -113,7 +115,31 @@ $Mirrors = @(
         Name = "duke-cli"
         Directory = Join-Path $PipelineRoot "cli"
         Files = @(
-            "src/duke_rates/cli.py"
+            "src/duke_rates/cli.py",
+            "src/duke_rates/cli_commands/_cli_utils.py",
+            "src/duke_rates/cli_commands/_ocr_reports.py",
+            "src/duke_rates/cli_commands/ocr.py",
+            "src/duke_rates/cli_commands/reprocess.py",
+            "src/duke_rates/cli_commands/export_audit.py",
+            "src/duke_rates/cli_commands/workflow.py",
+            "src/duke_rates/cli_commands/search.py"
+        )
+    },
+    @{
+        Name = "duke-cli-data"
+        Directory = Join-Path $PipelineRoot "cli-data"
+        Files = @(
+            "src/duke_rates/cli_commands/lineage.py",
+            "src/duke_rates/cli_commands/ncuc.py",
+            "src/duke_rates/cli_commands/billing.py"
+        )
+    },
+    @{
+        Name = "duke-cli-intel"
+        Directory = Join-Path $PipelineRoot "cli-intel"
+        Files = @(
+            "src/duke_rates/cli_commands/progress.py",
+            "src/duke_rates/cli_commands/doc_intel.py"
         )
     },
     @{
@@ -174,7 +200,7 @@ $Mirrors = @(
         Files = @(
             "dashboard_views/rate_comparison.py",
             "app/streamlit_rate_comparison_app.py",
-            "app/streamlit_res_comparison_app.py"
+            "app/streamlit_duke_residential.py"
         )
     },
     @{
