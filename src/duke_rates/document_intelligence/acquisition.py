@@ -1378,7 +1378,14 @@ def acquire_and_cycle(
             (not o.success) or o.delta_semantics == "redirect"
             for o in cycle_result.outcomes
         )
-        no_improvement_threshold = 4 if only_redirect_acted else 2
+        # Bumped 2 -> 3 (and 4 -> 5 for redirect-only) on 2026-05-24.
+        # The 2026-05-23 overnight stopped at cycle 4 after 2 zero-
+        # delta cycles, when the underlying problem was the MEASURE
+        # under-count bug (now fixed) AND queue-dedup making cycles
+        # 3+4 actually enqueue 0 items. With the metric fix giving
+        # us truer signal, an extra cycle of tolerance lets the loop
+        # try acquisition / a different category before stopping.
+        no_improvement_threshold = 5 if only_redirect_acted else 3
 
         if work_attempted and not improvement_observed:
             cycles_without_improvement += 1
@@ -1675,8 +1682,18 @@ def _run_global_post_steps(
             ar.duration_ms = int((time.perf_counter() - t0) * 1000)
             return ar
 
-        # Extract is the slow one; allow up to 4x stage timeout
-        proc = _run(["extract-rates-nc"], timeout_per_stage_s * 4, "extract")
+        # Extract is the slow one; cap by --limit so it doesn't walk
+        # the entire 1300+ NC version corpus on every cycle. The
+        # 2026-05-23 overnight burned 1200s per cycle (4 cycles, 80
+        # min total) on an unlimited extract that timed out before
+        # finishing. With --limit 200 a typical cycle finishes in
+        # 5-10 min. The MAIN drain step at line 870 still consumes
+        # the reprocess queue, so anything missed here gets picked
+        # up next cycle anyway.
+        proc = _run(
+            ["extract-rates-nc", "--limit", "200", "--progress"],
+            timeout_per_stage_s * 2, "extract",
+        )
         if not _record("extract", proc):
             # Extract failure is non-fatal: docs are imported, just
             # not parsed yet. Record it but don't mark outcome=failed.

@@ -29,6 +29,7 @@ class CorrectiveAction:
     max_per_cycle: int = 100  # safety cap
     requires_execute: bool = True  # all commands default to dry-run
     supports_limit_flag: bool = False  # accepts ``--limit N`` to drain in batches
+    timeout_s: int | None = None  # per-action subprocess timeout; None = use run_cycle default (1800s)
 
     # How success of this action shows up in summary_counts:
     # "drain"     -> the action's OWN category count should DECREASE
@@ -493,12 +494,19 @@ def run_cycle(
             duration_ms=0,
             delta_semantics=rec.action.delta_semantics,
         )
+        # Per-action timeout. Default 1800s (30m) because the
+        # original 600s timeout killed doc-intel
+        # adjudicate-classifications on the 2026-05-23 run -- the
+        # Ollama LLM calls average ~3-5s per doc and 200 docs at
+        # --limit 200 puts the floor at 600-1000s plus buffer.
+        # Actions can override via CorrectiveAction.timeout_s.
+        action_timeout = getattr(rec.action, "timeout_s", None) or 1800
         try:
             proc = subprocess.run(
                 [sys.executable, "-m", "duke_rates", *cmd.split(), *args],
                 capture_output=True,
                 text=True,
-                timeout=600,
+                timeout=action_timeout,
                 check=False,
             )
             outcome.return_code = proc.returncode
@@ -513,8 +521,8 @@ def run_cycle(
                 f"(targeted {rec.finding_count} findings, rc={proc.returncode})"
             )
         except subprocess.TimeoutExpired:
-            outcome.error = "timeout (600s)"
-            errors.append(f"{cmd}: timeout")
+            outcome.error = f"timeout ({action_timeout}s)"
+            errors.append(f"{cmd}: timeout ({action_timeout}s)")
         except Exception as exc:
             outcome.error = str(exc)
             errors.append(f"{cmd}: {exc}")

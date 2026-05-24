@@ -872,13 +872,21 @@ def _outcome_metrics(conn: sqlite3.Connection) -> dict[str, Any]:
         except sqlite3.Error:
             return 0
 
+    # NOTE: join via historical_documents.state, NOT tariff_families.state.
+    # Some NC versions reference a family_key that has no row in
+    # tariff_families (e.g. provisional families retired before the
+    # next discovery sweep). Joining tariff_families would silently
+    # drop those versions' charges. The 2026-05-23 overnight under-
+    # counted by 670 charges this way, triggering a premature
+    # no_improvement stop. All other metrics in this function already
+    # use the historical_documents join — make this one consistent.
     out["tariff_charges_total"] = _scalar(
         """
         SELECT COUNT(*)
         FROM tariff_charges tc
         JOIN tariff_versions tv ON tv.id = tc.version_id
-        JOIN tariff_families tf ON tf.family_key = tv.family_key
-        WHERE tf.state = 'NC'
+        JOIN historical_documents hd ON hd.id = tv.historical_document_id
+        WHERE hd.state = 'NC'
         """
     )
     linked_versions = _scalar(
