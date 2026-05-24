@@ -187,6 +187,13 @@ SEVERITY_THRESHOLDS: dict[str, int] = {
 _EFFECTIVE_COUNT_PATTERNS = [
     # enqueue_specific_historical_documents -> "enqueued inserted=N skipped=M"
     (r"\benqueued\s+inserted=(\d+)\b", 1),
+    # enqueue-parser-improvement-nc / enqueue-stale-nc early-exit when
+    # no candidates: "no actionable hd_ids; nothing to enqueue"
+    (r"no actionable hd_ids", "zero"),  # special marker -> returns 0
+    # enqueue-parser-improvement-nc summary line, captures hd_ids count
+    # (used when the enqueue WOULD have run but stops short of inserts;
+    # also a fallback when the inserted line is buffered weirdly)
+    (r"reprocess\s+\(execute\):\s+families=\d+\s+hd_ids=(\d+)", 1),
     # bootstrap-missing-versions-nc -> "Done: created=N skipped=M"
     (r"\bcreated=(\d+)\s+skipped=", 1),
     # lineage deduplicate -> "Removed N duplicate rows" or "Deleted N rows"
@@ -207,6 +214,10 @@ def _parse_effective_count(stdout: str) -> int | None:
     (typically because the candidate pool was already drained).
     Returning None means we couldn't tell, so the caller should fall
     back to other signals (cycle-level outcome_delta, return_code).
+
+    The "zero" sentinel in the pattern table means "if this matches,
+    the effective count is definitely 0" — used for early-exit
+    sentinels like "no actionable hd_ids".
     """
     if not stdout:
         return None
@@ -214,11 +225,14 @@ def _parse_effective_count(stdout: str) -> int | None:
     for pattern, group_idx in _EFFECTIVE_COUNT_PATTERNS:
         for line in stdout.splitlines():
             m = re.search(pattern, line)
-            if m:
-                try:
-                    return int(m.group(group_idx))
-                except (ValueError, IndexError):
-                    pass
+            if not m:
+                continue
+            if group_idx == "zero":
+                return 0
+            try:
+                return int(m.group(group_idx))
+            except (ValueError, IndexError):
+                pass
     return None
 
 

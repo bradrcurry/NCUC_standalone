@@ -1453,6 +1453,8 @@ def acquire_and_cycle(
                     "stderr_tail": o.stderr_tail,
                     "error": o.error,
                     "delta_semantics": o.delta_semantics,
+                    "effective_count": o.effective_count,
+                    "timed_out": o.timed_out,
                 }
                 for o in cycle_result.outcomes
             ],
