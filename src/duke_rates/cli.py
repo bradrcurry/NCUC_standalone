@@ -4631,6 +4631,39 @@ def run_continuous_loop_nc(
     dry_run: bool = typer.Option(True, "--dry-run/--execute", help="Preview without fetching or writing (default: dry-run)."),
     sleep: int = typer.Option(300, "--sleep", help="Seconds between cycles (default: 300 = 5 min)."),
     json_out: bool = typer.Option(False, "--json", help="JSON output at end."),
+    include_categories: str | None = typer.Option(
+        None,
+        "--include-categories",
+        help=(
+            "Comma-separated list of finding categories to target. "
+            "Everything else is excluded. Example: "
+            "'low_quality_parses,missing_versions,family_lineage_gaps' "
+            "for a charge-yield focused run. Valid categories: "
+            "duplicate_documents, missing_versions, stale_artifacts, "
+            "low_quality_parses, unknown_documents, family_lineage_gaps, "
+            "docket_coverage."
+        ),
+    ),
+    exclude_categories: str | None = typer.Option(
+        None,
+        "--exclude-categories",
+        help=(
+            "Comma-separated list of finding categories to skip. "
+            "All others remain enabled. Mutually exclusive with "
+            "--include-categories."
+        ),
+    ),
+    dynamic_routing: bool = typer.Option(
+        True,
+        "--dynamic-routing/--no-dynamic-routing",
+        help=(
+            "Bias category priority toward those that historically "
+            "produce the most charges per cycle. Uses an EMA over "
+            "loop_state.category_yield. Falls back to count+severity "
+            "for first-time categories. Disable to use only the static "
+            "count+severity priority formula."
+        ),
+    ),
 ) -> None:
     """Run the continuous autonomous loop with acquisition.
 
@@ -4745,6 +4778,19 @@ def run_continuous_loop_nc(
         typer.echo("Dry run — no writes, no portal calls. Use --execute to run for real.")
         typer.echo("")
 
+    if include_categories and exclude_categories:
+        raise typer.BadParameter(
+            "--include-categories and --exclude-categories are mutually exclusive."
+        )
+    include_set: set[str] | None = (
+        {c.strip() for c in include_categories.split(",") if c.strip()}
+        if include_categories else None
+    )
+    exclude_set: set[str] | None = (
+        {c.strip() for c in exclude_categories.split(",") if c.strip()}
+        if exclude_categories else None
+    )
+
     result = acquire_and_cycle(
         str(settings.database_path),
         limit=limit,
@@ -4758,6 +4804,9 @@ def run_continuous_loop_nc(
         history_dir=settings.data_dir / "state" / "loop_history",
         reset_state=reset_state,
         portal_precheck=portal_precheck,
+        include_categories=include_set,
+        exclude_categories=exclude_set,
+        dynamic_routing=dynamic_routing,
     )
 
     if json_out:

@@ -199,6 +199,9 @@ def decide_actions(
     action_registry: dict[str, CorrectiveAction] | None = None,
     max_actions: int = 3,
     cooldown_categories: set[str] | None = None,
+    include_categories: set[str] | None = None,
+    exclude_categories: set[str] | None = None,
+    category_yield: dict[str, float] | None = None,
 ) -> list[RecommendedAction]:
     """Map a database intelligence report to a ranked list of corrective actions.
 
@@ -215,6 +218,17 @@ def decide_actions(
         prior runs against the same backlog produced no measurable
         improvement). The action is still listed in the returned set
         with priority demoted, so the caller can see it was considered.
+    include_categories:
+        Only consider these categories. Mutually exclusive with
+        exclude_categories. None = all categories.
+    exclude_categories:
+        Skip these categories. None = exclude nothing.
+    category_yield:
+        Per-category EMA of charges produced per successful action,
+        from loop_state.json. When provided, priority is biased toward
+        high-yield categories: a category with EMA=20 charges/action
+        gets a ~33-point priority discount vs one at EMA=0. First-time
+        categories (not in dict) get no bias.
 
     Returns
     -------
@@ -222,12 +236,22 @@ def decide_actions(
     """
     registry = action_registry or ACTION_REGISTRY
     cooldown = cooldown_categories or set()
+    include = include_categories
+    exclude = exclude_categories or set()
+    yield_table = category_yield or {}
     summary_counts: dict[str, int] = report.get("summary_counts", {})
     recommendations: list[RecommendedAction] = []
 
     for category, action in registry.items():
         count = summary_counts.get(category, 0)
         if count == 0:
+            continue
+
+        # Static category targeting: skip categories outside the
+        # include list, or explicitly in the exclude list.
+        if include is not None and category not in include:
+            continue
+        if category in exclude:
             continue
 
         # Determine highest severity for this category
@@ -244,7 +268,10 @@ def decide_actions(
         if category in cooldown:
             continue
 
-        priority = _compute_priority(count, severity)
+        priority = _compute_priority(
+            count, severity,
+            category_yield=yield_table.get(category),
+        )
         recommendations.append(
             RecommendedAction(
                 action=action,
@@ -296,7 +323,12 @@ def _highest_severity(section: dict[str, Any]) -> str:
     return "low"
 
 
-def _compute_priority(count: int, severity: str) -> int:
+def _compute_priority(
+    count: int,
+    severity: str,
+    *,
+    category_yield: float | None = None,
+) -> int:
     """Lower priority value = run sooner.
 
     Old formula was ``severity_weight * 1000 - min(count, 999)``, which
@@ -310,6 +342,13 @@ def _compute_priority(count: int, severity: str) -> int:
     moves priority by ~6 (one severity tier), but going from 5,000 ->
     50,000 moves it by another ~2.3. Severity contributes 100 per tier,
     log-count contributes ~33 per decade.
+
+    When ``category_yield`` is provided (the EMA of charges produced
+    per successful action of this category), it discounts priority
+    by ~33 * log10(yield + 1). So a category averaging 10 charges/run
+    gets a 33-point boost (one decade), and a category averaging 100
+    gets a 66-point boost. First-time categories (yield=None) get no
+    bias — they run on count+severity alone until enough data exists.
     """
     import math
 
@@ -322,7 +361,15 @@ def _compute_priority(count: int, severity: str) -> int:
     # A "medium" with 11 findings (log10≈1.0) -> 2*100 - 1.0*33 ≈ 167
     # so medium-tiny still beats low-huge slightly, but a low at 50,000
     # (log10≈4.7) ≈ 145 beats medium-tiny.
-    return int(round(sev * 100 - log_count * 33))
+    base = sev * 100 - log_count * 33
+
+    # Yield discount: high-charge-producing categories get to run
+    # sooner. Use log10 so a 100-charge category gets 2x the boost
+    # of a 10-charge category, not 10x.
+    if category_yield is not None and category_yield > 0:
+        base -= math.log10(category_yield + 1) * 33
+
+    return int(round(base))
 
 
 # ---------------------------------------------------------------------------
@@ -364,6 +411,9 @@ def run_cycle(
     dry_run: bool = True,
     action_batch_limit: int | None = None,
     cooldown_categories: set[str] | None = None,
+    include_categories: set[str] | None = None,
+    exclude_categories: set[str] | None = None,
+    category_yield: dict[str, float] | None = None,
 ) -> CycleResult:
     """Run one autonomous loop cycle: detect -> decide -> act -> measure.
 
@@ -401,6 +451,9 @@ def run_cycle(
         report,
         max_actions=max_actions,
         cooldown_categories=cooldown_categories,
+        include_categories=include_categories,
+        exclude_categories=exclude_categories,
+        category_yield=category_yield,
     )
 
     # 3. ACT (or preview)

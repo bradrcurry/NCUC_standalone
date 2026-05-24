@@ -134,6 +134,7 @@ def _save_loop_state(
     cooldown_remaining: dict[str, int],
     last_run_at: str,
     last_outcomes: dict[str, Any] | None = None,
+    category_yield: dict[str, float] | None = None,
 ) -> None:
     """Atomically persist loop state. Best-effort — never raise."""
     try:
@@ -144,6 +145,7 @@ def _save_loop_state(
             "cooldown_remaining": cooldown_remaining,
             "last_run_at": last_run_at,
             "last_outcomes": last_outcomes or {},
+            "category_yield": category_yield or {},
         }
         tmp = path.with_suffix(".json.tmp")
         tmp.write_text(json.dumps(payload, indent=2), encoding="utf-8")
@@ -569,6 +571,9 @@ def acquire_and_cycle(
     history_dir: Path | None = None,
     reset_state: bool = False,
     portal_precheck: bool = True,
+    include_categories: set[str] | None = None,
+    exclude_categories: set[str] | None = None,
+    dynamic_routing: bool = True,
 ) -> dict[str, Any]:
     """Run the full continuous autonomous loop with acquisition.
 
@@ -612,10 +617,20 @@ def acquire_and_cycle(
     cooldown_remaining: dict[str, int] = dict(
         persisted.get("cooldown_remaining") or {}
     )
+    # EMA of per-category charge yield across cycles. Persists across
+    # runs so the loop "remembers" which categories pay best. Updated
+    # at end of each cycle when work attributable to a category produced
+    # measurable charge growth. ALPHA controls how fast new data weighs
+    # in vs history: 0.3 means 30% new / 70% prior.
+    category_yield: dict[str, float] = dict(
+        persisted.get("category_yield") or {}
+    ) if dynamic_routing else {}
+    YIELD_EMA_ALPHA = 0.3
     if persisted:
         logger.info(
-            "Loaded loop state from %s (stuck=%s cooldown=%s)",
+            "Loaded loop state from %s (stuck=%s cooldown=%s yield=%s)",
             state_file, stuck_counter, cooldown_remaining,
+            {k: round(v, 1) for k, v in category_yield.items()},
         )
 
     # Per-run JSONL checkpoint so a crash doesn't lose history.
@@ -742,6 +757,9 @@ def acquire_and_cycle(
             dry_run=dry_run,
             action_batch_limit=action_batch_limit,
             cooldown_categories=active_cooldown,
+            include_categories=include_categories,
+            exclude_categories=exclude_categories,
+            category_yield=category_yield if dynamic_routing else None,
         )
         _heartbeat(
             f"        ACT done in {time.perf_counter() - act_t0:.1f}s "
@@ -1202,6 +1220,25 @@ def acquire_and_cycle(
             cat: n - 1 for cat, n in cooldown_remaining.items() if n - 1 > 0
         }
 
+        # Update per-category yield EMA. Attribute this cycle's
+        # charge delta to whatever categories had successful actions,
+        # weighted by their finding_count share. Skip when no charge
+        # growth (yield stays at prior EMA) or no successful actions.
+        if dynamic_routing:
+            cycle_charge_delta = outcome_delta.get("tariff_charges_total", 0) or 0
+            if cycle_charge_delta > 0 and succeeded_outcomes:
+                total_findings = sum(
+                    o.finding_count for o in succeeded_outcomes
+                ) or 1
+                for o in succeeded_outcomes:
+                    share = o.finding_count / total_findings
+                    cat_yield_observation = cycle_charge_delta * share
+                    prior = category_yield.get(o.category, 0.0)
+                    category_yield[o.category] = (
+                        YIELD_EMA_ALPHA * cat_yield_observation
+                        + (1.0 - YIELD_EMA_ALPHA) * prior
+                    )
+
         # Adaptive sleep target for the *next* cycle. Three signals:
         #   - Acquisition ran -> portal politeness floor (>=60s).
         #   - Improvement observed -> halve sleep (more to drain).
@@ -1235,6 +1272,7 @@ def acquire_and_cycle(
             "stuck_counter": dict(stuck_counter),
             "cooldown_remaining": dict(cooldown_remaining),
             "active_cooldown": sorted(active_cooldown),
+            "category_yield": {k: round(v, 2) for k, v in category_yield.items()},
             "sleep_s_used": sleep_s,
             "sleep_s_next": next_sleep,
             "corrective_actions": cycle_result.actions_taken,
@@ -1321,6 +1359,7 @@ def acquire_and_cycle(
             cooldown_remaining=cooldown_remaining,
             last_run_at=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             last_outcomes=after_outcomes,
+            category_yield=category_yield,
         )
 
         sleep_s = next_sleep
@@ -1410,6 +1449,7 @@ def acquire_and_cycle(
         "loaded_state": bool(persisted),
         "final_stuck_counter": dict(stuck_counter),
         "final_cooldown_remaining": dict(cooldown_remaining),
+        "final_category_yield": {k: round(v, 2) for k, v in category_yield.items()},
         "portal_precheck": portal_precheck_result,
         "capabilities": caps,
         "history": history,
