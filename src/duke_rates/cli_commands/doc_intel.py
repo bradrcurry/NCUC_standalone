@@ -4944,3 +4944,184 @@ def classify_documents_v2_nc(
     conn.close()
 
 
+@doc_intel_app.command("promote-sections-to-gold")
+def promote_sections_to_gold_cmd(
+    section_types: str = typer.Option(
+        "rate_schedule,rider,terms_conditions,cover_letter,procedural",
+        "--section-types",
+        help=(
+            "Comma-separated section types to consider. The 'unknown' type "
+            "is never promoted regardless of inclusion."
+        ),
+    ),
+    min_classifiers: int = typer.Option(
+        2,
+        "--min-classifiers",
+        help=(
+            "Minimum number of classifiers that must agree on a section's "
+            "type before it is eligible for gold. section_aggregator_v1 "
+            "always counts as one — so 2 means at least one doc-level "
+            "classifier (rule, embedding KNN, or LLM) also has to map to "
+            "the same section type."
+        ),
+    ),
+    min_confidence_override: float | None = typer.Option(
+        None,
+        "--min-confidence",
+        help=(
+            "Override the per-type confidence floors with a single global "
+            "threshold. Useful for one-off experiments; leave unset for "
+            "production runs (rate_schedule=0.75, rider=0.70, "
+            "procedural=0.45, etc.)."
+        ),
+    ),
+    limit: int | None = typer.Option(
+        None,
+        "--limit",
+        help="Cap the number of candidate sections evaluated.",
+    ),
+    execute: bool = typer.Option(
+        False,
+        "--execute",
+        help="Actually write gold rows. Without this flag, dry-run only.",
+    ),
+    promoted_by: str | None = typer.Option(
+        None,
+        "--promoted-by",
+        help="Free-text label for who/what triggered this run (e.g. 'cli', "
+        "'overnight_loop_cycle_5'). Stored on each new gold row.",
+    ),
+    no_log_conflicts: bool = typer.Option(
+        False,
+        "--no-log-conflicts",
+        help="Skip writing rejected-as-conflict candidates to "
+        "section_classification_conflicts. Default: log them.",
+    ),
+    json_out: bool = typer.Option(False, "--json", help="Emit summary as JSON."),
+) -> None:
+    """Promote high-confidence section_aggregator outputs to section_type_gold.
+
+    Section-level training corpus seeder. Each section in document_sections
+    that clears (a) a per-type confidence floor, (b) doc-level classifier
+    agreement, and (c) consistency with the parent document's classifier
+    consensus gets a row in section_type_gold.
+
+    Rejected-as-conflict sections (where section_type contradicts doc-level
+    consensus) are logged to section_classification_conflicts for triage —
+    these are exactly the cases LLM adjudication should focus on next.
+
+    Idempotent. Re-promoting a section with a new label supersedes the
+    old row (sets superseded_by). Re-running with no label changes is a
+    no-op.
+
+    Examples:
+
+      # Dry-run sanity check (default)
+      doc-intel promote-sections-to-gold
+
+      # Real promotion for rate sections only
+      doc-intel promote-sections-to-gold --execute --section-types rate_schedule,rider
+
+      # Aggressive: single 0.5 floor across all types
+      doc-intel promote-sections-to-gold --execute --min-confidence 0.5
+    """
+    from duke_rates.document_intelligence.section_gold_promotion import (
+        promote_sections,
+    )
+
+    settings, _ = _bootstrap()
+
+    types_list = [t.strip() for t in section_types.split(",") if t.strip()]
+    if not types_list:
+        raise typer.BadParameter("--section-types must list at least one type")
+
+    run = promote_sections(
+        settings.database_path,
+        section_types=types_list,
+        min_classifiers_agreed=min_classifiers,
+        min_section_confidence_override=min_confidence_override,
+        limit=limit,
+        dry_run=not execute,
+        gold_source="auto_promotion",
+        promoted_by=promoted_by or ("cli_execute" if execute else "cli_dry_run"),
+        log_conflicts=not no_log_conflicts,
+    )
+
+    if json_out:
+        # Sample lists may contain dataclasses; serialize defensively
+        def _ser(x):
+            if hasattr(x, "__dict__"):
+                return {k: v for k, v in x.__dict__.items()}
+            return x
+        payload = {
+            "mode": "execute" if execute else "dry_run",
+            "section_types": types_list,
+            "candidates_evaluated": run.candidates_evaluated,
+            "promoted": run.promoted,
+            "skipped_already_gold": run.skipped_already_gold,
+            "skipped_low_confidence": run.skipped_low_confidence,
+            "skipped_no_consensus": run.skipped_no_consensus,
+            "rejected_conflict": run.rejected_conflict,
+            "rejected_other": run.rejected_other,
+            "by_type": run.by_type,
+            "sample_promotions": [_ser(p) for p in run.sample_promotions],
+            "sample_conflicts": [_ser(p) for p in run.sample_conflicts],
+        }
+        typer.echo(json.dumps(payload, indent=2, default=str))
+        return
+
+    mode = "EXECUTE" if execute else "DRY-RUN"
+    typer.echo(f"=== Section gold promotion ({mode}) ===")
+    typer.echo(f"  section_types:       {','.join(types_list)}")
+    typer.echo(f"  min_classifiers:     {min_classifiers}")
+    if min_confidence_override is not None:
+        typer.echo(f"  confidence_override: {min_confidence_override}")
+    if limit:
+        typer.echo(f"  limit:               {limit}")
+    typer.echo("")
+    # Effective-count line in canonical format for the autonomous loop's
+    # M1 stdout parser. The pattern "promoted N" doesn't currently match
+    # any pattern in _EFFECTIVE_COUNT_PATTERNS but matches the spirit of
+    # "inserted=N". Use "Done: created=N skipped=M" so the existing
+    # bootstrap pattern catches it.
+    typer.echo(
+        f"Done: created={run.promoted} skipped="
+        f"{run.skipped_already_gold + run.skipped_low_confidence + run.skipped_no_consensus + run.rejected_other}"
+    )
+    typer.echo(f"  candidates_evaluated:   {run.candidates_evaluated}")
+    typer.echo(f"  promoted:               {run.promoted}")
+    typer.echo(f"  skipped_already_gold:   {run.skipped_already_gold}")
+    typer.echo(f"  skipped_low_confidence: {run.skipped_low_confidence}")
+    typer.echo(f"  skipped_no_consensus:   {run.skipped_no_consensus}")
+    typer.echo(f"  rejected_conflict:      {run.rejected_conflict}")
+    typer.echo(f"  rejected_other:         {run.rejected_other}")
+
+    if run.by_type:
+        typer.echo("")
+        typer.echo("  promoted by type:")
+        for t, n in sorted(run.by_type.items(), key=lambda kv: (-kv[1], kv[0])):
+            typer.echo(f"    {t:25s} {n}")
+
+    if run.sample_promotions:
+        typer.echo("")
+        typer.echo("  sample promotions (first 5):")
+        for p in run.sample_promotions:
+            code = p.schedule_code or p.rider_code or "-"
+            typer.echo(
+                f"    {p.source_pdf[-50:]:50s} idx={p.section_index:>3} "
+                f"type={p.section_type:18s} code={code:12s} "
+                f"conf={p.confidence:.2f} n_clf={p.n_classifiers_agreed}"
+            )
+
+    if run.sample_conflicts:
+        typer.echo("")
+        typer.echo("  sample conflicts (first 5 — review or adjudicate):")
+        for p in run.sample_conflicts:
+            typer.echo(
+                f"    {p.source_pdf[-50:]:50s} idx={p.section_index:>3} "
+                f"section_says={p.section_type:18s} reason={(p.reject_reason or '')[:60]}"
+            )
+
+    if not execute:
+        typer.echo("")
+        typer.echo("  Dry-run only. Pass --execute to write rows.")

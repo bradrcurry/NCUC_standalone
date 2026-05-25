@@ -489,6 +489,41 @@ def _fetch_doc_classifications(
     conn: sqlite3.Connection,
     source_pdf: str,
 ) -> list[dict[str, Any]]:
+    """Return active document_type classifications for the parent PDF.
+
+    Production classifications key by ``subject_kind='historical_document'``
+    + ``subject_id = str(historical_documents.id)``. The join through
+    ``historical_documents.local_path = source_pdf`` resolves that. As a
+    fallback, also accept rows keyed directly by ``subject_kind='document'``
+    + ``subject_id=source_pdf`` (used by the unit-test fixture and by
+    some hypothetical future classifiers).
+
+    The historical_documents join is wrapped in a try/except so the
+    function still works against minimal test fixtures that don't
+    include that table.
+    """
+    rows: list[dict[str, Any]] = []
+    # Path A: production keying via historical_documents.id
+    try:
+        cur = conn.execute(
+            """
+            SELECT dc.classifier, dc.label, dc.confidence, dc.classifier_version
+            FROM document_classifications dc
+            JOIN historical_documents hd ON CAST(hd.id AS TEXT) = dc.subject_id
+            WHERE dc.subject_kind = 'historical_document'
+              AND hd.local_path = ?
+              AND dc.stage = 'document_type'
+              AND dc.superseded_by IS NULL
+            """,
+            (source_pdf,),
+        )
+        rows.extend(dict(r) for r in cur.fetchall())
+        cur.close()
+    except sqlite3.OperationalError:
+        # historical_documents table missing — fine for test fixtures
+        pass
+
+    # Path B: direct subject_id = source_pdf
     cur = conn.execute(
         """
         SELECT classifier, label, confidence, classifier_version
@@ -500,7 +535,7 @@ def _fetch_doc_classifications(
         """,
         (source_pdf,),
     )
-    rows = [dict(r) for r in cur.fetchall()]
+    rows.extend(dict(r) for r in cur.fetchall())
     cur.close()
     return rows
 
