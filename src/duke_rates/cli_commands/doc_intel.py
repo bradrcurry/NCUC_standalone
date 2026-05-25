@@ -2362,6 +2362,15 @@ def backfill_embedding_classifications_nc(
             "or 'section_gold_or_rule' (preferred — falls back to rule_v1)."
         ),
     ),
+    rerun: bool = typer.Option(
+        False,
+        "--rerun",
+        help=(
+            "Re-classify documents that already have an active embedding_knn_v1 "
+            "row. The new (v2) row is written and the old row is superseded. "
+            "Use this when switching --label-source on already-classified docs."
+        ),
+    ),
 ) -> None:
     """Backfill embedding-based document_type classifications for existing documents.
 
@@ -2386,22 +2395,33 @@ def backfill_embedding_classifications_nc(
 
     conn = connect(settings.database_path)
     try:
-        rows = conn.execute(
-            """
-            SELECT hd.id, hd.local_path, hd.family_key
-            FROM historical_documents hd
-            WHERE hd.local_path IS NOT NULL AND hd.local_path != ''
-              AND hd.id NOT IN (
-                  SELECT DISTINCT CAST(subject_id AS INTEGER)
-                  FROM document_classifications
-                  WHERE subject_kind = 'historical_document'
-                    AND stage = 'document_type'
-                    AND classifier = 'embedding_knn_v1'
-                    AND superseded_by IS NULL
-              )
-            ORDER BY hd.id
-            """
-        ).fetchall()
+        if rerun:
+            # Include all docs with local_path — we'll re-classify and supersede.
+            rows = conn.execute(
+                """
+                SELECT hd.id, hd.local_path, hd.family_key
+                FROM historical_documents hd
+                WHERE hd.local_path IS NOT NULL AND hd.local_path != ''
+                ORDER BY hd.id
+                """
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                """
+                SELECT hd.id, hd.local_path, hd.family_key
+                FROM historical_documents hd
+                WHERE hd.local_path IS NOT NULL AND hd.local_path != ''
+                  AND hd.id NOT IN (
+                      SELECT DISTINCT CAST(subject_id AS INTEGER)
+                      FROM document_classifications
+                      WHERE subject_kind = 'historical_document'
+                        AND stage = 'document_type'
+                        AND classifier = 'embedding_knn_v1'
+                        AND superseded_by IS NULL
+                  )
+                ORDER BY hd.id
+                """
+            ).fetchall()
     finally:
         conn.close()
 
@@ -2472,13 +2492,37 @@ def backfill_embedding_classifications_nc(
         else:
             cls_conn = connect(settings.database_path)
             try:
-                record_classification(
+                new_id = record_classification(
                     cls_conn,
                     subject_kind="historical_document",
                     subject_id=str(doc_id),
                     stage="document_type",
                     result=result,
                 )
+                # When rerunning, supersede prior active rows of a different
+                # version. Same-version rows were UPDATE-in-place by
+                # record_classification so they aren't duplicates.
+                if rerun:
+                    cls_conn.execute(
+                        """
+                        UPDATE document_classifications
+                        SET superseded_by = ?
+                        WHERE subject_kind = 'historical_document'
+                          AND subject_id = ?
+                          AND stage = 'document_type'
+                          AND classifier = ?
+                          AND classifier_version != ?
+                          AND superseded_by IS NULL
+                          AND id != ?
+                        """,
+                        (
+                            new_id,
+                            str(doc_id),
+                            result.classifier,
+                            result.classifier_version,
+                            new_id,
+                        ),
+                    )
                 cls_conn.commit()
                 ok += 1
             except Exception:
