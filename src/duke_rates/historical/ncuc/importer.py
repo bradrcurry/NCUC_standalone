@@ -319,14 +319,42 @@ class NcucPipelineImporter:
 
         return results
 
-    def import_all_pending_downloads(self) -> list[dict]:
+    def _mark_import_error(self, record_id: int | None, error_detail: str) -> None:
+        """Mark a discovery record as handled/skipped by import without changing fetch metadata."""
+        if record_id is None:
+            return
+        try:
+            with self.repository._connect() as conn:
+                conn.execute(
+                    """
+                    UPDATE ncuc_discovery_records
+                    SET error_detail = ?
+                    WHERE id = ?
+                    """,
+                    (error_detail[:200], record_id),
+                )
+        except Exception:
+            logger.debug("Failed to mark import error for NCUC record id=%s", record_id, exc_info=True)
+
+    def import_all_pending_downloads(
+        self,
+        *,
+        limit: int | None = None,
+        max_workers: int = 1,
+        max_pages: int = 75,
+    ) -> list[dict]:
         """Import successfully-fetched NCUC records that have NOT yet been imported.
 
         Filters by absence of ncuc_span_artifacts so cycles don't re-process the
         full SUCCESS backlog (~4K records) on every invocation — that scan was
         the cause of the run-continuous-loop-nc 1800s acquisition timeout.
         """
-        downloaded = self.repository.list_ncuc_pending_imports()
+        downloaded = [
+            r for r in self.repository.list_ncuc_pending_imports()
+            if not str(r.error_detail or "").startswith(("import_skipped_", "import_failed_"))
+        ]
+        if limit is not None:
+            downloaded = downloaded[:max(0, limit)]
         if not downloaded:
             logger.info("import_all_pending_downloads: 0 records pending import")
             return []
@@ -335,6 +363,13 @@ class NcucPipelineImporter:
 
         def _process_record(record) -> dict:
             try:
+                if max_pages > 0 and record.local_path:
+                    triage = triage_pdf(str(record.local_path))
+                    page_count = int(getattr(triage, "page_count", 0) or 0)
+                    if page_count > max_pages:
+                        detail = f"import_skipped_oversized_pdf_pages={page_count}_max={max_pages}"
+                        self._mark_import_error(record.id, detail)
+                        return {"ncuc_id": record.id, "skipped": detail, "page_count": page_count}
                 summary = self.import_discovery_record(record)
                 summary["ncuc_id"] = record.id
                 
@@ -346,13 +381,18 @@ class NcucPipelineImporter:
                 return summary
             except Exception as exc:
                 logger.error("Failed to import NCUC record id=%s: %s", record.id, exc)
+                self._mark_import_error(record.id, f"import_failed_{type(exc).__name__}: {exc}")
                 return {"ncuc_id": record.id, "error": str(exc)}
 
         summaries = []
-        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
-            futures = [executor.submit(_process_record, r) for r in downloaded]
-            for future in concurrent.futures.as_completed(futures):
-                summaries.append(future.result())
+        if max_workers <= 1:
+            for record in downloaded:
+                summaries.append(_process_record(record))
+        else:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+                futures = [executor.submit(_process_record, r) for r in downloaded]
+                for future in concurrent.futures.as_completed(futures):
+                    summaries.append(future.result())
                 
         return summaries
 

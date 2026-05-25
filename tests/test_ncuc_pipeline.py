@@ -501,6 +501,63 @@ def test_importer_prefers_schedule_pg_over_generic_type_of_service_heading(
     assert stored.family_key == "nc-carolinas-schedule-PG"
 
 
+def test_import_all_pending_downloads_skips_oversized_pdf_and_marks_record(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    db_path = tmp_path / "test.db"
+    repo = Repository(db_path)
+    settings = Settings(database_path=db_path, data_dir=tmp_path / "data")
+    importer = NcucPipelineImporter(settings, repo)
+
+    pdf_path = tmp_path / "large.pdf"
+    pdf_path.write_bytes(b"%PDF-1.4\n")
+    rec_id = repo.upsert_ncuc_discovery_record(
+        NcucDiscoveryRecord(
+            utility="Duke Energy Progress",
+            filing_title="Large PDF",
+            docket_number="E-2 Sub 999",
+            local_path=str(pdf_path),
+            fetch_status=NcucFetchStatus.SUCCESS,
+            discovered_url="https://example.test/large.pdf",
+            content_hash="hash-large",
+        )
+    )
+
+    monkeypatch.setattr(
+        importer_module,
+        "triage_pdf",
+        lambda _: type(
+            "T",
+            (),
+            {
+                "route_recommendation": PipelineRoute.TEXT_PARSE,
+                "file_hash": "hash-large",
+                "page_count": 100,
+            },
+        )(),
+    )
+
+    def _unexpected_mine(record):
+        raise AssertionError("oversized record should not be page-mined")
+
+    monkeypatch.setattr(importer, "mine_discovery_record_spans", _unexpected_mine)
+
+    summaries = importer.import_all_pending_downloads(limit=10, max_workers=1, max_pages=75)
+
+    assert summaries == [
+        {
+            "ncuc_id": rec_id,
+            "skipped": "import_skipped_oversized_pdf_pages=100_max=75",
+            "page_count": 100,
+        }
+    ]
+    stored = repo.get_ncuc_discovery_record(rec_id)
+    assert stored is not None
+    assert stored.error_detail == "import_skipped_oversized_pdf_pages=100_max=75"
+    assert importer.import_all_pending_downloads(limit=10, max_workers=1, max_pages=75) == []
+
+
 def test_importer_matches_existing_historical_opt_i_family_from_explicit_title_alias(
     tmp_path: Path,
     monkeypatch,

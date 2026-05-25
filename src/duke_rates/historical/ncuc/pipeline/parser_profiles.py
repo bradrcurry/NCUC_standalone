@@ -2425,7 +2425,76 @@ class ProgressBillingAdjustmentsProfile:
                     confidence_score=charge.confidence_score,
                 )
             )
+
+        # CEPS Net Billing Rate table (page 2 of leaf-601, Dec 2024+):
+        # the BA leaf-601 PDF added a per-customer-per-month "Clean Energy
+        # Portfolio Standard" section that the kWh-oriented leaf parser skips.
+        extracted.extend(self._extract_ceps_charges(text))
+
         return extracted or self._extract_notice_adjustments(text)
+
+    # CEPS section: matches everything from the section header up to the
+    # description footnotes or sales-tax block (whichever comes first).
+    _CEPS_SECTION_RE = re.compile(
+        r"APPLICABILITY\s*[–—\-]\s*CLEAN ENERGY PORTFOLIO STANDARD CHARGES"
+        r"(.*?)"
+        r"(?:Billing Adjustment Factors Description|SALES\s+TAX|\* Billing Adjustment Factors,\s+shown above,\s+includes a North Carolina regulatory fee\.\s*\n\s*For purposes of the applicability|\Z)",
+        re.I | re.S,
+    )
+    # Within the section: capture each class label and the lines that follow up
+    # to the next class label. The Net Billing Rate is the LAST $ value in the
+    # block (after CEPS Rate and CEPS EMF columns).
+    _CEPS_ROW_RE = re.compile(
+        r"^\s*(Residential|Commercial|Industrial(?:/Public Authority)?|Lighting)\s*$"
+        r"(.*?)"
+        r"(?=^\s*(?:Residential|Commercial|Industrial(?:/Public Authority)?|Lighting|\*\s*Billing|For purposes)\s*$|\Z)",
+        re.I | re.M | re.S,
+    )
+    _CEPS_DOLLAR_RE = re.compile(r"\$\s*\(?\s*([\d.,]+)\s*\)?\s*per\s*month", re.I)
+
+    @classmethod
+    def _extract_ceps_charges(cls, text: str) -> list[ExtractedCharge]:
+        """Extract the CEPS Net Billing Rate per-customer monthly charges.
+
+        The leaf-601 PDF added a CEPS table effective with the Dec 2024 BA
+        revision (formerly REPS). Each row has CEPS Rate, CEPS EMF, and Net
+        Billing Rate columns; the last $/month value is the bill-line amount.
+        """
+        section = cls._CEPS_SECTION_RE.search(text)
+        if not section:
+            return []
+        body = section.group(1)
+        extracted: list[ExtractedCharge] = []
+        for match in cls._CEPS_ROW_RE.finditer(body):
+            class_name = match.group(1).strip()
+            block = match.group(2)
+            if "not applicable" in block.lower():
+                continue
+            dollar_values = cls._CEPS_DOLLAR_RE.findall(block)
+            if not dollar_values:
+                continue
+            # Net Billing Rate is the last $ value in the block. Parens around
+            # the value indicate a credit (EMF can be negative); the Net rate
+            # itself is not parenthesized in any observed leaf-601 PDF.
+            try:
+                net_rate = float(dollar_values[-1].replace(",", ""))
+            except ValueError:
+                continue
+            extracted.append(
+                ExtractedCharge(
+                    charge_type="fixed",
+                    charge_label=f"CEPS Net Billing Rate - {class_name}",
+                    rate_value=net_rate,
+                    rate_unit="$/month",
+                    season="all_year",
+                    tou_period=None,
+                    tier_min=None,
+                    tier_max=None,
+                    source_snippet=match.group(0)[:160],
+                    confidence_score=0.92,
+                )
+            )
+        return extracted
 
     @classmethod
     def _extract_notice_adjustments(cls, text: str) -> list[ExtractedCharge]:

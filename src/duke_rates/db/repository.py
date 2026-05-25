@@ -3108,9 +3108,11 @@ class Repository:
         file_hash: str | None = None,
         limit: int = 0,
     ) -> dict[str, Any]:
-        """Consolidate historical_documents that share the same ``content_hash``.
+        """Consolidate historical_documents that share the same scoped hash.
 
-        For each duplicate group the best survivor is kept and all foreign-key
+        A full-PDF content hash can be shared by distinct page spans from the
+        same source PDF.  For each duplicate group with the same hash, family,
+        start page, and end page, the best survivor is kept and all foreign-key
         references from the other rows are remapped to it.  Non-survivors are
         then deleted.
 
@@ -3132,13 +3134,20 @@ class Repository:
                 f"""
                 SELECT
                     hd.content_hash,
+                    hd.family_key,
+                    COALESCE(hd.start_page, -1) AS start_page_scope,
+                    COALESCE(hd.end_page, COALESCE(hd.start_page, -1)) AS end_page_scope,
                     COUNT(*)        AS cnt,
                     GROUP_CONCAT(hd.id) AS id_list
                 FROM historical_documents hd
                 WHERE hd.content_hash IS NOT NULL
                   AND hd.content_hash != ''
                 {where}
-                GROUP BY hd.content_hash
+                GROUP BY
+                    hd.content_hash,
+                    hd.family_key,
+                    COALESCE(hd.start_page, -1),
+                    COALESCE(hd.end_page, COALESCE(hd.start_page, -1))
                 HAVING COUNT(*) > 1
                 ORDER BY cnt DESC
                 """,
@@ -3156,6 +3165,9 @@ class Repository:
 
             for dr in dup_rows:
                 content_hash_val = dr["content_hash"]
+                family_key_val = dr["family_key"]
+                start_page_scope = None if int(dr["start_page_scope"]) == -1 else int(dr["start_page_scope"])
+                end_page_scope = None if int(dr["end_page_scope"]) == -1 else int(dr["end_page_scope"])
                 id_str = dr["id_list"]
                 if not id_str:
                     continue
@@ -3202,6 +3214,9 @@ class Repository:
                 if dry_run:
                     per_group.append({
                         "content_hash": content_hash_val,
+                        "family_key": family_key_val,
+                        "start_page": start_page_scope,
+                        "end_page": end_page_scope,
                         "survivor_id": survivor_id,
                         "survivor_charges": best_score[0],
                         "removed_ids": non_survivors,
@@ -3270,6 +3285,9 @@ class Repository:
                     conn.commit()
                     per_group.append({
                         "content_hash": content_hash_val,
+                        "family_key": family_key_val,
+                        "start_page": start_page_scope,
+                        "end_page": end_page_scope,
                         "survivor_id": survivor_id,
                         "survivor_charges": best_score[0],
                         "removed_ids": non_survivors,

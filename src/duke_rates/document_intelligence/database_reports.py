@@ -92,98 +92,68 @@ def find_missing_versions(
     limit: int = 50,
     family_key: str | None = None,
 ) -> dict[str, Any]:
-    """Detect year gaps in tariff/rider version timelines per family.
+    """Find historical documents the bootstrap command can version-link.
 
-    Returns families whose observed distinct years are fewer than the
-    expected span suggests, implying missing annual versions.
+    This category is wired to ``bootstrap-missing-versions-nc``. Keep the
+    report definition aligned with that command: NC historical documents with
+    a date and path but no ``tariff_versions.historical_document_id`` link.
+    Annual timeline gaps are a different audit surface and are not directly
+    fixed by the bootstrap action.
     """
-    base_sql = """
-        WITH family_year_spans AS (
-            SELECT
-                tv.family_key,
-                COALESCE(tf.company, '') AS company,
-                CAST(MIN(CAST(SUBSTR(tv.effective_start, 1, 4) AS INTEGER)) AS INTEGER) AS first_year,
-                CAST(MAX(CAST(SUBSTR(tv.effective_start, 1, 4) AS INTEGER)) AS INTEGER) AS last_year,
-                COUNT(DISTINCT CAST(SUBSTR(tv.effective_start, 1, 4) AS INTEGER)) AS distinct_years,
-                COUNT(DISTINCT tv.id) AS version_count
-            FROM tariff_versions tv
-            JOIN tariff_families tf ON tf.family_key = tv.family_key
-            WHERE tf.state = 'NC'
-              AND tv.effective_start IS NOT NULL
-              AND tv.effective_start != ''
-              AND LENGTH(TRIM(tv.effective_start)) >= 4
-            GROUP BY tv.family_key
-        )
+    sql = """
         SELECT
-            family_key,
-            company,
-            first_year,
-            last_year,
-            distinct_years,
-            version_count,
-            (last_year - first_year + 1) AS expected_years,
-            (last_year - first_year + 1) - distinct_years AS missing_year_count
-        FROM family_year_spans
-        WHERE (last_year - first_year + 1) > distinct_years
-          AND version_count >= 2
+            hd.id AS historical_document_id,
+            hd.family_key,
+            hd.company,
+            hd.effective_start,
+            hd.title,
+            hd.local_path AS source_pdf
+        FROM historical_documents hd
+        WHERE hd.state = 'NC'
+          AND hd.company IN ('progress', 'carolinas')
+          AND hd.effective_start IS NOT NULL
+          AND hd.effective_start != ''
+          AND hd.local_path IS NOT NULL
+          AND NOT EXISTS (
+              SELECT 1 FROM tariff_versions tv
+              WHERE tv.historical_document_id = hd.id
+          )
     """
 
     params: tuple = ()
     if family_key:
-        base_sql += " AND family_key = ?"
+        sql += " AND hd.family_key = ?"
         params = (family_key,)
 
-    total_count = _count_rows(conn, base_sql, params)
-    base_sql += " ORDER BY missing_year_count DESC"
+    total_count = _count_rows(conn, sql, params)
+    sql += " ORDER BY hd.family_key, hd.effective_start, hd.id"
+    rows = _query_rows(conn, sql, params, limit=limit)
 
-    rows = _query_rows(conn, base_sql, params, limit=limit)
-
-    # Compute the actual missing years per family
-    family_rows = []
-    for r in rows:
-        # Get the distinct observed years
-        yr_sql = """
-            SELECT DISTINCT CAST(SUBSTR(effective_start, 1, 4) AS INTEGER) AS yr
-            FROM tariff_versions
-            WHERE family_key = ?
-              AND effective_start IS NOT NULL
-              AND effective_start != ''
-              AND LENGTH(TRIM(effective_start)) >= 4
-            ORDER BY yr
-        """
-        yr_cursor = conn.execute(yr_sql, (r["family_key"],))
-        observed_years = [int(row["yr"]) for row in yr_cursor.fetchall()]
-        yr_cursor.close()
-
-        first = _safe_int(r.get("first_year"))
-        last = _safe_int(r.get("last_year"))
-        missing_years: list[int] = []
-        if first and last:
-            for y in range(first, last + 1):
-                if y not in observed_years:
-                    missing_years.append(y)
-
-        family_rows.append({
-            "family_key": r["family_key"],
+    parsed_rows = [
+        {
+            "historical_document_id": _safe_int(r.get("historical_document_id")),
+            "family_key": r.get("family_key", ""),
             "company": r.get("company", ""),
-            "first_year": first,
-            "last_year": last,
-            "distinct_years": _safe_int(r.get("distinct_years", 0)),
-            "version_count": _safe_int(r.get("version_count", 0)),
-            "expected_years": _safe_int(r.get("expected_years", 0)),
-            "missing_year_count": _safe_int(r.get("missing_year_count", 0)),
-            "missing_years": missing_years,
-            "observed_years": observed_years,
-        })
+            "effective_start": r.get("effective_start", ""),
+            "title": r.get("title", ""),
+            "source_pdf": r.get("source_pdf", ""),
+        }
+        for r in rows
+    ]
+    family_counts: dict[str, int] = {}
+    for row in parsed_rows:
+        family = str(row.get("family_key") or "")
+        family_counts[family] = family_counts.get(family, 0) + 1
 
     return {
         "summary": {
-            "count": len(family_rows),
+            "count": len(parsed_rows),
             "total_count": total_count,
-            "total_missing_years": sum(r["missing_year_count"] or 0 for r in family_rows),
-            "worst_family": family_rows[0]["family_key"] if family_rows else None,
+            "historical_docs_missing_versions": total_count,
+            "families_in_sample": len(family_counts),
+            "by_family": dict(sorted(family_counts.items(), key=lambda item: (-item[1], item[0]))[:10]),
         },
-        "rows": family_rows,
+        "rows": parsed_rows,
     }
 
 
@@ -198,29 +168,79 @@ def find_unknown_documents(
     docket: str | None = None,
     since: str | None = None,
 ) -> dict[str, Any]:
-    """Find documents classified as UNKNOWN, grouped by fingerprint cluster."""
+    """Find documents the LLM adjudication action can process.
+
+    This category is wired to ``doc-intel adjudicate-classifications``, so it
+    mirrors that command's candidate definition: active rule v1 and embedding
+    KNN document-type rows that disagree, contain UNKNOWN, or are low
+    confidence, with no active LLM classification already present.
+    """
     sql = """
-        SELECT
-            dc.subject_kind,
-            dc.subject_id,
-            dc.label,
-            dc.confidence,
-            dc.classifier,
-            dc.classifier_version,
-            COALESCE(dfv.cluster_signature_v1, 'no_cluster') AS cluster_signature,
-            COUNT(*) OVER (PARTITION BY COALESCE(dfv.cluster_signature_v1, 'no_cluster')) AS cluster_size,
-            COALESCE(hd.title, '') AS title,
-            hd.local_path AS source_pdf,
-            hd.family_key,
-            hd.effective_start
-        FROM document_classifications dc
-        LEFT JOIN historical_documents hd
-            ON dc.subject_kind = 'historical_document'
-            AND CAST(dc.subject_id AS INTEGER) = hd.id
-        LEFT JOIN document_fingerprints_v2 dfv
-            ON dfv.source_pdf = hd.local_path
-        WHERE dc.label = 'UNKNOWN'
-          AND dc.superseded_by IS NULL
+        WITH adjudication_candidates AS (
+            SELECT
+                r.subject_kind,
+                r.subject_id,
+                r.label AS rule_label,
+                r.confidence AS rule_confidence,
+                r.classifier_version AS rule_classifier_version,
+                r.created_at AS rule_created_at,
+                e.label AS embedding_label,
+                e.confidence AS embedding_confidence,
+                e.classifier_version AS embedding_classifier_version,
+                e.created_at AS embedding_created_at
+            FROM document_classifications r
+            JOIN document_classifications e
+              ON e.subject_kind = r.subject_kind
+             AND e.subject_id = r.subject_id
+             AND e.stage = r.stage
+             AND e.classifier = 'embedding_knn_v1'
+             AND e.superseded_by IS NULL
+            LEFT JOIN document_classifications existing_llm
+              ON existing_llm.subject_kind = r.subject_kind
+             AND existing_llm.subject_id = r.subject_id
+             AND existing_llm.stage = r.stage
+             AND existing_llm.classifier LIKE 'llm_%'
+             AND existing_llm.superseded_by IS NULL
+            WHERE r.stage = 'document_type'
+              AND r.classifier = 'rule_document_type_v1'
+              AND r.superseded_by IS NULL
+              AND existing_llm.id IS NULL
+              AND (
+                  r.label != e.label
+                  OR r.label = 'UNKNOWN'
+                  OR e.label = 'UNKNOWN'
+                  OR MAX(r.confidence, e.confidence) < 0.5
+              )
+        ),
+        fingerprint_one AS (
+            SELECT
+                source_pdf,
+                COALESCE(MAX(cluster_signature_v1), 'no_cluster') AS cluster_signature
+            FROM document_fingerprints_v2
+            GROUP BY source_pdf
+        ),
+        unknown_documents AS (
+            SELECT
+                ac.subject_kind,
+                ac.subject_id,
+                MAX(ac.rule_confidence, ac.embedding_confidence) AS confidence,
+                ac.rule_label,
+                ac.embedding_label,
+                ac.rule_classifier_version,
+                ac.embedding_classifier_version,
+                MAX(ac.rule_created_at, ac.embedding_created_at) AS last_classified_at,
+                COALESCE(fp.cluster_signature, 'no_cluster') AS cluster_signature,
+                COALESCE(hd.title, '') AS title,
+                hd.local_path AS source_pdf,
+                hd.family_key,
+                hd.effective_start
+            FROM adjudication_candidates ac
+            LEFT JOIN historical_documents hd
+                ON ac.subject_kind = 'historical_document'
+                AND CAST(ac.subject_id AS INTEGER) = hd.id
+            LEFT JOIN fingerprint_one fp
+                ON fp.source_pdf = hd.local_path
+            WHERE 1 = 1
     """
 
     params: tuple = ()
@@ -228,11 +248,30 @@ def find_unknown_documents(
         sql += " AND hd.family_key IN (SELECT family_key FROM tariff_versions WHERE docket_number LIKE ?)"
         params = (f"%{docket}%",)
     if since:
-        sql += " AND dc.created_at >= ?"
+        sql += " AND MAX(ac.rule_created_at, ac.embedding_created_at) >= ?"
         params = params + (since,)
 
+    sql += """
+        )
+        SELECT
+            subject_kind,
+            subject_id,
+            confidence,
+            rule_label,
+            embedding_label,
+            rule_classifier_version,
+            embedding_classifier_version,
+            cluster_signature,
+            COUNT(*) OVER (PARTITION BY cluster_signature) AS cluster_size,
+            title,
+            source_pdf,
+            family_key,
+            effective_start
+        FROM unknown_documents
+    """
+
     total_count = _count_rows(conn, sql, params)
-    sql += " ORDER BY cluster_size DESC, dc.subject_id"
+    sql += " ORDER BY cluster_size DESC, subject_id"
 
     rows = _query_rows(conn, sql, params, limit=limit)
 
@@ -253,7 +292,9 @@ def find_unknown_documents(
             "source_pdf": r.get("source_pdf", ""),
             "family_key": r.get("family_key", ""),
             "effective_start": r.get("effective_start", ""),
-            "classifier": r.get("classifier", ""),
+            "classifier": "rule_document_type_v1,embedding_knn_v1",
+            "rule_label": r.get("rule_label", ""),
+            "embedding_label": r.get("embedding_label", ""),
             "confidence": r.get("confidence", 0.0),
         })
 
@@ -292,6 +333,14 @@ def find_low_quality_parses(
     # then we filter that single row per document for low-quality
     # signals. This makes the count reflect *currently* failing parses,
     # not the historical accumulation of every failure ever logged.
+    #
+    # Only rows that can be mapped to historical_documents are actionable
+    # by the reprocess queue. Large batches of tiered ingest attempts can
+    # exist for source paths that are not historical documents; counting
+    # them here makes the autonomous loop chase work it cannot enqueue.
+    # Likewise, any document already present in historical_reprocess_queue
+    # has already been routed through the corrective path, regardless of
+    # status, so it should not keep inflating the candidate count.
     sql = """
         WITH latest_attempt AS (
             SELECT pal.*,
@@ -313,12 +362,25 @@ def find_low_quality_parses(
             COALESCE(hd.title, '') AS title,
             COALESCE(hd.effective_start, '') AS effective_start
         FROM latest_attempt pal
-        LEFT JOIN historical_documents hd
-            ON hd.local_path = pal.source_pdf
+        JOIN historical_documents hd
+            ON REPLACE(COALESCE(hd.local_path, ''), '\\', '/')
+             = REPLACE(COALESCE(pal.source_pdf, ''), '\\', '/')
         WHERE pal.rn = 1
           AND (pal.charge_count = 0
                OR pal.confidence < 0.3
                OR pal.status IN ('empty', 'error'))
+          AND COALESCE(pal.status, '') NOT LIKE 'skipped_%'
+          AND COALESCE(hd.effective_start, '') != ''
+          AND hd.family_key NOT LIKE '%-doc-%'
+          AND hd.family_key NOT LIKE '%-program-%'
+          AND COALESCE(pal.parser_profile, '') NOT IN ('unknown', 'tiered_ingest')
+          AND NOT EXISTS (
+              SELECT 1
+              FROM historical_reprocess_queue hrq
+              WHERE hrq.historical_document_id = hd.id
+                 OR REPLACE(COALESCE(hrq.source_pdf, ''), '\\', '/')
+                  = REPLACE(COALESCE(pal.source_pdf, ''), '\\', '/')
+          )
     """
 
     params: tuple = ()
@@ -383,7 +445,14 @@ def find_stale_artifacts(
     family_key: str | None = None,
     since: str | None = None,
 ) -> dict[str, Any]:
-    """Find documents with missing page/span artifacts and stuck reprocess items."""
+    """Find actionable stale artifact work.
+
+    The ``no_evidence_json`` branch mirrors
+    ``Repository.backfill_evidence_json`` so the autonomous loop only sees
+    evidence rows the wired corrective action can actually backfill. Missing
+    evidence without a usable span-artifact breakdown needs a different repair
+    path and should not keep this category hot.
+    """
     # Pending reprocess queue items
     reprocess_sql = """
         SELECT
@@ -424,7 +493,16 @@ def find_stale_artifacts(
         FROM historical_documents hd
         WHERE hd.state = 'NC'
           AND hd.local_path IS NOT NULL
+          AND hd.content_hash IS NOT NULL
+          AND hd.content_hash != ''
           AND (hd.evidence_json IS NULL OR hd.evidence_json = '{}' OR hd.evidence_json = '')
+          AND EXISTS (
+              SELECT 1 FROM ncuc_span_artifacts nsa
+              WHERE nsa.file_hash = hd.content_hash
+                AND nsa.evidence_score_breakdown_json IS NOT NULL
+                AND nsa.evidence_score_breakdown_json != ''
+                AND nsa.evidence_score_breakdown_json != '{}'
+          )
     """
     ev_params: tuple = ()
     if family_key:
@@ -485,19 +563,17 @@ def find_duplicate_documents(
 ) -> dict[str, Any]:
     """Detect actually-duplicate historical documents.
 
-    Counts groups of ``historical_documents`` rows that share a
-    ``content_hash`` -- the SAME field that ``lineage deduplicate-documents-nc``
-    operates on. The previous implementation queried
-    ``document_fingerprints_v2.file_hash``, which is a many-to-one
-    fingerprint index (one PDF can have multiple fingerprint rows),
-    so it reported ~3,400 "duplicate groups" while dedup only had
-    ~25 actual groups to drain. The autonomous loop ran dedup 21
-    times in a row against an already-empty backlog because of this
-    mismatch.
+    A full-PDF ``content_hash`` alone is not enough: a single PDF can be
+    split into many span-scoped historical documents that legitimately share
+    that hash. Match the same scope used by ``deduplicate-documents-nc``:
+    hash, family, start page, and end page.
     """
     sql = """
         SELECT
             hd.content_hash,
+            hd.family_key,
+            COALESCE(hd.start_page, -1) AS start_page_scope,
+            COALESCE(hd.end_page, COALESCE(hd.start_page, -1)) AS end_page_scope,
             COUNT(*) AS duplicate_count,
             GROUP_CONCAT(hd.local_path, '|||') AS source_pdfs_csv,
             GROUP_CONCAT(hd.id) AS id_list_csv
@@ -513,7 +589,11 @@ def find_duplicate_documents(
         params = (since,)
 
     sql += """
-        GROUP BY hd.content_hash
+        GROUP BY
+            hd.content_hash,
+            hd.family_key,
+            COALESCE(hd.start_page, -1),
+            COALESCE(hd.end_page, COALESCE(hd.start_page, -1))
         HAVING COUNT(*) > 1
     """
     total_count = _count_rows(conn, sql, params)
@@ -530,6 +610,9 @@ def find_duplicate_documents(
         total_dup_instances += dup_count
         parsed_rows.append({
             "content_hash": r["content_hash"],
+            "family_key": r.get("family_key", ""),
+            "start_page": None if r.get("start_page_scope") == -1 else _safe_int(r.get("start_page_scope")),
+            "end_page": None if r.get("end_page_scope") == -1 else _safe_int(r.get("end_page_scope")),
             "duplicate_count": dup_count,
             "source_pdfs": pdfs[:20],  # cap list length
             "historical_document_ids": [int(i) for i in ids if i.strip().isdigit()][:20],
@@ -593,20 +676,58 @@ def find_family_lineage_gaps(
     rows1 = _query_rows(conn, sql1, params1, limit=limit)
     gap_type_counts["no_version_link"] = gap1_total
 
-    # Gap type 2: docs with null effective_start
+    # Gap type 2: docs with null effective_start that the deterministic repair
+    # command can resolve from same-PDF siblings with one known date.
     sql2 = """
+        WITH pdf_dates AS (
+            SELECT
+                local_path,
+                COUNT(DISTINCT effective_start) AS known_date_count,
+                MAX(effective_start) AS inferred_effective_start
+            FROM historical_documents
+            WHERE state = 'NC'
+              AND local_path IS NOT NULL
+              AND COALESCE(effective_start, '') <> ''
+              AND SUBSTR(effective_start, 1, 4) GLOB '[12][0-9][0-9][0-9]'
+            GROUP BY local_path
+        )
         SELECT
             hd.id AS historical_document_id,
             hd.family_key,
             hd.company,
-            hd.effective_start,
+            pdf_dates.inferred_effective_start AS effective_start,
             hd.title,
             hd.local_path AS source_pdf,
             'no_effective_start' AS gap_type
         FROM historical_documents hd
+        JOIN pdf_dates
+          ON pdf_dates.local_path = hd.local_path
         WHERE hd.state = 'NC'
           AND hd.local_path IS NOT NULL
           AND (hd.effective_start IS NULL OR hd.effective_start = '')
+          AND pdf_dates.known_date_count = 1
+          AND NOT EXISTS (
+              SELECT 1
+              FROM tariff_versions linked_tv
+              WHERE linked_tv.family_key = hd.family_key
+                AND linked_tv.effective_start = pdf_dates.inferred_effective_start
+                AND linked_tv.historical_document_id IS NOT NULL
+          )
+          AND (
+              NOT EXISTS (
+                  SELECT 1
+                  FROM tariff_versions any_tv
+                  WHERE any_tv.family_key = hd.family_key
+                    AND any_tv.effective_start = pdf_dates.inferred_effective_start
+              )
+              OR 1 = (
+                  SELECT COUNT(*)
+                  FROM tariff_versions unlinked_tv
+                  WHERE unlinked_tv.family_key = hd.family_key
+                    AND unlinked_tv.effective_start = pdf_dates.inferred_effective_start
+                    AND unlinked_tv.historical_document_id IS NULL
+              )
+          )
     """
     params2: tuple = ()
     if family_key:
@@ -635,6 +756,7 @@ def find_family_lineage_gaps(
         JOIN tariff_families tf ON tf.family_key = tv.family_key
         WHERE tf.state = 'NC'
           AND tv.historical_document_id IS NULL
+          AND (tv.source_type != 'utility_current' OR tv.document_id IS NULL)
     """
     params3: tuple = ()
     if family_key:
@@ -693,88 +815,35 @@ def find_docket_coverage_summary(
     docket: str | None = None,
     since: str | None = None,
 ) -> dict[str, Any]:
-    """Summarize document counts per docket, year, and document-type classification."""
-    sql = """
-        SELECT
-            COALESCE(ndr.docket_number, 'unknown') AS docket_number,
-            COALESCE(ndr.utility, hd.company, 'unknown') AS utility,
-            CAST(
-                SUBSTR(
-                    COALESCE(NULLIF(hd.effective_start, ''), hd.snapshot_timestamp, '0000'),
-                    1, 4
-                ) AS INTEGER
-            ) AS year,
-            COUNT(DISTINCT hd.id) AS doc_count,
-            SUM(CASE WHEN dc.label = 'TARIFF_SHEET' THEN 1 ELSE 0 END) AS tariff_sheet_count,
-            SUM(CASE WHEN dc.label = 'RIDER' THEN 1 ELSE 0 END) AS rider_count,
-            SUM(CASE WHEN dc.label = 'ORDER_FINAL' THEN 1 ELSE 0 END) AS order_count,
-            SUM(CASE WHEN dc.label = 'COVER_LETTER' THEN 1 ELSE 0 END) AS cover_letter_count,
-            SUM(CASE WHEN dc.label = 'UNKNOWN' THEN 1 ELSE 0 END) AS unknown_count
-        FROM historical_documents hd
-        LEFT JOIN ncuc_discovery_records ndr
-            ON ndr.content_hash = hd.content_hash
-        LEFT JOIN document_classifications dc
-            ON dc.subject_kind = 'historical_document'
-            AND CAST(dc.subject_id AS INTEGER) = hd.id
-            AND dc.stage = 'document_type'
-            AND dc.superseded_by IS NULL
-        WHERE hd.state = 'NC'
+    """Return actionable docket coverage work for the autonomous loop.
+
+    The old docket/year summary was descriptive, but it inflated the loop's
+    backlog with already-processed buckets. The loop-facing category should
+    reflect work the acquisition/import lanes can actually move.
     """
-
-    params: tuple = ()
-    if docket:
-        sql += " AND (ndr.docket_number LIKE ? OR ndr.docket_number = ?)"
-        params = (f"%{docket}%", docket)
-    if since:
-        sql += " AND hd.retrieved_at >= ?"
-        params = params + (since,)
-
-    sql += " GROUP BY docket_number, utility, year"
-    total_count = _count_rows(conn, sql, params)
-    sql += " ORDER BY year DESC, doc_count DESC"
-
-    rows = _query_rows(conn, sql, params, limit=limit)
-
-    # Summary aggregates
-    dockets: set[str] = set()
-    years: set[int] = set()
-    utilities: set[str] = set()
-    total_docs = 0
-    total_tariff = 0
-
-    for r in rows:
-        dockets.add(r.get("docket_number", "unknown"))
-        yr = _safe_int(r.get("year"))
-        if yr:
-            years.add(yr)
-        utilities.add(r.get("utility", "unknown"))
-        total_docs += _safe_int(r.get("doc_count", 0)) or 0
-        total_tariff += _safe_int(r.get("tariff_sheet_count", 0)) or 0
-
+    _ = since
+    report = find_missing_docket_coverage(conn, limit=limit, docket=docket)
+    rows = list(report.get("recommendations", []))
+    leads = list(report.get("docket_leads", []))
+    fetch_records = sum(_safe_int(row.get("fetch_eligible_count", 0)) or 0 for row in rows)
+    import_records = sum(_safe_int(row.get("downloaded_not_imported_count", 0)) or 0 for row in rows)
     return {
         "summary": {
-            "count": len(rows),
-            "total_count": total_count,
-            "unique_dockets": len(dockets),
-            "unique_years": len(years),
-            "year_range": f"{min(years)}-{max(years)}" if years else "N/A",
-            "total_docs": total_docs,
-            "total_tariff_sheets": total_tariff,
+            "count": len(rows) + len(leads),
+            "total_count": len(rows) + len(leads),
+            "fetch_eligible_records": fetch_records,
+            "downloaded_not_imported_records": import_records,
+            "dockets_requiring_fetch": sum(
+                1 for row in rows
+                if (_safe_int(row.get("fetch_eligible_count", 0)) or 0) > 0
+            ),
+            "dockets_requiring_import": sum(
+                1 for row in rows
+                if (_safe_int(row.get("downloaded_not_imported_count", 0)) or 0) > 0
+            ),
+            "leads_without_discovery": len(leads),
         },
-        "rows": [
-            {
-                "docket_number": r.get("docket_number", "unknown"),
-                "utility": r.get("utility", "unknown"),
-                "year": _safe_int(r.get("year")),
-                "doc_count": _safe_int(r.get("doc_count", 0)),
-                "tariff_sheet_count": _safe_int(r.get("tariff_sheet_count", 0)),
-                "rider_count": _safe_int(r.get("rider_count", 0)),
-                "order_count": _safe_int(r.get("order_count", 0)),
-                "cover_letter_count": _safe_int(r.get("cover_letter_count", 0)),
-                "unknown_count": _safe_int(r.get("unknown_count", 0)),
-            }
-            for r in rows
-        ],
+        "rows": rows,
     }
 
 
@@ -948,15 +1017,14 @@ def find_missing_docket_coverage(
     docket: str | None = None,
     since: str | None = None,
 ) -> dict[str, Any]:
-    """Recommend dockets with discovery records but low or zero processed coverage.
+    """Recommend actionable docket acquisition/import work.
 
-    Cross-references ``ncuc_discovery_records`` against ``tariff_versions`` and
-    ``historical_documents`` by docket number.  Dockets with many discovery
-    records but few historical documents are the highest-value targets.
-
-    Also surfaces discovery records whose ``fetch_status != 'complete'``
-    (never downloaded) and docket leads from ``regulatory_docket_leads`` that
-    have no corresponding discovery records yet.
+    Each discovery record contributes once. Imported coverage is inferred by
+    matching tariff versions at the docket level. Import work mirrors
+    ``Repository.list_ncuc_pending_imports()``: successfully fetched discovery
+    rows with no ``ncuc_span_artifacts`` rows. Fetch work uses the real live
+    statuses (``pending``, ``failed``, ``requires_browser``), not the older
+    ``complete`` sentinel.
     """
     _ = since  # reserved for future use
 
@@ -974,31 +1042,90 @@ def find_missing_docket_coverage(
 
     # ── Main coverage ranking ──────────────────────────────────────────
     coverage_sql = f"""
+        WITH discovery_rows AS (
+            SELECT
+                ndr.id,
+                ndr.docket_number,
+                ndr.utility,
+                ndr.filing_title,
+                ndr.fetch_status,
+                ndr.local_path,
+                ndr.content_hash,
+                ndr.error_detail
+            FROM ncuc_discovery_records ndr
+            WHERE ndr.docket_number IS NOT NULL
+              AND ndr.docket_number != ''
+              {where}
+        ),
+        docket_rollup AS (
+            SELECT
+                docket_number,
+                MAX(utility) AS utility,
+                MAX(filing_title) AS filing_title,
+                COUNT(*) AS discovery_records_count,
+                SUM(CASE
+                    WHEN fetch_status IN ('pending', 'failed', 'requires_browser')
+                      OR (fetch_status IS NULL AND (local_path IS NULL OR local_path = ''))
+                    THEN 1 ELSE 0
+                END) AS fetch_eligible_count,
+                SUM(CASE WHEN local_path IS NOT NULL AND local_path != '' THEN 1 ELSE 0 END) AS downloaded_count,
+                SUM(CASE
+                    WHEN local_path IS NOT NULL
+                     AND local_path != ''
+                     AND fetch_status = 'success'
+                     AND COALESCE(error_detail, '') NOT LIKE 'import_skipped_%'
+                     AND COALESCE(error_detail, '') NOT LIKE 'import_failed_%'
+                     AND NOT EXISTS (
+                         SELECT 1
+                         FROM ncuc_span_artifacts nsa
+                         WHERE nsa.discovery_record_id = discovery_rows.id
+                     )
+                    THEN 1 ELSE 0
+                END) AS downloaded_not_imported_count
+            FROM discovery_rows
+            GROUP BY docket_number
+        ),
+        version_rollup AS (
+            SELECT
+                tv.docket_number,
+                COUNT(DISTINCT tv.historical_document_id) AS historical_docs_count,
+                COUNT(DISTINCT tv.id) AS tariff_versions_count,
+                COUNT(DISTINCT tc.id) AS tariff_charges_count,
+                COUNT(DISTINCT CASE WHEN dc.label = 'UNKNOWN' THEN tv.historical_document_id END) AS unknown_classified_count
+            FROM tariff_versions tv
+            LEFT JOIN tariff_charges tc
+              ON tc.version_id = tv.id
+            LEFT JOIN document_classifications dc
+              ON dc.subject_kind = 'historical_document'
+             AND CAST(dc.subject_id AS INTEGER) = tv.historical_document_id
+             AND dc.stage = 'document_type'
+             AND dc.superseded_by IS NULL
+            WHERE tv.docket_number IS NOT NULL
+              AND tv.docket_number != ''
+            GROUP BY tv.docket_number
+        )
         SELECT
-            ndr.docket_number,
-            MAX(ndr.utility) AS utility,
-            MAX(ndr.filing_title) AS filing_title,
-            COUNT(DISTINCT ndr.id) AS discovery_records_count,
-            COUNT(DISTINCT hd.id) AS historical_docs_count,
-            COUNT(DISTINCT tv.id) AS tariff_versions_count,
-            COUNT(DISTINCT tc.id) AS tariff_charges_count,
-            SUM(CASE WHEN ndr.fetch_status = 'complete' THEN 1 ELSE 0 END) AS fetch_complete_count,
-            SUM(CASE WHEN ndr.local_path IS NOT NULL AND ndr.local_path != '' THEN 1 ELSE 0 END) AS downloaded_count,
-            COUNT(DISTINCT CASE WHEN dc.label = 'UNKNOWN' THEN hd.id END) AS unknown_classified_count
-        FROM ncuc_discovery_records ndr
-        LEFT JOIN tariff_versions tv ON tv.docket_number = ndr.docket_number
-        LEFT JOIN historical_documents hd ON hd.id = tv.historical_document_id
-        LEFT JOIN tariff_charges tc ON tc.version_id = tv.id
-        LEFT JOIN document_classifications dc
-            ON dc.subject_kind = 'historical_document'
-            AND CAST(dc.subject_id AS INTEGER) = hd.id
-            AND dc.stage = 'document_type'
-            AND dc.superseded_by IS NULL
-        WHERE ndr.docket_number IS NOT NULL
-          AND ndr.docket_number != ''
-          {where}
-        GROUP BY ndr.docket_number
-        ORDER BY discovery_records_count DESC, historical_docs_count ASC
+            dr.docket_number,
+            dr.utility,
+            dr.filing_title,
+            dr.discovery_records_count,
+            COALESCE(vr.historical_docs_count, 0) AS historical_docs_count,
+            COALESCE(vr.tariff_versions_count, 0) AS tariff_versions_count,
+            COALESCE(vr.tariff_charges_count, 0) AS tariff_charges_count,
+            dr.fetch_eligible_count,
+            dr.downloaded_count,
+            dr.downloaded_not_imported_count,
+            COALESCE(vr.unknown_classified_count, 0) AS unknown_classified_count
+        FROM docket_rollup dr
+        LEFT JOIN version_rollup vr
+          ON vr.docket_number = dr.docket_number
+        WHERE dr.fetch_eligible_count > 0
+           OR dr.downloaded_not_imported_count > 0
+           OR COALESCE(vr.unknown_classified_count, 0) > 0
+        ORDER BY
+            dr.downloaded_not_imported_count DESC,
+            dr.fetch_eligible_count DESC,
+            dr.discovery_records_count DESC
     """
 
     rows = _query_rows(conn, coverage_sql, tuple(params), limit=limit)
@@ -1008,21 +1135,20 @@ def find_missing_docket_coverage(
         disc_count = _safe_int(r.get("discovery_records_count", 0)) or 0
         hd_count = _safe_int(r.get("historical_docs_count", 0)) or 0
         unk_count = _safe_int(r.get("unknown_classified_count", 0)) or 0
-        fetch_complete = _safe_int(r.get("fetch_complete_count", 0)) or 0
+        fetch_eligible = _safe_int(r.get("fetch_eligible_count", 0)) or 0
         downloaded = _safe_int(r.get("downloaded_count", 0)) or 0
+        downloaded_not_imported = _safe_int(r.get("downloaded_not_imported_count", 0)) or 0
 
         # Coverage: if no discovery records → 100% (nothing to fetch)
         coverage_pct = round(100 * hd_count / disc_count, 1) if disc_count > 0 else 100.0
 
         # Recommended action
-        if fetch_complete < disc_count and downloaded == 0:
-            action = "fetch"
-        elif hd_count == 0 and downloaded > 0:
+        if downloaded_not_imported > 0:
             action = "import"
+        elif fetch_eligible > 0:
+            action = "fetch"
         elif unk_count > 0 and hd_count > 0 and (unk_count >= hd_count * 0.5):
             action = "classify"
-        elif hd_count > 0 and disc_count > hd_count:
-            action = "reprocess"
         else:
             action = "investigate"
 
@@ -1034,8 +1160,9 @@ def find_missing_docket_coverage(
             "historical_docs_count": hd_count,
             "tariff_versions_count": _safe_int(r.get("tariff_versions_count", 0)) or 0,
             "tariff_charges_count": _safe_int(r.get("tariff_charges_count", 0)) or 0,
-            "fetch_complete_count": fetch_complete,
+            "fetch_eligible_count": fetch_eligible,
             "downloaded_count": downloaded,
+            "downloaded_not_imported_count": downloaded_not_imported,
             "unknown_classified_count": unk_count,
             "coverage_pct": coverage_pct,
             "recommended_action": action,
@@ -1093,7 +1220,10 @@ def find_missing_docket_coverage(
         FROM ncuc_discovery_records ndr
         WHERE ndr.docket_number IS NOT NULL
           AND ndr.docket_number != ''
-          AND ndr.fetch_status != 'complete'
+          AND (
+              ndr.fetch_status IN ('pending', 'failed', 'requires_browser')
+              OR (ndr.fetch_status IS NULL AND (ndr.local_path IS NULL OR ndr.local_path = ''))
+          )
           {where}
         GROUP BY ndr.docket_number
         ORDER BY unfetched_count DESC

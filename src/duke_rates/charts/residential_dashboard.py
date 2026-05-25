@@ -6,6 +6,8 @@ its existing consumers.
 """
 from __future__ import annotations
 
+from pathlib import Path
+
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -287,3 +289,195 @@ def rider_buildup_area(
         template="plotly_white",
     )
     return fig
+
+
+def all_in_rate_history_stack(
+    components_df: pd.DataFrame,
+    timeline_df: pd.DataFrame,
+    *,
+    utility: str,
+    database_path: Path | None = None,
+) -> go.Figure:
+    """Stacked-area chart of the ALL-IN rate over time: Base Rate + individual riders.
+
+    Handles negative riders (credits) correctly by computing the cumulative sums
+    ourselves and plotting them as overlapping area traces (Option A).
+    """
+    from duke_rates.analytics.residential_bill_breakdown import load_rider_glossary
+
+    if components_df.empty or timeline_df.empty:
+        fig = go.Figure()
+        fig.update_layout(title=f"{utility}: no data available for all-in stack")
+        return fig
+
+    # 1. Clean and align data
+    df_comp = components_df.copy()
+    df_comp["effective_date"] = pd.to_datetime(df_comp["effective_date"])
+
+    df_timeline = timeline_df[timeline_df["utility"] == utility].sort_values("effective_date").copy()
+    df_timeline["effective_date"] = pd.to_datetime(df_timeline["effective_date"])
+
+    if df_timeline.empty:
+        fig = go.Figure()
+        fig.update_layout(title=f"{utility}: no timeline data for base rates")
+        return fig
+
+    df_comp = df_comp.sort_values("effective_date")
+
+    # 2. Reconstruct the grid of all active rates for each date
+    all_riders = df_comp["rider_code"].unique()
+    rider_dates = df_comp["effective_date"].unique()
+
+    rider_rows = []
+    for d in rider_dates:
+        sub = df_comp[df_comp["effective_date"] == d]
+        active_riders = set(sub["rider_code"])
+        for r in all_riders:
+            if r in active_riders:
+                val = float(sub[sub["rider_code"] == r]["cents_per_kwh"].iloc[0])
+            else:
+                val = 0.0
+            rider_rows.append({
+                "effective_date": d,
+                "component": r,
+                "cents_per_kwh": val
+            })
+
+    df_riders_clean = pd.DataFrame(rider_rows)
+
+    base_rows = []
+    for _, row in df_timeline.iterrows():
+        base_rows.append({
+            "effective_date": row["effective_date"],
+            "component": "Base Rate",
+            "cents_per_kwh": float(row["base_cents_per_kwh"] or 0.0)
+        })
+    df_base = pd.DataFrame(base_rows)
+
+    df_all_filings = pd.concat([df_riders_clean, df_base], ignore_index=True)
+
+    pivot_df = df_all_filings.pivot_table(
+        index="effective_date",
+        columns="component",
+        values="cents_per_kwh",
+        aggfunc="last"
+    )
+
+    unique_dates = sorted(list(set(df_timeline["effective_date"]).union(set(df_comp["effective_date"]))))
+    pivot_df = pivot_df.reindex(unique_dates)
+    pivot_df = pivot_df.ffill().fillna(0.0)
+
+    # 3. Classify and order columns: Base Rate -> Negative Riders -> Positive Riders
+    other_cols = [c for c in pivot_df.columns if c != "Base Rate"]
+    positive_riders = []
+    negative_riders = []
+
+    for col in other_cols:
+        col_sum = pivot_df[col].sum()
+        if col_sum >= 0:
+            positive_riders.append(col)
+        else:
+            negative_riders.append(col)
+
+    positive_riders = sorted(positive_riders)
+    negative_riders = sorted(negative_riders)
+
+    ordered_cols = ["Base Rate"] + negative_riders + positive_riders
+    pivot_df = pivot_df[ordered_cols]
+
+    # Compute cumulative values
+    cum_df = pivot_df.cumsum(axis=1)
+
+    # 4. Load glossary for names and categories
+    glossary = load_rider_glossary(database_path=database_path)
+    code_to_category = {}
+    code_to_name = {}
+    if not glossary.empty:
+        code_to_category = glossary.drop_duplicates("rider_code").set_index("rider_code")["category"].to_dict()
+        code_to_name = glossary.drop_duplicates("rider_code").set_index("rider_code")["short_name"].to_dict()
+
+    def get_color(col):
+        if col == "Base Rate":
+            return CATEGORY_COLORS["base"]
+        cat = code_to_category.get(col, "rider")
+        return CATEGORY_COLORS.get(cat, CATEGORY_COLORS["rider"])
+
+    def get_name(col):
+        if col == "Base Rate":
+            return "Base Rate"
+        name = code_to_name.get(col, col)
+        if name != col:
+            return f"{col} — {name}"
+        return col
+
+    # 5. Create Plotly traces
+    fig = go.Figure()
+
+    # Trace 1: Base Rate
+    fig.add_trace(
+        go.Scatter(
+            x=pivot_df.index,
+            y=cum_df["Base Rate"],
+            mode="lines",
+            line=dict(width=0.5, shape="hv", color=get_color("Base Rate")),
+            fill="tozeroy",
+            fillcolor=get_color("Base Rate"),
+            name="Base Rate",
+            customdata=pivot_df["Base Rate"],
+            hovertemplate=(
+                "<b>Base Rate</b><br>"
+                "Rate: %{customdata:.4f} ¢/kWh<br>"
+                "Cumulative: %{y:.4f} ¢/kWh<extra></extra>"
+            ),
+        )
+    )
+
+    # Subsequent traces
+    for i in range(1, len(ordered_cols)):
+        col = ordered_cols[i]
+        fig.add_trace(
+            go.Scatter(
+                x=pivot_df.index,
+                y=cum_df[col],
+                mode="lines",
+                line=dict(width=0.5, shape="hv", color=get_color(col)),
+                fill="tonexty",
+                fillcolor=get_color(col),
+                name=get_name(col),
+                customdata=pivot_df[col],
+                hovertemplate=(
+                    f"<b>{get_name(col)}</b><br>"
+                    "Rate: %{customdata:+.4f} ¢/kWh<br>"
+                    "Cumulative: %{y:.4f} ¢/kWh<extra></extra>"
+                ),
+            )
+        )
+
+    # Add an overall All-In line trace on top for high-contrast visibility
+    fig.add_trace(
+        go.Scatter(
+            x=pivot_df.index,
+            y=cum_df[ordered_cols[-1]],
+            mode="lines",
+            line=dict(color="#0f172a" if utility == "DEP" else "#7c2d12", width=2.5, shape="hv"),
+            name="All-In Rate Total",
+            hovertemplate="<b>All-In Rate Total</b>: %{y:.3f} ¢/kWh<extra></extra>"
+        )
+    )
+
+    fig.update_layout(
+        title=f"{utility} Residential All-In Rate Buildup Over Time (¢/kWh)",
+        xaxis_title="Effective date",
+        yaxis_title="¢/kWh",
+        template="plotly_white",
+        hovermode="x unified",
+        height=480,
+        margin=dict(t=80, b=40, l=40, r=40),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        yaxis=dict(gridcolor="rgba(226, 232, 240, 0.4)")
+    )
+
+    return fig
+
