@@ -16,7 +16,22 @@ from typing import Any
 import numpy as np
 
 from duke_rates.classification.result import ClassificationResult
+from duke_rates.document_intelligence.section_derived_labels import (
+    fetch_section_derived_labels,
+)
 from duke_rates.document_intelligence.text_slicer import slice_pdf_text
+
+
+# Allowed values for the label_source constructor arg.
+LABEL_SOURCE_RULE_V1 = "rule_v1"
+LABEL_SOURCE_SECTION_GOLD = "section_gold"
+LABEL_SOURCE_SECTION_GOLD_OR_RULE = "section_gold_or_rule"
+
+_VALID_LABEL_SOURCES = {
+    LABEL_SOURCE_RULE_V1,
+    LABEL_SOURCE_SECTION_GOLD,
+    LABEL_SOURCE_SECTION_GOLD_OR_RULE,
+}
 
 
 class EmbeddingKNNClassifier:
@@ -38,6 +53,15 @@ class EmbeddingKNNClassifier:
         Which text slice to embed and match against (default ``"full_text"``).
     max_chars : int
         Truncate query text to this many characters (default 2000).
+    label_source : str
+        Which source to use for neighbor doc_type labels:
+        - ``"rule_v1"``: legacy, reads rule_document_type_v1 from
+          document_classifications (default for back-compat).
+        - ``"section_gold"``: aggregate section_type_gold rows per neighbor
+          PDF into a doc_type. Only neighbors with section gold contribute;
+          others vote UNKNOWN.
+        - ``"section_gold_or_rule"``: prefer section_gold, fall back to
+          rule_v1 for neighbors without section gold. Recommended.
     """
 
     def __init__(
@@ -50,7 +74,13 @@ class EmbeddingKNNClassifier:
         min_neighbors: int = 5,
         embedding_kind: str = "full_text",
         max_chars: int = 2000,
+        label_source: str = LABEL_SOURCE_RULE_V1,
     ) -> None:
+        if label_source not in _VALID_LABEL_SOURCES:
+            raise ValueError(
+                f"Invalid label_source {label_source!r}; must be one of "
+                f"{sorted(_VALID_LABEL_SOURCES)}"
+            )
         self._db_path = db_path
         self._orchestrator = orchestrator
         self._model_role = model_role
@@ -58,6 +88,7 @@ class EmbeddingKNNClassifier:
         self._min_neighbors = min_neighbors
         self._embedding_kind = embedding_kind
         self._max_chars = max_chars
+        self._label_source = label_source
 
         # Cache
         self._loaded_model: str | None = None
@@ -174,7 +205,7 @@ class EmbeddingKNNClassifier:
             label=predicted,
             confidence=round(confidence, 4),
             classifier="embedding_knn_v1",
-            classifier_version="v1",
+            classifier_version=self._classifier_version(),
             evidence=top_evidence[:10],
             alternatives=alternatives,
             metadata={
@@ -182,8 +213,17 @@ class EmbeddingKNNClassifier:
                 "embedding_kind": self._embedding_kind,
                 "k": self._k,
                 "actual_neighbors": len(neighbor_labels),
+                "label_source": self._label_source,
             },
         )
+
+    def _classifier_version(self) -> str:
+        # When the label source changes the prediction space (section_gold can
+        # emit COMPLIANCE_FILING) we bump the version so downstream consumers
+        # can tell results apart.
+        if self._label_source == LABEL_SOURCE_RULE_V1:
+            return "v1"
+        return "v2"
 
     # ------------------------------------------------------------------
     # Internal
@@ -265,49 +305,119 @@ class EmbeddingKNNClassifier:
         return r_norms @ q_norm
 
     def _lookup_labels(self, top_indices: np.ndarray) -> list[dict[str, Any]]:
-        """Look up document_type labels for the given neighbor indices."""
+        """Look up document_type labels for the given neighbor indices.
+
+        Branches on ``label_source``:
+        - ``rule_v1``: read rule_document_type_v1 from document_classifications.
+        - ``section_gold``: derive from aggregated section_type_gold rows.
+        - ``section_gold_or_rule``: prefer section_gold, fall back to rule_v1.
+        """
         import sqlite3
 
-        # Collect the source_pdfs for top neighbors
         top_pdfs = [self._ref_pdfs[i] for i in top_indices]
         if not top_pdfs:
             return []
 
-        placeholders = ",".join("?" for _ in top_pdfs)
         conn = sqlite3.connect(str(self._db_path))
         conn.row_factory = sqlite3.Row
         try:
-            rows = conn.execute(
-                f"""
-                SELECT hd.id, hd.local_path, dc.label, dc.confidence
-                FROM historical_documents hd
-                JOIN document_classifications dc
-                  ON dc.subject_id = CAST(hd.id AS TEXT)
-                 AND dc.subject_kind = 'historical_document'
-                 AND dc.stage = 'document_type'
-                 AND dc.classifier = 'rule_document_type_v1'
-                 AND dc.superseded_by IS NULL
-                WHERE hd.local_path IN ({placeholders})
-                """,
-                top_pdfs,
-            ).fetchall()
+            section_map: dict[str, dict] = {}
+            if self._label_source in (
+                LABEL_SOURCE_SECTION_GOLD,
+                LABEL_SOURCE_SECTION_GOLD_OR_RULE,
+            ):
+                section_map = fetch_section_derived_labels(conn)
+
+            rule_map: dict[str, dict] = {}
+            if self._label_source in (
+                LABEL_SOURCE_RULE_V1,
+                LABEL_SOURCE_SECTION_GOLD_OR_RULE,
+            ):
+                rule_map = self._fetch_rule_v1_labels(conn, top_pdfs)
         finally:
             conn.close()
 
-        # Map back to input order
-        label_map: dict[str, dict] = {}
+        results: list[dict[str, Any]] = []
+        for pdf in top_pdfs:
+            if (
+                self._label_source == LABEL_SOURCE_SECTION_GOLD_OR_RULE
+                and pdf in section_map
+            ):
+                entry = section_map[pdf]
+                results.append(
+                    {
+                        "label": entry["label"],
+                        "confidence": entry["confidence"],
+                        "subject_id": "",
+                        "source_pdf": pdf,
+                        "label_source": "section_gold",
+                    }
+                )
+            elif self._label_source == LABEL_SOURCE_SECTION_GOLD:
+                entry = section_map.get(pdf)
+                if entry is None:
+                    results.append(
+                        {
+                            "label": "UNKNOWN",
+                            "confidence": 0.0,
+                            "subject_id": "",
+                            "source_pdf": pdf,
+                            "label_source": "section_gold_missing",
+                        }
+                    )
+                else:
+                    results.append(
+                        {
+                            "label": entry["label"],
+                            "confidence": entry["confidence"],
+                            "subject_id": "",
+                            "source_pdf": pdf,
+                            "label_source": "section_gold",
+                        }
+                    )
+            else:  # rule_v1, or section_gold_or_rule with no section coverage
+                entry = rule_map.get(pdf)
+                if entry is None:
+                    results.append(
+                        {
+                            "label": "UNKNOWN",
+                            "confidence": 0.0,
+                            "subject_id": "",
+                            "source_pdf": pdf,
+                            "label_source": "rule_v1_missing",
+                        }
+                    )
+                else:
+                    results.append({**entry, "label_source": "rule_v1"})
+        return results
+
+    def _fetch_rule_v1_labels(
+        self, conn: Any, top_pdfs: list[str]
+    ) -> dict[str, dict]:
+        placeholders = ",".join("?" for _ in top_pdfs)
+        rows = conn.execute(
+            f"""
+            SELECT hd.id, hd.local_path, dc.label, dc.confidence
+            FROM historical_documents hd
+            JOIN document_classifications dc
+              ON dc.subject_id = CAST(hd.id AS TEXT)
+             AND dc.subject_kind = 'historical_document'
+             AND dc.stage = 'document_type'
+             AND dc.classifier = 'rule_document_type_v1'
+             AND dc.superseded_by IS NULL
+            WHERE hd.local_path IN ({placeholders})
+            """,
+            top_pdfs,
+        ).fetchall()
+        out: dict[str, dict] = {}
         for row in rows:
-            label_map[row["local_path"]] = {
+            out[row["local_path"]] = {
                 "label": row["label"] or "UNKNOWN",
                 "confidence": row["confidence"] or 0.5,
                 "subject_id": str(row["id"]),
                 "source_pdf": row["local_path"],
             }
-
-        return [
-            label_map.get(pdf, {"label": "UNKNOWN", "confidence": 0.0, "subject_id": "", "source_pdf": pdf})
-            for pdf in top_pdfs
-        ]
+        return out
 
     def _unknown_result(
         self, reason: str, **extra: Any
