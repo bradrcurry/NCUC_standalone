@@ -2353,6 +2353,15 @@ def backfill_embedding_classifications_nc(
     limit: int = typer.Option(0, "--limit", help="Only process N documents (0 = all)."),
     dry_run: bool = typer.Option(False, "--dry-run", help="Classify but do not persist."),
     progress: bool = typer.Option(True, "--progress/--no-progress", help="Emit progress to stderr."),
+    label_source: str = typer.Option(
+        "rule_v1",
+        "--label-source",
+        help=(
+            "Source of neighbor doc_type labels for KNN voting: "
+            "'rule_v1' (legacy), 'section_gold' (section_type_gold only), "
+            "or 'section_gold_or_rule' (preferred — falls back to rule_v1)."
+        ),
+    ),
 ) -> None:
     """Backfill embedding-based document_type classifications for existing documents.
 
@@ -2437,6 +2446,7 @@ def backfill_embedding_classifications_nc(
         k=11,
         min_neighbors=3,
         embedding_kind="full_text",
+        label_source=label_source,
     )
 
     ok = skip = fail = 0
@@ -5125,3 +5135,110 @@ def promote_sections_to_gold_cmd(
     if not execute:
         typer.echo("")
         typer.echo("  Dry-run only. Pass --execute to write rows.")
+
+
+@doc_intel_app.command("benchmark-knn-label-source")
+def benchmark_knn_label_source(
+    json_output: bool = typer.Option(
+        False, "--json", help="Emit a JSON report instead of a human summary."
+    ),
+) -> None:
+    """Compare neighbor-label sources for embedding_knn_v1 (no embedding needed).
+
+    For every PDF that has both section_type_gold and a rule_v1 classification,
+    compute (a) the doc_type derived from section gold, (b) the rule_v1 label,
+    and report agreement and the most common disagreement patterns. This is the
+    upstream signal driving the KNN improvement — if these labels agree on a
+    given neighbor, the KNN vote is unchanged. Where they disagree, the
+    'section_gold_or_rule' mode will vote with the section-derived label.
+    """
+    import sqlite3
+    from collections import Counter
+
+    from duke_rates.document_intelligence.section_derived_labels import (
+        derive_doc_type_from_sections,
+    )
+
+    settings, _ = _bootstrap()
+
+    conn = sqlite3.connect(str(settings.database_path))
+    conn.row_factory = sqlite3.Row
+    try:
+        rows = conn.execute(
+            """
+            SELECT s.source_pdf,
+                   GROUP_CONCAT(DISTINCT s.section_type) AS section_types,
+                   dc.label AS rule_label,
+                   dc.confidence AS rule_conf
+            FROM section_type_gold s
+            JOIN historical_documents hd ON hd.local_path = s.source_pdf
+            JOIN document_classifications dc
+              ON dc.subject_kind = 'historical_document'
+             AND dc.subject_id = CAST(hd.id AS TEXT)
+             AND dc.stage = 'document_type'
+             AND dc.classifier = 'rule_document_type_v1'
+             AND dc.superseded_by IS NULL
+            WHERE s.superseded_by IS NULL
+            GROUP BY s.source_pdf, dc.label, dc.confidence
+            """
+        ).fetchall()
+    finally:
+        conn.close()
+
+    if not rows:
+        typer.echo("No PDFs with both section gold and rule_v1 labels.")
+        raise typer.Exit(code=0)
+
+    total = len(rows)
+    agreements = 0
+    disagreements: Counter[tuple[str, str]] = Counter()
+    none_derived = 0
+    for row in rows:
+        section_types = set(row["section_types"].split(","))
+        derived = derive_doc_type_from_sections(section_types)
+        rule = row["rule_label"]
+        if derived is None:
+            none_derived += 1
+            continue
+        if derived == rule:
+            agreements += 1
+        else:
+            disagreements[(derived, rule)] += 1
+
+    if json_output:
+        report = {
+            "total_comparable_pdfs": total,
+            "agreement": agreements,
+            "agreement_pct": round(100 * agreements / total, 2),
+            "disagreement": sum(disagreements.values()),
+            "no_derivation_possible": none_derived,
+            "top_disagreements": [
+                {"derived": d, "rule_v1": r, "count": n}
+                for (d, r), n in disagreements.most_common(15)
+            ],
+        }
+        typer.echo(json.dumps(report, indent=2))
+        return
+
+    typer.echo("=== KNN label-source benchmark ===")
+    typer.echo(f"  comparable PDFs:       {total}")
+    typer.echo(
+        f"  agreement:             {agreements} "
+        f"({100 * agreements / total:.1f}%)"
+    )
+    typer.echo(
+        f"  disagreement:          {sum(disagreements.values())} "
+        f"({100 * sum(disagreements.values()) / total:.1f}%)"
+    )
+    typer.echo(f"  no derivation:         {none_derived}")
+    typer.echo("")
+    typer.echo("  Top disagreements (derived vs rule_v1):")
+    for (derived, rule), n in disagreements.most_common(15):
+        typer.echo(
+            f"    {n:4d}  derived={derived:<22} rule_v1={rule:<22}"
+        )
+    typer.echo("")
+    typer.echo(
+        "  Where these disagree, 'section_gold_or_rule' label_source will vote with"
+    )
+    typer.echo("  the derived label (higher-quality signal from human-curated gold).")
