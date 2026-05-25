@@ -60,8 +60,10 @@ doc-intel benchmark-ollama-roles
 doc-intel benchmark-redline-analysis
 doc-intel check-ollama-models
 doc-intel classify-documents-v2
+doc-intel classify-sections
 doc-intel compare-document-page-text
 doc-intel embed-corpus
+doc-intel embed-sections
 doc-intel fingerprint-corpus
 doc-intel list-document-types
 doc-intel mine-docling
