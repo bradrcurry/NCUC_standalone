@@ -177,8 +177,8 @@ class RagGenerator:
         *,
         generation_role: str = "balanced_classifier",
         top_k: int = 8,
-        max_context_chars: int = 8000,
-        max_excerpt_chars: int = 800,
+        max_context_chars: int = 16000,
+        max_excerpt_chars: int = 2000,
         include_prompt: bool = False,
     ) -> None:
         self._retriever = retriever

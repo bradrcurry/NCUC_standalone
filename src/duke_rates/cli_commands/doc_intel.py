@@ -5652,7 +5652,7 @@ def rag_search(
         help="Drop hits below this cosine similarity.",
     ),
     excerpt_chars: int = typer.Option(
-        400,
+        2000,
         "--excerpt-chars",
         help="Chars of section text to include in each hit.",
     ),
@@ -5812,10 +5812,10 @@ def rag_answer(
         help="Ollama orchestrator role for synthesis (default: qwen3:8b).",
     ),
     max_context_chars: int = typer.Option(
-        8000, "--max-context-chars", help="Cap on total context block bytes."
+        16000, "--max-context-chars", help="Cap on total context block bytes."
     ),
     max_excerpt_chars: int = typer.Option(
-        800, "--max-excerpt-chars", help="Cap on each excerpt."
+        2000, "--max-excerpt-chars", help="Cap on each excerpt."
     ),
     show_uncited: bool = typer.Option(
         False,
