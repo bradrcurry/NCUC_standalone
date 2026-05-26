@@ -5611,3 +5611,151 @@ def classify_sections_nc(
         typer.echo("  predicted label distribution:")
         for lbl, n in sorted(label_dist.items(), key=lambda x: -x[1]):
             typer.echo(f"    {lbl:20s} {n}")
+
+
+@doc_intel_app.command("rag-search")
+def rag_search(
+    query: str = typer.Argument(..., help="Natural-language question or keyword phrase."),
+    top_k: int = typer.Option(10, "--top-k", "-k", help="Number of results to return."),
+    section_types: str = typer.Option(
+        "",
+        "--section-types",
+        help="Comma-separated section_type filter (e.g. rate_schedule,rider).",
+    ),
+    schedule_code: str = typer.Option(
+        "",
+        "--schedule-code",
+        help="Substring match on schedule_codes (case-insensitive).",
+    ),
+    source_pdf: str = typer.Option(
+        "",
+        "--source-pdf",
+        help="Substring match on source_pdf path (case-insensitive).",
+    ),
+    min_similarity: float = typer.Option(
+        0.0,
+        "--min-similarity",
+        help="Drop hits below this cosine similarity.",
+    ),
+    excerpt_chars: int = typer.Option(
+        400,
+        "--excerpt-chars",
+        help="Chars of section text to include in each hit.",
+    ),
+    json_output: bool = typer.Option(
+        False, "--json", help="Emit JSON instead of human-readable table."
+    ),
+) -> None:
+    """Section-level RAG retriever (R1) — no generation, just retrieval.
+
+    Embeds the query, runs cosine similarity against section_embeddings,
+    applies optional metadata filters, and prints the top-k matches with
+    citation-grade metadata and a text excerpt.
+    """
+    import json as _json
+
+    from duke_rates.db.sqlite import connect
+    from duke_rates.document_intelligence.ollama_orchestrator import (
+        OllamaOrchestrator,
+    )
+    from duke_rates.document_intelligence.rag_retriever import RagRetriever
+
+    settings, _ = _bootstrap()
+
+    # Light corpus sanity check
+    conn = connect(settings.database_path)
+    try:
+        n_emb = conn.execute(
+            "SELECT COUNT(*) FROM section_embeddings"
+        ).fetchone()[0]
+    finally:
+        conn.close()
+    if n_emb == 0:
+        typer.echo(
+            "section_embeddings is empty — run `doc-intel embed-sections` first.",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    orch = OllamaOrchestrator()
+    retriever = RagRetriever(
+        db_path=settings.database_path,
+        orchestrator=orch,
+        excerpt_chars=excerpt_chars,
+    )
+
+    type_list = (
+        [t.strip() for t in section_types.split(",") if t.strip()]
+        if section_types
+        else None
+    )
+
+    hits = retriever.search(
+        query,
+        top_k=top_k,
+        section_types=type_list,
+        schedule_code_like=schedule_code or None,
+        source_pdf_like=source_pdf or None,
+        min_similarity=min_similarity,
+    )
+
+    if json_output:
+        out = [
+            {
+                "rank": i + 1,
+                "citation": h.citation(),
+                "source_pdf": h.source_pdf,
+                "section_index": h.section_index,
+                "start_page": h.start_page,
+                "end_page": h.end_page,
+                "similarity": round(h.similarity, 4),
+                "section_type": h.section_type,
+                "section_type_source": h.section_type_source,
+                "section_type_conf": (
+                    round(h.section_type_conf, 4)
+                    if h.section_type_conf is not None
+                    else None
+                ),
+                "schedule_codes": h.schedule_codes,
+                "rider_codes": h.rider_codes,
+                "leaf_numbers": h.leaf_numbers,
+                "text_excerpt": h.text_excerpt,
+            }
+            for i, h in enumerate(hits)
+        ]
+        typer.echo(_json.dumps(out, indent=2))
+        return
+
+    typer.echo(f"\n=== RAG search: {query!r} ===")
+    typer.echo(
+        f"  filters: section_types={type_list or 'any'} "
+        f"schedule~{schedule_code or '*'} pdf~{source_pdf or '*'} "
+        f"min_sim={min_similarity}"
+    )
+    typer.echo(f"  reference corpus: {n_emb} section embeddings")
+    typer.echo(f"  returned: {len(hits)} hits\n")
+
+    if not hits:
+        typer.echo("  No matches.")
+        return
+
+    for i, h in enumerate(hits):
+        conf_str = (
+            f" conf={h.section_type_conf:.2f}" if h.section_type_conf else ""
+        )
+        sec_str = f"{h.section_type or '?'}({h.section_type_source}){conf_str}"
+        codes: list[str] = []
+        if h.schedule_codes:
+            codes.append(f"sched={','.join(h.schedule_codes[:3])}")
+        if h.rider_codes:
+            codes.append(f"rider={','.join(h.rider_codes[:3])}")
+        if h.leaf_numbers:
+            codes.append(f"leaf={','.join(h.leaf_numbers[:3])}")
+        codes_str = "  ".join(codes) if codes else ""
+        excerpt = h.text_excerpt.replace("\n", " ").replace("\f", "|")[:300]
+        typer.echo(
+            f"  [{i + 1}] sim={h.similarity:.3f}  {h.citation()}"
+        )
+        typer.echo(f"      {sec_str}  {codes_str}")
+        typer.echo(f"      {excerpt}")
+        typer.echo("")
