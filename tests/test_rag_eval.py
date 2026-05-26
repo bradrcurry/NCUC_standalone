@@ -96,6 +96,34 @@ cases:
         cases = load_eval_set(p)
         assert len(cases) >= 10
 
+    def test_filter_fields_loaded(self, tmp_path: Path) -> None:
+        yaml_content = """
+version: 1
+cases:
+  - id: with_filters
+    question: "q"
+    filter_schedule_code: "RES"
+    filter_source_pdf: "sub-1234"
+"""
+        p = tmp_path / "eval.yaml"
+        p.write_text(yaml_content, encoding="utf-8")
+        cases = load_eval_set(p)
+        assert cases[0].filter_schedule_code == "RES"
+        assert cases[0].filter_source_pdf == "sub-1234"
+        assert cases[0].has_filter is True
+
+    def test_has_filter_false_when_no_filters(self, tmp_path: Path) -> None:
+        yaml_content = """
+version: 1
+cases:
+  - id: no_filters
+    question: "q"
+"""
+        p = tmp_path / "eval.yaml"
+        p.write_text(yaml_content, encoding="utf-8")
+        cases = load_eval_set(p)
+        assert cases[0].has_filter is False
+
 
 # ----------------------------------------------------------------------
 # score_retrieval
@@ -162,6 +190,48 @@ class TestScoreRetrieval:
         assert result.expected_rank is None
         assert result.top1_similarity is None
         assert result.hits_returned == 0
+
+
+class TestFilterPrecision:
+    def test_schedule_filter_precision_100_pct(self) -> None:
+        case = _case(filter_schedule_code="RES")
+        hits = [
+            _hit(1, sched=["RES"]),
+            _hit(2, sched=["RES", "RES-S6"]),
+            _hit(3, sched=["RES"]),
+        ]
+        result = score_retrieval(case, hits)
+        assert result.filter_schedule_match_rate == 1.0
+
+    def test_schedule_filter_precision_partial(self) -> None:
+        case = _case(filter_schedule_code="RES")
+        hits = [
+            _hit(1, sched=["RES"]),
+            _hit(2, sched=["LGS"]),  # Filter miss
+            _hit(3, sched=["RES"]),
+        ]
+        result = score_retrieval(case, hits)
+        assert result.filter_schedule_match_rate == round(2 / 3, 4) or result.filter_schedule_match_rate == 2 / 3
+
+    def test_filter_precision_substring_match(self) -> None:
+        # Filter "RES" should match a code like "RES-S6"
+        case = _case(filter_schedule_code="RES")
+        hits = [_hit(1, sched=["RES-S6"])]
+        result = score_retrieval(case, hits)
+        assert result.filter_schedule_match_rate == 1.0
+
+    def test_section_type_filter_precision(self) -> None:
+        case = _case(section_types=["rate_schedule"])
+        # All _hit() default to section_type='rate_schedule'
+        hits = [_hit(1), _hit(2), _hit(3)]
+        result = score_retrieval(case, hits)
+        assert result.filter_section_type_match_rate == 1.0
+
+    def test_filter_precision_none_when_no_filter(self) -> None:
+        case = _case()
+        result = score_retrieval(case, [_hit(1)])
+        assert result.filter_schedule_match_rate is None
+        assert result.filter_section_type_match_rate is None
 
 
 # ----------------------------------------------------------------------

@@ -6084,6 +6084,16 @@ def rag_eval(
     typer.echo(f"  recall@10:            {rm['recall_at_10']}")
     typer.echo(f"  mrr@10:               {rm['mrr_at_10']}")
     typer.echo(f"  avg top-1 similarity: {rm['avg_top1_similarity']}")
+    if rm.get("schedule_filter_precision") is not None:
+        typer.echo(
+            f"  schedule_code filter precision: {rm['schedule_filter_precision']} "
+            f"({rm['n_schedule_filtered']} filtered cases)"
+        )
+    if rm.get("section_type_filter_precision") is not None:
+        typer.echo(
+            f"  section_type filter precision:  {rm['section_type_filter_precision']} "
+            f"({rm['n_type_filtered']} filtered cases)"
+        )
     typer.echo("")
     typer.echo("Per-case (rank of first matching hit):")
     typer.echo(f"  {'id':<30} {'rank':<6} {'via':<10} top1_sim")
