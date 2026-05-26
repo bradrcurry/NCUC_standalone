@@ -5759,3 +5759,172 @@ def rag_search(
         typer.echo(f"      {sec_str}  {codes_str}")
         typer.echo(f"      {excerpt}")
         typer.echo("")
+
+
+@doc_intel_app.command("rag-answer")
+def rag_answer(
+    question: str = typer.Argument(..., help="The question to answer."),
+    top_k: int = typer.Option(8, "--top-k", "-k", help="Sections to retrieve."),
+    section_types: str = typer.Option(
+        "", "--section-types", help="Comma-separated section_type filter."
+    ),
+    schedule_code: str = typer.Option(
+        "", "--schedule-code", help="Substring match on schedule_codes."
+    ),
+    source_pdf: str = typer.Option(
+        "", "--source-pdf", help="Substring match on source_pdf path."
+    ),
+    min_similarity: float = typer.Option(0.0, "--min-similarity"),
+    generation_role: str = typer.Option(
+        "balanced_classifier",
+        "--generation-role",
+        help="Ollama orchestrator role for synthesis (default: qwen3:8b).",
+    ),
+    max_context_chars: int = typer.Option(
+        8000, "--max-context-chars", help="Cap on total context block bytes."
+    ),
+    max_excerpt_chars: int = typer.Option(
+        800, "--max-excerpt-chars", help="Cap on each excerpt."
+    ),
+    show_uncited: bool = typer.Option(
+        False,
+        "--show-uncited/--hide-uncited",
+        help="Show retrieved sections the LLM did not cite.",
+    ),
+    show_prompt: bool = typer.Option(
+        False, "--show-prompt", help="Print the full prompt sent to the LLM."
+    ),
+    json_output: bool = typer.Option(
+        False, "--json", help="Emit JSON instead of human-readable output."
+    ),
+) -> None:
+    """End-to-end RAG: retrieve sections, then synthesize an answer with citations.
+
+    The LLM is instructed to answer ONLY from the retrieved context and to cite
+    every claim with [N]. If the answer is not in the indexed corpus, it must
+    say so rather than hallucinate.
+    """
+    import json as _json
+
+    from duke_rates.db.sqlite import connect
+    from duke_rates.document_intelligence.ollama_orchestrator import (
+        OllamaOrchestrator,
+    )
+    from duke_rates.document_intelligence.rag_generator import RagGenerator
+    from duke_rates.document_intelligence.rag_retriever import RagRetriever
+
+    settings, _ = _bootstrap()
+
+    conn = connect(settings.database_path)
+    try:
+        n_emb = conn.execute(
+            "SELECT COUNT(*) FROM section_embeddings"
+        ).fetchone()[0]
+    finally:
+        conn.close()
+    if n_emb == 0:
+        typer.echo(
+            "section_embeddings is empty — run `doc-intel embed-sections` first.",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    orch = OllamaOrchestrator()
+    retriever = RagRetriever(
+        db_path=settings.database_path,
+        orchestrator=orch,
+        excerpt_chars=max_excerpt_chars,
+    )
+    gen = RagGenerator(
+        retriever=retriever,
+        orchestrator=orch,
+        generation_role=generation_role,
+        top_k=top_k,
+        max_context_chars=max_context_chars,
+        max_excerpt_chars=max_excerpt_chars,
+        include_prompt=show_prompt,
+    )
+
+    type_list = (
+        [t.strip() for t in section_types.split(",") if t.strip()]
+        if section_types
+        else None
+    )
+
+    answer = gen.answer(
+        question,
+        section_types=type_list,
+        schedule_code_like=schedule_code or None,
+        source_pdf_like=source_pdf or None,
+        min_similarity=min_similarity,
+    )
+
+    if json_output:
+        out = {
+            "question": answer.question,
+            "answer": answer.answer,
+            "is_grounded": answer.is_grounded,
+            "cited_indices": answer.cited_indices,
+            "llm_model": answer.llm_model,
+            "llm_status": answer.llm_status,
+            "retrieval_ms": round(answer.retrieval_ms, 1),
+            "generation_ms": round(answer.generation_ms, 1),
+            "cited_hits": [
+                {
+                    "rank": rank,
+                    "citation": h.citation(),
+                    "source_pdf": h.source_pdf,
+                    "start_page": h.start_page,
+                    "end_page": h.end_page,
+                    "similarity": round(h.similarity, 4),
+                    "section_type": h.section_type,
+                    "section_type_source": h.section_type_source,
+                }
+                for rank, h in answer.cited_hits()
+            ],
+            "uncited_hits": (
+                [
+                    {
+                        "rank": rank,
+                        "citation": h.citation(),
+                        "similarity": round(h.similarity, 4),
+                    }
+                    for rank, h in answer.uncited_hits()
+                ]
+                if show_uncited
+                else None
+            ),
+            "prompt": answer.prompt if show_prompt else None,
+        }
+        typer.echo(_json.dumps(out, indent=2))
+        return
+
+    typer.echo("")
+    typer.echo(f"Q: {answer.question}")
+    typer.echo("")
+    typer.echo(f"A: {answer.answer}")
+    typer.echo("")
+    grounded_str = "grounded" if answer.is_grounded else "UNGROUNDED"
+    typer.echo(
+        f"  [{grounded_str}]  llm={answer.llm_model}({answer.llm_status})  "
+        f"retrieval={answer.retrieval_ms:.0f}ms  "
+        f"generation={answer.generation_ms:.0f}ms"
+    )
+
+    if answer.cited_hits():
+        typer.echo("")
+        typer.echo("  cited sources:")
+        for rank, h in answer.cited_hits():
+            typer.echo(f"    [{rank}] sim={h.similarity:.3f}  {h.citation()}")
+
+    if show_uncited and answer.uncited_hits():
+        typer.echo("")
+        typer.echo("  retrieved but not cited:")
+        for rank, h in answer.uncited_hits():
+            typer.echo(f"    [{rank}] sim={h.similarity:.3f}  {h.citation()}")
+
+    if show_prompt:
+        typer.echo("")
+        typer.echo("=" * 60)
+        typer.echo("PROMPT:")
+        typer.echo(answer.prompt)
