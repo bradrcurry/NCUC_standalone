@@ -111,7 +111,7 @@ class RagRetriever:
         *,
         model_role: str = "embedding_primary",
         embedding_kind: str = "section_text",
-        excerpt_chars: int = 400,
+        excerpt_chars: int = 2000,
     ) -> None:
         self._db_path = db_path
         self._orchestrator = orchestrator
