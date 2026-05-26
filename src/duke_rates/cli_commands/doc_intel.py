@@ -5928,3 +5928,180 @@ def rag_answer(
         typer.echo("=" * 60)
         typer.echo("PROMPT:")
         typer.echo(answer.prompt)
+
+
+@doc_intel_app.command("rag-eval")
+def rag_eval(
+    eval_set: Path = typer.Option(
+        Path("tests/rag_eval_set.yaml"),
+        "--eval-set",
+        help="Path to a YAML eval set (cases + expected matchers).",
+    ),
+    full: bool = typer.Option(
+        False,
+        "--full",
+        help="Run generation in addition to retrieval (slow — ~1 min/case).",
+    ),
+    top_k: int = typer.Option(
+        10,
+        "--top-k",
+        help="Retrieval depth for scoring (and generation context size).",
+    ),
+    generation_role: str = typer.Option(
+        "balanced_classifier", "--generation-role"
+    ),
+    json_output: bool = typer.Option(
+        False, "--json", help="Emit a JSON report instead of human summary."
+    ),
+    case_id: str = typer.Option(
+        "", "--case-id", help="Run only one case by id (debug)."
+    ),
+) -> None:
+    """Run the RAG eval harness and print baseline metrics.
+
+    Retrieval-only (default) is fast — seconds per case. Use ``--full`` for
+    end-to-end metrics that include LLM generation; this is the regression
+    suite for the system but is too slow to run on every change.
+    """
+    import json as _json
+
+    from duke_rates.db.sqlite import connect
+    from duke_rates.document_intelligence.ollama_orchestrator import (
+        OllamaOrchestrator,
+    )
+    from duke_rates.document_intelligence.rag_eval import (
+        EvalReport,
+        load_eval_set,
+        run_full_eval,
+        run_retrieval_eval,
+    )
+    from duke_rates.document_intelligence.rag_generator import RagGenerator
+    from duke_rates.document_intelligence.rag_retriever import RagRetriever
+
+    settings, _ = _bootstrap()
+
+    if not eval_set.exists():
+        typer.echo(f"Eval set not found: {eval_set}", err=True)
+        raise typer.Exit(code=1)
+    cases = load_eval_set(eval_set)
+    if case_id:
+        cases = [c for c in cases if c.id == case_id]
+        if not cases:
+            typer.echo(f"No case with id={case_id!r}", err=True)
+            raise typer.Exit(code=1)
+
+    conn = connect(settings.database_path)
+    try:
+        n_emb = conn.execute(
+            "SELECT COUNT(*) FROM section_embeddings"
+        ).fetchone()[0]
+    finally:
+        conn.close()
+    if n_emb == 0:
+        typer.echo("section_embeddings is empty — eval cannot run.", err=True)
+        raise typer.Exit(code=1)
+
+    orch = OllamaOrchestrator()
+    retriever = RagRetriever(
+        db_path=settings.database_path,
+        orchestrator=orch,
+    )
+
+    def _progress(i: int, n: int, cid: str) -> None:
+        typer.echo(f"  [{i}/{n}] {cid}", err=True)
+
+    if full:
+        gen = RagGenerator(
+            retriever=retriever,
+            orchestrator=orch,
+            generation_role=generation_role,
+            top_k=top_k,
+        )
+        ret_results, gen_results = run_full_eval(
+            cases, gen, top_k=top_k, progress_callback=_progress
+        )
+        report = EvalReport(
+            cases=cases,
+            retrieval_results=ret_results,
+            generation_results=gen_results,
+        )
+    else:
+        ret_results = run_retrieval_eval(
+            cases, retriever, top_k=top_k, progress_callback=_progress
+        )
+        report = EvalReport(cases=cases, retrieval_results=ret_results)
+
+    rm = report.retrieval_metrics()
+    gm = report.generation_metrics() if full else None
+
+    if json_output:
+        per_case = []
+        gen_by_id = (
+            {g.case_id: g for g in report.generation_results} if full else {}
+        )
+        for c, r in zip(report.cases, report.retrieval_results):
+            row = {
+                "id": c.id,
+                "question": c.question,
+                "section_types": c.section_types,
+                "expected_no_answer": c.expected_no_answer,
+                "top1_similarity": r.top1_similarity,
+                "expected_rank": r.expected_rank,
+                "matched_via": r.matched_via,
+            }
+            if full and c.id in gen_by_id:
+                g = gen_by_id[c.id]
+                row.update(
+                    {
+                        "answer": g.answer_text,
+                        "answered": g.answered,
+                        "grounded": g.grounded,
+                        "keyword_matches": g.keyword_matches,
+                        "expected_refusal_correct": g.expected_refusal_correct,
+                        "llm_status": g.llm_status,
+                        "generation_ms": round(g.generation_ms, 1),
+                    }
+                )
+            per_case.append(row)
+        out = {
+            "retrieval_metrics": rm,
+            "generation_metrics": gm,
+            "n_cases": len(cases),
+            "per_case": per_case,
+        }
+        typer.echo(_json.dumps(out, indent=2))
+        return
+
+    typer.echo("")
+    typer.echo(f"=== RAG eval: {eval_set.name} ===")
+    typer.echo(f"  cases:                {len(cases)}")
+    typer.echo(f"  retrieval top_k:      {top_k}")
+    typer.echo(f"  full (with gen):      {full}")
+    typer.echo("")
+    typer.echo("Retrieval metrics:")
+    typer.echo(f"  cases scored:         {rm['n_cases']}")
+    typer.echo(f"  recall@5:             {rm['recall_at_5']}")
+    typer.echo(f"  recall@10:            {rm['recall_at_10']}")
+    typer.echo(f"  mrr@10:               {rm['mrr_at_10']}")
+    typer.echo(f"  avg top-1 similarity: {rm['avg_top1_similarity']}")
+    typer.echo("")
+    typer.echo("Per-case (rank of first matching hit):")
+    typer.echo(f"  {'id':<30} {'rank':<6} {'via':<10} top1_sim")
+    for c, r in zip(report.cases, report.retrieval_results):
+        if not c.has_retrieval_target:
+            continue
+        rank_str = str(r.expected_rank) if r.expected_rank else "miss"
+        via = r.matched_via or "-"
+        sim = (
+            f"{r.top1_similarity:.3f}" if r.top1_similarity is not None else "-"
+        )
+        typer.echo(f"  {c.id:<30} {rank_str:<6} {via:<10} {sim}")
+
+    if full and gm:
+        typer.echo("")
+        typer.echo("Generation metrics:")
+        typer.echo(f"  cases answered:       {gm['n_answered']}/{gm['n_cases']}")
+        typer.echo(f"  grounded rate:        {gm['grounded_rate']}")
+        typer.echo(f"  keyword match rate:   {gm['keyword_match_rate']}")
+        typer.echo(f"  correct refusal rate: {gm['correct_refusal_rate']} "
+                   f"({gm['n_refusal_expected']} expected)")
