@@ -97,3 +97,47 @@ cases:
     question: "What is the Python language's release date?"
     expected_no_answer: true
     notes: "Sanity check — totally off-topic question"
+
+  # --- Filter-driven retrieval (added in eval-B for filter-precision) ---
+  # These exercise the schedule_code / section_type / source_pdf filters
+  # added in R3.2. The filter is applied at retrieval time; the test
+  # measures (a) filter-precision (all hits satisfy the filter) and
+  # (b) whether the right thing surfaces inside the filtered subset.
+
+  - id: filter_res_residential_service
+    question: "residential service rates and charges"
+    section_types: [rate_schedule]
+    filter_schedule_code: "RES"
+    expected_schedule_codes: ["RES", "SCHEDULE RES"]
+    expected_answer_keywords: ["residential"]
+    notes: "Filter to sections with RES code; should be high-precision"
+
+  - id: filter_eb_energywise_business
+    question: "EnergyWise for Business program incentives"
+    section_types: [rate_schedule]
+    filter_schedule_code: "EB"
+    expected_schedule_codes: ["EB", "RIDER EB"]
+    expected_answer_keywords: ["EnergyWise"]
+    notes: "EB rider — 14 sections have EB code post-R3.2 backfill"
+
+  - id: filter_lgs_demand_charge
+    question: "Large General Service demand charges and energy rates"
+    section_types: [rate_schedule]
+    filter_schedule_code: "LGS"
+    expected_schedule_codes: ["LGS", "LGS-TOU", "LGS-HLF"]
+    expected_answer_keywords: ["Large General Service"]
+    notes: "Broad LGS family — many sections, tests filter scaling"
+
+  - id: filter_ba_rider_summary
+    question: "Rider BA fuel charge adjustment summary"
+    section_types: [rider]
+    filter_schedule_code: "BA"
+    expected_schedule_codes: ["BA", "RIDER BA"]
+    expected_answer_keywords: ["rider"]
+    notes: "BA filter on rider sections — 356 BA-coded sections"
+
+  - id: filter_pdf_sub_1305
+    question: "Schedule details and rates"
+    filter_source_pdf: "sub-1305"
+    expected_source_pdf_substrings: ["Sub_1305", "sub-1305"]
+    notes: "Source-PDF filter scoping retrieval to a specific docket filing. Paths use dash-separator."

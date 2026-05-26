@@ -42,11 +42,18 @@ _DEFAULT_REFUSAL_TEXT = "i could not find this in the indexed documents"
 
 @dataclass(frozen=True)
 class EvalCase:
-    """One entry in the eval set."""
+    """One entry in the eval set.
+
+    ``section_types``, ``filter_schedule_code``, and ``filter_source_pdf``
+    are retrieval-time filters — they're applied before scoring so the
+    case measures retrieval quality *within* the filtered subset.
+    """
 
     id: str
     question: str
     section_types: list[str] = field(default_factory=list)
+    filter_schedule_code: str | None = None
+    filter_source_pdf: str | None = None
     expected_source_pdf_substrings: list[str] = field(default_factory=list)
     expected_leaf_numbers: list[str] = field(default_factory=list)
     expected_schedule_codes: list[str] = field(default_factory=list)
@@ -62,6 +69,14 @@ class EvalCase:
             or self.expected_schedule_codes
         )
 
+    @property
+    def has_filter(self) -> bool:
+        return bool(
+            self.section_types
+            or self.filter_schedule_code
+            or self.filter_source_pdf
+        )
+
 
 @dataclass
 class CaseRetrievalResult:
@@ -71,6 +86,10 @@ class CaseRetrievalResult:
     expected_rank: int | None  # 1-based rank of first expected hit; None if not found
     matched_via: str | None  # 'leaf', 'schedule', 'source_pdf', or None
     section_type_filter: list[str] | None
+    # Filter-precision metrics: fraction of returned hits that satisfy
+    # each filter dimension. Only meaningful when the case has filters.
+    filter_schedule_match_rate: float | None = None
+    filter_section_type_match_rate: float | None = None
 
 
 @dataclass
@@ -93,12 +112,32 @@ class EvalReport:
     generation_results: list[CaseGenerationResult] = field(default_factory=list)
 
     def retrieval_metrics(self) -> dict[str, Any]:
-        # Only cases with a real retrieval target contribute.
+        # Only cases with a real retrieval target contribute to recall/MRR.
         in_scope = [
             (c, r) for c, r in zip(self.cases, self.retrieval_results)
             if c.has_retrieval_target
         ]
         n = len(in_scope)
+
+        # Filter-precision metrics: any case with a filter contributes,
+        # regardless of retrieval target.
+        sched_filtered = [
+            r for c, r in zip(self.cases, self.retrieval_results)
+            if c.filter_schedule_code and r.filter_schedule_match_rate is not None
+        ]
+        type_filtered = [
+            r for c, r in zip(self.cases, self.retrieval_results)
+            if c.section_types and r.filter_section_type_match_rate is not None
+        ]
+        sched_precision = (
+            sum(r.filter_schedule_match_rate for r in sched_filtered) / len(sched_filtered)
+            if sched_filtered else None
+        )
+        type_precision = (
+            sum(r.filter_section_type_match_rate for r in type_filtered) / len(type_filtered)
+            if type_filtered else None
+        )
+
         if n == 0:
             return {
                 "n_cases": 0,
@@ -106,6 +145,10 @@ class EvalReport:
                 "recall_at_10": None,
                 "mrr_at_10": None,
                 "avg_top1_similarity": None,
+                "schedule_filter_precision": round(sched_precision, 3) if sched_precision is not None else None,
+                "section_type_filter_precision": round(type_precision, 3) if type_precision is not None else None,
+                "n_schedule_filtered": len(sched_filtered),
+                "n_type_filtered": len(type_filtered),
             }
         recall_5 = sum(
             1 for _, r in in_scope if r.expected_rank and r.expected_rank <= 5
@@ -125,6 +168,10 @@ class EvalReport:
             "recall_at_10": round(recall_10, 3),
             "mrr_at_10": round(mrr, 3),
             "avg_top1_similarity": round(avg_sim, 4) if avg_sim is not None else None,
+            "schedule_filter_precision": round(sched_precision, 3) if sched_precision is not None else None,
+            "section_type_filter_precision": round(type_precision, 3) if type_precision is not None else None,
+            "n_schedule_filtered": len(sched_filtered),
+            "n_type_filtered": len(type_filtered),
         }
 
     def generation_metrics(self) -> dict[str, Any]:
@@ -204,6 +251,8 @@ def load_eval_set(path: Path) -> list[EvalCase]:
                 id=str(raw["id"]),
                 question=str(raw["question"]),
                 section_types=list(raw.get("section_types") or []),
+                filter_schedule_code=(raw.get("filter_schedule_code") or None),
+                filter_source_pdf=(raw.get("filter_source_pdf") or None),
                 expected_source_pdf_substrings=list(
                     raw.get("expected_source_pdf_substrings") or []
                 ),
@@ -224,8 +273,29 @@ def load_eval_set(path: Path) -> list[EvalCase]:
 
 
 def score_retrieval(case: EvalCase, hits: list[RetrievalHit]) -> CaseRetrievalResult:
-    """Find the rank of the first hit that matches any expected_* criterion."""
+    """Find the rank of the first hit that matches any expected_* criterion.
+
+    Also computes filter-precision rates: when the case specifies a filter
+    (section_type, schedule_code), the fraction of returned hits that
+    satisfy that filter. This is how we detect filter regressions.
+    """
     top1_sim = hits[0].similarity if hits else None
+
+    # Filter-precision: when the retriever applies the case's filter,
+    # 100% of hits should satisfy it. If not, the filter is buggy.
+    sched_match_rate: float | None = None
+    type_match_rate: float | None = None
+    if case.filter_schedule_code and hits:
+        needle = case.filter_schedule_code.upper()
+        sched_match_rate = sum(
+            1 for h in hits if any(needle in c.upper() for c in h.schedule_codes)
+        ) / len(hits)
+    if case.section_types and hits:
+        allowed = set(case.section_types)
+        type_match_rate = sum(
+            1 for h in hits if h.section_type in allowed
+        ) / len(hits)
+
     if not case.has_retrieval_target:
         return CaseRetrievalResult(
             case_id=case.id,
@@ -234,6 +304,8 @@ def score_retrieval(case: EvalCase, hits: list[RetrievalHit]) -> CaseRetrievalRe
             expected_rank=None,
             matched_via=None,
             section_type_filter=list(case.section_types) or None,
+            filter_schedule_match_rate=sched_match_rate,
+            filter_section_type_match_rate=type_match_rate,
         )
 
     sched_set = {c.upper() for c in case.expected_schedule_codes}
@@ -241,7 +313,6 @@ def score_retrieval(case: EvalCase, hits: list[RetrievalHit]) -> CaseRetrievalRe
     pdf_subs = [s.lower() for s in case.expected_source_pdf_substrings]
 
     for rank, hit in enumerate(hits, 1):
-        # leaf number match
         if leaf_set and any(str(ln) in leaf_set for ln in hit.leaf_numbers):
             return CaseRetrievalResult(
                 case_id=case.id,
@@ -250,8 +321,9 @@ def score_retrieval(case: EvalCase, hits: list[RetrievalHit]) -> CaseRetrievalRe
                 expected_rank=rank,
                 matched_via="leaf",
                 section_type_filter=list(case.section_types) or None,
+                filter_schedule_match_rate=sched_match_rate,
+                filter_section_type_match_rate=type_match_rate,
             )
-        # schedule code match (uppercase)
         if sched_set and any(c.upper() in sched_set for c in hit.schedule_codes):
             return CaseRetrievalResult(
                 case_id=case.id,
@@ -260,8 +332,9 @@ def score_retrieval(case: EvalCase, hits: list[RetrievalHit]) -> CaseRetrievalRe
                 expected_rank=rank,
                 matched_via="schedule",
                 section_type_filter=list(case.section_types) or None,
+                filter_schedule_match_rate=sched_match_rate,
+                filter_section_type_match_rate=type_match_rate,
             )
-        # source_pdf substring match
         pdf_lower = hit.source_pdf.lower()
         if pdf_subs and any(s in pdf_lower for s in pdf_subs):
             return CaseRetrievalResult(
@@ -271,6 +344,8 @@ def score_retrieval(case: EvalCase, hits: list[RetrievalHit]) -> CaseRetrievalRe
                 expected_rank=rank,
                 matched_via="source_pdf",
                 section_type_filter=list(case.section_types) or None,
+                filter_schedule_match_rate=sched_match_rate,
+                filter_section_type_match_rate=type_match_rate,
             )
 
     return CaseRetrievalResult(
@@ -280,6 +355,8 @@ def score_retrieval(case: EvalCase, hits: list[RetrievalHit]) -> CaseRetrievalRe
         expected_rank=None,
         matched_via=None,
         section_type_filter=list(case.section_types) or None,
+        filter_schedule_match_rate=sched_match_rate,
+        filter_section_type_match_rate=type_match_rate,
     )
 
 
@@ -323,13 +400,15 @@ def run_retrieval_eval(
     top_k: int = 10,
     progress_callback: Any = None,
 ) -> list[CaseRetrievalResult]:
-    """Run retrieval-only eval (fast)."""
+    """Run retrieval-only eval (fast). Applies all case-level filters."""
     out: list[CaseRetrievalResult] = []
     for i, case in enumerate(cases):
         hits = retriever.search(
             case.question,
             top_k=top_k,
             section_types=case.section_types or None,
+            schedule_code_like=case.filter_schedule_code,
+            source_pdf_like=case.filter_source_pdf,
         )
         out.append(score_retrieval(case, hits))
         if progress_callback:
@@ -352,6 +431,8 @@ def run_full_eval(
             case.question,
             top_k=top_k,
             section_types=case.section_types or None,
+            schedule_code_like=case.filter_schedule_code,
+            source_pdf_like=case.filter_source_pdf,
         )
         retrieval.append(score_retrieval(case, answer.hits))
         generation.append(score_generation(case, answer))
