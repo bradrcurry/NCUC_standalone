@@ -61,7 +61,18 @@ class SectionKNNClassifier:
         min_neighbors: int = 3,
         embedding_kind: str = "section_text",
         max_chars: int = 2000,
+        gold_only_reference: bool = True,
     ) -> None:
+        """Build a section-level KNN classifier.
+
+        ``gold_only_reference`` (default True) restricts the reference vector
+        pool at load time to sections that have an active section_type_gold
+        row. This is necessary because section_embeddings is densely
+        populated (one vector per section in document_sections) but only a
+        small minority of sections have gold labels — without this filter,
+        the top-k neighbors are mostly unlabeled and the classifier
+        returns "unknown" for the vast majority of queries.
+        """
         self._db_path = db_path
         self._orchestrator = orchestrator
         self._model_role = model_role
@@ -69,6 +80,7 @@ class SectionKNNClassifier:
         self._min_neighbors = min_neighbors
         self._embedding_kind = embedding_kind
         self._max_chars = max_chars
+        self._gold_only_reference = gold_only_reference
 
         self._loaded_model: str | None = None
         self._loaded_kind: str | None = None
@@ -191,21 +203,36 @@ class SectionKNNClassifier:
 
     def _load_reference_vectors(self) -> None:
         model = self._orchestrator._roles[self._model_role].primary
-        key = (model, self._embedding_kind)
-        if key == (self._loaded_model, self._loaded_kind):
+        key = (model, self._embedding_kind, self._gold_only_reference)
+        if key == (self._loaded_model, self._loaded_kind, self._gold_only_reference) and self._loaded_model is not None:
             return
 
         conn = sqlite3.connect(str(self._db_path))
         try:
-            rows = conn.execute(
-                """
-                SELECT source_pdf, section_index, vector
-                FROM section_embeddings
-                WHERE embedding_kind = ? AND embedding_model = ?
-                ORDER BY id
-                """,
-                (self._embedding_kind, model),
-            ).fetchall()
+            if self._gold_only_reference:
+                rows = conn.execute(
+                    """
+                    SELECT e.source_pdf, e.section_index, e.vector
+                    FROM section_embeddings e
+                    JOIN section_type_gold g
+                      ON g.source_pdf = e.source_pdf
+                     AND g.section_index = e.section_index
+                     AND g.superseded_by IS NULL
+                    WHERE e.embedding_kind = ? AND e.embedding_model = ?
+                    ORDER BY e.id
+                    """,
+                    (self._embedding_kind, model),
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    """
+                    SELECT source_pdf, section_index, vector
+                    FROM section_embeddings
+                    WHERE embedding_kind = ? AND embedding_model = ?
+                    ORDER BY id
+                    """,
+                    (self._embedding_kind, model),
+                ).fetchall()
         finally:
             conn.close()
 

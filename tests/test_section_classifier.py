@@ -230,6 +230,44 @@ class TestClassify:
         assert result.label == "unknown"
 
 
+class TestGoldOnlyReference:
+    def test_default_filters_to_gold_only(self, db_path: Path) -> None:
+        # d.pdf has an embedding but no gold. With gold_only_reference=True
+        # (default), d.pdf is never seen as a neighbor candidate.
+        clf = _build(db_path, [0.0, 0.0, 1.0], k=3)
+        clf._load_reference_vectors()
+        ref_pdfs = {pdf for pdf, _ in clf._ref_keys}
+        assert "d.pdf" not in ref_pdfs
+        assert ref_pdfs == {"a.pdf", "b.pdf", "c.pdf"}
+
+    def test_gold_only_false_includes_all(self, db_path: Path) -> None:
+        # Explicit opt-out: include d.pdf in the reference pool.
+        orch = _FakeOrchestrator([0.0, 0.0, 1.0])
+        clf = SectionKNNClassifier(
+            db_path=db_path,
+            orchestrator=orch,
+            k=3,
+            min_neighbors=1,
+            gold_only_reference=False,
+        )
+        clf._load_reference_vectors()
+        ref_pdfs = {pdf for pdf, _ in clf._ref_keys}
+        assert "d.pdf" in ref_pdfs
+        assert len(ref_pdfs) == 4
+
+    def test_gold_only_avoids_unknown_in_high_density_queries(
+        self, db_path: Path
+    ) -> None:
+        # Query similar to d.pdf [0,0,1]. With gold_only_reference=False,
+        # d.pdf is the closest neighbor but has no gold → wasted slot.
+        # With gold_only_reference=True (default), only gold neighbors are
+        # in the pool, so the prediction is grounded.
+        clf = _build(db_path, [0.05, 0.05, 1.0], k=3)
+        result = clf.classify("text")
+        # Should produce a real label, not unknown
+        assert result.label in {"rate_schedule", "rider"}
+
+
 class TestEdgeCases:
     def test_min_neighbors_threshold(self, db_path: Path) -> None:
         # Require 5 neighbors with gold but only 3 exist → unknown
