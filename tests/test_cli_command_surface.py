@@ -71,7 +71,7 @@ def test_cli_command_count_is_stable() -> None:
     the snapshot file in one direction but a count drift signals an
     unintended change in another.
     """
-    expected_count = 330
+    expected_count = 331
     actual = len(_current_command_names())
     assert actual == expected_count, (
         f"Expected {expected_count} CLI commands, got {actual}. "

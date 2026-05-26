@@ -71,6 +71,7 @@ doc-intel process-docling-batch
 doc-intel promote-high-confidence-subset
 doc-intel promote-sections-to-gold
 doc-intel rag-answer
+doc-intel rag-eval
 doc-intel rag-search
 doc-intel report-classification-disagreements
 doc-intel report-docling-skipped-pages
