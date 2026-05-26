@@ -5299,6 +5299,14 @@ def embed_sections_nc(
     embedding_kind: str = typer.Option(
         "section_text", "--embedding-kind", help="Embedding slice key."
     ),
+    model_role: str = typer.Option(
+        "embedding_primary",
+        "--model-role",
+        help=(
+            "OllamaOrchestrator role to embed with. Use 'embedding_secondary' "
+            "(bge-m3) to populate a second axis for retriever comparison."
+        ),
+    ),
     max_chars: int = typer.Option(
         2000, "--max-chars", help="Truncate section text to this many chars."
     ),
@@ -5324,7 +5332,13 @@ def embed_sections_nc(
     settings, _ = _bootstrap()
 
     orch = OllamaOrchestrator()
-    model_role = "embedding_primary"
+    if model_role not in orch._roles:
+        typer.echo(
+            f"Unknown model_role {model_role!r}. "
+            f"Available: {sorted(orch._roles.keys())}",
+            err=True,
+        )
+        raise typer.Exit(code=1)
     model = orch._roles[model_role].primary
 
     conn = connect(settings.database_path)
@@ -5642,6 +5656,11 @@ def rag_search(
         "--excerpt-chars",
         help="Chars of section text to include in each hit.",
     ),
+    model_role: str = typer.Option(
+        "embedding_primary",
+        "--model-role",
+        help="Orchestrator role used to embed the query AND select reference vectors.",
+    ),
     json_output: bool = typer.Option(
         False, "--json", help="Emit JSON instead of human-readable table."
     ),
@@ -5678,9 +5697,16 @@ def rag_search(
         raise typer.Exit(code=1)
 
     orch = OllamaOrchestrator()
+    if model_role not in orch._roles:
+        typer.echo(
+            f"Unknown model_role {model_role!r}. Available: {sorted(orch._roles.keys())}",
+            err=True,
+        )
+        raise typer.Exit(code=1)
     retriever = RagRetriever(
         db_path=settings.database_path,
         orchestrator=orch,
+        model_role=model_role,
         excerpt_chars=excerpt_chars,
     )
 
@@ -5775,6 +5801,11 @@ def rag_answer(
         "", "--source-pdf", help="Substring match on source_pdf path."
     ),
     min_similarity: float = typer.Option(0.0, "--min-similarity"),
+    embedding_role: str = typer.Option(
+        "embedding_primary",
+        "--embedding-role",
+        help="Orchestrator role for query embedding + reference vector pool.",
+    ),
     generation_role: str = typer.Option(
         "balanced_classifier",
         "--generation-role",
@@ -5830,9 +5861,17 @@ def rag_answer(
         raise typer.Exit(code=1)
 
     orch = OllamaOrchestrator()
+    if embedding_role not in orch._roles:
+        typer.echo(
+            f"Unknown --embedding-role {embedding_role!r}. "
+            f"Available: {sorted(orch._roles.keys())}",
+            err=True,
+        )
+        raise typer.Exit(code=1)
     retriever = RagRetriever(
         db_path=settings.database_path,
         orchestrator=orch,
+        model_role=embedding_role,
         excerpt_chars=max_excerpt_chars,
     )
     gen = RagGenerator(
@@ -5947,6 +5986,11 @@ def rag_eval(
         "--top-k",
         help="Retrieval depth for scoring (and generation context size).",
     ),
+    embedding_role: str = typer.Option(
+        "embedding_primary",
+        "--embedding-role",
+        help="Orchestrator role for retrieval embeddings (e.g. embedding_secondary).",
+    ),
     generation_role: str = typer.Option(
         "balanced_classifier", "--generation-role"
     ),
@@ -6002,9 +6046,17 @@ def rag_eval(
         raise typer.Exit(code=1)
 
     orch = OllamaOrchestrator()
+    if embedding_role not in orch._roles:
+        typer.echo(
+            f"Unknown --embedding-role {embedding_role!r}. "
+            f"Available: {sorted(orch._roles.keys())}",
+            err=True,
+        )
+        raise typer.Exit(code=1)
     retriever = RagRetriever(
         db_path=settings.database_path,
         orchestrator=orch,
+        model_role=embedding_role,
     )
 
     def _progress(i: int, n: int, cid: str) -> None:
