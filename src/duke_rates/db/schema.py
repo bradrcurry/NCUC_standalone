@@ -1961,6 +1961,39 @@ def migrate(conn) -> None:
     )
     conn.commit()
 
+    # --- Migration OL-002b: Section embeddings store (A3 phase 2) ---
+    #
+    # Per-section embeddings keyed on (source_pdf, section_index). Sections
+    # come from document_sections; text is extracted from the start_page..
+    # end_page range of ncuc_page_artifacts. embedding_kind classifies which
+    # slice was embedded:
+    #   section_text        — concatenated page text for the section
+    #   section_first_page  — only the first page (title-block-heavy)
+    conn.executescript(
+        """
+        CREATE TABLE IF NOT EXISTS section_embeddings (
+            id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            source_pdf          TEXT NOT NULL,
+            section_index       INTEGER NOT NULL,
+            start_page          INTEGER NOT NULL,
+            end_page            INTEGER NOT NULL,
+            embedding_kind      TEXT NOT NULL,
+            embedding_model     TEXT NOT NULL,
+            embedding_version   TEXT NOT NULL DEFAULT 'v1',
+            vector              BLOB NOT NULL,
+            text_sample         TEXT,
+            metadata_json       TEXT,
+            created_at          TEXT NOT NULL DEFAULT (datetime('now')),
+            UNIQUE(source_pdf, section_index, embedding_kind, embedding_model, embedding_version)
+        );
+        CREATE INDEX IF NOT EXISTS idx_section_emb_source
+        ON section_embeddings(source_pdf);
+        CREATE INDEX IF NOT EXISTS idx_section_emb_kind_model
+        ON section_embeddings(embedding_kind, embedding_model);
+        """
+    )
+    conn.commit()
+
     # --- Migration OL-003: LLM-assisted parse diagnosis tables (Phase 5.6) ---
     #
     # Four additive tables that store parse failure diagnoses, regex/normalization

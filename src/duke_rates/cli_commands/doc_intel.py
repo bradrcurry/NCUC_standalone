@@ -2362,6 +2362,15 @@ def backfill_embedding_classifications_nc(
             "or 'section_gold_or_rule' (preferred — falls back to rule_v1)."
         ),
     ),
+    rerun: bool = typer.Option(
+        False,
+        "--rerun",
+        help=(
+            "Re-classify documents that already have an active embedding_knn_v1 "
+            "row. The new (v2) row is written and the old row is superseded. "
+            "Use this when switching --label-source on already-classified docs."
+        ),
+    ),
 ) -> None:
     """Backfill embedding-based document_type classifications for existing documents.
 
@@ -2386,22 +2395,33 @@ def backfill_embedding_classifications_nc(
 
     conn = connect(settings.database_path)
     try:
-        rows = conn.execute(
-            """
-            SELECT hd.id, hd.local_path, hd.family_key
-            FROM historical_documents hd
-            WHERE hd.local_path IS NOT NULL AND hd.local_path != ''
-              AND hd.id NOT IN (
-                  SELECT DISTINCT CAST(subject_id AS INTEGER)
-                  FROM document_classifications
-                  WHERE subject_kind = 'historical_document'
-                    AND stage = 'document_type'
-                    AND classifier = 'embedding_knn_v1'
-                    AND superseded_by IS NULL
-              )
-            ORDER BY hd.id
-            """
-        ).fetchall()
+        if rerun:
+            # Include all docs with local_path — we'll re-classify and supersede.
+            rows = conn.execute(
+                """
+                SELECT hd.id, hd.local_path, hd.family_key
+                FROM historical_documents hd
+                WHERE hd.local_path IS NOT NULL AND hd.local_path != ''
+                ORDER BY hd.id
+                """
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                """
+                SELECT hd.id, hd.local_path, hd.family_key
+                FROM historical_documents hd
+                WHERE hd.local_path IS NOT NULL AND hd.local_path != ''
+                  AND hd.id NOT IN (
+                      SELECT DISTINCT CAST(subject_id AS INTEGER)
+                      FROM document_classifications
+                      WHERE subject_kind = 'historical_document'
+                        AND stage = 'document_type'
+                        AND classifier = 'embedding_knn_v1'
+                        AND superseded_by IS NULL
+                  )
+                ORDER BY hd.id
+                """
+            ).fetchall()
     finally:
         conn.close()
 
@@ -2472,13 +2492,37 @@ def backfill_embedding_classifications_nc(
         else:
             cls_conn = connect(settings.database_path)
             try:
-                record_classification(
+                new_id = record_classification(
                     cls_conn,
                     subject_kind="historical_document",
                     subject_id=str(doc_id),
                     stage="document_type",
                     result=result,
                 )
+                # When rerunning, supersede prior active rows of a different
+                # version. Same-version rows were UPDATE-in-place by
+                # record_classification so they aren't duplicates.
+                if rerun:
+                    cls_conn.execute(
+                        """
+                        UPDATE document_classifications
+                        SET superseded_by = ?
+                        WHERE subject_kind = 'historical_document'
+                          AND subject_id = ?
+                          AND stage = 'document_type'
+                          AND classifier = ?
+                          AND classifier_version != ?
+                          AND superseded_by IS NULL
+                          AND id != ?
+                        """,
+                        (
+                            new_id,
+                            str(doc_id),
+                            result.classifier,
+                            result.classifier_version,
+                            new_id,
+                        ),
+                    )
                 cls_conn.commit()
                 ok += 1
             except Exception:
@@ -5242,3 +5286,328 @@ def benchmark_knn_label_source(
         "  Where these disagree, 'section_gold_or_rule' label_source will vote with"
     )
     typer.echo("  the derived label (higher-quality signal from human-curated gold).")
+
+
+@doc_intel_app.command("embed-sections")
+def embed_sections_nc(
+    limit: int = typer.Option(0, "--limit", help="Only embed N sections (0 = all)."),
+    skip_existing: bool = typer.Option(
+        True,
+        "--skip-existing/--no-skip-existing",
+        help="Skip sections already in section_embeddings for the active model+kind.",
+    ),
+    embedding_kind: str = typer.Option(
+        "section_text", "--embedding-kind", help="Embedding slice key."
+    ),
+    max_chars: int = typer.Option(
+        2000, "--max-chars", help="Truncate section text to this many chars."
+    ),
+    progress: bool = typer.Option(True, "--progress/--no-progress"),
+) -> None:
+    """Embed per-section text from document_sections into section_embeddings.
+
+    For each section, text is built by concatenating ncuc_page_artifacts
+    rows in the section's start_page..end_page range. The active embedding
+    model (orchestrator role 'embedding_primary') is used. Writes are
+    idempotent on (source_pdf, section_index, embedding_kind, model, version).
+    """
+    import struct
+
+    from duke_rates.db.sqlite import connect
+    from duke_rates.document_intelligence.ollama_orchestrator import (
+        OllamaOrchestrator,
+    )
+    from duke_rates.document_intelligence.section_text_extractor import (
+        fetch_section_text,
+    )
+
+    settings, _ = _bootstrap()
+
+    orch = OllamaOrchestrator()
+    model_role = "embedding_primary"
+    model = orch._roles[model_role].primary
+
+    conn = connect(settings.database_path)
+    try:
+        if skip_existing:
+            rows = conn.execute(
+                """
+                SELECT s.id, s.source_pdf, s.section_index, s.start_page, s.end_page
+                FROM document_sections s
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM section_embeddings e
+                    WHERE e.source_pdf = s.source_pdf
+                      AND e.section_index = s.section_index
+                      AND e.embedding_kind = ?
+                      AND e.embedding_model = ?
+                )
+                ORDER BY s.source_pdf, s.section_index
+                """,
+                (embedding_kind, model),
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                """
+                SELECT id, source_pdf, section_index, start_page, end_page
+                FROM document_sections
+                ORDER BY source_pdf, section_index
+                """
+            ).fetchall()
+    finally:
+        conn.close()
+
+    sections = [dict(r) for r in rows]
+    if limit > 0:
+        sections = sections[:limit]
+
+    if not sections:
+        typer.echo(
+            f"No sections to embed (kind={embedding_kind}, model={model})."
+        )
+        return
+
+    typer.echo(
+        f"Embedding {len(sections)} sections (kind={embedding_kind}, model={model})..."
+    )
+
+    ok = skip = fail = 0
+    for i, sec in enumerate(sections):
+        conn = connect(settings.database_path)
+        try:
+            sec_text = fetch_section_text(
+                conn,
+                sec["source_pdf"],
+                int(sec["start_page"]),
+                int(sec["end_page"]),
+                max_chars=max_chars,
+            )
+        finally:
+            conn.close()
+
+        if not sec_text.text.strip():
+            skip += 1
+            continue
+
+        try:
+            vector = orch.embed(model_role, sec_text.text)
+        except Exception:
+            fail += 1
+            continue
+
+        blob = struct.pack(f"{len(vector)}f", *vector)
+        conn = connect(settings.database_path)
+        try:
+            conn.execute(
+                """
+                INSERT OR REPLACE INTO section_embeddings
+                    (source_pdf, section_index, start_page, end_page,
+                     embedding_kind, embedding_model, embedding_version,
+                     vector, text_sample)
+                VALUES (?,?,?,?,?,?,?,?,?)
+                """,
+                (
+                    sec["source_pdf"],
+                    int(sec["section_index"]),
+                    int(sec["start_page"]),
+                    int(sec["end_page"]),
+                    embedding_kind,
+                    model,
+                    "v1",
+                    blob,
+                    sec_text.text[:200],
+                ),
+            )
+            conn.commit()
+            ok += 1
+        except Exception:
+            fail += 1
+        finally:
+            conn.close()
+
+        if progress and (i + 1) % 50 == 0:
+            typer.echo(
+                f"  {i + 1}/{len(sections)} ok={ok} skip={skip} fail={fail}",
+                err=True,
+            )
+
+    typer.echo(f"Done: ok={ok} skip={skip} fail={fail}")
+
+
+@doc_intel_app.command("classify-sections")
+def classify_sections_nc(
+    limit: int = typer.Option(0, "--limit", help="Only classify N sections (0 = all)."),
+    skip_existing: bool = typer.Option(
+        True,
+        "--skip-existing/--no-skip-existing",
+        help="Skip sections that already have an active section_knn_v1 row.",
+    ),
+    skip_gold: bool = typer.Option(
+        True,
+        "--skip-gold/--no-skip-gold",
+        help="Skip sections that are already in section_type_gold.",
+    ),
+    dry_run: bool = typer.Option(False, "--dry-run"),
+    progress: bool = typer.Option(True, "--progress/--no-progress"),
+    k: int = typer.Option(9, "--k"),
+    min_neighbors: int = typer.Option(3, "--min-neighbors"),
+) -> None:
+    """Classify sections via SectionKNNClassifier and persist to document_classifications.
+
+    Subject keying: ``subject_kind='document_section'``,
+    ``subject_id=str(document_sections.id)``, ``stage='section_type'``,
+    ``classifier='section_knn_v1'``. Each section's classification can be
+    used to propose new section_type_gold rows after adjudication.
+    """
+    from duke_rates.classification.persistence import record_classification
+    from duke_rates.db.sqlite import connect
+    from duke_rates.document_intelligence.ollama_orchestrator import (
+        OllamaOrchestrator,
+    )
+    from duke_rates.document_intelligence.section_classifier import (
+        SectionKNNClassifier,
+    )
+    from duke_rates.document_intelligence.section_text_extractor import (
+        fetch_section_text,
+    )
+
+    settings, _ = _bootstrap()
+
+    where_clauses = ["1=1"]
+    if skip_existing:
+        where_clauses.append(
+            """NOT EXISTS (
+                SELECT 1 FROM document_classifications dc
+                WHERE dc.subject_kind = 'document_section'
+                  AND dc.subject_id = CAST(s.id AS TEXT)
+                  AND dc.stage = 'section_type'
+                  AND dc.classifier = 'section_knn_v1'
+                  AND dc.superseded_by IS NULL
+            )"""
+        )
+    if skip_gold:
+        where_clauses.append(
+            """NOT EXISTS (
+                SELECT 1 FROM section_type_gold g
+                WHERE g.source_pdf = s.source_pdf
+                  AND g.section_index = s.section_index
+                  AND g.superseded_by IS NULL
+            )"""
+        )
+
+    where_sql = " AND ".join(where_clauses)
+
+    conn = connect(settings.database_path)
+    try:
+        rows = conn.execute(
+            f"""
+            SELECT s.id, s.source_pdf, s.section_index, s.start_page, s.end_page
+            FROM document_sections s
+            WHERE {where_sql}
+            ORDER BY s.source_pdf, s.section_index
+            """
+        ).fetchall()
+        emb_count = conn.execute(
+            "SELECT COUNT(*) FROM section_embeddings"
+        ).fetchone()[0]
+        gold_count = conn.execute(
+            "SELECT COUNT(*) FROM section_type_gold WHERE superseded_by IS NULL"
+        ).fetchone()[0]
+    finally:
+        conn.close()
+
+    if emb_count == 0:
+        typer.echo(
+            "No section_embeddings — run doc-intel embed-sections first.",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+    if gold_count == 0:
+        typer.echo(
+            "No section_type_gold rows — KNN cannot vote. Promote some "
+            "sections first via doc-intel promote-sections-to-gold.",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    sections = [dict(r) for r in rows]
+    if limit > 0:
+        sections = sections[:limit]
+    if not sections:
+        typer.echo("No sections to classify.")
+        return
+
+    typer.echo(
+        f"Classifying {len(sections)} sections (ref embeddings={emb_count}, "
+        f"gold neighbors={gold_count})..."
+    )
+    if dry_run:
+        typer.echo("[DRY RUN — no rows will be written]")
+
+    orch = OllamaOrchestrator()
+    clf = SectionKNNClassifier(
+        db_path=settings.database_path,
+        orchestrator=orch,
+        k=k,
+        min_neighbors=min_neighbors,
+    )
+
+    ok = skip = fail = 0
+    label_dist: dict[str, int] = {}
+    for i, sec in enumerate(sections):
+        conn = connect(settings.database_path)
+        try:
+            sec_text = fetch_section_text(
+                conn,
+                sec["source_pdf"],
+                int(sec["start_page"]),
+                int(sec["end_page"]),
+                max_chars=2000,
+            )
+        finally:
+            conn.close()
+
+        if not sec_text.text.strip():
+            skip += 1
+            continue
+
+        try:
+            result = clf.classify(
+                sec_text.text,
+                exclude_key=(sec["source_pdf"], int(sec["section_index"])),
+            )
+        except Exception:
+            fail += 1
+            continue
+
+        if result.label == "unknown":
+            skip += 1
+            continue
+
+        label_dist[result.label] = label_dist.get(result.label, 0) + 1
+
+        if not dry_run:
+            cls_conn = connect(settings.database_path)
+            try:
+                record_classification(
+                    cls_conn,
+                    subject_kind="document_section",
+                    subject_id=str(sec["id"]),
+                    stage="section_type",
+                    result=result,
+                )
+                cls_conn.commit()
+            finally:
+                cls_conn.close()
+        ok += 1
+
+        if progress and (i + 1) % 50 == 0:
+            typer.echo(
+                f"  {i + 1}/{len(sections)} ok={ok} skip={skip} fail={fail}",
+                err=True,
+            )
+
+    typer.echo(f"\nDone: ok={ok} skip={skip} fail={fail}")
+    if label_dist:
+        typer.echo("  predicted label distribution:")
+        for lbl, n in sorted(label_dist.items(), key=lambda x: -x[1]):
+            typer.echo(f"    {lbl:20s} {n}")
