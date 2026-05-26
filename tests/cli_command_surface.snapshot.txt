@@ -53,6 +53,7 @@ doc-intel audit-stale-gold
 doc-intel backfill-classifications
 doc-intel backfill-embedding-classifications
 doc-intel backfill-flag-classifications
+doc-intel backfill-schedule-codes
 doc-intel benchmark-docling
 doc-intel benchmark-document-normalization
 doc-intel benchmark-knn-label-source

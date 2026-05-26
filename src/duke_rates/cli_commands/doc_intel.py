@@ -6105,3 +6105,164 @@ def rag_eval(
         typer.echo(f"  keyword match rate:   {gm['keyword_match_rate']}")
         typer.echo(f"  correct refusal rate: {gm['correct_refusal_rate']} "
                    f"({gm['n_refusal_expected']} expected)")
+
+
+@doc_intel_app.command("backfill-schedule-codes")
+def backfill_schedule_codes(
+    limit: int = typer.Option(0, "--limit", help="Process at most N sections (0 = all)."),
+    overwrite: bool = typer.Option(
+        False,
+        "--overwrite",
+        help="Replace existing schedule_codes_json. Default merges (additive).",
+    ),
+    only_empty: bool = typer.Option(
+        True,
+        "--only-empty/--all-sections",
+        help="Default: only sections whose schedule_codes_json is empty.",
+    ),
+    section_types: str = typer.Option(
+        "rate_schedule,rider",
+        "--section-types",
+        help="Comma-separated section_type filter (default: rate_schedule,rider).",
+    ),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Report what would change."),
+    progress: bool = typer.Option(True, "--progress/--no-progress"),
+) -> None:
+    """Extract schedule/rider codes from section text and backfill document_sections.
+
+    Default behavior:
+      - Only sections with empty schedule_codes_json (12k of 14k).
+      - Only sections classified as rate_schedule or rider.
+      - Additive merge: existing codes are preserved; new codes are appended.
+    """
+    import json as _json
+
+    from duke_rates.db.sqlite import connect
+    from duke_rates.document_intelligence.schedule_code_extractor import (
+        extract_codes,
+    )
+    from duke_rates.document_intelligence.section_text_extractor import (
+        fetch_section_text,
+    )
+
+    settings, _ = _bootstrap()
+
+    types = [t.strip() for t in section_types.split(",") if t.strip()]
+    if not types:
+        typer.echo("--section-types must be non-empty", err=True)
+        raise typer.Exit(code=1)
+    placeholders = ",".join("?" for _ in types)
+
+    where_extra = ""
+    if only_empty and not overwrite:
+        where_extra = (
+            "AND (schedule_codes_json IS NULL OR schedule_codes_json IN ('[]','null',''))"
+        )
+
+    conn = connect(settings.database_path)
+    try:
+        rows = conn.execute(
+            f"""
+            SELECT id, source_pdf, section_index, start_page, end_page,
+                   schedule_codes_json
+            FROM document_sections
+            WHERE section_type IN ({placeholders})
+              {where_extra}
+            ORDER BY id
+            """,
+            types,
+        ).fetchall()
+    finally:
+        conn.close()
+
+    sections = [dict(r) for r in rows]
+    if limit > 0:
+        sections = sections[:limit]
+    if not sections:
+        typer.echo("No sections match the filter.")
+        return
+
+    typer.echo(
+        f"Backfilling schedule_codes_json for {len(sections)} sections "
+        f"(types={types}, overwrite={overwrite}, only_empty={only_empty})..."
+    )
+    if dry_run:
+        typer.echo("[DRY RUN — no rows will be written]")
+
+    n_updated = n_skipped = n_no_codes = n_fail = 0
+    code_freq: dict[str, int] = {}
+
+    for i, sec in enumerate(sections):
+        rconn = connect(settings.database_path)
+        try:
+            sec_text = fetch_section_text(
+                rconn,
+                sec["source_pdf"],
+                int(sec["start_page"]),
+                int(sec["end_page"]),
+                max_chars=2000,
+            )
+        finally:
+            rconn.close()
+
+        if not sec_text.text.strip():
+            n_skipped += 1
+            continue
+
+        try:
+            extraction = extract_codes(sec_text.text)
+        except Exception:
+            n_fail += 1
+            continue
+
+        if not extraction.codes:
+            n_no_codes += 1
+            continue
+
+        try:
+            existing = _json.loads(sec["schedule_codes_json"] or "[]")
+            if not isinstance(existing, list):
+                existing = []
+        except Exception:
+            existing = []
+        existing_set = {str(c).upper() for c in existing}
+
+        if overwrite:
+            new_codes = list(extraction.codes)
+        else:
+            new_codes = list(existing) + [
+                c for c in extraction.codes if c.upper() not in existing_set
+            ]
+
+        if new_codes == existing and not overwrite:
+            n_skipped += 1
+            continue
+
+        for c in new_codes:
+            code_freq[str(c).upper()] = code_freq.get(str(c).upper(), 0) + 1
+
+        if not dry_run:
+            wconn = connect(settings.database_path)
+            try:
+                wconn.execute(
+                    "UPDATE document_sections SET schedule_codes_json = ? WHERE id = ?",
+                    (_json.dumps(new_codes), int(sec["id"])),
+                )
+                wconn.commit()
+            finally:
+                wconn.close()
+        n_updated += 1
+
+        if progress and (i + 1) % 500 == 0:
+            typer.echo(
+                f"  {i + 1}/{len(sections)} updated={n_updated} no_codes={n_no_codes}",
+                err=True,
+            )
+
+    typer.echo(
+        f"\nDone: updated={n_updated} no_codes={n_no_codes} skipped={n_skipped} fail={n_fail}"
+    )
+    if code_freq:
+        typer.echo("\nTop 15 codes extracted:")
+        for code, n in sorted(code_freq.items(), key=lambda x: -x[1])[:15]:
+            typer.echo(f"  {code:<25} {n}")
