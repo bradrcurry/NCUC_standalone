@@ -2478,18 +2478,26 @@ class ProgressJaaRiderProfile:
 
     name: str = "progress_jaa_rider"
 
-    # Matches "Non-Demand Rate Class (dollars per kilowatt-hour)" header
+    # Matches "Non-Demand Rate Class (dollars per kilowatt-hour)" header and
+    # captures the body up to the demand section. Uses negative-lookahead so
+    # the closing anchor doesn't match the literal "Demand Rate Class" inside
+    # the word "Non-Demand Rate Class" (which appears in the same row as the
+    # header in markdown-table rendering).
     _NON_DEMAND_RE = re.compile(
-        r"Non-Demand Rate Class\s*\(dollars per kilowatt-hour\)(.*?)(?:Demand Rate Class|$)",
+        r"Non-Demand Rate Class\s*\(dollars per kilowatt-hour\)(.*?)"
+        r"(?:(?<!Non-)Demand Rate Class(?:es)?\s*\(dollars per kilowatt\)|$)",
         re.I | re.S,
     )
     # Matches "Demand Rate Classes (dollars per kilowatt)" header
     _DEMAND_RE = re.compile(
-        r"Demand Rate Class(?:es)?\s*\(dollars per kilowatt\)(.*?)(?:\*\s*Incremental|$)",
+        r"(?<!Non-)Demand Rate Class(?:es)?\s*\(dollars per kilowatt\)(.*?)(?:\*\s*Incremental|$)",
         re.I | re.S,
     )
-    # A rate value: optional leading paren for negatives, digits, dot
-    _RATE_RE = re.compile(r"\(?([\d.]+)\)?(?:\s*\n|$)", re.M)
+    # A rate value: optional leading paren for negatives, digits, dot.
+    # Accept newline, pipe (markdown-table column separator), or end-of-string
+    # as terminator so the same parser works on both plain text and the
+    # docling markdown rendering.
+    _RATE_RE = re.compile(r"\(?([\d.]+)\)?(?:\s*[\n|]|$)", re.M)
     # Class name labels we care about (first word(s) before schedules line)
     _CLASS_LABELS = [
         ("Residential", "residential"),

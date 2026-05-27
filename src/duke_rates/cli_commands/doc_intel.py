@@ -3439,12 +3439,12 @@ def process_docling_batch(
                 conn.commit()
                 tables_count = len(result.get("tables") or [])
                 degraded = result.get("_degraded_modes")
-                skipped = result.get("_skipped_pages", [])
+                skipped_pages = result.get("_skipped_pages", [])
                 suffix = ""
                 if degraded:
                     suffix = f" [{','.join(degraded)}]"
-                if skipped:
-                    suffix += f" (skipped {len(skipped)}p)"
+                if skipped_pages:
+                    suffix += f" (skipped {len(skipped_pages)}p)"
                 typer.echo(
                     f"  OK  pages={result['page_count']} tables={tables_count} "
                     f"t={elapsed:.1f}s{suffix}"
