@@ -10,6 +10,10 @@ Usage:
     # Mark all docs from a docket as proposed (e.g. an application's exhibits)
     python scripts/set_doc_status.py --docket "E-7 Sub 1329" --status proposed --requested-effective-date 2026-07-01
 
+    # Auto-detect status from NCUC docket state (open docket → proposed,
+    # docket with an order issued → approved)
+    python scripts/set_doc_status.py --auto-detect-docket "E-7 Sub 1329"
+
     # Link a proposed doc to the approved version once it lands
     python scripts/set_doc_status.py --hd-id 1234 --approved-document-id 5678
 
@@ -51,6 +55,10 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--hd-id", type=int, help="Target a single historical_document by id")
     ap.add_argument("--docket", help="Target all docs from a specific NCUC docket")
+    ap.add_argument(
+        "--auto-detect-docket",
+        help="Derive status from the docket's NCUC filing mix (open → proposed; order issued → approved) and apply to all imported docs from that docket",
+    )
     ap.add_argument("--status", choices=sorted(VALID_STATUSES), help="New status value")
     ap.add_argument("--requested-effective-date", help="Requested effective date for proposed docs (YYYY-MM-DD)")
     ap.add_argument("--approved-document-id", type=int, help="Lineage pointer to approved version (used when a proposed doc lands)")
@@ -60,6 +68,34 @@ def main() -> int:
 
     conn = sqlite3.connect(str(DB_PATH))
     conn.row_factory = sqlite3.Row
+
+    if args.auto_detect_docket:
+        # Lazy import so the script doesn't need the package on the path for
+        # the --report or single-id workflows.
+        import sys
+        sys.path.insert(0, str(Path("src").resolve()))
+        from duke_rates.historical.ncuc.status_detection import (  # noqa: E402
+            detect_docket_status_from_db,
+            historical_doc_ids_for_docket,
+        )
+
+        docket = args.auto_detect_docket
+        derived_status = detect_docket_status_from_db(conn, docket)
+        hd_ids = historical_doc_ids_for_docket(conn, docket)
+        print(f"Docket: {docket}")
+        print(f"  derived status: {derived_status}")
+        print(f"  imported historical_documents: {len(hd_ids)}")
+        if not hd_ids:
+            print("  (no imported docs — nothing to tag)")
+            return 0
+        # Reuse the standard --status path so mirroring to tariff_versions stays
+        # in one place.
+        args.status = derived_status
+        args.hd_id = None
+        args.docket = None
+        targets = hd_ids
+    else:
+        targets = None
 
     if args.report:
         print("=== historical_documents.status distribution ===")
@@ -76,7 +112,8 @@ def main() -> int:
         print(f"hd with approved_document_id (lineage):   {n_linked}")
         return 0
 
-    targets = _select_targets(conn, args)
+    if targets is None:
+        targets = _select_targets(conn, args)
     if not targets:
         print("No targets selected. Use --hd-id or --docket. Or --report to see current state.")
         return 0
