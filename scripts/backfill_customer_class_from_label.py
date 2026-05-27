@@ -42,6 +42,7 @@ CLASS_PATTERNS = [
     (re.compile(r"\bMedium\s+General\s+Service\b", re.I), "commercial_medium"),
     (re.compile(r"\bSmall\s+General\s+Service\b", re.I), "commercial_small"),
     (re.compile(r"\b(?:Sports\s+Field|Traffic\s+Signal|Outdoor)\s+Lighting\b", re.I), "lighting"),
+    (re.compile(r"\bTraffic\s+Signal\b", re.I), "traffic_signal"),
     (re.compile(r"\bLighting\b", re.I), "lighting"),
     (re.compile(r"\bResidential\b", re.I), "residential"),
     (re.compile(r"\bIndustrial\b", re.I), "industrial"),
