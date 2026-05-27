@@ -187,6 +187,40 @@ class TestVersionSelection:
         result = _select_version([v1, v2], datetime.date(2025, 1, 1))
         assert result is v1
 
+    def test_proposed_excluded_by_default(self):
+        approved = TariffVersionRecord(
+            family_key="x", source_type="utility_current",
+            effective_start="2024-01-01", status="approved",
+        )
+        proposed = TariffVersionRecord(
+            family_key="x", source_type="utility_current",
+            effective_start="2026-07-01", status="proposed",
+        )
+        v = _select_version([approved, proposed], datetime.date(2026, 8, 1))
+        assert v is approved
+
+    def test_proposed_included_when_opted_in(self):
+        approved = TariffVersionRecord(
+            family_key="x", source_type="utility_current",
+            effective_start="2024-01-01", status="approved",
+        )
+        proposed = TariffVersionRecord(
+            family_key="x", source_type="utility_current",
+            effective_start="2026-07-01", status="proposed",
+        )
+        v = _select_version(
+            [approved, proposed], datetime.date(2026, 8, 1), include_proposed=True,
+        )
+        assert v is proposed
+
+    def test_only_proposed_falls_back(self):
+        proposed = TariffVersionRecord(
+            family_key="x", source_type="utility_current",
+            effective_start="2026-07-01", status="proposed",
+        )
+        v = _select_version([proposed], datetime.date(2026, 8, 1))
+        assert v is proposed
+
 
 # ---------------------------------------------------------------------------
 # Core billing calculation tests
