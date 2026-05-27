@@ -5244,6 +5244,10 @@ class Repository:
     @staticmethod
     def _row_to_tariff_version(row) -> "TariffVersionRecord":
         from duke_rates.models.tariff import TariffVersionRecord
+        keys = set(row.keys()) if hasattr(row, "keys") else set()
+        status = (row["status"] if "status" in keys and row["status"] else "approved")
+        req_eff = row["requested_effective_date"] if "requested_effective_date" in keys else None
+        approved_vid = row["approved_version_id"] if "approved_version_id" in keys else None
         return TariffVersionRecord(
             id=int(row["id"]),
             family_key=row["family_key"],
@@ -5262,6 +5266,9 @@ class Repository:
             confidence_score=float(row["confidence_score"]),
             notes=row["notes"],
             created_at=datetime.fromisoformat(row["created_at"]),
+            status=status,
+            requested_effective_date=req_eff,
+            approved_version_id=approved_vid,
         )
 
     @staticmethod
