@@ -111,6 +111,37 @@ class TestSTS:
         assert rates["Rate Adjustment - Lighting"] == pytest.approx(0.001168)
 
 
+# Docling-flattened EDIT-3 (same table structure as EDIT-4, parenthesised
+# decrements — but the family_key kept the "RIDER" prefix, so it lands as
+# `nc-carolinas-rider-rideredit3`, not `nc-carolinas-rider-edit3`)
+EDIT3_FLATTENED = """\
+Duke Energy Carolinas, LLC
+RIDER EDIT-3 (NC) EXCESS DEFERRED INCOME TAX RIDER #3
+APPLICABILITY (North Carolina Only)
+All service supplied under the Company's rate schedules is subject to a
+decrement per kilowatt-hour as set forth below.
+Rate Class Applicable Schedules Billing Rate (¢/kWh)
+
+Residential RS, RE, ES, RT, RSTC, RETC (0.1894)
+General Service SGS, BC, LGS, TS, OPT-V, OPT-E, HP, PG, S, SGSTC (0.1132)
+Industrial Service I, OPT-V, OPT-E, HP, PG (0.0886)
+Lighting OL, PL, NL (0.4875)
+"""
+
+
+class TestEDIT3:
+    def test_rideredit3_supported(self, profile):
+        doc = {"family_key": "nc-carolinas-rider-RIDEREDIT3"}
+        assert profile.supports(doc, EDIT3_FLATTENED)
+        charges = profile.extract(doc, EDIT3_FLATTENED)
+        assert len(charges) == 4
+        rates = {c.charge_label: c.rate_value for c in charges}
+        assert rates["Rate Adjustment - Residential"] == pytest.approx(-0.001894)
+        assert rates["Rate Adjustment - General Service"] == pytest.approx(-0.001132)
+        assert rates["Rate Adjustment - Industrial Service"] == pytest.approx(-0.000886)
+        assert rates["Rate Adjustment - Lighting"] == pytest.approx(-0.004875)
+
+
 class TestSupportGuards:
     def test_wrong_family_key_rejected(self, profile):
         doc = {"family_key": "nc-progress-leaf-604"}

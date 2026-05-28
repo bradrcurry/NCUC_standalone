@@ -4059,6 +4059,10 @@ class CarolinasMultiClassRateTableProfile:
     _SUPPORTED_FAMILIES = {
         "nc-carolinas-rider-edit4",
         "nc-carolinas-rider-sts",
+        # EDIT-3 has identical structure to EDIT-4 (per-class ¢/kWh decrement
+        # table) but its family_key was minted with the "RIDER" prefix
+        # preserved; the canonicalizer never stripped it.
+        "nc-carolinas-rider-rideredit3",
     }
     # Matches: optional ( + digits + optional ) then optional ¢/c then /kWh or per kWh
     _RATE_CELL_RE = re.compile(
@@ -8185,7 +8189,11 @@ class HistoricalRateParserRegistry:
             return min(score, 0.97), tuple(reasons)
 
         if profile_name == "carolinas_multi_class_rate_table":
-            if signals.family_key not in {"nc-carolinas-rider-edit4", "nc-carolinas-rider-sts"}:
+            if signals.family_key not in {
+                "nc-carolinas-rider-edit4",
+                "nc-carolinas-rider-sts",
+                "nc-carolinas-rider-rideredit3",
+            }:
                 return 0.0, ()
             lowered = signals.text_lower
             if "rate class" not in lowered or "residential" not in lowered or "/kwh" not in lowered:
