@@ -40,10 +40,9 @@ from duke_rates.analytics.residential_bill_breakdown import (
 )
 from duke_rates.charts.residential_dashboard import (
     CATEGORY_COLORS,
+    all_in_rate_history_stack,
     annotated_history_chart,
     rider_breakdown_donut,
-    rider_buildup_area,
-    all_in_rate_history_stack,
 )
 
 DB_PATH = ROOT / "data" / "db" / "duke_rates.db"
@@ -89,7 +88,6 @@ def _components(db_path: str, utility: str) -> pd.DataFrame:
     return load_dec_rs_canonical_rider_components(database_path=Path(db_path))
 
 
-@st.cache_data(show_spinner=False)
 def _breakdown(db_path: str, utility: str, monthly_kwh: float) -> pd.DataFrame:
     return load_latest_residential_breakdown(
         utility=utility,
@@ -148,137 +146,58 @@ st.markdown(
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-    /* Typography overrides */
-    html, body, [class*="css"], .stApp {
+    /* Global Page overrides */
+    .stApp {
+        background: radial-gradient(circle at 50% 0%, #0c111e 0%, #05070d 100%) !important;
+        color: #e2e8f0 !important;
         font-family: 'Inter', sans-serif;
     }
 
     h1, h2, h3, h4, h5, h6 {
         font-family: 'Plus Jakarta Sans', sans-serif !important;
         font-weight: 700 !important;
+        color: #f8fafc !important;
     }
 
-    /* Custom premium card style for KPIs */
-    .metric-card {
-        padding: 20px;
-        border-radius: 16px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        margin-bottom: 15px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    /* Sidebar Styling */
+    section[data-testid="stSidebar"] {
+        background-color: rgba(6, 8, 14, 0.9) !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+        backdrop-filter: blur(20px) !important;
     }
 
-    .metric-card:hover {
-        transform: translateY(-4px);
+    section[data-testid="stSidebar"] hr {
+        border-color: rgba(255, 255, 255, 0.08) !important;
     }
 
-    .metric-title {
-        font-size: 0.8rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        margin-bottom: 8px;
+    /* Selectbox, Number Input, Sliders styling */
+    div[data-baseweb="select"] > div, 
+    input, 
+    div[role="slider"] {
+        background-color: rgba(15, 23, 42, 0.6) !important;
+        color: #cbd5e1 !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 8px !important;
     }
 
-    .metric-value {
-        font-size: 2.2rem;
-        font-weight: 800;
-        line-height: 1.1;
-        margin-bottom: 4px;
-        font-family: 'Plus Jakarta Sans', sans-serif;
-    }
-
-    .metric-delta {
-        font-size: 0.85rem;
-        font-weight: 600;
-        display: inline-flex;
-        align-items: center;
-        border-radius: 6px;
-        padding: 2px 8px;
-    }
-
-    /* Light Mode Styles */
-    @media (prefers-color-scheme: light) {
-        .metric-card {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(248, 250, 252, 0.8) 100%);
-            border: 1px solid rgba(226, 232, 240, 0.8);
-        }
-        .metric-card:hover {
-            border-color: #3b82f6;
-            box-shadow: 0 20px 25px -5px rgba(59, 130, 246, 0.1), 0 8px 10px -6px rgba(59, 130, 246, 0.1);
-            background: rgba(255, 255, 255, 0.95);
-        }
-        .metric-title {
-            color: #64748b;
-        }
-        .metric-value {
-            color: #0f172a;
-        }
-    }
-
-    /* Dark Mode Styles */
-    @media (prefers-color-scheme: dark) {
-        .metric-card {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-        }
-        .metric-card:hover {
-            border-color: #60a5fa;
-            box-shadow: 0 20px 25px -5px rgba(96, 165, 250, 0.15), 0 8px 10px -6px rgba(96, 165, 250, 0.15);
-            background: rgba(30, 41, 59, 0.7);
-        }
-        .metric-title {
-            color: #94a3b8;
-        }
-        .metric-value {
-            color: #f8fafc;
-        }
-    }
-
-    .delta-positive {
-        background-color: rgba(16, 185, 129, 0.12);
-        color: #10b981;
-    }
-
-    .delta-negative {
-        background-color: rgba(239, 68, 68, 0.12);
-        color: #ef4444;
-    }
-
-    .delta-neutral {
-        background-color: rgba(100, 116, 139, 0.12);
-        color: #64748b;
-    }
-
-    /* Tab enhancements */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-    }
-
-    .stTabs [data-baseweb="tab"] {
-        padding: 10px 16px;
-        border-radius: 8px;
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-weight: 600;
-        transition: all 0.2s ease;
-    }
-
-    /* Rider Spotlight Detail Explorer */
+    /* Glass Cards for Spotlights */
     .spotlight-card {
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03) 0%, rgba(147, 51, 234, 0.03) 100%);
-        border: 1px solid rgba(59, 130, 246, 0.12);
-        border-radius: 16px;
-        padding: 24px;
+        background: linear-gradient(135deg, rgba(79, 172, 254, 0.08) 0%, rgba(243, 85, 218, 0.04) 100%) !important;
+        border: 1px solid rgba(79, 172, 254, 0.2) !important;
+        border-radius: 16px !important;
+        padding: 24px !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
         margin-top: 15px;
         margin-bottom: 25px;
     }
 
-    @media (prefers-color-scheme: dark) {
-        .spotlight-card {
-            background: linear-gradient(135deg, rgba(96, 165, 250, 0.05) 0%, rgba(192, 132, 252, 0.05) 100%);
-            border-color: rgba(96, 165, 250, 0.15);
-        }
+    .spotlight-card:hover {
+        transform: translateY(-2px) !important;
+        border-color: rgba(79, 172, 254, 0.4) !important;
+        box-shadow: 0 12px 40px 0 rgba(79, 172, 254, 0.2) !important;
     }
 
     .spotlight-header {
@@ -295,55 +214,192 @@ st.markdown(
         font-weight: 800;
         font-family: 'Plus Jakarta Sans', sans-serif;
         margin: 0;
+        background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
 
     .spotlight-desc {
         font-size: 1rem;
         line-height: 1.6;
-        color: #475569;
-    }
-
-    @media (prefers-color-scheme: dark) {
-        .spotlight-desc {
-            color: #cbd5e1;
-        }
+        color: #cbd5e1 !important;
     }
 
     .spotlight-stat {
         display: flex;
         flex-direction: column;
-        background: rgba(255, 255, 255, 0.5);
-        border: 1px solid rgba(0,0,0,0.05);
+        background: rgba(15, 23, 42, 0.6) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
         border-radius: 12px;
         padding: 12px 18px;
         min-width: 140px;
-    }
-
-    @media (prefers-color-scheme: dark) {
-        .spotlight-stat {
-            background: rgba(15, 23, 42, 0.5);
-            border-color: rgba(255,255,255,0.05);
-        }
     }
 
     .spotlight-stat-label {
         font-size: 0.75rem;
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        color: #64748b;
+        color: #94a3b8 !important;
         margin-bottom: 4px;
-    }
-
-    @media (prefers-color-scheme: dark) {
-        .spotlight-stat-label {
-            color: #94a3b8;
-        }
     }
 
     .spotlight-stat-val {
         font-size: 1.25rem;
         font-weight: 700;
         font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    /* Custom premium card style for KPIs */
+    .metric-card {
+        padding: 20px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, rgba(22, 28, 45, 0.45) 0%, rgba(15, 23, 42, 0.35) 100%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-bottom: 15px;
+    }
+
+    .metric-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(0, 242, 254, 0.4) !important;
+        box-shadow: 0 16px 36px -5px rgba(0, 242, 254, 0.2) !important;
+    }
+
+    .metric-title {
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 8px;
+        color: #94a3b8;
+    }
+
+    .metric-value {
+        font-size: 2.2rem;
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 8px;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        color: #f8fafc;
+    }
+
+    .metric-delta {
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        border-radius: 6px;
+        padding: 2px 8px;
+    }
+
+    .delta-positive {
+        background-color: rgba(255, 90, 95, 0.12) !important;
+        color: #ff5a5f !important;
+        border: 1px solid rgba(255, 90, 95, 0.2) !important;
+    }
+
+    .delta-negative {
+        background-color: rgba(0, 255, 208, 0.12) !important;
+        color: #00ffd0 !important;
+        border: 1px solid rgba(0, 255, 208, 0.2) !important;
+    }
+
+    .delta-neutral {
+        background-color: rgba(148, 163, 184, 0.12) !important;
+        color: #cbd5e1 !important;
+        border: 1px solid rgba(148, 163, 184, 0.2) !important;
+    }
+
+    /* Tabs styling */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px !important;
+        background-color: rgba(15, 23, 42, 0.4) !important;
+        padding: 6px !important;
+        border-radius: 12px !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        padding: 8px 16px !important;
+        border-radius: 8px !important;
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        font-weight: 600 !important;
+        color: #94a3b8 !important;
+        border: none !important;
+        background-color: transparent !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .stTabs [data-baseweb="tab"]:hover {
+        color: #f8fafc !important;
+        background-color: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    .stTabs [aria-selected="true"] {
+        color: #00f2fe !important;
+        background-color: rgba(0, 242, 254, 0.1) !important;
+        border: 1px solid rgba(0, 242, 254, 0.2) !important;
+    }
+
+    /* Step Infographic */
+    .infographic-container {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+    }
+
+    .infographic-step {
+        flex: 1;
+        min-width: 220px;
+        background: rgba(22, 28, 45, 0.45);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        padding: 18px;
+        position: relative;
+        backdrop-filter: blur(12px);
+    }
+
+    .infographic-step::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .step-base::before { background: #4facfe; }
+    .step-riders::before { background: #ff5a5f; }
+    .step-total::before { background: #00ffd0; }
+
+    .step-num {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #64748b;
+        margin-bottom: 6px;
+    }
+
+    .step-title {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #f8fafc;
+        margin-bottom: 8px;
+    }
+
+    .step-desc {
+        font-size: 0.85rem;
+        line-height: 1.5;
+        color: #94a3b8;
     }
 
     /* Category tag badges */
@@ -357,12 +413,12 @@ st.markdown(
         letter-spacing: 0.05em;
     }
 
-    .cat-fuel { background-color: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
-    .cat-renewable { background-color: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
-    .cat-efficiency { background-color: rgba(132, 204, 22, 0.12); color: #84cc16; border: 1px solid rgba(132, 204, 22, 0.2); }
-    .cat-tax { background-color: rgba(139, 92, 246, 0.12); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.2); }
-    .cat-base { background-color: rgba(59, 130, 246, 0.12); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); }
-    .cat-other { background-color: rgba(107, 114, 128, 0.12); color: #6b7280; border: 1px solid rgba(107, 114, 128, 0.2); }
+    .cat-fuel { background-color: rgba(255, 90, 95, 0.12); color: #ff5a5f; border: 1px solid rgba(255, 90, 95, 0.2); }
+    .cat-renewable { background-color: rgba(0, 255, 208, 0.12); color: #00ffd0; border: 1px solid rgba(0, 255, 208, 0.2); }
+    .cat-efficiency { background-color: rgba(168, 255, 53, 0.12); color: #a8ff35; border: 1px solid rgba(168, 255, 53, 0.2); }
+    .cat-tax { background-color: rgba(243, 85, 218, 0.12); color: #f355da; border: 1px solid rgba(243, 85, 218, 0.2); }
+    .cat-base { background-color: rgba(79, 172, 254, 0.12); color: #4facfe; border: 1px solid rgba(79, 172, 254, 0.2); }
+    .cat-other { background-color: rgba(148, 163, 184, 0.12); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.2); }
     </style>
     """,
     unsafe_allow_html=True
@@ -400,6 +456,13 @@ with st.sidebar:
 
     st.markdown("---")
     show_eia_overlay = st.toggle("Show NC + US EIA averages in Section 2", value=True)
+    graph_style = st.selectbox(
+        "Graph line style",
+        ["Fluid (Curved)", "Stepped (Technical)"],
+        index=0,
+        help="Fluid uses smooth curves for an elegant view. Stepped shows the actual flat-rate periods between rate filings."
+    )
+    interpolation = "spline" if graph_style == "Fluid (Curved)" else "hv"
 
 
 # ---------------------------------------------------------------------------
@@ -411,6 +474,30 @@ st.caption(
     "A residential-customer view of the DEP and DEC rate stack: not just the base rate, "
     "but every named rider that lands on your bill, where it came from, and what your "
     "options are."
+)
+
+# Step-by-step visual rate composition infographic
+st.markdown(
+    """
+    <div class="infographic-container">
+        <div class="infographic-step step-base">
+            <div class="step-num">Step 1</div>
+            <div class="step-title">Base Tariff Rate</div>
+            <div class="step-desc">The baseline cost for generation, transmission, distribution, and core support operations. Approved during major regulatory rate cases.</div>
+        </div>
+        <div class="infographic-step step-riders">
+            <div class="step-num">Step 2</div>
+            <div class="step-title">Rider Adjustments</div>
+            <div class="step-desc">Dynamic monthly additions or credits for fuel cost volatility, renewable energy integration, energy efficiency fees, and corporate tax refunds.</div>
+        </div>
+        <div class="infographic-step step-total">
+            <div class="step-num">Step 3</div>
+            <div class="step-title">All-In Energy Rate</div>
+            <div class="step-desc">The sum of Base Rate + Riders. This represents the total price per kilowatt-hour (¢/kWh) used to compute your monthly electric charge.</div>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
 )
 
 timeline_df = _timeline(str(DB_PATH))
@@ -562,7 +649,7 @@ with tab1:
             rider_dollars = rider_only["dollars"].sum()
             credit_rows = rider_only[rider_only["dollars"] < 0]
             credit_dollars = credit_rows["dollars"].sum()
-            st.markdown(f"### What this view shows")
+            st.markdown("### What this view shows")
             st.markdown(
                 f"- **{n_riders} named riders** were active in the most recent filing.\n"
                 f"- They add **${rider_dollars:,.2f}/mo** to your bill at this usage.\n"
@@ -667,7 +754,7 @@ with tab1:
                                     x=rider_hist["effective_date"],
                                     y=rider_hist["cents_per_kwh"],
                                     mode="lines+markers",
-                                    line=dict(color="#3b82f6" if dollars >= 0 else "#8b5cf6", width=2.5, shape="hv"),
+                                    line=dict(color="#00ffd0" if dollars >= 0 else "#f355da", width=2.5, shape=interpolation),
                                     marker=dict(size=4),
                                     hovertemplate="<b>%{x|%b %Y}</b><br>Rate: %{y:.4f} ¢/kWh<extra></extra>"
                                 )
@@ -675,13 +762,37 @@ with tab1:
                             fig_spark.update_layout(
                                 height=180,
                                 margin=dict(t=10, b=10, l=10, r=10),
-                                template="plotly_white",
+                                template="plotly_dark",
                                 xaxis=dict(showgrid=False, zeroline=False),
-                                yaxis=dict(showgrid=True, gridcolor="rgba(226,232,240,0.4)"),
+                                yaxis=dict(showgrid=True, gridcolor="rgba(255, 255, 255, 0.05)"),
                                 paper_bgcolor="rgba(0,0,0,0)",
                                 plot_bgcolor="rgba(0,0,0,0)",
+                                font=dict(color="#cbd5e1", family="Inter, sans-serif"),
                             )
                             st.plotly_chart(fig_spark, use_container_width=True)
+
+            # --- Educational Note on Variable/Storm Riders ---
+            st.markdown(
+                """
+                <div class="spotlight-card" style="background: linear-gradient(135deg, rgba(251, 146, 60, 0.08) 0%, rgba(243, 85, 218, 0.03) 100%) !important; border-color: rgba(251, 146, 60, 0.25) !important;">
+                    <div class="spotlight-header">
+                        <span class="spotlight-title" style="background: linear-gradient(135deg, #ffaf40 0%, #fb923c 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">💡 Understanding Variable & Storm Riders</span>
+                    </div>
+                    <p class="spotlight-desc">
+                        <b>Why are these riders added on top of your base rate?</b><br>
+                        The core <b>Base Rate</b> is set during major regulatory rate cases (which occur only once every few years) to cover expected baseline operations like running power plants and maintaining transmission lines. 
+                    </p>
+                    <p class="spotlight-desc">
+                        However, the utility faces unpredictable, volatile expenses that cannot be forecast in advance. Instead of initiating complex rate cases for every unexpected cost, the North Carolina Utilities Commission (NCUC) allows <b>variable riders</b> to adjust customer bills dynamically:
+                    </p>
+                    <ul class="spotlight-desc" style="margin-left: 20px; padding-left: 10px; margin-top: -10px;">
+                        <li><b>Storm Recovery (Riders STS & STS-2):</b> Major weather events (like Hurricanes Florence, Dorian, and Isaias) cause hundreds of millions of dollars in unexpected grid damage. Rather than funding these with high-interest utility debt, the NCUC authorizes "Securitization"—issuing low-interest, AAA-rated bonds. These storm riders service that bond debt at a much lower cost to customers, spread out over 10-15 years.</li>
+                        <li><b>Fuel Cost Volatility (Rider BA-Fuel):</b> Market fuel prices fluctuate constantly. The fuel rider acts as a dynamic pass-through mechanism: it increases when fuel costs rise and credits customers back when fuel prices decrease, without any utility profit markup.</li>
+                    </ul>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
             with st.expander("Show every rider Duke tracks (not just yours)", expanded=False):
                 if glossary_df.empty:
@@ -706,6 +817,49 @@ with tab2:
     )
 
     eia_df = _eia(start_year=2016) if show_eia_overlay else pd.DataFrame()
+
+    # Dynamic EIA comparisons
+    if show_eia_overlay and not eia_df.empty and primary_utility in latest_per_utility.index:
+        latest_year = int(eia_df["year"].max())
+        nc_latest = eia_df[(eia_df["state"] == "NC") & (eia_df["year"] == latest_year)]
+        us_latest = eia_df[(eia_df["state"] == "US") & (eia_df["year"] == latest_year)]
+        
+        if not nc_latest.empty and not us_latest.empty:
+            nc_val = float(nc_latest["price_cents_per_kwh"].iloc[0])
+            us_val = float(us_latest["price_cents_per_kwh"].iloc[0])
+            duke_val = float(latest_per_utility.loc[primary_utility]["all_in_cents_per_kwh"])
+            
+            diff_nc = ((duke_val - nc_val) / nc_val) * 100.0
+            diff_us = ((duke_val - us_val) / us_val) * 100.0
+            
+            st.markdown(f"#### Comparative Cost Snapshots (vs. {latest_year} EIA averages)")
+            
+            comp_cols = st.columns(2)
+            comp_cols[0].markdown(
+                f"""
+                <div class="metric-card">
+                    <div class="metric-title">Duke {primary_utility} vs. NC Average</div>
+                    <div class="metric-value">{abs(diff_nc):.1f}% {'Higher' if diff_nc >= 0 else 'Lower'}</div>
+                    <div class="metric-delta {'delta-positive' if diff_nc >= 0 else 'delta-negative'}">
+                        NC EIA Avg: {nc_val:.2f} ¢/kWh ({latest_year})
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+            comp_cols[1].markdown(
+                f"""
+                <div class="metric-card">
+                    <div class="metric-title">Duke {primary_utility} vs. US Average</div>
+                    <div class="metric-value">{abs(diff_us):.1f}% {'Higher' if diff_us >= 0 else 'Lower'}</div>
+                    <div class="metric-delta {'delta-positive' if diff_us >= 0 else 'delta-negative'}">
+                        US EIA Avg: {us_val:.2f} ¢/kWh ({latest_year})
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
     st.plotly_chart(
         annotated_history_chart(
             timeline_df,
@@ -714,12 +868,13 @@ with tab2:
             monthly_kwh=float(monthly_kwh),
             show_eia=show_eia_overlay,
             eia_df=eia_df,
+            interpolation=interpolation,
         ),
         use_container_width=True,
     )
 
     if not events_df.empty:
-        with st.expander("Event details (timeline annotations)", expanded=False):
+        with st.expander("Event details (regulatory & market timeline annotations)", expanded=False):
             ev_view = events_df[
                 ["effective_date", "bill_number", "short_title", "impact_category", "summary", "source_url"]
             ].copy()
@@ -735,7 +890,7 @@ with tab2:
             )
             st.caption(
                 "Events are stored in the `legislative_actions` table. "
-                "Add more rows there (or via a future seed script) and they'll appear automatically."
+                "Add more rows there and they'll appear automatically."
             )
 
     st.markdown("#### All-In Rate Composition History")
@@ -753,7 +908,8 @@ with tab2:
                 components_df,
                 timeline_df,
                 utility=primary_utility,
-                database_path=Path(DB_PATH)
+                database_path=Path(DB_PATH),
+                interpolation=interpolation,
             ),
             use_container_width=True,
         )
@@ -791,13 +947,15 @@ with tab2:
         title=f"{primary_utility} estimated monthly energy charge at {monthly_kwh:,.0f} kWh",
         xaxis_title="Effective date",
         yaxis_title="$ / month",
-        template="plotly_white",
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+        template="plotly_dark",
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0, bgcolor="rgba(0,0,0,0)"),
         height=360,
         margin=dict(t=70, b=40),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        yaxis=dict(gridcolor="rgba(226, 232, 240, 0.4)")
+        yaxis=dict(gridcolor="rgba(255, 255, 255, 0.05)", zeroline=False),
+        xaxis=dict(gridcolor="rgba(255, 255, 255, 0.05)", zeroline=False),
+        font=dict(color="#cbd5e1", family="Inter, sans-serif"),
     )
     st.plotly_chart(fig_bill_hist, use_container_width=True)
 
@@ -854,7 +1012,7 @@ with tab3:
         st.warning(f"No residential schedules found for {state}/{company}.")
     else:
         results, partial = [], []
-        for fk, title, _ in families:
+        for fk, _, _ in families:
             r = engine.calculate(fk, usage, customer_class="residential", include_riders=True)
             if any("Partial TOU coverage" in w for w in r.warnings):
                 partial.append(r)

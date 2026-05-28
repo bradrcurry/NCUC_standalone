@@ -204,4 +204,148 @@ def load_latest_residential_breakdown(
             }
         )
 
+    # --- Direct-billed riders (in_rider_summary = 0) ---
+    db_path = Path(database_path) if database_path else None
+    if db_path is not None and pd.notna(rider_effective_date):
+        base_family_key = "nc-progress-leaf-500" if utility == "DEP" else "nc-carolinas-schedule-RS"
+        date_str = str(rider_effective_date.date())
+        
+        conn = sqlite3.connect(str(db_path))
+        conn.row_factory = sqlite3.Row
+        try:
+            # Query all mandatory applicability links for this base schedule where in_rider_summary = 0
+            links = conn.execute(
+                """
+                SELECT rider_family_key, effective_start, effective_end, mandatory
+                FROM rider_applicability
+                WHERE applies_to_family_key = ?
+                  AND in_rider_summary = 0
+                  AND mandatory = 1
+                """,
+                (base_family_key,),
+            ).fetchall()
+            
+            # Filter links active on rider_effective_date
+            active_links = []
+            for lnk in links:
+                start = lnk["effective_start"]
+                end = lnk["effective_end"]
+                if (start is None or start <= date_str) and (end is None or end >= date_str):
+                    active_links.append(lnk["rider_family_key"])
+                    
+            active_links = list(set(active_links))
+            
+            from duke_rates.billing.tariff_engine import _label_class, _class_matches
+            
+            for rider_key in active_links:
+                # Find all versions of this rider
+                versions = conn.execute(
+                    "SELECT id, effective_start, effective_end FROM tariff_versions WHERE family_key = ?",
+                    (rider_key,),
+                ).fetchall()
+                
+                # Select version
+                dated_versions = [v for v in versions if v["effective_start"]]
+                selected_version_id = None
+                if dated_versions:
+                    eligible_versions = [v for v in dated_versions if v["effective_start"] <= date_str]
+                    if eligible_versions:
+                        selected = max(eligible_versions, key=lambda v: v["effective_start"])
+                    else:
+                        selected = min(dated_versions, key=lambda v: v["effective_start"])
+                    selected_version_id = selected["id"]
+                elif versions:
+                    selected_version_id = versions[0]["id"]
+                    
+                if selected_version_id is not None:
+                    # Query charges for this version
+                    charges = conn.execute(
+                        "SELECT charge_label, rate_value, rate_unit, customer_class FROM tariff_charges WHERE version_id = ? AND charge_type = 'adjustment'",
+                        (selected_version_id,),
+                    ).fetchall()
+                    
+                    cents_sum = 0.0
+                    found_charge = False
+                    for c in charges:
+                        resolved_class = c["customer_class"] or _label_class(c["charge_label"])
+                        if _class_matches(resolved_class, "residential"):
+                            val = c["rate_value"] or 0.0
+                            unit = (c["rate_unit"] or "").lower()
+                            if "kwh" in unit:
+                                if "cent" in unit or "¢" in unit:
+                                    cents_sum += val
+                                else:
+                                    cents_sum += val * 100.0
+                                found_charge = True
+                    
+                    if found_charge:
+                        # Map known family keys to clean codes
+                        import re
+                        leaf_match = re.search(r'leaf-(\d+)$', rider_key)
+                        code = rider_key.split("-")[-1].upper()
+                        
+                        meta_short = code
+                        meta_category = "rider"
+                        meta_desc = ""
+                        
+                        known_codes = {"607": "STS", "613": "STS-2", "113": "SSR"}
+                        matched_known = False
+                        if leaf_match and leaf_match.group(1) in known_codes:
+                            code = known_codes[leaf_match.group(1)]
+                            matched_known = True
+                            if not glossary.empty and code in glossary.index:
+                                g = glossary.loc[code]
+                                meta_short = g.get("short_name") or g.get("full_name") or code
+                                meta_category = g.get("category") or "rider"
+                                meta_desc = g.get("description") or ""
+                            else:
+                                if code == "STS-2":
+                                    meta_short = "Rider STS-2"
+                                    meta_category = "storm"
+                                    meta_desc = (
+                                        "Storm Securitization Rider 2. Services debt on AAA-rated bonds "
+                                        "issued to finance restoration costs from other major hurricanes. "
+                                        "Securitizing these costs keeps interest rates and monthly bills lower "
+                                        "than traditional utility financing."
+                                    )
+                                elif code == "SSR":
+                                    meta_short = "Rider SSR"
+                                    meta_category = "storm"
+                                    meta_desc = (
+                                        "Storm Securitization Rider. Services debt on storm recovery bonds "
+                                        "for historical storm damage."
+                                    )
+                                
+                        if not matched_known:
+                            desc_row = None
+                            if leaf_match:
+                                leaf_no = leaf_match.group(1)
+                                desc_row = conn.execute(
+                                    "SELECT rider_code, short_name, full_name, description, category FROM rider_descriptions WHERE notes LIKE ? OR description LIKE ? OR full_name LIKE ?",
+                                    (f"%Leaf No. {leaf_no}%", f"%Leaf {leaf_no}%", f"%Leaf No. {leaf_no}%")
+                                ).fetchone()
+                                
+                            if desc_row:
+                                code = desc_row["rider_code"]
+                                meta_short = desc_row["short_name"] or desc_row["full_name"] or code
+                                meta_category = desc_row["category"] or "rider"
+                                meta_desc = desc_row["description"] or ""
+                                
+                        rows.append(
+                            {
+                                "component": code,
+                                "component_kind": "rider",
+                                "short_name": meta_short,
+                                "category": meta_category,
+                                "description": meta_desc,
+                                "cents_per_kwh": cents_sum,
+                                "dollars": cents_sum * monthly_kwh / 100.0,
+                                "effective_date": pd.to_datetime(latest["effective_date"]),
+                                "rider_effective_date": rider_effective_date,
+                            }
+                        )
+        finally:
+            conn.close()
+
     return pd.DataFrame(rows)
+

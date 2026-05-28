@@ -12,29 +12,38 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-# Color palette mapped to rider category so the same color means the same thing
-# across the donut, the build-up area chart, and the comparison views.
+# Color palette mapped to rider category with vibrant electric/neon colors
 CATEGORY_COLORS = {
-    "base": "#1f4e79",
-    "fuel": "#c0504d",
-    "renewable": "#2e8b57",
-    "efficiency": "#9bbb59",
-    "tax": "#7030a0",
-    "performance": "#4f81bd",
-    "regulatory": "#a5a5a5",
-    "capital": "#e8a33d",
-    "affordability": "#17becf",
-    "storm": "#bcbd22",
-    "solar": "#3cb371",
-    "residual": "#cccccc",
-    "rider": "#8c564b",
+    "base": "#4facfe",         # Electric Blue
+    "fuel": "#ff5a5f",         # Neon Coral/Red
+    "renewable": "#00ffd0",    # Electric Mint/Green
+    "efficiency": "#a8ff35",   # Bright Lime
+    "tax": "#f355da",          # Electric Purple
+    "performance": "#00c6ff",  # Bright Cyan
+    "regulatory": "#94a3b8",   # Cool Slate
+    "capital": "#ffd000",      # Neon Gold
+    "affordability": "#38bdf8",# Sky Blue
+    "storm": "#fb923c",        # Bright Orange
+    "solar": "#10b981",        # Emerald Green
+    "residual": "#475569",     # Slate
+    "rider": "#ec4899",        # Neon Pink
 }
+
+
+def _hex_to_rgba(hex_str: str, alpha: float = 0.5) -> str:
+    """Convert hex color string to rgba format."""
+    h = hex_str.lstrip('#')
+    if len(h) == 6:
+        r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+        return f"rgba({r}, {g}, {b}, {alpha})"
+    return hex_str
 
 
 def _category_color(category: str | None) -> str:
     if not category:
         return CATEGORY_COLORS["rider"]
     return CATEGORY_COLORS.get(category, CATEGORY_COLORS["rider"])
+
 
 
 def rider_breakdown_donut(
@@ -100,8 +109,11 @@ def rider_breakdown_donut(
             go.Pie(
                 labels=df["component"],
                 values=df["abs_dollars"],
-                hole=0.55,
-                marker=dict(colors=df["color"].tolist()),
+                hole=0.6,
+                marker=dict(
+                    colors=df["color"].tolist(),
+                    line=dict(color="#0b0f19", width=2)
+                ),
                 customdata=customdata,
                 hovertemplate=(
                     "<b>%{customdata[4]}</b><br>"
@@ -117,25 +129,33 @@ def rider_breakdown_donut(
     )
     total = total_charges_signed
     fig.update_layout(
-        title=f"{utility} residential bill at {monthly_kwh:,.0f} kWh — est. ${total:,.2f}/mo (energy only)",
+        template="plotly_dark",
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(color="#cbd5e1", family="Inter, sans-serif"),
+        title=dict(
+            text=f"{utility} Bill Breakdown at {monthly_kwh:,.0f} kWh — est. ${total:,.2f}/mo",
+            font=dict(size=16, family="Plus Jakarta Sans, sans-serif", color="#f8fafc", weight="bold")
+        ),
         annotations=[
             dict(
-                text=f"<b>${total:,.0f}</b><br>per month",
+                text=f"<span style='color: #94a3b8; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;'>Est. Bill</span><br><b style='color: #f8fafc; font-size: 26px;'>${total:,.0f}</b><br><span style='color: #64748b; font-size: 11px;'>per month</span>",
                 x=0.5,
                 y=0.5,
-                font=dict(size=18),
                 showarrow=False,
             )
         ],
-        height=460,
-        margin=dict(t=70, b=20, l=20, r=200),
+        height=420,
+        margin=dict(t=60, b=20, l=20, r=200),
         showlegend=True,
         legend=dict(
             orientation="v",
             yanchor="middle",
             y=0.5,
             xanchor="left",
-            x=1.05
+            x=1.05,
+            font=dict(size=11),
+            bgcolor="rgba(0,0,0,0)",
         )
     )
     return fig
@@ -149,38 +169,73 @@ def annotated_history_chart(
     monthly_kwh: float,
     show_eia: bool = True,
     eia_df: pd.DataFrame | None = None,
+    interpolation: str = "spline",
 ) -> go.Figure:
-    """Long timeline of all-in ¢/kWh with event annotations."""
+    """Long timeline of all-in ¢/kWh with event annotations and fluid curves."""
     fig = go.Figure()
 
-    utility_colors = {"DEP": "#0f766e", "DEC": "#b45309"}
+    # Electric glow palette for utilities
+    utility_colors = {"DEP": "#00f2fe", "DEC": "#f355da"}
     for utility in utilities:
         sub = timeline_df[timeline_df["utility"] == utility].sort_values("effective_date")
         if sub.empty:
             continue
-        color = utility_colors.get(utility, "#4a5568")
+        color = utility_colors.get(utility, "#cbd5e1")
+        
+        # Dual-line glow effect if using spline (fluid mode)
+        if interpolation == "spline":
+            # 1. Broad translucent glow line
+            fig.add_trace(
+                go.Scatter(
+                    x=sub["effective_date"],
+                    y=sub["all_in_cents_per_kwh"],
+                    mode="lines",
+                    name=f"{utility} glow",
+                    line=dict(color=color, width=8, shape="spline", smoothing=1.3),
+                    opacity=0.15,
+                    showlegend=False,
+                    hoverinfo="skip"
+                )
+            )
+            # 2. Translucent shaded area under the curve
+            fig.add_trace(
+                go.Scatter(
+                    x=sub["effective_date"],
+                    y=sub["all_in_cents_per_kwh"],
+                    mode="lines",
+                    line=dict(color="rgba(0,0,0,0)", shape="spline", smoothing=1.3),
+                    fill="tozeroy",
+                    fillcolor=_hex_to_rgba(color, 0.03),
+                    showlegend=False,
+                    hoverinfo="skip"
+                )
+            )
+
+        # Main high-intensity line
         fig.add_trace(
             go.Scatter(
                 x=sub["effective_date"],
                 y=sub["all_in_cents_per_kwh"],
                 mode="lines+markers",
-                name=f"{utility} all-in",
-                line=dict(color=color, width=3, shape="hv"),
-                marker=dict(size=6),
+                name=f"{utility} All-In",
+                line=dict(color=color, width=3.5, shape=interpolation),
+                marker=dict(size=6, symbol="circle", line=dict(color="#0b0f19", width=1.5)),
                 hovertemplate=(
                     "<b>%{x|%b %Y}</b><br>"
                     f"{utility} all-in: %{{y:.3f}} ¢/kWh<extra></extra>"
                 ),
             )
         )
+        
+        # Base rate reference line
         fig.add_trace(
             go.Scatter(
                 x=sub["effective_date"],
                 y=sub["base_cents_per_kwh"],
                 mode="lines",
-                name=f"{utility} base",
-                line=dict(color=color, width=1.5, dash="dot", shape="hv"),
-                opacity=0.7,
+                name=f"{utility} Base Rate",
+                line=dict(color=color, width=1.5, dash="dot", shape=interpolation),
+                opacity=0.6,
                 hovertemplate=(
                     "<b>%{x|%b %Y}</b><br>"
                     f"{utility} base: %{{y:.3f}} ¢/kWh<extra></extra>"
@@ -188,10 +243,11 @@ def annotated_history_chart(
             )
         )
 
+    # EIA comparisons (NC + US averages)
     if show_eia and eia_df is not None and not eia_df.empty:
         for state, dash, color, label in [
-            ("NC", "dash", "#7f1d1d", "NC EIA avg"),
-            ("US", "dot", "#1f2937", "US EIA avg"),
+            ("NC", "dash", "#00ffd0", "NC State Avg (EIA)"), # neon mint
+            ("US", "dot", "#ffd000", "US Nat'l Avg (EIA)"),  # neon gold
         ]:
             state_eia = eia_df[eia_df["state"] == state].sort_values("year")
             if state_eia.empty:
@@ -211,7 +267,7 @@ def annotated_history_chart(
                     mode="lines",
                     name=label,
                     line=dict(color=color, width=2, dash=dash),
-                    opacity=0.65,
+                    opacity=0.6,
                     hovertemplate=f"<b>{label}</b>: %{{y:.2f}} ¢/kWh<extra></extra>",
                 )
             )
@@ -221,24 +277,25 @@ def annotated_history_chart(
     else:
         y_max = float(timeline_df["all_in_cents_per_kwh"].max()) * 1.15
 
+    # Glowing event vertical dividers
     category_colors = {
-        "renewable_policy": "#2e8b57",
-        "carbon_policy": "#1f4e79",
-        "fuel_event": "#c0504d",
-        "tax_policy": "#7030a0",
-        "rate_case": "#e8a33d",
+        "renewable_policy": "#00ffd0", # neon mint
+        "carbon_policy": "#4facfe",    # electric blue
+        "fuel_event": "#ff5a5f",       # neon coral
+        "tax_policy": "#f355da",       # electric purple
+        "rate_case": "#ffd000",        # neon gold
     }
     for _, ev in events_df.iterrows():
         ev_date = pd.to_datetime(ev["effective_date"])
-        color = category_colors.get(ev["impact_category"], "#666666")
+        color = category_colors.get(ev["impact_category"], "#94a3b8")
         fig.add_vline(
             x=ev_date,
             line=dict(color=color, width=1, dash="dash"),
-            opacity=0.5,
+            opacity=0.4,
         )
         fig.add_annotation(
             x=ev_date,
-            y=0.02,
+            y=0.03,
             yref="paper",
             text=f"<b>{ev['bill_number']}</b>",
             showarrow=False,
@@ -246,20 +303,54 @@ def annotated_history_chart(
             yanchor="bottom",
             textangle=-90,
             xshift=4,
-            font=dict(size=10, color=color),
-            hovertext=f"{ev['short_title']}<br><br>{ev['summary']}",
+            font=dict(size=10, color=color, family="Plus Jakarta Sans"),
+            hovertext=f"<b>{ev['short_title']}</b><br><br>{ev['summary']}",
+            bgcolor="rgba(15, 23, 42, 0.8)",
+            bordercolor=color,
+            borderwidth=1,
+            borderpad=3,
         )
 
     fig.update_layout(
-        title="DEP & DEC residential all-in rate — annotated with policy & market events",
-        xaxis_title="Effective date",
-        yaxis_title="¢/kWh",
-        yaxis=dict(range=[0, y_max * 1.05]),
-        template="plotly_white",
+        template="plotly_dark",
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(color="#cbd5e1", family="Inter, sans-serif"),
+        title=dict(
+            text="DEP & DEC Residential Rate History vs. EIA Averages",
+            font=dict(size=16, family="Plus Jakarta Sans, sans-serif", color="#f8fafc", weight="bold")
+        ),
+        xaxis=dict(
+            title="Effective Date",
+            gridcolor="rgba(255, 255, 255, 0.05)",
+            zeroline=False,
+            showgrid=True,
+            linecolor="rgba(255, 255, 255, 0.1)",
+        ),
+        yaxis=dict(
+            title="¢/kWh",
+            range=[0, y_max * 1.05],
+            gridcolor="rgba(255, 255, 255, 0.05)",
+            zeroline=False,
+            showgrid=True,
+            linecolor="rgba(255, 255, 255, 0.1)",
+        ),
         hovermode="x unified",
-        legend=dict(orientation="h", yanchor="top", y=-0.15, xanchor="center", x=0.5),
+        hoverlabel=dict(
+            bgcolor="rgba(22, 28, 45, 0.95)",
+            bordercolor="rgba(255, 255, 255, 0.1)",
+            font=dict(color="#cbd5e1")
+        ),
+        legend=dict(
+            orientation="h",
+            yanchor="top",
+            y=-0.15,
+            xanchor="center",
+            x=0.5,
+            bgcolor="rgba(0,0,0,0)",
+        ),
         height=480,
-        margin=dict(t=100, b=80, l=40, r=20),
+        margin=dict(t=80, b=80, l=50, r=20),
     )
     return fig
 
@@ -323,6 +414,7 @@ def all_in_rate_history_stack(
     *,
     utility: str,
     database_path: Path | None = None,
+    interpolation: str = "spline",
 ) -> go.Figure:
     """Stacked-area chart of the ALL-IN rate over time: Base Rate + individual riders.
 
@@ -445,9 +537,9 @@ def all_in_rate_history_stack(
             x=pivot_df.index,
             y=cum_df["Base Rate"],
             mode="lines",
-            line=dict(width=0.5, shape="hv", color=get_color("Base Rate")),
+            line=dict(width=0.8, shape=interpolation, color=get_color("Base Rate")),
             fill="tozeroy",
-            fillcolor=get_color("Base Rate"),
+            fillcolor=_hex_to_rgba(get_color("Base Rate"), 0.3),
             name="Base Rate",
             customdata=pivot_df["Base Rate"],
             hovertemplate=(
@@ -466,9 +558,9 @@ def all_in_rate_history_stack(
                 x=pivot_df.index,
                 y=cum_df[col],
                 mode="lines",
-                line=dict(width=0.5, shape="hv", color=get_color(col)),
+                line=dict(width=0.8, shape=interpolation, color=get_color(col)),
                 fill="tonexty",
-                fillcolor=get_color(col),
+                fillcolor=_hex_to_rgba(get_color(col), 0.35),
                 name=get_name(col),
                 customdata=pivot_df[col],
                 hovertemplate=(
@@ -480,29 +572,72 @@ def all_in_rate_history_stack(
         )
 
     # Add an overall All-In line trace on top for high-contrast visibility
+    top_color = "#00f2fe" if utility == "DEP" else "#f355da"
+    if interpolation == "spline":
+        # Glowing shadow line
+        fig.add_trace(
+            go.Scatter(
+                x=pivot_df.index,
+                y=cum_df[ordered_cols[-1]],
+                mode="lines",
+                line=dict(color=top_color, width=6, shape="spline", smoothing=1.3),
+                opacity=0.2,
+                showlegend=False,
+                hoverinfo="skip"
+            )
+        )
+
     fig.add_trace(
         go.Scatter(
             x=pivot_df.index,
             y=cum_df[ordered_cols[-1]],
             mode="lines",
-            line=dict(color="#0f172a" if utility == "DEP" else "#7c2d12", width=2.5, shape="hv"),
+            line=dict(color=top_color, width=2.5, shape=interpolation),
             name="All-In Rate Total",
             hovertemplate="<b>All-In Rate Total</b>: %{y:.3f} ¢/kWh<extra></extra>"
         )
     )
 
     fig.update_layout(
-        title=f"{utility} Residential All-In Rate Buildup Over Time (¢/kWh)",
-        xaxis_title="Effective date",
-        yaxis_title="¢/kWh",
-        template="plotly_white",
-        hovermode="x unified",
-        height=480,
-        margin=dict(t=80, b=40, l=40, r=40),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+        template="plotly_dark",
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        yaxis=dict(gridcolor="rgba(226, 232, 240, 0.4)")
+        font=dict(color="#cbd5e1", family="Inter, sans-serif"),
+        title=dict(
+            text=f"{utility} Residential All-In Rate Buildup Over Time (¢/kWh)",
+            font=dict(size=16, family="Plus Jakarta Sans, sans-serif", color="#f8fafc", weight="bold")
+        ),
+        xaxis=dict(
+            title="Effective Date",
+            gridcolor="rgba(255, 255, 255, 0.05)",
+            zeroline=False,
+            showgrid=True,
+            linecolor="rgba(255, 255, 255, 0.1)",
+        ),
+        yaxis=dict(
+            title="¢/kWh",
+            gridcolor="rgba(255, 255, 255, 0.05)",
+            zeroline=False,
+            showgrid=True,
+            linecolor="rgba(255, 255, 255, 0.1)",
+        ),
+        hovermode="x unified",
+        hoverlabel=dict(
+            bgcolor="rgba(22, 28, 45, 0.95)",
+            bordercolor="rgba(255, 255, 255, 0.1)",
+            font=dict(color="#cbd5e1")
+        ),
+        height=480,
+        margin=dict(t=80, b=40, l=50, r=40),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="left",
+            x=0,
+            bgcolor="rgba(0,0,0,0)",
+            font=dict(size=10)
+        )
     )
 
     return fig
