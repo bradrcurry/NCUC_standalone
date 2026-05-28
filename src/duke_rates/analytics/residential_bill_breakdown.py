@@ -149,7 +149,7 @@ def load_latest_residential_breakdown(
                 "most recent rate case. Everything below is added on top of this."
             ),
             "cents_per_kwh": base_cents,
-            "dollars": round(base_cents * monthly_kwh / 100.0, 2),
+            "dollars": base_cents * monthly_kwh / 100.0,
             "effective_date": pd.to_datetime(latest["effective_date"]),
             "rider_effective_date": pd.NaT,
         }
@@ -177,7 +177,7 @@ def load_latest_residential_breakdown(
                     "category": meta_category,
                     "description": meta_desc,
                     "cents_per_kwh": cents,
-                    "dollars": round(cents * monthly_kwh / 100.0, 2),
+                    "dollars": cents * monthly_kwh / 100.0,
                     "effective_date": pd.to_datetime(latest["effective_date"]),
                     "rider_effective_date": rider_effective_date,
                 }
@@ -198,7 +198,7 @@ def load_latest_residential_breakdown(
                     "(pre-2023) periods where component-level data is incomplete."
                 ),
                 "cents_per_kwh": residual,
-                "dollars": round(residual * monthly_kwh / 100.0, 2),
+                "dollars": residual * monthly_kwh / 100.0,
                 "effective_date": pd.to_datetime(latest["effective_date"]),
                 "rider_effective_date": rider_effective_date,
             }

@@ -12,7 +12,6 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-
 # Color palette mapped to rider category so the same color means the same thing
 # across the donut, the build-up area chart, and the comparison views.
 CATEGORY_COLORS = {
@@ -94,24 +93,24 @@ def rider_breakdown_donut(
     # Plotly Pie expects customdata to be a 2D array shaped (n_slices, n_fields).
     # Passing a list of tuples renders blank in hover ("N/A"); using a numpy
     # array (or list-of-lists with proper shape) fixes it.
-    customdata = df[["dollars", "cents_per_kwh", "category", "polarity"]].to_numpy()
+    customdata = df[["dollars", "cents_per_kwh", "category", "polarity", "label"]].to_numpy()
 
     fig = go.Figure(
         data=[
             go.Pie(
-                labels=df["label"],
+                labels=df["component"],
                 values=df["abs_dollars"],
                 hole=0.55,
                 marker=dict(colors=df["color"].tolist()),
                 customdata=customdata,
                 hovertemplate=(
-                    "<b>%{label}</b><br>"
+                    "<b>%{customdata[4]}</b><br>"
                     "$%{customdata[0]:.2f}/mo (%{customdata[3]})<br>"
                     "%{customdata[1]:.4f} ¢/kWh<br>"
                     "Category: %{customdata[2]}<extra></extra>"
                 ),
-                texttemplate="<b>%{label}</b><br>$%{customdata[0]:.2f} (%{percent})",
-                textposition="outside",
+                textinfo="percent",
+                textposition="inside",
                 sort=False,
             )
         ]
@@ -129,8 +128,15 @@ def rider_breakdown_donut(
             )
         ],
         height=460,
-        margin=dict(t=70, b=20, l=20, r=20),
-        showlegend=False,
+        margin=dict(t=70, b=20, l=20, r=200),
+        showlegend=True,
+        legend=dict(
+            orientation="v",
+            yanchor="middle",
+            y=0.5,
+            xanchor="left",
+            x=1.05
+        )
     )
     return fig
 
@@ -232,24 +238,28 @@ def annotated_history_chart(
         )
         fig.add_annotation(
             x=ev_date,
-            y=y_max,
+            y=0.02,
+            yref="paper",
             text=f"<b>{ev['bill_number']}</b>",
             showarrow=False,
+            xanchor="left",
             yanchor="bottom",
+            textangle=-90,
+            xshift=4,
             font=dict(size=10, color=color),
             hovertext=f"{ev['short_title']}<br><br>{ev['summary']}",
         )
 
     fig.update_layout(
-        title=f"DEP & DEC residential all-in rate — annotated with policy & market events",
+        title="DEP & DEC residential all-in rate — annotated with policy & market events",
         xaxis_title="Effective date",
         yaxis_title="¢/kWh",
         yaxis=dict(range=[0, y_max * 1.05]),
         template="plotly_white",
         hovermode="x unified",
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+        legend=dict(orientation="h", yanchor="top", y=-0.15, xanchor="center", x=0.5),
         height=480,
-        margin=dict(t=100, b=40),
+        margin=dict(t=100, b=80, l=40, r=20),
     )
     return fig
 
@@ -268,7 +278,23 @@ def rider_buildup_area(
         return fig
     df = components_df.copy()
     df["effective_date"] = pd.to_datetime(df["effective_date"])
+    
+    # Pivot and fill missing rider_code values with 0.0 to prevent NaN hovers on stacked area chart
+    pivoted = df.pivot_table(
+        index="effective_date",
+        columns="rider_code",
+        values="cents_per_kwh",
+        aggfunc="sum",
+        fill_value=0.0,
+    )
+    df = pivoted.reset_index().melt(
+        id_vars="effective_date",
+        value_vars=pivoted.columns,
+        var_name="rider_code",
+        value_name="cents_per_kwh",
+    )
     df = df.sort_values(["effective_date", "rider_code"])
+    
     fig = px.area(
         df,
         x="effective_date",
