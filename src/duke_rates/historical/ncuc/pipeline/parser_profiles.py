@@ -4094,16 +4094,26 @@ class CarolinasMultiClassRateTableProfile:
     def extract(self, doc: dict, text: str) -> list[ExtractedCharge]:
         charges: list[ExtractedCharge] = []
         for pattern, display_label in self._CLASS_ANCHORS:
+            # Match the class anchor, then up to 200 non-newline chars (the
+            # applicable-schedules cell), then the rate value. This form
+            # works for both layouts the pipeline produces:
+            #   - pdfplumber: class label and rate on separate lines (with
+            #     the schedules row optionally between them)
+            #   - docling (flattened): class label, schedules, and rate
+            #     all on one line ("Residential RS, RE, ... (0.5081)")
+            # Parenthesised → decrement (credit, e.g. EDIT-4 tax refund);
+            # bare positive → increment (e.g. STS storm recovery).
             pat = re.compile(
-                pattern + r"\s*\n(?:[^\n]*\n)?\s*\(?([\-]?[\d]+\.[\d]+)\)?",
+                pattern + r"[\s\S]{0,200}?(\(?)([\-]?[\d]+\.[\d]+)(\)?)(?:\s|$)",
                 re.I,
             )
             m = pat.search(text)
             if not m:
                 continue
-            raw = float(m.group(1))
-            # Parenthesised values are decrements
-            if "(" in m.group(0) and ")" in m.group(0) and raw > 0:
+            open_paren, rate_str, close_paren = m.group(1), m.group(2), m.group(3)
+            raw = float(rate_str)
+            parenthesised = bool(open_paren and close_paren)
+            if parenthesised and raw > 0:
                 raw = -raw
             value = raw / 100.0  # ¢ → $
             charges.append(
