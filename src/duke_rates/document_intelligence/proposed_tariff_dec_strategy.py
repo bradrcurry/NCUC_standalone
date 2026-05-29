@@ -26,6 +26,7 @@ from typing import Iterable
 
 from duke_rates.document_intelligence.proposed_tariff_detector import (
     ProposedTariffBlock,
+    extract_effective_start_date,
 )
 
 
@@ -825,6 +826,7 @@ def detect_dec_proposed_blocks_from_pdf(
                 else tariff_name
             )
             for page in range(section.start_page, section.end_page + 1):
+                page_text = page_texts.get(page, "")
                 blocks.append(
                     ProposedTariffBlock(
                         source_pdf=str(pdf),
@@ -846,10 +848,13 @@ def detect_dec_proposed_blocks_from_pdf(
                             f"Leaf {section.leaf_no} {section.schedule_code}",
                             schedule_label,
                         ],
+                        leaf_no=section.leaf_no,
+                        effective_start=extract_effective_start_date(page_text),
                     )
                 )
         for body in rider_bodies:
             for page in range(body.start_page, body.end_page + 1):
+                page_text = page_texts.get(page, "")
                 blocks.append(
                     ProposedTariffBlock(
                         source_pdf=str(pdf),
@@ -871,6 +876,8 @@ def detect_dec_proposed_blocks_from_pdf(
                             body.rider_name,
                             f"Pages {body.start_page}-{body.end_page}",
                         ],
+                        leaf_no=None,
+                        effective_start=extract_effective_start_date(page_text),
                     )
                 )
 
@@ -908,6 +915,8 @@ def detect_dec_proposed_blocks_from_pdf(
                             f"Leaf {entry.leaf_no} Orig.",
                             entry.normalized_name,
                         ],
+                        leaf_no=entry.leaf_no,
+                        effective_start=None,
                     )
                 )
     finally:

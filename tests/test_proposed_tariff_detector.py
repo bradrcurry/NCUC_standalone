@@ -3,6 +3,8 @@ from __future__ import annotations
 from duke_rates.document_intelligence.proposed_tariff_detector import (
     detect_blocks_from_sections,
     detect_exhibit_context,
+    extract_dep_leaf_no,
+    extract_effective_start_date,
     extract_rate_fields,
     find_schedule_name,
     is_current_baseline,
@@ -152,6 +154,53 @@ def test_detect_blocks_requires_target_application_by_default() -> None:
         lambda row: text,
         require_target_document=False,
     )
+
+
+def test_extract_effective_start_date_handles_dep_and_dec_phrasings() -> None:
+    assert (
+        extract_effective_start_date(
+            "NCUC Docket No. E-2, Sub 1380, Order dated\n"
+            "Effective for service rendered on and after January 1, 2027"
+        )
+        == "2027-01-01"
+    )
+    assert (
+        extract_effective_start_date(
+            "Effective for service on and after January 1, 2028"
+        )
+        == "2028-01-01"
+    )
+    assert (
+        extract_effective_start_date(
+            "Effective for bills rendered on and after December 15, 2026"
+        )
+        == "2026-12-15"
+    )
+    assert extract_effective_start_date("Some unrelated text") is None
+
+
+def test_extract_dep_leaf_no_reads_revised_leaf_header() -> None:
+    assert (
+        extract_dep_leaf_no(
+            "Duke Energy Progress, LLC\n"
+            "NC Original Leaf No. 614\n"
+            "Effective for service rendered on and after January 1, 2027"
+        )
+        == 614
+    )
+    assert (
+        extract_dep_leaf_no(
+            "NC Seventh Revised Leaf No. 600\nEffective..."
+        )
+        == 600
+    )
+    assert (
+        extract_dep_leaf_no(
+            "NC Third Revised Leaf No. 575"
+        )
+        == 575
+    )
+    assert extract_dep_leaf_no("No leaf reference here") is None
 
 
 def test_detect_blocks_extracts_starred_new_rider_catalog_entries() -> None:

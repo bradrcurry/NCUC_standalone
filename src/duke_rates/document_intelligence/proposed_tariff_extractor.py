@@ -51,6 +51,8 @@ CREATE TABLE IF NOT EXISTS proposed_tariff_blocks (
     tariff_name TEXT NOT NULL,
     tariff_kind TEXT NOT NULL,
     schedule_code TEXT,
+    leaf_no INTEGER,
+    effective_start TEXT,
     confidence REAL NOT NULL,
     evidence_json TEXT NOT NULL DEFAULT '[]',
     block_json TEXT NOT NULL DEFAULT '{}',
@@ -135,7 +137,23 @@ class ProposedExtractionSummary:
 
 def ensure_schema(conn: sqlite3.Connection) -> None:
     conn.executescript(_DDL)
+    _add_missing_block_columns(conn)
     conn.commit()
+
+
+def _add_missing_block_columns(conn: sqlite3.Connection) -> None:
+    """Lightweight migration for DBs created before leaf_no/effective_start
+    were added to proposed_tariff_blocks."""
+    existing = {
+        row[1]
+        for row in conn.execute("PRAGMA table_info(proposed_tariff_blocks)")
+    }
+    if "leaf_no" not in existing:
+        conn.execute("ALTER TABLE proposed_tariff_blocks ADD COLUMN leaf_no INTEGER")
+    if "effective_start" not in existing:
+        conn.execute(
+            "ALTER TABLE proposed_tariff_blocks ADD COLUMN effective_start TEXT"
+        )
 
 
 def extract_charge_candidates(text: str) -> list[ProposedChargeCandidate]:
@@ -218,6 +236,7 @@ def persist_proposed_pdf_extraction(
     else:
         blocks = detect_proposed_tariff_blocks_from_pdf(pdf)
         text_by_page = _load_pdf_text_by_page(pdf, {b.start_page for b in blocks})
+    blocks = _propagate_effective_start_within_exhibit(blocks)
     now = datetime.now(UTC).isoformat()
 
     with conn:
@@ -304,8 +323,9 @@ def _insert_block(
         INSERT INTO proposed_tariff_blocks
             (proposed_document_id, source_pdf, start_page, end_page, exhibit_key,
              rate_year_context, tariff_name, tariff_kind, schedule_code,
+             leaf_no, effective_start,
              confidence, evidence_json, block_json)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             doc_id,
@@ -317,6 +337,8 @@ def _insert_block(
             tariff_name,
             tariff_kind,
             schedule_code,
+            block.leaf_no,
+            block.effective_start,
             block.confidence,
             json.dumps(block.evidence),
             json.dumps(block.to_dict()),
@@ -440,6 +462,46 @@ def _looks_like_parenthesized_credit(line: str, match_start: int) -> bool:
         return False
     open_idx = prefix.rfind("(")
     return ")" in line[open_idx:]
+
+
+def _propagate_effective_start_within_exhibit(
+    blocks: list[ProposedTariffBlock],
+) -> list[ProposedTariffBlock]:
+    """Backfill ``effective_start`` on blocks that share an exhibit with at
+    least one dated peer. Useful for DEC schedule body pages, which omit the
+    explicit Effective line — neighboring rider body pages in the same
+    Exhibit B/B_1/B_2 carry it explicitly."""
+    from collections import Counter
+
+    counts: dict[tuple[str, str], Counter[str]] = {}
+    for block in blocks:
+        if not block.effective_start:
+            continue
+        key = (block.source_pdf, block.exhibit_key)
+        counts.setdefault(key, Counter())[block.effective_start] += 1
+
+    mode_by_exhibit: dict[tuple[str, str], str] = {}
+    for key, counter in counts.items():
+        if counter:
+            mode_by_exhibit[key] = counter.most_common(1)[0][0]
+
+    if not mode_by_exhibit:
+        return blocks
+
+    filled: list[ProposedTariffBlock] = []
+    for block in blocks:
+        if block.effective_start:
+            filled.append(block)
+            continue
+        key = (block.source_pdf, block.exhibit_key)
+        mode = mode_by_exhibit.get(key)
+        if mode is None:
+            filled.append(block)
+            continue
+        data = block.to_dict()
+        data["effective_start"] = mode
+        filled.append(ProposedTariffBlock(**data))
+    return filled
 
 
 def _detect_strategy(pdf_path: Path, utility: str | None) -> str:

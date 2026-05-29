@@ -68,6 +68,8 @@ class TariffComparison:
     tariff_name: str
     pages: list[int]
     proposed_charges: list[ProposedCharge]
+    proposed_effective_start: str | None = None
+    proposed_leaf_no: int | None = None
     family_match: FamilyMatch | None = None
     approved_version_id: int | None = None
     approved_effective_start: str | None = None
@@ -81,6 +83,8 @@ class TariffComparison:
             "schedule_code": self.schedule_code,
             "tariff_name": self.tariff_name,
             "pages": self.pages,
+            "proposed_effective_start": self.proposed_effective_start,
+            "proposed_leaf_no": self.proposed_leaf_no,
             "proposed_charges": [c.__dict__ for c in self.proposed_charges],
             "family_match": (
                 self.family_match.__dict__ if self.family_match else None
@@ -127,7 +131,9 @@ def build_comparisons(
                proposed_tariff_blocks.tariff_kind AS tariff_kind,
                proposed_tariff_blocks.schedule_code AS schedule_code,
                proposed_tariff_blocks.tariff_name AS tariff_name,
-               proposed_tariff_blocks.start_page AS start_page
+               proposed_tariff_blocks.start_page AS start_page,
+               proposed_tariff_blocks.effective_start AS effective_start,
+               proposed_tariff_blocks.leaf_no AS leaf_no
         FROM proposed_tariff_blocks
         JOIN proposed_tariff_documents
             ON proposed_tariff_blocks.proposed_document_id
@@ -146,15 +152,26 @@ def build_comparisons(
         )
         bucket = grouped.setdefault(
             key,
-            {"block_ids": [], "pages": set()},
+            {
+                "block_ids": [],
+                "pages": set(),
+                "effective_starts": set(),
+                "leaf_nos": set(),
+            },
         )
         bucket["block_ids"].append(row["block_id"])
         bucket["pages"].add(row["start_page"])
+        if row["effective_start"]:
+            bucket["effective_starts"].add(row["effective_start"])
+        if row["leaf_no"] is not None:
+            bucket["leaf_nos"].add(int(row["leaf_no"]))
 
     comparisons: list[TariffComparison] = []
     company = utility_to_company(utility)
     for (exhibit_key, tariff_kind, schedule_code, tariff_name), data in grouped.items():
         proposed = _load_proposed_charges(conn, data["block_ids"])
+        eff_starts = sorted(data["effective_starts"])
+        leaf_nos = sorted(data["leaf_nos"])
         comparison = TariffComparison(
             docket_number=docket_number,
             exhibit_key=exhibit_key,
@@ -163,6 +180,8 @@ def build_comparisons(
             tariff_name=tariff_name,
             pages=sorted(data["pages"]),
             proposed_charges=proposed,
+            proposed_effective_start=eff_starts[0] if eff_starts else None,
+            proposed_leaf_no=leaf_nos[0] if leaf_nos else None,
         )
         match = match_family(
             conn,

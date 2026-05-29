@@ -90,6 +90,57 @@ _INTERCLASS_RE = re.compile(
     r"PRESENT\s+BASE\s+RATE\s+REVENUES.{0,300}TOTAL\s+INCREASE",
     re.IGNORECASE | re.DOTALL,
 )
+_EFFECTIVE_DATE_RE = re.compile(
+    r"Effective\s+for\s+(?:service\s+(?:rendered\s+)?|services\s+rendered\s+|bills\s+rendered\s+)"
+    r"on\s+and\s+after\s+"
+    r"(?P<month>January|February|March|April|May|June|July|August|September|October|November|December)"
+    r"\s+(?P<day>\d{1,2}),\s*(?P<year>\d{4})",
+    re.IGNORECASE,
+)
+_DEP_LEAF_NO_RE = re.compile(
+    r"\bNC\s+(?:Original|First|Second|Third|Fourth|Fifth|Sixth|Seventh|Eighth|"
+    r"Ninth|Tenth|Eleventh|Twelfth|Thirteenth|Fourteenth|Fifteenth|"
+    r"Sixteenth|Seventeenth|Eighteenth|Nineteenth|Twentieth|"
+    r"Twenty[-\s]?First|Twenty[-\s]?Second|Twenty[-\s]?Third|Twenty[-\s]?Fourth|"
+    r"Twenty[-\s]?Fifth|Thirtieth|[A-Za-z][a-z]+\-?[A-Za-z]*)?\s*(?:Revised\s+)?"
+    r"Leaf\s+No\.?\s+(?P<leaf>\d{1,4})",
+    re.IGNORECASE,
+)
+_MONTH_TO_NUM = {
+    "january": "01", "february": "02", "march": "03", "april": "04",
+    "may": "05", "june": "06", "july": "07", "august": "08",
+    "september": "09", "october": "10", "november": "11", "december": "12",
+}
+
+
+def extract_effective_start_date(text: str) -> str | None:
+    """Return the proposed effective date from page header text as ISO 8601.
+
+    Both DEP and DEC pages carry a header line like
+    ``Effective for service rendered on and after January 1, 2027``.
+    """
+    match = _EFFECTIVE_DATE_RE.search(text or "")
+    if not match:
+        return None
+    month = _MONTH_TO_NUM.get(match.group("month").lower())
+    if month is None:
+        return None
+    day = match.group("day").zfill(2)
+    year = match.group("year")
+    return f"{year}-{month}-{day}"
+
+
+def extract_dep_leaf_no(text: str) -> int | None:
+    """Return the integer leaf number from a DEP page's tariff-sheet header."""
+    match = _DEP_LEAF_NO_RE.search(text or "")
+    if not match:
+        return None
+    try:
+        return int(match.group("leaf"))
+    except ValueError:
+        return None
+
+
 _RIDER_CATALOG_HEADER_RE = re.compile(r"\bRETAIL\s+RIDERS\b", re.IGNORECASE)
 _RIDER_CATALOG_LEAF_RE = re.compile(
     r"^(?P<star>\*)?\s*Leaf\s+(?P<leaf>\d+)\b",
@@ -159,6 +210,8 @@ class ProposedTariffBlock:
     has_interclass_impact_table: bool
     confidence: float
     evidence: list[str]
+    leaf_no: int | None = None
+    effective_start: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -481,6 +534,8 @@ def detect_blocks_from_sections(
                         f"*Leaf {leaf_number}",
                         catalog_name,
                     ],
+                    leaf_no=leaf_number,
+                    effective_start=None,
                 )
             )
 
@@ -537,6 +592,8 @@ def detect_blocks_from_sections(
                 has_interclass_impact_table=fields["has_interclass_impact_table"],
                 confidence=confidence,
                 evidence=evidence,
+                leaf_no=extract_dep_leaf_no(text),
+                effective_start=extract_effective_start_date(text),
             )
         )
 

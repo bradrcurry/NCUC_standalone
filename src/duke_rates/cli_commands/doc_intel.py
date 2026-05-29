@@ -5865,12 +5865,17 @@ def compare_proposed_vs_approved(
             f"{c.schedule_code or '-':10s}  {c.tariff_name}"
         )
         typer.echo(header)
-        typer.echo(f"        pages={c.pages}")
+        meta_bits = [f"pages={c.pages}"]
+        if c.proposed_leaf_no is not None:
+            meta_bits.append(f"leaf={c.proposed_leaf_no}")
+        if c.proposed_effective_start:
+            meta_bits.append(f"proposed_effective={c.proposed_effective_start}")
+        typer.echo("        " + "  ".join(meta_bits))
         if c.family_match:
             typer.echo(
                 f"        family={c.family_match.family_key} "
                 f"(strategy={c.family_match.match_strategy}, "
-                f"effective={c.approved_effective_start or 'n/a'})"
+                f"approved_effective={c.approved_effective_start or 'n/a'})"
             )
         else:
             typer.echo("        family=<no matching accepted family - new/unmatched>")
