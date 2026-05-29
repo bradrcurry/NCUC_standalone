@@ -709,6 +709,10 @@ Fixture shape:
 |---|---|
 | `doc-intel embed-corpus` | Generate embeddings for all historical_documents (embedding_primary + embedding_secondary roles). Populates `document_embeddings`. Idempotent. `--limit`, `--refresh`, `--kind` (full_text/first_3_pages/title_block/rate_table_text/order_conclusion_section), `--max-chars` (default 2000) |
 | `doc-intel backfill-embedding-classifications` | Run embedding KNN classifier on docs with reference embeddings; persists `embedding_knn_v1` row. `--limit`, `--dry-run` |
+| `doc-intel embed-sections` | Generate embeddings for page-bounded `document_sections`. Used by section KNN and RAG. |
+| `doc-intel classify-sections` | Classify section spans with `section_knn_v1`, storing proposed labels in `document_classifications`. |
+| `doc-intel detect-proposed-tariffs` | Read-only detector for forward-looking proposed tariff/rate sections in NCUC rate-case/PBR filings. Uses Exhibit B/B_1/B_2 and MYRP anchors, excludes Exhibit A/current-schedule baselines, and emits page ranges plus JSON-able candidate fields. |
+| `doc-intel extract-proposed-tariffs` | Persist proposed tariff/rider block and charge candidates into separate `proposed_tariff_*` tables. Does not write to accepted `tariff_versions` or `tariff_charges`. |
 
 Typical embedding workflow:
 ```bash

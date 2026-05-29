@@ -213,6 +213,8 @@ class NcucDownloader:
     def _playwright_fetch(self, url: str) -> tuple[bytes | None, str, str]:
         """Download a document using Playwright (for session-gated or JS-rendered pages)."""
         try:
+            from playwright.sync_api import Error as PlaywrightError
+            from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
             from playwright.sync_api import sync_playwright
         except ImportError:
             logger.warning("Playwright not installed; cannot browser-fetch %s", url)
@@ -242,11 +244,32 @@ class NcucDownloader:
 
             page.on("response", _on_response)
             try:
-                page.goto(
-                    url,
-                    wait_until="networkidle",
-                    timeout=int(self.settings.request_timeout * 1000),
-                )
+                timeout_ms = int(self.settings.request_timeout * 1000)
+                try:
+                    with page.expect_download(timeout=timeout_ms) as download_info:
+                        try:
+                            page.goto(
+                                url,
+                                wait_until="networkidle",
+                                timeout=timeout_ms,
+                            )
+                        except PlaywrightError as exc:
+                            if "Download is starting" not in str(exc):
+                                raise
+                    download = download_info.value
+                    download_path = download.path()
+                    if download_path:
+                        return (
+                            download_path.read_bytes(),
+                            "application/pdf",
+                            download.url or url,
+                        )
+                except PlaywrightTimeoutError:
+                    page.goto(
+                        url,
+                        wait_until="networkidle",
+                        timeout=timeout_ms,
+                    )
             finally:
                 browser.close()
 

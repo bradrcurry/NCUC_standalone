@@ -5627,6 +5627,168 @@ def classify_sections_nc(
             typer.echo(f"    {lbl:20s} {n}")
 
 
+@doc_intel_app.command("detect-proposed-tariffs")
+def detect_proposed_tariffs(
+    source_pdf: str = typer.Option(
+        "",
+        "--source-pdf",
+        help="Substring filter for a specific source_pdf.",
+    ),
+    pdf_path: Path | None = typer.Option(
+        None,
+        "--pdf-path",
+        help="Scan a local PDF directly when document_sections/page artifacts are unavailable.",
+    ),
+    limit: int = typer.Option(
+        0,
+        "--limit",
+        help="Read at most N document_sections before detection (0 = all).",
+    ),
+    max_chars: int = typer.Option(
+        8000,
+        "--max-chars",
+        help="Max page text chars loaded per section.",
+    ),
+    json_out: bool = typer.Option(False, "--json", help="Output raw JSON."),
+    require_target_document: bool = typer.Option(
+        True,
+        "--require-target-document/--include-generic-exhibit-b",
+        help=(
+            "Default: require rate-case/PBR application anchors in the same PDF. "
+            "Use --include-generic-exhibit-b for broader Exhibit B scans."
+        ),
+    ),
+) -> None:
+    """Find forward-looking proposed tariff/rate sections in NCUC filings.
+
+    This is a read-only detector. It uses exhibit anchors such as Exhibit B,
+    Application Exhibit B_1/B_2, and MYRP Rate Year 1/2 while excluding
+    Exhibit A/current-schedule baseline text.
+    """
+    from duke_rates.db.sqlite import connect
+    from duke_rates.document_intelligence.proposed_tariff_detector import (
+        detect_proposed_tariff_blocks,
+        detect_proposed_tariff_blocks_from_pdf,
+    )
+
+    settings, _ = _bootstrap()
+    if pdf_path is not None:
+        blocks = detect_proposed_tariff_blocks_from_pdf(
+            pdf_path,
+            max_pages=limit,
+            require_target_document=require_target_document,
+        )
+    else:
+        conn = connect(settings.database_path)
+        try:
+            blocks = detect_proposed_tariff_blocks(
+                conn,
+                source_pdf=source_pdf or None,
+                limit=limit,
+                max_chars=max_chars,
+                require_target_document=require_target_document,
+            )
+        finally:
+            conn.close()
+
+    rows = [b.to_dict() for b in blocks]
+    if json_out:
+        typer.echo(json.dumps(rows, indent=2, default=str))
+        return
+
+    by_exhibit: dict[str, int] = {}
+    by_pdf: dict[str, int] = {}
+    for row in rows:
+        by_exhibit[row["exhibit_key"]] = by_exhibit.get(row["exhibit_key"], 0) + 1
+        by_pdf[row["source_pdf"]] = by_pdf.get(row["source_pdf"], 0) + 1
+
+    typer.echo("Proposed Tariff Detector")
+    typer.echo(f"  candidates={len(rows)}")
+    if by_exhibit:
+        typer.echo(
+            "  exhibits="
+            + ", ".join(f"{key}:{n}" for key, n in sorted(by_exhibit.items()))
+        )
+    if by_pdf:
+        typer.echo("  top_documents:")
+        for pdf, n in sorted(by_pdf.items(), key=lambda item: -item[1])[:10]:
+            typer.echo(f"    {n:4d}  {pdf}")
+
+    if not rows:
+        return
+
+    typer.echo("\nCandidates")
+    for row in rows[:25]:
+        charge = row["basic_customer_charge"] or "-"
+        tou = len(row["time_of_use_lines"])
+        energy = len(row["volumetric_energy_charge_lines"])
+        typer.echo(
+            "  "
+            f"pages={row['start_page']}-{row['end_page']} "
+            f"exhibit={row['exhibit_key']} "
+            f"confidence={row['confidence']:.2f} "
+            f"schedule={row['schedule_name']} "
+            f"basic={charge} energy_lines={energy} tou_lines={tou}"
+        )
+        typer.echo(f"    {row['source_pdf']}")
+        if row["evidence"]:
+            typer.echo(f"    evidence={row['evidence'][0][:160]}")
+    if len(rows) > 25:
+        typer.echo(f"\n  ... {len(rows) - 25} more; rerun with --json for full output")
+
+
+@doc_intel_app.command("extract-proposed-tariffs")
+def extract_proposed_tariffs(
+    pdf_path: Path = typer.Option(
+        ...,
+        "--pdf-path",
+        help="Local proposed application PDF to scan and parse.",
+    ),
+    docket_number: str = typer.Option("", "--docket-number"),
+    utility: str = typer.Option("", "--utility"),
+    source_record_id: int | None = typer.Option(None, "--source-record-id"),
+    report_path: Path | None = typer.Option(
+        None,
+        "--report-path",
+        help="Optional JSON report path for parsed blocks and charge candidates.",
+    ),
+    json_out: bool = typer.Option(False, "--json", help="Output summary JSON."),
+) -> None:
+    """Persist proposed tariff/rider charge candidates outside production rates."""
+    from duke_rates.db.sqlite import connect
+    from duke_rates.document_intelligence.proposed_tariff_extractor import (
+        persist_proposed_pdf_extraction,
+    )
+
+    settings, _ = _bootstrap()
+    conn = connect(settings.database_path)
+    try:
+        summary = persist_proposed_pdf_extraction(
+            conn,
+            pdf_path=pdf_path,
+            docket_number=docket_number or None,
+            utility=utility or None,
+            source_record_id=source_record_id,
+            report_path=report_path,
+        )
+    finally:
+        conn.close()
+
+    payload = {
+        "document_id": summary.document_id,
+        "blocks_detected": summary.blocks_detected,
+        "blocks_persisted": summary.blocks_persisted,
+        "charges_persisted": summary.charges_persisted,
+        "report_path": summary.report_path,
+    }
+    if json_out:
+        typer.echo(json.dumps(payload, indent=2))
+        return
+    typer.echo("Proposed tariff extraction complete")
+    for key, value in payload.items():
+        typer.echo(f"  {key}={value}")
+
+
 @doc_intel_app.command("rag-search")
 def rag_search(
     query: str = typer.Argument(..., help="Natural-language question or keyword phrase."),
