@@ -63,6 +63,7 @@ doc-intel check-ollama-models
 doc-intel classify-documents-v2
 doc-intel classify-sections
 doc-intel compare-document-page-text
+doc-intel compare-proposed-vs-approved
 doc-intel detect-proposed-tariffs
 doc-intel embed-corpus
 doc-intel embed-sections

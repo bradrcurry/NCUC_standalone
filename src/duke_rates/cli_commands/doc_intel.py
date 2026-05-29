@@ -5789,6 +5789,114 @@ def extract_proposed_tariffs(
         typer.echo(f"  {key}={value}")
 
 
+@doc_intel_app.command("compare-proposed-vs-approved")
+def compare_proposed_vs_approved(
+    docket_number: str = typer.Option(
+        ...,
+        "--docket-number",
+        help="Docket whose proposed_tariff_* rows should be compared, e.g. 'E-2 Sub 1380'.",
+    ),
+    utility: str = typer.Option(
+        "",
+        "--utility",
+        help=(
+            "Utility name used to scope tariff_families matching, e.g. "
+            "'Duke Energy Progress' or 'Duke Energy Carolinas'."
+        ),
+    ),
+    exhibit: str = typer.Option(
+        "",
+        "--exhibit",
+        help="Restrict to one exhibit key (B, B_1, B_2).",
+    ),
+    code: str = typer.Option(
+        "",
+        "--code",
+        help="Restrict to one schedule/rider code (e.g. PC, RAL-2).",
+    ),
+    json_out: bool = typer.Option(False, "--json", help="Output JSON instead of a table."),
+) -> None:
+    """Compare proposed tariffs/riders to the latest accepted lineage.
+
+    Read-only. Reads ``proposed_tariff_*`` rows for the docket and looks up a
+    matching ``tariff_families`` row to fetch the latest approved version's
+    ``tariff_charges``. Nothing is written; promotion of a candidate into
+    accepted lineage stays a separate explicit step.
+    """
+    from duke_rates.db.sqlite import connect
+    from duke_rates.document_intelligence.proposed_vs_approved import (
+        build_comparisons,
+    )
+
+    settings, _ = _bootstrap()
+    conn = connect(settings.database_path)
+    try:
+        comparisons = build_comparisons(
+            conn,
+            docket_number=docket_number,
+            utility=utility or None,
+            exhibit_filter=exhibit or None,
+            code_filter=code or None,
+        )
+    finally:
+        conn.close()
+
+    if json_out:
+        typer.echo(
+            json.dumps([c.to_dict() for c in comparisons], indent=2, default=str)
+        )
+        return
+
+    if not comparisons:
+        typer.echo(f"No proposed tariffs found for docket {docket_number!r}.")
+        return
+
+    matched = sum(1 for c in comparisons if c.family_match is not None)
+    typer.echo(f"Docket: {docket_number}")
+    typer.echo(
+        f"  proposed tariffs: {len(comparisons)} "
+        f"({matched} matched to an accepted family, "
+        f"{len(comparisons) - matched} new / unmatched)"
+    )
+    typer.echo("")
+    for c in comparisons:
+        header = (
+            f"{c.exhibit_key:4s}  {c.tariff_kind:8s}  "
+            f"{c.schedule_code or '-':10s}  {c.tariff_name}"
+        )
+        typer.echo(header)
+        typer.echo(f"        pages={c.pages}")
+        if c.family_match:
+            typer.echo(
+                f"        family={c.family_match.family_key} "
+                f"(strategy={c.family_match.match_strategy}, "
+                f"effective={c.approved_effective_start or 'n/a'})"
+            )
+        else:
+            typer.echo("        family=<no matching accepted family - new/unmatched>")
+        if c.proposed_charges:
+            typer.echo("        proposed:")
+            for pc in c.proposed_charges:
+                typer.echo(
+                    f"          {pc.charge_type:11s} "
+                    f"{(pc.charge_label or '')[:50]:52s} "
+                    f"{pc.rate_value!s:>12} {pc.rate_unit or ''}"
+                )
+        else:
+            typer.echo("        proposed: <no charges extracted>")
+        if c.approved_charges:
+            typer.echo("        approved:")
+            for ac in c.approved_charges:
+                typer.echo(
+                    f"          {ac.charge_type:11s} "
+                    f"{(ac.charge_label or '')[:50]:52s} "
+                    f"{ac.rate_value!s:>12} {ac.rate_unit or ''}"
+                )
+        elif c.family_match:
+            typer.echo("        approved: <family found but no current charges>")
+        typer.echo("")
+
+
 @doc_intel_app.command("rag-search")
 def rag_search(
     query: str = typer.Argument(..., help="Natural-language question or keyword phrase."),
