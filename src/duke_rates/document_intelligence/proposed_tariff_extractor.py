@@ -19,6 +19,12 @@ from duke_rates.document_intelligence.proposed_tariff_detector import (
     ProposedTariffBlock,
     detect_proposed_tariff_blocks_from_pdf,
 )
+from duke_rates.document_intelligence.proposed_tariff_dec_strategy import (
+    DecSplitCharge,
+    detect_dec_proposed_blocks_from_pdf,
+    extract_dec_split_line_charges,
+    is_dec_filing,
+)
 
 
 _DDL = """
@@ -91,7 +97,9 @@ _MONEY_UNIT_RE = re.compile(
     re.IGNORECASE,
 )
 _CENTS_UNIT_RE = re.compile(
-    r"([0-9][0-9,]*(?:\.[0-9]+)?)\s*(?:¢|cents?)\s+(?:per\s+)?kWh\b",
+    r"([0-9][0-9,]*(?:\.[0-9]+)?)\s*(?:¢|cents?)\s+(?:per\s+)?"
+    r"(?:on[-\s]?peak\s+|off[-\s]?peak\s+|discount\s+|super[-\s]?off[-\s]?peak\s+)?"
+    r"kWh\b",
     re.IGNORECASE,
 )
 _RATE_WORD_RE = re.compile(
@@ -191,11 +199,20 @@ def persist_proposed_pdf_extraction(
     source_record_id: int | None = None,
     report_path: Path | str | None = None,
 ) -> ProposedExtractionSummary:
-    """Detect, parse, and persist proposed charge candidates for a PDF."""
+    """Detect, parse, and persist proposed charge candidates for a PDF.
+
+    Filings from Duke Energy Carolinas (E-7 dockets) use a leaf-index header
+    and split-line rate cells; we dispatch those to the DEC strategy. Anything
+    else falls through the DEP/PBR exhibit-anchor detector.
+    """
     ensure_schema(conn)
     pdf = Path(pdf_path)
-    blocks = detect_proposed_tariff_blocks_from_pdf(pdf)
-    text_by_page = _load_pdf_text_by_page(pdf, {b.start_page for b in blocks})
+    strategy = _detect_strategy(pdf, utility)
+    if strategy == "dec":
+        blocks, text_by_page = detect_dec_proposed_blocks_from_pdf(pdf)
+    else:
+        blocks = detect_proposed_tariff_blocks_from_pdf(pdf)
+        text_by_page = _load_pdf_text_by_page(pdf, {b.start_page for b in blocks})
     now = datetime.now(UTC).isoformat()
 
     with conn:
@@ -237,7 +254,12 @@ def persist_proposed_pdf_extraction(
             block_id = _insert_block(conn, doc_id, block)
             block_count += 1
             text = text_by_page.get(block.start_page, "")
-            charges = extract_charge_candidates(text)
+            if strategy == "dec":
+                charges = _candidates_from_dec(text)
+            else:
+                inline = extract_charge_candidates(text)
+                split = _candidates_from_dec(text)
+                charges = _dedupe_candidates(list(inline) + list(split))
             for charge in charges:
                 _insert_charge(conn, block_id, block, charge)
                 charge_count += 1
@@ -361,9 +383,26 @@ def _infer_charge_type(line: str) -> str:
 
 
 def _label_from_line(line: str) -> str:
-    label = re.split(r"\$?\s*[0-9][0-9,]*(?:\.[0-9]+)?\s*(?:¢|cents?|per|\$)", line, maxsplit=1)[0]
-    label = _clean_line(label).strip(" :-")
-    return label[:120] or "Proposed Charge"
+    cleaned = _clean_line(line)
+    before = re.split(
+        r"\$?\s*[0-9][0-9,]*(?:\.[0-9]+)?\s*(?:¢|cents?|per|\$)",
+        cleaned,
+        maxsplit=1,
+    )[0].strip(" :-")
+    if before:
+        return before[:120]
+    # Value-first patterns such as "21.859¢ per On-Peak kWh": label is the
+    # descriptive tail that follows the value and unit.
+    after = re.sub(
+        r"^\s*\$?\s*[0-9][0-9,]*(?:\.[0-9]+)?\s*(?:¢|cents?)?\s*(?:per\s+)?",
+        "",
+        cleaned,
+        count=1,
+        flags=re.IGNORECASE,
+    ).strip(" :-")
+    if after:
+        return after[:120]
+    return "Proposed Charge"
 
 
 def _infer_code(tariff_name: str) -> str | None:
@@ -383,6 +422,50 @@ def _to_float(raw: str) -> float | None:
         return float(raw.replace(",", ""))
     except Exception:
         return None
+
+
+def _detect_strategy(pdf_path: Path, utility: str | None) -> str:
+    """Return ``"dec"`` for Duke Energy Carolinas filings, else ``"dep"``.
+
+    The utility hint from the CLI is respected when provided; otherwise we
+    sniff the first few pages of the PDF for the DEC company name."""
+    if utility:
+        if "carolinas" in utility.lower():
+            return "dec"
+        if "progress" in utility.lower():
+            return "dep"
+    try:
+        import fitz
+    except ImportError:
+        return "dep"
+    try:
+        doc = fitz.open(pdf_path)
+    except Exception:
+        return "dep"
+    try:
+        for page_number in range(1, min(doc.page_count, 25) + 1):
+            text = doc.load_page(page_number - 1).get_text("text") or ""
+            if is_dec_filing(text):
+                return "dec"
+    finally:
+        doc.close()
+    return "dep"
+
+
+def _candidates_from_dec(text: str) -> list[ProposedChargeCandidate]:
+    """Adapt DEC split-line charges into the shared candidate dataclass."""
+    return [_to_candidate(charge) for charge in extract_dec_split_line_charges(text)]
+
+
+def _to_candidate(charge: DecSplitCharge) -> ProposedChargeCandidate:
+    return ProposedChargeCandidate(
+        charge_type=charge.charge_type,
+        charge_label=charge.charge_label,
+        rate_value=charge.rate_value,
+        rate_unit=charge.rate_unit,
+        raw_line=charge.raw_line,
+        confidence=charge.confidence,
+    )
 
 
 def _dedupe_candidates(
