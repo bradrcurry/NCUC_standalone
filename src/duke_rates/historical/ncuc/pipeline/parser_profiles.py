@@ -2547,9 +2547,15 @@ class ProgressJaaRiderProfile:
 
     name: str = "progress_jaa_rider"
 
-    # Matches "Non-Demand Rate Class (dollars per kilowatt-hour)" header
+    # Matches "Non-Demand Rate Class (dollars per kilowatt-hour)" header.
+    # The closing boundary requires "Demand Rate Class" preceded by NOT "Non-"
+    # (the recent Docling rendering of E-2 Sub 1354 triples the Non-Demand
+    # header — "Non-Demand Rate Class ... Non-Demand Rate Class ..." — and the
+    # naive boundary would match the second "Non-Demand Rate Class" via its
+    # "Demand Rate Class" substring, capturing an empty section).
     _NON_DEMAND_RE = re.compile(
-        r"Non-Demand Rate Class\s*\(dollars per kilowatt-hour\)(.*?)(?:Demand Rate Class|$)",
+        r"Non-Demand Rate Class\s*\(dollars per kilowatt-hour\)(.*?)"
+        r"(?:(?<!Non-)Demand Rate Class(?:es)?\s*\(dollars per kilowatt\)|$)",
         re.I | re.S,
     )
     # Matches "Demand Rate Classes (dollars per kilowatt)" header
