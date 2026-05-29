@@ -1,0 +1,143 @@
+# RAG eval set — held-out questions with expected retrieval/generation targets.
+#
+# Used by:
+#   doc-intel rag-eval [--full]    (--full also runs generation, much slower)
+#
+# Each case specifies what a correct retrieval looks like (any of the
+# expected_* matchers being satisfied by at least one top-k hit counts as a
+# hit) and what a correct answer must contain. Update deliberately —
+# changing this set changes the meaning of the baseline numbers.
+
+version: 1
+cases:
+  # --- Should answer: specific schedule/rider queries ---
+
+  - id: storm_recovery_leaf_607
+    question: "What is the storm recovery rider on leaf 607?"
+    section_types: [rider]
+    expected_leaf_numbers: ["607"]
+    expected_answer_keywords: ["storm", "rider"]
+    notes: "STS rider, gold-labeled section observed in live testing"
+
+  - id: r_tou_cpp_kwh_rates
+    question: "What are the kWh energy charges for residential time-of-use schedule R-TOU-CPP?"
+    section_types: [rate_schedule]
+    expected_schedule_codes: ["R-TOU-CPP"]
+    expected_answer_keywords: ["kWh"]
+    notes: "Gold section with critical peak/on-peak/off-peak rates"
+
+  - id: fuel_charge_adjustment
+    question: "What is the DEP fuel charge adjustment rider?"
+    section_types: [rider]
+    expected_answer_keywords: ["fuel"]
+    notes: "Generic fuel rider — should hit any of several DEP fuel filings"
+
+  - id: rider_ba_summary
+    question: "What is included in the Rider BA summary of rider adjustments?"
+    section_types: [rider]
+    expected_schedule_codes: ["RIDER BA", "BA"]
+    expected_answer_keywords: ["rider"]
+    notes: "Compliance tariff summary leaf 600"
+
+  - id: lgs_demand_charge
+    question: "What is the demand charge for DEP Large General Service Time-of-Use LGS-TOU?"
+    section_types: [rate_schedule]
+    expected_schedule_codes: ["LGS-TOU", "LGS"]
+    expected_answer_keywords: ["demand"]
+    notes: "LGS-TOU rate schedule"
+
+  - id: solar_choice_for_business
+    question: "What is the EnergyWise for Business program EB?"
+    section_types: [rate_schedule]
+    expected_schedule_codes: ["EB"]
+    expected_answer_keywords: ["EnergyWise", "business"]
+    notes: "DEC EB rider tariff"
+
+  - id: schedule_res_residential
+    question: "What is the Duke Energy Progress Schedule RES residential service tariff?"
+    section_types: [rate_schedule]
+    expected_schedule_codes: ["RES"]
+    expected_answer_keywords: ["residential"]
+    notes: "DEP RES — known to be noisy retrieval per R1 eyeball test"
+
+  - id: storm_securitization_rider
+    question: "What does the Storm Securitization Rider STS apply to?"
+    section_types: [rider]
+    expected_leaf_numbers: ["607"]
+    expected_answer_keywords: ["storm", "securitization"]
+    notes: "Variation on storm_recovery_leaf_607 to test phrasing"
+
+  # --- Cross-document concept queries ---
+
+  - id: time_of_use_peak_hours
+    question: "What are the peak hours for residential time-of-use rates?"
+    section_types: [rate_schedule]
+    expected_answer_keywords: ["peak"]
+    notes: "Concept query — any TOU rate schedule should hit"
+
+  - id: clean_energy_rider
+    question: "What is the Clean Energy Plan Surcharge rider?"
+    section_types: [rider]
+    expected_answer_keywords: ["clean energy"]
+    notes: "CEPS rider — formerly REPS"
+
+  # --- Should refuse: questions whose answer is NOT in the corpus ---
+
+  - id: oop_natural_gas_price
+    question: "What is the current price of natural gas per therm?"
+    expected_no_answer: true
+    notes: "Natural gas prices are not in the indexed electric tariffs"
+
+  - id: oop_company_revenue
+    question: "What was Duke Energy's total annual revenue in 2024?"
+    expected_no_answer: true
+    notes: "Financial data not in tariff sheets"
+
+  - id: oop_unrelated_topic
+    question: "What is the Python language's release date?"
+    expected_no_answer: true
+    notes: "Sanity check — totally off-topic question"
+
+  # --- Filter-driven retrieval (added in eval-B for filter-precision) ---
+  # These exercise the schedule_code / section_type / source_pdf filters
+  # added in R3.2. The filter is applied at retrieval time; the test
+  # measures (a) filter-precision (all hits satisfy the filter) and
+  # (b) whether the right thing surfaces inside the filtered subset.
+
+  - id: filter_res_residential_service
+    question: "residential service rates and charges"
+    section_types: [rate_schedule]
+    filter_schedule_code: "RES"
+    expected_schedule_codes: ["RES", "SCHEDULE RES"]
+    expected_answer_keywords: ["residential"]
+    notes: "Filter to sections with RES code; should be high-precision"
+
+  - id: filter_eb_energywise_business
+    question: "EnergyWise for Business program incentives"
+    section_types: [rate_schedule]
+    filter_schedule_code: "EB"
+    expected_schedule_codes: ["EB", "RIDER EB"]
+    expected_answer_keywords: ["EnergyWise"]
+    notes: "EB rider — 14 sections have EB code post-R3.2 backfill"
+
+  - id: filter_lgs_demand_charge
+    question: "Large General Service demand charges and energy rates"
+    section_types: [rate_schedule]
+    filter_schedule_code: "LGS"
+    expected_schedule_codes: ["LGS", "LGS-TOU", "LGS-HLF"]
+    expected_answer_keywords: ["Large General Service"]
+    notes: "Broad LGS family — many sections, tests filter scaling"
+
+  - id: filter_ba_rider_summary
+    question: "Rider BA fuel charge adjustment summary"
+    section_types: [rider]
+    filter_schedule_code: "BA"
+    expected_schedule_codes: ["BA", "RIDER BA"]
+    expected_answer_keywords: ["rider"]
+    notes: "BA filter on rider sections — 356 BA-coded sections"
+
+  - id: filter_pdf_sub_1305
+    question: "Schedule details and rates"
+    filter_source_pdf: "sub-1305"
+    expected_source_pdf_substrings: ["Sub_1305", "sub-1305"]
+    notes: "Source-PDF filter scoping retrieval to a specific docket filing. Paths use dash-separator."

@@ -1071,14 +1071,25 @@ class TariffBillingEngine:
 # ---------------------------------------------------------------------------
 
 
-def _select_version(versions, ref_date: datetime.date):
+def _select_version(versions, ref_date: datetime.date, *, include_proposed: bool = False):
     """Pick the version in effect as of ref_date.
 
     Prefers the most recent version with effective_start <= ref_date.
     Falls back to the latest version if none have a known effective_start.
+
+    By default, only approved versions are eligible. Pass include_proposed=True
+    to also consider proposed/withdrawn/superseded versions (e.g. for
+    rate-comparison use cases that need to model a pending filing).
     """
     if not versions:
         return None
+    if not include_proposed:
+        approved = [v for v in versions if getattr(v, "status", "approved") == "approved"]
+        # If filtering yields nothing, fall back to the unfiltered list rather
+        # than returning None — keeps behavior stable for families that pre-date
+        # the status migration or that only have proposed versions on file.
+        if approved:
+            versions = approved
     dated = [v for v in versions if v.effective_start]
     if dated:
         eligible = [v for v in dated if v.effective_start <= str(ref_date)]

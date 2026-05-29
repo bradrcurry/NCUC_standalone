@@ -39,3 +39,7 @@ class HistoricalDocumentRecord(BaseModel):
     metadata_json: str | None = None
     parsed_result_json: str | None = None
     notes: list[str] = Field(default_factory=list)
+    # Projected/proposed rates support (PR #34 schema migration)
+    status: str = "approved"  # approved | proposed | withdrawn | superseded
+    requested_effective_date: str | None = None
+    approved_document_id: int | None = None

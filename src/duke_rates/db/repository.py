@@ -376,20 +376,27 @@ class Repository:
                     ),
                 ).fetchone()
             if existing:
-                conn.execute(
+                # Preserve any operator-set status on the existing row unless the
+                # caller is supplying something other than the default 'approved'.
+                preserve_status = bool(
+                    record.status == "approved"
+                    and record.requested_effective_date is None
+                    and record.approved_document_id is None
+                )
+                if preserve_status:
+                    update_sql = """
+                        UPDATE historical_documents
+                        SET current_document_id = ?, family_key = ?, title = ?, state = ?, company = ?,
+                            category = ?, kind = ?, canonical_url = ?, snapshot_timestamp = ?,
+                            archived_url = ?, local_path = ?, raw_text_path = ?, content_hash = ?,
+                            content_type = ?,
+                            direct_status_code = ?, direct_downloadable = ?, revision_label = ?,
+                            supersedes_label = ?, leaf_no = ?,
+                            effective_start = ?, effective_end = ?, retrieved_at = ?, metadata_json = ?,
+                            start_page = ?, end_page = ?, evidence_json = ?
+                        WHERE id = ?
                     """
-                    UPDATE historical_documents
-                    SET current_document_id = ?, family_key = ?, title = ?, state = ?, company = ?,
-                        category = ?, kind = ?, canonical_url = ?, snapshot_timestamp = ?,
-                        archived_url = ?, local_path = ?, raw_text_path = ?, content_hash = ?,
-                        content_type = ?,
-                        direct_status_code = ?, direct_downloadable = ?, revision_label = ?,
-                        supersedes_label = ?, leaf_no = ?,
-                        effective_start = ?, effective_end = ?, retrieved_at = ?, metadata_json = ?,
-                        start_page = ?, end_page = ?, evidence_json = ?
-                    WHERE id = ?
-                    """,
-                    (
+                    params = (
                         record.current_document_id,
                         record.family_key,
                         record.title,
@@ -417,8 +424,54 @@ class Repository:
                         record.end_page,
                         record.evidence_json,
                         int(existing["id"]),
-                    ),
-                )
+                    )
+                else:
+                    update_sql = """
+                        UPDATE historical_documents
+                        SET current_document_id = ?, family_key = ?, title = ?, state = ?, company = ?,
+                            category = ?, kind = ?, canonical_url = ?, snapshot_timestamp = ?,
+                            archived_url = ?, local_path = ?, raw_text_path = ?, content_hash = ?,
+                            content_type = ?,
+                            direct_status_code = ?, direct_downloadable = ?, revision_label = ?,
+                            supersedes_label = ?, leaf_no = ?,
+                            effective_start = ?, effective_end = ?, retrieved_at = ?, metadata_json = ?,
+                            start_page = ?, end_page = ?, evidence_json = ?,
+                            status = ?, requested_effective_date = ?, approved_document_id = ?
+                        WHERE id = ?
+                    """
+                    params = (
+                        record.current_document_id,
+                        record.family_key,
+                        record.title,
+                        record.state,
+                        record.company,
+                        record.category,
+                        record.kind,
+                        record.canonical_url,
+                        record.snapshot_timestamp.isoformat(),
+                        record.archived_url,
+                        str(record.local_path),
+                        str(record.raw_text_path) if record.raw_text_path else None,
+                        record.content_hash,
+                        record.content_type,
+                        record.direct_status_code,
+                        1 if record.direct_downloadable else 0,
+                        record.revision_label,
+                        record.supersedes_label,
+                        record.leaf_no,
+                        record.effective_start,
+                        record.effective_end,
+                        record.retrieved_at.isoformat(),
+                        json.dumps(payload, sort_keys=True),
+                        record.start_page,
+                        record.end_page,
+                        record.evidence_json,
+                        record.status,
+                        record.requested_effective_date,
+                        record.approved_document_id,
+                        int(existing["id"]),
+                    )
+                conn.execute(update_sql, params)
                 return int(existing["id"])
 
             try:
@@ -429,8 +482,9 @@ class Repository:
                         canonical_url, archived_url, snapshot_timestamp, local_path, raw_text_path,
                         content_hash, content_type, direct_status_code, direct_downloadable,
                         revision_label, supersedes_label, leaf_no, effective_start, effective_end,
-                        retrieved_at, metadata_json, start_page, end_page, evidence_json
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        retrieved_at, metadata_json, start_page, end_page, evidence_json,
+                        status, requested_effective_date, approved_document_id
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         record.current_document_id,
@@ -459,6 +513,9 @@ class Repository:
                         record.start_page,
                         record.end_page,
                         record.evidence_json,
+                        record.status,
+                        record.requested_effective_date,
+                        record.approved_document_id,
                     ),
                 )
                 return int(cursor.lastrowid)
@@ -5262,6 +5319,10 @@ class Repository:
     @staticmethod
     def _row_to_tariff_version(row) -> "TariffVersionRecord":
         from duke_rates.models.tariff import TariffVersionRecord
+        keys = set(row.keys()) if hasattr(row, "keys") else set()
+        status = (row["status"] if "status" in keys and row["status"] else "approved")
+        req_eff = row["requested_effective_date"] if "requested_effective_date" in keys else None
+        approved_vid = row["approved_version_id"] if "approved_version_id" in keys else None
         return TariffVersionRecord(
             id=int(row["id"]),
             family_key=row["family_key"],
@@ -5280,6 +5341,9 @@ class Repository:
             confidence_score=float(row["confidence_score"]),
             notes=row["notes"],
             created_at=datetime.fromisoformat(row["created_at"]),
+            status=status,
+            requested_effective_date=req_eff,
+            approved_version_id=approved_vid,
         )
 
     @staticmethod

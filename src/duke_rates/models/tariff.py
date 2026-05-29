@@ -43,6 +43,10 @@ class TariffVersionRecord(BaseModel):
     confidence_score: float = 0.0
     notes: str | None = None
     created_at: datetime | None = None
+    # Projected/proposed rates support (PR #34 schema migration)
+    status: str = "approved"  # approved | proposed | withdrawn | superseded
+    requested_effective_date: str | None = None
+    approved_version_id: int | None = None
 
 
 class TariffChargeRecord(BaseModel):

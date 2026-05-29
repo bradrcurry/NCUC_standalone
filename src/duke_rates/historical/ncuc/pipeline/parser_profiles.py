@@ -2547,12 +2547,12 @@ class ProgressJaaRiderProfile:
 
     name: str = "progress_jaa_rider"
 
-    # Matches "Non-Demand Rate Class (dollars per kilowatt-hour)" header.
-    # The closing boundary requires "Demand Rate Class" preceded by NOT "Non-"
-    # (the recent Docling rendering of E-2 Sub 1354 triples the Non-Demand
-    # header — "Non-Demand Rate Class ... Non-Demand Rate Class ..." — and the
-    # naive boundary would match the second "Non-Demand Rate Class" via its
-    # "Demand Rate Class" substring, capturing an empty section).
+    # Matches "Non-Demand Rate Class (dollars per kilowatt-hour)" header and
+    # captures the body up to the demand section. Uses negative-lookbehind so
+    # the closing anchor doesn't match the literal "Demand Rate Class" inside
+    # the word "Non-Demand Rate Class" (which appears in the same row as the
+    # header in markdown-table rendering, and is tripled by Docling on
+    # E-2 Sub 1354 — the naive boundary would match the second repetition).
     _NON_DEMAND_RE = re.compile(
         r"Non-Demand Rate Class\s*\(dollars per kilowatt-hour\)(.*?)"
         r"(?:(?<!Non-)Demand Rate Class(?:es)?\s*\(dollars per kilowatt\)|$)",
@@ -2560,11 +2560,14 @@ class ProgressJaaRiderProfile:
     )
     # Matches "Demand Rate Classes (dollars per kilowatt)" header
     _DEMAND_RE = re.compile(
-        r"Demand Rate Class(?:es)?\s*\(dollars per kilowatt\)(.*?)(?:\*\s*Incremental|$)",
+        r"(?<!Non-)Demand Rate Class(?:es)?\s*\(dollars per kilowatt\)(.*?)(?:\*\s*Incremental|$)",
         re.I | re.S,
     )
-    # A rate value: optional leading paren for negatives, digits, dot
-    _RATE_RE = re.compile(r"\(?([\d.]+)\)?(?:\s*\n|$)", re.M)
+    # A rate value: optional leading paren for negatives, digits, dot.
+    # Accept newline, pipe (markdown-table column separator), or end-of-string
+    # as terminator so the same parser works on both plain text and the
+    # docling markdown rendering.
+    _RATE_RE = re.compile(r"\(?([\d.]+)\)?(?:\s*[\n|]|$)", re.M)
     # Class name labels we care about (first word(s) before schedules line)
     _CLASS_LABELS = [
         ("Residential", "residential"),
@@ -4126,6 +4129,10 @@ class CarolinasMultiClassRateTableProfile:
     _SUPPORTED_FAMILIES = {
         "nc-carolinas-rider-edit4",
         "nc-carolinas-rider-sts",
+        # EDIT-3 has identical structure to EDIT-4 (per-class ¢/kWh decrement
+        # table) but its family_key was minted with the "RIDER" prefix
+        # preserved; the canonicalizer never stripped it.
+        "nc-carolinas-rider-rideredit3",
     }
     # Matches: optional ( + digits + optional ) then optional ¢/c then /kWh or per kWh
     _RATE_CELL_RE = re.compile(
@@ -4161,16 +4168,26 @@ class CarolinasMultiClassRateTableProfile:
     def extract(self, doc: dict, text: str) -> list[ExtractedCharge]:
         charges: list[ExtractedCharge] = []
         for pattern, display_label in self._CLASS_ANCHORS:
+            # Match the class anchor, then up to 200 non-newline chars (the
+            # applicable-schedules cell), then the rate value. This form
+            # works for both layouts the pipeline produces:
+            #   - pdfplumber: class label and rate on separate lines (with
+            #     the schedules row optionally between them)
+            #   - docling (flattened): class label, schedules, and rate
+            #     all on one line ("Residential RS, RE, ... (0.5081)")
+            # Parenthesised → decrement (credit, e.g. EDIT-4 tax refund);
+            # bare positive → increment (e.g. STS storm recovery).
             pat = re.compile(
-                pattern + r"\s*\n(?:[^\n]*\n)?\s*\(?([\-]?[\d]+\.[\d]+)\)?",
+                pattern + r"[\s\S]{0,200}?(\(?)([\-]?[\d]+\.[\d]+)(\)?)(?:\s|$)",
                 re.I,
             )
             m = pat.search(text)
             if not m:
                 continue
-            raw = float(m.group(1))
-            # Parenthesised values are decrements
-            if "(" in m.group(0) and ")" in m.group(0) and raw > 0:
+            open_paren, rate_str, close_paren = m.group(1), m.group(2), m.group(3)
+            raw = float(rate_str)
+            parenthesised = bool(open_paren and close_paren)
+            if parenthesised and raw > 0:
                 raw = -raw
             value = raw / 100.0  # ¢ → $
             charges.append(
@@ -8251,7 +8268,11 @@ class HistoricalRateParserRegistry:
             return min(score, 0.97), tuple(reasons)
 
         if profile_name == "carolinas_multi_class_rate_table":
-            if signals.family_key not in {"nc-carolinas-rider-edit4", "nc-carolinas-rider-sts"}:
+            if signals.family_key not in {
+                "nc-carolinas-rider-edit4",
+                "nc-carolinas-rider-sts",
+                "nc-carolinas-rider-rideredit3",
+            }:
                 return 0.0, ()
             lowered = signals.text_lower
             if "rate class" not in lowered or "residential" not in lowered or "/kwh" not in lowered:

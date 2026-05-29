@@ -2353,6 +2353,24 @@ def backfill_embedding_classifications_nc(
     limit: int = typer.Option(0, "--limit", help="Only process N documents (0 = all)."),
     dry_run: bool = typer.Option(False, "--dry-run", help="Classify but do not persist."),
     progress: bool = typer.Option(True, "--progress/--no-progress", help="Emit progress to stderr."),
+    label_source: str = typer.Option(
+        "rule_v1",
+        "--label-source",
+        help=(
+            "Source of neighbor doc_type labels for KNN voting: "
+            "'rule_v1' (legacy), 'section_gold' (section_type_gold only), "
+            "or 'section_gold_or_rule' (preferred — falls back to rule_v1)."
+        ),
+    ),
+    rerun: bool = typer.Option(
+        False,
+        "--rerun",
+        help=(
+            "Re-classify documents that already have an active embedding_knn_v1 "
+            "row. The new (v2) row is written and the old row is superseded. "
+            "Use this when switching --label-source on already-classified docs."
+        ),
+    ),
 ) -> None:
     """Backfill embedding-based document_type classifications for existing documents.
 
@@ -2377,22 +2395,33 @@ def backfill_embedding_classifications_nc(
 
     conn = connect(settings.database_path)
     try:
-        rows = conn.execute(
-            """
-            SELECT hd.id, hd.local_path, hd.family_key
-            FROM historical_documents hd
-            WHERE hd.local_path IS NOT NULL AND hd.local_path != ''
-              AND hd.id NOT IN (
-                  SELECT DISTINCT CAST(subject_id AS INTEGER)
-                  FROM document_classifications
-                  WHERE subject_kind = 'historical_document'
-                    AND stage = 'document_type'
-                    AND classifier = 'embedding_knn_v1'
-                    AND superseded_by IS NULL
-              )
-            ORDER BY hd.id
-            """
-        ).fetchall()
+        if rerun:
+            # Include all docs with local_path — we'll re-classify and supersede.
+            rows = conn.execute(
+                """
+                SELECT hd.id, hd.local_path, hd.family_key
+                FROM historical_documents hd
+                WHERE hd.local_path IS NOT NULL AND hd.local_path != ''
+                ORDER BY hd.id
+                """
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                """
+                SELECT hd.id, hd.local_path, hd.family_key
+                FROM historical_documents hd
+                WHERE hd.local_path IS NOT NULL AND hd.local_path != ''
+                  AND hd.id NOT IN (
+                      SELECT DISTINCT CAST(subject_id AS INTEGER)
+                      FROM document_classifications
+                      WHERE subject_kind = 'historical_document'
+                        AND stage = 'document_type'
+                        AND classifier = 'embedding_knn_v1'
+                        AND superseded_by IS NULL
+                  )
+                ORDER BY hd.id
+                """
+            ).fetchall()
     finally:
         conn.close()
 
@@ -2437,6 +2466,7 @@ def backfill_embedding_classifications_nc(
         k=11,
         min_neighbors=3,
         embedding_kind="full_text",
+        label_source=label_source,
     )
 
     ok = skip = fail = 0
@@ -2462,13 +2492,37 @@ def backfill_embedding_classifications_nc(
         else:
             cls_conn = connect(settings.database_path)
             try:
-                record_classification(
+                new_id = record_classification(
                     cls_conn,
                     subject_kind="historical_document",
                     subject_id=str(doc_id),
                     stage="document_type",
                     result=result,
                 )
+                # When rerunning, supersede prior active rows of a different
+                # version. Same-version rows were UPDATE-in-place by
+                # record_classification so they aren't duplicates.
+                if rerun:
+                    cls_conn.execute(
+                        """
+                        UPDATE document_classifications
+                        SET superseded_by = ?
+                        WHERE subject_kind = 'historical_document'
+                          AND subject_id = ?
+                          AND stage = 'document_type'
+                          AND classifier = ?
+                          AND classifier_version != ?
+                          AND superseded_by IS NULL
+                          AND id != ?
+                        """,
+                        (
+                            new_id,
+                            str(doc_id),
+                            result.classifier,
+                            result.classifier_version,
+                            new_id,
+                        ),
+                    )
                 cls_conn.commit()
                 ok += 1
             except Exception:
@@ -3385,12 +3439,12 @@ def process_docling_batch(
                 conn.commit()
                 tables_count = len(result.get("tables") or [])
                 degraded = result.get("_degraded_modes")
-                skipped = result.get("_skipped_pages", [])
+                skipped_pages = result.get("_skipped_pages", [])
                 suffix = ""
                 if degraded:
                     suffix = f" [{','.join(degraded)}]"
-                if skipped:
-                    suffix += f" (skipped {len(skipped)}p)"
+                if skipped_pages:
+                    suffix += f" (skipped {len(skipped_pages)}p)"
                 typer.echo(
                     f"  OK  pages={result['page_count']} tables={tables_count} "
                     f"t={elapsed:.1f}s{suffix}"
@@ -4944,3 +4998,1333 @@ def classify_documents_v2_nc(
     conn.close()
 
 
+@doc_intel_app.command("promote-sections-to-gold")
+def promote_sections_to_gold_cmd(
+    section_types: str = typer.Option(
+        "rate_schedule,rider,terms_conditions,cover_letter,procedural",
+        "--section-types",
+        help=(
+            "Comma-separated section types to consider. The 'unknown' type "
+            "is never promoted regardless of inclusion."
+        ),
+    ),
+    min_classifiers: int = typer.Option(
+        2,
+        "--min-classifiers",
+        help=(
+            "Minimum number of classifiers that must agree on a section's "
+            "type before it is eligible for gold. section_aggregator_v1 "
+            "always counts as one — so 2 means at least one doc-level "
+            "classifier (rule, embedding KNN, or LLM) also has to map to "
+            "the same section type."
+        ),
+    ),
+    min_confidence_override: float | None = typer.Option(
+        None,
+        "--min-confidence",
+        help=(
+            "Override the per-type confidence floors with a single global "
+            "threshold. Useful for one-off experiments; leave unset for "
+            "production runs (rate_schedule=0.75, rider=0.70, "
+            "procedural=0.45, etc.)."
+        ),
+    ),
+    limit: int | None = typer.Option(
+        None,
+        "--limit",
+        help="Cap the number of candidate sections evaluated.",
+    ),
+    execute: bool = typer.Option(
+        False,
+        "--execute",
+        help="Actually write gold rows. Without this flag, dry-run only.",
+    ),
+    promoted_by: str | None = typer.Option(
+        None,
+        "--promoted-by",
+        help="Free-text label for who/what triggered this run (e.g. 'cli', "
+        "'overnight_loop_cycle_5'). Stored on each new gold row.",
+    ),
+    no_log_conflicts: bool = typer.Option(
+        False,
+        "--no-log-conflicts",
+        help="Skip writing rejected-as-conflict candidates to "
+        "section_classification_conflicts. Default: log them.",
+    ),
+    json_out: bool = typer.Option(False, "--json", help="Emit summary as JSON."),
+) -> None:
+    """Promote high-confidence section_aggregator outputs to section_type_gold.
+
+    Section-level training corpus seeder. Each section in document_sections
+    that clears (a) a per-type confidence floor, (b) doc-level classifier
+    agreement, and (c) consistency with the parent document's classifier
+    consensus gets a row in section_type_gold.
+
+    Rejected-as-conflict sections (where section_type contradicts doc-level
+    consensus) are logged to section_classification_conflicts for triage —
+    these are exactly the cases LLM adjudication should focus on next.
+
+    Idempotent. Re-promoting a section with a new label supersedes the
+    old row (sets superseded_by). Re-running with no label changes is a
+    no-op.
+
+    Examples:
+
+      # Dry-run sanity check (default)
+      doc-intel promote-sections-to-gold
+
+      # Real promotion for rate sections only
+      doc-intel promote-sections-to-gold --execute --section-types rate_schedule,rider
+
+      # Aggressive: single 0.5 floor across all types
+      doc-intel promote-sections-to-gold --execute --min-confidence 0.5
+    """
+    from duke_rates.document_intelligence.section_gold_promotion import (
+        promote_sections,
+    )
+
+    settings, _ = _bootstrap()
+
+    types_list = [t.strip() for t in section_types.split(",") if t.strip()]
+    if not types_list:
+        raise typer.BadParameter("--section-types must list at least one type")
+
+    run = promote_sections(
+        settings.database_path,
+        section_types=types_list,
+        min_classifiers_agreed=min_classifiers,
+        min_section_confidence_override=min_confidence_override,
+        limit=limit,
+        dry_run=not execute,
+        gold_source="auto_promotion",
+        promoted_by=promoted_by or ("cli_execute" if execute else "cli_dry_run"),
+        log_conflicts=not no_log_conflicts,
+    )
+
+    if json_out:
+        # Sample lists may contain dataclasses; serialize defensively
+        def _ser(x):
+            if hasattr(x, "__dict__"):
+                return {k: v for k, v in x.__dict__.items()}
+            return x
+        payload = {
+            "mode": "execute" if execute else "dry_run",
+            "section_types": types_list,
+            "candidates_evaluated": run.candidates_evaluated,
+            "promoted": run.promoted,
+            "skipped_already_gold": run.skipped_already_gold,
+            "skipped_low_confidence": run.skipped_low_confidence,
+            "skipped_no_consensus": run.skipped_no_consensus,
+            "rejected_conflict": run.rejected_conflict,
+            "rejected_other": run.rejected_other,
+            "by_type": run.by_type,
+            "sample_promotions": [_ser(p) for p in run.sample_promotions],
+            "sample_conflicts": [_ser(p) for p in run.sample_conflicts],
+        }
+        typer.echo(json.dumps(payload, indent=2, default=str))
+        return
+
+    mode = "EXECUTE" if execute else "DRY-RUN"
+    typer.echo(f"=== Section gold promotion ({mode}) ===")
+    typer.echo(f"  section_types:       {','.join(types_list)}")
+    typer.echo(f"  min_classifiers:     {min_classifiers}")
+    if min_confidence_override is not None:
+        typer.echo(f"  confidence_override: {min_confidence_override}")
+    if limit:
+        typer.echo(f"  limit:               {limit}")
+    typer.echo("")
+    # Effective-count line in canonical format for the autonomous loop's
+    # M1 stdout parser. The pattern "promoted N" doesn't currently match
+    # any pattern in _EFFECTIVE_COUNT_PATTERNS but matches the spirit of
+    # "inserted=N". Use "Done: created=N skipped=M" so the existing
+    # bootstrap pattern catches it.
+    typer.echo(
+        f"Done: created={run.promoted} skipped="
+        f"{run.skipped_already_gold + run.skipped_low_confidence + run.skipped_no_consensus + run.rejected_other}"
+    )
+    typer.echo(f"  candidates_evaluated:   {run.candidates_evaluated}")
+    typer.echo(f"  promoted:               {run.promoted}")
+    typer.echo(f"  skipped_already_gold:   {run.skipped_already_gold}")
+    typer.echo(f"  skipped_low_confidence: {run.skipped_low_confidence}")
+    typer.echo(f"  skipped_no_consensus:   {run.skipped_no_consensus}")
+    typer.echo(f"  rejected_conflict:      {run.rejected_conflict}")
+    typer.echo(f"  rejected_other:         {run.rejected_other}")
+
+    if run.by_type:
+        typer.echo("")
+        typer.echo("  promoted by type:")
+        for t, n in sorted(run.by_type.items(), key=lambda kv: (-kv[1], kv[0])):
+            typer.echo(f"    {t:25s} {n}")
+
+    if run.sample_promotions:
+        typer.echo("")
+        typer.echo("  sample promotions (first 5):")
+        for p in run.sample_promotions:
+            code = p.schedule_code or p.rider_code or "-"
+            typer.echo(
+                f"    {p.source_pdf[-50:]:50s} idx={p.section_index:>3} "
+                f"type={p.section_type:18s} code={code:12s} "
+                f"conf={p.confidence:.2f} n_clf={p.n_classifiers_agreed}"
+            )
+
+    if run.sample_conflicts:
+        typer.echo("")
+        typer.echo("  sample conflicts (first 5 — review or adjudicate):")
+        for p in run.sample_conflicts:
+            typer.echo(
+                f"    {p.source_pdf[-50:]:50s} idx={p.section_index:>3} "
+                f"section_says={p.section_type:18s} reason={(p.reject_reason or '')[:60]}"
+            )
+
+    if not execute:
+        typer.echo("")
+        typer.echo("  Dry-run only. Pass --execute to write rows.")
+
+
+@doc_intel_app.command("benchmark-knn-label-source")
+def benchmark_knn_label_source(
+    json_output: bool = typer.Option(
+        False, "--json", help="Emit a JSON report instead of a human summary."
+    ),
+) -> None:
+    """Compare neighbor-label sources for embedding_knn_v1 (no embedding needed).
+
+    For every PDF that has both section_type_gold and a rule_v1 classification,
+    compute (a) the doc_type derived from section gold, (b) the rule_v1 label,
+    and report agreement and the most common disagreement patterns. This is the
+    upstream signal driving the KNN improvement — if these labels agree on a
+    given neighbor, the KNN vote is unchanged. Where they disagree, the
+    'section_gold_or_rule' mode will vote with the section-derived label.
+    """
+    import sqlite3
+    from collections import Counter
+
+    from duke_rates.document_intelligence.section_derived_labels import (
+        derive_doc_type_from_sections,
+    )
+
+    settings, _ = _bootstrap()
+
+    conn = sqlite3.connect(str(settings.database_path))
+    conn.row_factory = sqlite3.Row
+    try:
+        rows = conn.execute(
+            """
+            SELECT s.source_pdf,
+                   GROUP_CONCAT(DISTINCT s.section_type) AS section_types,
+                   dc.label AS rule_label,
+                   dc.confidence AS rule_conf
+            FROM section_type_gold s
+            JOIN historical_documents hd ON hd.local_path = s.source_pdf
+            JOIN document_classifications dc
+              ON dc.subject_kind = 'historical_document'
+             AND dc.subject_id = CAST(hd.id AS TEXT)
+             AND dc.stage = 'document_type'
+             AND dc.classifier = 'rule_document_type_v1'
+             AND dc.superseded_by IS NULL
+            WHERE s.superseded_by IS NULL
+            GROUP BY s.source_pdf, dc.label, dc.confidence
+            """
+        ).fetchall()
+    finally:
+        conn.close()
+
+    if not rows:
+        typer.echo("No PDFs with both section gold and rule_v1 labels.")
+        raise typer.Exit(code=0)
+
+    total = len(rows)
+    agreements = 0
+    disagreements: Counter[tuple[str, str]] = Counter()
+    none_derived = 0
+    for row in rows:
+        section_types = set(row["section_types"].split(","))
+        derived = derive_doc_type_from_sections(section_types)
+        rule = row["rule_label"]
+        if derived is None:
+            none_derived += 1
+            continue
+        if derived == rule:
+            agreements += 1
+        else:
+            disagreements[(derived, rule)] += 1
+
+    if json_output:
+        report = {
+            "total_comparable_pdfs": total,
+            "agreement": agreements,
+            "agreement_pct": round(100 * agreements / total, 2),
+            "disagreement": sum(disagreements.values()),
+            "no_derivation_possible": none_derived,
+            "top_disagreements": [
+                {"derived": d, "rule_v1": r, "count": n}
+                for (d, r), n in disagreements.most_common(15)
+            ],
+        }
+        typer.echo(json.dumps(report, indent=2))
+        return
+
+    typer.echo("=== KNN label-source benchmark ===")
+    typer.echo(f"  comparable PDFs:       {total}")
+    typer.echo(
+        f"  agreement:             {agreements} "
+        f"({100 * agreements / total:.1f}%)"
+    )
+    typer.echo(
+        f"  disagreement:          {sum(disagreements.values())} "
+        f"({100 * sum(disagreements.values()) / total:.1f}%)"
+    )
+    typer.echo(f"  no derivation:         {none_derived}")
+    typer.echo("")
+    typer.echo("  Top disagreements (derived vs rule_v1):")
+    for (derived, rule), n in disagreements.most_common(15):
+        typer.echo(
+            f"    {n:4d}  derived={derived:<22} rule_v1={rule:<22}"
+        )
+    typer.echo("")
+    typer.echo(
+        "  Where these disagree, 'section_gold_or_rule' label_source will vote with"
+    )
+    typer.echo("  the derived label (higher-quality signal from human-curated gold).")
+
+
+@doc_intel_app.command("embed-sections")
+def embed_sections_nc(
+    limit: int = typer.Option(0, "--limit", help="Only embed N sections (0 = all)."),
+    skip_existing: bool = typer.Option(
+        True,
+        "--skip-existing/--no-skip-existing",
+        help="Skip sections already in section_embeddings for the active model+kind.",
+    ),
+    embedding_kind: str = typer.Option(
+        "section_text", "--embedding-kind", help="Embedding slice key."
+    ),
+    model_role: str = typer.Option(
+        "embedding_primary",
+        "--model-role",
+        help=(
+            "OllamaOrchestrator role to embed with. Use 'embedding_secondary' "
+            "(bge-m3) to populate a second axis for retriever comparison."
+        ),
+    ),
+    max_chars: int = typer.Option(
+        2000, "--max-chars", help="Truncate section text to this many chars."
+    ),
+    progress: bool = typer.Option(True, "--progress/--no-progress"),
+) -> None:
+    """Embed per-section text from document_sections into section_embeddings.
+
+    For each section, text is built by concatenating ncuc_page_artifacts
+    rows in the section's start_page..end_page range. The active embedding
+    model (orchestrator role 'embedding_primary') is used. Writes are
+    idempotent on (source_pdf, section_index, embedding_kind, model, version).
+    """
+    import struct
+
+    from duke_rates.db.sqlite import connect
+    from duke_rates.document_intelligence.ollama_orchestrator import (
+        OllamaOrchestrator,
+    )
+    from duke_rates.document_intelligence.section_text_extractor import (
+        fetch_section_text,
+    )
+
+    settings, _ = _bootstrap()
+
+    orch = OllamaOrchestrator()
+    if model_role not in orch._roles:
+        typer.echo(
+            f"Unknown model_role {model_role!r}. "
+            f"Available: {sorted(orch._roles.keys())}",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+    model = orch._roles[model_role].primary
+
+    conn = connect(settings.database_path)
+    try:
+        if skip_existing:
+            rows = conn.execute(
+                """
+                SELECT s.id, s.source_pdf, s.section_index, s.start_page, s.end_page
+                FROM document_sections s
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM section_embeddings e
+                    WHERE e.source_pdf = s.source_pdf
+                      AND e.section_index = s.section_index
+                      AND e.embedding_kind = ?
+                      AND e.embedding_model = ?
+                )
+                ORDER BY s.source_pdf, s.section_index
+                """,
+                (embedding_kind, model),
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                """
+                SELECT id, source_pdf, section_index, start_page, end_page
+                FROM document_sections
+                ORDER BY source_pdf, section_index
+                """
+            ).fetchall()
+    finally:
+        conn.close()
+
+    sections = [dict(r) for r in rows]
+    if limit > 0:
+        sections = sections[:limit]
+
+    if not sections:
+        typer.echo(
+            f"No sections to embed (kind={embedding_kind}, model={model})."
+        )
+        return
+
+    typer.echo(
+        f"Embedding {len(sections)} sections (kind={embedding_kind}, model={model})..."
+    )
+
+    ok = skip = fail = 0
+    for i, sec in enumerate(sections):
+        conn = connect(settings.database_path)
+        try:
+            sec_text = fetch_section_text(
+                conn,
+                sec["source_pdf"],
+                int(sec["start_page"]),
+                int(sec["end_page"]),
+                max_chars=max_chars,
+            )
+        finally:
+            conn.close()
+
+        if not sec_text.text.strip():
+            skip += 1
+            continue
+
+        try:
+            vector = orch.embed(model_role, sec_text.text)
+        except Exception:
+            fail += 1
+            continue
+
+        blob = struct.pack(f"{len(vector)}f", *vector)
+        conn = connect(settings.database_path)
+        try:
+            conn.execute(
+                """
+                INSERT OR REPLACE INTO section_embeddings
+                    (source_pdf, section_index, start_page, end_page,
+                     embedding_kind, embedding_model, embedding_version,
+                     vector, text_sample)
+                VALUES (?,?,?,?,?,?,?,?,?)
+                """,
+                (
+                    sec["source_pdf"],
+                    int(sec["section_index"]),
+                    int(sec["start_page"]),
+                    int(sec["end_page"]),
+                    embedding_kind,
+                    model,
+                    "v1",
+                    blob,
+                    sec_text.text[:200],
+                ),
+            )
+            conn.commit()
+            ok += 1
+        except Exception:
+            fail += 1
+        finally:
+            conn.close()
+
+        if progress and (i + 1) % 50 == 0:
+            typer.echo(
+                f"  {i + 1}/{len(sections)} ok={ok} skip={skip} fail={fail}",
+                err=True,
+            )
+
+    typer.echo(f"Done: ok={ok} skip={skip} fail={fail}")
+
+
+@doc_intel_app.command("classify-sections")
+def classify_sections_nc(
+    limit: int = typer.Option(0, "--limit", help="Only classify N sections (0 = all)."),
+    skip_existing: bool = typer.Option(
+        True,
+        "--skip-existing/--no-skip-existing",
+        help="Skip sections that already have an active section_knn_v1 row.",
+    ),
+    skip_gold: bool = typer.Option(
+        True,
+        "--skip-gold/--no-skip-gold",
+        help="Skip sections that are already in section_type_gold.",
+    ),
+    dry_run: bool = typer.Option(False, "--dry-run"),
+    progress: bool = typer.Option(True, "--progress/--no-progress"),
+    k: int = typer.Option(9, "--k"),
+    min_neighbors: int = typer.Option(3, "--min-neighbors"),
+) -> None:
+    """Classify sections via SectionKNNClassifier and persist to document_classifications.
+
+    Subject keying: ``subject_kind='document_section'``,
+    ``subject_id=str(document_sections.id)``, ``stage='section_type'``,
+    ``classifier='section_knn_v1'``. Each section's classification can be
+    used to propose new section_type_gold rows after adjudication.
+    """
+    from duke_rates.classification.persistence import record_classification
+    from duke_rates.db.sqlite import connect
+    from duke_rates.document_intelligence.ollama_orchestrator import (
+        OllamaOrchestrator,
+    )
+    from duke_rates.document_intelligence.section_classifier import (
+        SectionKNNClassifier,
+    )
+    from duke_rates.document_intelligence.section_text_extractor import (
+        fetch_section_text,
+    )
+
+    settings, _ = _bootstrap()
+
+    where_clauses = ["1=1"]
+    if skip_existing:
+        where_clauses.append(
+            """NOT EXISTS (
+                SELECT 1 FROM document_classifications dc
+                WHERE dc.subject_kind = 'document_section'
+                  AND dc.subject_id = CAST(s.id AS TEXT)
+                  AND dc.stage = 'section_type'
+                  AND dc.classifier = 'section_knn_v1'
+                  AND dc.superseded_by IS NULL
+            )"""
+        )
+    if skip_gold:
+        where_clauses.append(
+            """NOT EXISTS (
+                SELECT 1 FROM section_type_gold g
+                WHERE g.source_pdf = s.source_pdf
+                  AND g.section_index = s.section_index
+                  AND g.superseded_by IS NULL
+            )"""
+        )
+
+    where_sql = " AND ".join(where_clauses)
+
+    conn = connect(settings.database_path)
+    try:
+        rows = conn.execute(
+            f"""
+            SELECT s.id, s.source_pdf, s.section_index, s.start_page, s.end_page
+            FROM document_sections s
+            WHERE {where_sql}
+            ORDER BY s.source_pdf, s.section_index
+            """
+        ).fetchall()
+        emb_count = conn.execute(
+            "SELECT COUNT(*) FROM section_embeddings"
+        ).fetchone()[0]
+        gold_count = conn.execute(
+            "SELECT COUNT(*) FROM section_type_gold WHERE superseded_by IS NULL"
+        ).fetchone()[0]
+    finally:
+        conn.close()
+
+    if emb_count == 0:
+        typer.echo(
+            "No section_embeddings — run doc-intel embed-sections first.",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+    if gold_count == 0:
+        typer.echo(
+            "No section_type_gold rows — KNN cannot vote. Promote some "
+            "sections first via doc-intel promote-sections-to-gold.",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    sections = [dict(r) for r in rows]
+    if limit > 0:
+        sections = sections[:limit]
+    if not sections:
+        typer.echo("No sections to classify.")
+        return
+
+    typer.echo(
+        f"Classifying {len(sections)} sections (ref embeddings={emb_count}, "
+        f"gold neighbors={gold_count})..."
+    )
+    if dry_run:
+        typer.echo("[DRY RUN — no rows will be written]")
+
+    orch = OllamaOrchestrator()
+    clf = SectionKNNClassifier(
+        db_path=settings.database_path,
+        orchestrator=orch,
+        k=k,
+        min_neighbors=min_neighbors,
+    )
+
+    ok = skip = fail = 0
+    label_dist: dict[str, int] = {}
+    for i, sec in enumerate(sections):
+        conn = connect(settings.database_path)
+        try:
+            sec_text = fetch_section_text(
+                conn,
+                sec["source_pdf"],
+                int(sec["start_page"]),
+                int(sec["end_page"]),
+                max_chars=2000,
+            )
+        finally:
+            conn.close()
+
+        if not sec_text.text.strip():
+            skip += 1
+            continue
+
+        try:
+            result = clf.classify(
+                sec_text.text,
+                exclude_key=(sec["source_pdf"], int(sec["section_index"])),
+            )
+        except Exception:
+            fail += 1
+            continue
+
+        if result.label == "unknown":
+            skip += 1
+            continue
+
+        label_dist[result.label] = label_dist.get(result.label, 0) + 1
+
+        if not dry_run:
+            cls_conn = connect(settings.database_path)
+            try:
+                record_classification(
+                    cls_conn,
+                    subject_kind="document_section",
+                    subject_id=str(sec["id"]),
+                    stage="section_type",
+                    result=result,
+                )
+                cls_conn.commit()
+            finally:
+                cls_conn.close()
+        ok += 1
+
+        if progress and (i + 1) % 50 == 0:
+            typer.echo(
+                f"  {i + 1}/{len(sections)} ok={ok} skip={skip} fail={fail}",
+                err=True,
+            )
+
+    typer.echo(f"\nDone: ok={ok} skip={skip} fail={fail}")
+    if label_dist:
+        typer.echo("  predicted label distribution:")
+        for lbl, n in sorted(label_dist.items(), key=lambda x: -x[1]):
+            typer.echo(f"    {lbl:20s} {n}")
+
+
+@doc_intel_app.command("rag-search")
+def rag_search(
+    query: str = typer.Argument(..., help="Natural-language question or keyword phrase."),
+    top_k: int = typer.Option(10, "--top-k", "-k", help="Number of results to return."),
+    section_types: str = typer.Option(
+        "",
+        "--section-types",
+        help="Comma-separated section_type filter (e.g. rate_schedule,rider).",
+    ),
+    schedule_code: str = typer.Option(
+        "",
+        "--schedule-code",
+        help="Substring match on schedule_codes (case-insensitive).",
+    ),
+    source_pdf: str = typer.Option(
+        "",
+        "--source-pdf",
+        help="Substring match on source_pdf path (case-insensitive).",
+    ),
+    min_similarity: float = typer.Option(
+        0.0,
+        "--min-similarity",
+        help="Drop hits below this cosine similarity.",
+    ),
+    excerpt_chars: int = typer.Option(
+        2000,
+        "--excerpt-chars",
+        help="Chars of section text to include in each hit.",
+    ),
+    model_role: str = typer.Option(
+        "embedding_primary",
+        "--model-role",
+        help="Orchestrator role used to embed the query AND select reference vectors.",
+    ),
+    json_output: bool = typer.Option(
+        False, "--json", help="Emit JSON instead of human-readable table."
+    ),
+) -> None:
+    """Section-level RAG retriever (R1) — no generation, just retrieval.
+
+    Embeds the query, runs cosine similarity against section_embeddings,
+    applies optional metadata filters, and prints the top-k matches with
+    citation-grade metadata and a text excerpt.
+    """
+    import json as _json
+
+    from duke_rates.db.sqlite import connect
+    from duke_rates.document_intelligence.ollama_orchestrator import (
+        OllamaOrchestrator,
+    )
+    from duke_rates.document_intelligence.rag_retriever import RagRetriever
+
+    settings, _ = _bootstrap()
+
+    # Light corpus sanity check
+    conn = connect(settings.database_path)
+    try:
+        n_emb = conn.execute(
+            "SELECT COUNT(*) FROM section_embeddings"
+        ).fetchone()[0]
+    finally:
+        conn.close()
+    if n_emb == 0:
+        typer.echo(
+            "section_embeddings is empty — run `doc-intel embed-sections` first.",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    orch = OllamaOrchestrator()
+    if model_role not in orch._roles:
+        typer.echo(
+            f"Unknown model_role {model_role!r}. Available: {sorted(orch._roles.keys())}",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+    retriever = RagRetriever(
+        db_path=settings.database_path,
+        orchestrator=orch,
+        model_role=model_role,
+        excerpt_chars=excerpt_chars,
+    )
+
+    type_list = (
+        [t.strip() for t in section_types.split(",") if t.strip()]
+        if section_types
+        else None
+    )
+
+    hits = retriever.search(
+        query,
+        top_k=top_k,
+        section_types=type_list,
+        schedule_code_like=schedule_code or None,
+        source_pdf_like=source_pdf or None,
+        min_similarity=min_similarity,
+    )
+
+    if json_output:
+        out = [
+            {
+                "rank": i + 1,
+                "citation": h.citation(),
+                "source_pdf": h.source_pdf,
+                "section_index": h.section_index,
+                "start_page": h.start_page,
+                "end_page": h.end_page,
+                "similarity": round(h.similarity, 4),
+                "section_type": h.section_type,
+                "section_type_source": h.section_type_source,
+                "section_type_conf": (
+                    round(h.section_type_conf, 4)
+                    if h.section_type_conf is not None
+                    else None
+                ),
+                "schedule_codes": h.schedule_codes,
+                "rider_codes": h.rider_codes,
+                "leaf_numbers": h.leaf_numbers,
+                "text_excerpt": h.text_excerpt,
+            }
+            for i, h in enumerate(hits)
+        ]
+        typer.echo(_json.dumps(out, indent=2))
+        return
+
+    typer.echo(f"\n=== RAG search: {query!r} ===")
+    typer.echo(
+        f"  filters: section_types={type_list or 'any'} "
+        f"schedule~{schedule_code or '*'} pdf~{source_pdf or '*'} "
+        f"min_sim={min_similarity}"
+    )
+    typer.echo(f"  reference corpus: {n_emb} section embeddings")
+    typer.echo(f"  returned: {len(hits)} hits\n")
+
+    if not hits:
+        typer.echo("  No matches.")
+        return
+
+    for i, h in enumerate(hits):
+        conf_str = (
+            f" conf={h.section_type_conf:.2f}" if h.section_type_conf else ""
+        )
+        sec_str = f"{h.section_type or '?'}({h.section_type_source}){conf_str}"
+        codes: list[str] = []
+        if h.schedule_codes:
+            codes.append(f"sched={','.join(h.schedule_codes[:3])}")
+        if h.rider_codes:
+            codes.append(f"rider={','.join(h.rider_codes[:3])}")
+        if h.leaf_numbers:
+            codes.append(f"leaf={','.join(h.leaf_numbers[:3])}")
+        codes_str = "  ".join(codes) if codes else ""
+        excerpt = h.text_excerpt.replace("\n", " ").replace("\f", "|")[:300]
+        typer.echo(
+            f"  [{i + 1}] sim={h.similarity:.3f}  {h.citation()}"
+        )
+        typer.echo(f"      {sec_str}  {codes_str}")
+        typer.echo(f"      {excerpt}")
+        typer.echo("")
+
+
+@doc_intel_app.command("rag-answer")
+def rag_answer(
+    question: str = typer.Argument(..., help="The question to answer."),
+    top_k: int = typer.Option(8, "--top-k", "-k", help="Sections to retrieve."),
+    section_types: str = typer.Option(
+        "", "--section-types", help="Comma-separated section_type filter."
+    ),
+    schedule_code: str = typer.Option(
+        "", "--schedule-code", help="Substring match on schedule_codes."
+    ),
+    source_pdf: str = typer.Option(
+        "", "--source-pdf", help="Substring match on source_pdf path."
+    ),
+    min_similarity: float = typer.Option(0.0, "--min-similarity"),
+    embedding_role: str = typer.Option(
+        "embedding_primary",
+        "--embedding-role",
+        help="Orchestrator role for query embedding + reference vector pool.",
+    ),
+    generation_role: str = typer.Option(
+        "balanced_classifier",
+        "--generation-role",
+        help="Ollama orchestrator role for synthesis (default: qwen3:8b).",
+    ),
+    max_context_chars: int = typer.Option(
+        16000, "--max-context-chars", help="Cap on total context block bytes."
+    ),
+    max_excerpt_chars: int = typer.Option(
+        2000, "--max-excerpt-chars", help="Cap on each excerpt."
+    ),
+    show_uncited: bool = typer.Option(
+        False,
+        "--show-uncited/--hide-uncited",
+        help="Show retrieved sections the LLM did not cite.",
+    ),
+    show_prompt: bool = typer.Option(
+        False, "--show-prompt", help="Print the full prompt sent to the LLM."
+    ),
+    json_output: bool = typer.Option(
+        False, "--json", help="Emit JSON instead of human-readable output."
+    ),
+) -> None:
+    """End-to-end RAG: retrieve sections, then synthesize an answer with citations.
+
+    The LLM is instructed to answer ONLY from the retrieved context and to cite
+    every claim with [N]. If the answer is not in the indexed corpus, it must
+    say so rather than hallucinate.
+    """
+    import json as _json
+
+    from duke_rates.db.sqlite import connect
+    from duke_rates.document_intelligence.ollama_orchestrator import (
+        OllamaOrchestrator,
+    )
+    from duke_rates.document_intelligence.rag_generator import RagGenerator
+    from duke_rates.document_intelligence.rag_retriever import RagRetriever
+
+    settings, _ = _bootstrap()
+
+    conn = connect(settings.database_path)
+    try:
+        n_emb = conn.execute(
+            "SELECT COUNT(*) FROM section_embeddings"
+        ).fetchone()[0]
+    finally:
+        conn.close()
+    if n_emb == 0:
+        typer.echo(
+            "section_embeddings is empty — run `doc-intel embed-sections` first.",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    orch = OllamaOrchestrator()
+    if embedding_role not in orch._roles:
+        typer.echo(
+            f"Unknown --embedding-role {embedding_role!r}. "
+            f"Available: {sorted(orch._roles.keys())}",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+    retriever = RagRetriever(
+        db_path=settings.database_path,
+        orchestrator=orch,
+        model_role=embedding_role,
+        excerpt_chars=max_excerpt_chars,
+    )
+    gen = RagGenerator(
+        retriever=retriever,
+        orchestrator=orch,
+        generation_role=generation_role,
+        top_k=top_k,
+        max_context_chars=max_context_chars,
+        max_excerpt_chars=max_excerpt_chars,
+        include_prompt=show_prompt,
+    )
+
+    type_list = (
+        [t.strip() for t in section_types.split(",") if t.strip()]
+        if section_types
+        else None
+    )
+
+    answer = gen.answer(
+        question,
+        section_types=type_list,
+        schedule_code_like=schedule_code or None,
+        source_pdf_like=source_pdf or None,
+        min_similarity=min_similarity,
+    )
+
+    if json_output:
+        out = {
+            "question": answer.question,
+            "answer": answer.answer,
+            "is_grounded": answer.is_grounded,
+            "cited_indices": answer.cited_indices,
+            "llm_model": answer.llm_model,
+            "llm_status": answer.llm_status,
+            "retrieval_ms": round(answer.retrieval_ms, 1),
+            "generation_ms": round(answer.generation_ms, 1),
+            "cited_hits": [
+                {
+                    "rank": rank,
+                    "citation": h.citation(),
+                    "source_pdf": h.source_pdf,
+                    "start_page": h.start_page,
+                    "end_page": h.end_page,
+                    "similarity": round(h.similarity, 4),
+                    "section_type": h.section_type,
+                    "section_type_source": h.section_type_source,
+                }
+                for rank, h in answer.cited_hits()
+            ],
+            "uncited_hits": (
+                [
+                    {
+                        "rank": rank,
+                        "citation": h.citation(),
+                        "similarity": round(h.similarity, 4),
+                    }
+                    for rank, h in answer.uncited_hits()
+                ]
+                if show_uncited
+                else None
+            ),
+            "prompt": answer.prompt if show_prompt else None,
+        }
+        typer.echo(_json.dumps(out, indent=2))
+        return
+
+    typer.echo("")
+    typer.echo(f"Q: {answer.question}")
+    typer.echo("")
+    typer.echo(f"A: {answer.answer}")
+    typer.echo("")
+    grounded_str = "grounded" if answer.is_grounded else "UNGROUNDED"
+    typer.echo(
+        f"  [{grounded_str}]  llm={answer.llm_model}({answer.llm_status})  "
+        f"retrieval={answer.retrieval_ms:.0f}ms  "
+        f"generation={answer.generation_ms:.0f}ms"
+    )
+
+    if answer.cited_hits():
+        typer.echo("")
+        typer.echo("  cited sources:")
+        for rank, h in answer.cited_hits():
+            typer.echo(f"    [{rank}] sim={h.similarity:.3f}  {h.citation()}")
+
+    if show_uncited and answer.uncited_hits():
+        typer.echo("")
+        typer.echo("  retrieved but not cited:")
+        for rank, h in answer.uncited_hits():
+            typer.echo(f"    [{rank}] sim={h.similarity:.3f}  {h.citation()}")
+
+    if show_prompt:
+        typer.echo("")
+        typer.echo("=" * 60)
+        typer.echo("PROMPT:")
+        typer.echo(answer.prompt)
+
+
+@doc_intel_app.command("rag-eval")
+def rag_eval(
+    eval_set: Path = typer.Option(
+        Path("tests/rag_eval_set.yaml"),
+        "--eval-set",
+        help="Path to a YAML eval set (cases + expected matchers).",
+    ),
+    full: bool = typer.Option(
+        False,
+        "--full",
+        help="Run generation in addition to retrieval (slow — ~1 min/case).",
+    ),
+    top_k: int = typer.Option(
+        10,
+        "--top-k",
+        help="Retrieval depth for scoring (and generation context size).",
+    ),
+    embedding_role: str = typer.Option(
+        "embedding_primary",
+        "--embedding-role",
+        help="Orchestrator role for retrieval embeddings (e.g. embedding_secondary).",
+    ),
+    generation_role: str = typer.Option(
+        "balanced_classifier", "--generation-role"
+    ),
+    json_output: bool = typer.Option(
+        False, "--json", help="Emit a JSON report instead of human summary."
+    ),
+    case_id: str = typer.Option(
+        "", "--case-id", help="Run only one case by id (debug)."
+    ),
+) -> None:
+    """Run the RAG eval harness and print baseline metrics.
+
+    Retrieval-only (default) is fast — seconds per case. Use ``--full`` for
+    end-to-end metrics that include LLM generation; this is the regression
+    suite for the system but is too slow to run on every change.
+    """
+    import json as _json
+
+    from duke_rates.db.sqlite import connect
+    from duke_rates.document_intelligence.ollama_orchestrator import (
+        OllamaOrchestrator,
+    )
+    from duke_rates.document_intelligence.rag_eval import (
+        EvalReport,
+        load_eval_set,
+        run_full_eval,
+        run_retrieval_eval,
+    )
+    from duke_rates.document_intelligence.rag_generator import RagGenerator
+    from duke_rates.document_intelligence.rag_retriever import RagRetriever
+
+    settings, _ = _bootstrap()
+
+    if not eval_set.exists():
+        typer.echo(f"Eval set not found: {eval_set}", err=True)
+        raise typer.Exit(code=1)
+    cases = load_eval_set(eval_set)
+    if case_id:
+        cases = [c for c in cases if c.id == case_id]
+        if not cases:
+            typer.echo(f"No case with id={case_id!r}", err=True)
+            raise typer.Exit(code=1)
+
+    conn = connect(settings.database_path)
+    try:
+        n_emb = conn.execute(
+            "SELECT COUNT(*) FROM section_embeddings"
+        ).fetchone()[0]
+    finally:
+        conn.close()
+    if n_emb == 0:
+        typer.echo("section_embeddings is empty — eval cannot run.", err=True)
+        raise typer.Exit(code=1)
+
+    orch = OllamaOrchestrator()
+    if embedding_role not in orch._roles:
+        typer.echo(
+            f"Unknown --embedding-role {embedding_role!r}. "
+            f"Available: {sorted(orch._roles.keys())}",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+    retriever = RagRetriever(
+        db_path=settings.database_path,
+        orchestrator=orch,
+        model_role=embedding_role,
+    )
+
+    def _progress(i: int, n: int, cid: str) -> None:
+        typer.echo(f"  [{i}/{n}] {cid}", err=True)
+
+    if full:
+        gen = RagGenerator(
+            retriever=retriever,
+            orchestrator=orch,
+            generation_role=generation_role,
+            top_k=top_k,
+        )
+        ret_results, gen_results = run_full_eval(
+            cases, gen, top_k=top_k, progress_callback=_progress
+        )
+        report = EvalReport(
+            cases=cases,
+            retrieval_results=ret_results,
+            generation_results=gen_results,
+        )
+    else:
+        ret_results = run_retrieval_eval(
+            cases, retriever, top_k=top_k, progress_callback=_progress
+        )
+        report = EvalReport(cases=cases, retrieval_results=ret_results)
+
+    rm = report.retrieval_metrics()
+    gm = report.generation_metrics() if full else None
+
+    if json_output:
+        per_case = []
+        gen_by_id = (
+            {g.case_id: g for g in report.generation_results} if full else {}
+        )
+        for c, r in zip(report.cases, report.retrieval_results):
+            row = {
+                "id": c.id,
+                "question": c.question,
+                "section_types": c.section_types,
+                "expected_no_answer": c.expected_no_answer,
+                "top1_similarity": r.top1_similarity,
+                "expected_rank": r.expected_rank,
+                "matched_via": r.matched_via,
+            }
+            if full and c.id in gen_by_id:
+                g = gen_by_id[c.id]
+                row.update(
+                    {
+                        "answer": g.answer_text,
+                        "answered": g.answered,
+                        "grounded": g.grounded,
+                        "keyword_matches": g.keyword_matches,
+                        "expected_refusal_correct": g.expected_refusal_correct,
+                        "llm_status": g.llm_status,
+                        "generation_ms": round(g.generation_ms, 1),
+                    }
+                )
+            per_case.append(row)
+        out = {
+            "retrieval_metrics": rm,
+            "generation_metrics": gm,
+            "n_cases": len(cases),
+            "per_case": per_case,
+        }
+        typer.echo(_json.dumps(out, indent=2))
+        return
+
+    typer.echo("")
+    typer.echo(f"=== RAG eval: {eval_set.name} ===")
+    typer.echo(f"  cases:                {len(cases)}")
+    typer.echo(f"  retrieval top_k:      {top_k}")
+    typer.echo(f"  full (with gen):      {full}")
+    typer.echo("")
+    typer.echo("Retrieval metrics:")
+    typer.echo(f"  cases scored:         {rm['n_cases']}")
+    typer.echo(f"  recall@5:             {rm['recall_at_5']}")
+    typer.echo(f"  recall@10:            {rm['recall_at_10']}")
+    typer.echo(f"  mrr@10:               {rm['mrr_at_10']}")
+    typer.echo(f"  avg top-1 similarity: {rm['avg_top1_similarity']}")
+    if rm.get("schedule_filter_precision") is not None:
+        typer.echo(
+            f"  schedule_code filter precision: {rm['schedule_filter_precision']} "
+            f"({rm['n_schedule_filtered']} filtered cases)"
+        )
+    if rm.get("section_type_filter_precision") is not None:
+        typer.echo(
+            f"  section_type filter precision:  {rm['section_type_filter_precision']} "
+            f"({rm['n_type_filtered']} filtered cases)"
+        )
+    typer.echo("")
+    typer.echo("Per-case (rank of first matching hit):")
+    typer.echo(f"  {'id':<30} {'rank':<6} {'via':<10} top1_sim")
+    for c, r in zip(report.cases, report.retrieval_results):
+        if not c.has_retrieval_target:
+            continue
+        rank_str = str(r.expected_rank) if r.expected_rank else "miss"
+        via = r.matched_via or "-"
+        sim = (
+            f"{r.top1_similarity:.3f}" if r.top1_similarity is not None else "-"
+        )
+        typer.echo(f"  {c.id:<30} {rank_str:<6} {via:<10} {sim}")
+
+    if full and gm:
+        typer.echo("")
+        typer.echo("Generation metrics:")
+        typer.echo(f"  cases answered:       {gm['n_answered']}/{gm['n_cases']}")
+        typer.echo(f"  grounded rate:        {gm['grounded_rate']}")
+        typer.echo(f"  keyword match rate:   {gm['keyword_match_rate']}")
+        typer.echo(f"  correct refusal rate: {gm['correct_refusal_rate']} "
+                   f"({gm['n_refusal_expected']} expected)")
+
+
+@doc_intel_app.command("backfill-schedule-codes")
+def backfill_schedule_codes(
+    limit: int = typer.Option(0, "--limit", help="Process at most N sections (0 = all)."),
+    overwrite: bool = typer.Option(
+        False,
+        "--overwrite",
+        help="Replace existing schedule_codes_json. Default merges (additive).",
+    ),
+    only_empty: bool = typer.Option(
+        True,
+        "--only-empty/--all-sections",
+        help="Default: only sections whose schedule_codes_json is empty.",
+    ),
+    section_types: str = typer.Option(
+        "rate_schedule,rider",
+        "--section-types",
+        help="Comma-separated section_type filter (default: rate_schedule,rider).",
+    ),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Report what would change."),
+    progress: bool = typer.Option(True, "--progress/--no-progress"),
+) -> None:
+    """Extract schedule/rider codes from section text and backfill document_sections.
+
+    Default behavior:
+      - Only sections with empty schedule_codes_json (12k of 14k).
+      - Only sections classified as rate_schedule or rider.
+      - Additive merge: existing codes are preserved; new codes are appended.
+    """
+    import json as _json
+
+    from duke_rates.db.sqlite import connect
+    from duke_rates.document_intelligence.schedule_code_extractor import (
+        extract_codes,
+    )
+    from duke_rates.document_intelligence.section_text_extractor import (
+        fetch_section_text,
+    )
+
+    settings, _ = _bootstrap()
+
+    types = [t.strip() for t in section_types.split(",") if t.strip()]
+    if not types:
+        typer.echo("--section-types must be non-empty", err=True)
+        raise typer.Exit(code=1)
+    placeholders = ",".join("?" for _ in types)
+
+    where_extra = ""
+    if only_empty and not overwrite:
+        where_extra = (
+            "AND (schedule_codes_json IS NULL OR schedule_codes_json IN ('[]','null',''))"
+        )
+
+    conn = connect(settings.database_path)
+    try:
+        rows = conn.execute(
+            f"""
+            SELECT id, source_pdf, section_index, start_page, end_page,
+                   schedule_codes_json
+            FROM document_sections
+            WHERE section_type IN ({placeholders})
+              {where_extra}
+            ORDER BY id
+            """,
+            types,
+        ).fetchall()
+    finally:
+        conn.close()
+
+    sections = [dict(r) for r in rows]
+    if limit > 0:
+        sections = sections[:limit]
+    if not sections:
+        typer.echo("No sections match the filter.")
+        return
+
+    typer.echo(
+        f"Backfilling schedule_codes_json for {len(sections)} sections "
+        f"(types={types}, overwrite={overwrite}, only_empty={only_empty})..."
+    )
+    if dry_run:
+        typer.echo("[DRY RUN — no rows will be written]")
+
+    n_updated = n_skipped = n_no_codes = n_fail = 0
+    code_freq: dict[str, int] = {}
+
+    for i, sec in enumerate(sections):
+        rconn = connect(settings.database_path)
+        try:
+            sec_text = fetch_section_text(
+                rconn,
+                sec["source_pdf"],
+                int(sec["start_page"]),
+                int(sec["end_page"]),
+                max_chars=2000,
+            )
+        finally:
+            rconn.close()
+
+        if not sec_text.text.strip():
+            n_skipped += 1
+            continue
+
+        try:
+            extraction = extract_codes(sec_text.text)
+        except Exception:
+            n_fail += 1
+            continue
+
+        if not extraction.codes:
+            n_no_codes += 1
+            continue
+
+        try:
+            existing = _json.loads(sec["schedule_codes_json"] or "[]")
+            if not isinstance(existing, list):
+                existing = []
+        except Exception:
+            existing = []
+        existing_set = {str(c).upper() for c in existing}
+
+        if overwrite:
+            new_codes = list(extraction.codes)
+        else:
+            new_codes = list(existing) + [
+                c for c in extraction.codes if c.upper() not in existing_set
+            ]
+
+        if new_codes == existing and not overwrite:
+            n_skipped += 1
+            continue
+
+        for c in new_codes:
+            code_freq[str(c).upper()] = code_freq.get(str(c).upper(), 0) + 1
+
+        if not dry_run:
+            wconn = connect(settings.database_path)
+            try:
+                wconn.execute(
+                    "UPDATE document_sections SET schedule_codes_json = ? WHERE id = ?",
+                    (_json.dumps(new_codes), int(sec["id"])),
+                )
+                wconn.commit()
+            finally:
+                wconn.close()
+        n_updated += 1
+
+        if progress and (i + 1) % 500 == 0:
+            typer.echo(
+                f"  {i + 1}/{len(sections)} updated={n_updated} no_codes={n_no_codes}",
+                err=True,
+            )
+
+    typer.echo(
+        f"\nDone: updated={n_updated} no_codes={n_no_codes} skipped={n_skipped} fail={n_fail}"
+    )
+    if code_freq:
+        typer.echo("\nTop 15 codes extracted:")
+        for code, n in sorted(code_freq.items(), key=lambda x: -x[1])[:15]:
+            typer.echo(f"  {code:<25} {n}")

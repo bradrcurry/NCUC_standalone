@@ -572,6 +572,53 @@ def migrate(conn) -> None:
         except Exception:
             pass
 
+    # --- Migration: projected/proposed rates support ---
+    # `status` distinguishes effective tariffs from proposed-but-not-yet-approved
+    # ones (e.g. rate-case applications, direct-testimony exhibits). Default
+    # 'approved' so existing rows are unaffected.
+    # Values: 'approved' | 'proposed' | 'withdrawn' | 'superseded'
+    # `requested_effective_date` carries the proposal's requested effective
+    # date, which may differ from the final approved effective_start.
+    # `approved_version_id` / `approved_document_id` are lineage pointers so a
+    # proposed row can be linked to the eventual approved version once it lands.
+    for table, cols in [
+        (
+            "historical_documents",
+            [
+                ("status", "TEXT NOT NULL DEFAULT 'approved'"),
+                ("requested_effective_date", "TEXT"),
+                ("approved_document_id", "INTEGER"),
+            ],
+        ),
+        (
+            "tariff_versions",
+            [
+                ("status", "TEXT NOT NULL DEFAULT 'approved'"),
+                ("requested_effective_date", "TEXT"),
+                ("approved_version_id", "INTEGER"),
+            ],
+        ),
+    ]:
+        for col, typedef in cols:
+            try:
+                conn.execute(f"ALTER TABLE {table} ADD COLUMN {col} {typedef}")
+                conn.commit()
+            except Exception:
+                pass
+    # Index for efficient status-based filtering
+    try:
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_historical_docs_status "
+            "ON historical_documents(status, family_key)"
+        )
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_tariff_versions_status "
+            "ON tariff_versions(status, family_key)"
+        )
+        conn.commit()
+    except Exception:
+        pass
+
     # --- Migration: NCUC ingest tables ---
     conn.executescript(
         """
@@ -1957,6 +2004,39 @@ def migrate(conn) -> None:
         ON document_embeddings(source_pdf, file_hash);
         CREATE INDEX IF NOT EXISTS idx_doc_embeddings_kind_model
         ON document_embeddings(embedding_kind, embedding_model);
+        """
+    )
+    conn.commit()
+
+    # --- Migration OL-002b: Section embeddings store (A3 phase 2) ---
+    #
+    # Per-section embeddings keyed on (source_pdf, section_index). Sections
+    # come from document_sections; text is extracted from the start_page..
+    # end_page range of ncuc_page_artifacts. embedding_kind classifies which
+    # slice was embedded:
+    #   section_text        — concatenated page text for the section
+    #   section_first_page  — only the first page (title-block-heavy)
+    conn.executescript(
+        """
+        CREATE TABLE IF NOT EXISTS section_embeddings (
+            id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            source_pdf          TEXT NOT NULL,
+            section_index       INTEGER NOT NULL,
+            start_page          INTEGER NOT NULL,
+            end_page            INTEGER NOT NULL,
+            embedding_kind      TEXT NOT NULL,
+            embedding_model     TEXT NOT NULL,
+            embedding_version   TEXT NOT NULL DEFAULT 'v1',
+            vector              BLOB NOT NULL,
+            text_sample         TEXT,
+            metadata_json       TEXT,
+            created_at          TEXT NOT NULL DEFAULT (datetime('now')),
+            UNIQUE(source_pdf, section_index, embedding_kind, embedding_model, embedding_version)
+        );
+        CREATE INDEX IF NOT EXISTS idx_section_emb_source
+        ON section_embeddings(source_pdf);
+        CREATE INDEX IF NOT EXISTS idx_section_emb_kind_model
+        ON section_embeddings(embedding_kind, embedding_model);
         """
     )
     conn.commit()
