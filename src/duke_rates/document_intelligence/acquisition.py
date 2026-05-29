@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 import subprocess
 import sys
 import time
@@ -26,6 +27,64 @@ from duke_rates.document_intelligence.action_registry import CorrectiveAction
 from duke_rates.document_intelligence.idle_work import IDLE_REGISTRY
 
 IDLE_REGISTRY_NAMES = [a.name for a in IDLE_REGISTRY]
+
+
+_NCUC_IMPORT_SUMMARY_RE = re.compile(
+    r"Imported\s+(?P<imported>\d+)\s*/\s*(?P<total>\d+)\s+downloaded\s+NCUC\s+records\.",
+    re.IGNORECASE,
+)
+
+
+def _parse_ncuc_imported_count(stdout: str) -> int | None:
+    """Return imported-record count from ``ncuc import-pipeline`` stdout.
+
+    ``None`` means the command output did not match the expected summary,
+    so callers should preserve the historical behavior instead of skipping
+    downstream work on an unknown format.
+    """
+    match = _NCUC_IMPORT_SUMMARY_RE.search(stdout or "")
+    if not match:
+        return None
+    return int(match.group("imported"))
+
+
+def _filter_fetch_inventory_cooldowns(
+    fetch_inventory: dict[str, Any],
+    record_fetch_cooldown: dict[str, int],
+    *,
+    excluded_dockets: set[str] | None = None,
+) -> dict[str, Any]:
+    """Return fetch inventory with cooling-down / already-attempted dockets removed."""
+    excluded = set(excluded_dockets or set())
+    if not record_fetch_cooldown and not excluded:
+        return fetch_inventory
+    cooled = {d for d, n in record_fetch_cooldown.items() if n > 0}
+    excluded.update(cooled)
+    if not excluded:
+        return fetch_inventory
+    out = dict(fetch_inventory)
+    out["top_dockets"] = [
+        d for d in (fetch_inventory.get("top_dockets") or [])
+        if d.get("docket_number") not in excluded
+    ]
+    out["cooldown_excluded_dockets"] = sorted(cooled)
+    out["same_cycle_excluded_dockets"] = sorted(excluded - cooled)
+    return out
+
+
+def _bootstrap_created_versions(outcomes: list[Any]) -> bool:
+    """Return True when bootstrap succeeded and likely created versions."""
+    return any(
+        o.success and o.return_code == 0
+        and o.cli_command == "bootstrap-missing-versions-nc"
+        and (o.effective_count is None or o.effective_count > 0)
+        for o in outcomes
+    )
+
+
+def _is_no_work_stop(*, work_attempted: bool | None, improvement_observed: bool | None) -> bool:
+    """Return True when the loop should stop because nothing moved or ran."""
+    return work_attempted is False and improvement_observed is not True
 
 
 def _heartbeat(msg: str) -> None:
@@ -141,6 +200,7 @@ def _save_loop_state(
     exhaustion_counter: dict[str, int] | None = None,
     timeout_counter: dict[str, int] | None = None,
     idle_yield: dict[str, float] | None = None,
+    record_fetch_cooldown: dict[str, int] | None = None,
 ) -> None:
     """Atomically persist loop state. Best-effort — never raise."""
     try:
@@ -155,6 +215,7 @@ def _save_loop_state(
             "exhaustion_counter": exhaustion_counter or {},
             "timeout_counter": timeout_counter or {},
             "idle_yield": idle_yield or {},
+            "record_fetch_cooldown": record_fetch_cooldown or {},
         }
         tmp = path.with_suffix(".json.tmp")
         tmp.write_text(json.dumps(payload, indent=2), encoding="utf-8")
@@ -360,10 +421,13 @@ def run_portal_smoke_test(timeout_s: int = 120) -> dict[str, Any]:
 class AcquisitionResult:
     docket_number: str
     action: str
-    outcome: str  # acquired | skipped_auth | skipped_no_uuid | failed
+    outcome: str  # acquired | no_progress | skipped_auth | skipped_no_uuid | failed
     docket_uuid: str | None = None
     docs_discovered: int = 0
     docs_imported: int = 0
+    fetch_eligible_before: int | None = None
+    fetch_eligible_after: int | None = None
+    fetch_eligible_delta: int | None = None
     versions_bootstrapped: int = 0
     charges_extracted: int = 0
     error: str | None = None
@@ -375,11 +439,39 @@ class AcquisitionResult:
     stage_outcomes: list[dict[str, Any]] = field(default_factory=list)
 
 
+def _count_fetch_eligible_for_docket(database_path: str, docket_number: str) -> int | None:
+    """Return fetch-eligible discovery-record count for one docket."""
+    from duke_rates.db.sqlite import connect
+
+    try:
+        conn = connect(database_path)
+        try:
+            row = conn.execute(
+                """
+                SELECT COUNT(*)
+                FROM ncuc_discovery_records
+                WHERE docket_number = ?
+                  AND (
+                    fetch_status IN ('pending', 'failed', 'requires_browser')
+                    OR (fetch_status IS NULL AND (local_path IS NULL OR local_path = ''))
+                  )
+                """,
+                (docket_number,),
+            ).fetchone()
+            return int(row[0]) if row and row[0] is not None else 0
+        finally:
+            conn.close()
+    except Exception:
+        logger.debug("Failed to count fetch-eligible records for %s", docket_number, exc_info=True)
+        return None
+
+
 @dataclass
 class AcquisitionCycleResult:
     results: list[AcquisitionResult] = field(default_factory=list)
     total_docs_imported: int = 0
     total_charges_added: int = 0
+    total_fetch_eligible_delta: int = 0
     errors: list[str] = field(default_factory=list)
     duration_ms: int = 0
 
@@ -512,6 +604,7 @@ def acquire_dockets(
         result.results.append(ar)
         result.total_docs_imported += ar.docs_imported
         result.total_charges_added += ar.charges_extracted
+        result.total_fetch_eligible_delta += max(0, ar.fetch_eligible_delta or 0)
         if ar.error:
             result.errors.append(f"{docket}: {ar.error}")
         if ar.outcome == "acquired":
@@ -658,11 +751,15 @@ def acquire_and_cycle(
         persisted.get("idle_yield") or {}
     ) if dynamic_routing else {}
     idle_skip_counter: dict[str, int] = {}  # in-memory: round-robin among zero-yield
+    record_fetch_cooldown: dict[str, int] = dict(
+        persisted.get("record_fetch_cooldown") or {}
+    )
     if persisted:
         logger.info(
-            "Loaded loop state from %s (stuck=%s cooldown=%s yield=%s)",
+            "Loaded loop state from %s (stuck=%s cooldown=%s yield=%s record_fetch_cooldown=%s)",
             state_file, stuck_counter, cooldown_remaining,
             {k: round(v, 1) for k, v in category_yield.items()},
+            record_fetch_cooldown,
         )
 
     # Per-run JSONL checkpoint so a crash doesn't lose history.
@@ -822,7 +919,14 @@ def acquire_and_cycle(
             not cycle_result.actions_taken
             and not cycle_result.actions_skipped
         )
-        recommendations = _get_docket_recommendations(database_path, limit=5)
+        recommendation_excluded_dockets = {
+            docket for docket, n in record_fetch_cooldown.items() if n > 0
+        }
+        recommendations = _get_docket_recommendations(
+            database_path,
+            limit=5,
+            excluded_dockets=recommendation_excluded_dockets,
+        )
         high_value_leads = [
             r for r in recommendations
             if (r.get("discovery_records_count", 0) or 0) >= 10
@@ -850,6 +954,9 @@ def acquire_and_cycle(
                 f"docs={acquisition_result.total_docs_imported} "
                 f"charges={acquisition_result.total_charges_added})"
             )
+            for r in acquisition_result.results:
+                if r.outcome in {"skipped_no_uuid", "no_progress"}:
+                    record_fetch_cooldown[r.docket_number] = COOLDOWN_DURATION
         elif not recommendations:
             acquisition_skip_reason = "no docket recommendations available"
             _heartbeat(f"  [3/5] ACQUISITION: skipped -- {acquisition_skip_reason}")
@@ -871,6 +978,7 @@ def acquire_and_cycle(
         # and the inventory is non-empty -- this is the work that was
         # never happening before.
         record_level_result: AcquisitionCycleResult | None = None
+        post_fetch_import_result: AcquisitionResult | None = None
         portal_runtime_disabled = bool(
             os.environ.get("DUKE_RATES_PORTAL_DISABLED_THIS_RUN")
         )
@@ -880,15 +988,33 @@ def acquire_and_cycle(
             and (fetch_inventory.get("total_eligible") or 0) > 0
             and max_dockets > 0
         ):
+            acquisition_attempted_dockets = {
+                r.docket_number
+                for r in (acquisition_result.results if acquisition_result else [])
+                if r.docket_number and r.action == "fetch"
+            }
+            effective_fetch_inventory = _filter_fetch_inventory_cooldowns(
+                fetch_inventory,
+                record_fetch_cooldown,
+                excluded_dockets=acquisition_attempted_dockets,
+            )
+            cooldown_excluded = effective_fetch_inventory.get(
+                "cooldown_excluded_dockets"
+            ) or []
+            same_cycle_excluded = effective_fetch_inventory.get(
+                "same_cycle_excluded_dockets"
+            ) or []
             _heartbeat(
                 f"  [3.1/5] RECORD-LEVEL FETCH: "
                 f"{fetch_inventory.get('total_eligible', 0)} eligible records "
                 f"across {fetch_inventory.get('distinct_dockets', 0)} dockets "
-                f"(fetching top {max_dockets})..."
+                f"(fetching top {max_dockets}"
+                f"{'; cooldown excludes ' + ', '.join(cooldown_excluded[:3]) if cooldown_excluded else ''}"
+                f"{'; same-cycle excludes ' + ', '.join(same_cycle_excluded[:3]) if same_cycle_excluded else ''})..."
             )
             rlf_t0 = time.perf_counter()
             record_level_result = fetch_record_level_dockets(
-                fetch_inventory,
+                effective_fetch_inventory,
                 database_path=database_path,
                 max_dockets=max_dockets,
                 dry_run=dry_run,
@@ -903,8 +1029,38 @@ def acquire_and_cycle(
                     f"            {r.docket_number}: outcome={r.outcome}"
                     f"{' err=' + r.error[:80] if r.error else ''}"
                 )
+            for r in record_level_result.results:
+                if r.outcome in {"skipped_no_uuid", "no_progress"}:
+                    record_fetch_cooldown[r.docket_number] = COOLDOWN_DURATION
             # Refresh inventory after fetch so the next cycle's
             # decision uses current state.
+            record_level_acquired = _count_acquired(record_level_result)
+            if not dry_run and record_level_acquired:
+                _heartbeat(
+                    f"  [3.2/5] POST-FETCH IMPORT: ncuc import-pipeline "
+                    f"for {record_level_acquired} fetched docket(s)..."
+                )
+                pfi_t0 = time.perf_counter()
+                post_fetch_import_result = _run_global_post_steps(
+                    database_path=database_path,
+                    timeout_per_stage_s=300,
+                )
+                _heartbeat(
+                    f"          POST-FETCH IMPORT done in {time.perf_counter() - pfi_t0:.1f}s "
+                    f"(docs={post_fetch_import_result.docs_imported} "
+                    f"charges={post_fetch_import_result.charges_extracted} "
+                    f"outcome={post_fetch_import_result.outcome})"
+                )
+                record_level_result.total_docs_imported += (
+                    post_fetch_import_result.docs_imported
+                )
+                record_level_result.total_charges_added += (
+                    post_fetch_import_result.charges_extracted
+                )
+                if post_fetch_import_result.error:
+                    record_level_result.errors.append(
+                        f"post_fetch_import: {post_fetch_import_result.error}"
+                    )
             if not dry_run and record_level_result.total_docs_imported:
                 fetch_inventory = _inventory_fetch_eligible(database_path)
         elif (fetch_inventory.get("total_eligible") or 0) == 0:
@@ -1035,11 +1191,7 @@ def acquire_and_cycle(
         # extract-rates-nc with a bounded --limit so newly-linked
         # versions get charges materialized this cycle.
         extract_drain_result: dict[str, Any] | None = None
-        bootstrap_succeeded = any(
-            o.success and o.return_code == 0
-            and o.cli_command == "bootstrap-missing-versions-nc"
-            for o in cycle_result.outcomes
-        )
+        bootstrap_succeeded = _bootstrap_created_versions(cycle_result.outcomes)
         if bootstrap_succeeded and not dry_run:
             extract_limit = action_batch_limit or 200
             extract_deadline = 1800
@@ -1123,6 +1275,10 @@ def acquire_and_cycle(
                 or acquisition_result.total_charges_added > 0
             ))
             or (record_level_result and record_level_result.total_docs_imported > 0)
+            or (post_fetch_import_result and (
+                post_fetch_import_result.docs_imported > 0
+                or post_fetch_import_result.charges_extracted > 0
+            ))
         )
         # A drain/extract that exited rc=0 in <5s means the queue was
         # empty and the subprocess did nothing — don't count it as
@@ -1194,6 +1350,16 @@ def acquire_and_cycle(
             or bool(
                 record_level_result and record_level_result.total_docs_imported > 0
             )
+            or bool(
+                post_fetch_import_result and (
+                    post_fetch_import_result.docs_imported > 0
+                    or post_fetch_import_result.charges_extracted > 0
+                    or any(
+                        s.get("skipped") is not True
+                        for s in post_fetch_import_result.stage_outcomes
+                    )
+                )
+            )
             or bool(idle_result and idle_result.get("success"))
         )
         if any_work:
@@ -1242,11 +1408,22 @@ def acquire_and_cycle(
         # ``outcome="acquired"`` entries that did nothing. Only count
         # acquisition as work if it actually imported docs OR added
         # charges — i.e. the underlying subprocesses really ran.
+        fetch_eligible_delta = (
+            (acquisition_result.total_fetch_eligible_delta if acquisition_result else 0)
+            + (record_level_result.total_fetch_eligible_delta if record_level_result else 0)
+        )
+
         acquisition_did_work = bool(
             acquisition_result and (
                 acquisition_result.total_docs_imported > 0
                 or acquisition_result.total_charges_added > 0
+                or acquisition_result.total_fetch_eligible_delta > 0
             )
+            or post_fetch_import_result and (
+                post_fetch_import_result.docs_imported > 0
+                or post_fetch_import_result.charges_extracted > 0
+            )
+            or record_level_result and record_level_result.total_fetch_eligible_delta > 0
         )
         work_attempted = bool(
             cycle_result.actions_taken or acquisition_did_work
@@ -1273,6 +1450,11 @@ def acquire_and_cycle(
             or bool(
                 acquisition_result and acquisition_result.total_docs_imported > 0
             )
+            or bool(
+                post_fetch_import_result
+                and post_fetch_import_result.docs_imported > 0
+            )
+            or fetch_eligible_delta > 0
         )
 
         # Update per-category stuck counters.
@@ -1366,6 +1548,11 @@ def acquire_and_cycle(
         cooldown_remaining = {
             cat: n - 1 for cat, n in cooldown_remaining.items() if n - 1 > 0
         }
+        record_fetch_cooldown = {
+            docket: n - 1
+            for docket, n in record_fetch_cooldown.items()
+            if n - 1 > 0
+        }
 
         # Update per-category yield EMA. Attribute this cycle's
         # charge delta to whatever categories had successful actions,
@@ -1435,11 +1622,13 @@ def acquire_and_cycle(
             "before_outcomes": before_outcomes,
             "after_outcomes": after_outcomes,
             "outcome_delta": outcome_delta,
+            "fetch_eligible_delta": fetch_eligible_delta,
             "improved_outcomes": improved_outcomes,
             "work_attempted": work_attempted,
             "improvement_observed": improvement_observed,
             "stuck_counter": dict(stuck_counter),
             "cooldown_remaining": dict(cooldown_remaining),
+            "record_fetch_cooldown": dict(record_fetch_cooldown),
             "active_cooldown": sorted(active_cooldown),
             "category_yield": {k: round(v, 2) for k, v in category_yield.items()},
             "exhaustion_counter": dict(exhaustion_counter),
@@ -1473,15 +1662,29 @@ def acquire_and_cycle(
             "idle_work": idle_result,
             "acquisition_skip_reason": acquisition_skip_reason,
             "fetch_inventory": fetch_inventory,
+            "post_fetch_import": (
+                {
+                    "outcome": post_fetch_import_result.outcome,
+                    "docs_imported": post_fetch_import_result.docs_imported,
+                    "charges_extracted": post_fetch_import_result.charges_extracted,
+                    "error": post_fetch_import_result.error,
+                    "duration_ms": post_fetch_import_result.duration_ms,
+                    "stage_outcomes": post_fetch_import_result.stage_outcomes,
+                } if post_fetch_import_result else None
+            ),
             "record_level_fetch": (
                 {
                     "dockets_acquired": _count_acquired(record_level_result),
                     "docs_imported": record_level_result.total_docs_imported,
+                    "fetch_eligible_delta": record_level_result.total_fetch_eligible_delta,
                     "results": [
                         {
                             "docket": r.docket_number,
                             "outcome": r.outcome,
                             "docs_imported": r.docs_imported,
+                            "fetch_eligible_before": r.fetch_eligible_before,
+                            "fetch_eligible_after": r.fetch_eligible_after,
+                            "fetch_eligible_delta": r.fetch_eligible_delta,
                             "error": r.error,
                             "stage_outcomes": r.stage_outcomes,
                         }
@@ -1493,12 +1696,16 @@ def acquire_and_cycle(
                 "dockets_acquired": _count_acquired(acquisition_result),
                 "docs_imported": acquisition_result.total_docs_imported if acquisition_result else 0,
                 "charges_added": acquisition_result.total_charges_added if acquisition_result else 0,
+                "fetch_eligible_delta": acquisition_result.total_fetch_eligible_delta if acquisition_result else 0,
                 "results": [
                     {
                         "docket": r.docket_number,
                         "outcome": r.outcome,
                         "docs_imported": r.docs_imported,
                         "charges_extracted": r.charges_extracted,
+                        "fetch_eligible_before": r.fetch_eligible_before,
+                        "fetch_eligible_after": r.fetch_eligible_after,
+                        "fetch_eligible_delta": r.fetch_eligible_delta,
                         "error": r.error,
                         "stage_outcomes": r.stage_outcomes,
                     }
@@ -1515,7 +1722,7 @@ def acquire_and_cycle(
         _heartbeat(
             f"  Cycle {cycle_idx} done: dur={(time.perf_counter() - cycle_start):.1f}s "
             f"work={work_attempted} improvement={improvement_observed} "
-            f"+{chg} charges +{vch} versions "
+            f"+{chg} charges +{vch} versions -{fetch_eligible_delta} fetch "
             f"next_sleep={next_sleep}s"
         )
 
@@ -1528,17 +1735,19 @@ def acquire_and_cycle(
                     f.write(json.dumps(cycle_entry, default=str) + "\n")
             except OSError:
                 logger.debug("Failed to append history JSONL", exc_info=True)
-        _save_loop_state(
-            state_file,
-            stuck_counter=stuck_counter,
-            cooldown_remaining=cooldown_remaining,
-            last_run_at=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-            last_outcomes=after_outcomes,
-            category_yield=category_yield,
-            exhaustion_counter=exhaustion_counter,
-            timeout_counter=timeout_counter,
-            idle_yield=idle_yield,
-        )
+        if not dry_run:
+            _save_loop_state(
+                state_file,
+                stuck_counter=stuck_counter,
+                cooldown_remaining=cooldown_remaining,
+                last_run_at=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                last_outcomes=after_outcomes,
+                category_yield=category_yield,
+                exhaustion_counter=exhaustion_counter,
+                timeout_counter=timeout_counter,
+                idle_yield=idle_yield,
+                record_fetch_cooldown=record_fetch_cooldown,
+            )
 
         sleep_s = next_sleep
 
@@ -1582,8 +1791,14 @@ def acquire_and_cycle(
 
         # If no work could be attempted at all (dry-run + no auth, no
         # findings), there is no point continuing — stop after the
-        # first such cycle so we don't burn runtime.
-        if not work_attempted and cycle_idx >= 1:
+        # first such cycle so we don't burn runtime. Do not stop when
+        # measurement still moved: the 2026-05-25 overnight saw
+        # work_attempted=False but improvement_observed=True because
+        # docket_coverage shrank after portal/no-progress filtering.
+        if _is_no_work_stop(
+            work_attempted=work_attempted,
+            improvement_observed=improvement_observed,
+        ) and cycle_idx >= 1:
             logger.info(
                 "Cycle %d attempted no work (dry-run/no-auth/no-findings). Stopping.",
                 cycle_idx,
@@ -1614,12 +1829,16 @@ def acquire_and_cycle(
                         )
 
     last_attempted = history[-1].get("work_attempted") if history else None
+    last_improved = history[-1].get("improvement_observed") if history else None
     stopped_reason: str
     if cycles_without_improvement >= 2:
         stopped_reason = "no_improvement"
     elif (time.perf_counter() - t0) >= max_runtime_s:
         stopped_reason = "max_runtime"
-    elif history and last_attempted is False:
+    elif history and _is_no_work_stop(
+        work_attempted=last_attempted,
+        improvement_observed=last_improved,
+    ):
         stopped_reason = "no_work_possible"
     else:
         stopped_reason = "max_cycles"
@@ -1634,6 +1853,7 @@ def acquire_and_cycle(
         "loaded_state": bool(persisted),
         "final_stuck_counter": dict(stuck_counter),
         "final_cooldown_remaining": dict(cooldown_remaining),
+        "final_record_fetch_cooldown": dict(record_fetch_cooldown),
         "final_category_yield": {k: round(v, 2) for k, v in category_yield.items()},
         "final_exhaustion_counter": dict(exhaustion_counter),
         "final_timeout_counter": dict(timeout_counter),
@@ -1723,6 +1943,10 @@ def _acquire_one(
     try:
         # Step 1: Fetch (if needed)
         if action == "fetch" and docket_uuid:
+            ar.fetch_eligible_before = _count_fetch_eligible_for_docket(
+                database_path,
+                docket_number,
+            )
             _heartbeat(
                 f"      ncuc docket-fetch {docket_number} (deadline {timeout_per_stage_s}s)..."
             )
@@ -1746,6 +1970,24 @@ def _acquire_one(
                 ar.outcome = "failed"
                 ar.error = f"ncuc docket-fetch failed: {proc.stderr[:300]}"
                 return ar
+            ar.fetch_eligible_after = _count_fetch_eligible_for_docket(
+                database_path,
+                docket_number,
+            )
+            if ar.stage_outcomes:
+                ar.stage_outcomes[-1]["fetch_eligible_before"] = ar.fetch_eligible_before
+                ar.stage_outcomes[-1]["fetch_eligible_after"] = ar.fetch_eligible_after
+            if ar.fetch_eligible_before is not None and ar.fetch_eligible_after is not None:
+                ar.fetch_eligible_delta = ar.fetch_eligible_before - ar.fetch_eligible_after
+                if ar.stage_outcomes:
+                    ar.stage_outcomes[-1]["fetch_eligible_delta"] = ar.fetch_eligible_delta
+                if ar.fetch_eligible_delta <= 0:
+                    ar.outcome = "no_progress"
+                    ar.error = (
+                        "ncuc docket-fetch completed but did not reduce "
+                        f"fetch-eligible records ({ar.fetch_eligible_before} -> "
+                        f"{ar.fetch_eligible_after})"
+                    )
             # Count discovered docs from stdout
             for line in proc.stdout.splitlines():
                 if "Found" in line and "documents" in line:
@@ -1806,17 +2048,36 @@ def _run_global_post_steps(
         outcome="acquired",
     )
 
-    def _record(stage: str, proc: subprocess.CompletedProcess) -> bool:
+    def _record(
+        stage: str,
+        proc: subprocess.CompletedProcess,
+        *,
+        extra: dict[str, Any] | None = None,
+    ) -> bool:
         entry: dict[str, Any] = {
             "stage": stage,
             "return_code": proc.returncode,
             "success": proc.returncode == 0,
             "duration_ms": getattr(proc, "_duration_ms", None),
         }
+        if extra:
+            entry.update(extra)
         if proc.returncode != 0:
             entry["stderr_tail"] = (proc.stderr or "")[-300:]
         ar.stage_outcomes.append(entry)
         return proc.returncode == 0
+
+    def _record_skipped(stage: str, reason: str) -> None:
+        ar.stage_outcomes.append(
+            {
+                "stage": stage,
+                "return_code": None,
+                "success": True,
+                "skipped": True,
+                "reason": reason,
+                "duration_ms": 0,
+            }
+        )
 
     def _run(cmd_args: list[str], timeout_s: int, label: str) -> subprocess.CompletedProcess:
         _heartbeat(
@@ -1849,11 +2110,19 @@ def _run_global_post_steps(
             ["ncuc", "import-pipeline", "--all-downloaded"],
             import_timeout, "import",
         )
-        if not _record("import", proc):
+        imported_count = _parse_ncuc_imported_count(proc.stdout or "")
+        import_extra = (
+            {"docs_imported": imported_count}
+            if imported_count is not None
+            else {"docs_imported": None, "parse_warning": "unrecognized_import_summary"}
+        )
+        if not _record("import", proc, extra=import_extra):
             ar.outcome = "failed"
             ar.error = f"ncuc import-pipeline rc={proc.returncode}"
             ar.duration_ms = int((time.perf_counter() - t0) * 1000)
             return ar
+        if imported_count is not None:
+            ar.docs_imported = imported_count
 
         # Bootstrap is fast: 60s ceiling
         proc = _run(["bootstrap-missing-versions-nc"], min(timeout_per_stage_s, 60), "bootstrap")
@@ -1871,14 +2140,20 @@ def _run_global_post_steps(
         # 5-10 min. The MAIN drain step at line 870 still consumes
         # the reprocess queue, so anything missed here gets picked
         # up next cycle anyway.
-        proc = _run(
-            ["extract-rates-nc", "--limit", "200", "--progress"],
-            timeout_per_stage_s * 2, "extract",
-        )
-        if not _record("extract", proc):
-            # Extract failure is non-fatal: docs are imported, just
-            # not parsed yet. Record it but don't mark outcome=failed.
-            ar.error = f"extract-rates-nc rc={proc.returncode}"
+        if imported_count == 0:
+            _heartbeat(
+                "      post-steps/extract skipped: import reported 0 downloaded NCUC records"
+            )
+            _record_skipped("extract", "no_imported_documents")
+        else:
+            proc = _run(
+                ["extract-rates-nc", "--limit", "200", "--progress"],
+                timeout_per_stage_s * 2, "extract",
+            )
+            if not _record("extract", proc):
+                # Extract failure is non-fatal: docs are imported, just
+                # not parsed yet. Record it but don't mark outcome=failed.
+                ar.error = f"extract-rates-nc rc={proc.returncode}"
 
         ar.duration_ms = int((time.perf_counter() - t0) * 1000)
     except subprocess.TimeoutExpired as exc:
@@ -1896,6 +2171,7 @@ def _run_global_post_steps(
 def _get_docket_recommendations(
     database_path: str,
     limit: int = 5,
+    excluded_dockets: set[str] | None = None,
 ) -> list[dict[str, Any]]:
     """Get docket recommendations from the database intelligence report."""
     import json
@@ -1907,7 +2183,10 @@ def _get_docket_recommendations(
 
     conn = connect(database_path)
     try:
-        report = find_missing_docket_coverage(conn, limit=limit)
+        excluded = set(excluded_dockets or set())
+        # Over-fetch before filtering so a small cooldown set does not starve
+        # the acquisition lane when the highest-ranked dockets are cooling down.
+        report = find_missing_docket_coverage(conn, limit=limit + len(excluded))
         recs = report.get("recommendations", [])
         # Accept all four action types. The previous filter dropped
         # "reprocess" and "classify" silently, hiding work the loop
@@ -1915,7 +2194,8 @@ def _get_docket_recommendations(
         return [
             r for r in recs
             if r.get("recommended_action") in ("fetch", "import", "reprocess", "classify")
-        ]
+            and r.get("docket_number") not in excluded
+        ][:limit]
     except Exception:
         logger.debug("Failed to get docket recommendations", exc_info=True)
         return []
@@ -2077,6 +2357,7 @@ def fetch_record_level_dockets(
         result.results.append(ar)
         result.total_docs_imported += ar.docs_imported
         result.total_charges_added += ar.charges_extracted
+        result.total_fetch_eligible_delta += max(0, ar.fetch_eligible_delta or 0)
         if ar.error:
             result.errors.append(f"{docket}: {ar.error}")
         if ar.outcome == "acquired":

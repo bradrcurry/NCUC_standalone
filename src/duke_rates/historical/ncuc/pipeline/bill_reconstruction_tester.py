@@ -52,13 +52,17 @@ class BillReconstructionTester:
         """Test multiple versions of a family."""
         tests = []
 
-        # Get all versions with extracted charges for this family
+        # Get all versions with extracted charges for this family.
+        # Exclude placeholder rows (status='pending_document' = bootstrap placeholder with no
+        # source doc; 'misregistered_document' = source doc is not the rate sheet) so
+        # the test reflects only versions with a real source document attached.
         cursor = self.conn.execute("""
             SELECT DISTINCT tv.id, tv.effective_start, COUNT(DISTINCT tc.charge_type) as charge_types
             FROM tariff_versions tv
             LEFT JOIN tariff_charges tc ON tv.id = tc.version_id AND tc.family_key = ?
             WHERE tv.family_key = ?
                 AND (tc.notes IS NULL OR tc.notes NOT LIKE 'TIER_BOUNDARY%')
+                AND tv.status NOT IN ('pending_document', 'misregistered_document')
             GROUP BY tv.id
             ORDER BY tv.effective_start DESC
             LIMIT 5

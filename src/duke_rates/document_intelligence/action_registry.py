@@ -30,6 +30,8 @@ class CorrectiveAction:
     requires_execute: bool = True  # all commands default to dry-run
     supports_limit_flag: bool = False  # accepts ``--limit N`` to drain in batches
     timeout_s: int | None = None  # per-action subprocess timeout; None = use run_cycle default (1800s)
+    summary_count_key: str | None = None  # optional category summary field this action drains
+    min_findings: int | None = None  # optional threshold override for small but actionable batches
 
     # How success of this action shows up in summary_counts:
     # "drain"     -> the action's OWN category count should DECREASE
@@ -107,18 +109,14 @@ ACTION_REGISTRY: dict[str, CorrectiveAction] = {
     "stale_artifacts": CorrectiveAction(
         finding_category="stale_artifacts",
         label="Stale Artifacts",
-        cli_command="reprocess enqueue-stale-nc",
+        cli_command="lineage backfill-evidence-nc",
         args=["--execute", "--limit", "100"],
-        estimated_impact="Enqueues documents with missing/outdated artifacts for reprocessing.",
+        estimated_impact="Backfills missing evidence_json from existing span artifacts.",
         risk="low",
         measurement="Re-run find_stale_artifacts() and compare stale count.",
         max_per_cycle=1000,
         supports_limit_flag=True,
-        # enqueue-* doesn't move its own category in summary_counts.
-        # The reprocess drainer (separate process) is what eventually
-        # moves the outcome metrics. Don't penalize this action when
-        # the category doesn't shrink in the same cycle.
-        delta_semantics="redirect",
+        delta_semantics="drain",
     ),
     "low_quality_parses": CorrectiveAction(
         finding_category="low_quality_parses",
@@ -148,11 +146,10 @@ ACTION_REGISTRY: dict[str, CorrectiveAction] = {
     "family_lineage_gaps": CorrectiveAction(
         finding_category="family_lineage_gaps",
         label="Family Lineage Gaps",
-        cli_command="bootstrap-missing-versions-nc",
-        # See note on missing_versions above; no --execute flag here.
-        args=["--limit", "100"],
-        estimated_impact="Fills version-timeline gaps by importing missing documents.",
-        risk="medium",
+        cli_command="lineage repair-lineage-gaps-nc",
+        args=["--execute", "--limit", "100"],
+        estimated_impact="Repairs deterministic historical lineage gaps by inferring missing effective dates and linking versions.",
+        risk="low",
         measurement="Re-run find_family_lineage_gaps() and compare gap count.",
         max_per_cycle=500,
         supports_limit_flag=True,
@@ -160,14 +157,17 @@ ACTION_REGISTRY: dict[str, CorrectiveAction] = {
     "docket_coverage": CorrectiveAction(
         finding_category="docket_coverage",
         label="Docket Coverage",
-        cli_command="recommend-missing-dockets-nc",
-        args=["--json"],
-        estimated_impact="Identifies highest-value dockets to fetch next. Read-only — no writes.",
+        cli_command="ncuc import-pipeline",
+        args=["--all-downloaded", "--workers", "1", "--max-pages", "75", "--limit", "25"],
+        estimated_impact="Imports already-downloaded NCUC records so coverage backlog can advance to version/bootstrap/extraction work.",
         risk="low",
-        measurement="Re-run find_docket_coverage_summary() and compare unique docket count.",
-        max_per_cycle=0,  # read-only
-        requires_execute=False,
-        delta_semantics="neutral",  # read-only: doesn't change state
+        measurement="Re-run find_docket_coverage_summary() and compare downloaded_not_imported_records.",
+        max_per_cycle=200,
+        requires_execute=True,
+        delta_semantics="drain",
+        summary_count_key="downloaded_not_imported_records",
+        min_findings=1,
+        supports_limit_flag=True,
     ),
 }
 
@@ -201,6 +201,12 @@ _EFFECTIVE_COUNT_PATTERNS = [
     (r"\bDeleted\s+(\d+)\s+rows\b", 1),
     # doc-intel adjudicate-classifications -> "Adjudicated N docs"
     (r"\bAdjudicated\s+(\d+)\s+docs?\b", 1),
+    # ncuc import-pipeline --all-downloaded -> "Imported N/M downloaded NCUC records."
+    (r"\bImported\s+(\d+)/\d+\s+downloaded\s+NCUC\s+records?\b", 1),
+    # lineage backfill-evidence-nc -> "Would backfill:         N"
+    (r"\bWould backfill:\s+(\d+)\b", 1),
+    # lineage repair-lineage-gaps-nc -> "Repaired lineage gaps: moved=N"
+    (r"\bRepaired lineage gaps:\s+moved=(\d+)\b", 1),
     # generic fallback: any "processed N" / "extracted N" leading line
     (r"^Processed\s+(\d+)\b", 1),
 ]
@@ -301,6 +307,12 @@ def decide_actions(
 
     for category, action in registry.items():
         count = summary_counts.get(category, 0)
+        if action.summary_count_key:
+            section = report.get(category, {})
+            if isinstance(section, dict):
+                summary = section.get("summary", {})
+                if isinstance(summary, dict):
+                    count = int(summary.get(action.summary_count_key, 0) or 0)
         if count == 0:
             continue
 
@@ -316,7 +328,11 @@ def decide_actions(
         severity = _highest_severity(section)
 
         # Check threshold
-        threshold = SEVERITY_THRESHOLDS.get(severity, 10)
+        threshold = (
+            action.min_findings
+            if action.min_findings is not None
+            else SEVERITY_THRESHOLDS.get(severity, 10)
+        )
         if count < threshold:
             continue
 

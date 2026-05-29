@@ -225,6 +225,23 @@ class TariffCompletenessAuditService:
             and (lnk.effective_end is None or lnk.effective_end >= date_str)
         ]
 
+        # Dedupe by rider_family_key: rider_applicability can contain multiple
+        # rows per (schedule, rider) — typically one undated + one dated link
+        # for the same logical applicability. Keep the most-specific link
+        # (latest effective_start; tie-break: any non-None mandatory or
+        # in_rider_summary flag wins over None).
+        deduped: dict[str, object] = {}
+        for lnk in active_links:
+            existing = deduped.get(lnk.rider_family_key)
+            if existing is None:
+                deduped[lnk.rider_family_key] = lnk
+                continue
+            ex_start = getattr(existing, "effective_start", None) or ""
+            new_start = lnk.effective_start or ""
+            if new_start > ex_start:
+                deduped[lnk.rider_family_key] = lnk
+        active_links = list(deduped.values())
+
         rider_entries: list[RiderCoverageEntry] = []
         engine_summary_total = 0.0
 
@@ -683,27 +700,88 @@ class TariffCompletenessAuditService:
             )
         return entries
 
+    # Class-matching tokens used to pull the customer class out of a charge
+    # label when the customer_class column is NULL (common for older
+    # extractions). Order matters: more specific phrases must come first so
+    # 'Small General Service' doesn't get caught by 'General Service'.
+    _CLASS_LABEL_TOKENS: tuple[tuple[str, str], ...] = (
+        ("small general service", "commercial_small"),
+        ("medium general service", "commercial_medium"),
+        ("large general service", "commercial_large"),
+        ("general service", "commercial_small"),  # default for unspecified GS
+        ("commercial_small", "commercial_small"),
+        ("commercial_medium", "commercial_medium"),
+        ("commercial_large", "commercial_large"),
+        ("commercial", "commercial_small"),
+        ("industrial", "industrial"),
+        ("public authority", "industrial"),
+        ("lighting", "lighting"),
+        ("traffic signal", "traffic_signal"),
+        ("seasonal", "seasonal_intermittent"),
+        ("intermittent", "seasonal_intermittent"),
+        ("residential", "residential"),
+    )
+
+    @classmethod
+    def _label_class(cls, label: str | None) -> str | None:
+        if not label:
+            return None
+        lower = label.lower()
+        for token, klass in cls._CLASS_LABEL_TOKENS:
+            if token in lower:
+                return klass
+        return None
+
     def _sum_per_kwh_rate(
         self, version_id: int, customer_class: str = "residential"
     ) -> float | None:
         """Sum all adjustment $/kWh charges for a version/customer_class.
 
+        Class matching priority:
+        1. `customer_class` column if populated.
+        2. Customer class parsed from `charge_label` (e.g. "Billing
+           Adjustment - Residential", "Rider Adjustment - lighting").
+        3. If neither the column nor the label encodes a class AND the version
+           has exactly one per-kWh adjustment row, treat it as applicable to
+           all classes (e.g. leaf-608 RDM has a single residential rate).
+        4. Otherwise skip the row (better undercount than overcount).
+
         Returns the total in $/kWh (not cents), or None if no matching charges.
         """
         charges = self._repo.list_tariff_charges(version_id)
-        total = 0.0
-        found = False
+        # First pass: enumerate eligible per-kWh adjustment rows and the class
+        # each one resolves to.
+        eligible: list[tuple[object, str | None]] = []
         for c in charges:
             if c.charge_type != "adjustment":
                 continue
             unit = (c.rate_unit or "").lower()
             if "kwh" not in unit:
                 continue
-            # Class matching: None or 'all' means applies to all
-            if c.customer_class and c.customer_class not in ("all", customer_class):
+            explicit = c.customer_class if c.customer_class else None
+            klass = explicit or self._label_class(c.charge_label)
+            eligible.append((c, klass))
+
+        if not eligible:
+            return None
+
+        # Heuristic for ambiguous single-row riders: if no row has a class hint
+        # and there is only one eligible row, treat it as applying to all.
+        all_unknown = all(klass is None for _, klass in eligible)
+        single_row_default = len(eligible) == 1 and all_unknown
+
+        total = 0.0
+        found = False
+        for c, klass in eligible:
+            if klass not in (None, "all", customer_class):
+                continue
+            if klass is None and not single_row_default:
+                # Generic-labelled, multi-row rider (e.g. leaf-604 EDIT-4
+                # variants where each row's class is positional). Cannot
+                # safely attribute without external context; skip.
                 continue
             val = c.rate_value or 0.0
-            # Convert cents/kWh → $/kWh if needed
+            unit = (c.rate_unit or "").lower()
             if unit.startswith("cents") or "¢" in unit:
                 val /= 100.0
             total += val

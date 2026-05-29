@@ -132,6 +132,7 @@ lineage rebind-historical-page-range
 lineage repair-anomaly-nc
 lineage repair-historical-current-snapshot
 lineage repair-legacy-ncuc-data
+lineage repair-lineage-gaps-nc
 lineage retire-historical-document
 lineage retire-provisional-garbage-nc
 lineage retire-tariff-version

@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 import typer
@@ -360,6 +360,213 @@ def show_lineage_gaps_nc(
             f"family={row['family_key']} company={row['company'] or '-'} "
             f"versions={row['version_count']} historical_docs={row['historical_document_count']}"
         )
+
+
+def _repair_lineage_effective_start_gaps(
+    conn: sqlite3.Connection,
+    *,
+    dry_run: bool,
+    limit: int = 100,
+) -> dict[str, object]:
+    """Fill missing effective_start from same-PDF siblings with one known date."""
+    started_at = datetime.now()
+    now = datetime.now(UTC).replace(microsecond=0).isoformat()
+    capped_limit = max(0, int(limit or 0))
+    limit_sql = "" if capped_limit == 0 else "LIMIT ?"
+    params: tuple[object, ...] = () if capped_limit == 0 else (capped_limit,)
+    candidates = conn.execute(
+        f"""
+        WITH pdf_dates AS (
+            SELECT
+                local_path,
+                COUNT(DISTINCT effective_start) AS known_date_count,
+                MAX(effective_start) AS inferred_effective_start
+            FROM historical_documents
+            WHERE state = 'NC'
+              AND local_path IS NOT NULL
+              AND COALESCE(effective_start, '') <> ''
+              AND SUBSTR(effective_start, 1, 4) GLOB '[12][0-9][0-9][0-9]'
+            GROUP BY local_path
+        )
+        SELECT
+            hd.id AS historical_document_id,
+            hd.family_key,
+            hd.title,
+            hd.local_path,
+            pdf_dates.inferred_effective_start
+        FROM historical_documents hd
+        JOIN pdf_dates
+          ON pdf_dates.local_path = hd.local_path
+        WHERE hd.state = 'NC'
+          AND hd.local_path IS NOT NULL
+          AND (hd.effective_start IS NULL OR hd.effective_start = '')
+          AND pdf_dates.known_date_count = 1
+        ORDER BY hd.id DESC
+        {limit_sql}
+        """,
+        params,
+    ).fetchall()
+
+    result: dict[str, object] = {
+        "dry_run": dry_run,
+        "candidates_found": len(candidates),
+        "effective_starts_repaired": 0,
+        "versions_linked": 0,
+        "versions_created": 0,
+        "skipped_existing_linked_version": 0,
+        "skipped_ambiguous_version": 0,
+        "errors": [],
+        "per_doc": [],
+        "duration_ms": 0,
+    }
+
+    for row in candidates:
+        hd_id = int(row["historical_document_id"])
+        family_key = str(row["family_key"])
+        effective_start = str(row["inferred_effective_start"])
+        action = "create_version"
+        version_id: int | None = None
+
+        try:
+            version_rows = conn.execute(
+                """
+                SELECT id, historical_document_id
+                FROM tariff_versions
+                WHERE family_key = ?
+                  AND effective_start = ?
+                ORDER BY id
+                """,
+                (family_key, effective_start),
+            ).fetchall()
+            unlinked_versions = [item for item in version_rows if item["historical_document_id"] is None]
+            linked_versions = [item for item in version_rows if item["historical_document_id"] is not None]
+
+            if len(unlinked_versions) == 1 and not linked_versions:
+                action = "link_version"
+                version_id = int(unlinked_versions[0]["id"])
+            elif not version_rows:
+                action = "create_version"
+            elif linked_versions:
+                action = "skip_existing_linked_version"
+                result["skipped_existing_linked_version"] = int(result["skipped_existing_linked_version"]) + 1
+            else:
+                action = "skip_ambiguous_version"
+                result["skipped_ambiguous_version"] = int(result["skipped_ambiguous_version"]) + 1
+
+            if action.startswith("skip_"):
+                per_doc_action = action
+            else:
+                per_doc_action = action
+                result["effective_starts_repaired"] = int(result["effective_starts_repaired"]) + 1
+                if not dry_run:
+                    conn.execute(
+                        """
+                        UPDATE historical_documents
+                        SET effective_start = ?
+                        WHERE id = ?
+                        """,
+                        (effective_start, hd_id),
+                    )
+
+                if action == "link_version":
+                    result["versions_linked"] = int(result["versions_linked"]) + 1
+                    if not dry_run:
+                        conn.execute(
+                            """
+                            UPDATE tariff_versions
+                            SET historical_document_id = ?
+                            WHERE id = ?
+                            """,
+                            (hd_id, version_id),
+                        )
+                else:
+                    result["versions_created"] = int(result["versions_created"]) + 1
+                    if not dry_run:
+                        cur = conn.execute(
+                            """
+                            INSERT INTO tariff_versions (
+                                family_key, historical_document_id, effective_start,
+                                source_type, confidence_score, notes, created_at
+                            ) VALUES (?, ?, ?, 'regulator', 0.85, ?, ?)
+                            """,
+                            (
+                                family_key,
+                                hd_id,
+                                effective_start,
+                                "Inferred by repair-lineage-gaps-nc from single-date source PDF.",
+                                now,
+                            ),
+                        )
+                        version_id = int(cur.lastrowid)
+
+            result["per_doc"].append(
+                {
+                    "historical_document_id": hd_id,
+                    "family_key": family_key,
+                    "title": row["title"],
+                    "local_path": row["local_path"],
+                    "effective_start": effective_start,
+                    "action": per_doc_action,
+                    "version_id": version_id,
+                }
+            )
+        except Exception as exc:  # pragma: no cover - defensive per-row isolation
+            result["errors"].append({"historical_document_id": hd_id, "error": str(exc)})
+
+    if not dry_run:
+        conn.commit()
+    result["duration_ms"] = int((datetime.now() - started_at).total_seconds() * 1000)
+    return result
+
+
+@lineage_app.command("repair-lineage-gaps-nc")
+def repair_lineage_gaps_nc(
+    dry_run: bool = typer.Option(True, "--dry-run/--execute", help="Preview without modifying DB (default: dry-run)."),
+    limit: int = typer.Option(100, "--limit", help="Max deterministic repairs to process (0 = all)."),
+    json_out: bool = typer.Option(False, "--json", help="Output as JSON."),
+) -> None:
+    """Repair deterministic NC lineage gaps.
+
+    Currently fixes historical documents missing effective_start when all
+    dated sibling spans from the same source PDF agree on exactly one date,
+    then links or creates the matching regulator tariff_version.
+    """
+    _, repository = _bootstrap()
+    conn = connect_sqlite(repository.database_path)
+    try:
+        result = _repair_lineage_effective_start_gaps(conn, dry_run=dry_run, limit=limit)
+    finally:
+        conn.close()
+
+    if json_out:
+        typer.echo(json.dumps(result, indent=2, default=str))
+        return
+
+    moved = int(result["effective_starts_repaired"])
+    typer.echo(f"\nLineage Gap Repair {'(DRY RUN)' if dry_run else '(EXECUTED)'}")
+    typer.echo(f"  Candidates found:           {result['candidates_found']}")
+    typer.echo(f"  Effective starts repaired:  {result['effective_starts_repaired']}")
+    typer.echo(f"  Versions linked:            {result['versions_linked']}")
+    typer.echo(f"  Versions created:           {result['versions_created']}")
+    typer.echo(f"  Skipped existing linked:    {result['skipped_existing_linked_version']}")
+    typer.echo(f"  Skipped ambiguous version:  {result['skipped_ambiguous_version']}")
+    typer.echo(f"  Repaired lineage gaps: moved={moved}")
+
+    if result["errors"]:
+        typer.echo(f"\n  Errors ({len(result['errors'])}):")
+        for item in result["errors"][:10]:
+            typer.echo(f"    - hd:{item['historical_document_id']} {item['error']}")
+
+    for item in result["per_doc"][:10]:
+        typer.echo(
+            "  "
+            f"hd:{item['historical_document_id']} action={item['action']} "
+            f"family={item['family_key']} eff={item['effective_start']}"
+        )
+
+    typer.echo(f"\n  Duration: {result['duration_ms']}ms")
+    if dry_run and moved > 0:
+        typer.echo("\n  Re-run with --execute to apply changes.")
 
 
 @lineage_app.command("show-provenance-gaps-nc")

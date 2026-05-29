@@ -107,8 +107,9 @@ def _charge_applies(charge, season: str | None, customer_class: str | None = Non
             return True  # unknown season — include with warning
         if charge.season != season:
             return False
-    if customer_class and charge.customer_class:
-        if not _class_matches(charge.customer_class, customer_class):
+    resolved_class = charge.customer_class or _label_class(charge.charge_label)
+    if customer_class and resolved_class:
+        if not _class_matches(resolved_class, customer_class):
             return False
     return True
 
@@ -126,6 +127,35 @@ _CLASS_FALLBACKS: dict[str, set[str]] = {
     "commercial_medium": {"commercial"},
     "commercial_large": {"commercial"},
 }
+
+
+_CLASS_LABEL_TOKENS: tuple[tuple[str, str], ...] = (
+    ("small general service", "commercial_small"),
+    ("medium general service", "commercial_medium"),
+    ("large general service", "commercial_large"),
+    ("general service", "commercial_small"),  # default for unspecified GS
+    ("commercial_small", "commercial_small"),
+    ("commercial_medium", "commercial_medium"),
+    ("commercial_large", "commercial_large"),
+    ("commercial", "commercial_small"),
+    ("industrial", "industrial"),
+    ("public authority", "industrial"),
+    ("lighting", "lighting"),
+    ("traffic signal", "traffic_signal"),
+    ("seasonal", "seasonal_intermittent"),
+    ("intermittent", "seasonal_intermittent"),
+    ("residential", "residential"),
+)
+
+
+def _label_class(label: str | None) -> str | None:
+    if not label:
+        return None
+    lower = label.lower()
+    for token, klass in _CLASS_LABEL_TOKENS:
+        if token in lower:
+            return klass
+    return None
 
 
 def _class_matches(charge_class: str | None, requested_class: str) -> bool:
@@ -361,7 +391,8 @@ def _calc_adjustment(
     items = []
     warnings: list[str] = []
     for c in charges:
-        if not _class_matches(c.customer_class, customer_class):
+        resolved_class = c.customer_class or _label_class(c.charge_label)
+        if not _class_matches(resolved_class, customer_class):
             continue
         rate_val = _rate_in_dollars(c.rate_value or 0.0, c.rate_unit)
         unit = (c.rate_unit or "$/kWh").lower()
@@ -543,7 +574,8 @@ def _get_rider_summary_total(
     totals = [
         c for c in charges
         if c.charge_type == "adjustment_total"
-        and _class_matches(c.customer_class, customer_class)
+        and "kwh" in (c.rate_unit or "").lower()
+        and _class_matches(c.customer_class or _label_class(c.charge_label), customer_class)
     ]
     if not totals:
         return None
@@ -621,6 +653,20 @@ def validate_rider_total(
 # ---------------------------------------------------------------------------
 # Main engine
 # ---------------------------------------------------------------------------
+
+
+def _parse_date_str(d_str: str | None) -> datetime.date | None:
+    if not d_str:
+        return None
+    if isinstance(d_str, datetime.date):
+        return d_str
+    # Try parsing YYYY-MM-DD or readable text dates
+    for fmt in ("%Y-%m-%d", "%B %d, %Y", "%b %d, %Y"):
+        try:
+            return datetime.datetime.strptime(d_str.strip(), fmt).date()
+        except ValueError:
+            continue
+    return None
 
 
 class TariffBillingEngine:
@@ -912,25 +958,45 @@ class TariffBillingEngine:
             )
             return items, warnings, optional_applied
 
+        # Filter and resolve links active on ref_date, deduplicated by rider_family_key
+        active_links = {}
+        for link in rider_links:
+            rider_key = link.rider_family_key
+            is_optional = not link.mandatory
+            if is_optional and rider_key not in extra_set:
+                continue
+
+            # Parse start and end dates
+            start = _parse_date_str(link.effective_start)
+            end = _parse_date_str(link.effective_end)
+
+            # Skip if not yet in effect
+            if start and ref_date < start:
+                continue
+            # Skip if already expired
+            if end and ref_date > end:
+                continue
+
+            # Dedup and prefer the most specific link (with the latest start date)
+            if rider_key not in active_links:
+                active_links[rider_key] = link
+            else:
+                existing = active_links[rider_key]
+                existing_start = _parse_date_str(existing.effective_start)
+                if start is not None:
+                    if existing_start is None or start > existing_start:
+                        active_links[rider_key] = link
+
         # Build set of rider family_keys that are part of the leaf-600 Summary of Rider
         # Adjustments (in_rider_summary=True). Direct-bill riders (STS, SSR) are excluded.
         summary_rider_keys: set[str] = {
-            link.rider_family_key for link in rider_links if link.in_rider_summary
+            link.rider_family_key for link in active_links.values() if link.in_rider_summary
         }
 
         not_found: list[str] = []
 
-        for link in rider_links:
+        for rider_key, link in active_links.items():
             is_optional = not link.mandatory
-            if is_optional and link.rider_family_key not in extra_set:
-                continue
-            # Skip riders not yet in effect or already expired as of ref_date
-            if link.effective_start and str(ref_date) < link.effective_start:
-                continue
-            if link.effective_end and str(ref_date) > link.effective_end:
-                continue
-
-            rider_key = link.rider_family_key
             versions = self._repo.list_tariff_versions(rider_key)
             rider_version = _select_version(versions, ref_date)
             if rider_version is None:

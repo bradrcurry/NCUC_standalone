@@ -96,6 +96,53 @@ def test_parse_rider_summary_extracts_dep_residential_service_schedules_block() 
     assert components["PIM"] == 0.002
 
 
+def test_parse_rider_summary_joins_docling_split_section_headers() -> None:
+    """Regression: Docling sometimes splits long DEC SUMMARY section headers across
+    lines, putting the schedule list and 'cents/kWh' marker on a second line below the
+    rate-class name. Without joining, _RATE_CLASS_RE never matches the second header
+    and all rows fall into the first (Residential) block. See production doc
+    e-7-sub-1307/bb3752b0-...pdf."""
+    text = """
+    Duke Energy Carolinas, LLC
+    SUMMARY OF RIDER ADJUSTMENTS
+
+    Residential Schedules RS, RE, ES, RT, RSTC, RETC cents/kWh Effective Date
+    Fuel Cost Adjustment Rider 1.4464 9/1/24
+    Energy Efficiency Rider 0.3775 1/1/24
+    TOTAL cents/kWh 1.4264
+
+    General Service Schedules SGS, BC, LGS, TS, S, HLF, OPT-V,
+
+    PG, SGSTC cents/kWh Effective Date
+    Fuel Cost Adjustment Rider 1.5996 9/1/24
+    Energy Efficiency Rider 0.4343 1/1/24
+    TOTAL cents/kWh 1.7137
+    """
+
+    result = parse_rider_summary(text, source_pdf="dec-leaf99-split.pdf", leaf_no="99")
+    assert len(result.rate_classes) == 2
+
+    blocks_by_class = {rc.rate_class: rc for rc in result.rate_classes}
+    assert blocks_by_class["Residential Schedules"].total_cents_per_kwh == 1.4264
+    assert blocks_by_class["General Service Schedules"].total_cents_per_kwh == 1.7137
+
+    res_components = {
+        item.rider_code: item.cents_per_kwh
+        for item in blocks_by_class["Residential Schedules"].line_items
+        if item.rider_code
+    }
+    assert res_components["FCA"] == 1.4464
+    assert res_components["EE"] == 0.3775
+
+    gs_components = {
+        item.rider_code: item.cents_per_kwh
+        for item in blocks_by_class["General Service Schedules"].line_items
+        if item.rider_code
+    }
+    assert gs_components["FCA"] == 1.5996
+    assert gs_components["EE"] == 0.4343
+
+
 def test_parse_rider_summary_prefers_leaf_effective_date_over_component_dates() -> None:
     text = """
     RIDER EDIT-3 (NC)

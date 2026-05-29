@@ -11,6 +11,7 @@ from duke_rates.historical.ncuc.lineage_gaps import (
     build_lineage_gap_report,
     suggest_family_links,
 )
+from duke_rates.cli_commands.lineage import _repair_lineage_effective_start_gaps
 
 
 def _seed_family(conn, *, family_key: str, schedule_code: str, title: str) -> None:
@@ -340,3 +341,169 @@ def test_build_lineage_gap_report_counts_expected_gap_surfaces(tmp_path: Path) -
     assert summary["versions_missing_historical_document_id_count"] == 1
     assert summary["families_without_charges_count"] == 1
     assert report["families_without_charges"][0]["family_key"] == "nc-progress-leaf-700"
+
+
+def test_repair_lineage_effective_start_gaps_fills_single_date_pdf_and_creates_version(tmp_path: Path) -> None:
+    db_path = tmp_path / "test.db"
+    conn = connect(db_path)
+
+    _seed_family(conn, family_key="nc-progress-leaf-800", schedule_code="RES", title="Residential Service")
+    _seed_historical_document(
+        conn,
+        family_key="nc-progress-leaf-800",
+        title="Residential Service Dated",
+        archived_url="https://example.com/dated.pdf",
+        local_path=str(tmp_path / "bundle.pdf"),
+        content_hash="hash-dated",
+        effective_start="2024-01-01",
+        leaf_no="800",
+    )
+    missing_id = _seed_historical_document(
+        conn,
+        family_key="nc-progress-leaf-800",
+        title="Residential Service Missing Date",
+        archived_url="https://example.com/missing.pdf",
+        local_path=str(tmp_path / "bundle.pdf"),
+        content_hash="hash-missing",
+        effective_start=None,
+        leaf_no="800",
+    )
+    conn.commit()
+
+    dry_run = _repair_lineage_effective_start_gaps(conn, dry_run=True, limit=10)
+
+    assert dry_run["effective_starts_repaired"] == 1
+    assert dry_run["versions_created"] == 1
+    assert conn.execute(
+        "SELECT effective_start FROM historical_documents WHERE id = ?",
+        (missing_id,),
+    ).fetchone()[0] is None
+
+    executed = _repair_lineage_effective_start_gaps(conn, dry_run=False, limit=10)
+
+    assert executed["effective_starts_repaired"] == 1
+    assert executed["versions_created"] == 1
+    assert conn.execute(
+        "SELECT effective_start FROM historical_documents WHERE id = ?",
+        (missing_id,),
+    ).fetchone()[0] == "2024-01-01"
+    version = conn.execute(
+        """
+        SELECT historical_document_id, effective_start, source_type
+        FROM tariff_versions
+        WHERE historical_document_id = ?
+        """,
+        (missing_id,),
+    ).fetchone()
+    assert dict(version) == {
+        "historical_document_id": missing_id,
+        "effective_start": "2024-01-01",
+        "source_type": "regulator",
+    }
+
+    conn.close()
+
+
+def test_repair_lineage_effective_start_gaps_skips_ambiguous_pdf_dates(tmp_path: Path) -> None:
+    db_path = tmp_path / "test.db"
+    conn = connect(db_path)
+
+    _seed_family(conn, family_key="nc-progress-leaf-801", schedule_code="RES", title="Residential Service")
+    for idx, effective_start in enumerate(["2024-01-01", "2025-01-01"], start=1):
+        _seed_historical_document(
+            conn,
+            family_key="nc-progress-leaf-801",
+            title=f"Residential Service Dated {idx}",
+            archived_url=f"https://example.com/dated-{idx}.pdf",
+            local_path=str(tmp_path / "bundle.pdf"),
+            content_hash=f"hash-dated-{idx}",
+            effective_start=effective_start,
+            leaf_no="801",
+        )
+    missing_id = _seed_historical_document(
+        conn,
+        family_key="nc-progress-leaf-801",
+        title="Residential Service Missing Date",
+        archived_url="https://example.com/missing.pdf",
+        local_path=str(tmp_path / "bundle.pdf"),
+        content_hash="hash-missing",
+        effective_start=None,
+        leaf_no="801",
+    )
+    conn.commit()
+
+    result = _repair_lineage_effective_start_gaps(conn, dry_run=False, limit=10)
+
+    assert result["candidates_found"] == 0
+    assert conn.execute(
+        "SELECT effective_start FROM historical_documents WHERE id = ?",
+        (missing_id,),
+    ).fetchone()[0] is None
+    conn.close()
+
+
+def test_deduplicate_historical_documents_uses_span_scoped_hash_groups(tmp_path: Path) -> None:
+    db_path = tmp_path / "test.db"
+    conn = connect(db_path)
+    _seed_family(conn, family_key="nc-progress-leaf-900", schedule_code="RS", title="Residential Service")
+    _seed_family(conn, family_key="nc-progress-leaf-901", schedule_code="GS", title="General Service")
+
+    rows = [
+        (1, "nc-progress-leaf-900", "Residential A", "https://example.com/a.pdf", "copy-a.pdf", 1, 2),
+        (2, "nc-progress-leaf-900", "Residential A Copy", "https://example.com/b.pdf", "copy-b.pdf", 1, 2),
+        (3, "nc-progress-leaf-900", "Residential B", "https://example.com/c.pdf", "span-b.pdf", 3, 4),
+        (4, "nc-progress-leaf-901", "General A", "https://example.com/d.pdf", "other-family.pdf", 1, 2),
+    ]
+    for hd_id, family_key, title, archived_url, local_name, start_page, end_page in rows:
+        conn.execute(
+            """
+            INSERT INTO historical_documents (
+                id, current_document_id, family_key, title, state, company, category, kind,
+                canonical_url, archived_url, snapshot_timestamp, local_path, raw_text_path,
+                content_hash, content_type, direct_status_code, direct_downloadable,
+                revision_label, supersedes_label, leaf_no, effective_start, effective_end,
+                retrieved_at, metadata_json, parsed_result_json, start_page, end_page, evidence_json
+            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            """,
+            (
+                hd_id,
+                None,
+                family_key,
+                title,
+                "NC",
+                "progress",
+                "tariff",
+                "pdf",
+                archived_url,
+                archived_url,
+                "2024-01-01T00:00:00+00:00",
+                str(tmp_path / local_name),
+                None,
+                "shared-hash",
+                "application/pdf",
+                200,
+                1,
+                None,
+                None,
+                "900",
+                "2024-01-01",
+                None,
+                "2024-01-02T00:00:00+00:00",
+                "{}",
+                None,
+                start_page,
+                end_page,
+                "{}",
+            ),
+        )
+    conn.commit()
+    conn.close()
+
+    repo = Repository(db_path)
+    dry_run = repo.deduplicate_historical_documents(dry_run=True)
+
+    assert dry_run["total_groups"] == 1
+    assert dry_run["documents_removed"] == 1
+    assert dry_run["per_group"][0]["removed_ids"] == [2]
+    assert dry_run["per_group"][0]["start_page"] == 1
+    assert dry_run["per_group"][0]["end_page"] == 2

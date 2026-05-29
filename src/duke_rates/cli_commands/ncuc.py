@@ -549,6 +549,15 @@ def ncuc_import_pipeline(
     all_discovered: bool = typer.Option(
         False, help="Import all NCUC discovery records (including pending/failed as leads)."
     ),
+    limit: int | None = typer.Option(
+        None, help="Maximum pending downloaded records to import in this run."
+    ),
+    workers: int = typer.Option(
+        1, help="Worker threads for --all-downloaded imports. Use 1 for Docling stability."
+    ),
+    max_pages: int = typer.Option(
+        75, help="Skip downloaded PDFs above this page count during --all-downloaded imports."
+    ),
 ) -> None:
     """Import NCUC downloads/discoveries into the historical lead and docket pipeline."""
     from duke_rates.historical.ncuc.importer import NcucPipelineImporter
@@ -566,9 +575,16 @@ def ncuc_import_pipeline(
         typer.echo(f"  lead_ids={result['lead_ids']}")
         typer.echo(f"  docket_lead_ids={result['docket_lead_ids']}")
     elif all_downloaded:
-        summaries = importer.import_all_pending_downloads()
-        ok = sum(1 for s in summaries if "error" not in s)
+        summaries = importer.import_all_pending_downloads(
+            limit=limit,
+            max_workers=workers,
+            max_pages=max_pages,
+        )
+        ok = sum(1 for s in summaries if "error" not in s and "skipped" not in s)
+        skipped = sum(1 for s in summaries if "skipped" in s)
         typer.echo(f"Imported {ok}/{len(summaries)} downloaded NCUC records.")
+        if skipped:
+            typer.echo(f"Skipped {skipped} oversized/problematic downloaded NCUC records.")
     elif all_discovered:
         summaries = importer.import_all_discovered()
         ok = sum(1 for s in summaries if "error" not in s)

@@ -224,6 +224,13 @@ def parse_rider_summary(
     # Normalize column-split text (PyMuPDF/fitz puts each table cell on its own line).
     # Detect by checking whether numbers appear on their own lines next to labels.
     normalized = _normalize_column_split_text(text)
+    # Join section headers that Docling split across lines, e.g.
+    #   "General Service Schedules SGS, BC, LGS, TS, S, HLF, OPT-V,"
+    #   "PG, SGSTC cents/kWh Effective Date"
+    # The _RATE_CLASS_RE expects the schedule list and the "cents/kWh" marker
+    # on the same line as the rate-class name; without joining, this header
+    # never matches and rows fall into the wrong rate-class block.
+    normalized = _join_split_section_headers(normalized)
 
     effective_date = _extract_summary_effective_date(text)
     docket_number, order_date = extract_docket_footer(text)
@@ -668,6 +675,77 @@ def _parse_summary_effective_candidate(value: str) -> datetime | None:
         except ValueError:
             continue
     return None
+
+
+def _join_split_section_headers(text: str) -> str:
+    """Re-join rate-class section headers that Docling/PDF extraction split across lines.
+
+    Docling sometimes emits headers like::
+
+        General Service Schedules SGS, BC, LGS, TS, S, HLF, OPT-V,
+
+        PG, SGSTC cents/kWh Effective Date
+
+    The schedule list "SGS, BC, ..., OPT-V, PG, SGSTC" is wrapped to a second
+    line (with a blank line between), so the "cents/kWh" marker ends up on a
+    different line than the rate-class name. ``_RATE_CLASS_RE`` expects them
+    on the same line, so without rejoining the GS section is silently merged
+    into the preceding Residential block.
+
+    Heuristic: a line that contains the keyword "Schedules" or "Service" or
+    "Lighting" AND ends with a trailing comma is a partial header; look ahead
+    up to 2 non-blank lines for a continuation containing "cents/kWh"; if
+    found, join them with a single space.
+    """
+    lines = text.splitlines()
+    out: list[str] = []
+    i = 0
+    n = len(lines)
+    while i < n:
+        line = lines[i]
+        stripped = line.rstrip()
+        # Header heuristic: contains Schedules/Service/Lighting and ends with comma
+        if (
+            stripped.endswith(",")
+            and re.search(r"\b(Schedules?|Service|Lighting)\b", stripped)
+            and not re.search(r"\bcents?\b|/kWh", stripped, re.I)
+        ):
+            # Look ahead up to 3 lines for a continuation containing cents/kWh
+            joined = stripped
+            j = i + 1
+            consumed = 0
+            while j < n and consumed < 3:
+                next_stripped = lines[j].strip()
+                if not next_stripped:
+                    j += 1
+                    consumed += 1
+                    continue
+                # Continuation: starts with uppercase letter/digit (schedule code) AND eventually contains cents/kWh
+                if re.match(r"^[A-Z0-9]", next_stripped):
+                    joined = joined + " " + next_stripped
+                    if re.search(r"cents?/?kWh|/kWh", next_stripped, re.I):
+                        # Found the marker, consume through this line
+                        out.append(joined)
+                        i = j + 1
+                        break
+                    j += 1
+                    consumed += 1
+                else:
+                    break
+            else:
+                # No continuation found within window; emit original
+                out.append(line)
+                i += 1
+                continue
+            if i == j + 1:
+                continue
+            # If loop exited without break (no marker found), emit original
+            out.append(line)
+            i += 1
+        else:
+            out.append(line)
+            i += 1
+    return "\n".join(out)
 
 
 def _normalize_column_split_text(text: str) -> str:

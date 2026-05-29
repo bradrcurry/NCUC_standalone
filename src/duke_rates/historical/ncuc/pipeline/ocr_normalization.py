@@ -119,6 +119,13 @@ def normalize_ocr_text(text: str) -> str:
     normalized = re.sub(r"(?<=\d)(?:[\^?!]{1,3})(?=\s*(?:per\s+kwh|/kwh|kwh|$))", "¢", normalized, flags=re.I)
     # £ after digit → cent sign
     normalized = re.sub(r"(?<=\d)\s*£(?=\s*(?:\d|per\s+kwh|/kwh|$|\n))", "¢", normalized, flags=re.I)
+    # Space-separated 2-3 char OCR garbage between decimal value and /kWh → cent sign.
+    # Observed in DEC BPM rider tariff sheets where ¢ rendered as j!, f!, tf, ji, ff, */
+    # (e.g. "0.0067 f!/kWh"). Conservative whitelist to avoid eating valid units like "c/kWh".
+    normalized = re.sub(
+        r"(\d+\.\d{3,5})\s+(?:j!|f!|tf|ji|ff|\*)(?=\s*/\s*kwh)",
+        r"\1¢", normalized, flags=re.I,
+    )
     # Trailing " 0" at end of line after a decimal → cent sign
     normalized = re.sub(r"(\d+\.\d+)\s+0\s*(\n|$)", r"\1¢\2", normalized)
     # "fi" ligature after decimal → cent sign
