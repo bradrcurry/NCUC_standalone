@@ -5865,6 +5865,13 @@ class CarolinasSolarChoiceRiderProfile:
         r"discount energy per month,\s*per\s*kwh\s+([\d.]+)\s*[¢\u00a2c]",
         re.I,
     )
+    # Customer-and-Distribution Energy Charge (NMB): appears under the
+    # "CUSTOMER AND DISTRIBUTION ENERGY CHARGES" section, used to compute the
+    # Minimum Bill's distribution component for net-metering customers.
+    _ALL_ENERGY_RE = re.compile(
+        r"All Energy per month,\s*per\s*kwh\s+([\d.]+)\s*[¢c]",
+        re.I,
+    )
     _MINIMUM_BILL_RE = re.compile(r"monthly minimum bill of \$([\d.]+)", re.I)
     _STANDBY_CHARGE_RE = re.compile(
         r"Standby Charge of \$([\d.]+)\s*per\s*kW\s*per\s*month",
@@ -5921,6 +5928,8 @@ class CarolinasSolarChoiceRiderProfile:
                 charges.append(self._charge("adjustment", "Net Excess Energy Credit", float(match.group(1)) / 100.0, "$/kWh"))
             if match := self._NON_BYPASSABLE_RE.search(text):
                 charges.append(self._charge("fixed", "Non-Bypassable Charge", float(match.group(1)), "$/kW-month"))
+            if match := self._ALL_ENERGY_RE.search(text):
+                charges.append(self._charge("energy", "Customer and Distribution Energy Charge", float(match.group(1)) / 100.0, "$/kWh"))
             if match := self._MINIMUM_BILL_RE.search(text):
                 charges.append(self._charge("fixed", "Minimum Bill", float(match.group(1)), "$/month"))
         elif family_key == "nc-carolinas-rider-nsc":
