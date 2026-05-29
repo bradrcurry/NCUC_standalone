@@ -60,6 +60,19 @@ _RIDER_HEADER_RE = re.compile(
     r"^\s*(RIDER\s+[A-Z0-9][A-Z0-9-]*(?:\s+[A-Z0-9][A-Z0-9&/() -]{0,80})?)\b",
     re.IGNORECASE,
 )
+_DEP_RIDER_BODY_RIDER_FIRST_RE = re.compile(
+    r"^\s*RIDER\s+(?P<code>[A-Z][A-Z0-9-]{0,7})\s*$"
+)
+_DEP_RIDER_BODY_TITLE_THEN_RIDER_CODE_RE = re.compile(
+    r"^\s*(?P<title>[A-Z][A-Z0-9\s&'/()-]{2,80}?)\s+RIDER\s+(?P<code>[A-Z][A-Z0-9-]{0,7})\s*$"
+)
+_DEP_RIDER_BODY_TITLE_THEN_RIDER_RE = re.compile(
+    r"^\s*(?P<title>[A-Z][A-Z0-9\s&'/()-]{2,80}?)\s+RIDER\s*$"
+)
+_DEP_RIDER_BODY_KNOWN_CODES = {
+    "BPM PROSPECTIVE": "BPM-P",
+    "BPM TRUE-UP": "BPM-T",
+}
 _BASIC_CHARGE_RE = re.compile(
     r"\bBASIC\s+CUSTOMER\s+CHARGE\s*:?\s*\$?\s*([0-9][0-9,]*(?:\.[0-9]+)?)"
     r"(?:\s+PER\s+MONTH)?",
@@ -224,8 +237,75 @@ def is_current_baseline(text: str) -> bool:
     return bool(_CURRENT_BASELINE_RE.search(normalize_text(text)))
 
 
+def find_dep_rider_body_name(text: str) -> str | None:
+    """Return a normalized ``RIDER <CODE> <TITLE>`` name when a DEP rider body
+    page is recognized by its header lines.
+
+    DEP rider body pages carry a clear three-part header — page provenance
+    (``NC Original Leaf No. ...``), the rider title, and ``RIDER <CODE>``.
+    Layouts seen in E-2 Sub 1380:
+
+    * ``PENSIONS COSTS`` / ``RIDER PC`` (title then code)
+    * ``RIDER PTC`` / ``PRODUCTION TAX CREDITS`` (code then title)
+    * ``BPM PROSPECTIVE RIDER`` (title-only, code embedded)
+    * ``SUPPLEMENTARY AND FIRM STANDBY SERVICE RIDER SS`` (title plus
+      trailing code on the same line)
+
+    We scan the first ~12 lines so the page-provenance lines do not pollute
+    the match, and prefer this over generic ``Schedule <X>`` cross-references
+    that appear later in the page body.
+    """
+    lines = [ln.strip() for ln in (text or "").splitlines() if ln.strip()][:14]
+    if not lines:
+        return None
+
+    for idx, line in enumerate(lines):
+        match = _DEP_RIDER_BODY_TITLE_THEN_RIDER_CODE_RE.match(line)
+        if match:
+            title = " ".join(match.group("title").upper().split())
+            code = match.group("code").upper()
+            return f"RIDER {code} {title}"
+
+    for idx, line in enumerate(lines):
+        match = _DEP_RIDER_BODY_TITLE_THEN_RIDER_RE.match(line)
+        if match:
+            title = " ".join(match.group("title").upper().split())
+            code = _DEP_RIDER_BODY_KNOWN_CODES.get(title)
+            if code is None:
+                code = title.split()[0]
+            return f"RIDER {code} {title}"
+
+    for idx, line in enumerate(lines):
+        match = _DEP_RIDER_BODY_RIDER_FIRST_RE.match(line)
+        if not match:
+            continue
+        code = match.group("code").upper()
+        title: str | None = None
+        for offset in (-1, 1):
+            neighbor_idx = idx + offset
+            if 0 <= neighbor_idx < len(lines):
+                candidate = lines[neighbor_idx]
+                if (
+                    candidate.isupper()
+                    and 3 <= len(candidate) <= 80
+                    and not candidate.startswith(("RIDER ", "SCHEDULE ", "NC ", "NCUC", "DUKE", "APPLICATION"))
+                    and "LEAF" not in candidate
+                    and "EFFECTIVE" not in candidate
+                ):
+                    title = " ".join(candidate.split())
+                    break
+        if title:
+            return f"RIDER {code} {title}"
+        return f"RIDER {code}"
+
+    return None
+
+
 def find_schedule_name(text: str) -> str | None:
     """Find the first schedule/rider header-like name in section text."""
+    rider_body = find_dep_rider_body_name(text)
+    if rider_body is not None:
+        return rider_body
     for match in _SCHEDULE_HEADER_RE.finditer(normalize_text(text)):
         name = " ".join(match.group(1).upper().split())
         if name.startswith("SCHEDULE "):
@@ -348,6 +428,7 @@ def detect_blocks_from_sections(
     blocks: list[ProposedTariffBlock] = []
     active_context_by_pdf: dict[str, ExhibitContext | None] = {}
     doc_target_by_pdf: dict[str, bool] = {}
+    last_rider_by_pdf: dict[str, str | None] = {}
 
     for section in sections:
         source_pdf = str(section.get("source_pdf") or "")
@@ -364,9 +445,13 @@ def detect_blocks_from_sections(
 
         context = detect_exhibit_context(norm)
         if context is not None:
+            previous = active_context_by_pdf.get(source_pdf)
             active_context_by_pdf[source_pdf] = context
+            if previous is None or previous.exhibit_key != context.exhibit_key:
+                last_rider_by_pdf[source_pdf] = None
         elif is_current_baseline(norm) or _has_non_target_exhibit(norm):
             active_context_by_pdf[source_pdf] = None
+            last_rider_by_pdf[source_pdf] = None
 
         active_context = active_context_by_pdf.get(source_pdf)
         if active_context is None:
@@ -399,12 +484,31 @@ def detect_blocks_from_sections(
                 )
             )
 
+        rider_body_name = find_dep_rider_body_name(text)
         schedule_name = find_schedule_name(norm)
         section_type = str(section.get("section_type") or "unknown")
-        if schedule_name is None and section_type not in {"rate_schedule", "rider"}:
+        page_starts_new_schedule = _page_starts_new_schedule(text)
+        page_is_admin = _page_is_admin_section(text)
+        if rider_body_name is not None:
+            last_rider_by_pdf[source_pdf] = rider_body_name
+        elif page_starts_new_schedule or page_is_admin:
+            last_rider_by_pdf[source_pdf] = None
+        carry_rider = last_rider_by_pdf.get(source_pdf)
+        if (
+            schedule_name is None
+            and rider_body_name is None
+            and carry_rider is None
+            and section_type not in {"rate_schedule", "rider"}
+        ):
             continue
         if schedule_name is None:
             schedule_name = _first_code_from_json(section.get("schedule_codes_json")) or section_type
+        if rider_body_name is not None:
+            schedule_name = rider_body_name
+            section_type = "rider"
+        elif carry_rider is not None and not page_starts_new_schedule and not page_is_admin:
+            schedule_name = carry_rider
+            section_type = "rider"
 
         fields = extract_rate_fields(text)
         evidence = _build_evidence(norm, active_context.evidence, schedule_name)
@@ -535,6 +639,72 @@ def detect_proposed_tariff_blocks_from_pdf(
         lambda row: texts[int(row["id"])],
         require_target_document=require_target_document,
     )
+
+
+_SCHEDULE_CODE_HEADER_RE = re.compile(r"^SCHEDULE\s+[A-Z0-9][A-Z0-9-]{0,12}\s*$")
+
+_DEP_NEW_SCHEDULE_HEADERS = (
+    "RESIDENTIAL SERVICE",
+    "SMALL GENERAL SERVICE",
+    "MEDIUM GENERAL SERVICE",
+    "LARGE GENERAL SERVICE",
+    "HOURLY PRICING",
+    "OUTDOOR LIGHTING",
+    "STREET LIGHTING",
+    "STREET AND PUBLIC LIGHTING",
+    "TRAFFIC SIGNAL",
+    "SPORTS FIELD LIGHTING",
+    "INDUSTRIAL SERVICE",
+    "BUILDING CONSTRUCTION",
+    "PARALLEL GENERATION",
+    "SEASONAL OR INTERMITTENT",
+    "CHURCH SERVICE",
+    "GENERAL SERVICE",
+    "AGRICULTURAL POST-HARVEST",
+)
+_DEP_ADMIN_HEADERS = (
+    "FORWARD",
+    "SERVICE REGULATIONS",
+    "OUTDOOR LIGHTING SERVICE REGULATIONS",
+    "DISTRIBUTION LINE EXTENSION",
+)
+
+
+def _page_starts_new_schedule(text: str) -> bool:
+    """Return True when a page's top lines look like the start of a new
+    schedule body — used to terminate any in-flight rider carry-forward.
+
+    Only the first ten non-empty lines are inspected, and a leading
+    ``SCHEDULE`` line must be a terse heading-style row (uppercase, no more
+    than a couple of words long) so prose like
+    ``Schedule and Rider(s) with which this Rider is used`` does not get
+    misread as a new schedule.
+    """
+    head = [
+        ln.strip().upper()
+        for ln in (text or "").splitlines()
+        if ln.strip()
+    ][:10]
+    for line in head:
+        if _SCHEDULE_CODE_HEADER_RE.match(line):
+            return True
+        for header in _DEP_NEW_SCHEDULE_HEADERS:
+            if line == header or line.startswith(header + " SCHEDULE"):
+                return True
+    return False
+
+
+def _page_is_admin_section(text: str) -> bool:
+    head = [
+        ln.strip().upper()
+        for ln in (text or "").splitlines()
+        if ln.strip()
+    ][:8]
+    for line in head:
+        for header in _DEP_ADMIN_HEADERS:
+            if line.startswith(header):
+                return True
+    return False
 
 
 def _has_non_target_exhibit(text: str) -> bool:

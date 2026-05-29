@@ -98,8 +98,8 @@ _MONEY_UNIT_RE = re.compile(
 )
 _CENTS_UNIT_RE = re.compile(
     r"\(?\s*"
-    r"(?P<neg>-)?\s*(?P<value>[0-9][0-9,]*(?:\.[0-9]+)?)\s*(?:¢|cents?)\s*\)?\s+"
-    r"(?:per\s+)?"
+    r"(?P<neg>-)?\s*(?P<value>[0-9][0-9,]*(?:\.[0-9]+)?)\s*(?:¢|cents?)\s*\)?"
+    r"\s*(?:\s+per\s+|\s*/\s*)"
     r"(?:on[-\s]?peak\s+|off[-\s]?peak\s+|discount\s+|super[-\s]?off[-\s]?peak\s+)?"
     r"(?:kWh|kilowatt[-\s]?hour)\b",
     re.IGNORECASE,
