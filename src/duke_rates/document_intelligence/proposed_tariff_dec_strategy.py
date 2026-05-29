@@ -100,6 +100,60 @@ _DEC_RIDER_LINE_RE = re.compile(
 )
 _DEC_RIDER_TERMINATOR_RE = re.compile(r"\bOther\s+Tariffs\b", re.IGNORECASE)
 
+_DEC_RIDER_BODY_HEADER_RE = re.compile(
+    r"^\s*RIDER\s+(?P<code>[A-Z][A-Z0-9-]{0,7})\b",
+)
+_DEC_RIDER_BODY_PARENS_RE = re.compile(
+    r"^\s*(?P<title>[A-Za-z][A-Za-z0-9\s'/&\-]*?)\s+Rider\s*\((?P<code>[A-Z][A-Z0-9-]{0,7})\)",
+)
+_DEC_RIDER_CONTENT_PATTERNS: tuple[tuple[str, str, re.Pattern[str]], ...] = (
+    ("FCAR", "FUEL COST ADJUSTMENT", re.compile(
+        r"\b(?:Fuel\s+Cost\s+Adjustment|fuel\s+charge\s+adjustment)\b", re.IGNORECASE
+    )),
+    ("EDPR", "EXISTING DSM PROGRAM COSTS ADJUSTMENT", re.compile(
+        r"\bExisting\s+DSM\s+Program\s+Costs\b", re.IGNORECASE
+    )),
+    ("PTC", "PRODUCTION TAX CREDITS", re.compile(
+        r"\bproduction\s+tax\s+credits?\b.*?[\"'‘’“”�]?PTC[\"'‘’“”�]?",
+        re.IGNORECASE | re.DOTALL,
+    )),
+    ("EE", "ENERGY EFFICIENCY", re.compile(
+        r"\bEnergy\s+Efficiency\s+Rider\b", re.IGNORECASE
+    )),
+    ("US", "UNMETERED SERVICE", re.compile(
+        r"\bUnmetered\s+Service\s+Rider\b", re.IGNORECASE
+    )),
+    ("BPM-P", "BPM PROSPECTIVE", re.compile(
+        r"\bBPM\s+Prospective\s+Rider\b", re.IGNORECASE
+    )),
+    ("BPM-T", "BPM TRUE-UP", re.compile(
+        r"\bBPM\s+True[-\s]?Up\s+Rider\b", re.IGNORECASE
+    )),
+    ("CPRE", "COMPETITIVE PROCUREMENT OF RENEWABLE ENERGY", re.compile(
+        r"\bCPRE\s+Rider\b", re.IGNORECASE
+    )),
+    ("EDIT-4", "EXCESS DEFERRED INCOME TAX", re.compile(
+        r"\bEDIT[-\s]?4\s+Rider\b", re.IGNORECASE
+    )),
+    ("ESM", "EARNINGS SHARING MECHANISM", re.compile(
+        r"\bEarnings\s+Sharing\s+Mechanism\b", re.IGNORECASE
+    )),
+    ("PIM", "PERFORMANCE INCENTIVE MECHANISM", re.compile(
+        r"\bPerformance\s+Incentive\s+Mechanism\b", re.IGNORECASE
+    )),
+)
+_DEC_ADMIN_SECTION_RE = re.compile(
+    r"^\s*("
+    r"FORWARD|"
+    r"DISTRIBUTION\s+LINE\s+EXTENSION\s+PLAN|"
+    r"SERVICE\s+REGULATIONS|"
+    r"OUTDOOR\s+LIGHTING\s+SERVICE\s+REGULATIONS|"
+    r"DEFINITIONS\s*$|"
+    r"I\.\s+APPLICABILITY\s+This\s+Plan"
+    r")\b",
+    re.IGNORECASE,
+)
+
 
 @dataclass(frozen=True)
 class DecIndexEntry:
@@ -114,6 +168,18 @@ class DecRiderCatalogEntry:
     schedule_code: str
     description: str
     normalized_name: str
+
+
+@dataclass(frozen=True)
+class DecRiderBody:
+    """A contiguous page range attributed to a single rider body in DEC."""
+
+    exhibit_key: str
+    rate_year_context: str
+    rider_code: str
+    rider_name: str
+    start_page: int
+    end_page: int
 
 
 @dataclass(frozen=True)
@@ -134,9 +200,12 @@ def has_dec_exhibit_index_header(text: str) -> bool:
 
 def parse_dec_exhibit_index(text: str) -> list[DecIndexEntry]:
     """Parse a DEC exhibit index page into ordered ``(leaf, code, description)``
-    entries. Section headers (``A.``, ``B.``, ``RESIDENTIAL RATE SCHEDULES``...)
-    are skipped; only rows that follow the ``LEAF / CODE / DESCRIPTION``
-    pattern with a trailing dot-leader revision number are captured."""
+    rate-schedule entries. The DEC index covers retail classification sections
+    A.-C. (residential / general / lighting schedules), then a ``RETAIL RIDERS``
+    section, then ``OTHER TARIFFS``. We stop at ``RETAIL RIDERS`` so the rider
+    catalog rows (US, FCAR, EDPR, PTC, PC, RAL-2, ...) do not end up
+    masquerading as schedules — those are parsed separately by
+    ``parse_dec_rider_catalog``."""
     raw_lines = [
         line.strip()
         for line in (text or "").splitlines()
@@ -146,6 +215,8 @@ def parse_dec_exhibit_index(text: str) -> list[DecIndexEntry]:
     i = 0
     while i < len(raw_lines):
         line = raw_lines[i]
+        if _DEC_RIDER_CATALOG_HEADER_RE.search(line):
+            break
         if line.isdigit() and i + 1 < len(raw_lines):
             combined = f"{line} {raw_lines[i + 1]}"
             match = _INDEX_LINE_RE.match(combined)
@@ -515,6 +586,145 @@ def detect_dec_exhibit_sections(
     return sections
 
 
+def classify_dec_page_role(text: str) -> tuple[str, str | None]:
+    """Classify a DEC body page into one of ``schedule`` / ``rider`` /
+    ``admin`` / ``unknown``. For rider pages, also return the rider code if
+    a clear ``RIDER X`` or ``... Rider (X)`` heading is present near the top.
+
+    The role is decided from the first handful of non-empty lines so that
+    headers (RIDER PC, Regulatory Asset and Liability Rider (RAL-2)) win over
+    schedule cross-references that may appear later in the page text.
+    """
+    lines = [ln.strip() for ln in (text or "").splitlines() if ln.strip()]
+    head = lines[:6]
+    if not head:
+        return "unknown", None
+    if _AVAILABILITY_START_RE.match(head[0]):
+        return "schedule", None
+    head_text = " ".join(head)
+    if _DEC_ADMIN_SECTION_RE.search(head_text):
+        return "admin", None
+    if re.search(r"This\s+Plan\s+is\s+applicable", head_text, re.IGNORECASE):
+        return "admin", None
+    for line in head:
+        match = _DEC_RIDER_BODY_HEADER_RE.match(line)
+        if match:
+            return "rider", match.group("code").upper()
+        match = _DEC_RIDER_BODY_PARENS_RE.match(line)
+        if match:
+            return "rider", match.group("code").upper()
+    # Content-based fallback for pages that carry rider rate text but no
+    # explicit header (FCAR, EDPR, PTC bodies often look like an
+    # "APPLICABILITY" page that names the rider only in the prose).
+    leading = "\n".join(lines[:25])
+    for code, _name, pattern in _DEC_RIDER_CONTENT_PATTERNS:
+        if pattern.search(leading):
+            return "rider", code
+    return "unknown", None
+
+
+def detect_dec_rider_bodies(
+    pdf_path: Path | str,
+    exhibit_ranges: dict[str, tuple[int, int]],
+    schedule_end_by_exhibit: dict[str, int],
+) -> list[DecRiderBody]:
+    """Find rider body page ranges within each DEC exhibit.
+
+    Scanning starts one page after the last schedule body ended (so the page
+    where the next AVAILABILITY would have appeared is checked first) and
+    walks forward through that exhibit. ``rider`` and ``admin`` page-role
+    classifications terminate the current run; pages between a rider head
+    and the next role transition belong to that rider.
+    """
+    try:
+        import fitz
+    except ImportError as exc:
+        raise RuntimeError("PyMuPDF/fitz is required for DEC scans") from exc
+
+    doc = fitz.open(Path(pdf_path))
+    try:
+        bodies: list[DecRiderBody] = []
+        for exhibit_key, (start, end) in exhibit_ranges.items():
+            scan_start = schedule_end_by_exhibit.get(exhibit_key, start)
+            current_code: str | None = None
+            current_start: int | None = None
+            current_name: str | None = None
+            rate_year_context: str | None = None
+            for page in range(scan_start, end + 1):
+                text = doc.load_page(page - 1).get_text("text") or ""
+                if rate_year_context is None:
+                    _, rate_year_context = _detect_exhibit_context(text)
+                role, code = classify_dec_page_role(text)
+                if role == "rider" and code:
+                    if current_code and current_start:
+                        bodies.append(
+                            DecRiderBody(
+                                exhibit_key=exhibit_key,
+                                rate_year_context=rate_year_context or "Proposed Exhibit B",
+                                rider_code=current_code,
+                                rider_name=current_name or f"RIDER {current_code}",
+                                start_page=current_start,
+                                end_page=page - 1,
+                            )
+                        )
+                    current_code = code
+                    current_start = page
+                    current_name = _rider_name_from_text(text, code)
+                    continue
+                if role in {"admin", "schedule"} and current_code and current_start:
+                    bodies.append(
+                        DecRiderBody(
+                            exhibit_key=exhibit_key,
+                            rate_year_context=rate_year_context or "Proposed Exhibit B",
+                            rider_code=current_code,
+                            rider_name=current_name or f"RIDER {current_code}",
+                            start_page=current_start,
+                            end_page=page - 1,
+                        )
+                    )
+                    current_code = None
+                    current_start = None
+                    current_name = None
+                    if role == "admin":
+                        break
+            if current_code and current_start:
+                bodies.append(
+                    DecRiderBody(
+                        exhibit_key=exhibit_key,
+                        rate_year_context=rate_year_context or "Proposed Exhibit B",
+                        rider_code=current_code,
+                        rider_name=current_name or f"RIDER {current_code}",
+                        start_page=current_start,
+                        end_page=end,
+                    )
+                )
+    finally:
+        doc.close()
+    return bodies
+
+
+def _rider_name_from_text(text: str, code: str) -> str:
+    """Derive a normalized ``RIDER <CODE> <TITLE>`` name from rider body text."""
+    lines = [ln.strip() for ln in (text or "").splitlines() if ln.strip()]
+    for line in lines[:6]:
+        parens = _DEC_RIDER_BODY_PARENS_RE.match(line)
+        if parens and parens.group("code").upper() == code:
+            title = " ".join(parens.group("title").upper().split())
+            return f"RIDER {code} {title}"
+    upper = code.upper()
+    for idx, line in enumerate(lines[:6]):
+        if line.upper() == f"RIDER {upper}" and idx + 1 < len(lines):
+            title_line = lines[idx + 1].upper()
+            title = re.sub(r"\s+RIDER\s*$", "", title_line)
+            title = " ".join(title.split())
+            if title:
+                return f"RIDER {code} {title}"
+    for cat_code, name, _pattern in _DEC_RIDER_CONTENT_PATTERNS:
+        if cat_code == code:
+            return f"RIDER {code} {name}"
+    return f"RIDER {code}"
+
+
 def detect_dec_proposed_blocks_from_pdf(
     pdf_path: Path | str,
 ) -> tuple[list[ProposedTariffBlock], dict[int, str]]:
@@ -540,11 +750,61 @@ def detect_dec_proposed_blocks_from_pdf(
     pdf = Path(pdf_path)
     doc = fitz.open(pdf)
     try:
+        # Compute exhibit ranges from the (possibly over-attributed) sections.
+        exhibit_ranges: dict[str, tuple[int, int]] = {}
+        for s in sections:
+            if s.exhibit_key not in exhibit_ranges:
+                exhibit_ranges[s.exhibit_key] = (s.start_page, s.end_page)
+            else:
+                lo, hi = exhibit_ranges[s.exhibit_key]
+                exhibit_ranges[s.exhibit_key] = (
+                    min(lo, s.start_page),
+                    max(hi, s.end_page),
+                )
+
+        # Find each exhibit's last schedule section and walk forward to find
+        # the real end of schedule content (the page before the first rider
+        # body or admin section begins). Then rewrite that section's
+        # end_page in place so blocks and downstream attribution agree.
+        last_schedule_by_exhibit: dict[str, int] = {}
+        for exhibit_key, (lo, hi) in exhibit_ranges.items():
+            last = max(
+                (s for s in sections if s.exhibit_key == exhibit_key),
+                key=lambda s: s.start_page,
+            )
+            true_end = last.end_page
+            for page in range(last.start_page + 1, hi + 1):
+                text = doc.load_page(page - 1).get_text("text") or ""
+                role, _ = classify_dec_page_role(text)
+                if role in {"rider", "admin"}:
+                    true_end = page - 1
+                    break
+            if true_end != last.end_page:
+                idx = sections.index(last)
+                sections[idx] = DecExhibitSection(
+                    exhibit_key=last.exhibit_key,
+                    rate_year_context=last.rate_year_context,
+                    schedule_code=last.schedule_code,
+                    description=last.description,
+                    leaf_no=last.leaf_no,
+                    start_page=last.start_page,
+                    end_page=true_end,
+                )
+            last_schedule_by_exhibit[exhibit_key] = true_end
+
+        rider_bodies = detect_dec_rider_bodies(
+            pdf, exhibit_ranges, last_schedule_by_exhibit
+        )
+
         page_texts: dict[int, str] = {}
         rider_catalog_seen: set[tuple[str, str, int]] = set()
         index_pages: dict[str, int] = {}
         for section in sections:
             for page in range(section.start_page, section.end_page + 1):
+                if page not in page_texts:
+                    page_texts[page] = doc.load_page(page - 1).get_text("text") or ""
+        for body in rider_bodies:
+            for page in range(body.start_page, body.end_page + 1):
                 if page not in page_texts:
                     page_texts[page] = doc.load_page(page - 1).get_text("text") or ""
         # Also load index pages so we can scan their RETAIL RIDERS sections.
@@ -588,6 +848,32 @@ def detect_dec_proposed_blocks_from_pdf(
                         ],
                     )
                 )
+        for body in rider_bodies:
+            for page in range(body.start_page, body.end_page + 1):
+                blocks.append(
+                    ProposedTariffBlock(
+                        source_pdf=str(pdf),
+                        section_id=None,
+                        section_index=page,
+                        start_page=page,
+                        end_page=page,
+                        section_type="rider",
+                        exhibit_key=body.exhibit_key,
+                        rate_year_context=body.rate_year_context,
+                        schedule_name=body.rider_name,
+                        basic_customer_charge=None,
+                        volumetric_energy_charge_lines=[],
+                        time_of_use_lines=[],
+                        has_interclass_impact_table=False,
+                        confidence=0.75,
+                        evidence=[
+                            body.rate_year_context,
+                            body.rider_name,
+                            f"Pages {body.start_page}-{body.end_page}",
+                        ],
+                    )
+                )
+
         for exhibit_key, idx_page in index_pages.items():
             if idx_page < 1:
                 continue

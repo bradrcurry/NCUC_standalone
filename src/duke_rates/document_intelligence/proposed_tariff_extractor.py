@@ -97,14 +97,16 @@ _MONEY_UNIT_RE = re.compile(
     re.IGNORECASE,
 )
 _CENTS_UNIT_RE = re.compile(
-    r"([0-9][0-9,]*(?:\.[0-9]+)?)\s*(?:¢|cents?)\s+(?:per\s+)?"
+    r"\(?\s*"
+    r"(?P<neg>-)?\s*(?P<value>[0-9][0-9,]*(?:\.[0-9]+)?)\s*(?:¢|cents?)\s*\)?\s+"
+    r"(?:per\s+)?"
     r"(?:on[-\s]?peak\s+|off[-\s]?peak\s+|discount\s+|super[-\s]?off[-\s]?peak\s+)?"
-    r"kWh\b",
+    r"(?:kWh|kilowatt[-\s]?hour)\b",
     re.IGNORECASE,
 )
 _RATE_WORD_RE = re.compile(
-    r"(basic customer charge|energy|kilowatt-hour|kwh|demand|on-peak|off-peak|"
-    r"discount|rider|credit|charge)",
+    r"(basic customer charge|energy|kilowatt[-\s]?hour|kwh|demand|on-peak|off-peak|"
+    r"discount|rider|credit|charge|fee|adjustment|increment|decrement)",
     re.IGNORECASE,
 )
 
@@ -161,11 +163,14 @@ def extract_charge_candidates(text: str) -> list[ProposedChargeCandidate]:
 
         cents = _CENTS_UNIT_RE.search(line)
         if cents:
+            value = (_to_float(cents.group("value")) or 0.0) / 100.0
+            if cents.group("neg") or _looks_like_parenthesized_credit(line, cents.start()):
+                value = -value
             candidates.append(
                 ProposedChargeCandidate(
                     charge_type=_infer_charge_type(line),
                     charge_label=_label_from_line(line),
-                    rate_value=round((_to_float(cents.group(1)) or 0.0) / 100.0, 8),
+                    rate_value=round(value, 8),
                     rate_unit="$/kWh",
                     raw_line=line,
                     confidence=0.72,
@@ -255,7 +260,9 @@ def persist_proposed_pdf_extraction(
             block_count += 1
             text = text_by_page.get(block.start_page, "")
             if strategy == "dec":
-                charges = _candidates_from_dec(text)
+                split = _candidates_from_dec(text)
+                inline = extract_charge_candidates(text)
+                charges = _dedupe_candidates(list(split) + list(inline))
             else:
                 inline = extract_charge_candidates(text)
                 split = _candidates_from_dec(text)
@@ -407,7 +414,7 @@ def _label_from_line(line: str) -> str:
 
 def _infer_code(tariff_name: str) -> str | None:
     upper = tariff_name.upper()
-    match = re.search(r"\b(?:SCHEDULE|RIDER)\s+([A-Z0-9][A-Z0-9-]{1,20})\b", upper)
+    match = re.search(r"\b(?:SCHEDULE|RIDER)\s+([A-Z0-9][A-Z0-9-]{0,20})\b", upper)
     if match:
         return match.group(1)
     return None
@@ -422,6 +429,17 @@ def _to_float(raw: str) -> float | None:
         return float(raw.replace(",", ""))
     except Exception:
         return None
+
+
+def _looks_like_parenthesized_credit(line: str, match_start: int) -> bool:
+    """Return True when the matched value is wrapped in parentheses — e.g.
+    ``(0.0030¢) per kilowatt hour`` — which is how DEC writes negative/credit
+    rider amounts on rider body pages."""
+    prefix = line[:match_start]
+    if "(" not in prefix.rsplit(")", 1)[-1]:
+        return False
+    open_idx = prefix.rfind("(")
+    return ")" in line[open_idx:]
 
 
 def _detect_strategy(pdf_path: Path, utility: str | None) -> str:
