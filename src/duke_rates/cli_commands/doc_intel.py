@@ -5902,6 +5902,140 @@ def compare_proposed_vs_approved(
         typer.echo("")
 
 
+@doc_intel_app.command("promote-proposed-tariffs")
+def promote_proposed_tariffs(
+    docket_number: str = typer.Option(
+        ...,
+        "--docket-number",
+        help="Docket whose proposed_tariff_* rows should be promoted into accepted lineage.",
+    ),
+    utility: str = typer.Option(
+        "",
+        "--utility",
+        help="Utility name used to scope family matching (e.g. 'Duke Energy Progress').",
+    ),
+    exhibit: str = typer.Option(
+        "",
+        "--exhibit",
+        help="Restrict promotion to one exhibit key (B, B_1, B_2).",
+    ),
+    code: str = typer.Option(
+        "",
+        "--code",
+        help="Restrict promotion to one schedule or rider code.",
+    ),
+    create_new_families: bool = typer.Option(
+        False,
+        "--create-new-families/--no-create-new-families",
+        help=(
+            "Allow inserting brand-new tariff_families rows for proposed riders/schedules "
+            "with no existing accepted family (e.g., PC, PTC, BPM, RAL-3 on E-2 Sub 1380). "
+            "Opt-in because it changes the accepted lineage schema-wise."
+        ),
+    ),
+    confirm: bool = typer.Option(
+        False,
+        "--confirm",
+        help=(
+            "Required to actually write to tariff_versions/tariff_charges. "
+            "Without --confirm the command is a dry-run that only prints the plan."
+        ),
+    ),
+    json_out: bool = typer.Option(False, "--json", help="Output the plan as JSON."),
+) -> None:
+    """Promote approved proposed-tariff candidates into the accepted lineage.
+
+    Defaults to dry-run. Use this only on dockets that have a final order
+    from the commission — the command does not verify approval state on
+    its own. Each action writes one tariff_versions row plus one
+    tariff_charges row per captured proposed charge, with
+    promoted_from_proposed_block_ids recorded in notes for traceability.
+    """
+    from duke_rates.db.sqlite import connect
+    from duke_rates.document_intelligence.proposed_tariff_promoter import (
+        apply_promotion,
+        plan_promotion,
+    )
+
+    settings, _ = _bootstrap()
+    conn = connect(settings.database_path)
+    try:
+        plan = plan_promotion(
+            conn,
+            docket_number=docket_number,
+            utility=utility or None,
+            exhibit_filter=exhibit or None,
+            code_filter=code or None,
+            create_new_families=create_new_families,
+        )
+        applied: list[Any] = []
+        if confirm:
+            applied = apply_promotion(conn, plan)
+    finally:
+        conn.close()
+
+    plan_payload = [a.to_dict() for a in plan.actions]
+    if json_out:
+        typer.echo(
+            json.dumps(
+                {
+                    "docket_number": plan.docket_number,
+                    "dry_run": not confirm,
+                    "actions": plan_payload,
+                    "applied_count": len(applied),
+                },
+                indent=2,
+                default=str,
+            )
+        )
+        return
+
+    mode = "APPLY" if confirm else "DRY-RUN"
+    typer.echo(f"Promotion plan ({mode}) for docket {docket_number}")
+    actionable = plan.actionable
+    typer.echo(
+        f"  total={len(plan.actions)}  actionable={len(actionable)}  "
+        f"skipped={len(plan.actions) - len(actionable)}"
+    )
+    typer.echo("")
+    for action in plan.actions:
+        header = (
+            f"{action.exhibit_key:4s}  {action.tariff_kind:12s}  "
+            f"{action.schedule_code or '-':10s}  {action.tariff_name}"
+        )
+        typer.echo(header)
+        meta = [
+            f"effective_start={action.effective_start}",
+            f"family_key={action.family_key}",
+        ]
+        if action.leaf_no is not None:
+            meta.append(f"leaf={action.leaf_no}")
+        if action.matched_existing_family:
+            meta.append("family=existing")
+        elif action.family_to_create is not None:
+            meta.append(f"family=NEW({action.family_to_create.family_key})")
+        typer.echo("        " + "  ".join(meta))
+        if action.skip_reason:
+            typer.echo(f"        SKIP: {action.skip_reason}")
+            continue
+        typer.echo(
+            f"        would write 1 tariff_versions + "
+            f"{len(action.charges)} tariff_charges"
+        )
+        if action.created_version_id is not None:
+            typer.echo(
+                f"        WROTE tariff_versions.id={action.created_version_id} "
+                f"+ {len(action.created_charge_ids)} tariff_charges rows"
+            )
+
+    if not confirm and actionable:
+        typer.echo("")
+        typer.echo(
+            f"Dry-run only. Re-run with --confirm to write {len(actionable)} "
+            "tariff_versions row(s) and their charges to the accepted lineage."
+        )
+
+
 @doc_intel_app.command("rag-search")
 def rag_search(
     query: str = typer.Argument(..., help="Natural-language question or keyword phrase."),

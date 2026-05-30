@@ -73,6 +73,7 @@ doc-intel list-document-types
 doc-intel mine-docling
 doc-intel process-docling-batch
 doc-intel promote-high-confidence-subset
+doc-intel promote-proposed-tariffs
 doc-intel promote-sections-to-gold
 doc-intel rag-answer
 doc-intel rag-eval

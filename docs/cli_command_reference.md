@@ -714,6 +714,7 @@ Fixture shape:
 | `doc-intel detect-proposed-tariffs` | Read-only detector for forward-looking proposed tariff/rate sections in NCUC rate-case/PBR filings. Uses Exhibit B/B_1/B_2 and MYRP anchors, excludes Exhibit A/current-schedule baselines, and emits page ranges plus JSON-able candidate fields. |
 | `doc-intel extract-proposed-tariffs` | Persist proposed tariff/rider block and charge candidates into separate `proposed_tariff_*` tables. Does not write to accepted `tariff_versions` or `tariff_charges`. |
 | `doc-intel compare-proposed-vs-approved` | Read-only side-by-side diff of `proposed_tariff_*` rows against the latest accepted `tariff_charges` for each matched `tariff_families` row. Filters: `--docket-number` (required), `--utility`, `--exhibit`, `--code`, `--json`. |
+| `doc-intel promote-proposed-tariffs` | Deliberately promote proposed-tariff candidates into accepted `tariff_versions`/`tariff_charges`. **Dry-run by default** — requires explicit `--confirm` to write. `--create-new-families` opts in to inserting brand-new rider/schedule families (e.g., PC, PTC, BPM, RAL-3). Idempotent: skips families already promoted at the same effective_start. |
 
 Typical embedding workflow:
 ```bash
