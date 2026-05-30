@@ -7,6 +7,7 @@ operator explicitly decides they have been approved and should be promoted.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import sqlite3
@@ -238,6 +239,15 @@ def persist_proposed_pdf_extraction(
         text_by_page = _load_pdf_text_by_page(pdf, {b.start_page for b in blocks})
     blocks = _propagate_effective_start_within_exhibit(blocks)
     now = datetime.now(UTC).isoformat()
+    if source_record_id is None:
+        source_record_id = _register_proposed_pdf_in_historical_documents(
+            conn,
+            pdf=pdf,
+            docket_number=docket_number,
+            utility=utility,
+            blocks=blocks,
+            now=now,
+        )
 
     with conn:
         conn.execute(
@@ -462,6 +472,124 @@ def _looks_like_parenthesized_credit(line: str, match_start: int) -> bool:
         return False
     open_idx = prefix.rfind("(")
     return ")" in line[open_idx:]
+
+
+def _synthetic_application_family_key(
+    company: str | None, docket_number: str | None
+) -> str:
+    """Build a stable, distinctive family_key for a proposed application PDF.
+
+    Real schedule/rider families use keys like ``nc-progress-leaf-614``; we
+    use ``nc-<company>-application-<docket-slug>`` so an application doc
+    cannot collide with a real tariff family and is easy to filter out.
+    """
+    company_slug = company or "unknown"
+    docket_slug = re.sub(
+        r"[^a-z0-9]+",
+        "-",
+        (docket_number or "unknown").lower(),
+    ).strip("-")
+    return f"nc-{company_slug}-application-{docket_slug or 'unknown'}"
+
+
+_UTILITY_TO_COMPANY_HD = {
+    "duke energy progress": "progress",
+    "duke energy carolinas": "carolinas",
+    "progress": "progress",
+    "carolinas": "carolinas",
+    "dep": "progress",
+    "dec": "carolinas",
+}
+
+
+def _register_proposed_pdf_in_historical_documents(
+    conn: sqlite3.Connection,
+    *,
+    pdf: Path,
+    docket_number: str | None,
+    utility: str | None,
+    blocks: list[ProposedTariffBlock],
+    now: str,
+) -> int | None:
+    """Register the proposed application PDF in ``historical_documents`` so the
+    proposed lane has a real document_id to point at, and so docket-level
+    lineage tooling can find the filing.
+
+    A lightweight upsert keyed on the file's sha256 content hash: if the PDF
+    has already been registered (e.g., by the normal NCUC discovery pipeline)
+    we reuse that row; otherwise we insert a new row with
+    ``status='proposed'`` and ``category='rate_case_application'`` so it does
+    not get mistaken for an accepted tariff sheet.
+    """
+    if not pdf.exists():
+        return None
+    try:
+        info = conn.execute("PRAGMA table_info(historical_documents)").fetchall()
+    except sqlite3.OperationalError:
+        return None
+    columns = {row[1] for row in info}
+    if not columns:
+        return None
+
+    content_hash = hashlib.sha256(pdf.read_bytes()).hexdigest()
+    existing = conn.execute(
+        "SELECT id FROM historical_documents WHERE content_hash = ? LIMIT 1",
+        (content_hash,),
+    ).fetchone()
+    if existing is not None:
+        return int(existing[0])
+
+    company = _UTILITY_TO_COMPANY_HD.get((utility or "").strip().lower())
+    eff_start = next(
+        (b.effective_start for b in blocks if b.effective_start),
+        None,
+    )
+    docket_label = docket_number or "Unknown Docket"
+    utility_label = utility or "Unknown Utility"
+    family_key = _synthetic_application_family_key(company, docket_number)
+    # The real ``historical_documents`` schema makes canonical_url /
+    # archived_url / direct_downloadable NOT NULL; these PDFs were dropped in
+    # outside the normal discovery flow so we synthesize file:// URLs that
+    # round-trip to the on-disk artifact.
+    local_url = pdf.resolve().as_uri()
+    payload: dict[str, Any] = {
+        "title": f"{utility_label} {docket_label} Proposed Tariff Application",
+        "state": "NC",
+        "company": company,
+        "category": "rate_case_application",
+        "kind": "pdf",
+        "family_key": family_key,
+        "canonical_url": local_url,
+        "archived_url": local_url,
+        "direct_downloadable": 0,
+        "local_path": str(pdf),
+        "content_hash": content_hash,
+        "content_type": "application/pdf",
+        "status": "proposed",
+        "retrieved_at": now,
+        "snapshot_timestamp": now,
+        "effective_start": eff_start,
+        "requested_effective_date": eff_start,
+        "metadata_json": json.dumps(
+            {
+                "source": "proposed_tariff_extractor",
+                "docket_number": docket_number,
+                "utility": utility,
+                "proposal_stage": "proposed",
+                "block_count": len(blocks),
+            }
+        ),
+    }
+    payload = {k: v for k, v in payload.items() if k in columns}
+    if not payload:
+        return None
+    cols = ", ".join(payload.keys())
+    placeholders = ", ".join("?" for _ in payload)
+    cur = conn.execute(
+        f"INSERT INTO historical_documents ({cols}) VALUES ({placeholders})",
+        list(payload.values()),
+    )
+    return int(cur.lastrowid) if cur.lastrowid else None
 
 
 def _propagate_effective_start_within_exhibit(
