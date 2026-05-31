@@ -38,6 +38,12 @@ from duke_rates.analytics.residential_bill_breakdown import (
     load_residential_event_annotations,
     load_rider_glossary,
 )
+from duke_rates.analytics.proposed_residential import (
+    load_proposed_residential_comparison,
+    load_proposed_rider_summary,
+)
+from duke_rates.analytics.proposed_revenue import load_proposed_revenue_adjustments
+from duke_rates.analytics.proposed_financial_context import load_proposed_class_revenue_impacts
 from duke_rates.charts.residential_dashboard import (
     CATEGORY_COLORS,
     all_in_rate_history_stack,
@@ -46,6 +52,7 @@ from duke_rates.charts.residential_dashboard import (
 )
 
 DB_PATH = ROOT / "data" / "db" / "duke_rates.db"
+BREAKDOWN_CACHE_VERSION = "canonical_breakdown_v2"
 
 # Residential schedules only — DEP RES (and RES variants R-TOU, R-TOUD) + DEC RS
 _RESIDENTIAL_GROUP = "residential"
@@ -88,7 +95,34 @@ def _components(db_path: str, utility: str) -> pd.DataFrame:
     return load_dec_rs_canonical_rider_components(database_path=Path(db_path))
 
 
-def _breakdown(db_path: str, utility: str, monthly_kwh: float) -> pd.DataFrame:
+@st.cache_data(show_spinner=False)
+def _proposed_comparison(db_path: str, monthly_kwh: float) -> pd.DataFrame:
+    return load_proposed_residential_comparison(
+        database_path=Path(db_path),
+        representative_kwh=float(monthly_kwh),
+    )
+
+
+@st.cache_data(show_spinner=False)
+def _proposed_riders(db_path: str, monthly_kwh: float) -> pd.DataFrame:
+    return load_proposed_rider_summary(
+        database_path=Path(db_path),
+        representative_kwh=float(monthly_kwh),
+    )
+
+
+@st.cache_data(show_spinner=False)
+def _proposed_revenue(db_path: str) -> pd.DataFrame:
+    return load_proposed_revenue_adjustments(database_path=Path(db_path))
+
+
+@st.cache_data(show_spinner=False)
+def _proposed_class_impacts() -> pd.DataFrame:
+    return load_proposed_class_revenue_impacts(root=ROOT)
+
+
+def _breakdown(db_path: str, utility: str, monthly_kwh: float, cache_version: str) -> pd.DataFrame:
+    _ = cache_version
     return load_latest_residential_breakdown(
         utility=utility,
         monthly_kwh=monthly_kwh,
@@ -151,6 +185,19 @@ st.markdown(
         background: radial-gradient(circle at 50% 0%, #0c111e 0%, #05070d 100%) !important;
         color: #e2e8f0 !important;
         font-family: 'Inter', sans-serif;
+    }
+
+    header[data-testid="stHeader"] {
+        background: rgba(5, 7, 13, 0.96) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    }
+
+    header[data-testid="stHeader"] * {
+        color: #e2e8f0 !important;
+    }
+
+    div[data-testid="stToolbar"] {
+        background: transparent !important;
     }
 
     h1, h2, h3, h4, h5, h6 {
@@ -449,13 +496,12 @@ with st.sidebar:
         "Featured utility",
         list(_STATE_COMPANY_OPTIONS.keys()),
         index=0,
-        help="Sections 1 and 3 focus on this utility. Section 2 always compares both.",
+        help="Sections 1 and 4 focus on this utility. Section 2 can compare either utility.",
     )
     state, company = _STATE_COMPANY_OPTIONS[utility_label]
     primary_utility = "DEP" if company == "progress" else "DEC"
 
     st.markdown("---")
-    show_eia_overlay = st.toggle("Show NC + US EIA averages in Section 2", value=True)
     graph_style = st.selectbox(
         "Graph line style",
         ["Fluid (Curved)", "Stepped (Technical)"],
@@ -610,9 +656,10 @@ kpi_cols[3].markdown(
 )
 
 # Tabs setup to tell a sequential data story
-tab1, tab2, tab3 = st.tabs([
+tab1, tab2, tab3, tab4 = st.tabs([
     "📊 Today's Bill Composition", 
     "📜 Historical Cost Story", 
+    "🧭 Proposed Rate Case",
     "💡 Optimize Your Plan"
 ])
 
@@ -629,7 +676,12 @@ with tab1:
         "fees, EDIT tax credits, and more."
     )
 
-    breakdown_df = _breakdown(str(DB_PATH), primary_utility, float(monthly_kwh))
+    breakdown_df = _breakdown(
+        str(DB_PATH),
+        primary_utility,
+        float(monthly_kwh),
+        BREAKDOWN_CACHE_VERSION,
+    )
     if breakdown_df.empty:
         st.warning(f"No breakdown available for {primary_utility} at this time.")
     else:
@@ -811,15 +863,45 @@ with tab1:
 with tab2:
     st.header("2 · How we got here")
     st.caption(
-        "DEP and DEC residential all-in rates over time, annotated with the laws and "
-        "market events that drove the major changes. Dashed verticals are events — "
-        "hover for the story behind each one."
+        "Residential rates over time, annotated with the laws and market events that drove "
+        "major changes. The timeline starts when the canonical dataset has both base rates "
+        "and enough rider detail to calculate all-in rates with confidence."
     )
 
-    eia_df = _eia(start_year=2016) if show_eia_overlay else pd.DataFrame()
+    control_cols = st.columns([1.2, 1.1, 1.1])
+    utility_options = ["DEP", "DEC", "Compare both"]
+    selected_utility_view = control_cols[0].radio(
+        "Utility view",
+        utility_options,
+        index=utility_options.index(primary_utility),
+        horizontal=True,
+    )
+    rate_view_label = control_cols[1].radio(
+        "Rate lines",
+        ["All-in + base", "All-in only", "Base only"],
+        horizontal=True,
+    )
+    eia_benchmark = control_cols[2].radio(
+        "EIA benchmark",
+        ["Off", "NC", "US", "NC + US"],
+        horizontal=True,
+    )
+
+    chart_utilities = ["DEP", "DEC"] if selected_utility_view == "Compare both" else [selected_utility_view]
+    rate_view = {
+        "All-in + base": "all_in_base",
+        "All-in only": "all_in",
+        "Base only": "base",
+    }[rate_view_label]
+    eia_df = _eia(start_year=2016) if eia_benchmark != "Off" else pd.DataFrame()
+    eia_states = {
+        "NC": ["NC"],
+        "US": ["US"],
+        "NC + US": ["NC", "US"],
+    }.get(eia_benchmark, [])
 
     # Dynamic EIA comparisons
-    if show_eia_overlay and not eia_df.empty and primary_utility in latest_per_utility.index:
+    if eia_benchmark != "Off" and not eia_df.empty and primary_utility in latest_per_utility.index:
         latest_year = int(eia_df["year"].max())
         nc_latest = eia_df[(eia_df["state"] == "NC") & (eia_df["year"] == latest_year)]
         us_latest = eia_df[(eia_df["state"] == "US") & (eia_df["year"] == latest_year)]
@@ -864,14 +946,146 @@ with tab2:
         annotated_history_chart(
             timeline_df,
             events_df=events_df,
-            utilities=["DEP", "DEC"],
+            utilities=chart_utilities,
             monthly_kwh=float(monthly_kwh),
-            show_eia=show_eia_overlay,
-            eia_df=eia_df,
+            show_eia=False,
+            eia_df=pd.DataFrame(),
             interpolation=interpolation,
+            rate_view=rate_view,
         ),
         use_container_width=True,
     )
+    coverage = (
+        timeline_df[timeline_df["utility"].isin(chart_utilities)]
+        .groupby("utility")["effective_date"]
+        .agg(["min", "max", "count"])
+        .reset_index()
+    )
+    coverage_bits = [
+        f"{row.utility}: {pd.to_datetime(row['min']).date()} to {pd.to_datetime(row['max']).date()} ({int(row['count'])} points)"
+        for _, row in coverage.iterrows()
+    ]
+    if coverage_bits:
+        st.caption(
+            "Canonical all-in coverage shown here: "
+            + "; ".join(coverage_bits)
+            + ". Earlier filings may exist in the corpus but are not included until their base and rider data are validated."
+        )
+
+    if "DEC" in chart_utilities:
+        dec_history = timeline_df[timeline_df["utility"] == "DEC"].sort_values("effective_date").copy()
+        if not dec_history.empty:
+            credit_rows = dec_history[dec_history["rider_cents_per_kwh"] < 0]
+            if not credit_rows.empty:
+                first_credit = pd.to_datetime(credit_rows["effective_date"].min()).date()
+                last_credit = pd.to_datetime(credit_rows["effective_date"].max()).date()
+                st.caption(
+                    f"DEC all-in falls below base from {first_credit} through {last_credit} "
+                    "because explicit rider-summary totals are net credits in those periods."
+                )
+            if "rider_component_reconciliation_status" in dec_history.columns:
+                recon = (
+                    dec_history.groupby("rider_component_reconciliation_status", dropna=False)
+                    .size()
+                    .reset_index(name="Periods")
+                    .rename(columns={"rider_component_reconciliation_status": "Component reconciliation"})
+                )
+                with st.expander("DEC rider-total audit", expanded=False):
+                    st.caption(
+                        "The DEC all-in line uses explicit total rider rows when available. "
+                        "`reconciled` means parsed component rows sum back to that explicit total; "
+                        "`component_gap` means the total is still used, but one or more component rows "
+                        "are not fully attributed."
+                    )
+                    st.dataframe(recon, use_container_width=True, hide_index=True)
+                    audit_cols = [
+                        "effective_date",
+                        "rider_cents_per_kwh",
+                        "rider_component_sum_cents_per_kwh",
+                        "rider_component_reconciliation_delta",
+                        "rider_component_reconciliation_status",
+                    ]
+                    audit_view = dec_history[[c for c in audit_cols if c in dec_history.columns]].copy()
+                    audit_view["effective_date"] = pd.to_datetime(audit_view["effective_date"]).dt.date
+                    audit_view = audit_view.rename(
+                        columns={
+                            "effective_date": "Date",
+                            "rider_cents_per_kwh": "Explicit rider total c/kWh",
+                            "rider_component_sum_cents_per_kwh": "Parsed component sum c/kWh",
+                            "rider_component_reconciliation_delta": "Total minus components",
+                            "rider_component_reconciliation_status": "Status",
+                        }
+                    )
+                    st.dataframe(
+                        audit_view,
+                        use_container_width=True,
+                        hide_index=True,
+                        column_config={
+                            "Explicit rider total c/kWh": st.column_config.NumberColumn(format="%.4f"),
+                            "Parsed component sum c/kWh": st.column_config.NumberColumn(format="%.4f"),
+                            "Total minus components": st.column_config.NumberColumn(format="%.4f"),
+                        },
+                    )
+
+    if eia_benchmark != "Off" and not eia_df.empty:
+        st.markdown("#### Benchmark against EIA averages")
+        fig_eia = go.Figure()
+        utility_colors = {"DEP": "#00f2fe", "DEC": "#f355da"}
+        for utility in chart_utilities:
+            sub = timeline_df[timeline_df["utility"] == utility].sort_values("effective_date")
+            if sub.empty:
+                continue
+            fig_eia.add_trace(
+                go.Scatter(
+                    x=sub["effective_date"],
+                    y=sub["all_in_cents_per_kwh"],
+                    mode="lines+markers",
+                    name=f"{utility} all-in",
+                    line=dict(color=utility_colors.get(utility, "#cbd5e1"), width=3, shape=interpolation),
+                    marker=dict(size=5),
+                    hovertemplate="<b>%{x|%b %Y}</b><br>%{y:.3f} ¢/kWh<extra></extra>",
+                )
+            )
+        for state_code, dash, color, label in [
+            ("NC", "dash", "#00ffd0", "NC State Avg (EIA)"),
+            ("US", "dot", "#ffd000", "US Nat'l Avg (EIA)"),
+        ]:
+            if state_code not in eia_states:
+                continue
+            state_eia = eia_df[eia_df["state"] == state_code].sort_values("year")
+            if state_eia.empty:
+                continue
+            xs, ys = [], []
+            for _, row in state_eia.iterrows():
+                year = int(row["year"])
+                xs.extend([pd.Timestamp(year=year, month=1, day=1), pd.Timestamp(year=year, month=12, day=31)])
+                ys.extend([float(row["price_cents_per_kwh"])] * 2)
+            fig_eia.add_trace(
+                go.Scatter(
+                    x=xs,
+                    y=ys,
+                    mode="lines",
+                    name=label,
+                    line=dict(color=color, width=2, dash=dash),
+                    opacity=0.7,
+                    hovertemplate=f"<b>{label}</b>: %{{y:.2f}} ¢/kWh<extra></extra>",
+                )
+            )
+        fig_eia.update_layout(
+            template="plotly_dark",
+            height=360,
+            title="Residential all-in rate vs EIA average price",
+            xaxis_title="Year",
+            yaxis_title="¢/kWh",
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0, bgcolor="rgba(0,0,0,0)"),
+            margin=dict(t=70, b=45),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            yaxis=dict(gridcolor="rgba(255, 255, 255, 0.05)", zeroline=False),
+            xaxis=dict(gridcolor="rgba(255, 255, 255, 0.05)", zeroline=False),
+            font=dict(color="#cbd5e1", family="Inter, sans-serif"),
+        )
+        st.plotly_chart(fig_eia, use_container_width=True)
 
     if not events_df.empty:
         with st.expander("Event details (regulatory & market timeline annotations)", expanded=False):
@@ -961,13 +1175,488 @@ with tab2:
 
 
 # ---------------------------------------------------------------------------
-# Section 3 — What should you do?
+# Section 3 — Proposed rate case
 # ---------------------------------------------------------------------------
 with tab3:
-    st.header("3 · What should you do?")
+    st.header("3 · Proposed rate case: accepted vs proposed")
+    st.caption(
+        "These rows come from proposed NCUC application exhibits and are not approved tariffs. "
+        "The chart uses accepted all-in rates and proposed base rates plus the small set of proposed "
+        "residential riders whose signs and applicability are validated. Ambiguous proposed riders "
+        "remain visible below as review candidates."
+    )
+
+    proposed_df = _proposed_comparison(str(DB_PATH), float(monthly_kwh))
+    rider_summary_df = _proposed_riders(str(DB_PATH), float(monthly_kwh))
+    revenue_df = _proposed_revenue(str(DB_PATH))
+    class_impact_df = _proposed_class_impacts()
+
+    if proposed_df.empty:
+        st.warning("No proposed residential comparison data is available yet.")
+    else:
+        accepted_df = proposed_df[proposed_df["source_status"] == "accepted"].copy()
+        future_df = proposed_df[proposed_df["source_status"] == "proposed"].copy()
+        proposed_df["display_cents_per_kwh"] = proposed_df["all_in_cents_per_kwh"].fillna(
+            proposed_df["base_cents_per_kwh"]
+        )
+        proposed_df["display_bill_amount"] = proposed_df["all_in_bill_amount"].fillna(
+            proposed_df["base_bill_amount"]
+        )
+        accepted_df = proposed_df[proposed_df["source_status"] == "accepted"].copy()
+        future_df = proposed_df[proposed_df["source_status"] == "proposed"].copy()
+
+        st.markdown("#### Residential all-in trajectory with proposed demarcation")
+        fig_prop = go.Figure()
+        for utility in ["DEP", "DEC"]:
+            accepted_rows = accepted_df[accepted_df["utility"] == utility].sort_values("effective_date")
+            proposed_rows = future_df[future_df["utility"] == utility].sort_values(
+                ["effective_date", "scenario_order"]
+            )
+            color = "#4facfe" if utility == "DEP" else "#00ffd0"
+            if not accepted_rows.empty:
+                fig_prop.add_trace(
+                    go.Scatter(
+                        x=accepted_rows["effective_date"],
+                        y=accepted_rows["display_cents_per_kwh"],
+                        mode="markers",
+                        name=f"{utility} accepted latest",
+                        marker=dict(size=11, color=color, symbol="circle"),
+                        hovertemplate=(
+                            "<b>%{fullData.name}</b><br>"
+                            "%{x|%Y-%m-%d}<br>"
+                            "Accepted all-in: %{y:.3f} c/kWh<extra></extra>"
+                        ),
+                    )
+                )
+            if not proposed_rows.empty:
+                fig_prop.add_trace(
+                    go.Scatter(
+                        x=proposed_rows["effective_date"],
+                        y=proposed_rows["display_cents_per_kwh"],
+                        mode="lines+markers+text",
+                        name=f"{utility} proposed",
+                        text=proposed_rows["scenario_label"],
+                        textposition="top center",
+                        line=dict(color=color, width=2.5, dash="dash"),
+                        marker=dict(size=9, color=color, symbol="circle-open"),
+                        hovertemplate=(
+                            "<b>%{text}</b><br>"
+                            "%{x|%Y-%m-%d}<br>"
+                            "Proposed shown: %{y:.3f} c/kWh<extra></extra>"
+                        ),
+                    )
+                )
+
+        if not accepted_df.empty:
+            cutoff = pd.to_datetime(accepted_df["effective_date"]).max().to_pydatetime()
+            fig_prop.add_shape(
+                type="line",
+                x0=cutoff,
+                x1=cutoff,
+                y0=0,
+                y1=1,
+                xref="x",
+                yref="paper",
+                line=dict(color="rgba(255,255,255,0.45)", width=1.5, dash="dot"),
+            )
+            fig_prop.add_annotation(
+                x=cutoff,
+                y=1,
+                xref="x",
+                yref="paper",
+                text="latest accepted",
+                showarrow=False,
+                xanchor="left",
+                yanchor="bottom",
+                font=dict(color="#cbd5e1", size=12),
+            )
+        fig_prop.update_layout(
+            template="plotly_dark",
+            height=430,
+            yaxis_title="All-in equivalent where validated (c/kWh)",
+            xaxis_title="Effective date",
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0, bgcolor="rgba(0,0,0,0)"),
+            margin=dict(t=80, b=45),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            yaxis=dict(gridcolor="rgba(255, 255, 255, 0.05)", zeroline=False),
+            xaxis=dict(gridcolor="rgba(255, 255, 255, 0.05)", zeroline=False),
+            font=dict(color="#cbd5e1", family="Inter, sans-serif"),
+        )
+        st.plotly_chart(fig_prop, use_container_width=True)
+
+        st.markdown("#### Before and after at your selected usage")
+        compare_cols = st.columns(2)
+        for col, utility in zip(compare_cols, ["DEP", "DEC"]):
+            with col:
+                utility_rows = proposed_df[proposed_df["utility"] == utility].copy()
+                accepted_row = utility_rows[utility_rows["source_status"] == "accepted"]
+                proposed_rows = utility_rows[utility_rows["source_status"] == "proposed"]
+                if accepted_row.empty or proposed_rows.empty:
+                    st.info(f"No accepted/proposed comparison available for {utility}.")
+                    continue
+                accepted_latest = accepted_row.iloc[0]
+                proposed_latest = proposed_rows.sort_values(["effective_date", "scenario_order"]).iloc[-1]
+                coverage = str(proposed_latest.get("proposed_rider_coverage") or "")
+                if coverage == "catalog_only_no_values" and len(proposed_rows) > 1:
+                    layered = proposed_rows[
+                        proposed_rows["proposed_rider_coverage"] == "partial_validated"
+                    ].sort_values(["effective_date", "scenario_order"])
+                    if not layered.empty:
+                        proposed_latest = layered.iloc[-1]
+                        coverage = str(proposed_latest.get("proposed_rider_coverage") or "")
+                delta_cents = float(proposed_latest["display_cents_per_kwh"]) - float(
+                    accepted_latest["display_cents_per_kwh"]
+                )
+                delta_bill = float(proposed_latest["display_bill_amount"]) - float(
+                    accepted_latest["display_bill_amount"]
+                )
+                rider_count = int(proposed_latest.get("proposed_rider_count") or 0)
+                coverage_note = (
+                    "latest scenario with validated rider values"
+                    if coverage == "partial_validated"
+                    else "latest scenario uses Rate Year 1 rider values carried forward"
+                    if coverage == "projected_riders_carried_forward"
+                    else "latest scenario is base-only; rider values were not present"
+                )
+                st.markdown(
+                    f"""
+                    <div class="metric-card">
+                        <div class="metric-title">{utility} proposed change</div>
+                        <div class="metric-value">{delta_cents:+.2f} c/kWh</div>
+                        <div class="metric-delta {'delta-positive' if delta_cents >= 0 else 'delta-negative'}">
+                            {proposed_latest['scenario_label']} vs latest accepted · ${delta_bill:+.2f}/mo at {monthly_kwh:,.0f} kWh · {rider_count} validated proposed riders
+                            <br><span style="font-size:0.85rem; opacity:0.78;">{coverage_note}</span>
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+        proposed_display = future_df.copy()
+        proposed_display["effective_date"] = pd.to_datetime(proposed_display["effective_date"]).dt.date
+        proposed_display = proposed_display[
+            [
+                "utility",
+                "scenario_label",
+                "effective_date",
+                "schedule",
+                "base_cents_per_kwh",
+                "rider_cents_per_kwh",
+                "all_in_cents_per_kwh",
+                "base_bill_amount",
+                "all_in_bill_amount",
+                "fixed_monthly_charge",
+                "proposed_rider_coverage",
+                "proposed_rider_count",
+                "docket_number",
+                "source_page",
+                "parser_confidence",
+            ]
+        ].rename(
+            columns={
+                "utility": "Utility",
+                "scenario_label": "Scenario",
+                "effective_date": "Proposed date",
+                "schedule": "Schedule",
+                "base_cents_per_kwh": "Base c/kWh equiv.",
+                "rider_cents_per_kwh": "Validated rider c/kWh",
+                "all_in_cents_per_kwh": "Shown all-in c/kWh",
+                "base_bill_amount": "$/mo base equiv.",
+                "all_in_bill_amount": "$/mo shown all-in",
+                "fixed_monthly_charge": "Fixed $/mo",
+                "proposed_rider_coverage": "Rider coverage",
+                "proposed_rider_count": "Riders layered",
+                "docket_number": "Docket",
+                "source_page": "Page",
+                "parser_confidence": "Confidence",
+            }
+        )
+        st.dataframe(
+            proposed_display,
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "Base c/kWh equiv.": st.column_config.NumberColumn(format="%.4f"),
+                "Validated rider c/kWh": st.column_config.NumberColumn(format="%.4f"),
+                "Shown all-in c/kWh": st.column_config.NumberColumn(format="%.4f"),
+                "$/mo base equiv.": st.column_config.NumberColumn(format="$%.2f"),
+                "$/mo shown all-in": st.column_config.NumberColumn(format="$%.2f"),
+                "Fixed $/mo": st.column_config.NumberColumn(format="$%.2f"),
+                "Confidence": st.column_config.NumberColumn(format="%.2f"),
+            },
+        )
+
+    st.markdown("#### Proposed and new riders")
+    if rider_summary_df.empty:
+        st.info("No proposed rider blocks are available yet.")
+    else:
+        new_only = st.toggle("Show only new proposed riders", value=True)
+        rider_view = rider_summary_df.copy()
+        if new_only and "is_new_rider" in rider_view.columns:
+            rider_view = rider_view[rider_view["is_new_rider"]]
+        if rider_view.empty:
+            st.info("No riders match the selected filter.")
+        else:
+            rider_view["effective_date"] = pd.to_datetime(rider_view["effective_date"], errors="coerce").dt.date
+            cols = [
+                "utility",
+                "scenario_label",
+                "effective_date",
+                "rider_code",
+                "tariff_name",
+                "rate_value",
+                "rate_unit",
+                "validated_status",
+                "validated_rate_value",
+                "validated_dollars",
+                "projection_basis",
+                "validated_reason",
+                "raw_line",
+                "docket_number",
+                "start_page",
+                "is_new_rider",
+            ]
+            available = [c for c in cols if c in rider_view.columns]
+            display = rider_view[available].rename(
+                columns={
+                    "utility": "Utility",
+                    "scenario_label": "Scenario",
+                    "effective_date": "Proposed date",
+                    "rider_code": "Rider",
+                    "tariff_name": "Name",
+                    "rate_value": "Parsed value",
+                    "rate_unit": "Unit",
+                    "validated_status": "Layer status",
+                    "validated_rate_value": "Layered $/kWh",
+                    "validated_dollars": "$/mo at usage",
+                    "projection_basis": "Basis",
+                    "validated_reason": "Validation note",
+                    "raw_line": "Source line",
+                    "docket_number": "Docket",
+                    "start_page": "Page",
+                    "is_new_rider": "New rider",
+                }
+            )
+            st.dataframe(
+                display,
+                use_container_width=True,
+                hide_index=True,
+                column_config={
+                    "Parsed value": st.column_config.NumberColumn(format="%.6f"),
+                    "Layered $/kWh": st.column_config.NumberColumn(format="%.6f"),
+                    "$/mo at usage": st.column_config.NumberColumn(format="$%.2f"),
+                },
+            )
+            st.caption(
+                "Only rows marked included are layered into the proposed all-in calculation. "
+                "Excluded and catalog-only rows are retained here to show what still needs review."
+            )
+
+    st.markdown("#### Why Duke says these increases are needed")
+    if revenue_df.empty:
+        st.info(
+            "Revenue requirement exhibits have not been parsed yet. The next extraction target is "
+            "revenue requirement, rider-offset, and class-impact tables from the same proposed dockets."
+        )
+    else:
+        total_rows = revenue_df[
+            revenue_df["description"].isin(
+                [
+                    "Traditional Base Rate Revenue Requirement",
+                    "Rate Year 1 - Total (L1 + L2)",
+                    "Cumulative Rate year 2 Revenue Increase (L3 + L4)",
+                ]
+            )
+        ].copy()
+        if not total_rows.empty:
+            fig_rev = go.Figure()
+            for utility in ["Duke Energy Progress", "Duke Energy Carolinas"]:
+                utility_rows = total_rows[total_rows["utility"] == utility]
+                if utility_rows.empty:
+                    continue
+                label = "DEP" if "Progress" in utility else "DEC"
+                fig_rev.add_trace(
+                    go.Bar(
+                        x=utility_rows["description"],
+                        y=utility_rows["total_impact_millions"],
+                        name=label,
+                        hovertemplate=(
+                            "<b>%{fullData.name}</b><br>%{x}<br>"
+                            "Total impact: $%{y:.1f}M<extra></extra>"
+                        ),
+                    )
+                )
+            fig_rev.update_layout(
+                template="plotly_dark",
+                height=360,
+                yaxis_title="Requested total impact ($ millions)",
+                xaxis_title="Application scenario",
+                barmode="group",
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+                margin=dict(t=70, b=90),
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                yaxis=dict(gridcolor="rgba(255, 255, 255, 0.05)", zeroline=False),
+                xaxis=dict(gridcolor="rgba(255, 255, 255, 0.05)", zeroline=False),
+                font=dict(color="#cbd5e1", family="Inter, sans-serif"),
+            )
+            st.plotly_chart(fig_rev, use_container_width=True)
+
+        revenue_display = revenue_df[
+            [
+                "utility",
+                "description",
+                "base_rates_millions",
+                "over_amortization_rider_millions",
+                "jaar_rider_millions",
+                "ptc_rider_millions",
+                "bpm_rider_millions",
+                "edpr_rider_millions",
+                "total_impact_millions",
+                "source_page",
+            ]
+        ].rename(
+            columns={
+                "utility": "Utility",
+                "description": "Revenue adjustment scenario",
+                "base_rates_millions": "Base rates $M",
+                "over_amortization_rider_millions": "RAL offset $M",
+                "jaar_rider_millions": "JAAR offset $M",
+                "ptc_rider_millions": "PTC offset $M",
+                "bpm_rider_millions": "BPM offset $M",
+                "edpr_rider_millions": "EDPR offset $M",
+                "total_impact_millions": "Total impact $M",
+                "source_page": "Page",
+            }
+        )
+        st.dataframe(
+            revenue_display,
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "Base rates $M": st.column_config.NumberColumn(format="$%.1fM"),
+                "RAL offset $M": st.column_config.NumberColumn(format="$%.1fM"),
+                "JAAR offset $M": st.column_config.NumberColumn(format="$%.1fM"),
+                "PTC offset $M": st.column_config.NumberColumn(format="$%.1fM"),
+                "BPM offset $M": st.column_config.NumberColumn(format="$%.1fM"),
+                "EDPR offset $M": st.column_config.NumberColumn(format="$%.1fM"),
+                "Total impact $M": st.column_config.NumberColumn(format="$%.1fM"),
+            },
+        )
+        st.caption(
+            "These figures are parsed from each application Exhibit 1 summary and are stated in "
+            "millions of dollars. They describe Duke's requested revenue impacts, not approved outcomes."
+        )
+
+    st.markdown("#### Who absorbs the proposed increase")
+    if class_impact_df.empty:
+        st.info(
+            "Class-level workpaper impacts are not parsed yet. The DEC E-1 Item 45 workpapers "
+            "are the first target; DEP companion workpapers still need authenticated download."
+        )
+    else:
+        scenario_options = list(class_impact_df["scenario_label"].dropna().unique())
+        default_idx = scenario_options.index("MYRP Rate Year 2") if "MYRP Rate Year 2" in scenario_options else 0
+        selected_scenario = st.selectbox(
+            "Class-impact scenario",
+            scenario_options,
+            index=default_idx,
+            key="proposed_class_impact_scenario",
+        )
+        class_view = class_impact_df[
+            (class_impact_df["scenario_label"] == selected_scenario)
+            & (class_impact_df["class_code"] != "Jur Retail")
+        ].copy()
+        class_view = class_view.sort_values("proposed_increase_millions", ascending=False)
+        top_classes = class_view.head(12)
+        fig_class = go.Figure(
+            go.Bar(
+                x=top_classes["class_name"],
+                y=top_classes["proposed_increase_millions"],
+                marker_color="#f472b6",
+                customdata=top_classes[["percent_increase", "source_page"]],
+                hovertemplate=(
+                    "<b>%{x}</b><br>"
+                    "Increase: $%{y:.1f}M<br>"
+                    "Increase vs current class revenue: %{customdata[0]:.2f}%<br>"
+                    "Source page: %{customdata[1]}<extra></extra>"
+                ),
+            )
+        )
+        fig_class.update_layout(
+            template="plotly_dark",
+            height=380,
+            yaxis_title="Proposed class increase ($ millions)",
+            xaxis_title="Customer class",
+            margin=dict(t=30, b=115),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            yaxis=dict(gridcolor="rgba(255, 255, 255, 0.05)", zeroline=False),
+            xaxis=dict(gridcolor="rgba(255, 255, 255, 0.05)", zeroline=False),
+            font=dict(color="#cbd5e1", family="Inter, sans-serif"),
+        )
+        st.plotly_chart(fig_class, use_container_width=True)
+
+        residential_rows = class_view[class_view["class_code"].isin(["NCRS", "NCRT", "NCRE"])]
+        if not residential_rows.empty:
+            residential_total = residential_rows["proposed_increase_millions"].sum()
+            total_increase = class_view["proposed_increase_millions"].sum()
+            share = (residential_total / total_increase * 100) if total_increase else 0
+            st.caption(
+                f"For {selected_scenario}, DEC residential-coded classes account for "
+                f"${residential_total:,.1f}M of the parsed ${total_increase:,.1f}M class increase "
+                f"({share:.1f}%). Source: local E-7 Sub 1329 E-1 Item 45 workpapers."
+            )
+
+        impact_display = class_view[
+            [
+                "utility",
+                "scenario_label",
+                "class_code",
+                "class_name",
+                "proposed_increase_millions",
+                "current_revenue_millions",
+                "proposed_revenue_millions",
+                "percent_increase",
+                "source_page",
+            ]
+        ].rename(
+            columns={
+                "utility": "Utility",
+                "scenario_label": "Scenario",
+                "class_code": "Class code",
+                "class_name": "Class",
+                "proposed_increase_millions": "Increase $M",
+                "current_revenue_millions": "Current class revenue $M",
+                "proposed_revenue_millions": "Proposed class revenue $M",
+                "percent_increase": "Increase %",
+                "source_page": "Page",
+            }
+        )
+        st.dataframe(
+            impact_display,
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "Increase $M": st.column_config.NumberColumn(format="$%.1fM"),
+                "Current class revenue $M": st.column_config.NumberColumn(format="$%.1fM"),
+                "Proposed class revenue $M": st.column_config.NumberColumn(format="$%.1fM"),
+                "Increase %": st.column_config.NumberColumn(format="%.2f%%"),
+            },
+        )
+
+
+# ---------------------------------------------------------------------------
+# Section 4 — What should you do?
+# ---------------------------------------------------------------------------
+with tab4:
+    st.header("4 · What should you do?")
     st.caption(
         "Rank every eligible residential rate plan for your usage, see whether shifting "
-        "to off-peak hours pays off, and estimate the payback period for rooftop solar."
+        "to off-peak hours pays off, and estimate the payback period for rooftop solar. "
+        "Plan ranking currently uses base schedule charges only; Section 1 remains the "
+        "source for current all-in rider composition."
     )
 
     from duke_rates.billing.tariff_engine import BillInput  # noqa: E402
@@ -1011,9 +1700,15 @@ with tab3:
     if not families:
         st.warning(f"No residential schedules found for {state}/{company}.")
     else:
+        st.warning(
+            "Optimizer totals are shown base-only. The raw tariff engine can over-apply "
+            "optional riders with `%` or `$ / block` units to every kWh, which inflates "
+            "some rider-inclusive totals by thousands of dollars. Rider-inclusive plan "
+            "ranking is disabled here until those applicability quantities are guarded."
+        )
         results, partial = [], []
         for fk, _, _ in families:
-            r = engine.calculate(fk, usage, customer_class="residential", include_riders=True)
+            r = engine.calculate(fk, usage, customer_class="residential", include_riders=False)
             if any("Partial TOU coverage" in w for w in r.warnings):
                 partial.append(r)
             elif r.base_subtotal > 0:
@@ -1043,7 +1738,7 @@ with tab3:
                     {
                         "Schedule": r.schedule_title or r.family_key,
                         "Base": round(r.base_subtotal, 2),
-                        "Riders": round(r.rider_subtotal, 2),
+                        "Riders": "disabled",
                         "Total": total,
                         "vs flat RES": vs_baseline,
                         "Confidence": f"{r.source_confidence:.0%}",
@@ -1057,7 +1752,6 @@ with tab3:
                 hide_index=True,
                 column_config={
                     "Base": st.column_config.NumberColumn(format="$%.2f"),
-                    "Riders": st.column_config.NumberColumn(format="$%.2f"),
                     "Total": st.column_config.NumberColumn(format="$%.2f"),
                 },
             )
