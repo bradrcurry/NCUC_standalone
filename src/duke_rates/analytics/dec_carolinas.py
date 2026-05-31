@@ -124,6 +124,9 @@ def load_dec_rs_all_in_history(
             "docket_dir",
             "total_source",
             "quality_flag",
+            "component_reconciliation_status",
+            "component_sum_cents_per_kwh",
+            "component_reconciliation_delta",
         ]
     ].rename(
         columns={
@@ -132,6 +135,9 @@ def load_dec_rs_all_in_history(
             "docket_dir": "rider_docket_dir",
             "total_source": "rider_total_source",
             "quality_flag": "rider_quality_flag",
+            "component_reconciliation_status": "rider_component_reconciliation_status",
+            "component_sum_cents_per_kwh": "rider_component_sum_cents_per_kwh",
+            "component_reconciliation_delta": "rider_component_reconciliation_delta",
         }
     )
     if not rider_coverage_df.empty:
@@ -255,6 +261,16 @@ def load_dec_rs_rider_history(
 
         total_source = "explicit_total" if declared_total is not None else "derived_components"
         quality_flag = "ok" if declared_total is not None else "derived_from_partial_components"
+        component_sum = sum(components.values()) if components else None
+        reconciliation_delta = (
+            total - component_sum if total is not None and component_sum is not None else None
+        )
+        reconciliation_status = _component_reconciliation_status(
+            declared_total=declared_total,
+            component_sum=component_sum,
+            reconciliation_delta=reconciliation_delta,
+            total_source=total_source,
+        )
 
         blocks.append(
             {
@@ -266,6 +282,9 @@ def load_dec_rs_rider_history(
                 "quality_sort": 1 if declared_total is not None else 0,
                 "supersedes": block["supersedes"],
                 "component_count": len(components),
+                "component_sum_cents_per_kwh": component_sum,
+                "component_reconciliation_delta": reconciliation_delta,
+                "component_reconciliation_status": reconciliation_status,
                 "total_rider_cents_per_kwh": total,
                 "total_source": total_source,
                 "quality_flag": quality_flag,
@@ -310,6 +329,24 @@ def load_dec_rs_rider_history(
     )
     component_df = component_df.sort_values(["effective_date", "rider_code"]).reset_index(drop=True)
     return blocks_df.drop(columns=["docket_sort", "quality_sort"]), component_df
+
+
+def _component_reconciliation_status(
+    *,
+    declared_total: float | None,
+    component_sum: float | None,
+    reconciliation_delta: float | None,
+    total_source: str,
+) -> str:
+    if declared_total is None and total_source == "derived_components":
+        return "derived_from_components"
+    if component_sum is None:
+        return "explicit_total_only"
+    if reconciliation_delta is None:
+        return "unknown"
+    if abs(reconciliation_delta) <= 0.005:
+        return "reconciled"
+    return "component_gap"
 
 
 # ---------------------------------------------------------------------------

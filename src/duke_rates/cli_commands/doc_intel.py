@@ -5627,6 +5627,415 @@ def classify_sections_nc(
             typer.echo(f"    {lbl:20s} {n}")
 
 
+@doc_intel_app.command("detect-proposed-tariffs")
+def detect_proposed_tariffs(
+    source_pdf: str = typer.Option(
+        "",
+        "--source-pdf",
+        help="Substring filter for a specific source_pdf.",
+    ),
+    pdf_path: Path | None = typer.Option(
+        None,
+        "--pdf-path",
+        help="Scan a local PDF directly when document_sections/page artifacts are unavailable.",
+    ),
+    limit: int = typer.Option(
+        0,
+        "--limit",
+        help="Read at most N document_sections before detection (0 = all).",
+    ),
+    max_chars: int = typer.Option(
+        8000,
+        "--max-chars",
+        help="Max page text chars loaded per section.",
+    ),
+    json_out: bool = typer.Option(False, "--json", help="Output raw JSON."),
+    require_target_document: bool = typer.Option(
+        True,
+        "--require-target-document/--include-generic-exhibit-b",
+        help=(
+            "Default: require rate-case/PBR application anchors in the same PDF. "
+            "Use --include-generic-exhibit-b for broader Exhibit B scans."
+        ),
+    ),
+) -> None:
+    """Find forward-looking proposed tariff/rate sections in NCUC filings.
+
+    This is a read-only detector. It uses exhibit anchors such as Exhibit B,
+    Application Exhibit B_1/B_2, and MYRP Rate Year 1/2 while excluding
+    Exhibit A/current-schedule baseline text.
+    """
+    from duke_rates.db.sqlite import connect
+    from duke_rates.document_intelligence.proposed_tariff_detector import (
+        detect_proposed_tariff_blocks,
+        detect_proposed_tariff_blocks_from_pdf,
+    )
+
+    settings, _ = _bootstrap()
+    if pdf_path is not None:
+        blocks = detect_proposed_tariff_blocks_from_pdf(
+            pdf_path,
+            max_pages=limit,
+            require_target_document=require_target_document,
+        )
+    else:
+        conn = connect(settings.database_path)
+        try:
+            blocks = detect_proposed_tariff_blocks(
+                conn,
+                source_pdf=source_pdf or None,
+                limit=limit,
+                max_chars=max_chars,
+                require_target_document=require_target_document,
+            )
+        finally:
+            conn.close()
+
+    rows = [b.to_dict() for b in blocks]
+    if json_out:
+        typer.echo(json.dumps(rows, indent=2, default=str))
+        return
+
+    by_exhibit: dict[str, int] = {}
+    by_pdf: dict[str, int] = {}
+    for row in rows:
+        by_exhibit[row["exhibit_key"]] = by_exhibit.get(row["exhibit_key"], 0) + 1
+        by_pdf[row["source_pdf"]] = by_pdf.get(row["source_pdf"], 0) + 1
+
+    typer.echo("Proposed Tariff Detector")
+    typer.echo(f"  candidates={len(rows)}")
+    if by_exhibit:
+        typer.echo(
+            "  exhibits="
+            + ", ".join(f"{key}:{n}" for key, n in sorted(by_exhibit.items()))
+        )
+    if by_pdf:
+        typer.echo("  top_documents:")
+        for pdf, n in sorted(by_pdf.items(), key=lambda item: -item[1])[:10]:
+            typer.echo(f"    {n:4d}  {pdf}")
+
+    if not rows:
+        return
+
+    typer.echo("\nCandidates")
+    for row in rows[:25]:
+        charge = row["basic_customer_charge"] or "-"
+        tou = len(row["time_of_use_lines"])
+        energy = len(row["volumetric_energy_charge_lines"])
+        typer.echo(
+            "  "
+            f"pages={row['start_page']}-{row['end_page']} "
+            f"exhibit={row['exhibit_key']} "
+            f"confidence={row['confidence']:.2f} "
+            f"schedule={row['schedule_name']} "
+            f"basic={charge} energy_lines={energy} tou_lines={tou}"
+        )
+        typer.echo(f"    {row['source_pdf']}")
+        if row["evidence"]:
+            typer.echo(f"    evidence={row['evidence'][0][:160]}")
+    if len(rows) > 25:
+        typer.echo(f"\n  ... {len(rows) - 25} more; rerun with --json for full output")
+
+
+@doc_intel_app.command("extract-proposed-tariffs")
+def extract_proposed_tariffs(
+    pdf_path: Path = typer.Option(
+        ...,
+        "--pdf-path",
+        help="Local proposed application PDF to scan and parse.",
+    ),
+    docket_number: str = typer.Option("", "--docket-number"),
+    utility: str = typer.Option("", "--utility"),
+    source_record_id: int | None = typer.Option(None, "--source-record-id"),
+    report_path: Path | None = typer.Option(
+        None,
+        "--report-path",
+        help="Optional JSON report path for parsed blocks and charge candidates.",
+    ),
+    json_out: bool = typer.Option(False, "--json", help="Output summary JSON."),
+) -> None:
+    """Persist proposed tariff/rider charge candidates outside production rates."""
+    from duke_rates.db.sqlite import connect
+    from duke_rates.document_intelligence.proposed_tariff_extractor import (
+        persist_proposed_pdf_extraction,
+    )
+
+    settings, _ = _bootstrap()
+    conn = connect(settings.database_path)
+    try:
+        summary = persist_proposed_pdf_extraction(
+            conn,
+            pdf_path=pdf_path,
+            docket_number=docket_number or None,
+            utility=utility or None,
+            source_record_id=source_record_id,
+            report_path=report_path,
+        )
+    finally:
+        conn.close()
+
+    payload = {
+        "document_id": summary.document_id,
+        "blocks_detected": summary.blocks_detected,
+        "blocks_persisted": summary.blocks_persisted,
+        "charges_persisted": summary.charges_persisted,
+        "report_path": summary.report_path,
+    }
+    if json_out:
+        typer.echo(json.dumps(payload, indent=2))
+        return
+    typer.echo("Proposed tariff extraction complete")
+    for key, value in payload.items():
+        typer.echo(f"  {key}={value}")
+
+
+@doc_intel_app.command("compare-proposed-vs-approved")
+def compare_proposed_vs_approved(
+    docket_number: str = typer.Option(
+        ...,
+        "--docket-number",
+        help="Docket whose proposed_tariff_* rows should be compared, e.g. 'E-2 Sub 1380'.",
+    ),
+    utility: str = typer.Option(
+        "",
+        "--utility",
+        help=(
+            "Utility name used to scope tariff_families matching, e.g. "
+            "'Duke Energy Progress' or 'Duke Energy Carolinas'."
+        ),
+    ),
+    exhibit: str = typer.Option(
+        "",
+        "--exhibit",
+        help="Restrict to one exhibit key (B, B_1, B_2).",
+    ),
+    code: str = typer.Option(
+        "",
+        "--code",
+        help="Restrict to one schedule/rider code (e.g. PC, RAL-2).",
+    ),
+    json_out: bool = typer.Option(False, "--json", help="Output JSON instead of a table."),
+) -> None:
+    """Compare proposed tariffs/riders to the latest accepted lineage.
+
+    Read-only. Reads ``proposed_tariff_*`` rows for the docket and looks up a
+    matching ``tariff_families`` row to fetch the latest approved version's
+    ``tariff_charges``. Nothing is written; promotion of a candidate into
+    accepted lineage stays a separate explicit step.
+    """
+    from duke_rates.db.sqlite import connect
+    from duke_rates.document_intelligence.proposed_vs_approved import (
+        build_comparisons,
+    )
+
+    settings, _ = _bootstrap()
+    conn = connect(settings.database_path)
+    try:
+        comparisons = build_comparisons(
+            conn,
+            docket_number=docket_number,
+            utility=utility or None,
+            exhibit_filter=exhibit or None,
+            code_filter=code or None,
+        )
+    finally:
+        conn.close()
+
+    if json_out:
+        typer.echo(
+            json.dumps([c.to_dict() for c in comparisons], indent=2, default=str)
+        )
+        return
+
+    if not comparisons:
+        typer.echo(f"No proposed tariffs found for docket {docket_number!r}.")
+        return
+
+    matched = sum(1 for c in comparisons if c.family_match is not None)
+    typer.echo(f"Docket: {docket_number}")
+    typer.echo(
+        f"  proposed tariffs: {len(comparisons)} "
+        f"({matched} matched to an accepted family, "
+        f"{len(comparisons) - matched} new / unmatched)"
+    )
+    typer.echo("")
+    for c in comparisons:
+        header = (
+            f"{c.exhibit_key:4s}  {c.tariff_kind:8s}  "
+            f"{c.schedule_code or '-':10s}  {c.tariff_name}"
+        )
+        typer.echo(header)
+        meta_bits = [f"pages={c.pages}"]
+        if c.proposed_leaf_no is not None:
+            meta_bits.append(f"leaf={c.proposed_leaf_no}")
+        if c.proposed_effective_start:
+            meta_bits.append(f"proposed_effective={c.proposed_effective_start}")
+        typer.echo("        " + "  ".join(meta_bits))
+        if c.family_match:
+            typer.echo(
+                f"        family={c.family_match.family_key} "
+                f"(strategy={c.family_match.match_strategy}, "
+                f"approved_effective={c.approved_effective_start or 'n/a'})"
+            )
+        else:
+            typer.echo("        family=<no matching accepted family - new/unmatched>")
+        if c.proposed_charges:
+            typer.echo("        proposed:")
+            for pc in c.proposed_charges:
+                typer.echo(
+                    f"          {pc.charge_type:11s} "
+                    f"{(pc.charge_label or '')[:50]:52s} "
+                    f"{pc.rate_value!s:>12} {pc.rate_unit or ''}"
+                )
+        else:
+            typer.echo("        proposed: <no charges extracted>")
+        if c.approved_charges:
+            typer.echo("        approved:")
+            for ac in c.approved_charges:
+                typer.echo(
+                    f"          {ac.charge_type:11s} "
+                    f"{(ac.charge_label or '')[:50]:52s} "
+                    f"{ac.rate_value!s:>12} {ac.rate_unit or ''}"
+                )
+        elif c.family_match:
+            typer.echo("        approved: <family found but no current charges>")
+        typer.echo("")
+
+
+@doc_intel_app.command("promote-proposed-tariffs")
+def promote_proposed_tariffs(
+    docket_number: str = typer.Option(
+        ...,
+        "--docket-number",
+        help="Docket whose proposed_tariff_* rows should be promoted into accepted lineage.",
+    ),
+    utility: str = typer.Option(
+        "",
+        "--utility",
+        help="Utility name used to scope family matching (e.g. 'Duke Energy Progress').",
+    ),
+    exhibit: str = typer.Option(
+        "",
+        "--exhibit",
+        help="Restrict promotion to one exhibit key (B, B_1, B_2).",
+    ),
+    code: str = typer.Option(
+        "",
+        "--code",
+        help="Restrict promotion to one schedule or rider code.",
+    ),
+    create_new_families: bool = typer.Option(
+        False,
+        "--create-new-families/--no-create-new-families",
+        help=(
+            "Allow inserting brand-new tariff_families rows for proposed riders/schedules "
+            "with no existing accepted family (e.g., PC, PTC, BPM, RAL-3 on E-2 Sub 1380). "
+            "Opt-in because it changes the accepted lineage schema-wise."
+        ),
+    ),
+    confirm: bool = typer.Option(
+        False,
+        "--confirm",
+        help=(
+            "Required to actually write to tariff_versions/tariff_charges. "
+            "Without --confirm the command is a dry-run that only prints the plan."
+        ),
+    ),
+    json_out: bool = typer.Option(False, "--json", help="Output the plan as JSON."),
+) -> None:
+    """Promote approved proposed-tariff candidates into the accepted lineage.
+
+    Defaults to dry-run. Use this only on dockets that have a final order
+    from the commission — the command does not verify approval state on
+    its own. Each action writes one tariff_versions row plus one
+    tariff_charges row per captured proposed charge, with
+    promoted_from_proposed_block_ids recorded in notes for traceability.
+    """
+    from duke_rates.db.sqlite import connect
+    from duke_rates.document_intelligence.proposed_tariff_promoter import (
+        apply_promotion,
+        plan_promotion,
+    )
+
+    settings, _ = _bootstrap()
+    conn = connect(settings.database_path)
+    try:
+        plan = plan_promotion(
+            conn,
+            docket_number=docket_number,
+            utility=utility or None,
+            exhibit_filter=exhibit or None,
+            code_filter=code or None,
+            create_new_families=create_new_families,
+        )
+        applied: list[Any] = []
+        if confirm:
+            applied = apply_promotion(conn, plan)
+    finally:
+        conn.close()
+
+    plan_payload = [a.to_dict() for a in plan.actions]
+    if json_out:
+        typer.echo(
+            json.dumps(
+                {
+                    "docket_number": plan.docket_number,
+                    "dry_run": not confirm,
+                    "actions": plan_payload,
+                    "applied_count": len(applied),
+                },
+                indent=2,
+                default=str,
+            )
+        )
+        return
+
+    mode = "APPLY" if confirm else "DRY-RUN"
+    typer.echo(f"Promotion plan ({mode}) for docket {docket_number}")
+    actionable = plan.actionable
+    typer.echo(
+        f"  total={len(plan.actions)}  actionable={len(actionable)}  "
+        f"skipped={len(plan.actions) - len(actionable)}"
+    )
+    typer.echo("")
+    for action in plan.actions:
+        header = (
+            f"{action.exhibit_key:4s}  {action.tariff_kind:12s}  "
+            f"{action.schedule_code or '-':10s}  {action.tariff_name}"
+        )
+        typer.echo(header)
+        meta = [
+            f"effective_start={action.effective_start}",
+            f"family_key={action.family_key}",
+        ]
+        if action.leaf_no is not None:
+            meta.append(f"leaf={action.leaf_no}")
+        if action.matched_existing_family:
+            meta.append("family=existing")
+        elif action.family_to_create is not None:
+            meta.append(f"family=NEW({action.family_to_create.family_key})")
+        typer.echo("        " + "  ".join(meta))
+        if action.skip_reason:
+            typer.echo(f"        SKIP: {action.skip_reason}")
+            continue
+        typer.echo(
+            f"        would write 1 tariff_versions + "
+            f"{len(action.charges)} tariff_charges"
+        )
+        if action.created_version_id is not None:
+            typer.echo(
+                f"        WROTE tariff_versions.id={action.created_version_id} "
+                f"+ {len(action.created_charge_ids)} tariff_charges rows"
+            )
+
+    if not confirm and actionable:
+        typer.echo("")
+        typer.echo(
+            f"Dry-run only. Re-run with --confirm to write {len(actionable)} "
+            "tariff_versions row(s) and their charges to the accepted lineage."
+        )
+
+
 @doc_intel_app.command("rag-search")
 def rag_search(
     query: str = typer.Argument(..., help="Natural-language question or keyword phrase."),
