@@ -41,6 +41,19 @@ def test_extract_charge_candidates_keeps_rider_adjustment_separate() -> None:
     assert charges[0].rate_value == 0.00123
 
 
+def test_extract_charge_candidates_reads_critical_peak_and_standard_periods() -> None:
+    charges = extract_charge_candidates(
+        """
+        1. 48.712¢ per Critical Peak kWh
+        B. kWh Energy Charge: 15.936¢ per Standard kWh
+        """
+    )
+
+    by_label = {c.charge_label: c for c in charges}
+    assert by_label["Critical Peak kWh"].rate_value == 0.48712
+    assert by_label["kWh Energy Charge"].rate_value == 0.15936
+
+
 def _hd_conn() -> sqlite3.Connection:
     conn = sqlite3.connect(":memory:")
     conn.row_factory = sqlite3.Row

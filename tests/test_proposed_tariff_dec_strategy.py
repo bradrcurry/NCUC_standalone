@@ -125,3 +125,18 @@ def test_extract_dec_split_line_charges_skips_bare_thresholds() -> None:
     """
 
     assert extract_dec_split_line_charges(text) == []
+
+
+def test_extract_dec_split_line_charges_pairs_critical_peak_and_standard_labels() -> None:
+    text = """
+    Critical Peak kWh
+    48.712¢
+    Standard kWh
+    15.936¢
+    """
+
+    charges = extract_dec_split_line_charges(text)
+
+    by_label = {c.charge_label: c for c in charges}
+    assert by_label["Critical Peak kWh"].rate_value == 0.48712
+    assert by_label["Standard kWh"].rate_value == 0.15936

@@ -103,7 +103,8 @@ _CENTS_UNIT_RE = re.compile(
     r"\(?\s*"
     r"(?P<neg>-)?\s*(?P<value>[0-9][0-9,]*(?:\.[0-9]+)?)\s*(?:¢|cents?)\s*\)?"
     r"\s*(?:\s+per\s+|\s*/\s*)"
-    r"(?:on[-\s]?peak\s+|off[-\s]?peak\s+|discount\s+|super[-\s]?off[-\s]?peak\s+)?"
+    r"(?:critical[-\s]?peak\s+|on[-\s]?peak\s+|off[-\s]?peak\s+|discount\s+|"
+    r"super[-\s]?off[-\s]?peak\s+|standard\s+)?"
     r"(?:kWh|kilowatt[-\s]?hour)\b",
     re.IGNORECASE,
 )
@@ -422,7 +423,7 @@ def _infer_charge_type(line: str) -> str:
 
 
 def _label_from_line(line: str) -> str:
-    cleaned = _clean_line(line)
+    cleaned = _strip_leading_list_marker(_clean_line(line))
     before = re.split(
         r"\$?\s*[0-9][0-9,]*(?:\.[0-9]+)?\s*(?:¢|cents?|per|\$)",
         cleaned,
@@ -442,6 +443,10 @@ def _label_from_line(line: str) -> str:
     if after:
         return after[:120]
     return "Proposed Charge"
+
+
+def _strip_leading_list_marker(line: str) -> str:
+    return re.sub(r"^\s*(?:[A-Z]|\d{1,2})[.)]\s+", "", line or "").strip()
 
 
 def _infer_code(tariff_name: str) -> str | None:

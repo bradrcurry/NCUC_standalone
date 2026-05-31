@@ -67,6 +67,7 @@ _RATE_LABEL_KEYWORDS_RE = re.compile(
     r"demand\s+charge|"
     r"energy\s+charge|"
     r"on[-\s]?peak|off[-\s]?peak|"
+    r"critical[-\s]?peak|standard|"
     r"discount|"
     r"rider\s+adjustment|"
     r"facilities\s+charge|"

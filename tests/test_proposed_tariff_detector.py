@@ -239,3 +239,51 @@ def test_detect_blocks_extracts_starred_new_rider_catalog_entries() -> None:
         "RIDER PTC PRODUCTION TAX CREDITS",
     ]
     assert all(block.section_type == "rider_catalog" for block in blocks)
+
+
+def test_detect_blocks_carries_schedule_context_to_rate_continuation_pages() -> None:
+    sections = [
+        {
+            "id": 1,
+            "source_pdf": "dep-rate-case-application.pdf",
+            "section_index": 1,
+            "start_page": 478,
+            "end_page": 478,
+            "section_type": "unknown",
+            "schedule_codes_json": "[]",
+        },
+        {
+            "id": 2,
+            "source_pdf": "dep-rate-case-application.pdf",
+            "section_index": 2,
+            "start_page": 479,
+            "end_page": 479,
+            "section_type": "unknown",
+            "schedule_codes_json": "[]",
+        },
+    ]
+    text_by_id = {
+        1: """
+            PBR Application
+            Application Exhibit B_2
+            RESIDENTIAL SERVICE
+            TIME-OF-USE
+            SCHEDULE R-TOUD
+            AVAILABILITY
+        """,
+        2: """
+            MONTHLY RATE
+            Basic Customer Charge:
+            $16.00
+            20.203¢ per On-Peak kWh
+            8.569¢ per Off-Peak kWh
+        """,
+    }
+
+    blocks = detect_blocks_from_sections(sections, lambda row: text_by_id[row["id"]])
+
+    assert len(blocks) == 2
+    assert blocks[0].schedule_name == "SCHEDULE R-TOUD"
+    assert blocks[1].schedule_name == "SCHEDULE R-TOUD"
+    assert blocks[1].section_type == "rate_schedule"
+    assert blocks[1].volumetric_energy_charge_lines

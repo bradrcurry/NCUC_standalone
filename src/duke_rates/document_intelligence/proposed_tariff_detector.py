@@ -482,6 +482,7 @@ def detect_blocks_from_sections(
     active_context_by_pdf: dict[str, ExhibitContext | None] = {}
     doc_target_by_pdf: dict[str, bool] = {}
     last_rider_by_pdf: dict[str, str | None] = {}
+    last_schedule_by_pdf: dict[str, str | None] = {}
 
     for section in sections:
         source_pdf = str(section.get("source_pdf") or "")
@@ -502,9 +503,11 @@ def detect_blocks_from_sections(
             active_context_by_pdf[source_pdf] = context
             if previous is None or previous.exhibit_key != context.exhibit_key:
                 last_rider_by_pdf[source_pdf] = None
+                last_schedule_by_pdf[source_pdf] = None
         elif is_current_baseline(norm) or _has_non_target_exhibit(norm):
             active_context_by_pdf[source_pdf] = None
             last_rider_by_pdf[source_pdf] = None
+            last_schedule_by_pdf[source_pdf] = None
 
         active_context = active_context_by_pdf.get(source_pdf)
         if active_context is None:
@@ -546,16 +549,26 @@ def detect_blocks_from_sections(
         page_is_admin = _page_is_admin_section(text)
         if rider_body_name is not None:
             last_rider_by_pdf[source_pdf] = rider_body_name
+            last_schedule_by_pdf[source_pdf] = None
         elif page_starts_new_schedule or page_is_admin:
             last_rider_by_pdf[source_pdf] = None
+            if page_is_admin:
+                last_schedule_by_pdf[source_pdf] = None
+        elif schedule_name is not None:
+            last_schedule_by_pdf[source_pdf] = schedule_name
         carry_rider = last_rider_by_pdf.get(source_pdf)
+        carry_schedule = last_schedule_by_pdf.get(source_pdf)
         if (
             schedule_name is None
             and rider_body_name is None
             and carry_rider is None
+            and carry_schedule is None
             and section_type not in {"rate_schedule", "rider"}
         ):
             continue
+        if schedule_name is None and carry_schedule is not None and not page_is_admin:
+            schedule_name = carry_schedule
+            section_type = "rate_schedule"
         if schedule_name is None:
             schedule_name = _first_code_from_json(section.get("schedule_codes_json")) or section_type
         if rider_body_name is not None:
@@ -564,6 +577,8 @@ def detect_blocks_from_sections(
         elif carry_rider is not None and not page_starts_new_schedule and not page_is_admin:
             schedule_name = carry_rider
             section_type = "rider"
+        elif section_type != "rider" and schedule_name is not None:
+            last_schedule_by_pdf[source_pdf] = schedule_name
 
         fields = extract_rate_fields(text)
         evidence = _build_evidence(norm, active_context.evidence, schedule_name)
