@@ -511,7 +511,7 @@ def _persist_rider_summaries(
                         (proposed_block_id, source_pdf, page_number, exhibit_key,
                          rate_year_context, tariff_name, tariff_kind, charge_type,
                          charge_label, rate_value, rate_unit, raw_line, confidence)
-                    VALUES (?, ?, ?, ?, ?, ?, 'rider_summary', 'adjustment', ?, ?, '$/kWh', ?, ?)
+                    VALUES (?, ?, ?, ?, ?, ?, 'rider_summary', ?, ?, ?, '$/kWh', ?, ?)
                     """,
                     (
                         block_id,
@@ -520,6 +520,10 @@ def _persist_rider_summaries(
                         active.exhibit_key,
                         active.rate_year_context,
                         "SUMMARY OF RIDER ADJUSTMENTS",
+                        # The group's own TOTAL row is the authoritative combined
+                        # rider adder; tag it distinctly so consumers use it for
+                        # all-in pricing without summing the itemized rows.
+                        "rider_total" if r.is_total else "adjustment",
                         f"{r.rider_label} [{r.schedule_group}]"[:120],
                         r.rate_value,
                         r.raw_line[:300],

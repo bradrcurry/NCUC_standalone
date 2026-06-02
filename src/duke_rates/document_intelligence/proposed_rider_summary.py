@@ -72,7 +72,14 @@ _NAME_TAIL_RE = re.compile(
 
 @dataclass(frozen=True)
 class RiderSummaryCharge:
-    """One rider increment row lifted from a summary table."""
+    """One rider increment row lifted from a summary table.
+
+    ``is_total`` marks the group's own printed ``TOTAL cents/kWh`` line rather
+    than an individual rider — the utility's authoritative combined rider
+    adder for that schedule group, which downstream callers use for all-in
+    pricing (it already nets sub-components and any embedded base-fuel, so it
+    must not be summed together with the individual rider rows).
+    """
 
     schedule_group: str
     schedule_codes: tuple[str, ...]
@@ -81,6 +88,7 @@ class RiderSummaryCharge:
     rate_value: float  # signed $/kWh
     effective_date: str | None
     raw_line: str
+    is_total: bool = False
 
 
 def is_rider_summary_page(text: str) -> bool:
@@ -111,9 +119,9 @@ def extract_rider_summary_charges(
     for header, body in groups:
         label, codes = _parse_group_header(header)
         if strategy == "dec":
-            rows = _pair_dec(body)
+            rows, total = _pair_dec(body)
         else:
-            rows = _pair_dep(body)
+            rows, total = _pair_dep(body)
         for name, value, date in rows:
             cents = value
             charges.append(
@@ -126,6 +134,19 @@ def extract_rider_summary_charges(
                     effective_date=date,
                     raw_line=f"{label} | {name} | {value}¢/kWh"
                     + (f" | eff {date}" if date else ""),
+                )
+            )
+        if total is not None:
+            charges.append(
+                RiderSummaryCharge(
+                    schedule_group=label,
+                    schedule_codes=codes,
+                    rider_label="TOTAL cents/kWh",
+                    cents_per_kwh=round(total, 6),
+                    rate_value=round(total / 100.0, 8),
+                    effective_date=None,
+                    raw_line=f"{label} | TOTAL cents/kWh | {total}¢/kWh",
+                    is_total=True,
                 )
             )
     return charges
@@ -224,19 +245,24 @@ def _looks_parenthesized(line: str) -> bool:
     return line.strip().startswith("(") and ")" in line
 
 
-def _pair_dec(body: list[str]) -> list[tuple[str, float, str | None]]:
+def _pair_dec(
+    body: list[str],
+) -> tuple[list[tuple[str, float, str | None]], float | None]:
     """FIFO-zip names, values, and dates within a DEC group.
 
     DEC wraps multiple rider names together before their values, but the
-    per-group counts match, so positional pairing is exact. Parsing stops at
-    the ``TOTAL`` row (whose trailing value carries no rider/date).
+    per-group counts match, so positional pairing is exact. Parsing of rider
+    rows stops at the ``TOTAL`` row; the first value after ``TOTAL`` is the
+    group's combined adder, returned alongside the rows.
     """
     names: list[str] = []
     values: list[float] = []
     dates: list[str] = []
-    for line in body:
+    total = None
+    for idx, line in enumerate(body):
         kind, value = _classify(line)
         if kind == "total":
+            total = _next_value(body[idx + 1 :])
             break
         if kind == "name":
             names.append(_clean_name(line))
@@ -249,23 +275,28 @@ def _pair_dec(body: list[str]) -> list[tuple[str, float, str | None]]:
         name = names[idx] if idx < len(names) else f"Rider {idx + 1}"
         date = dates[idx] if idx < len(dates) else None
         rows.append((name, value, date))
-    return rows
+    return rows, total
 
 
-def _pair_dep(body: list[str]) -> list[tuple[str, float, str | None]]:
+def _pair_dep(
+    body: list[str],
+) -> tuple[list[tuple[str, float, str | None]], float | None]:
     """Sequentially pair DEP rows: each value binds to the most recent name,
     and a following date line (if any) attaches to that value.
 
     A name immediately followed by another name is a section header
     (``Annual Billing Adjustments Rider BA``); it is simply superseded by the
     next name. Dateless subtotals (``... - Net Adjustment``) are kept with a
-    ``None`` date.
+    ``None`` date. The first value after ``TOTAL`` is the group's combined
+    adder, returned alongside the rows.
     """
     rows: list[tuple[str, float, str | None]] = []
     pending_name: str | None = None
-    for line in body:
+    total = None
+    for idx, line in enumerate(body):
         kind, value = _classify(line)
         if kind == "total":
+            total = _next_value(body[idx + 1 :])
             break
         if kind == "name":
             pending_name = _clean_name(line)
@@ -275,7 +306,16 @@ def _pair_dep(body: list[str]) -> list[tuple[str, float, str | None]]:
         elif kind == "date" and rows and rows[-1][2] is None:
             name, val, _ = rows[-1]
             rows[-1] = (name, val, line.strip())
-    return rows
+    return rows, total
+
+
+def _next_value(lines: list[str]) -> float | None:
+    """Return the first classifiable value in ``lines`` (the TOTAL amount)."""
+    for line in lines:
+        kind, value = _classify(line)
+        if kind == "value" and value is not None:
+            return value
+    return None
 
 
 def _clean_name(line: str) -> str:

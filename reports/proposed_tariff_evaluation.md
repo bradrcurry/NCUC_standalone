@@ -45,6 +45,7 @@ ALS, APH-TES, CH-TOUE, GS-TES, HP, LGS, LGS-HLF, LGS-RTP, LGS-TOU, MGS, MGS-TOU,
 | Production Tax Credit Rider PTC | -0.1010 | -0.00101000 | 1/1/27 |
 | BPM Prospective Rider | -0.0050 | -0.00005000 | 1/1/27 |
 | Regulatory Asset Liability Rider RAL-3 | -0.0360 | -0.00036000 | 1/1/27 |
+| TOTAL cents/kWh | 1.7680 | 0.01768000 |  |
 
 #### B p274 (eff 2027-01-01) — Small General Service Schedules
 
@@ -64,6 +65,7 @@ ALS, APH-TES, CH-TOUE, GS-TES, HP, LGS, LGS-HLF, LGS-RTP, LGS-TOU, MGS, MGS-TOU,
 | Production Tax Credit Rider PTC | -0.1010 | -0.00101000 | 1/1/27 |
 | BPM Prospective Rider | -0.0050 | -0.00005000 | 1/1/27 |
 | Regulatory Asset Liability Rider RAL-3 | -0.0360 | -0.00036000 | 1/1/27 |
+| TOTAL cents/kWh | 0.4770 | 0.00477000 |  |
 
 #### B_1 p422 (eff 2027-01-01) — Residential Service Schedules
 
@@ -84,6 +86,7 @@ ALS, APH-TES, CH-TOUE, GS-TES, HP, LGS, LGS-HLF, LGS-RTP, LGS-TOU, MGS, MGS-TOU,
 | Production Tax Credit Rider PTC | -0.1010 | -0.00101000 | 1/1/27 |
 | BPM Prospective Rider | -0.0050 | -0.00005000 | 1/1/27 |
 | Regulatory Asset Liability Rider RAL-3 | -0.0360 | -0.00036000 | 1/1/27 |
+| TOTAL cents/kWh | 1.7680 | 0.01768000 |  |
 
 #### B_1 p422 (eff 2027-01-01) — Small General Service Schedules
 
@@ -103,6 +106,7 @@ ALS, APH-TES, CH-TOUE, GS-TES, HP, LGS, LGS-HLF, LGS-RTP, LGS-TOU, MGS, MGS-TOU,
 | Production Tax Credit Rider PTC | -0.1010 | -0.00101000 | 1/1/27 |
 | BPM Prospective Rider | -0.0050 | -0.00005000 | 1/1/27 |
 | Regulatory Asset Liability Rider RAL-3 | -0.0360 | -0.00036000 | 1/1/27 |
+| TOTAL cents/kWh | 0.4770 | 0.00477000 |  |
 
 ## E-7 Sub 1329 — Duke Energy Carolinas
 
@@ -141,6 +145,7 @@ BC, ES, HLF, HP, I, LGS, NL, OL, OPT-V, PG, PL, RE, RETC, RS, RSTC, RT, RT-EV, S
 | Production Tax Credits Rider | -0.1648 | -0.00164800 | 1/1/27 |
 | Pension Cost Rider | 0.0000 | 0.00000000 | 1/1/27 |
 | Regulatory Asset and Liability Rider | -0.0030 | -0.00003000 | 1/1/27 |
+| TOTAL cents/kWh | 0.5265 | 0.00526500 |  |
 
 #### B p193 — General Service Schedules SGS, BC, LGS, TS, S, HLF, OPT-V, PG, SGSTC
 
@@ -157,6 +162,7 @@ BC, ES, HLF, HP, I, LGS, NL, OL, OPT-V, PG, PL, RE, RETC, RS, RSTC, RT, RT-EV, S
 | Production Tax Credits Rider | -0.1648 | -0.00164800 | 1/1/27 |
 | Pension Cost Rider | 0.0000 | 0.00000000 | 1/1/27 |
 | Regulatory Asset and Liability Rider | -0.0030 | -0.00003000 | 1/1/27 |
+| TOTAL cents/kWh | 0.6821 | 0.00682100 |  |
 
 #### B p193 — Lighting Schedules PL, OL, NL
 
@@ -186,6 +192,7 @@ BC, ES, HLF, HP, I, LGS, NL, OL, OPT-V, PG, PL, RE, RETC, RS, RSTC, RT, RT-EV, S
 | Production Tax Credits Rider | -0.1648 | -0.00164800 | 1/1/27 |
 | Pension Cost Rider | 0.0000 | 0.00000000 | 1/1/27 |
 | Regulatory Asset and Liability Rider | -0.0030 | -0.00003000 | 1/1/27 |
+| TOTAL cents/kWh | 0.5265 | 0.00526500 |  |
 
 #### B_1 p290 — General Service Schedules SGS, BC, LGS, TS, S, HLF, OPT-V, PG, SGSTC
 
@@ -202,6 +209,7 @@ BC, ES, HLF, HP, I, LGS, NL, OL, OPT-V, PG, PL, RE, RETC, RS, RSTC, RT, RT-EV, S
 | Production Tax Credits Rider | -0.1648 | -0.00164800 | 1/1/27 |
 | Pension Cost Rider | 0.0000 | 0.00000000 | 1/1/27 |
 | Regulatory Asset and Liability Rider | -0.0030 | -0.00003000 | 1/1/27 |
+| TOTAL cents/kWh | 0.6821 | 0.00682100 |  |
 
 #### B_1 p290 — Lighting Schedules PL, OL, NL
 

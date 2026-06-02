@@ -50,8 +50,21 @@ def load_proposed_residential_comparison(
     *,
     database_path: Path | None = None,
     representative_kwh: float = DEFAULT_KWH,
+    rider_basis: str = "summary_total",
 ):
-    """Return latest accepted rows plus proposed residential scenarios."""
+    """Return latest accepted rows plus proposed residential scenarios.
+
+    ``rider_basis`` selects how the proposed all-in rider layer is built:
+
+    * ``"summary_total"`` (default) — use the utility's own ``TOTAL cents/kWh``
+      line from the Summary of Rider Adjustments sheet, i.e. the full proposed
+      rider stack (fuel, EE/DSM, EDIT, decoupling, the new riders, …). This is
+      apples-to-apples with the accepted all-in, which also carries every
+      rider.
+    * ``"validated_subset"`` — the conservative allow-list of individually
+      validated new riders only (PC/PTC/RAL/BPM-P). Understates the all-in but
+      every layered value is sign- and applicability-checked.
+    """
     pd = _require_pandas()
     accepted = _latest_accepted_rows(
         pd,
@@ -63,12 +76,20 @@ def load_proposed_residential_comparison(
         database_path=database_path,
         representative_kwh=representative_kwh,
     )
-    proposed = _apply_validated_riders(
-        pd,
-        proposed,
-        database_path=database_path,
-        representative_kwh=representative_kwh,
-    )
+    if rider_basis == "summary_total":
+        proposed = _apply_summary_rider_totals(
+            pd,
+            proposed,
+            database_path=database_path,
+            representative_kwh=representative_kwh,
+        )
+    else:
+        proposed = _apply_validated_riders(
+            pd,
+            proposed,
+            database_path=database_path,
+            representative_kwh=representative_kwh,
+        )
     frames = [df for df in (accepted, proposed) if not df.empty]
     if not frames:
         return pd.DataFrame()
@@ -77,6 +98,99 @@ def load_proposed_residential_comparison(
         .sort_values(["utility", "effective_date", "scenario_order", "source_status"])
         .reset_index(drop=True)
     )
+
+
+def _residential_summary_totals(pd, *, database_path: Path | None):
+    """Return the residential-group ``TOTAL cents/kWh`` per (utility, exhibit).
+
+    Reads the ``rider_total`` charge rows the extractor persists for each
+    Summary of Rider Adjustments page and keeps only the residential schedule
+    group (DEC ``Residential Schedules RS,...``; DEP ``Residential Service
+    Schedules``).
+    """
+    db_path = _database_path(database_path)
+    conn = connect(db_path)
+    try:
+        rows = conn.execute(
+            """
+            SELECT d.utility AS utility_name, b.exhibit_key, c.rate_value, c.raw_line
+            FROM proposed_tariff_charge_candidates c
+            JOIN proposed_tariff_blocks b ON b.id = c.proposed_block_id
+            JOIN proposed_tariff_documents d ON d.id = b.proposed_document_id
+            WHERE c.charge_type = 'rider_total'
+              AND c.charge_label LIKE '%[Residential%'
+            """
+        ).fetchall()
+    except Exception:
+        return pd.DataFrame()
+    finally:
+        conn.close()
+    records = []
+    for row in rows:
+        record = dict(row)
+        records.append(
+            {
+                "utility": _utility_code(record["utility_name"]),
+                "exhibit_key": str(record["exhibit_key"] or ""),
+                "summary_rider_value": float(record["rate_value"]),
+                "summary_rider_cents": float(record["rate_value"]) * 100.0,
+            }
+        )
+    return pd.DataFrame(records)
+
+
+def _apply_summary_rider_totals(
+    pd,
+    proposed,
+    *,
+    database_path: Path | None,
+    representative_kwh: float,
+):
+    """Layer the residential summary TOTAL into proposed all-in pricing.
+
+    Each proposed base row is matched to its rate year's residential summary
+    total by ``(utility, exhibit_key)``. Rate years whose tariff copy omits a
+    summary sheet (DEC/DEP Rate Year 2) carry the latest available total
+    forward, mirroring how the validated-rider path projects RY2.
+    """
+    if proposed.empty:
+        return proposed
+    totals = _residential_summary_totals(pd, database_path=database_path)
+    if totals.empty:
+        # No summary totals parsed yet — fall back to the validated subset so
+        # the dashboard still shows something rather than base-only.
+        return _apply_validated_riders(
+            pd,
+            proposed,
+            database_path=database_path,
+            representative_kwh=representative_kwh,
+        )
+
+    carried_basis: dict[str, float] = {}
+    out = proposed.copy()
+    for idx, row in out.iterrows():
+        utility = row["utility"]
+        exhibit = str(row.get("exhibit_key") or "")
+        match = totals[(totals["utility"] == utility) & (totals["exhibit_key"] == exhibit)]
+        if not match.empty:
+            cents = float(match.iloc[0]["summary_rider_cents"])
+            value = float(match.iloc[0]["summary_rider_value"])
+            carried_basis[utility] = cents
+            coverage = "summary_total"
+        elif utility in carried_basis:
+            cents = carried_basis[utility]
+            value = cents / 100.0
+            coverage = "summary_total_carried_forward"
+        else:
+            continue
+        out.at[idx, "rider_cents_per_kwh"] = cents
+        out.at[idx, "all_in_cents_per_kwh"] = float(row["base_cents_per_kwh"]) + cents
+        out.at[idx, "all_in_bill_amount"] = float(row["base_bill_amount"]) + value * float(
+            representative_kwh
+        )
+        out.at[idx, "proposed_base_only"] = False
+        out.at[idx, "proposed_rider_coverage"] = coverage
+    return out
 
 
 def load_proposed_rider_summary(
@@ -337,6 +451,7 @@ def _proposed_base_rows(
             "source_status",
             "scenario_label",
             "scenario_order",
+            "exhibit_key",
             "proposed_base_only",
             "docket_number",
             "source_pdf",

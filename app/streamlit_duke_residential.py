@@ -96,10 +96,13 @@ def _components(db_path: str, utility: str) -> pd.DataFrame:
 
 
 @st.cache_data(show_spinner=False)
-def _proposed_comparison(db_path: str, monthly_kwh: float) -> pd.DataFrame:
+def _proposed_comparison(
+    db_path: str, monthly_kwh: float, rider_basis: str = "summary_total"
+) -> pd.DataFrame:
     return load_proposed_residential_comparison(
         database_path=Path(db_path),
         representative_kwh=float(monthly_kwh),
+        rider_basis=rider_basis,
     )
 
 
@@ -1181,12 +1184,29 @@ with tab3:
     st.header("3 · Proposed rate case: accepted vs proposed")
     st.caption(
         "These rows come from proposed NCUC application exhibits and are not approved tariffs. "
-        "The chart uses accepted all-in rates and proposed base rates plus the small set of proposed "
-        "residential riders whose signs and applicability are validated. Ambiguous proposed riders "
-        "remain visible below as review candidates."
+        "By default the proposed all-in layers each filing's own **Summary of Rider Adjustments** "
+        "total — the full proposed rider stack (fuel, EE/DSM, EDIT, decoupling, and the new riders) — "
+        "so it compares apples-to-apples with the accepted all-in. Switch the basis below to see only "
+        "the conservative validated subset of new riders."
     )
 
-    proposed_df = _proposed_comparison(str(DB_PATH), float(monthly_kwh))
+    rider_basis_label = st.radio(
+        "Proposed rider basis",
+        options=["Full rider stack (filing total)", "Validated new riders only"],
+        horizontal=True,
+        help=(
+            "Full rider stack uses the utility's printed TOTAL cents/kWh from the Summary of Rider "
+            "Adjustments sheet. Validated subset layers only PC/PTC/RAL/BPM-P, whose sign and "
+            "residential applicability are individually checked — it understates the true all-in."
+        ),
+    )
+    rider_basis = (
+        "summary_total"
+        if rider_basis_label.startswith("Full")
+        else "validated_subset"
+    )
+
+    proposed_df = _proposed_comparison(str(DB_PATH), float(monthly_kwh), rider_basis)
     rider_summary_df = _proposed_riders(str(DB_PATH), float(monthly_kwh))
     revenue_df = _proposed_revenue(str(DB_PATH))
     class_impact_df = _proposed_class_impacts()
@@ -1273,7 +1293,8 @@ with tab3:
         fig_prop.update_layout(
             template="plotly_dark",
             height=430,
-            yaxis_title="All-in equivalent where validated (c/kWh)",
+            hovermode="x unified",
+            yaxis_title="All-in c/kWh (base + proposed rider stack)",
             xaxis_title="Effective date",
             legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0, bgcolor="rgba(0,0,0,0)"),
             margin=dict(t=80, b=45),
@@ -1312,20 +1333,38 @@ with tab3:
                     accepted_latest["display_bill_amount"]
                 )
                 rider_count = int(proposed_latest.get("proposed_rider_count") or 0)
-                coverage_note = (
-                    "latest scenario with validated rider values"
-                    if coverage == "partial_validated"
-                    else "latest scenario uses Rate Year 1 rider values carried forward"
-                    if coverage == "projected_riders_carried_forward"
-                    else "latest scenario is base-only; rider values were not present"
+                coverage_note = {
+                    "summary_total": "all-in uses the filing's full rider-stack total",
+                    "summary_total_carried_forward": (
+                        "all-in carries the latest filing rider-stack total forward "
+                        "(this rate year's summary sheet omits one)"
+                    ),
+                    "partial_validated": "latest scenario with validated rider values",
+                    "projected_riders_carried_forward": (
+                        "latest scenario uses Rate Year 1 rider values carried forward"
+                    ),
+                }.get(coverage, "latest scenario is base-only; rider values were not present")
+                rider_descriptor = (
+                    "full proposed rider stack"
+                    if coverage.startswith("summary_total")
+                    else f"{rider_count} validated proposed riders"
+                )
+                base_delta = float(proposed_latest["base_cents_per_kwh"]) - float(
+                    accepted_latest["base_cents_per_kwh"]
+                )
+                tooltip = (
+                    f"Accepted all-in {float(accepted_latest['display_cents_per_kwh']):.2f} "
+                    f"to proposed {float(proposed_latest['display_cents_per_kwh']):.2f} c/kWh. "
+                    f"Base rate change {base_delta:+.2f} c/kWh; rider layer "
+                    f"{float(proposed_latest.get('rider_cents_per_kwh') or 0):.2f} c/kWh."
                 )
                 st.markdown(
                     f"""
-                    <div class="metric-card">
+                    <div class="metric-card" title="{tooltip}">
                         <div class="metric-title">{utility} proposed change</div>
                         <div class="metric-value">{delta_cents:+.2f} c/kWh</div>
                         <div class="metric-delta {'delta-positive' if delta_cents >= 0 else 'delta-negative'}">
-                            {proposed_latest['scenario_label']} vs latest accepted · ${delta_bill:+.2f}/mo at {monthly_kwh:,.0f} kWh · {rider_count} validated proposed riders
+                            {proposed_latest['scenario_label']} vs latest accepted · ${delta_bill:+.2f}/mo at {monthly_kwh:,.0f} kWh · {rider_descriptor}
                             <br><span style="font-size:0.85rem; opacity:0.78;">{coverage_note}</span>
                         </div>
                     </div>
@@ -1360,7 +1399,7 @@ with tab3:
                 "effective_date": "Proposed date",
                 "schedule": "Schedule",
                 "base_cents_per_kwh": "Base c/kWh equiv.",
-                "rider_cents_per_kwh": "Validated rider c/kWh",
+                "rider_cents_per_kwh": "Proposed rider c/kWh",
                 "all_in_cents_per_kwh": "Shown all-in c/kWh",
                 "base_bill_amount": "$/mo base equiv.",
                 "all_in_bill_amount": "$/mo shown all-in",
@@ -1377,13 +1416,32 @@ with tab3:
             use_container_width=True,
             hide_index=True,
             column_config={
-                "Base c/kWh equiv.": st.column_config.NumberColumn(format="%.4f"),
-                "Validated rider c/kWh": st.column_config.NumberColumn(format="%.4f"),
-                "Shown all-in c/kWh": st.column_config.NumberColumn(format="%.4f"),
-                "$/mo base equiv.": st.column_config.NumberColumn(format="$%.2f"),
-                "$/mo shown all-in": st.column_config.NumberColumn(format="$%.2f"),
-                "Fixed $/mo": st.column_config.NumberColumn(format="$%.2f"),
-                "Confidence": st.column_config.NumberColumn(format="%.2f"),
+                "Base c/kWh equiv.": st.column_config.NumberColumn(
+                    format="%.4f",
+                    help="Proposed base rate spread over your usage: (fixed monthly charge + energy rate × kWh) ÷ kWh.",
+                ),
+                "Proposed rider c/kWh": st.column_config.NumberColumn(
+                    format="%.4f",
+                    help="Rider layer added to base. Under 'Full rider stack' this is the filing's TOTAL cents/kWh; under 'Validated' it is only the checked new riders.",
+                ),
+                "Shown all-in c/kWh": st.column_config.NumberColumn(
+                    format="%.4f", help="Base equivalent + proposed rider layer."
+                ),
+                "$/mo base equiv.": st.column_config.NumberColumn(
+                    format="$%.2f", help="Base-only bill at your selected monthly usage."
+                ),
+                "$/mo shown all-in": st.column_config.NumberColumn(
+                    format="$%.2f", help="All-in bill (base + riders) at your selected monthly usage."
+                ),
+                "Fixed $/mo": st.column_config.NumberColumn(
+                    format="$%.2f", help="Proposed fixed Basic Customer Charge, independent of usage."
+                ),
+                "Rider coverage": st.column_config.TextColumn(
+                    help="summary_total = full filing rider stack; *_carried_forward = projected from the prior rate year; partial_validated = validated subset only.",
+                ),
+                "Confidence": st.column_config.NumberColumn(
+                    format="%.2f", help="Parser confidence for the proposed base block (0–1)."
+                ),
             },
         )
 

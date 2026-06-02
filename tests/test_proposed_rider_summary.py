@@ -96,12 +96,35 @@ def test_dec_grouped_names_pair_with_values_and_dates() -> None:
 
 def test_dec_codes_and_groups_extracted() -> None:
     charges = extract_rider_summary_charges(DEC_PAGE, strategy="dec")
-    res = next(c for c in charges if c.schedule_group.startswith("Residential"))
+    res = next(
+        c
+        for c in charges
+        if c.schedule_group.startswith("Residential") and not c.is_total
+    )
     assert res.schedule_codes == ("RS", "RE", "ES", "RT", "RSTC", "RETC")
     lighting = [c for c in charges if c.schedule_group.startswith("Lighting")]
     assert lighting and lighting[0].schedule_codes == ("PL", "OL", "NL")
-    # TOTAL row is not emitted as a rider.
-    assert not any("TOTAL" in c.rider_label.upper() for c in charges)
+    # The only TOTAL-labeled row is flagged is_total, never a rider increment.
+    totals = [c for c in charges if "TOTAL" in c.rider_label.upper()]
+    assert all(c.is_total for c in totals)
+    assert all(not c.is_total for c in charges if c.rider_label != "TOTAL cents/kWh")
+
+
+def test_group_total_is_captured() -> None:
+    charges = extract_rider_summary_charges(DEC_PAGE, strategy="dec")
+    res_total = next(
+        c for c in charges if c.is_total and c.schedule_group.startswith("Residential")
+    )
+    assert res_total.cents_per_kwh == 0.5265
+    assert res_total.rate_value == 0.005265
+    # The Lighting group on this fixture has no TOTAL line, so none is emitted.
+    assert not any(
+        c.is_total for c in charges if c.schedule_group.startswith("Lighting")
+    )
+    # DEP TOTAL is captured from its own line too.
+    dep = extract_rider_summary_charges(DEP_PAGE, strategy="dep")
+    dep_total = next(c for c in dep if c.is_total)
+    assert dep_total.cents_per_kwh == 1.768
 
 
 def test_dep_interleaved_with_dateless_subtotal() -> None:
