@@ -170,6 +170,7 @@ def annotated_history_chart(
     show_eia: bool = True,
     eia_df: pd.DataFrame | None = None,
     interpolation: str = "spline",
+    rate_view: str = "all_in_base",
 ) -> go.Figure:
     """Long timeline of all-in ¢/kWh with event annotations and fluid curves."""
     fig = go.Figure()
@@ -182,8 +183,11 @@ def annotated_history_chart(
             continue
         color = utility_colors.get(utility, "#cbd5e1")
         
+        show_all_in = rate_view in {"all_in_base", "all_in"}
+        show_base = rate_view in {"all_in_base", "base"}
+
         # Dual-line glow effect if using spline (fluid mode)
-        if interpolation == "spline":
+        if interpolation == "spline" and show_all_in:
             # 1. Broad translucent glow line
             fig.add_trace(
                 go.Scatter(
@@ -211,37 +215,39 @@ def annotated_history_chart(
                 )
             )
 
-        # Main high-intensity line
-        fig.add_trace(
-            go.Scatter(
-                x=sub["effective_date"],
-                y=sub["all_in_cents_per_kwh"],
-                mode="lines+markers",
-                name=f"{utility} All-In",
-                line=dict(color=color, width=3.5, shape=interpolation),
-                marker=dict(size=6, symbol="circle", line=dict(color="#0b0f19", width=1.5)),
-                hovertemplate=(
-                    "<b>%{x|%b %Y}</b><br>"
-                    f"{utility} all-in: %{{y:.3f}} ¢/kWh<extra></extra>"
+        if show_all_in:
+            # Main high-intensity line
+            fig.add_trace(
+                go.Scatter(
+                    x=sub["effective_date"],
+                    y=sub["all_in_cents_per_kwh"],
+                    mode="lines+markers",
+                    name=f"{utility} All-In",
+                    line=dict(color=color, width=3.5, shape=interpolation),
+                    marker=dict(size=6, symbol="circle", line=dict(color="#0b0f19", width=1.5)),
+                    hovertemplate=(
+                        "<b>%{x|%b %Y}</b><br>"
+                        f"{utility} all-in: %{{y:.3f}} ¢/kWh<extra></extra>"
+                    ),
                 ),
             )
-        )
-        
-        # Base rate reference line
-        fig.add_trace(
-            go.Scatter(
-                x=sub["effective_date"],
-                y=sub["base_cents_per_kwh"],
-                mode="lines",
-                name=f"{utility} Base Rate",
-                line=dict(color=color, width=1.5, dash="dot", shape=interpolation),
-                opacity=0.6,
-                hovertemplate=(
-                    "<b>%{x|%b %Y}</b><br>"
-                    f"{utility} base: %{{y:.3f}} ¢/kWh<extra></extra>"
+
+        if show_base:
+            # Base rate reference line
+            fig.add_trace(
+                go.Scatter(
+                    x=sub["effective_date"],
+                    y=sub["base_cents_per_kwh"],
+                    mode="lines",
+                    name=f"{utility} Base Rate",
+                    line=dict(color=color, width=1.8, dash="dot", shape=interpolation),
+                    opacity=0.75,
+                    hovertemplate=(
+                        "<b>%{x|%b %Y}</b><br>"
+                        f"{utility} base: %{{y:.3f}} ¢/kWh<extra></extra>"
+                    ),
                 ),
             )
-        )
 
     # EIA comparisons (NC + US averages)
     if show_eia and eia_df is not None and not eia_df.empty:
@@ -317,7 +323,7 @@ def annotated_history_chart(
         plot_bgcolor="rgba(0,0,0,0)",
         font=dict(color="#cbd5e1", family="Inter, sans-serif"),
         title=dict(
-            text="DEP & DEC Residential Rate History vs. EIA Averages",
+            text=_history_chart_title(utilities, rate_view, show_eia),
             font=dict(size=16, family="Plus Jakarta Sans, sans-serif", color="#f8fafc", weight="bold")
         ),
         xaxis=dict(
@@ -353,6 +359,18 @@ def annotated_history_chart(
         margin=dict(t=80, b=80, l=50, r=20),
     )
     return fig
+
+
+def _history_chart_title(utilities: list[str], rate_view: str, show_eia: bool) -> str:
+    utility_label = "DEP & DEC" if set(utilities) == {"DEP", "DEC"} else utilities[0]
+    if rate_view == "all_in":
+        rate_label = "All-In"
+    elif rate_view == "base":
+        rate_label = "Base Rate"
+    else:
+        rate_label = "All-In vs Base Rate"
+    suffix = " vs. EIA Averages" if show_eia else ""
+    return f"{utility_label} Residential {rate_label} History{suffix}"
 
 
 def rider_buildup_area(
