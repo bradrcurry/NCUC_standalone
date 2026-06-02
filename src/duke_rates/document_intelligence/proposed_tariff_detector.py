@@ -359,13 +359,28 @@ def find_schedule_name(text: str) -> str | None:
     rider_body = find_dep_rider_body_name(text)
     if rider_body is not None:
         return rider_body
-    for match in _SCHEDULE_HEADER_RE.finditer(normalize_text(text)):
-        name = " ".join(match.group(1).upper().split())
+    norm = normalize_text(text)
+    for match in _SCHEDULE_HEADER_RE.finditer(norm):
+        raw = match.group(1)
+        name = " ".join(raw.upper().split())
         if name.startswith("SCHEDULE "):
             code = name.removeprefix("SCHEDULE ").strip()
             if code in _GENERIC_SCHEDULE_STOPWORDS:
                 continue
             if len(code) > 5 and not any(ch.isdigit() or ch == "-" for ch in code):
+                continue
+            # Real tariff codes are uppercase ("A", "HP", "LGS-TOU"). A
+            # lowercase code means the regex caught the verb phrase
+            # "...Commission schedule a Joint Conference..." rather than a
+            # schedule heading, so reject it.
+            raw_code = " ".join(raw.split())[len("schedule "):].strip()
+            if raw_code and not raw_code.replace("-", "").isupper():
+                continue
+            # A bare "Schedule HP, Hourly Pricing" reference in testimony prose
+            # is followed by a comma and descriptive clause; real schedule
+            # headings are not. Reject the prose enumeration so it does not
+            # carry forward across narrative pages.
+            if norm[match.end() : match.end() + 1] == ",":
                 continue
         return name
     for line in (text or "").splitlines()[:40]:

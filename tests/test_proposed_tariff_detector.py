@@ -49,6 +49,17 @@ def test_find_schedule_name_reads_target_headers() -> None:
     assert find_schedule_name("This schedule nor any rider applies") is None
     assert find_schedule_name("Service is available under Schedule LGS-TOU") == "SCHEDULE LGS-TOU"
     assert find_schedule_name("RIDER BA\nBilling Adjustment") == "RIDER BA"
+    # The verb phrase "schedule a <noun>" must not be read as Schedule A.
+    assert (
+        find_schedule_name("the Commission schedule a Joint Technical Conference")
+        is None
+    )
+    # A prose reference "Schedule HP, Hourly Pricing" in testimony is not a
+    # schedule heading (real headings are not followed by a comma+description).
+    assert (
+        find_schedule_name("response opportunities for customers on Schedule HP, Hourly Pricing")
+        is None
+    )
 
 
 def test_detect_exhibit_context_reads_dec_rate_year_tariff_heading() -> None:

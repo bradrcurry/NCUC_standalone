@@ -18,13 +18,20 @@ from typing import Any, Iterable
 
 from duke_rates.document_intelligence.proposed_tariff_detector import (
     ProposedTariffBlock,
+    detect_exhibit_context,
     detect_proposed_tariff_blocks_from_pdf,
+    extract_effective_start_date,
+    is_current_baseline,
 )
 from duke_rates.document_intelligence.proposed_tariff_dec_strategy import (
     DecSplitCharge,
     detect_dec_proposed_blocks_from_pdf,
     extract_dec_split_line_charges,
     is_dec_filing,
+)
+from duke_rates.document_intelligence.proposed_rider_summary import (
+    extract_rider_summary_charges,
+    is_rider_summary_page,
 )
 
 
@@ -304,6 +311,17 @@ def persist_proposed_pdf_extraction(
             row["charge_candidates"] = [c.to_dict() for c in charges]
             report_rows.append(row)
 
+        # Summary of Rider Adjustments pages (DEC leaf 99 / DEP leaf 600) carry
+        # the per-schedule rider increment stack with effective dates in a
+        # multi-line table the line-anchored extractors above cannot read.
+        # Parse them in a dedicated pass and replace any block that the body
+        # scanner mis-attributed to the summary page.
+        summary_blocks, summary_charges = _persist_rider_summaries(
+            conn, doc_id, pdf, strategy
+        )
+        block_count += summary_blocks
+        charge_count += summary_charges
+
     if report_path is not None:
         out = Path(report_path)
         out.parent.mkdir(parents=True, exist_ok=True)
@@ -390,6 +408,128 @@ def _insert_charge(
             charge.confidence,
         ),
     )
+
+
+def _persist_rider_summaries(
+    conn: sqlite3.Connection,
+    doc_id: int,
+    pdf: Path,
+    strategy: str,
+) -> tuple[int, int]:
+    """Detect, parse, and persist Summary of Rider Adjustments pages.
+
+    Walks every page of the application, tracking the active proposed exhibit
+    via the same anchors the detectors use (rate-year-specific keys are never
+    downgraded by a plain ``Exhibit B`` footer, and current-baseline pages
+    reset the context so Exhibit A summaries are skipped). For each proposed
+    summary page it removes any block the body scanner mis-attributed to that
+    page, then inserts a ``rider_summary`` block plus one charge candidate per
+    rider increment row. Returns ``(blocks_added, charges_added)``.
+    """
+    try:
+        import fitz
+    except ImportError:
+        return 0, 0
+    try:
+        doc = fitz.open(pdf)
+    except Exception:
+        return 0, 0
+
+    blocks_added = charges_added = 0
+    try:
+        active = None
+        for page_number in range(1, doc.page_count + 1):
+            text = doc.load_page(page_number - 1).get_text("text") or ""
+            context = detect_exhibit_context(text)
+            if context is not None:
+                if context.exhibit_key in {"B_1", "B_2"} or active is None:
+                    active = context
+            elif is_current_baseline(text):
+                active = None
+            if active is None or not is_rider_summary_page(text):
+                continue
+
+            rows = extract_rider_summary_charges(text, strategy=strategy)
+            if not rows:
+                continue
+
+            # Replace any block (e.g. an over-attributed schedule) sitting on
+            # this exact page so the summary is represented once, cleanly.
+            conn.execute(
+                """
+                DELETE FROM proposed_tariff_charge_candidates
+                WHERE proposed_block_id IN (
+                    SELECT id FROM proposed_tariff_blocks
+                    WHERE source_pdf = ? AND start_page = ?
+                )
+                """,
+                (str(pdf), page_number),
+            )
+            conn.execute(
+                "DELETE FROM proposed_tariff_blocks WHERE source_pdf = ? AND start_page = ?",
+                (str(pdf), page_number),
+            )
+
+            effective_start = extract_effective_start_date(text)
+            cur = conn.execute(
+                """
+                INSERT INTO proposed_tariff_blocks
+                    (proposed_document_id, source_pdf, start_page, end_page,
+                     exhibit_key, rate_year_context, tariff_name, tariff_kind,
+                     schedule_code, leaf_no, effective_start, confidence,
+                     evidence_json, block_json)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'rider_summary', NULL, NULL, ?, ?, ?, ?)
+                """,
+                (
+                    doc_id,
+                    str(pdf),
+                    page_number,
+                    page_number,
+                    active.exhibit_key,
+                    active.rate_year_context,
+                    "SUMMARY OF RIDER ADJUSTMENTS",
+                    effective_start,
+                    0.85,
+                    json.dumps([active.rate_year_context, "Summary of Rider Adjustments"]),
+                    json.dumps(
+                        {
+                            "section_type": "rider_summary",
+                            "schedule_groups": sorted(
+                                {r.schedule_group for r in rows}
+                            ),
+                        }
+                    ),
+                ),
+            )
+            block_id = int(cur.lastrowid)
+            blocks_added += 1
+
+            for r in rows:
+                conn.execute(
+                    """
+                    INSERT OR IGNORE INTO proposed_tariff_charge_candidates
+                        (proposed_block_id, source_pdf, page_number, exhibit_key,
+                         rate_year_context, tariff_name, tariff_kind, charge_type,
+                         charge_label, rate_value, rate_unit, raw_line, confidence)
+                    VALUES (?, ?, ?, ?, ?, ?, 'rider_summary', 'adjustment', ?, ?, '$/kWh', ?, ?)
+                    """,
+                    (
+                        block_id,
+                        str(pdf),
+                        page_number,
+                        active.exhibit_key,
+                        active.rate_year_context,
+                        "SUMMARY OF RIDER ADJUSTMENTS",
+                        f"{r.rider_label} [{r.schedule_group}]"[:120],
+                        r.rate_value,
+                        r.raw_line[:300],
+                        0.8,
+                    ),
+                )
+                charges_added += 1
+    finally:
+        doc.close()
+    return blocks_added, charges_added
 
 
 def _load_pdf_text_by_page(pdf_path: Path, pages: Iterable[int]) -> dict[int, str]:
