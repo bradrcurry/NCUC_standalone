@@ -667,6 +667,101 @@ def _main_energy_from_record(utility: str, record: dict[str, Any]) -> float | No
     return float(value)
 
 
+def load_proposed_residential_rider_stack(
+    *,
+    database_path: Path | None = None,
+    representative_kwh: float = DEFAULT_KWH,
+):
+    """Return the itemized residential rider stack per proposed scenario.
+
+    One row per (utility, scenario, rider) for the residential schedule group
+    of the Summary of Rider Adjustments sheet, suitable for a stacked
+    composition chart (Base Rate + each rider). The redundant DEP
+    ``Rider BA - Net Adjustment`` subtotal is dropped so its Fuel/EMF/DSM-EE
+    sub-components are not double-counted, and the ``TOTAL`` line is excluded.
+    Rate years whose tariff copy omits a summary sheet (RY2) carry the latest
+    available stack forward, labeled as such.
+    """
+    pd = _require_pandas()
+    db_path = _database_path(database_path)
+    conn = connect(db_path)
+    try:
+        rows = conn.execute(
+            """
+            SELECT d.utility AS utility_name, b.exhibit_key, b.rate_year_context,
+                   COALESCE(
+                       b.effective_start,
+                       CASE WHEN b.exhibit_key = 'B_2' THEN '2028-01-01' ELSE '2027-01-01' END
+                   ) AS effective_date,
+                   c.charge_label, c.rate_value, c.raw_line
+            FROM proposed_tariff_charge_candidates c
+            JOIN proposed_tariff_blocks b ON b.id = c.proposed_block_id
+            JOIN proposed_tariff_documents d ON d.id = b.proposed_document_id
+            WHERE c.tariff_kind = 'rider_summary'
+              AND c.charge_type = 'adjustment'
+              AND c.charge_label LIKE '%[Residential%'
+            ORDER BY d.utility, b.exhibit_key, c.id
+            """
+        ).fetchall()
+    except Exception:
+        return pd.DataFrame()
+    finally:
+        conn.close()
+
+    records = []
+    for row in rows:
+        record = dict(row)
+        label = _strip_group_suffix(str(record["charge_label"] or ""))
+        if "net adjustment" in label.lower() or "total" in label.lower():
+            continue
+        exhibit = str(record["exhibit_key"] or "")
+        cents = float(record["rate_value"]) * 100.0
+        records.append(
+            {
+                "utility": _utility_code(record["utility_name"]),
+                "exhibit_key": exhibit,
+                "effective_date": pd.to_datetime(record["effective_date"], errors="coerce"),
+                "scenario_label": _scenario_label(
+                    exhibit, str(record["rate_year_context"] or "")
+                ),
+                "scenario_order": _scenario_order(exhibit),
+                "rider_label": label,
+                "cents_per_kwh": cents,
+                "rate_value": float(record["rate_value"]),
+                "dollars": float(record["rate_value"]) * float(representative_kwh),
+                "projection_basis": "parsed",
+            }
+        )
+    if not records:
+        return pd.DataFrame()
+    df = pd.DataFrame(records)
+
+    # Carry the latest available stack forward into any rate year that has no
+    # summary sheet of its own (e.g. Rate Year 2 / B_2).
+    additions = []
+    for utility, urows in df.groupby("utility", dropna=False):
+        present = set(urows["scenario_order"])
+        if 3 in present:
+            continue
+        latest_order = max(present)
+        latest = urows[urows["scenario_order"] == latest_order]
+        for _, r in latest.iterrows():
+            carried = r.copy()
+            carried["exhibit_key"] = "B_2"
+            carried["scenario_label"] = "Proposed Rate Year 2"
+            carried["scenario_order"] = 3
+            carried["effective_date"] = pd.to_datetime("2028-01-01")
+            carried["projection_basis"] = "carried_forward_from_rate_year_1"
+            additions.append(carried)
+    if additions:
+        df = pd.concat([df, pd.DataFrame(additions)], ignore_index=True)
+    return df.sort_values(["utility", "scenario_order"]).reset_index(drop=True)
+
+
+def _strip_group_suffix(label: str) -> str:
+    return label.split(" [")[0].strip()
+
+
 def _scenario_label(exhibit_key: str, context: str) -> str:
     if exhibit_key == "B_1":
         return "Proposed Rate Year 1"

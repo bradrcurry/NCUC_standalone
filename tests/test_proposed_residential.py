@@ -1,9 +1,62 @@
 from __future__ import annotations
 
+from pathlib import Path
+
+import pytest
+
 from duke_rates.analytics.proposed_residential import (
     _add_rate_year_2_carried_forward_riders,
     _validated_residential_rider_value,
+    load_proposed_residential_rider_stack,
 )
+from duke_rates.db.sqlite import connect
+from duke_rates.document_intelligence.proposed_tariff_extractor import ensure_schema
+
+
+def _seed_summary_db(path: Path) -> None:
+    conn = connect(str(path))
+    ensure_schema(conn)
+    conn.executescript(
+        """
+        INSERT INTO proposed_tariff_documents
+            (id, source_pdf, docket_number, utility, proposal_stage)
+        VALUES (1, 'dep.pdf', 'E-2 Sub 1380', 'Duke Energy Progress', 'proposed');
+        INSERT INTO proposed_tariff_blocks
+            (id, proposed_document_id, source_pdf, start_page, end_page,
+             exhibit_key, rate_year_context, tariff_name, tariff_kind, confidence,
+             effective_start)
+        VALUES
+            (10, 1, 'dep.pdf', 274, 274, 'B', 'Proposed Exhibit B',
+             'SUMMARY OF RIDER ADJUSTMENTS', 'rider_summary', 0.85, '2027-01-01');
+        INSERT INTO proposed_tariff_charge_candidates
+            (proposed_block_id, source_pdf, page_number, exhibit_key,
+             rate_year_context, tariff_name, tariff_kind, charge_type,
+             charge_label, rate_value, rate_unit, raw_line, confidence)
+        VALUES
+            (10, 'dep.pdf', 274, 'B', 'B', 'SUMMARY OF RIDER ADJUSTMENTS',
+             'rider_summary', 'adjustment',
+             'Demand Side Management DSM & EE Rate [Residential Service Schedules]',
+             0.00767, '$/kWh', 'x', 0.8),
+            (10, 'dep.pdf', 274, 'B', 'B', 'SUMMARY OF RIDER ADJUSTMENTS',
+             'rider_summary', 'adjustment',
+             'Annual Billing Adjustments Rider BA - Net Adjustment [Residential Service Schedules]',
+             0.01347, '$/kWh', 'x', 0.8),
+            (10, 'dep.pdf', 274, 'B', 'B', 'SUMMARY OF RIDER ADJUSTMENTS',
+             'rider_summary', 'adjustment',
+             'Production Tax Credit Rider PTC [Residential Service Schedules]',
+             -0.00101, '$/kWh', 'x', 0.8),
+            (10, 'dep.pdf', 274, 'B', 'B', 'SUMMARY OF RIDER ADJUSTMENTS',
+             'rider_summary', 'adjustment',
+             'Fuel Rate [Small General Service Schedules]',
+             0.005, '$/kWh', 'x', 0.8),
+            (10, 'dep.pdf', 274, 'B', 'B', 'SUMMARY OF RIDER ADJUSTMENTS',
+             'rider_summary', 'rider_total',
+             'TOTAL cents/kWh [Residential Service Schedules]',
+             0.01768, '$/kWh', 'x', 0.8);
+        """
+    )
+    conn.commit()
+    conn.close()
 
 
 def _record(
@@ -141,3 +194,27 @@ def test_rate_year_2_riders_are_explicitly_carried_forward_when_values_are_missi
     assert carried["validated_dollars"] == -1.01
     assert carried["projection_basis"] == "carried_forward_from_rate_year_1"
     assert "carrying forward" in carried["validated_reason"]
+
+
+def test_proposed_rider_stack_itemizes_drops_subtotal_and_carries_forward(tmp_path) -> None:
+    db = tmp_path / "stack.db"
+    _seed_summary_db(db)
+    stack = load_proposed_residential_rider_stack(database_path=db, representative_kwh=1000)
+    assert not stack.empty
+
+    dep = stack[stack["utility"] == "DEP"]
+    labels = set(dep["rider_label"])
+    # Residential group only — the Small General Service "Fuel Rate" row is excluded.
+    assert "Fuel Rate" not in labels
+    # The redundant BA Net Adjustment subtotal and the TOTAL line are dropped.
+    assert not any("Net Adjustment" in lbl for lbl in labels)
+    assert not any("TOTAL" in lbl.upper() for lbl in labels)
+    # Itemized residential riders are kept, including the credit.
+    assert "Demand Side Management DSM & EE Rate" in labels
+    ptc = dep[dep["rider_label"] == "Production Tax Credit Rider PTC"]
+    assert float(ptc.iloc[0]["cents_per_kwh"]) == pytest.approx(-0.101)
+
+    # Rate Year 2 (B_2) has no summary sheet, so the latest stack carries forward.
+    ry2 = dep[dep["scenario_order"] == 3]
+    assert not ry2.empty
+    assert (ry2["projection_basis"] == "carried_forward_from_rate_year_1").all()

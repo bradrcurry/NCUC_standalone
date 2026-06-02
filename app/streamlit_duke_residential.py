@@ -40,6 +40,7 @@ from duke_rates.analytics.residential_bill_breakdown import (
 )
 from duke_rates.analytics.proposed_residential import (
     load_proposed_residential_comparison,
+    load_proposed_residential_rider_stack,
     load_proposed_rider_summary,
 )
 from duke_rates.analytics.proposed_revenue import load_proposed_revenue_adjustments
@@ -109,6 +110,14 @@ def _proposed_comparison(
 @st.cache_data(show_spinner=False)
 def _proposed_riders(db_path: str, monthly_kwh: float) -> pd.DataFrame:
     return load_proposed_rider_summary(
+        database_path=Path(db_path),
+        representative_kwh=float(monthly_kwh),
+    )
+
+
+@st.cache_data(show_spinner=False)
+def _proposed_rider_stack(db_path: str, monthly_kwh: float) -> pd.DataFrame:
+    return load_proposed_residential_rider_stack(
         database_path=Path(db_path),
         representative_kwh=float(monthly_kwh),
     )
@@ -1371,6 +1380,109 @@ with tab3:
                     """,
                     unsafe_allow_html=True,
                 )
+
+        st.markdown("#### How the proposed all-in is built (base + rider stack)")
+        st.caption(
+            "Base rate at the bottom, each proposed rider stacked on top, per rate year — the same "
+            "kind of composition as the historical all-in stack in Section 2. The dashed line marks "
+            "today's accepted all-in for comparison. Rate Year 2 carries the latest rider stack "
+            "forward where the filing omits its own summary sheet."
+        )
+        stack_df = _proposed_rider_stack(str(DB_PATH), float(monthly_kwh))
+        summary_cmp = _proposed_comparison(str(DB_PATH), float(monthly_kwh), "summary_total")
+        if stack_df.empty or summary_cmp.empty:
+            st.info("No itemized proposed rider stack is available yet.")
+        else:
+            _rider_palette = [
+                "#ff5a5f", "#a8ff35", "#f355da", "#00c6ff", "#ffd000", "#fb923c",
+                "#10b981", "#38bdf8", "#ec4899", "#94a3b8", "#c084fc", "#f97316",
+                "#22d3ee", "#facc15", "#4ade80", "#fca5a5",
+            ]
+            stack_cols = st.columns(2)
+            for col, utility in zip(stack_cols, ["DEP", "DEC"]):
+                with col:
+                    u_stack = stack_df[stack_df["utility"] == utility]
+                    u_cmp = summary_cmp[summary_cmp["utility"] == utility]
+                    u_prop = u_cmp[u_cmp["source_status"] == "proposed"].sort_values("scenario_order")
+                    if u_stack.empty or u_prop.empty:
+                        st.info(f"No proposed rider stack for {utility}.")
+                        continue
+                    scen = u_prop.drop_duplicates("scenario_order")
+                    orders = list(scen["scenario_order"])
+                    x_labels = list(scen["scenario_label"])
+                    base_by_order = dict(zip(scen["scenario_order"], scen["base_cents_per_kwh"]))
+                    total_rider_by_order = dict(zip(scen["scenario_order"], scen["rider_cents_per_kwh"]))
+
+                    fig_stack = go.Figure()
+                    fig_stack.add_trace(
+                        go.Bar(
+                            x=x_labels,
+                            y=[float(base_by_order.get(o) or 0.0) for o in orders],
+                            name="Base rate",
+                            marker_color=CATEGORY_COLORS["base"],
+                            hovertemplate="<b>Base rate</b><br>%{y:.3f} c/kWh<extra></extra>",
+                        )
+                    )
+                    riders = list(dict.fromkeys(u_stack["rider_label"]))
+                    for i, rl in enumerate(riders):
+                        rsub = u_stack[u_stack["rider_label"] == rl]
+                        by_order = dict(zip(rsub["scenario_order"], rsub["cents_per_kwh"]))
+                        fig_stack.add_trace(
+                            go.Bar(
+                                x=x_labels,
+                                y=[float(by_order.get(o, 0.0)) for o in orders],
+                                name=(rl[:30] + "…") if len(rl) > 31 else rl,
+                                marker_color=_rider_palette[i % len(_rider_palette)],
+                                hovertemplate=f"<b>{rl}</b><br>%{{y:.3f}} c/kWh<extra></extra>",
+                            )
+                        )
+                    # Reconcile to the filing's printed TOTAL (DEC embeds some
+                    # base fuel outside the itemized rider rows).
+                    gap_y = []
+                    for o in orders:
+                        gap = float(total_rider_by_order.get(o) or 0.0) - float(
+                            u_stack[u_stack["scenario_order"] == o]["cents_per_kwh"].sum()
+                        )
+                        gap_y.append(gap if gap > 0.005 else 0.0)
+                    if any(gap_y):
+                        fig_stack.add_trace(
+                            go.Bar(
+                                x=x_labels,
+                                y=gap_y,
+                                name="Embedded base fuel (per filing total)",
+                                marker_color=CATEGORY_COLORS["residual"],
+                                hovertemplate="<b>Embedded base fuel</b><br>%{y:.3f} c/kWh<extra></extra>",
+                            )
+                        )
+                    accepted = u_cmp[u_cmp["source_status"] == "accepted"]
+                    if not accepted.empty:
+                        acc_allin = float(
+                            accepted.iloc[0]["all_in_cents_per_kwh"]
+                            or accepted.iloc[0]["base_cents_per_kwh"]
+                        )
+                        fig_stack.add_hline(
+                            y=acc_allin,
+                            line_dash="dot",
+                            line_color="rgba(255,255,255,0.55)",
+                            annotation_text=f"accepted all-in {acc_allin:.2f}",
+                            annotation_position="top left",
+                            annotation_font_color="#cbd5e1",
+                        )
+                    fig_stack.update_layout(
+                        barmode="stack",
+                        template="plotly_dark",
+                        height=460,
+                        title=f"{utility} proposed all-in composition",
+                        yaxis_title="c/kWh",
+                        legend=dict(orientation="h", yanchor="top", y=-0.18, x=0, font=dict(size=9), bgcolor="rgba(0,0,0,0)"),
+                        margin=dict(t=60, b=120),
+                        paper_bgcolor="rgba(0,0,0,0)",
+                        plot_bgcolor="rgba(0,0,0,0)",
+                        yaxis=dict(gridcolor="rgba(255, 255, 255, 0.05)", zeroline=False),
+                        xaxis=dict(gridcolor="rgba(255, 255, 255, 0.05)", zeroline=False),
+                        font=dict(color="#cbd5e1", family="Inter, sans-serif"),
+                    )
+                    st.plotly_chart(fig_stack, use_container_width=True)
 
         proposed_display = future_df.copy()
         proposed_display["effective_date"] = pd.to_datetime(proposed_display["effective_date"]).dt.date
