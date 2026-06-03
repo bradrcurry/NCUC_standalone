@@ -52,6 +52,10 @@ from duke_rates.analytics.forecast_trueup import (
     load_forecast_trueup_series,
     summarize_trueup,
 )
+from duke_rates.analytics.forecast_vs_history import (
+    load_load_growth_cagr,
+    load_load_growth_continuity,
+)
 from duke_rates.analytics.proposed_financial_context import load_proposed_class_revenue_impacts
 from duke_rates.charts.residential_dashboard import (
     CATEGORY_COLORS,
@@ -159,6 +163,16 @@ def _trueup_series(db_path: str) -> pd.DataFrame:
 @st.cache_data(show_spinner=False)
 def _trueup_summary(db_path: str) -> pd.DataFrame:
     return summarize_trueup(database_path=Path(db_path))
+
+
+@st.cache_data(show_spinner=False)
+def _growth_continuity(db_path: str) -> pd.DataFrame:
+    return load_load_growth_continuity(database_path=Path(db_path))
+
+
+@st.cache_data(show_spinner=False)
+def _growth_cagr(db_path: str) -> pd.DataFrame:
+    return load_load_growth_cagr(database_path=Path(db_path))
 
 
 def _breakdown(db_path: str, utility: str, monthly_kwh: float, cache_version: str) -> pd.DataFrame:
@@ -1892,6 +1906,87 @@ with tab3:
             "means no earnings above the authorized band. Full vintage-by-vintage backtesting is "
             "scoped in docs/FORECAST_ACCURACY_PLAN.md."
         )
+
+        st.markdown("##### Is this forecast a break from history?")
+        continuity = _growth_continuity(str(DB_PATH))
+        cagr_df = _growth_cagr(str(DB_PATH))
+        if continuity.empty:
+            st.info("Not enough actual/forecast data to compare growth yet.")
+        else:
+            fig_acc = go.Figure()
+            _series_style = {
+                "NC actual (EIA)": dict(color="#94a3b8", dash="solid"),
+                "Duke DEC+DEP forecast": dict(color="#ff5a5f", dash="dash"),
+            }
+            for series, style in _series_style.items():
+                sub = continuity[continuity["series"] == series].sort_values("year")
+                if sub.empty:
+                    continue
+                fig_acc.add_trace(
+                    go.Scatter(
+                        x=sub["year"],
+                        y=sub["indexed"],
+                        mode="lines+markers",
+                        name=series,
+                        line=dict(color=style["color"], width=2.5, dash=style["dash"]),
+                        hovertemplate=(
+                            f"<b>{series}</b><br>%{{x}}<br>index %{{y:.1f}} "
+                            "(2025=100)<br>%{customdata:,.0f} GWh<extra></extra>"
+                        ),
+                        customdata=sub["gwh"],
+                    )
+                )
+            fig_acc.add_vline(
+                x=2025, line_color="rgba(255,255,255,0.35)", line_dash="dot",
+                annotation_text="forecast begins", annotation_position="top left",
+                annotation_font_color="#cbd5e1",
+            )
+            fig_acc.update_layout(
+                template="plotly_dark",
+                height=320,
+                title="Realized NC load vs Duke forecast (indexed, 2025 = 100)",
+                yaxis_title="Index (2025 = 100)",
+                xaxis_title="Year",
+                hovermode="x unified",
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0),
+                margin=dict(t=70, b=40),
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                yaxis=dict(gridcolor="rgba(255,255,255,0.05)", zeroline=False),
+                xaxis=dict(gridcolor="rgba(255,255,255,0.05)", zeroline=False),
+                font=dict(color="#cbd5e1", family="Inter, sans-serif"),
+            )
+            st.plotly_chart(fig_acc, use_container_width=True)
+
+            if not cagr_df.empty:
+                def _g(scope: str, basis_contains: str) -> str:
+                    m = cagr_df[
+                        (cagr_df["scope"] == scope)
+                        & (cagr_df["basis"].str.contains(basis_contains))
+                    ]
+                    return f"{float(m['cagr_pct'].iloc[0]):+.2f}%/yr" if not m.empty else "—"
+
+                st.markdown(
+                    f"""
+                    <div class="metric-card" title="EIA NC actuals are state-level (DEC+DEP+others); Duke forecast is DEC+DEP. Compared on growth, not level.">
+                        <div class="metric-title">Forecast vs realized growth</div>
+                        <div class="metric-value">{_g('Total','2019–24')} actual → {_g('Total','2025–40')} forecast</div>
+                        <div class="metric-delta">
+                            Near-term {_g('Total','near-term')} · Commercial {_g('Commercial','Duke')} ·
+                            Residential {_g('Residential','Duke')} (a sharp acceleration vs flat history)
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+            st.caption(
+                "NC retail sales were essentially flat 2019–24 (+0.07%/yr) even as customers grew, "
+                "yet the application forecasts ~+2.4%/yr (and +4.4%/yr near-term) — a ~5× acceleration "
+                "concentrated in commercial / data-center load. Whether that surge materializes is the "
+                "central risk in the dollar ask. (Level mismatch: EIA NC = all utilities; Duke = DEC+DEP, "
+                "so this compares growth, not absolute levels. A true prior-vintage backtest needs the "
+                "2022-case PDFs fetched from the NCUC portal.)"
+            )
 
     st.markdown("#### Why Duke says these increases are needed")
     if revenue_df.empty:
