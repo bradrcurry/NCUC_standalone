@@ -48,6 +48,10 @@ from duke_rates.analytics.proposed_revenue import (
     load_proposed_revenue_adjustments,
 )
 from duke_rates.analytics.proposed_forecast import load_proposed_load_forecast
+from duke_rates.analytics.forecast_trueup import (
+    load_forecast_trueup_series,
+    summarize_trueup,
+)
 from duke_rates.analytics.proposed_financial_context import load_proposed_class_revenue_impacts
 from duke_rates.charts.residential_dashboard import (
     CATEGORY_COLORS,
@@ -145,6 +149,16 @@ def _proposed_forecast(db_path: str) -> pd.DataFrame:
 @st.cache_data(show_spinner=False)
 def _proposed_capex_anchors(db_path: str) -> pd.DataFrame:
     return load_proposed_capex_anchors(database_path=Path(db_path))
+
+
+@st.cache_data(show_spinner=False)
+def _trueup_series(db_path: str) -> pd.DataFrame:
+    return load_forecast_trueup_series(database_path=Path(db_path))
+
+
+@st.cache_data(show_spinner=False)
+def _trueup_summary(db_path: str) -> pd.DataFrame:
+    return summarize_trueup(database_path=Path(db_path))
 
 
 def _breakdown(db_path: str, utility: str, monthly_kwh: float, cache_version: str) -> pd.DataFrame:
@@ -1785,6 +1799,99 @@ with tab3:
                     """,
                     unsafe_allow_html=True,
                 )
+
+    st.markdown("#### Track record: how Duke's past forecasts trued up")
+    st.caption(
+        "Under PBR/MYRP several riders are Duke's own reconciliations of actual vs forecast, "
+        "filed and Commission-approved — a forecast-error history straight from verified numbers. "
+        "Fuel (DEC FCA / DEP EMF): positive = fuel ran above the projection in base rates. "
+        "Decoupling (RDM): positive = residential sales came in below the target set last case "
+        "(over-forecast). Earnings (ESM): positive = over-earned vs authorized ROE."
+    )
+    trueup_df = _trueup_series(str(DB_PATH))
+    trueup_summary = _trueup_summary(str(DB_PATH))
+    if trueup_df.empty:
+        st.info("No true-up rider history available yet.")
+    else:
+        fig_tu = go.Figure()
+        _tu_color = {"DEP": "#4facfe", "DEC": "#00ffd0"}
+        fuel = trueup_df[trueup_df["category"] == "Fuel cost"]
+        for utility in ["DEP", "DEC"]:
+            sub = fuel[fuel["utility"] == utility].sort_values("effective_date")
+            if sub.empty:
+                continue
+            fig_tu.add_trace(
+                go.Scatter(
+                    x=sub["effective_date"],
+                    y=sub["cents_per_kwh"],
+                    mode="lines+markers",
+                    name=f"{utility} fuel true-up",
+                    line=dict(color=_tu_color[utility], width=2.5, shape="hv"),
+                    hovertemplate=(
+                        f"<b>{utility} fuel true-up</b><br>%{{x|%b %Y}}<br>"
+                        "%{y:+.3f} c/kWh<extra></extra>"
+                    ),
+                )
+            )
+        fig_tu.add_hline(y=0, line_color="rgba(255,255,255,0.35)", line_width=1)
+        fig_tu.update_layout(
+            template="plotly_dark",
+            height=340,
+            title="Fuel-cost true-up over time (actual vs projection)",
+            yaxis_title="c/kWh true-up (+ = under-forecast)",
+            xaxis_title="Effective date",
+            hovermode="x unified",
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0),
+            margin=dict(t=70, b=40),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            yaxis=dict(gridcolor="rgba(255,255,255,0.05)", zeroline=False),
+            xaxis=dict(gridcolor="rgba(255,255,255,0.05)", zeroline=False),
+            font=dict(color="#cbd5e1", family="Inter, sans-serif"),
+        )
+        st.plotly_chart(fig_tu, use_container_width=True)
+
+        if not trueup_summary.empty:
+            tu_cards = st.columns(2)
+            for col, utility in zip(tu_cards, ["DEP", "DEC"]):
+                u = trueup_summary[trueup_summary["utility"] == utility]
+                if u.empty:
+                    continue
+
+                def _cat(cat: str) -> str:
+                    row = u[u["category"] == cat]
+                    return f"{float(row['latest_cents'].iloc[0]):+.3f}" if not row.empty else "—"
+
+                def _peak(cat: str) -> str:
+                    row = u[u["category"] == cat]
+                    if row.empty:
+                        return "—"
+                    return (
+                        f"{float(row['peak_cents'].iloc[0]):+.3f} "
+                        f"({str(row['peak_date'].iloc[0])[:7]})"
+                    )
+
+                col.markdown(
+                    f"""
+                    <div class="metric-card" title="Latest filed true-up values; positive fuel = fuel cost above forecast.">
+                        <div class="metric-title">{utility} — latest true-ups (c/kWh)</div>
+                        <div class="metric-value">Fuel {_cat('Fuel cost')}</div>
+                        <div class="metric-delta">
+                            Fuel peak {_peak('Fuel cost')} ·
+                            Decoupling {_cat('Residential decoupling')} ·
+                            Earnings {_cat('Earnings sharing')}
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+        st.caption(
+            "Read: the 2023–24 fuel spikes (DEC peaked +2.30, DEP +1.19 c/kWh) show fuel cost ran "
+            "far above the forecast embedded in rates and was later recovered. DEP's +0.23 decoupling "
+            "rider means residential sales came in modestly below the prior case's target. ESM at 0 "
+            "means no earnings above the authorized band. Full vintage-by-vintage backtesting is "
+            "scoped in docs/FORECAST_ACCURACY_PLAN.md."
+        )
 
     st.markdown("#### Why Duke says these increases are needed")
     if revenue_df.empty:

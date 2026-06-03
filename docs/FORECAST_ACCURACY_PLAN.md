@@ -8,10 +8,31 @@ This builds on Phase 1 (shipped): `proposed_forecast.load_proposed_load_forecast
 harvests the current **Spring 2025** vintage (Customer Growth, Retail Sales by
 class, Gross-to-Net drivers, Peak) from the two proposed filings.
 
+## Phase 3a — SHIPPED: true-up riders as a forecast-error track record
+
+Duke's own PBR/MYRP true-up riders *are* actual-vs-forecast reconciliations, so
+their historical values give a forecast-error series with **no external data**:
+
+- **Fuel** (DEC `FCA`, DEP `BA-EMF`) — actual fuel cost vs the projection in base
+  rates. DEC peaked **+2.30 ¢/kWh (2024-01)**, DEP **+1.19** — a large fuel
+  under-forecast in 2023–24 later recovered from customers.
+- **Decoupling** (`RDM`) — actual residential revenue-per-customer vs the case
+  target. DEP **+0.232** = residential sales came in below forecast.
+- **Earnings** (`ESM`) — actual vs authorized ROE. **0** = no over-earning.
+
+Implemented in `analytics/forecast_trueup.py`
+(`load_forecast_trueup_series`, `summarize_trueup`) over the accepted canonical
+rider-component timelines, surfaced as the dashboard "Track record" panel.
+This is the most faithful answer to "what did Duke later verify," and it is the
+recommended primary lens. The classic external backtest below remains a
+complementary cross-check.
+
 ## What we already have
 
 - **Current-vintage forecast** (2025 → 2040) for DEC and DEP, reconciled
   (gross+drivers = net; class components = total). Too new to grade on its own.
+- **True-up rider history** (Phase 3a) — fuel/decoupling/earnings reconciliations
+  back to ~2016 (fuel) / 2023 (decoupling).
 - **Actuals:** `eia_retail_sales` — NC (and other states) annual sales
   (`sales_million_kwh`), `customers`, `revenue`, `price` by sector (RES/COM/IND/
   ALL) back to 2001. This is the actuals spine.
