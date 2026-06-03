@@ -169,6 +169,148 @@ def parse_proposed_revenue_adjustment_page(
     return rows
 
 
+_REVREQ_ANCHOR = "CALCULATION OF ADDITIONAL REVENUE REQUIREMENT"
+_RATEBASE_ANCHOR = "COST RATE BASE-ELECTRIC OPERATIONS"
+_REVREQ_LABEL_RE = re.compile(
+    r"Additional traditional base rate revenue requirement", re.I
+)
+_PLANT_LABEL_RE = re.compile(r"^Electric plant in service", re.I)
+_TOTAL_LABEL_RE = re.compile(r"^Total$", re.I)
+
+
+@dataclass(frozen=True)
+class ProposedCapexAnchor:
+    """Single-number 'basis for the ask' anchors, in $ thousands.
+
+    These tie the load-growth forecast to the dollar request: the utility must
+    build plant (``electric_plant_in_service``) which enters ``rate_base``;
+    applying the allowed return yields the ``revenue_requirement`` increase.
+    """
+
+    utility: str
+    docket_number: str | None
+    source_pdf: str
+    revenue_requirement_thousands: float | None
+    rate_base_thousands: float | None
+    plant_in_service_thousands: float | None
+
+    def to_dict(self) -> dict[str, object]:
+        return asdict(self)
+
+
+def load_proposed_capex_anchors(*, database_path: Path | None = None):
+    """Return the rate-base / plant / revenue-requirement anchors per utility."""
+    pd = _require_pandas()
+    db_path = _database_path(database_path)
+    conn = connect(db_path)
+    try:
+        docs = conn.execute(
+            "SELECT source_pdf, docket_number, utility FROM proposed_tariff_documents"
+            " ORDER BY utility"
+        ).fetchall()
+    except Exception:
+        return pd.DataFrame()
+    finally:
+        conn.close()
+    records = []
+    for doc in docs:
+        pdf = Path(str(doc["source_pdf"]))
+        if not pdf.exists():
+            continue
+        anchor = extract_capex_anchors_from_pdf(
+            pdf, utility=str(doc["utility"] or ""), docket_number=doc["docket_number"]
+        )
+        if anchor is not None:
+            records.append(anchor.to_dict())
+    return pd.DataFrame(records)
+
+
+def extract_capex_anchors_from_pdf(
+    pdf_path: Path | str,
+    *,
+    utility: str,
+    docket_number: str | None = None,
+) -> ProposedCapexAnchor | None:
+    try:
+        import fitz
+    except ImportError as exc:  # pragma: no cover
+        raise RuntimeError("PyMuPDF/fitz is required for capex anchor parsing") from exc
+
+    pdf = Path(pdf_path)
+    doc = fitz.open(pdf)
+    rev_req = rate_base = plant = None
+    try:
+        for page_number in range(1, doc.page_count + 1):
+            text = doc.load_page(page_number - 1).get_text("text") or ""
+            upper = text.upper()
+            lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+            if rev_req is None and _REVREQ_ANCHOR in upper:
+                vals = _values_after(lines, _REVREQ_LABEL_RE, limit=8)
+                if vals:
+                    rev_req = vals[0]
+            if _RATEBASE_ANCHOR in upper:
+                # 4-column schedules: Total Company / Per Books / Adjustments /
+                # As Adjusted (NC retail). The NC-retail figure is column 4.
+                # Values are interleaved with standalone "$" lines, so widen
+                # the scan window to clear all four columns.
+                plant_vals = _values_after(lines, _PLANT_LABEL_RE, limit=12)
+                if plant is None and len(plant_vals) >= 4:
+                    plant = plant_vals[3]
+                base_vals = _values_after(lines, _TOTAL_LABEL_RE, limit=12)
+                if rate_base is None and len(base_vals) >= 4:
+                    rate_base = base_vals[3]
+    finally:
+        doc.close()
+    if rev_req is None and rate_base is None and plant is None:
+        return None
+    return ProposedCapexAnchor(
+        utility=utility,
+        docket_number=docket_number,
+        source_pdf=str(pdf),
+        revenue_requirement_thousands=rev_req,
+        rate_base_thousands=rate_base,
+        plant_in_service_thousands=plant,
+    )
+
+
+def _values_after(lines: list[str], label_re: re.Pattern[str], *, limit: int) -> list[float]:
+    """Return the numeric run following the first label occurrence that has one.
+
+    Column headers can repeat a label (e.g. ``Total`` over ``Total Company``)
+    before the data row; such matches yield no numbers and are skipped so the
+    real data row wins.
+    """
+    for idx, line in enumerate(lines):
+        if not label_re.search(line):
+            continue
+        out: list[float] = []
+        for nxt in lines[idx + 1 : idx + 1 + limit]:
+            if label_re.search(nxt):
+                break
+            v = _scalar(nxt)
+            if v is not None:
+                out.append(v)
+        if out:
+            return out
+    return []
+
+
+def _scalar(token: str) -> float | None:
+    t = token.strip()
+    if not re.fullmatch(r"\(?-?[\d,]+(?:\.\d+)?\)?", t):
+        return None
+    neg = t.startswith("(") and t.endswith(")")
+    t = t.strip("()").replace(",", "")
+    try:
+        v = float(t)
+    except ValueError:
+        return None
+    # Drop tiny stray footnote refs like a trailing "2".
+    if v < 100:
+        return None
+    return -v if neg else v
+
+
 def _find_line(lines: list[str], label: str) -> int | None:
     wanted = _normalize_label(label)
     for idx, line in enumerate(lines):

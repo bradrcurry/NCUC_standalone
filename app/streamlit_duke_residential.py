@@ -43,7 +43,11 @@ from duke_rates.analytics.proposed_residential import (
     load_proposed_residential_rider_stack,
     load_proposed_rider_summary,
 )
-from duke_rates.analytics.proposed_revenue import load_proposed_revenue_adjustments
+from duke_rates.analytics.proposed_revenue import (
+    load_proposed_capex_anchors,
+    load_proposed_revenue_adjustments,
+)
+from duke_rates.analytics.proposed_forecast import load_proposed_load_forecast
 from duke_rates.analytics.proposed_financial_context import load_proposed_class_revenue_impacts
 from duke_rates.charts.residential_dashboard import (
     CATEGORY_COLORS,
@@ -131,6 +135,16 @@ def _proposed_revenue(db_path: str) -> pd.DataFrame:
 @st.cache_data(show_spinner=False)
 def _proposed_class_impacts() -> pd.DataFrame:
     return load_proposed_class_revenue_impacts(root=ROOT)
+
+
+@st.cache_data(show_spinner=False)
+def _proposed_forecast(db_path: str) -> pd.DataFrame:
+    return load_proposed_load_forecast(database_path=Path(db_path))
+
+
+@st.cache_data(show_spinner=False)
+def _proposed_capex_anchors(db_path: str) -> pd.DataFrame:
+    return load_proposed_capex_anchors(database_path=Path(db_path))
 
 
 def _breakdown(db_path: str, utility: str, monthly_kwh: float, cache_version: str) -> pd.DataFrame:
@@ -1622,6 +1636,155 @@ with tab3:
                 "Only rows marked included are layered into the proposed all-in calculation. "
                 "Excluded and catalog-only rows are retained here to show what still needs review."
             )
+
+    st.markdown("#### Growth & the basis for the ask")
+    st.caption(
+        "Duke's own 'Spring 2025 Forecast' from the application: load grows mostly on the "
+        "commercial class and an Economic Development (large-load / data-center) wedge. That growth "
+        "is the stated basis for the plant investment and rate-base growth that drive the revenue ask."
+    )
+    forecast_df = _proposed_forecast(str(DB_PATH))
+    capex_df = _proposed_capex_anchors(str(DB_PATH))
+    if forecast_df.empty:
+        st.info("Load forecast tables have not been parsed yet.")
+    else:
+        fc_cols = st.columns(2)
+        _class_colors = {
+            "Residential": CATEGORY_COLORS["base"],
+            "Commercial": "#a8ff35",
+            "Industrial": "#ffd000",
+            "Other": "#94a3b8",
+        }
+        _driver_colors = {
+            "Economic Development": "#ff5a5f",
+            "Electric Vehicles": "#00c6ff",
+            "Energy Efficiency": "#a8ff35",
+            "Rooftop Solar": "#10b981",
+            "Voltage Control": "#94a3b8",
+        }
+        for col, utility in zip(fc_cols, ["DEP", "DEC"]):
+            with col:
+                u_fc = forecast_df[forecast_df["utility"] == utility]
+                rs = u_fc[u_fc["table_type"] == "retail_sales"]
+                if rs.empty:
+                    st.info(f"No retail-sales forecast for {utility}.")
+                    continue
+                label = str(rs["forecast_label"].iloc[0])
+                fig_sales = go.Figure()
+                for cls in ["Residential", "Commercial", "Industrial", "Other"]:
+                    sub = rs[rs["segment"] == cls].sort_values("year")
+                    if sub.empty:
+                        continue
+                    fig_sales.add_trace(
+                        go.Scatter(
+                            x=sub["year"],
+                            y=sub["value"],
+                            mode="lines",
+                            name=cls,
+                            stackgroup="sales",
+                            line=dict(width=0.5, color=_class_colors.get(cls)),
+                            fillcolor=_class_colors.get(cls),
+                            hovertemplate=f"<b>{cls}</b> %{{x}}<br>%{{y:,.0f}} GWh<extra></extra>",
+                        )
+                    )
+                total = rs[rs["segment"] == "Total"].sort_values("year")
+                if not total.empty:
+                    growth = total["value"].iloc[-1] / total["value"].iloc[0] - 1.0
+                    title = (
+                        f"{utility} forecast retail sales by class — "
+                        f"{int(total['year'].iloc[0])}–{int(total['year'].iloc[-1])} "
+                        f"(+{growth*100:.0f}%)"
+                    )
+                else:
+                    title = f"{utility} forecast retail sales by class"
+                fig_sales.update_layout(
+                    template="plotly_dark",
+                    height=340,
+                    title=title,
+                    yaxis_title="GWh",
+                    hovermode="x unified",
+                    legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0, font=dict(size=10)),
+                    margin=dict(t=70, b=30),
+                    paper_bgcolor="rgba(0,0,0,0)",
+                    plot_bgcolor="rgba(0,0,0,0)",
+                    yaxis=dict(gridcolor="rgba(255,255,255,0.05)", zeroline=False),
+                    xaxis=dict(gridcolor="rgba(255,255,255,0.05)", zeroline=False),
+                    font=dict(color="#cbd5e1", family="Inter, sans-serif"),
+                )
+                st.plotly_chart(fig_sales, use_container_width=True)
+
+                # Gross-to-Net drivers: what bends the curve.
+                g2n = u_fc[u_fc["table_type"] == "gross_to_net"]
+                drivers = [
+                    "Economic Development",
+                    "Electric Vehicles",
+                    "Energy Efficiency",
+                    "Rooftop Solar",
+                    "Voltage Control",
+                ]
+                fig_drv = go.Figure()
+                for drv in drivers:
+                    sub = g2n[g2n["segment"] == drv].sort_values("year")
+                    if sub.empty:
+                        continue
+                    fig_drv.add_trace(
+                        go.Bar(
+                            x=sub["year"],
+                            y=sub["value"],
+                            name=drv,
+                            marker_color=_driver_colors.get(drv),
+                            hovertemplate=f"<b>{drv}</b> %{{x}}<br>%{{y:,.0f}} GWh<extra></extra>",
+                        )
+                    )
+                fig_drv.update_layout(
+                    barmode="relative",
+                    template="plotly_dark",
+                    height=320,
+                    title=f"{utility} gross→net sales drivers (GWh vs gross)",
+                    yaxis_title="GWh adjustment",
+                    legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0, font=dict(size=9)),
+                    margin=dict(t=70, b=30),
+                    paper_bgcolor="rgba(0,0,0,0)",
+                    plot_bgcolor="rgba(0,0,0,0)",
+                    yaxis=dict(gridcolor="rgba(255,255,255,0.05)", zeroline=False),
+                    xaxis=dict(gridcolor="rgba(255,255,255,0.05)", zeroline=False),
+                    font=dict(color="#cbd5e1", family="Inter, sans-serif"),
+                )
+                st.plotly_chart(fig_drv, use_container_width=True)
+
+        st.caption(f"Source: {label} forecast tables in the application exhibits.")
+
+        # Capex anchors that connect the growth to the dollar ask.
+        if not capex_df.empty:
+            anchor_cols = st.columns(2)
+            name_to_code = {"Duke Energy Progress": "DEP", "Duke Energy Carolinas": "DEC"}
+            ordered = sorted(
+                capex_df.to_dict("records"),
+                key=lambda r: name_to_code.get(str(r.get("utility")), "ZZ"),
+            )
+            for col, rec in zip(anchor_cols, ordered):
+                code = name_to_code.get(str(rec.get("utility")), str(rec.get("utility")))
+                rb = rec.get("rate_base_thousands")
+                pis = rec.get("plant_in_service_thousands")
+                rr = rec.get("revenue_requirement_thousands")
+                tip = (
+                    "Test-year (Dec 31, 2024) NC-retail figures from Exhibit 2: the plant Duke "
+                    "has built enters rate base; the allowed return on it plus expenses yields the "
+                    "base revenue requirement increase."
+                )
+                col.markdown(
+                    f"""
+                    <div class="metric-card" title="{tip}">
+                        <div class="metric-title">{code} — basis for the ask</div>
+                        <div class="metric-value">${(rb or 0)/1e6:.1f}B rate base</div>
+                        <div class="metric-delta">
+                            Electric plant in service ${(pis or 0)/1e6:.1f}B ·
+                            base revenue requirement +${(rr or 0)/1000:.0f}M/yr
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
 
     st.markdown("#### Why Duke says these increases are needed")
     if revenue_df.empty:
