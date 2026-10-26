@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from duke_rates.historical.ncuc.pipeline.ocr_normalization import (
     normalize_docling_markdown,
     normalize_ocr_label,
@@ -231,3 +233,18 @@ def test_slice_docling_text_includes_texts_unreferenced_from_body_children(tmp_p
         "unreferenced-but-in-range text was silently dropped — this is the bug "
         "that hid rate content from page-bounded slices for leaf-500 et al."
     )
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("Basic Customer Charge $55.00 per month", "Basic Customer Charge $55.00 per month"),
+        ("Demand Charge $52.50 per kW", "Demand Charge $52.50 per kW"),
+        ("Revenue 515.27 and 1,550.74", "Revenue 515.27 and 1,550.74"),
+        ("Load factor 50.066%", "Load factor 50.066%"),
+        ("S14.00 per month", "$14.00 per month"),
+    ],
+)
+def test_normalize_ocr_text_never_rewrites_a_leading_digit_five(text: str, expected: str) -> None:
+    """Native values starting with 5 were rewritten as "$" ("$55.00" -> "$$5.00")."""
+    assert normalize_ocr_text(text) == expected
