@@ -1,0 +1,14 @@
+{
+ "doc_id": "hd0396_ssr",
+ "sha256": "f6f6f042bd1a741823197882a5f71ade69f0dc6ed68761bafd0d517e8c01a8a0",
+ "effective_date": "2019-04-04",
+ "effective_date_source_text": "Effective for bills rendered on and after April 4, 2019",
+ "expected_zero": true,
+ "charges": [],
+ "rider_summary_totals": [],
+ "notes": "DEP NC Original Leaf No. 664, Shared Solar Rider SSR. All prices are site-specific (Initial Subscription Charge, Monthly Subscription Charge per block, Shared Solar Credit) and are NOT printed. Expected zero charges. Numeric distractors that are not charges: 5,000 kW max site, 5 subscribers min, 40% cap, 20,000 kW aggregate, 75 miles, 1000 wattsAC block, 159 kWh/month, 100% of max annual demand, 20-year term, 30 days notice.",
+ "pages_transcribed": [
+  1,
+  2
+ ]
+}

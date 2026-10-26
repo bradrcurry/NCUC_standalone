@@ -1,0 +1,73 @@
+{
+ "doc_id": "hd7295_car",
+ "sha256": "41890987738e72340a6e8d084fc7a5d3be42639fae80d229146c27fa2a9ea9ac",
+ "effective_date": null,
+ "effective_date_source_text": null,
+ "expected_zero": true,
+ "charges": [],
+ "rider_summary_totals": [],
+ "notes": "hd 7295 'CAR (Span 1-6)' (E-7 Sub 1276) is a Nov 25 2025 LETTER filing DEC's Supplemental Customer Assistance Recovery Rider Update (pp1-2), a certificate of service (p3) and Revised Attachment A rate calculations (pp4-6). It is neither an order nor a tariff sheet (classifier misroute). Expected zero tariff charges. Attachment A p4 'Customer Assistance Recovery Rider Summary Rate' (proposed for 1/1/26-12/31/26; native text, verified on rendered page) transcribed under exhibit_rates. Compare: the approved DEC Leaf 99 eff 2026-06-01 shows residential CAR 0.0959 c/kWh while this proposed combined rate is $0.000957/kWh (=0.0957 c/kWh) - they differ slightly (likely regulatory fee); do not treat these as tariff values. p6 also repeats the prior-year (2025) rates 0.001209/(0.000750)/0.000459 $/kWh and 1.15/(0.82)/0.33 $/bill (Scenario 2/3); Scenario 3 mislabels the non-residential rate 'per kWh'.",
+ "pages_transcribed": [
+  1,
+  6
+ ],
+ "exhibit_rates": [
+  {
+   "rate_class": "Residential",
+   "label": "Prospective Rate (Col. A)",
+   "value": "0.000810",
+   "unit": "dollars_per_kwh",
+   "source_page": 4,
+   "rate_period": "1/1/26-12/31/26",
+   "verified": true
+  },
+  {
+   "rate_class": "Residential",
+   "label": "Rolling Recovery Factor Rate (Col. B)",
+   "value": "0.000147",
+   "unit": "dollars_per_kwh",
+   "source_page": 4,
+   "rate_period": "1/1/26-12/31/26",
+   "verified": true
+  },
+  {
+   "rate_class": "Residential",
+   "label": "Combined Rate (Col. C) = A + B",
+   "value": "0.000957",
+   "unit": "dollars_per_kwh",
+   "source_page": 4,
+   "rate_period": "1/1/26-12/31/26",
+   "verified": true
+  },
+  {
+   "rate_class": "Non-residential (billed based on Accounts)",
+   "label": "Prospective Rate (Col. A)",
+   "value": "0.78",
+   "unit": "dollars_per_month",
+   "unit_text": "per bill",
+   "source_page": 4,
+   "rate_period": "1/1/26-12/31/26",
+   "verified": true
+  },
+  {
+   "rate_class": "Non-residential (billed based on Accounts)",
+   "label": "Rolling Recovery Factor Rate (Col. B)",
+   "value": "0.28",
+   "unit": "dollars_per_month",
+   "unit_text": "per bill",
+   "source_page": 4,
+   "rate_period": "1/1/26-12/31/26",
+   "verified": true
+  },
+  {
+   "rate_class": "Non-residential (billed based on Accounts)",
+   "label": "Combined Rate (Col. C) = A + B",
+   "value": "1.06",
+   "unit": "dollars_per_month",
+   "unit_text": "per bill",
+   "source_page": 4,
+   "rate_period": "1/1/26-12/31/26",
+   "verified": true
+  }
+ ]
+}

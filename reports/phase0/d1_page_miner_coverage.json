@@ -1,0 +1,499 @@
+{
+ "artifacts": 40,
+ "results": {
+  "baseline": {
+   "total": 3316,
+   "found": 26,
+   "seconds": 0.6,
+   "coverage": 0.0078
+  },
+  "repaired": {
+   "total": 3316,
+   "found": 3316,
+   "seconds": 1.0,
+   "coverage": 1.0
+  }
+ },
+ "per_artifact": [
+  {
+   "artifact_id": 2201,
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1330\\d6ed4cce-ea99-4f4e-97d4-082c96200dca.pdf",
+   "baseline": {
+    "total": 0,
+    "found": 0
+   },
+   "repaired": {
+    "total": 0,
+    "found": 0
+   }
+  },
+  {
+   "artifact_id": 2199,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1275\\9c355332-9bfe-4790-8175-140f128a27ea.pdf",
+   "baseline": {
+    "total": 42,
+    "found": 12
+   },
+   "repaired": {
+    "total": 42,
+    "found": 42
+   }
+  },
+  {
+   "artifact_id": 2198,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1275\\a0131e49-f3e5-4157-bf4c-e53e1d9f5fdb.pdf",
+   "baseline": {
+    "total": 3,
+    "found": 0
+   },
+   "repaired": {
+    "total": 3,
+    "found": 3
+   }
+  },
+  {
+   "artifact_id": 2197,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1225\\dc08482d-cc0a-4b3a-a3e9-68c1bedef221.pdf",
+   "baseline": {
+    "total": 288,
+    "found": 0
+   },
+   "repaired": {
+    "total": 288,
+    "found": 288
+   }
+  },
+  {
+   "artifact_id": 2196,
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1300\\25ea8bc3-bfbb-48ca-8bfd-2b47fdbb0674.pdf",
+   "baseline": {
+    "total": 0,
+    "found": 0
+   },
+   "repaired": {
+    "total": 0,
+    "found": 0
+   }
+  },
+  {
+   "artifact_id": 2195,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1225\\21899a69-1308-467a-9bf1-47bea4e9954d.pdf",
+   "baseline": {
+    "total": 271,
+    "found": 0
+   },
+   "repaired": {
+    "total": 271,
+    "found": 271
+   }
+  },
+  {
+   "artifact_id": 2194,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1225\\62e21da8-f51b-4ea0-8dfa-90d66100edd6.pdf",
+   "baseline": {
+    "total": 320,
+    "found": 0
+   },
+   "repaired": {
+    "total": 320,
+    "found": 320
+   }
+  },
+  {
+   "artifact_id": 2193,
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1350\\98a890f6-f314-49b7-8c5f-ec92e74fe068.pdf",
+   "baseline": {
+    "total": 227,
+    "found": 3
+   },
+   "repaired": {
+    "total": 227,
+    "found": 227
+   }
+  },
+  {
+   "artifact_id": 2191,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1300\\58790cd9-0dad-4983-ac43-1ae88a203eda.pdf",
+   "baseline": {
+    "total": 0,
+    "found": 0
+   },
+   "repaired": {
+    "total": 0,
+    "found": 0
+   }
+  },
+  {
+   "artifact_id": 2190,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1300\\37b5d159-6089-41df-baf9-a25b2b788d32.pdf",
+   "baseline": {
+    "total": 0,
+    "found": 0
+   },
+   "repaired": {
+    "total": 0,
+    "found": 0
+   }
+  },
+  {
+   "artifact_id": 2189,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1300\\86d2ea86-9414-498a-82c5-de86a93365aa.pdf",
+   "baseline": {
+    "total": 0,
+    "found": 0
+   },
+   "repaired": {
+    "total": 0,
+    "found": 0
+   }
+  },
+  {
+   "artifact_id": 2188,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1300\\ccb3fcc5-e00a-43b0-8508-3d7fe5bdd6a2.pdf",
+   "baseline": {
+    "total": 0,
+    "found": 0
+   },
+   "repaired": {
+    "total": 0,
+    "found": 0
+   }
+  },
+  {
+   "artifact_id": 2187,
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1330\\8458c441-a88c-4a72-8485-e0d71bac72f1.pdf",
+   "baseline": {
+    "total": 0,
+    "found": 0
+   },
+   "repaired": {
+    "total": 0,
+    "found": 0
+   }
+  },
+  {
+   "artifact_id": 2186,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1300\\a2670694-519e-4f25-82eb-47e4a14af0fa.pdf",
+   "baseline": {
+    "total": 1,
+    "found": 0
+   },
+   "repaired": {
+    "total": 1,
+    "found": 1
+   }
+  },
+  {
+   "artifact_id": 2184,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1225\\0549de0d-0979-445c-ac3c-07a0e5f58b0b.pdf",
+   "baseline": {
+    "total": 287,
+    "found": 0
+   },
+   "repaired": {
+    "total": 287,
+    "found": 287
+   }
+  },
+  {
+   "artifact_id": 2183,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1300\\176ad684-f629-4f33-b3d5-73873269be8e.pdf",
+   "baseline": {
+    "total": 135,
+    "found": 0
+   },
+   "repaired": {
+    "total": 135,
+    "found": 135
+   }
+  },
+  {
+   "artifact_id": 2182,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1300\\4248651a-3b06-414d-a7ce-e35cffbcf5e0.pdf",
+   "baseline": {
+    "total": 1,
+    "found": 1
+   },
+   "repaired": {
+    "total": 1,
+    "found": 1
+   }
+  },
+  {
+   "artifact_id": 2181,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1300\\0c5713b0-ba53-4fbe-b31d-a4cb300965b5.pdf",
+   "baseline": {
+    "total": 119,
+    "found": 4
+   },
+   "repaired": {
+    "total": 119,
+    "found": 119
+   }
+  },
+  {
+   "artifact_id": 2179,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1300\\65687df5-2978-4f36-950a-282b3d922ee2.pdf",
+   "baseline": {
+    "total": 0,
+    "found": 0
+   },
+   "repaired": {
+    "total": 0,
+    "found": 0
+   }
+  },
+  {
+   "artifact_id": 2178,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1300\\afe40430-c350-43ef-946c-f69983816e41.pdf",
+   "baseline": {
+    "total": 0,
+    "found": 0
+   },
+   "repaired": {
+    "total": 0,
+    "found": 0
+   }
+  },
+  {
+   "artifact_id": 2177,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1300\\32208643-2247-46ec-93c9-2c8b5f05a751.pdf",
+   "baseline": {
+    "total": 0,
+    "found": 0
+   },
+   "repaired": {
+    "total": 0,
+    "found": 0
+   }
+  },
+  {
+   "artifact_id": 2176,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1300\\fa9d5b1a-cd7b-4798-9e75-3f5cc878e917.pdf",
+   "baseline": {
+    "total": 0,
+    "found": 0
+   },
+   "repaired": {
+    "total": 0,
+    "found": 0
+   }
+  },
+  {
+   "artifact_id": 2175,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1300\\5973608a-0d24-40a1-be1f-06d0fb077a81.pdf",
+   "baseline": {
+    "total": 2,
+    "found": 0
+   },
+   "repaired": {
+    "total": 2,
+    "found": 2
+   }
+  },
+  {
+   "artifact_id": 2174,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1225\\3b7e26d6-01a6-429f-8825-c339893f7491.pdf",
+   "baseline": {
+    "total": 216,
+    "found": 0
+   },
+   "repaired": {
+    "total": 216,
+    "found": 216
+   }
+  },
+  {
+   "artifact_id": 2173,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1225\\51afae30-7b4e-43fc-b7bd-72cf33b5051c.pdf",
+   "baseline": {
+    "total": 194,
+    "found": 0
+   },
+   "repaired": {
+    "total": 194,
+    "found": 194
+   }
+  },
+  {
+   "artifact_id": 2172,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1300\\80771dff-a0c5-4ed9-98fb-e3a031ad96c2.pdf",
+   "baseline": {
+    "total": 0,
+    "found": 0
+   },
+   "repaired": {
+    "total": 0,
+    "found": 0
+   }
+  },
+  {
+   "artifact_id": 2171,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1275\\643579d8-8266-472c-b243-849cc925ee7d.pdf",
+   "baseline": {
+    "total": 0,
+    "found": 0
+   },
+   "repaired": {
+    "total": 0,
+    "found": 0
+   }
+  },
+  {
+   "artifact_id": 2170,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1275\\8e84a9b8-416c-4b81-88bd-f3a6009c45c3.pdf",
+   "baseline": {
+    "total": 0,
+    "found": 0
+   },
+   "repaired": {
+    "total": 0,
+    "found": 0
+   }
+  },
+  {
+   "artifact_id": 2169,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1225\\5e5503a9-0229-437d-b8f3-7802b6500ea0.pdf",
+   "baseline": {
+    "total": 207,
+    "found": 0
+   },
+   "repaired": {
+    "total": 207,
+    "found": 207
+   }
+  },
+  {
+   "artifact_id": 2167,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1275\\4cac8ce5-afbe-4111-9a5c-d2871f8eef6a.pdf",
+   "baseline": {
+    "total": 2,
+    "found": 2
+   },
+   "repaired": {
+    "total": 2,
+    "found": 2
+   }
+  },
+  {
+   "artifact_id": 2166,
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1330\\b311810c-d3ff-457e-95ee-7c8f430f1460.pdf",
+   "baseline": {
+    "total": 0,
+    "found": 0
+   },
+   "repaired": {
+    "total": 0,
+    "found": 0
+   }
+  },
+  {
+   "artifact_id": 2165,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1275\\46bcd32d-005f-4180-869b-b1bd8c99deea.pdf",
+   "baseline": {
+    "total": 1,
+    "found": 0
+   },
+   "repaired": {
+    "total": 1,
+    "found": 1
+   }
+  },
+  {
+   "artifact_id": 2163,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1225\\57f75852-d213-4310-bc8a-2e8bb9ad4809.pdf",
+   "baseline": {
+    "total": 218,
+    "found": 0
+   },
+   "repaired": {
+    "total": 218,
+    "found": 218
+   }
+  },
+  {
+   "artifact_id": 2162,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1204\\ce9ddd43-741d-4f44-b96a-6b64150e2521.pdf",
+   "baseline": {
+    "total": 323,
+    "found": 0
+   },
+   "repaired": {
+    "total": 323,
+    "found": 323
+   }
+  },
+  {
+   "artifact_id": 2161,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1275\\e4131d82-f716-46b6-882e-dab7beba7797.pdf",
+   "baseline": {
+    "total": 0,
+    "found": 0
+   },
+   "repaired": {
+    "total": 0,
+    "found": 0
+   }
+  },
+  {
+   "artifact_id": 2160,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1225\\dc613a9b-3a0d-4927-a1b0-763ba45c4190.pdf",
+   "baseline": {
+    "total": 212,
+    "found": 0
+   },
+   "repaired": {
+    "total": 212,
+    "found": 212
+   }
+  },
+  {
+   "artifact_id": 2159,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1225\\1ebf36fa-bfa7-4941-be03-7a22ad7fc804.pdf",
+   "baseline": {
+    "total": 216,
+    "found": 0
+   },
+   "repaired": {
+    "total": 216,
+    "found": 216
+   }
+  },
+  {
+   "artifact_id": 2154,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1206\\bf5a0379-5789-4457-99bc-8e71ac76e96f.pdf",
+   "baseline": {
+    "total": 18,
+    "found": 0
+   },
+   "repaired": {
+    "total": 18,
+    "found": 18
+   }
+  },
+  {
+   "artifact_id": 2152,
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1307\\b895a242-3d0e-490b-90d7-c69cb7e3f3f5.pdf",
+   "baseline": {
+    "total": 10,
+    "found": 1
+   },
+   "repaired": {
+    "total": 10,
+    "found": 10
+   }
+  },
+  {
+   "artifact_id": 2151,
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1307\\baac01d7-1f42-42af-bb37-7500d92b37c4.pdf",
+   "baseline": {
+    "total": 3,
+    "found": 3
+   },
+   "repaired": {
+    "total": 3,
+    "found": 3
+   }
+  }
+ ]
+}

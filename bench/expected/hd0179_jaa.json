@@ -1,0 +1,106 @@
+{
+ "doc_id": "hd0179_jaa",
+ "sha256": "8b0b4361181964cdd36111a0d2b921ed43da1fdc43fcea7c9d765387bf4eba5d",
+ "effective_date": null,
+ "effective_date_source_text": null,
+ "expected_zero": true,
+ "charges": [],
+ "rider_summary_totals": [],
+ "notes": "hd 179 (19 pp, all scanned) is DEP's PROOF OF PUBLICATION in E-2 Sub 1176 (Sept 13, 2018 cover letter, newspaper affidavits of publication with the Commission's public notice clipped in, certificate of service). It contains NO tariff sheet - expected zero tariff charges. The public notice (verified on rendered p6) quotes PROPOSED JAAR values effective Dec 1, 2018 - Nov 30, 2019, listed under non_tariff_values_mentioned; an extractor that emits these as approved tariff charges should be scored as false positives. The notice is repeated ~9 times across the newspaper copies, often heavily OCR-garbled (e.g. p4).",
+ "pages_transcribed": [
+  1,
+  19
+ ],
+ "non_tariff_values_mentioned": [
+  {
+   "context": "proposed JAAR, public notice",
+   "rate_class": "Residential",
+   "value": "0.427",
+   "unit": "cents_per_kwh",
+   "source_page": 6,
+   "source_text": "The proposed JAAR for residential service is 0.427 cents per kilowatt hour (kWh); including regulatory fee",
+   "verified": true
+  },
+  {
+   "context": "proposed decrease",
+   "rate_class": "Residential",
+   "value": "-0.049",
+   "unit": "cents_per_kwh",
+   "source_page": 6,
+   "source_text": "which would be a decrease of 0.049 cents per kWh over the JAAR presently in effect",
+   "verified": true
+  },
+  {
+   "context": "proposed JAAR",
+   "rate_class": "Small General Service",
+   "value": "0.513",
+   "unit": "cents_per_kwh",
+   "source_page": 6,
+   "source_text": "0.513 cents for Small General Service",
+   "verified": true
+  },
+  {
+   "context": "proposed JAAR",
+   "rate_class": "Medium General Service (non-demand)",
+   "value": "0.382",
+   "unit": "cents_per_kwh",
+   "source_page": 6,
+   "source_text": "0.382 cents for Medium General Service",
+   "verified": true
+  },
+  {
+   "context": "proposed JAAR",
+   "rate_class": "Seasonal and Intermittent Service",
+   "value": "0.383",
+   "unit": "cents_per_kwh",
+   "source_page": 6,
+   "source_text": "0.383 cents for Seasonal and Intermittent Service",
+   "verified": true
+  },
+  {
+   "context": "proposed JAAR",
+   "rate_class": "Traffic Signal Service",
+   "value": "0.219",
+   "unit": "cents_per_kwh",
+   "source_page": 6,
+   "source_text": "0.219 cents for Traffic Signal Service",
+   "verified": true
+  },
+  {
+   "context": "proposed JAAR",
+   "rate_class": "Outdoor Lighting Service",
+   "value": "0",
+   "unit": "cents_per_kwh",
+   "source_page": 6,
+   "source_text": "and no charge for Outdoor Lighting Service",
+   "verified": true
+  },
+  {
+   "context": "proposed JAAR",
+   "rate_class": "Medium General Service (demand)",
+   "value": "1.27",
+   "unit": "dollars_per_kw",
+   "source_page": 6,
+   "source_text": "$1.27 for Medium General Service",
+   "verified": true
+  },
+  {
+   "context": "proposed JAAR",
+   "rate_class": "Large General Service",
+   "value": "1.30",
+   "unit": "dollars_per_kw",
+   "source_page": 6,
+   "source_text": "$1.30 for Large General Service",
+   "verified": true
+  },
+  {
+   "context": "bill impact",
+   "rate_class": "Residential",
+   "value": "-0.49",
+   "unit": "dollars_per_month",
+   "source_page": 6,
+   "source_text": "would decrease the monthly bill of a residential customer using 1,000 kilowatt hours per month by $0.49",
+   "verified": true
+  }
+ ]
+}

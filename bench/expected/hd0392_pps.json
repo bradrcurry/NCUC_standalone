@@ -1,0 +1,36 @@
+{
+ "doc_id": "hd0392_pps",
+ "sha256": "f8eee690b26bb4c99415d6a2ec33ff17b5b177f6be8915f85c9694d8a9b0b8a6",
+ "effective_date": "2023-10-18",
+ "effective_date_source_text": "Effective for bills rendered on and after October 18, 2023",
+ "expected_zero": false,
+ "charges": [
+  {
+   "family_key": "nc-progress-leaf-660",
+   "rate_class": "Premier Power Service Rider PPS",
+   "applicability": [
+    "PPS"
+   ],
+   "charge_type": "other",
+   "label": "Customer Requested Test - Administrative Fee",
+   "rider_code": "PPS",
+   "value": "50",
+   "unit": "dollars_per_occurrence",
+   "tou_period": null,
+   "season": null,
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 2,
+   "source_text": "Customer shall pay an Administrative Fee of $50 per occurrence plus the replacement cost of all fuel consumed during the test.",
+   "verified": true,
+   "note": "per-occurrence fee (unit outside the base enum) plus fuel replacement cost"
+  }
+ ],
+ "rider_summary_totals": [],
+ "notes": "NEGATIVE CONTROL THAT IS NOT FULLY ZERO: DEP NC First Revised Leaf No. 660, Rider PPS. The Monthly Services Payment is formula/contract-based (no fixed value), but p2 prints ONE fixed charge: an Administrative Fee of $50 per occurrence for a customer-requested generator test. Recorded as the single expected charge; expected_zero=false. Non-charge numerics: 50 kW min / 250 MW max generator capacity, 10-year pricing floor, 60 days notice, $5 million credit threshold.",
+ "pages_transcribed": [
+  1,
+  5
+ ]
+}

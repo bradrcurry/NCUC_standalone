@@ -1,0 +1,279 @@
+{
+ "doc_id": "hd7770_dec_riderlc",
+ "sha256": "c1919843e386d8cfe3a13e7da153fdb162d1e175c3e5526bb9fa8b61cb59bf8b",
+ "effective_date": "2025-01-01",
+ "effective_date_source_text": "Effective for service on and after January 1, 2025",
+ "expected_zero": false,
+ "charges": [
+  {
+   "family_key": "nc-carolinas-rider-RIDERLC",
+   "rate_class": "Rider LC Residential Service - Equipment Control",
+   "applicability": [
+    "LC"
+   ],
+   "charge_type": "other",
+   "label": "AC or Heat Pump Load Control Device Non-Winter - Initial Incentive (One time per residence)",
+   "rider_code": null,
+   "value": "50",
+   "unit": "dollars_one_time",
+   "tou_period": null,
+   "season": "non_summer",
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 17,
+   "source_text": "AC or Heat Pump Load Control Device Non-Winter $50*",
+   "verified": true,
+   "note": "incentive/credit to customer; unit outside the base enum. Initial $50* (limited participation for the non-winter months)",
+   "sign": "credit"
+  },
+  {
+   "family_key": "nc-carolinas-rider-RIDERLC",
+   "rate_class": "Rider LC Residential Service - Equipment Control",
+   "applicability": [
+    "LC"
+   ],
+   "charge_type": "other",
+   "label": "AC or Heat Pump Load Control Device Non-Winter - Annual Incentive (May be paid monthly or annually)",
+   "rider_code": null,
+   "value": "56",
+   "unit": "dollars_per_year",
+   "tou_period": null,
+   "season": "non_summer",
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 17,
+   "source_text": "AC or Heat Pump Load Control Device Non-Winter ... $56",
+   "verified": true,
+   "note": "incentive/credit to customer; unit outside the base enum.",
+   "sign": "credit"
+  },
+  {
+   "family_key": "nc-carolinas-rider-RIDERLC",
+   "rate_class": "Rider LC Residential Service - Equipment Control",
+   "applicability": [
+    "LC"
+   ],
+   "charge_type": "other",
+   "label": "Heat Strip Load Control Device Winter - Initial Incentive (One time per residence)",
+   "rider_code": null,
+   "value": "50",
+   "unit": "dollars_one_time",
+   "tou_period": null,
+   "season": "winter",
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 17,
+   "source_text": "Heat Strip Load Control Device Winter $50",
+   "verified": true,
+   "note": "incentive/credit to customer; unit outside the base enum.",
+   "sign": "credit"
+  },
+  {
+   "family_key": "nc-carolinas-rider-RIDERLC",
+   "rate_class": "Rider LC Residential Service - Equipment Control",
+   "applicability": [
+    "LC"
+   ],
+   "charge_type": "other",
+   "label": "Heat Strip Load Control Device Winter - Annual Incentive (May be paid monthly or annually)",
+   "rider_code": null,
+   "value": "40",
+   "unit": "dollars_per_year",
+   "tou_period": null,
+   "season": "winter",
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 17,
+   "source_text": "Heat Strip Load Control Device Winter ... $40",
+   "verified": true,
+   "note": "incentive/credit to customer; unit outside the base enum.",
+   "sign": "credit"
+  },
+  {
+   "family_key": "nc-carolinas-rider-RIDERLC",
+   "rate_class": "Rider LC Residential Service - Equipment Control",
+   "applicability": [
+    "LC"
+   ],
+   "charge_type": "other",
+   "label": "Thermostat Internet Connected Non-Winter - Annual Incentive (May be paid monthly or annually)",
+   "rider_code": null,
+   "value": "50",
+   "unit": "dollars_per_year",
+   "tou_period": null,
+   "season": "non_summer",
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 17,
+   "source_text": "Thermostat Internet Connected Non-Winter ... $50",
+   "verified": true,
+   "note": "incentive/credit to customer; unit outside the base enum. Initial Incentive cell reads \"Closed to new participants\"",
+   "sign": "credit"
+  },
+  {
+   "family_key": "nc-carolinas-rider-RIDERLC",
+   "rate_class": "Rider LC Residential Service - Equipment Control",
+   "applicability": [
+    "LC"
+   ],
+   "charge_type": "other",
+   "label": "Thermostat Internet Connected Winter Focused - Initial Incentive (One time per residence)",
+   "rider_code": null,
+   "value": "150",
+   "unit": "dollars_one_time",
+   "tou_period": null,
+   "season": "winter",
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 17,
+   "source_text": "Thermostat Internet Connected Winter Focused $150",
+   "verified": true,
+   "note": "incentive/credit to customer; unit outside the base enum.",
+   "sign": "credit"
+  },
+  {
+   "family_key": "nc-carolinas-rider-RIDERLC",
+   "rate_class": "Rider LC Residential Service - Equipment Control",
+   "applicability": [
+    "LC"
+   ],
+   "charge_type": "other",
+   "label": "Thermostat Internet Connected Winter Focused - Annual Incentive (May be paid monthly or annually)",
+   "rider_code": null,
+   "value": "50",
+   "unit": "dollars_per_year",
+   "tou_period": null,
+   "season": "winter",
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 17,
+   "source_text": "Thermostat Internet Connected Winter Focused ... $50",
+   "verified": true,
+   "note": "incentive/credit to customer; unit outside the base enum.",
+   "sign": "credit"
+  },
+  {
+   "family_key": "nc-carolinas-rider-RIDERLC",
+   "rate_class": "Rider LC Residential Service - Equipment Control",
+   "applicability": [
+    "LC"
+   ],
+   "charge_type": "other",
+   "label": "Water Heater Load Control Device - Initial Incentive (One time per residence)",
+   "rider_code": null,
+   "value": "25",
+   "unit": "dollars_one_time",
+   "tou_period": null,
+   "season": null,
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 17,
+   "source_text": "Water Heater Load Control Device $25",
+   "verified": true,
+   "note": "incentive/credit to customer; unit outside the base enum.",
+   "sign": "credit"
+  },
+  {
+   "family_key": "nc-carolinas-rider-RIDERLC",
+   "rate_class": "Rider LC Residential Service - Equipment Control",
+   "applicability": [
+    "LC"
+   ],
+   "charge_type": "other",
+   "label": "Water Heater Load Control Device - Annual Incentive (May be paid monthly or annually)",
+   "rider_code": null,
+   "value": "25",
+   "unit": "dollars_per_year",
+   "tou_period": null,
+   "season": null,
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 17,
+   "source_text": "Water Heater Load Control Device ... $25",
+   "verified": true,
+   "note": "incentive/credit to customer; unit outside the base enum.",
+   "sign": "credit"
+  },
+  {
+   "family_key": "nc-carolinas-rider-RIDERLC",
+   "rate_class": "Rider LC Residential Service - Equipment Control",
+   "applicability": [
+    "LC"
+   ],
+   "charge_type": "other",
+   "label": "Water Heater Internet Connected - Initial Incentive (One time per residence)",
+   "rider_code": null,
+   "value": "25",
+   "unit": "dollars_one_time",
+   "tou_period": null,
+   "season": null,
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 17,
+   "source_text": "Water Heater Internet Connected $25",
+   "verified": true,
+   "note": "incentive/credit to customer; unit outside the base enum.",
+   "sign": "credit"
+  },
+  {
+   "family_key": "nc-carolinas-rider-RIDERLC",
+   "rate_class": "Rider LC Residential Service - Equipment Control",
+   "applicability": [
+    "LC"
+   ],
+   "charge_type": "other",
+   "label": "Water Heater Internet Connected - Annual Incentive (May be paid monthly or annually)",
+   "rider_code": null,
+   "value": "25",
+   "unit": "dollars_per_year",
+   "tou_period": null,
+   "season": null,
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 17,
+   "source_text": "Water Heater Internet Connected ... $25",
+   "verified": true,
+   "note": "incentive/credit to customer; unit outside the base enum.",
+   "sign": "credit"
+  },
+  {
+   "family_key": "nc-carolinas-rider-RIDERLC",
+   "rate_class": "Rider LC Residential Service - Equipment Control",
+   "applicability": [
+    "LC"
+   ],
+   "charge_type": "other",
+   "label": "Battery Internet Connected - Monthly Incentive",
+   "rider_code": null,
+   "value": "6.50",
+   "unit": "dollars_per_kw",
+   "tou_period": null,
+   "season": null,
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 17,
+   "source_text": "Monthly Incentive - $6.50 per kW based on nameplate continuous discharge capacity ... adjusted by a capability factor",
+   "verified": true,
+   "note": "monthly credit per kW of nameplate continuous discharge capacity x capability factor; Initial Incentive N/A",
+   "sign": "credit"
+  }
+ ],
+ "rider_summary_totals": [],
+ "notes": "DEC RIDER LC (Residential Service - Equipment Control), NC Ninth Revised Leaf No. 71, as filed as EXHIBIT 25 in E-7 Sub 1032 (footer 'Order dated ____' - this is the PROPOSED clean sheet, Aug 20 2024 stamp). hd 7770 bounds are pages 16-24: pp16-19 = clean Ninth Revised (transcribed); pp20-24 = REDLINE vs Eighth Revised (Rider PM -> LC), not transcribed (would duplicate/garble). The published ncriderlc-pdf.pdf referenced by scripts/recover_riderlc_incentives_nc.py is NOT present in the repo, and this copy's text layer is native and clean (not OCR-mangled), so it is a weak category-G sample; hd7380 is the better OCR-mangling case. All values are incentives (CREDITS) in a bordered table on p17; units dollars_one_time / dollars_per_year extend the base unit enum. Season mapping: 'Non-Winter' -> non_summer is imprecise (control season Apr-Oct); 'Winter' = Nov-Mar. Hour limits (60/45/15 hours, 4 hours/day, 30-36 battery events, 20% state of charge) are program parameters, not charges. Verified against rendered p17.",
+ "pages_transcribed": [
+  16,
+  19
+ ]
+}

@@ -1,0 +1,255 @@
+{
+ "doc_id": "hd3140_dep_rtoud44",
+ "sha256": "cd8ac04a830ded1c2029f1fac05e652c1bbb2a40dd662a20793fa19c1b3ffdac",
+ "effective_date": "2017-12-01",
+ "effective_date_source_text": "Effective for service rendered on and after December 1, 2017",
+ "expected_zero": false,
+ "charges": [
+  {
+   "family_key": "nc-progress-leaf-501",
+   "rate_class": "Residential Service Time-of-Use Schedule R-TOUD-44",
+   "applicability": [
+    "R-TOUD"
+   ],
+   "charge_type": "basic_customer",
+   "label": "Basic Customer Charge",
+   "rider_code": null,
+   "value": "14.13",
+   "unit": "dollars_per_month",
+   "tou_period": null,
+   "season": "summer",
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 5,
+   "source_text": "1. Basic Customer Charge: $14.13",
+   "verified": true,
+   "note": "no explicit \"per month\" printed; it is the monthly rate section",
+   "season_text": "Service used during calendar months of June through September",
+   "phase": "single"
+  },
+  {
+   "family_key": "nc-progress-leaf-501",
+   "rate_class": "Residential Service Time-of-Use Schedule R-TOUD-44",
+   "applicability": [
+    "R-TOUD"
+   ],
+   "charge_type": "basic_customer",
+   "label": "Basic Customer Charge",
+   "rider_code": null,
+   "value": "14.13",
+   "unit": "dollars_per_month",
+   "tou_period": null,
+   "season": "non_summer",
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 5,
+   "source_text": "1. Basic Customer Charge: $14.13",
+   "verified": true,
+   "season_text": "Service used during calendar months of October through May",
+   "phase": "single"
+  },
+  {
+   "family_key": "nc-progress-leaf-501",
+   "rate_class": "Residential Service Time-of-Use Schedule R-TOUD-44",
+   "applicability": [
+    "R-TOUD"
+   ],
+   "charge_type": "demand",
+   "label": "On-Peak kW Demand Charge",
+   "rider_code": null,
+   "value": "4.97",
+   "unit": "dollars_per_kw",
+   "tou_period": "on_peak",
+   "season": "summer",
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 5,
+   "source_text": "$4.97 per kW for all on-peak Billing Demand",
+   "verified": true,
+   "season_text": "Service used during calendar months of June through September",
+   "phase": "single"
+  },
+  {
+   "family_key": "nc-progress-leaf-501",
+   "rate_class": "Residential Service Time-of-Use Schedule R-TOUD-44",
+   "applicability": [
+    "R-TOUD"
+   ],
+   "charge_type": "demand",
+   "label": "On-Peak kW Demand Charge",
+   "rider_code": null,
+   "value": "3.69",
+   "unit": "dollars_per_kw",
+   "tou_period": "on_peak",
+   "season": "non_summer",
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 5,
+   "source_text": "$3.69 per kW for all on-peak Billing Demand",
+   "verified": true,
+   "season_text": "Service used during calendar months of October through May",
+   "phase": "single"
+  },
+  {
+   "family_key": "nc-progress-leaf-501",
+   "rate_class": "Residential Service Time-of-Use Schedule R-TOUD-44",
+   "applicability": [
+    "R-TOUD"
+   ],
+   "charge_type": "energy",
+   "label": "kWh Energy Charge",
+   "rider_code": null,
+   "value": "6.922",
+   "unit": "cents_per_kwh",
+   "tou_period": "on_peak",
+   "season": "summer",
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 5,
+   "source_text": "6.922¢ per on-peak kWh",
+   "verified": true,
+   "season_text": "Service used during calendar months of June through September",
+   "phase": "single"
+  },
+  {
+   "family_key": "nc-progress-leaf-501",
+   "rate_class": "Residential Service Time-of-Use Schedule R-TOUD-44",
+   "applicability": [
+    "R-TOUD"
+   ],
+   "charge_type": "energy",
+   "label": "kWh Energy Charge",
+   "rider_code": null,
+   "value": "5.560",
+   "unit": "cents_per_kwh",
+   "tou_period": "off_peak",
+   "season": "summer",
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 5,
+   "source_text": "5.560¢ per off-peak kWh",
+   "verified": true,
+   "season_text": "Service used during calendar months of June through September",
+   "phase": "single"
+  },
+  {
+   "family_key": "nc-progress-leaf-501",
+   "rate_class": "Residential Service Time-of-Use Schedule R-TOUD-44",
+   "applicability": [
+    "R-TOUD"
+   ],
+   "charge_type": "energy",
+   "label": "kWh Energy Charge",
+   "rider_code": null,
+   "value": "6.922",
+   "unit": "cents_per_kwh",
+   "tou_period": "on_peak",
+   "season": "non_summer",
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 5,
+   "source_text": "6.922¢ per on-peak kWh",
+   "verified": true,
+   "season_text": "Service used during calendar months of October through May",
+   "phase": "single"
+  },
+  {
+   "family_key": "nc-progress-leaf-501",
+   "rate_class": "Residential Service Time-of-Use Schedule R-TOUD-44",
+   "applicability": [
+    "R-TOUD"
+   ],
+   "charge_type": "energy",
+   "label": "kWh Energy Charge",
+   "rider_code": null,
+   "value": "5.560",
+   "unit": "cents_per_kwh",
+   "tou_period": "off_peak",
+   "season": "non_summer",
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 5,
+   "source_text": "5.560¢ per off-peak kWh",
+   "verified": true,
+   "season_text": "Service used during calendar months of October through May",
+   "phase": "single"
+  },
+  {
+   "family_key": "nc-progress-leaf-501",
+   "rate_class": "Residential Service Time-of-Use Schedule R-TOUD-44",
+   "applicability": [
+    "R-TOUD"
+   ],
+   "charge_type": "other",
+   "label": "For Three-Phase Service (adder to single-phase bill)",
+   "rider_code": null,
+   "value": "8.71",
+   "unit": "dollars_per_month",
+   "tou_period": null,
+   "season": null,
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 5,
+   "source_text": "The bill computed for single-phase service plus $8.71.",
+   "verified": true,
+   "phase": "three"
+  },
+  {
+   "family_key": "nc-progress-leaf-501",
+   "rate_class": "Residential Service Time-of-Use Schedule R-TOUD-44",
+   "applicability": [
+    "R-TOUD"
+   ],
+   "charge_type": "other",
+   "label": "REPS Adjustment - Residential Classification",
+   "rider_code": "REPS",
+   "value": "0.55",
+   "unit": "dollars_per_month",
+   "tou_period": null,
+   "season": null,
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 5,
+   "source_text": "Residential Classification - $0.55/month",
+   "verified": true
+  },
+  {
+   "family_key": "nc-progress-leaf-501",
+   "rate_class": "Residential Service Time-of-Use Schedule R-TOUD-44",
+   "applicability": [
+    "R-TOUD"
+   ],
+   "charge_type": "other",
+   "label": "Late payment charge",
+   "rider_code": null,
+   "value": "1",
+   "unit": "percent",
+   "tou_period": null,
+   "season": null,
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 6,
+   "source_text": "subject to an additional charge of 1% per month",
+   "verified": true,
+   "note": "late-payment charge (procedural, applies to unpaid balance); marked optional - scorers may exclude",
+   "optional": true
+  }
+ ],
+ "rider_summary_totals": [],
+ "notes": "SUBSTITUTE for requested hd 3199, which does not exist in the test snapshot (snapshot has 682 historical_documents, none with id 3199). Used hd 3140 instead: DEP Schedule R-TOUD-44 from E-2 Sub 1143/1144/1146 compliance tariffs (cc3d5821...pdf, 75 pages, 942 KB), pages 4-6. Seasons: June-September = summer, October-May = non_summer. On/off-peak hour definitions (p5-p6) are not charges. Minimum Bill = Basic Customer Charge plus the REPS Adjustment (formula, no separate value; not recorded as a charge). Monthly rate includes fuel/DSM/EE/JAA factors (stated on p6). Verified against rendered p5.",
+ "pages_transcribed": [
+  4,
+  6
+ ]
+}

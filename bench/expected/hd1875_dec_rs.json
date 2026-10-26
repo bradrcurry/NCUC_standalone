@@ -1,0 +1,116 @@
+{
+ "doc_id": "hd1875_dec_rs",
+ "sha256": "85640f78da6e0cf9205741e877ed990a638982d2e5121e767a5641f7d6963bf1",
+ "effective_date": "2025-01-01",
+ "effective_date_source_text": "Effective for service rendered on and after January 1, 2025",
+ "expected_zero": false,
+ "charges": [
+  {
+   "family_key": "nc-carolinas-schedule-RS",
+   "rate_class": "Schedule RS Residential Service",
+   "applicability": [
+    "RS"
+   ],
+   "charge_type": "basic_customer",
+   "label": "Basic Customer Charge per month",
+   "rider_code": null,
+   "value": "14.00",
+   "unit": "dollars_per_month",
+   "tou_period": null,
+   "season": null,
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 1,
+   "source_text": "I. Basic Customer Charge per month $ 14.00",
+   "verified": true
+  },
+  {
+   "family_key": "nc-carolinas-schedule-RS",
+   "rate_class": "Schedule RS Residential Service",
+   "applicability": [
+    "RS"
+   ],
+   "charge_type": "energy",
+   "label": "Energy Charge per month, per kWh*",
+   "rider_code": null,
+   "value": "11.8504",
+   "unit": "cents_per_kwh",
+   "tou_period": null,
+   "season": null,
+   "tier": "all kWh",
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 1,
+   "source_text": "II. Energy Charge per month, per kWh* 11.8504¢",
+   "verified": true
+  },
+  {
+   "family_key": "nc-carolinas-schedule-RS",
+   "rate_class": "Schedule RS Residential Service",
+   "applicability": [
+    "RS"
+   ],
+   "charge_type": "energy",
+   "label": "SSI experimental rate, first 350 kWh",
+   "rider_code": null,
+   "value": "10.6654",
+   "unit": "cents_per_kwh",
+   "tou_period": null,
+   "season": null,
+   "tier": "first 350 kWh",
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 1,
+   "source_text": "the rate for the first 350 kWh used per month shall be 10.6654 cents per kWh",
+   "verified": true,
+   "note": "applies only to qualifying SSI customers"
+  },
+  {
+   "family_key": "nc-carolinas-schedule-RS",
+   "rate_class": "Schedule RS Residential Service",
+   "applicability": [
+    "RS"
+   ],
+   "charge_type": "other",
+   "label": "SSI experiment maximum discount",
+   "rider_code": null,
+   "value": "4.15",
+   "unit": "dollars_per_month",
+   "tou_period": null,
+   "season": null,
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 1,
+   "source_text": "The present maximum discount to customers being served under this experiment is $4.15 per month.",
+   "verified": true,
+   "note": "cap on SSI discount, not a billed charge",
+   "optional": true
+  },
+  {
+   "family_key": "nc-carolinas-schedule-RS",
+   "rate_class": "Schedule RS Residential Service",
+   "applicability": [
+    "RS"
+   ],
+   "charge_type": "other",
+   "label": "Late payment charge",
+   "rider_code": null,
+   "value": "1",
+   "unit": "percent",
+   "tou_period": null,
+   "season": null,
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 2,
+   "source_text": "subject to a one percent (1%) late payment charge on the unpaid amount",
+   "verified": true,
+   "note": "late-payment charge (procedural, applies to unpaid balance); marked optional - scorers may exclude",
+   "optional": true
+  }
+ ],
+ "rider_summary_totals": [],
+ "notes": "DEC NC Fifty-Eighth Revised Leaf No. 11 (Schedule RS), eff 2025-01-01, E-7 Sub 1276. Native text, 2 pages. Flat (non-seasonal, non-tiered) energy charge. Riders listed by leaf number only (FCA, EE, EDPR, BPM-P, BPM-T, CPRE, EDIT-4, CAR, RDM, ESM, PIM, NPTC, CEPS, STS) - no values on this sheet. Verified against rendered p1."
+}
