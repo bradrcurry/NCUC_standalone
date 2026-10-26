@@ -3110,6 +3110,12 @@ class ProgressRiderAdjustmentMatrixProfile:
                 summary = parse_rider_summary_from_pdf(pdf_path, leaf_no=leaf_no)
             except Exception:
                 summary = parse_rider_summary(text, source_pdf=local_path, leaf_no=leaf_no)
+            # Coordinate-aware extraction can silently yield no rate classes when
+            # the PDF's internal layout changes (observed on DEP Tenth Revised
+            # Leaf No. 600). Fall back to the text-based parser in that case
+            # rather than emitting zero charges for an otherwise-rich summary.
+            if not summary.rate_classes:
+                summary = parse_rider_summary(text, source_pdf=local_path, leaf_no=leaf_no)
         else:
             summary = parse_rider_summary(text, source_pdf=local_path, leaf_no=leaf_no)
 
