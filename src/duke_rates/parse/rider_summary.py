@@ -392,6 +392,8 @@ def parse_rider_summary_from_pdf(
         result.rate_classes = _dedupe_rate_class_blocks(
             _build_blocks_from_rows(all_rows, result.parse_warnings)
         )
+        for block in result.rate_classes:
+            _check_block_totals(block)
         return result
     finally:
         doc.close()
@@ -663,14 +665,14 @@ def _build_blocks_from_rows(
         # Assign values based on layout
         if has_incremental:
             # HP/LGS-RTP: col1=baseline cents/kWh, col2=incremental cents/kWh, col3=$/kW
-            # We store col1 (baseline) as cents_per_kwh, col3 as dollars_per_kw
-            # col2 (incremental) stored as a note but not as a separate charge
             cents = row.col1
             dollars = row.col3
+            incremental = row.col2
         else:
             # Standard layout: col1=cents/kWh, col2=$/kW (demand sections only)
             cents = row.col1
             dollars = row.col2
+            incremental = None
 
         item = RiderLineItem(
             label=label,
@@ -680,6 +682,7 @@ def _build_blocks_from_rows(
             effective_date=row.date,
             is_subtotal=is_subtotal,
             indented=row.indented,
+            incremental_cents_per_kwh=incremental,
         )
         current_block.line_items.append(item)
 
@@ -703,8 +706,12 @@ def _handle_total_row(
         val = row.col1
         if val is not None:
             block.total_cents_per_kwh = val
+        if row.col2 is not None and row.col1 is not None and row.col3 is None:
+            # HP: TOTAL cents/kWh <baseline> <incremental>
+            block.total_incremental_cents_per_kwh = row.col2
         block.line_items.append(RiderLineItem(
             label=label, is_total=True, cents_per_kwh=val,
+            incremental_cents_per_kwh=block.total_incremental_cents_per_kwh,
         ))
     elif "dollar" in label_lower or "/kw" in label_lower:
         # col3 for HP/LGS-RTP (x≈477), col2 for standard demand (x≈393)
@@ -1002,7 +1009,7 @@ def _parse_rate_class_blocks(
 
     # Column-header / boilerplate line patterns
     _COL_HEADER_RE = re.compile(
-        r"^(?:cents\b|/kWh|/kW|Baseline\b|Incremental\b|dollars\b|Date\s*$|Effective\b|e\s*$)",
+        r"^(?:cents\b|/kWh|/kW|Baseline\b|Increment\w*|dollars\b|Date\s*$|Effecti\w*|e\s*$)",
         re.I,
     )
     # A potential class-name line: ends with "Schedules", "Schedule", "Service", "Lighting", "Signal"
@@ -1022,7 +1029,9 @@ def _parse_rate_class_blocks(
     # Combined single-line format: "Residential Service Schedules /kWh Date"
     _CLASS_INLINE_RE = re.compile(
         r"^([\w\s:,&/-]+?(?:Service\s+Schedules?|General\s+Service\s+Schedules?|Schedules?|Service|Lighting|Signal|LGS-RTP\*{0,3}))"
-        r"\*{0,3}\s+(?:cents\s*)?(?:/\s*kWh|/\s*kW|Baseline|dollars)",
+        # "(?:[a-z]{1,2}\s+)?": a stray word fragment from a wrapped column
+        # header, e.g. "Schedule HP & Schedule LGS-RTP** l /kW Date".
+        r"\*{0,3}\s+(?:[a-z]{1,2}\s+)?(?:cents\s*)?(?:/\s*kWh|/\s*kW|Baseline|dollars)",
         re.I,
     )
 
@@ -1093,7 +1102,7 @@ def _parse_rate_class_blocks(
 def _detect_column_layout(header_text: str) -> str:
     """Classify a section's value columns from its column-header text."""
     h = header_text.lower()
-    if "baseline" in h and "incremental" in h:
+    if "baseline" in h and "increment" in h:
         return "baseline_incremental"
     has_kwh = bool(re.search(r"\bcents\b|/\s*kwh", h))
     has_kw = bool(re.search(r"\bdollars\b|/\s*kw\b", h))
@@ -1171,6 +1180,13 @@ def _check_block_totals(block: RiderRateClassBlock) -> None:
     if any(li.unit_ambiguous for li in block.line_items):
         checks.append(False)
     block.checksum_ok = all(checks) if checks else None
+
+
+def checksum_score(result: RiderSummaryResult) -> tuple[int, int]:
+    """(blocks whose printed TOTALs reconcile, blocks that fail) for a parse."""
+    ok = sum(1 for b in result.rate_classes if b.checksum_ok is True)
+    bad = sum(1 for b in result.rate_classes if b.checksum_ok is False)
+    return ok, bad
 
 
 def _parse_one_block(

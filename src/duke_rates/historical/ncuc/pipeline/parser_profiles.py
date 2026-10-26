@@ -15,7 +15,11 @@ from duke_rates.historical.ncuc.pipeline.ocr_normalization import (
 )
 from duke_rates.parse.nc_carolinas import parse_nc_carolinas_leaf, parse_nc_carolinas_leaf_file
 from duke_rates.parse.nc_progress import parse_nc_progress_leaf, parse_nc_progress_leaf_file
-from duke_rates.parse.rider_summary import parse_rider_summary, parse_rider_summary_from_pdf
+from duke_rates.parse.rider_summary import (
+    checksum_score,
+    parse_rider_summary,
+    parse_rider_summary_from_pdf,
+)
 from duke_rates.utils.duke_company import detect_duke_company
 
 
@@ -3116,6 +3120,15 @@ class ProgressRiderAdjustmentMatrixProfile:
             # rather than emitting zero charges for an otherwise-rich summary.
             if not summary.rate_classes:
                 summary = parse_rider_summary(text, source_pdf=local_path, leaf_no=leaf_no)
+            else:
+                # The coordinate parser buckets values by fixed x-positions and
+                # can misassign columns; prefer the text parse when its printed
+                # TOTALs reconcile for more blocks (ties keep the coordinate parse).
+                text_summary = parse_rider_summary(text, source_pdf=local_path, leaf_no=leaf_no)
+                coord_ok, coord_bad = checksum_score(summary)
+                text_ok, text_bad = checksum_score(text_summary)
+                if (text_ok, -text_bad) > (coord_ok, -coord_bad):
+                    summary = text_summary
         else:
             summary = parse_rider_summary(text, source_pdf=local_path, leaf_no=leaf_no)
 

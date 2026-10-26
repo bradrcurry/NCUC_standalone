@@ -28,5 +28,11 @@
   "sha256": "1081b1797915e179ae80478e8376de6896e2649a7d64f81259362e81eb609caa",
   "pages": 5,
   "why": "control"
+ },
+ "dep_leaf600_2026-06-01": {
+  "source_pdf": "data/raw/nc/progress/rider/leaf-600-eff-2026-06-01.pdf",
+  "sha256": "84c7962c2fa262e7d5f64d408fdef3deacd080a22ee445eb9ecbd0c7a9f0d474",
+  "pages": 5,
+  "why": "June 2026 layout with fragmented HP column headers"
  }
 }

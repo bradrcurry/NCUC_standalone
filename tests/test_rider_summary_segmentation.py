@@ -235,6 +235,27 @@ def test_demand_class_keeps_both_unit_totals_in_one_block(extractor: str) -> Non
     assert _item(demand, "EDIT-4 Rider").cents_per_kwh == pytest.approx(-0.145)
 
 
+@pytest.mark.parametrize("extractor", EXTRACTORS)
+def test_june_2026_layout_fragmented_hp_header_is_recognized(extractor: str) -> None:
+    """Tenth Revised Leaf 600 splits header words ("Incrementa" / "l")."""
+    result = _parse("dep_leaf600_2026-06-01", extractor)
+    _assert_no_cross_section_merge(result)
+    assert len(result.rate_classes) == 11
+    assert not any(b.ambiguous_rate_class for b in result.rate_classes)
+    assert _block(result, "Residential Service Schedules").total_cents_per_kwh == pytest.approx(3.144)
+
+    hp = _block(result, "Schedule HP & Schedule LGS-RTP")
+    assert hp.column_layout == "baseline_incremental"
+    fuel = _item(hp, "Fuel and Fuel-Related Adjustment Rate")
+    assert (fuel.cents_per_kwh, fuel.incremental_cents_per_kwh, fuel.dollars_per_kw) == (
+        pytest.approx(0.361), pytest.approx(0.0), None,
+    )
+    assert hp.total_cents_per_kwh == pytest.approx(1.397)
+    assert hp.total_incremental_cents_per_kwh == pytest.approx(0.242)
+    assert hp.total_dollars_per_kw == pytest.approx(3.03)
+    assert all(b.checksum_ok is True for b in result.rate_classes)
+
+
 # ---------------------------------------------------------------------------
 # blk 361 -- DEC E-7 Sub 1146 FCA filing (cover letter, service list, HP pages)
 # ---------------------------------------------------------------------------
