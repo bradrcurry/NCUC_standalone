@@ -5,6 +5,7 @@ Phase 2 of data preparation: Extract rates from confirmed tariff documents
 using improved metadata (effective_start dates from Step 1).
 """
 
+import hashlib
 import sqlite3
 import logging
 import re
@@ -37,12 +38,13 @@ from duke_rates.historical.ncuc.pipeline.ocr_normalization import (
     normalize_ocr_text,
 )
 from duke_rates.historical.ncuc.pipeline.stage_versions import (
+    DOCLING_BACKEND_VERSION,
     HISTORICAL_BULK_PARSER_VERSION,
 )
 from duke_rates.db.reprocess import (
     record_historical_processing_run,
 )
-from duke_rates.db.artifact_cache import load_page_artifacts
+from duke_rates.db.artifact_cache import docling_artifact_is_degraded, load_page_artifacts
 from duke_rates.document_intelligence.normalization import DocumentNormalizationConfig
 from duke_rates.document_intelligence.service import (
     DocumentIntelligenceOrchestrator,
@@ -430,35 +432,122 @@ class BulkExtractor:
     def _load_docling_artifact(
         self, pdf_path: str, want_doc_json: bool = False
     ) -> dict | None:
-        """Return the latest usable Docling artifact row for ``pdf_path``, or None.
+        """Return the best usable Docling artifact row for ``pdf_path``, or None.
+
+        Only artifacts whose ``file_hash`` matches the PDF currently on disk
+        are eligible: a newer revision downloaded to the same path must not be
+        read through a superseded revision's conversion.  Among those, skip
+        conversions that lost content (see ``docling_artifact_is_degraded``)
+        and prefer the current ``DOCLING_BACKEND_VERSION``, then the newest.
 
         ``want_doc_json=True`` selects the (large) ``doc_json_content`` column,
         used by page-range slicing. The default omits it to keep memory low
         for the full-document text path.
         """
-        cols = "plain_text_content, status, page_count"
+        file_hash = self._current_file_hash(pdf_path)
+        if not file_hash:
+            return None
+        cols = "id, file_hash, plain_text_content, status, page_count, metadata_json"
         if want_doc_json:
             cols += ", doc_json_content"
         conn = self._get_connection()
         try:
-            row = conn.execute(
+            rows = conn.execute(
                 f"""
                 SELECT {cols}
                 FROM docling_artifacts
                 WHERE source_pdf = ?
                   AND plain_text_content IS NOT NULL
-                ORDER BY id DESC
-                LIMIT 1
+                ORDER BY (file_hash = ?) DESC, (backend_version = ?) DESC, id DESC
                 """,
-                (pdf_path,),
-            ).fetchone()
+                (pdf_path, file_hash, DOCLING_BACKEND_VERSION),
+            ).fetchall()
         except sqlite3.OperationalError:
             return None
         finally:
             conn.close()
-        if not row or not self._docling_status_is_usable(row["status"]):
+        for row in rows:
+            if not self._docling_status_is_usable(row["status"]):
+                continue
+            if docling_artifact_is_degraded(row["metadata_json"]):
+                continue
+            if row["file_hash"] == file_hash:
+                return dict(row)
+            # Bytes changed since conversion.  Re-downloads often differ only
+            # in byte-level details, so accept the artifact only when its
+            # content is verified against the PDF now on disk.
+            if self._docling_text_matches_pdf(pdf_path, row):
+                logger.info(
+                    "Docling artifact %s for %s has a different file_hash but "
+                    "matching content; using it", row["id"], pdf_path,
+                )
+                return dict(row)
+            logger.warning(
+                "Docling artifact %s for %s was converted from different bytes "
+                "and its content does not match the current PDF; ignoring it",
+                row["id"], pdf_path,
+            )
+        return None
+
+    #: Thresholds for accepting a hash-mismatched artifact (see
+    #: ``_docling_text_matches_pdf``).  Docling/OCR reads differ slightly from
+    #: the PDF text layer, so large docs allow a small numeric residue; small
+    #: docs must match every number because one changed rate is a new revision.
+    _DOCLING_MATCH_NUMBER_SHARE = 0.95
+    _DOCLING_MATCH_NUMBER_EXACT_BELOW = 5
+    _DOCLING_MATCH_WORD_SHARE = 0.90
+    _DOCLING_MATCH_MIN_WORDS = 20
+
+    def _docling_text_matches_pdf(self, pdf_path: str, row: sqlite3.Row) -> bool:
+        """Verify a hash-mismatched artifact describes the PDF currently on disk.
+
+        Requires the same page count, the artifact's words to appear in the
+        PDF's text layer, and its decimal tokens (where rates live) to appear
+        there too: all of them when there are few, nearly all otherwise.
+        Returns False when this cannot be verified (no text layer, unreadable
+        PDF), so an unverifiable artifact is never attributed to a newer document.
+        """
+        try:
+            import fitz
+            with fitz.open(pdf_path) as pdf:
+                if pdf.page_count != (row["page_count"] or 0):
+                    return False
+                pdf_text = "\n".join(page.get_text() for page in pdf)
+        except Exception:
+            return False
+        artifact_text = row["plain_text_content"] or ""
+        artifact_words = set(re.findall(r"[A-Za-z]{4,}", artifact_text.lower()))
+        if len(artifact_words) < self._DOCLING_MATCH_MIN_WORDS:
+            return False
+        pdf_words = set(re.findall(r"[A-Za-z]{4,}", pdf_text.lower()))
+        if len(artifact_words & pdf_words) / len(artifact_words) < self._DOCLING_MATCH_WORD_SHARE:
+            return False
+        artifact_numbers = set(re.findall(r"\d+\.\d+", artifact_text))
+        if not artifact_numbers:
+            return True
+        found = len(artifact_numbers & set(re.findall(r"\d+\.\d+", pdf_text)))
+        if len(artifact_numbers) < self._DOCLING_MATCH_NUMBER_EXACT_BELOW:
+            return found == len(artifact_numbers)
+        return found / len(artifact_numbers) >= self._DOCLING_MATCH_NUMBER_SHARE
+
+    def _current_file_hash(self, pdf_path: str) -> str | None:
+        """SHA-256 of ``pdf_path`` as it is on disk now (memoized by size/mtime)."""
+        try:
+            stat = Path(pdf_path).stat()
+        except OSError:
             return None
-        return dict(row)
+        cache = self.__dict__.setdefault("_file_hash_cache", {})
+        key = (pdf_path, stat.st_size, stat.st_mtime_ns)
+        if key not in cache:
+            hasher = hashlib.sha256()
+            try:
+                with open(pdf_path, "rb") as handle:
+                    for chunk in iter(lambda: handle.read(1 << 20), b""):
+                        hasher.update(chunk)
+            except OSError:
+                return None
+            cache[key] = hasher.hexdigest()
+        return cache[key]
 
     def _load_docling_text(self, pdf_path: str) -> str | None:
         """Return the full plain_text body of the latest usable Docling artifact.

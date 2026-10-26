@@ -146,9 +146,12 @@ def test_slice_docling_text_rejects_partial_coverage_artifact(tmp_path) -> None:
         ],
         "tables": [],
     }
+    # Bind the artifact to the PDF by hash so the coverage check (not D3) decides.
+    import hashlib
     conn.execute(
-        "INSERT INTO docling_artifacts(source_pdf, status, page_count, doc_json_content, plain_text_content) VALUES (?,?,?,?,?)",
-        (str(pdf_path), "success", 5, json.dumps(fake_doc), "wrong-content from chunk"),
+        "INSERT INTO docling_artifacts(source_pdf, status, page_count, doc_json_content, plain_text_content, file_hash) VALUES (?,?,?,?,?,?)",
+        (str(pdf_path), "success", 5, json.dumps(fake_doc), "wrong-content from chunk",
+         hashlib.sha256(pdf_path.read_bytes()).hexdigest()),
     )
     conn.commit()
     conn.close()
@@ -209,9 +212,12 @@ def test_slice_docling_text_includes_texts_unreferenced_from_body_children(tmp_p
         ],
         "tables": [],
     }
+    # The artifact must be bound to the PDF on disk by file_hash (D3).
+    import hashlib
+    file_hash = hashlib.sha256(pdf_path.read_bytes()).hexdigest()
     conn.execute(
-        "INSERT INTO docling_artifacts(source_pdf, status, page_count, doc_json_content, plain_text_content) VALUES (?,?,?,?,?)",
-        (str(pdf_path), "success", 2, json.dumps(fake_doc), "x" * 200),
+        "INSERT INTO docling_artifacts(source_pdf, status, page_count, doc_json_content, plain_text_content, file_hash) VALUES (?,?,?,?,?,?)",
+        (str(pdf_path), "success", 2, json.dumps(fake_doc), "x" * 200, file_hash),
     )
     conn.commit()
     conn.close()

@@ -335,6 +335,31 @@ def save_docling_artifact(
     return int(cur.lastrowid)
 
 
+#: ``degraded_modes`` entries (written by ``convert_pdf_safe``) that mean the
+#: conversion lost content -- OCR and/or table structure were switched off for
+#: some pages.  ``chunked`` and ``cpu_fallback`` keep full model quality.
+DOCLING_QUALITY_LOSS_MODES = frozenset({"page_degraded"})
+
+
+def docling_artifact_is_degraded(metadata: dict | str | None) -> bool:
+    """True when a Docling artifact's metadata says content was lost.
+
+    Accepts the ``metadata_json`` column (str) or an already-decoded dict.
+    Unknown or missing metadata counts as not degraded, matching legacy rows.
+    """
+    if isinstance(metadata, str):
+        try:
+            metadata = json.loads(metadata)
+        except ValueError:
+            return False
+    if not isinstance(metadata, dict):
+        return False
+    modes = metadata.get("degraded_modes") or metadata.get("_degraded_modes") or []
+    if any(mode in DOCLING_QUALITY_LOSS_MODES for mode in modes):
+        return True
+    return bool(metadata.get("skipped_pages") or metadata.get("_skipped_pages"))
+
+
 def load_docling_artifact(
     conn: sqlite3.Connection,
     *,

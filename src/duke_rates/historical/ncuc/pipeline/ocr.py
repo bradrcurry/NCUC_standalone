@@ -390,11 +390,22 @@ def _try_docling_ocr(file_path: str) -> list[PageEvidence] | None:
         if get_docling_unavailable_reason():
             logger.info("Docling GPU unavailable for progressive OCR: %s", get_docling_unavailable_reason())
             return None
-        result = convert_pdf_with_docling(file_path, force=True)
+        # This is an OCR backend: enable Docling's OCR stage, which
+        # convert_pdf_with_docling leaves off unless has_scanned_pages is set.
+        result = convert_pdf_with_docling(file_path, force=True, has_scanned_pages=True)
         if not result or not result.get("document"):
             return None
         from duke_rates.historical.ncuc.pipeline.docling_page_miner import mine_pages_from_docling_artifact
-        pages, _metadata = mine_pages_from_docling_artifact(result)
+        # The miner reads the DB artifact shape; map the conversion envelope's
+        # keys explicitly (it used to receive none of them and return blanks).
+        pages, _metadata = mine_pages_from_docling_artifact({
+            **result,
+            "doc_json_content": result.get("document"),
+            "plain_text_content": result.get("plain_text") or "",
+        })
+        if not any((p.text_content or "").strip() for p in pages):
+            logger.info("Docling OCR produced no text for %s", file_path)
+            return None
         if pages:
             logger.info("Docling GPU OCR succeeded for %s: %d pages, %d avg chars",
                         file_path, len(pages),
@@ -491,6 +502,7 @@ def extract_pages_with_progressive_ocr(
     )
     attempted: list[str] = []
     best_pages: list[PageEvidence] = []
+    best_backend = ""
 
     # Map backend names to extraction functions
     _BACKEND_EXTRACTORS = {
@@ -511,15 +523,17 @@ def extract_pages_with_progressive_ocr(
         except Exception as exc:
             logger.warning("Backend %s raised for %s: %s", backend, file_path, exc)
             continue
-        if not pages:
+        if not pages or not any((p.text_content or "").strip() for p in pages):
             continue
         if not best_pages:
             best_pages = pages
+            best_backend = backend
         if _ocr_text_quality_ok(pages):
             return pages, backend, attempted
 
     if best_pages:
-        return best_pages, attempted[-1] if attempted else "", attempted
+        # Report the backend that produced best_pages, not the last one tried.
+        return best_pages, best_backend, attempted
 
     logger.warning("All OCR backends failed for %s: attempted=%s", file_path, attempted)
     return [], "", attempted
