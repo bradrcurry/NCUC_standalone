@@ -226,6 +226,10 @@ def _load_family_historical_leaf_nos(conn: sqlite3.Connection, family_key: str) 
     return {str(row["leaf_no"]).strip() for row in rows if row["leaf_no"]}
 
 
+class HistoricalDataLossError(RuntimeError):
+    """A write would delete historical versions or curated charges."""
+
+
 class Repository:
     def __init__(self, database_path: Path):
         self.database_path = database_path
@@ -4973,10 +4977,18 @@ class Repository:
         version: "TariffVersionRecord",
         charges: list["TariffChargeRecord"],
         riders: list["RiderApplicabilityRecord"],
+        *,
+        allow_history_loss: bool = False,
     ) -> None:
         """Atomically delete old tariff data and insert the new version and its charges/riders.
         
         This prevents empty or incomplete tariff records if parsing or insertion fails.
+
+        The delete covers *every* version of the family.  It refuses (raises
+        ``HistoricalDataLossError`` before touching anything) when that would
+        remove versions bound to historical documents or charges carrying
+        notes (manual corrections, LLM promotions), unless
+        ``allow_history_loss=True``.
         """
         import sqlite3
         import logging
@@ -4984,6 +4996,26 @@ class Repository:
         log = logging.getLogger("duke_rates.repository")
         
         with self._connect() as conn:
+            if not allow_history_loss:
+                historical_versions, annotated_charges = conn.execute(
+                    """
+                    SELECT
+                        (SELECT COUNT(*) FROM tariff_versions
+                          WHERE family_key = ? AND historical_document_id IS NOT NULL),
+                        (SELECT COUNT(*) FROM tariff_charges tc
+                           JOIN tariff_versions tv ON tv.id = tc.version_id
+                          WHERE tv.family_key = ? AND COALESCE(tc.notes, '') <> '')
+                    """,
+                    (family_key, family_key),
+                ).fetchone()
+                if historical_versions or annotated_charges:
+                    raise HistoricalDataLossError(
+                        f"replace_parsed_tariff_data({family_key!r}) would delete "
+                        f"{historical_versions} historical version(s) and "
+                        f"{annotated_charges} manual/LLM-promoted charge(s); refusing. "
+                        "Use the non-destructive historical ingestion path, or pass "
+                        "allow_history_loss=True deliberately."
+                    )
             try:
                 # 1. Delete existing data for this family
                 version_ids = [

@@ -26,7 +26,7 @@ from duke_rates.billing.reconciliation import ProgressNCBillReconciliationServic
 from duke_rates.billing.usage_io import read_usage_file
 from duke_rates.config import get_settings
 from duke_rates.db.artifact_cache import load_page_artifacts, save_page_artifacts, save_span_artifacts
-from duke_rates.db.repository import Repository
+from duke_rates.db.repository import HistoricalDataLossError, Repository
 from duke_rates.db.sqlite import connect as connect_sqlite
 from duke_rates.discovery.classifier import extract_rev_token
 from duke_rates.discovery.duke_site import DukeDiscoveryService
@@ -1461,8 +1461,14 @@ def parse_tariff_versions(
             n_processed += 1
             continue
 
-        # Atomically replace old data with newly parsed data
-        repository.replace_parsed_tariff_data(family.family_key, version, charges, riders)
+        # Atomically replace old data with newly parsed data.  Families with
+        # historical versions are protected (see replace_parsed_tariff_data).
+        try:
+            repository.replace_parsed_tariff_data(family.family_key, version, charges, riders)
+        except HistoricalDataLossError as exc:
+            log.warning("Skipped %s: %s", family.family_key, exc)
+            typer.echo(f"  [skip] {family.family_key}: protected historical data ({exc})")
+            continue
 
         if version.revision_label is None:
             log.warning("No revision_label parsed for %s", family.family_key)

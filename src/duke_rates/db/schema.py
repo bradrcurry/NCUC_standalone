@@ -1,3 +1,6 @@
+import logging
+import sqlite3
+
 SCHEMA_SQL = """
 CREATE TABLE IF NOT EXISTS documents (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1222,17 +1225,38 @@ def migrate(conn) -> None:
 
     # --- Migration TD-002: enforce uniqueness on rider_summary_blocks ---
     # DB-level guard against duplicate rows from repeated imports.
-    # Clean up any pre-existing duplicates first (keep lowest id per key).
-    conn.executescript(
-        """
-        DELETE FROM rider_summary_blocks WHERE id NOT IN (
-            SELECT MIN(id) FROM rider_summary_blocks
-            GROUP BY docket_dir, source_pdf, rate_class, effective_date
-        );
-        CREATE UNIQUE INDEX IF NOT EXISTS idx_rider_blocks_unique
-        ON rider_summary_blocks(docket_dir, source_pdf, rate_class, effective_date);
-        """
-    )
+    # Runs once, before the unique index exists.  It used to run on every
+    # connection and delete duplicates without their rider_line_items
+    # (orphaning them); GROUP BY also lumps NULL effective dates together,
+    # which the unique index itself allows, so NULL-dated blocks kept being
+    # deleted.  Now only duplicate blocks with no line items are removed; if
+    # duplicates carrying data remain, the index is skipped instead.
+    has_unique_index = conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='index' AND name='idx_rider_blocks_unique'"
+    ).fetchone()
+    if not has_unique_index:
+        conn.execute(
+            """
+            DELETE FROM rider_summary_blocks
+            WHERE id NOT IN (
+                SELECT MIN(id) FROM rider_summary_blocks
+                GROUP BY docket_dir, source_pdf, rate_class, effective_date
+            )
+              AND NOT EXISTS (
+                SELECT 1 FROM rider_line_items li WHERE li.block_id = rider_summary_blocks.id
+            )
+            """
+        )
+        try:
+            conn.execute(
+                "CREATE UNIQUE INDEX IF NOT EXISTS idx_rider_blocks_unique "
+                "ON rider_summary_blocks(docket_dir, source_pdf, rate_class, effective_date)"
+            )
+        except sqlite3.IntegrityError:
+            logging.getLogger(__name__).warning(
+                "TD-002: duplicate rider_summary_blocks with line items remain; "
+                "unique index not created (resolve duplicates manually)"
+            )
     conn.commit()
 
     # --- Migration TD-OPT-001: add enrollment_type to rider_applicability ---

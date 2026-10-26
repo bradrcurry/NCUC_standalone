@@ -2027,8 +2027,34 @@ class BulkExtractor:
             now = datetime.now(UTC).isoformat()
 
             # Delete existing charges first so reprocessing replaces, not appends.
+            # Only rows this extractor wrote are replaced: manual corrections,
+            # sibling copies and LLM promotions carry notes (and promotions an
+            # audit row) and must survive re-extraction.
+            has_audit = conn.execute(
+                "SELECT 1 FROM sqlite_master WHERE type='table' AND name='llm_promoted_charge_audit'"
+            ).fetchone()
+            has_notes = any(
+                row[1] == "notes" for row in conn.execute("PRAGMA table_info(tariff_charges)")
+            )
+            audit_clause = (
+                " AND id NOT IN (SELECT tariff_charge_id FROM llm_promoted_charge_audit"
+                " WHERE tariff_charge_id IS NOT NULL)"
+                if has_audit else ""
+            )
+            replaceable = ("COALESCE(notes, '') = ''" if has_notes else "1 = 1") + audit_clause
+            preserved = conn.execute(
+                "SELECT COUNT(*) FROM tariff_charges WHERE version_id = ? AND family_key = ?"
+                " AND NOT (" + replaceable + ")",
+                (version_id, family_key),
+            ).fetchone()[0]
+            if preserved:
+                logger.info(
+                    "insert_charges: keeping %d curated charge(s) for version %s (%s)",
+                    preserved, version_id, family_key,
+                )
             conn.execute(
-                "DELETE FROM tariff_charges WHERE version_id = ? AND family_key = ?",
+                "DELETE FROM tariff_charges WHERE version_id = ? AND family_key = ?"
+                " AND " + replaceable,
                 (version_id, family_key),
             )
 
