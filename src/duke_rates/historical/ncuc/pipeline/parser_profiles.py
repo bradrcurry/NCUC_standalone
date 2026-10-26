@@ -3121,6 +3121,10 @@ class ProgressRiderAdjustmentMatrixProfile:
 
         charges: list[ExtractedCharge] = []
         for block in summary.rate_classes:
+            # Rows the parser could not tie to a rate class must not become
+            # charges attributed to whatever class preceded them.
+            if block.ambiguous_rate_class:
+                continue
             for item in block.line_items:
                 if item.is_section_header:
                     continue
@@ -3262,6 +3266,10 @@ class CarolinasRiderAdjustmentMatrixProfile:
 
         charges: list[ExtractedCharge] = []
         for block in summary.rate_classes:
+            # Rows the parser could not tie to a rate class must not become
+            # charges attributed to whatever class preceded them.
+            if block.ambiguous_rate_class:
+                continue
             for item in block.line_items:
                 if item.is_section_header:
                     continue

@@ -51,6 +51,11 @@ class RiderLineItem:
     is_subtotal: bool = False           # True for "BA - Net Adjustment" rows
     is_total: bool = False              # True for "TOTAL cents/kWh" rows
     indented: bool = False              # True for BA sub-items (x≈87 vs x≈78)
+    # HP / LGS-RTP "Incremental" cents/kWh column (second cents column).
+    incremental_cents_per_kwh: float | None = None
+    # True when the row's value(s) could not be tied to a unit column; the
+    # values are then left unset instead of guessed.
+    unit_ambiguous: bool = False
 
 
 @dataclass
@@ -61,6 +66,17 @@ class RiderRateClassBlock:
     line_items: list[RiderLineItem] = field(default_factory=list)
     total_cents_per_kwh: float | None = None
     total_dollars_per_kw: float | None = None
+    total_incremental_cents_per_kwh: float | None = None
+    # Value columns announced by the section header: "kwh", "kw", "kwh_kw",
+    # "baseline_incremental" (HP: two cents/kWh columns, optional $/kW), or
+    # "unknown" when no column header was seen.
+    column_layout: str = "unknown"
+    # Printed TOTAL equals the sum of its components (None when no TOTAL row).
+    checksum_ok: bool | None = None
+    # Rows followed a closed section without a recognizable rate-class header;
+    # rate_class is a placeholder and applicable_schedules is empty.
+    ambiguous_rate_class: bool = False
+    warnings: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -151,7 +167,12 @@ _SKIP_LINE_RE = re.compile(
     ^Revised\s+Leaf\s+No\. |        # short form
     ^Leaf\s+No\.\s+\d+ |            # standalone "Leaf No. 99" lines
     ^(?:Amended|Superseding)\s+North\s+Carolina |  # "Amended NC ..." / "Superseding NC ..."
-    ^Original\s+Leaf\s+No\.         # "Original Leaf No. N"
+    ^Original\s+Leaf\s+No\. |       # "Original Leaf No. N"
+    # Any page header/footer ending in a leaf reference, e.g.
+    # "NC Sixty-Third Revised Leaf No. 99" (hyphenated ordinals defeat \w+).
+    ^.*\b(?:Revised|Original)\s+Leaf\s+No\.\s*\d*\s*$ |
+    ^Superseding\b |
+    ^rider\s+as\s+a\s+fixed\s+charge   # DEP "** ... CAR rider as a fixed charge" footnote
     """,
     re.I | re.X,
 )
@@ -221,6 +242,12 @@ def parse_rider_summary(
         extract_supersedes,
     )
 
+    bound_warnings: list[str] = []
+    text = _bound_to_summary_pages(text, bound_warnings)
+    # "Schedule HP – General Service" arrives as en/em dashes or as U+FFFD
+    # (an undecodable dash); normalize so header patterns match.
+    text = re.sub(r"\s[–—�]\s", " - ", text)
+
     # Normalize column-split text (PyMuPDF/fitz puts each table cell on its own line).
     # Detect by checking whether numbers appear on their own lines next to labels.
     normalized = _normalize_column_split_text(text)
@@ -244,10 +271,61 @@ def parse_rider_summary(
         order_date=order_date,
         supersedes=supersedes,
     )
+    result.parse_warnings.extend(bound_warnings)
+    if _REDLINE_TEXT_RE.search(normalized) or _REDLINE_DATE_RE.search(normalized):
+        result.parse_warnings.append(
+            "redline markers present (fused ordinals/dates); fused struck+inserted "
+            "values may appear and should fail their checksum"
+        )
 
     rate_classes = _parse_rate_class_blocks(normalized, result.parse_warnings)
-    result.rate_classes = _dedupe_rate_class_blocks(rate_classes)
+    result.rate_classes = _dedupe_rate_class_blocks(rate_classes, result.parse_warnings)
+    for block in result.rate_classes:
+        result.parse_warnings.extend(f"{block.rate_class}: {w}" for w in block.warnings)
     return result
+
+
+# Redline compliance copies print struck and inserted text side by side, which
+# text extraction fuses: "FifthSixth Revised", "JanuaryApril 1, 2025", and
+# dates such as "1/1/234" or "104/1/235".
+_ORDINALS = (
+    "First|Second|Third|Fourth|Fifth|Sixth|Seventh|Eighth|Ninth|Tenth|Eleventh|"
+    "Twelfth|Thirteenth|Fourteenth|Fifteenth|Sixteenth|Seventeenth|Eighteenth|"
+    "Nineteenth|Twentieth|Thirtieth|Fortieth|Fiftieth|Sixtieth|Seventieth"
+)
+_MONTHS = "January|February|March|April|May|June|July|August|September|October|November|December"
+_REDLINE_TEXT_RE = re.compile(
+    rf"(?:{_ORDINALS})(?:{_ORDINALS})\s+Revised|(?:{_MONTHS})(?:{_MONTHS})\s+\d"
+)
+_REDLINE_DATE_RE = re.compile(r"(?<![\d/])(?:\d{1,2}/\d{1,2}/\d{3}|\d{3}/\d{1,2}/\d{2,3})(?![\d/])")
+_SUMMARY_TITLE_RE = re.compile(r"SUMMARY\s+OF\s+RIDER\s+ADJUSTMENTS", re.I)
+_SUMMARY_TOTAL_RE = re.compile(r"^\s*TOTAL\s+(?:cents|dollars)\s*/\s*kW", re.I | re.M)
+
+
+def _bound_to_summary_pages(text: str, warnings: list[str]) -> str:
+    """Keep only rider-summary pages when page breaks (form feeds) are present.
+
+    Compliance filings wrap the summary in cover letters, certificates and
+    service lists, and often include a redline copy next to the clean one.
+    A page is kept when it carries the summary title or a TOTAL row.  When
+    both clean and redline summary pages exist, redline pages are dropped.
+    Text without form feeds, or with no recognizable summary page, is
+    returned unchanged.
+    """
+    if "\f" not in text:
+        return text
+    pages = text.split("\f")
+    summary = [i for i, p in enumerate(pages) if _SUMMARY_TITLE_RE.search(p) or _SUMMARY_TOTAL_RE.search(p)]
+    if not summary:
+        return text
+    redline = {i for i in summary if _REDLINE_TEXT_RE.search(pages[i]) or len(_REDLINE_DATE_RE.findall(pages[i])) >= 2}
+    keep = [i for i in summary if i not in redline] or summary
+    dropped_other = len(pages) - len(summary)
+    if dropped_other:
+        warnings.append(f"bounded to summary pages {[i + 1 for i in summary]} of {len(pages)}")
+    if redline and len(keep) < len(summary):
+        warnings.append(f"redline copy pages {sorted(i + 1 for i in redline)} excluded; clean copy kept")
+    return "\f".join(pages[i] for i in keep)
 
 
 def parse_rider_summary_from_pdf(
@@ -783,6 +861,12 @@ def _normalize_column_split_text(text: str) -> str:
     if num_only < 3:
         return text
 
+    def _next_nonblank(idx: int) -> int:
+        # PyMuPDF can emit whitespace-only lines between a row's cells.
+        while idx < len(lines) and not lines[idx].strip():
+            idx += 1
+        return idx
+
     out: list[str] = []
     i = 0
     while i < len(lines):
@@ -792,17 +876,31 @@ def _normalize_column_split_text(text: str) -> str:
             i += 1
             continue
 
-        # Is the NEXT line a pure number?
-        is_next_num = i + 1 < len(lines) and _is_pure_num(lines[i + 1].strip())
+        # Column-wise interleave: n rider labels, then n values, then n dates
+        # (PyMuPDF reads two short rows cell-column by cell-column).  Pair
+        # them in order; anything less regular is left to the normal path.
+        transposed = _transpose_interleaved_rows(lines, i, _is_pure_num, _is_pure_date)
+        if transposed is not None:
+            rows, i = transposed
+            out.extend(rows)
+            continue
+
+        # Is the NEXT non-blank line a pure number?
+        nxt = _next_nonblank(i + 1)
+        is_next_num = nxt < len(lines) and _is_pure_num(lines[nxt].strip())
 
         # Join if current line is not itself a number or date (it's a label)
         if is_next_num and not _is_pure_num(line) and not _is_pure_date(line):
             # This line is a label; join with the following number(s) and optional date
             combined = line
-            i += 1
+            i = nxt
             while i < len(lines):
                 part = lines[i].strip()
                 if not part:
+                    ahead = _next_nonblank(i)
+                    if ahead < len(lines) and _is_pure_date(lines[ahead].strip()):
+                        i = ahead
+                        continue
                     i += 1
                     break
                 if _is_pure_num(part) or _is_pure_date(part):
@@ -816,6 +914,33 @@ def _normalize_column_split_text(text: str) -> str:
             i += 1
 
     return "\n".join(out)
+
+
+def _transpose_interleaved_rows(lines, start, is_num, is_date):
+    """Detect ``L1, L2, v1, v2, d1, d2`` at ``start`` and return paired rows.
+
+    Returns ``(rows, next_index)`` or None.  Requires >=2 consecutive rider
+    labels followed by exactly as many values and as many dates, so a row
+    with two value columns (``L, v1, v2, d``) is never mistaken for it.
+    """
+    labels: list[str] = []
+    j = start
+    while j < len(lines) and lines[j].strip() and not is_num(lines[j].strip()) and not is_date(lines[j].strip()):
+        labels.append(lines[j].strip())
+        j += 1
+    if len(labels) < 2 or not all(_is_rider_like(label) for label in labels):
+        return None
+    values: list[str] = []
+    while j < len(lines) and is_num(lines[j].strip()):
+        values.append(lines[j].strip())
+        j += 1
+    dates: list[str] = []
+    while j < len(lines) and is_date(lines[j].strip()):
+        dates.append(lines[j].strip())
+        j += 1
+    if len(values) != len(labels) or len(dates) != len(labels):
+        return None
+    return [f"{label} {value} {date}" for label, value, date in zip(labels, values, dates)], j
 
 
 # ---------------------------------------------------------------------------
@@ -843,22 +968,41 @@ def _parse_rate_class_blocks(
     * pdfplumber:  ``"Residential Service Schedules /kWh Date"``  (single line)
     * PyMuPDF/fitz: ``"Residential Service Schedules"`` / ``"/kWh"``  (split lines)
     * DEC Leaf 99: ``"Residential Schedules RS, RE, ES, RT, RSTC, RETC cents/kWh Effective Date"``
+
+    Column-header lines seen just before or after a class header are kept as
+    the block's ``header_text`` so the value columns can be identified.
     """
     blocks: list[RiderRateClassBlock] = []
     current_class: str | None = None
     current_schedules: list[str] | None = None
     current_lines: list[str] = []
-    prev_potential_class: str | None = None  # line that might be a class name
+    current_header: list[str] = []
+    pending_header: list[str] = []   # column-header lines not yet tied to a class
+    prev_potential_class: tuple[str, list[str] | None] | None = None  # name-only line
 
     def flush() -> None:
         if current_class and current_lines:
-            block = _parse_one_block(current_class, current_lines, warnings, current_schedules)
-            if block.line_items:
-                blocks.append(block)
+            for block in _parse_one_block(
+                current_class, current_lines, warnings, current_schedules,
+                header_text=" ".join(current_header),
+            ):
+                if block.line_items:
+                    blocks.append(block)
+
+    def start(name: str, schedules: list[str] | None, header_line: str) -> None:
+        nonlocal current_class, current_schedules, current_lines, current_header
+        nonlocal pending_header, prev_potential_class
+        flush()
+        current_class = name
+        current_schedules = schedules
+        current_lines = []
+        current_header = pending_header + [header_line]
+        pending_header = []
+        prev_potential_class = None
 
     # Column-header / boilerplate line patterns
     _COL_HEADER_RE = re.compile(
-        r"^(?:cents\s*$|cents\s|/kWh|/kW|Baseline\s+Incr|dollars\s+Effective|dollars\s*$|Date\s*$|Effective\s*$)",
+        r"^(?:cents\b|/kWh|/kW|Baseline\b|Incremental\b|dollars\b|Date\s*$|Effective\b|e\s*$)",
         re.I,
     )
     # A potential class-name line: ends with "Schedules", "Schedule", "Service", "Lighting", "Signal"
@@ -869,17 +1013,24 @@ def _parse_rate_class_blocks(
         ),
         re.I,
     )
+    # Class name followed by its schedule codes but no unit marker, e.g.
+    # "Residential Schedules RS, RE, ES, RT, WC" under "cents/kWh Effective Date".
+    _CLASS_WITH_CODES_RE = re.compile(
+        r"^(?P<name>[A-Z][\w\s:&/-]*?\b(?i:schedules?))\s+"
+        r"(?P<codes>[A-Z0-9][A-Z0-9-]*(?:\s*,\s*[A-Z0-9][A-Z0-9-]*)+,?)\s*$"
+    )
     # Combined single-line format: "Residential Service Schedules /kWh Date"
     _CLASS_INLINE_RE = re.compile(
         r"^([\w\s:,&/-]+?(?:Service\s+Schedules?|General\s+Service\s+Schedules?|Schedules?|Service|Lighting|Signal|LGS-RTP\*{0,3}))"
-        r"\*{0,3}\s+(?:cents\s+)?(?:/kWh|/kW|Baseline|dollars)",
+        r"\*{0,3}\s+(?:cents\s*)?(?:/\s*kWh|/\s*kW|Baseline|dollars)",
         re.I,
     )
 
     for raw_line in _coalesce_wrapped_header_lines(text.splitlines()):
         line = raw_line.strip()
         if not line:
-            prev_potential_class = None
+            # Layout noise: PyMuPDF puts blank lines between a class name and
+            # its column header, so blanks must not drop the candidate.
             continue
 
         # Skip boilerplate lines
@@ -891,29 +1042,34 @@ def _parse_rate_class_blocks(
         if _COL_HEADER_RE.match(line):
             # If the previous non-blank line was a class-name candidate, promote it
             if prev_potential_class is not None:
-                flush()
-                current_class = prev_potential_class
-                current_schedules = None
-                current_lines = []
-                prev_potential_class = None
+                name, schedules = prev_potential_class
+                start(name, schedules, name)
+                current_header.append(line)
+            elif current_class is not None and not current_lines:
+                current_header.append(line)
+            else:
+                pending_header.append(line)
             continue
 
         header = _extract_block_header(line)
         if header is not None:
-            prev_potential_class = None
-            flush()
-            current_class, current_schedules = header
-            current_lines = []
+            start(header[0], header[1], line)
             continue
 
         # Single-line combined format: "Residential Service Schedules /kWh Date"
         class_m = _CLASS_INLINE_RE.match(line)
         if class_m:
-            prev_potential_class = None
-            flush()
-            current_class = class_m.group(1).strip().rstrip("*").strip()
-            current_schedules = None
-            current_lines = []
+            start(class_m.group(1).strip().rstrip("*").strip(), None, line)
+            continue
+
+        codes_m = _CLASS_WITH_CODES_RE.match(line)
+        if codes_m and not re.search(r"\d\.\d", line):
+            schedules = _split_schedule_codes(codes_m.group("codes"))
+            name = codes_m.group("name").strip()
+            if pending_header:
+                start(name, schedules, line)
+            else:
+                prev_potential_class = (name, schedules)
             continue
 
         # Check whether this line alone looks like a rate class name
@@ -921,10 +1077,11 @@ def _parse_rate_class_blocks(
         if not re.search(r"\d", line):
             name_m = _CLASS_NAME_RE.match(line)
             if name_m:
-                prev_potential_class = name_m.group(1).strip().rstrip("*").strip()
+                prev_potential_class = (name_m.group(1).strip().rstrip("*").strip(), None)
                 continue
 
         prev_potential_class = None
+        pending_header = []
 
         if current_class is not None:
             current_lines.append(line)
@@ -933,88 +1090,243 @@ def _parse_rate_class_blocks(
     return blocks
 
 
+def _detect_column_layout(header_text: str) -> str:
+    """Classify a section's value columns from its column-header text."""
+    h = header_text.lower()
+    if "baseline" in h and "incremental" in h:
+        return "baseline_incremental"
+    has_kwh = bool(re.search(r"\bcents\b|/\s*kwh", h))
+    has_kw = bool(re.search(r"\bdollars\b|/\s*kw\b", h))
+    if has_kwh and has_kw:
+        return "kwh_kw"
+    if has_kwh:
+        return "kwh"
+    if has_kw:
+        return "kw"
+    return "unknown"
+
+
+_TOTAL_UNIT_RE = re.compile(r"^TOTAL\s+(cents|dollars)\s*/\s*(kWh|kW)\b(.*)$", re.I)
+_VALUE_TOKEN_RE = re.compile(_NUM_RE)
+_CHECKSUM_TOLERANCE = 0.002
+
+
+def _is_rider_like(label: str) -> bool:
+    return _extract_rider_code(label) is not None or bool(re.search(r"\bRider\b", label, re.I))
+
+
+def _assign_row_values(
+    item: RiderLineItem, values: list[float], unit: str | None, layout: str, block: RiderRateClassBlock,
+) -> None:
+    """Set an item's value fields from its printed numbers, by column meaning.
+
+    ``unit`` is the unit of the TOTAL row that closes the item's segment
+    ("kwh" / "kw"), or None when no TOTAL follows.  Anything that cannot be
+    tied to a column is flagged ``unit_ambiguous`` and left unset.
+    """
+    n = len(values)
+    if layout == "baseline_incremental" and n == 2 and unit in ("kwh", None):
+        item.cents_per_kwh, item.incremental_cents_per_kwh = values
+        return
+    if unit is None:
+        unit = layout if layout in ("kwh", "kw") else None
+    if unit == "kwh" and n == 1:
+        item.cents_per_kwh = values[0]
+        return
+    if unit == "kw" and n == 1:
+        item.dollars_per_kw = values[0]
+        return
+    if n == 2 and layout == "kwh_kw" and unit is not None:
+        item.cents_per_kwh, item.dollars_per_kw = values
+        return
+    item.unit_ambiguous = True
+    block.warnings.append(
+        f"unit ambiguous for {item.label!r} (values {values}, layout {layout}, "
+        f"segment unit {unit or 'none'}); values not assigned"
+    )
+
+
+def _check_block_totals(block: RiderRateClassBlock) -> None:
+    """Compare each printed TOTAL with the sum of the block's top-level rows."""
+    components = [
+        li for li in block.line_items
+        if not li.is_total and not li.is_section_header and not li.indented
+    ]
+    checks = []
+    for total, attr in (
+        (block.total_cents_per_kwh, "cents_per_kwh"),
+        (block.total_incremental_cents_per_kwh, "incremental_cents_per_kwh"),
+        (block.total_dollars_per_kw, "dollars_per_kw"),
+    ):
+        if total is None:
+            continue
+        values = [getattr(li, attr) for li in components if getattr(li, attr) is not None]
+        ok = bool(values) and abs(sum(values) - total) <= _CHECKSUM_TOLERANCE
+        if not ok:
+            block.warnings.append(
+                f"checksum mismatch for {attr}: components sum {sum(values):.4f} "
+                f"vs printed TOTAL {total}"
+            )
+        checks.append(ok)
+    if any(li.unit_ambiguous for li in block.line_items):
+        checks.append(False)
+    block.checksum_ok = all(checks) if checks else None
+
+
 def _parse_one_block(
     rate_class: str,
     lines: list[str],
     warnings: list[str],
     applicable_schedules: list[str] | None = None,
-) -> RiderRateClassBlock:
-    """Parse the lines belonging to one rate class into a ``RiderRateClassBlock``."""
-    block = RiderRateClassBlock(
-        rate_class=rate_class,
-        applicable_schedules=list(applicable_schedules or _lookup_schedules(rate_class)),
+    *,
+    header_text: str = "",
+) -> list[RiderRateClassBlock]:
+    """Parse the lines under one rate-class header into ``RiderRateClassBlock``s.
+
+    Rows accumulate in a segment until a ``TOTAL cents/kWh`` or ``TOTAL
+    dollars/kW`` row closes it; the TOTAL fixes the unit of the rows above it
+    (a lone $/kW JAA row is $/kW because ``TOTAL dollars/kW`` follows it).  A
+    class may carry one TOTAL per unit.  A second TOTAL in an already-closed
+    unit means a rate-class header was missed, so those rows go to a separate
+    block flagged ``ambiguous_rate_class`` instead of being merged.  Rows after
+    the last TOTAL are kept only if they look like rider rows.
+    """
+    layout = _detect_column_layout(header_text)
+
+    def new_block(name: str, schedules: list[str], ambiguous: bool = False) -> RiderRateClassBlock:
+        return RiderRateClassBlock(
+            rate_class=name,
+            applicable_schedules=schedules,
+            column_layout=layout,
+            ambiguous_rate_class=ambiguous,
+        )
+
+    block = new_block(
+        rate_class, list(applicable_schedules or _lookup_schedules(rate_class)),
     )
+    blocks = [block]
+    pending: list[tuple[RiderLineItem, list[float]]] = []
+    pending_items: list[RiderLineItem] = []  # every item since the last TOTAL
+    closed_units: set[str] = set()
     in_ba_section = False
+    redline_rows = 0
 
     for line in lines:
         # BA section header (no numbers)
         if _BA_HEADER_RE.match(line):
             in_ba_section = True
-            block.line_items.append(RiderLineItem(
-                label=line,
-                rider_code="BA",
-                is_section_header=True,
-            ))
+            item = RiderLineItem(label=line, rider_code="BA", is_section_header=True)
+            block.line_items.append(item)
+            pending_items.append(item)
             continue
 
-        # Total row
-        if _TOTAL_ROW_RE.match(line):
+        total_m = _TOTAL_UNIT_RE.match(line)
+        if total_m:
             in_ba_section = False
-            m = re.match(
-                r"^TOTAL\s+(cents/kWh|dollars/kW)\s+(-?\d+(?:\.\d+)?)",
-                line, re.I,
-            )
-            if m:
-                val = float(m.group(2))
-                is_kwh = "cents" in m.group(1).lower()
-                item = RiderLineItem(label=line, is_total=True)
-                if is_kwh:
-                    item.cents_per_kwh = val
-                    block.total_cents_per_kwh = val
+            unit = "kwh" if total_m.group(2).lower() == "kwh" else "kw"
+            values = [_parse_num(v) for v in _VALUE_TOKEN_RE.findall(total_m.group(3))]
+            if unit in closed_units:
+                orphan = new_block(f"Unidentified section after {rate_class}", [], ambiguous=True)
+                orphan.warnings.append(
+                    f"second TOTAL {unit} without a recognizable rate class header; "
+                    "rate class not assigned"
+                )
+                warnings.append(
+                    f"rate class header missed after {rate_class!r}; rows isolated in "
+                    "an unidentified block"
+                )
+                for moved in pending_items:
+                    block.line_items.remove(moved)
+                    orphan.line_items.append(moved)
+                block = orphan
+                blocks.append(block)
+                closed_units = set()
+            for item, row_values in pending:
+                _assign_row_values(item, row_values, unit, layout, block)
+            total_item = RiderLineItem(label=line, is_total=True)
+            if values:
+                if unit == "kwh":
+                    total_item.cents_per_kwh = block.total_cents_per_kwh = values[0]
+                    if len(values) > 1 and layout == "baseline_incremental":
+                        total_item.incremental_cents_per_kwh = values[1]
+                        block.total_incremental_cents_per_kwh = values[1]
                 else:
-                    item.dollars_per_kw = val
-                    block.total_dollars_per_kw = val
-                block.line_items.append(item)
+                    total_item.dollars_per_kw = block.total_dollars_per_kw = values[0]
+                extra = values[2:] if layout == "baseline_incremental" and unit == "kwh" else values[1:]
+                if extra:
+                    block.warnings.append(
+                        f"TOTAL row {line!r} has unexplained extra values {extra}; ignored"
+                    )
+            block.line_items.append(total_item)
+            closed_units.add(unit)
+            pending = []
+            pending_items = []
             continue
 
         # Data row: label + number(s) + optional date
         m = _DATA_ROW_RE.match(line)
-        if m:
-            label = m.group(1).strip()
-            val1 = _parse_num(m.group(2))
-            val2 = _parse_num(m.group(3)) if m.group(3) else None
-            date = m.group(4)
-            rider_code = _extract_rider_code(label)
-            is_subtotal = bool(_SUBTOTAL_RE.search(label))
-            item = RiderLineItem(
-                label=label,
-                rider_code=rider_code,
-                cents_per_kwh=val1,
-                dollars_per_kw=val2,
-                effective_date=date,
-                is_subtotal=is_subtotal,
-            )
-            # BA sub-items retain parent rider code
-            if in_ba_section and not rider_code:
-                item.rider_code = "BA"
-            block.line_items.append(item)
-            if is_subtotal:
-                in_ba_section = False
-        else:
-            # Could be a section header with no numbers (e.g. "Joint Agency Asset Rider JAA  1.43  12/1/22" split)
-            # or a footnote — skip silently
-            pass
+        if not m:
+            # Could be a section header with no numbers or a footnote -- skip
+            continue
+        label = m.group(1).strip()
+        if closed_units and not pending and not _is_rider_like(label):
+            # After a closed section only rider rows can follow (service
+            # lists, addresses and footers must not be absorbed).
+            continue
+        values = [_parse_num(m.group(2))] + ([_parse_num(m.group(3))] if m.group(3) else [])
+        date = m.group(4)
+        if date and _REDLINE_DATE_RE.fullmatch(date):
+            redline_rows += 1
+        rider_code = _extract_rider_code(label)
+        is_subtotal = bool(_SUBTOTAL_RE.search(label))
+        item = RiderLineItem(
+            label=label,
+            rider_code=rider_code,
+            effective_date=date,
+            is_subtotal=is_subtotal,
+            indented=in_ba_section and not is_subtotal,
+        )
+        # BA sub-items retain parent rider code
+        if in_ba_section and not rider_code:
+            item.rider_code = "BA"
+        block.line_items.append(item)
+        pending.append((item, values))
+        pending_items.append(item)
+        if is_subtotal:
+            in_ba_section = False
 
-    return block
+    # Rows after the last TOTAL: no TOTAL confirms their unit.
+    for item, row_values in pending:
+        if not _is_rider_like(item.label) and closed_units:
+            block.line_items.remove(item)
+            continue
+        _assign_row_values(item, row_values, None, layout, block)
+
+    for b in blocks:
+        if redline_rows:
+            b.warnings.append(f"{redline_rows} row(s) carry redline-fused dates")
+        _check_block_totals(b)
+    return blocks
 
 
 def _lookup_schedules(rate_class: str) -> list[str]:
-    """Return the list of schedule codes that belong to a named rate class."""
+    """Return the list of schedule codes that belong to a named rate class.
+
+    Explicit "Schedule X & Schedule Y" names yield those codes.  Otherwise the
+    most specific map key wins: the one matching earliest in the name, then
+    the longest ("Large General Service Schedules" is LGS, not the
+    "general service schedules" list).
+    """
+    explicit = re.findall(r"\bSchedule\s+([A-Z][A-Z0-9]*(?:-[A-Z0-9]+)*)", rate_class)
+    if explicit and re.match(r"^Schedule\s", rate_class):
+        return explicit
     lower = rate_class.lower()
-    for key, codes in _RATE_CLASS_SCHEDULE_MAP.items():
-        if key in lower:
-            return list(codes)
-    return []
+    best: tuple[int, int, str] | None = None
+    for key in _RATE_CLASS_SCHEDULE_MAP:
+        pos = lower.find(key)
+        if pos >= 0 and (best is None or (pos, -len(key)) < (best[0], best[1])):
+            best = (pos, -len(key), key)
+    return list(_RATE_CLASS_SCHEDULE_MAP[best[2]]) if best else []
 
 
 def _extract_rider_code(label: str) -> str | None:
@@ -1040,13 +1352,24 @@ def _extract_block_header(line: str) -> tuple[str, list[str]] | None:
         if schedules:
             return rate_class, schedules
 
+    # DEC "Schedule HP - General Service Baseline Incremental [Effective Date]"
     hp_match = re.match(
-        r"^(?P<rate_class>Schedule\s+HP\s+[–-]\s+.+?)\s+Baseline\s+Incremental\s+Effective\s+Date$",
+        r"^(?P<rate_class>Schedule\s+HP\s+[–-]\s+.+?)\s+Baseline\s+Incremental(?:\s+Effective\s+Date)?\s*$",
         line,
         re.I,
     )
     if hp_match:
-        return hp_match.group("rate_class").strip(), ["HP"]
+        return " ".join(hp_match.group("rate_class").split()), ["HP"]
+
+    # Same header as PyMuPDF emits it, unit marker first:
+    # "Schedule HP - Industrial cents/kWh" (Baseline/Incremental on later lines)
+    hp_split = re.match(
+        r"^(?P<rate_class>Schedule\s+HP\s+-\s+[A-Za-z][A-Za-z ]*?)\s+cents\s*/\s*kWh\s*$",
+        line,
+        re.I,
+    )
+    if hp_split:
+        return " ".join(hp_split.group("rate_class").split()), ["HP"]
 
     return None
 
@@ -1075,7 +1398,8 @@ def _coalesce_wrapped_header_lines(lines: list[str]) -> list[str]:
             found_unit = False
             while j < len(lines):
                 candidate = lines[j].strip()
-                if not candidate:
+                # A data or TOTAL row ends the header; never join those into it.
+                if not candidate or re.search(r"\d\.\d|\(\d", candidate) or _TOTAL_UNIT_RE.match(candidate):
                     break
                 header_parts.append(candidate)
                 if candidate.lower() == "cents":
@@ -1095,13 +1419,25 @@ def _coalesce_wrapped_header_lines(lines: list[str]) -> list[str]:
     return merged
 
 
-def _dedupe_rate_class_blocks(blocks: list[RiderRateClassBlock]) -> list[RiderRateClassBlock]:
+def _dedupe_rate_class_blocks(
+    blocks: list[RiderRateClassBlock], warnings: list[str] | None = None
+) -> list[RiderRateClassBlock]:
+    """Keep the first block per (rate_class, schedules); note dropped copies that differ."""
     deduped: list[RiderRateClassBlock] = []
-    seen: set[tuple[str, tuple[str, ...]]] = set()
+    kept: dict[tuple[str, tuple[str, ...]], RiderRateClassBlock] = {}
     for block in blocks:
         key = (block.rate_class, tuple(block.applicable_schedules))
-        if key in seen:
+        if key in kept:
+            first = kept[key]
+            if warnings is not None and (
+                first.total_cents_per_kwh != block.total_cents_per_kwh
+                or first.total_dollars_per_kw != block.total_dollars_per_kw
+            ):
+                warnings.append(
+                    f"duplicate section {block.rate_class!r} with different totals "
+                    f"({block.total_cents_per_kwh} vs kept {first.total_cents_per_kwh}) dropped"
+                )
             continue
-        seen.add(key)
+        kept[key] = block
         deduped.append(block)
     return deduped

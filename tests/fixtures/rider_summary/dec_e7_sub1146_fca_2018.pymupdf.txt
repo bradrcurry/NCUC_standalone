@@ -1,0 +1,669 @@
+ef,DUKE 
+~"ENERGY® 
+VIA ELECTRONIC FILING 
+Ms. M. Lynn Jarvis 
+Chief Clerk 
+North Carolina Utilities Commission 
+4325 Mail Service Center 
+Raleigh, North Carolina 27699-4300 
+July 31, 2018 
+Lawrence B. Somers 
+Deputy General Counsel 
+Mailing Address: 
+NCRH 20 / P.O. Box 1551 
+Raleigh, NC 27602 
+o: 919.546.6722 
+f: 919.546.2694 
+bo.somers@duke-energy.com 
+RE: 
+Application of Duke Energy Carolinas, LLC for Adjustment of Rates 
+and Charges Applicable to Electric Utility Service in North Carolina 
+Docket No. E-7, Sub 1146 
+Dear Ms. Jarvis: 
+On July 27, 2018, the Commission issued its Order Approving Compliance Filing 
+and Change in Rates in connection with the referenced matter. Since that time and after 
+consultation with the Public Staff, Duke Energy Carolinas, LLC ("DEC") has identified 
+changes needed to its Fuel Cost Adjustment Rider (NC) in order for municipal customers 
+on lighting Schedules GL and PL to remain fuel neutral from the fuel rate changes 
+otherwise effective August 1, 2018. Accordingly, I enclose a redlined and clean version 
+of DEC's revised Fuel Cost Adjustment Rider, along with a revised Summary of Rider 
+Adjustments to reflect these revisions, for filing and approval by the Commission. DEC 
+will hand deliver five (5) copies of the rate schedules to the Clerk's office tomorrow. 
+Thank you for your attention to this matter. If you have any questions, please let 
+me know. 
+Lawrence B. Somers 
+cc: Parties of Record 
+Duke Energy Carolinas, LLC                                                                                                                                   Electricity No. 4 
+North Carolina Thirty-Third Revised Leaf No. 60 
+Superseding North Carolina Thirty-Second Revised Leaf No. 60 
+ 
+FUEL COST ADJUSTMENT RIDER (NC) 
+ 
+North Carolina Thirty-Third Revised Leaf No. 60 
+Effective for service  rendered on and after August 1, 2018 
+NCUC Docket No. E-7 Sub 1146,  Order dated June 22, 2018 
+Page 1 of 1 
+ 
+ 
+APPLICABILITY (North Carolina Only) 
+Service supplied under the Company’s rate schedules are subject to approved fuel charge adjustments, if any, over or under the 
+Rate set forth in the approved rate schedules.  Adjustments are made pursuant to North Carolina General Statute 62-133.2 and 
+North Carolina Utilities Commission Rule R8-55 as ordered by the North Carolina Utilities Commission. 
+ 
+BASE FUEL COSTS 
+Effective August 1, 2018, the Base Fuel Cost established in Docket No. E-7, Sub 1146 are: Residential: -1.7828¢ per kilowatt 
+hour, General Service/Lighting: -1.9163¢ per kilowatt hour (except rate schedules GL/PL which is 2.3182¢ per kilowatt hour)  
+and Industrial: -2.0207¢ per kilowatt hour. These amounts are included in the energy charges of the Company’s rate schedules.  
+ 
+FUEL COST ADJUSTMENT AND EXPERIENCE MODIFICATION FACTOR 
+All service supplied under the Company’s rate schedules is subject to an increment per kilowatt hour as set forth below. This 
+adjustment is not included in the Rate Schedules of the Company and therefore, must be applied to the bill as calculated under the 
+applicable rate.   
+ 
+ 
+ 
+Fuel and Fuel Related Costs 
+RESIDENTIAL SERVICE 
+August 1, 2018 
+Adjustment to Residential  
+-0.0000 ¢/kWh 
+Experience Modification Factor & Interest 
+-0.1081 ¢/kWh 
+Net Fuel Rider Factor  
+-0.1081 ¢/kWh 
+Regulatory Fee Multiplier 
+X   1.001402 
+Fuel Cost Adjustment Factor 
+-0.1083 ¢/kWh 
+ 
+ 
+Fuel and Fuel Related Costs 
+GENERAL SERVICE AND LIGHTING(1) 
+August 1, 2018 
+Adjustment to General Service and Lighting 
+-0.0000 ¢/kWh 
+Experience Modification Factor& Interest 
+-0.0764 ¢/kWh 
+Net Fuel  Rider Factor 
+-0.0764 ¢/kWh 
+Regulatory Fee Multiplier 
+X   1.001402 
+Fuel Cost Adjustment Factor 
+-0.0765 ¢/kWh 
+ 
+ 
+Fuel and Fuel Related Costs 
+INDUSTRIAL SERVICE 
+   August 1, 2018 
+Adjustment to Industrial 
+-0.0000 ¢/kWh 
+Experience Modification Factor & Interest 
+-0.0711 ¢/kWh  
+Net Fuel Rider Factor 
+-0.0711 ¢/kWh 
+Regulatory Fee Multiplier 
+X   1.001402 
+Fuel Cost Adjustment Factor 
+-0.0712 ¢/kWh 
+ 
+ 
+ 
+(1) The applicable Total Fuel Cost Adjustment Factor for Rate Schedules GL and PL is -0.4790 ¢/kWh. 
+ 
+                   
+Formatted: Superscript
+Formatted: List Paragraph, Numbered + Level:
+1 + Numbering Style: 1, 2, 3, … + Start at: 1 +
+Alignment: Left + Aligned at:  0.25" + Indent
+at:  0.5"
+Formatted: Font: 9 pt
+Duke Energy Carolinas, LLC                                                                                                                                   Electricity No. 4 
+North Carolina Thirty-Third Revised Leaf No. 60 
+Superseding North Carolina Thirty-Second Revised Leaf No. 60 
+ 
+FUEL COST ADJUSTMENT RIDER (NC) 
+ 
+North Carolina Thirty-Third Revised Leaf No. 60 
+Effective for service  rendered on and after August 1, 2018 
+NCUC Docket No. E-7 Sub 1146,  Order dated June 22, 2018 
+Page 1 of 1 
+ 
+ 
+APPLICABILITY (North Carolina Only) 
+Service supplied under the Company’s rate schedules are subject to approved fuel charge adjustments, if any, over or under the 
+Rate set forth in the approved rate schedules.  Adjustments are made pursuant to North Carolina General Statute 62-133.2 and 
+North Carolina Utilities Commission Rule R8-55 as ordered by the North Carolina Utilities Commission. 
+ 
+BASE FUEL COSTS 
+Effective August 1, 2018, the Base Fuel Cost established in Docket No. E-7, Sub 1146 are: Residential: 1.7828¢ per kilowatt 
+hour, General Service/Lighting: 1.9163¢ per kilowatt hour (except rate schedules GL/PL which is 2.3182¢ per kilowatt hour)  
+and Industrial: 2.0207¢ per kilowatt hour. These amounts are included in the energy charges of the Company’s rate schedules.  
+ 
+FUEL COST ADJUSTMENT AND EXPERIENCE MODIFICATION FACTOR 
+All service supplied under the Company’s rate schedules is subject to an increment per kilowatt hour as set forth below. This 
+adjustment is not included in the Rate Schedules of the Company and therefore, must be applied to the bill as calculated under the 
+applicable rate.   
+ 
+ 
+ 
+Fuel and Fuel Related Costs 
+RESIDENTIAL SERVICE 
+August 1, 2018 
+Adjustment to Residential  
+0.0000 ¢/kWh 
+Experience Modification Factor & Interest 
+-0.1081 ¢/kWh 
+Net Fuel Rider Factor  
+-0.1081 ¢/kWh 
+Regulatory Fee Multiplier 
+X   1.001402 
+Fuel Cost Adjustment Factor 
+-0.1083 ¢/kWh 
+ 
+ 
+Fuel and Fuel Related Costs 
+GENERAL SERVICE AND LIGHTING(1) 
+August 1, 2018 
+Adjustment to General Service and Lighting 
+0.0000 ¢/kWh 
+Experience Modification Factor& Interest 
+-0.0764 ¢/kWh 
+Net Fuel  Rider Factor 
+-0.0764 ¢/kWh 
+Regulatory Fee Multiplier 
+X   1.001402 
+Fuel Cost Adjustment Factor 
+-0.0765 ¢/kWh 
+ 
+ 
+Fuel and Fuel Related Costs 
+INDUSTRIAL SERVICE 
+   August 1, 2018 
+Adjustment to Industrial 
+0.0000 ¢/kWh 
+Experience Modification Factor & Interest 
+-0.0711 ¢/kWh  
+Net Fuel Rider Factor 
+-0.0711 ¢/kWh 
+Regulatory Fee Multiplier 
+X   1.001402 
+Fuel Cost Adjustment Factor 
+-0.0712 ¢/kWh 
+ 
+ 
+ 
+(1) The applicable Total Fuel Cost Adjustment Factor for Rate Schedules GL and PL is -0.4790 ¢/kWh. 
+ 
+                   
+ 
+Duke Energy Carolinas, LLC                                                                                                                                              Electricity No. 4 
+                                                                                                                                  North Carolina Thirty-Third Revised Leaf No. 99   
+Superseding North Carolina Thirty-Second Revised Leaf No. 99 
+ 
+SUMMARY OF RIDER ADJUSTMENTS 
+ 
+*   Qualifying customers who have opted out of the Company’s Energy Efficiency and/or Demand Side Management Programs are not subject to the 
+applicable Energy Efficiency Rider charges based on the individual customer’s opt-out election.  Refer to Rider EE to determine the Rider EE 
+amount, if any applicable to customers who have opted out.  
+ 
+North Carolina Thirty-Third Revised Leaf No. 99  
+Effective for service rendered on and after August 1, 2018 
+NCUC Docket No. E-7, Sub 1146 Order dated June 22, 2018 
+ 
+Page 1 of 2 
+ 
+ 
+The following is a summary of Rider Adjustments that must be added to the bill calculated on the applicable rate schedule in order to 
+compute the bill. The factors shown below include revenue-related taxes and regulatory fees.  More specific information concerning 
+these Riders is contained in the applicable Rider listed below. 
+ 
+Residential Schedules RS,  RE, ES, RT, WC  
+cents/kWh  
+Effective Date 
+EDIT-1 Rider 
+Fuel Cost Adjustment Rider 
+-0.1049 
+-0.1083 
+8/1/18 
+8/1/18 
+Energy Efficiency Rider 
+0.5529 
+1/1/18 
+Existing DSM Program Costs Adjustment Rider 
+-0.0055 
+7/1/18 
+Coal Inventory Rider 
+0.0004 
+8/1/18 
+BPM Prospective Rider 
+-0.0078 
+7/1/18 
+BPM True-Up Rider 
+0.0067 
+7/1/18 
+TOTAL cents/kWh  
+0.3335 
+ 
+ 
+General Service Schedules SGS, BC, LGS, TS, S, OPT-E, OPT-V, PG  
+cents/kWh  
+Effective Date 
+EDIT-1 Rider 
+Fuel Cost Adjustment Rider 
+-0.1049 
+-0.0765 
+8/1/18 
+8/1/18 
+Energy Efficiency Rider 
+0.6238 
+1/1/18 
+Existing DSM Program Costs Adjustment Rider 
+-0.0055 
+7/1/18 
+Coal Inventory Rider 
+0.0004 
+8/1/18 
+BPM Prospective Rider 
+-0.0078 
+7/1/18 
+BPM True-Up Rider 
+0.0067 
+7/1/18 
+TOTAL cents/kWh  
+ 0.4362 
+ 
+ 
+Lighting Schedules PL, GL 
+cents/kWh  Effective Date 
+EDIT-1 Rider 
+Fuel Cost Adjustment Rider 
+-0.1049 
+-0.4790 
+8/1/18 
+9/1/17 
+Energy Efficiency Rider 
+0.0000 
+1/1/18 
+Existing DSM Program Costs Adjustment Rider 
+-0.0055 
+7/1/18 
+Coal Inventory Rider 
+0.0004 
+8/1/18 
+BPM Prospective Rider 
+-0.0078 
+7/1/18 
+BPM True-Up Rider 
+0.0067 
+7/1/18 
+TOTAL cents/kWh  
+-0.5901 
+ 
+ 
+Lighting Schedules OL, NL 
+cents/kWh  Effective Date 
+EDIT-1 Rider 
+Fuel Cost Adjustment Rider 
+-0.1049 
+-0.0765 
+8/1/18 
+8/1/18 
+Energy Efficiency Rider 
+0.0000 
+1/1/18 
+Existing DSM Program Costs Adjustment Rider 
+-0.0055 
+7/1/18 
+Coal Inventory Rider 
+0.0004 
+8/1/18 
+BPM Prospective Rider 
+-0.0078 
+7/1/18 
+BPM True-Up Rider 
+0.0067 
+7/1/18 
+TOTAL cents/kWh  
+-0.1876 
+ 
+ 
+ 
+Industrial Schedules I, OPT-E, OPT-V, PG  
+cents/kWh  Effective Date 
+EDIT-1 Rider 
+Fuel Cost Adjustment Rider 
+-0.1049 
+-0.0712 
+8/1/18 
+8/1/18 
+Energy Efficiency Rider 
+0.6238 
+1/1/18 
+Existing DSM Program Costs Adjustment Rider 
+-0.0055 
+7/1/18 
+Coal Inventory Rider 
+0.0004 
+8/1/18 
+BPM Prospective Rider 
+-0.0078 
+7/1/18 
+BPM True-Up Rider 
+0.0067 
+7/1/18 
+TOTAL cents/kWh  
+ 0.4415 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Duke Energy Carolinas, LLC                                                                                                                                              Electricity No. 4 
+                                                                                                                                  North Carolina Thirty-Third Revised Leaf No. 99   
+Superseding North Carolina Thirty-Second Revised Leaf No. 99 
+ 
+SUMMARY OF RIDER ADJUSTMENTS 
+ 
+*   Qualifying customers who have opted out of the Company’s Energy Efficiency and/or Demand Side Management Programs are not subject to the 
+applicable Energy Efficiency Rider charges based on the individual customer’s opt-out election.  Refer to Rider EE to determine the Rider EE 
+amount, if any applicable to customers who have opted out.  
+ 
+North Carolina Thirty-Third Revised Leaf No. 99  
+Effective for service rendered on and after August 1, 2018 
+NCUC Docket No. E-7, Sub 1146 Order dated June 22, 2018 
+ 
+Page 2 of 2 
+ 
+ 
+ 
+Schedule HP – General Service 
+cents/kWh 
+Baseline  
+cents/kWh  
+Incremental 
+ 
+Effective Date 
+EDIT-1 Rider 
+-0.1049 
+-0.1049 
+8/1/18 
+Fuel Cost Adjustment Rider 
+-0.0765 
+0.0000 
+8/1/18 
+Energy Efficiency Rider 
+0.6238 
+0.6238 
+1/1/18 
+Existing DSM Program Costs Adjustment Rider 
+-0.0055 
+-0.0055 
+7/1/18 
+Coal Inventory Rider 
+0.0004 
+0.0004 
+8/1/18 
+BPM Prospective Rider 
+-0.0078 
+-0.0078 
+7/1/18 
+BPM True-Up Rider 
+0.0067 
+0.0067 
+7/1/18 
+TOTAL cents/kWh  
+0.4362 
+0.5127 
+ 
+ 
+ 
+ 
+Schedule HP – Industrial 
+cents/kWh 
+Baseline  
+cents/kWh  
+Incremental 
+Effective Date 
+EDIT-1 Rider 
+-0.1049 
+-0.1049 
+8/1/18 
+Fuel Cost Adjustment Rider 
+-0.0712 
+0.0000 
+8/1/18 
+Energy Efficiency Rider 
+0.6238 
+0.6238 
+1/1/18 
+Existing DSM Program Costs Adjustment Rider 
+-0.0055 
+-0.0055 
+7/1/18 
+Coal Inventory Rider 
+0.0004 
+0.0004 
+8/1/18 
+BPM Prospective Rider 
+-0.0078 
+-0.0078 
+7/1/18 
+BPM True-Up Rider 
+0.0067 
+0.0067 
+7/1/18 
+TOTAL cents/kWh  
+0.4415 
+0.5127 
+ 
+ 
+CERTIFICATE OF SERVICE 
+I certify that a copy of Duke Energy Carolinas, LLC's Revised Fuel Cost 
+Adjustment Rider and Summary of Rider Adjustments, in Docket No. E-7, Sub 1146, has 
+been served by electronic mail, hand delivery or by depositing a copy in the United States 
+mail, postage prepaid to the following parties: 
+David Drooz, Chief Counsel 
+Dianna Downey, Counsel 
+Lucy Edmondson, Counsel 
+Public Staff 
+North Carolina Utilities Commission 
+4326 Mail Service Center 
+Raleigh, NC 27699-4326 
+david.drooz@psncuc.nc. gov 
+dianna.downey@psncuc.nc.gov 
+lucy.edmondson@psncuc.nc. gov 
+Jennifer T. Harrod, Special Deputy Attorney 
+General 
+Margaret Force, Assistant Attorney General 
+Teresa L. Townsend, Assistant Attorney 
+General 
+NC Department of Justice 
+PO Box 629 
+Raleigh, NC 27602-0629 
+pforce@ncdoj.gov 
+ttownsend@ncdoj.gov 
+jharrod@ncdoj.gov 
+Sharon Miller 
+Carolina Utility Customers Assoc. 
+1708 Trawick Road, Suite 210 
+Raleigh, NC 27604 
+smiller@cucainc.org 
+John Runkle, Attorney 
+Counsel for NC WARN 
+2121 Damascus Church Rd. 
+Chapel Hill, NC 27516 
+jrunkle@pricecreek.com 
+Ralph McDonald 
+Warren Hicks 
+Bailey & Dixon, LLP 
+Counsel for CIGFUR 
+PO Box 1351 
+Raleigh, NC 27602-1351 
+rmcdonald@bdixon.com 
+whicks@bdixon.com 
+Peter H. Ledford 
+NC Sustainable Energy Association 
+4800 Six Forks Road, Suite 300 
+Raleigh, NC 27609 
+peter@energync.org 
+Robert Page 
+Counsel for CUCA 
+Crisp, Page & Currin, LLP 
+4010 Barrett Drive, Ste. 205 
+Raleigh, NC 27609-6622 
+rpage@cpclaw.com 
+Alan R. Jenkins 
+Jenkins At Law, LLC 
+2950 Y ellowtail Ave. 
+Marathon, FL 33050 
+aj@jenkinsatlaw.com 
+Glen C. Raynor 
+Young Moore and Henderson, PA 
+P.O. Box 31627 
+Raleigh, NC 27627 
+gcr@youngmoorelaw.com 
+Michael Colo 
+Christopher S. Dwight 
+Counsel for ASU 
+Poyner Spruill LLP 
+P.O. Box 353 
+Rocky Mount, NC 27802 
+mscolo@poynerspruill.com 
+cdwight@poynerspruill.com 
+F. Bryan Brice, Jr. 
+The City of Kings Mountain 
+Law Offices of F. Bryan Brice, Jr. 
+127 W. Hargett St., Ste. 600 
+Raleigh, NC 27602 
+bryan@attybryanbrice.com 
+Thomas Batchelor 
+Haywood Electric Membership Corp. 
+376 Grindstone Road 
+Waynesville, NC 28785 
+tom.batchelor@haywoodemc.com 
+Mona Lisa Wallace 
+John Hughes 
+Marlowe Rary 
+Wallace & Graham PA 
+525 N. Main St. 
+Salisbury, NC 28144 
+mwallace@wallacegraham.com 
+jhughes@wallacegraham.com 
+mrary@wallacegraham.com 
+Douglas W. Johnson 
+Blue Ridge EMC 
+1216 Blowing Rock Blvd, NE 
+Lenoir, NC 28645-0112 
+djohnson@blueridgeemc.com 
+Sarah Collins 
+NC League of Municipalities 
+PO Box 3069 
+Raleigh, NC 27602 
+scollins@nclm.org 
+B. L. Krause 
+Appalachian State Univ. 
+PO Box 32126 
+Boone, NC 28608 
+krausebl@appstate.edu 
+Stephen Hamlin 
+Piedmont EMC 
+PO Drawer 1179 
+Hillsborough, NC 27278 
+steve.hamlin@pemc.coop 
+Ben M. Royster 
+Royster & Royster 
+851 Marshall Street 
+Mt. Airy, NC 27030 
+benroyster@roysterlaw.com 
+H. Julian Philpott, Jr. 
+NC Farm Bureau Federation, Inc. 
+PO Box 27766 
+Raleigh, NC 27611 
+julian.philpott@ncfb.org 
+Nickey Hendricks, Jr. 
+City of Kings Mountain 
+P.O. Box429 
+Kings Mountain, NC 28086 
+nickh@cityofkm.com 
+Kurt J. Boehm 
+Jody Kyler Cohn 
+Boehm, Kurtz & Lowry 
+36 E. Seventh St., Suite 1510 
+Cincinnati, OH 45202 
+kboemn@BKLlawfirm.com 
+jkyler@BKLlawfirm.com 
+Jim W. Phillips 
+Brooks, Pierce, McLendon, Humphrey & 
+Leonard, LLP 
+230 N. Elm Street 
+Greensboro, NC 27401 
+jphillips@brookspierce.com 
+Bridget Lee 
+Dorothy Jaffe 
+Sierra Club 
+50 F Street NW, Floor 8 
+Washington, DC 20001 
+bridget.lee@sierraclub.org 
+dori. j aff e@sierraclub.org 
+John J. Finnigan, Jr. 
+Environmental Defense Fund 
+128 Winding Brook Lane 
+Terrace Park, OH 45174 
+jfininigan@edf.org 
+Bob Pate 
+City of Concord 
+PO Box 308 
+Concord, NC 28026 
+bpage@ci.concord.nc. us 
+David Neal 
+Gudrun Thompson 
+Southern Environmental Law Center 
+601 W. Rosemary Street, Suite 220 
+Chapel Hill, NC 27516 
+dneal @selcnc.org 
+gthompson@selcnc.org 
+Marcus Trathen 
+Brooks, Pierce, McLendon, Humphrey 
+& Leonard, LLP 
+150 Fayetteville St., Suite 1700 
+Raleigh, NC 27601 
+mtrathen@brookspierce.com 
+Karen M. Kemerait 
+Deborah Ross 
+Smith Moore Leatherwood LLP 
+434 Fayetteville St., Suite 2800 
+Raleigh, NC 27601 
+karen.kemerait@smithmoorelaw.com 
+deborah.ross@smithmoorelaw.com 
+Joseph H. Joplin 
+Rutherford EMC 
+PO Box 1569 
+Forest City, NC 28-43-1569 
+jjoplin@remc.com 
+Daniel Whittle 
+Environmental Defense Fund 
+4000 Westchase Blvd, Suite 510 
+Raleigh, NC 27607-3965 
+dwhittle@edf.org 
+Sherri Zann Rosenthal 
+City of Durham 
+101 City Hall Plaza 
+Durham, NC 27701 
+sherrizann.rosenthal @durhamnc.gov 
+This the 31st day of July, 2018. 
+Lawrence B. Somers 
+Deputy General Counsel 
+Duke Energy Corporation 
+P.O. Box 1551/NCRH 20 
+Raleigh, North Carolina 27602 
+(919) 546-6722 
+bo.somers@duke-energy.com 

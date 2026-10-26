@@ -1,0 +1,32 @@
+{
+ "dec_rev63_2025-01-01": {
+  "source_pdf": "data/processed/search_leads/downloads/dec_rider_summary_targets/34b967fb-527c-44aa-bc5a-78d01d74f758__DEC-NC Rider Summary - Rev. _ 63 _Eff. 01.01.2025 - Current_.pdf",
+  "sha256": "e9f06237dfc5891beee8e6a62837f5cb8ddda4116b10e22f997f553073edc10d",
+  "pages": 2,
+  "why": "blk 307"
+ },
+ "dec_e7_sub1285_2024-01-01": {
+  "source_pdf": "data/processed/search_leads/downloads/dec_rider_summary_targets/33bac29c-2fa3-4ad1-8e97-c23b76191960__E-7 Sub 1285 DEC Rider Summary Compliance Tariffs.pdf",
+  "sha256": "6456c0b061f558656bb72116de9cc160d4c83c83e460c3f2e345485740f98f3f",
+  "pages": 6,
+  "why": "blk 304"
+ },
+ "dep_e2_sub1300_leaf600_redline": {
+  "source_pdf": "data/historical/ncuc/e-2-sub-1300/176ad684-f629-4f33-b3d5-73873269be8e.pdf",
+  "sha256": "2746270ff4e1987ef6bb70b08fe2c9a75df72d93c3c68cb420a4e1885cb81375",
+  "pages": 5,
+  "why": "blk 13"
+ },
+ "dec_e7_sub1146_fca_2018": {
+  "source_pdf": "data/processed/search_leads/downloads/dec_2018_leaf99_target/3c16193b-55fd-4d9c-8ea1-c97fd1661a42__E-7 Sub 1146 DEC_s Revised Fuel Cost Adjustment Rider.pdf",
+  "sha256": "7346216ba4f8e8170ce1bdaf2f2203edde1c39bbf9d2115d321e7c3fb1761350",
+  "pages": 9,
+  "why": "blk 361"
+ },
+ "dep_leaf600_2026-04-01": {
+  "source_pdf": "tests/fixtures/docling/dep_leaf600_2026-04-01.pdf",
+  "sha256": "1081b1797915e179ae80478e8376de6896e2649a7d64f81259362e81eb609caa",
+  "pages": 5,
+  "why": "control"
+ }
+}

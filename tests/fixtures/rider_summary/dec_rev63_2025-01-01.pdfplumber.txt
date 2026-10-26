@@ -1,0 +1,99 @@
+Duke Energy Carolinas, LLC NC Sixty-Third Revised Leaf No. 99
+(North Carolina Only) Superseding NC Sixty-Second Revised Leaf No. 99
+SUMMARY OF RIDER ADJUSTMENTS
+The following is a summary of Rider Adjustments that must be added to the bill calculated on the applicable rate schedule in order
+to compute the bill. The factors shown below include revenue-related taxes and regulatory fees. More specific information
+concerning these Riders is contained in the applicable Rider listed below.
+Residential Schedules RS, RE, ES, RT, RSTC, RETC cents/kWh Effective Date
+Fuel Cost Adjustment Rider 0.1779 1/1/25
+Energy Efficiency Rider 0.4933 1/1/25
+Existing DSM Program Costs Adjustment Rider -0.0027 7/1/24
+BPM Prospective Rider -0.0128 7/1/24
+BPM True-Up Rider -0.0039 7/1/24
+CPRE Rider 0.0063 9/1/24
+EDIT-4 Rider -0.5081 1/15/24
+Customer Assistance Recovery Rider 0.0459 1/1/25
+Residential Decoupling Mechanism Rider 0.0000 1/15/24
+Earnings Sharing Mechanism Rider 0.0000 1/15/24
+Performance Incentive Mechanism Rider 0.0000 1/15/24
+Nuclear Production Tax Credits Rider -0.0834 1/1/25
+TOTAL cents/kWh 0.1125
+General Service Schedules SGS, BC, LGS, TS, S, HLF, OPT-V,
+PG, SGSTC cents/kWh Effective Date
+Fuel Cost Adjustment Rider 0.3551 1/1/25
+Energy Efficiency Rider 0.2963 1/1/25
+Existing DSM Program Costs Adjustment Rider -0.0027 7/1/24
+BPM Prospective Rider -0.0128 7/1/24
+BPM True-Up Rider -0.0039 7/1/24
+CPRE Rider 0.0034 9/1/24
+EDIT-4 Rider -0.3033 1/15/24
+Earnings Sharing Mechanism Rider 0.0000 1/15/24
+Performance Incentive Mechanism Rider 0.0000 1/15/24
+Nuclear Production Tax Credits Rider -0.0834 1/1/25
+TOTAL cents/kWh 0.2487
+Lighting Schedules PL, OL, NL cents/kWh Effective Date
+Fuel Cost Adjustment Rider 0.3551 1/1/25
+Energy Efficiency Rider 0.0000 1/1/25
+Existing DSM Program Costs Adjustment Rider -0.0027 7/1/24
+BPM Prospective Rider -0.0128 7/1/24
+BPM True-Up Rider -0.0039 7/1/24
+CPRE Rider 0.0034 9/1/24
+EDIT-4 Rider -1.3455 1/15/24
+Earnings Sharing Mechanism Rider 0.0000 1/15/24
+Performance Incentive Mechanism Rider 0.0000 1/15/24
+Nuclear Production Tax Credits Rider -0.0834 1/1/25
+TOTAL cents/kWh -1.0898
+* Qualifying customers who have opted out of the Company’s Energy Efficiency and/or Demand Side Management Programs are not subject to
+the applicable Energy Efficiency Rider charges based on the individual customer’s opt-out election. Refer to Rider EE to determine the Rider
+EE amount, if any, applicable to customers who have opted out.
+NC Sixty-Third Revised Leaf No. 99
+Effective for service rendered on and after January 1, 2025
+NCUC Docket Nos. E-7, Subs 1304, 1305, and 1276, Orders dated August 20, 2024 and December 10, 2024
+Page 1 of 2Duke Energy Carolinas, LLC NC Sixty-Third Revised Leaf No. 99
+(North Carolina Only) Superseding NC Sixty-Second Revised Leaf No. 99
+SUMMARY OF RIDER ADJUSTMENTS
+Industrial Schedules I, HLF, OPT-V, PG cents/kWh Effective Date
+Fuel Cost Adjustment Rider 1.2530 1/1/25
+Energy Efficiency Rider 0.2963 1/1/25
+Existing DSM Program Costs Adjustment Rider -0.0027 7/1/24
+BPM Prospective Rider -0.0128 7/1/24
+BPM True-Up Rider -0.0039 7/1/24
+CPRE Rider 0.0054 9/1/24
+EDIT-4 Rider -0.2371 1/15/24
+Earnings Sharing Mechanism Rider 0.0000 1/15/24
+Performance Incentive Mechanism Rider 0.0000 1/15/24
+Nuclear Production Tax Credits Rider -0.0834 1/1/25
+TOTAL cents/kWh 1.2148
+cents/kWh cents/kWh
+Schedule HP – General Service Baseline Incremental Effective Date
+Fuel Cost Adjustment Rider 0.3551 0.0000 1/1/25
+Energy Efficiency Rider 0.2963 0.2963 1/1/25
+Existing DSM Program Costs Adjustment Rider -0.0027 -0.0027 7/1/24
+BPM Prospective Rider -0.0128 -0.0128 7/1/24
+BPM True-Up Rider -0.0039 -0.0039 7/1/24
+CPRE Rider 0.0034 0.0034 9/1/24
+EDIT-4 Rider -0.3033 -0.3033 1/15/24
+Earnings Sharing Mechanism Rider 0.0000 0.0000 1/15/24
+Performance Incentive Mechanism Rider 0.0000 0.0000 1/15/24
+Nuclear Production Tax Credits Rider -0.0834 0.0000 1/1/25
+TOTAL cents/kWh 0.2487 -0.0230
+cents/kWh cents/kWh
+Schedule HP – Industrial Baseline Incremental Effective Date
+Fuel Cost Adjustment Rider 1.2530 0.0000 1/1/25
+Energy Efficiency Rider 0.2963 0.2963 1/1/24
+Existing DSM Program Costs Adjustment Rider -0.0027 -0.0027 7/1/24
+BPM Prospective Rider -0.0128 -0.0128 7/1/24
+BPM True-Up Rider -0.0039 -0.0039 7/1/24
+CPRE Rider 0.0054 0.0054 9/1/24
+EDIT-4 Rider -0.2371 -0.2371 1/15/24
+Earnings Sharing Mechanism Rider 0.0000 0.0000 1/15/24
+Performance Incentive Mechanism Rider 0.0000 0.0000 1/15/24
+Nuclear Production Tax Credits Rider -0.0834 0.0000 1/1/25
+TOTAL cents/kWh 1.2982 0.0452
+* Qualifying customers who have opted out of the Company’s Energy Efficiency and/or Demand Side Management Programs are not subject to
+the applicable Energy Efficiency Rider charges based on the individual customer’s opt-out election. Refer to Rider EE to determine the Rider
+EE amount, if any, applicable to customers who have opted out.
+NC Sixty-Third Revised Leaf No. 99
+Effective for service rendered on and after January 1, 2025
+NCUC Docket Nos. E-7, Subs 1304, 1305, and 1276, Orders dated August 20, 2024 and December 10, 2024
+Page 2 of 2

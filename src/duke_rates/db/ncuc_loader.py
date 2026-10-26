@@ -137,6 +137,11 @@ def persist_rider_summary_records(
         supersedes = rec.get("supersedes")
 
         for rc in rec.get("rate_classes", []):
+            # The parser isolates rows it could not tie to a rate class; never
+            # store them under a class name (that is how merged blocks arose).
+            if rc.get("ambiguous_rate_class"):
+                blocks_skipped += 1
+                continue
             rate_class = rc.get("rate_class", "")
             total_cents = _clean_rate(rc.get("total_cents_per_kwh"))
             total_kw = _clean_rate(rc.get("total_dollars_per_kw"))
