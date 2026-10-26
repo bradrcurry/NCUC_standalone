@@ -8,6 +8,8 @@ Docling-text materialization) is left to manual verification.
 from __future__ import annotations
 
 import pytest
+
+pytest.importorskip("sklearn", reason="scikit-learn not installed (optional ML dependency)")
 from duke_rates.classification.baseline_classifier import (
     TrainingDataset,
     train_baseline,

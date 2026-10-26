@@ -27,7 +27,10 @@ _EXPECTED_COLUMNS = {
     "trust_tier",
 }
 _VALID_TIERS = {"high", "medium", "low", "unverified"}
-_VALID_GROUPS = {"dep_residential", "dep_sgs", "dep_sgs_clr", "dec_residential"}
+_VALID_GROUPS = {
+    "dep_residential", "dep_sgs", "dep_sgs_clr", "dep_mgs_nd", "dep_mgs_d", "dep_lgs",
+    "dec_residential",
+}
 
 
 class TestLoadRiderTrustTable:

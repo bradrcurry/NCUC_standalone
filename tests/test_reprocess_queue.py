@@ -1000,7 +1000,9 @@ def test_process_reprocess_queue_bootstraps_missing_tariff_version(tmp_path, mon
         lambda: (SimpleNamespace(database_path=db_path), None),
     )
 
-    def _fake_process_document(self, doc: dict) -> tuple[int, str, int, str, str | None]:
+    def _fake_process_document(
+        self, doc: dict, force_clear: bool = False
+    ) -> tuple[int, str, int, str, str | None]:
         return int(doc["id"]), str(doc["family_key"]), 0, "parsed", None
 
     monkeypatch.setattr(BulkExtractor, "process_document", _fake_process_document)
