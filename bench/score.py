@@ -22,6 +22,9 @@ Metrics (per run, and per document in the JSON):
 6. rider-summary total reconciliation -- printed TOTAL rows found with the right class
 7. source evidence -- extracted charges with a snippet; snippet containing the value
 8. processing time -- seconds per document
+9. provenance coverage (Phase 2B runs) -- extracted charges with a source page,
+   a bounding box, a table-cell reference, and a quote that prints the value;
+   also the share of value-matched charges that carry a page
 
 Usage::
 
@@ -169,7 +172,16 @@ def score_doc(expected: dict, corpus_entry: dict, run: dict) -> dict:
         candidates = {f"{v:g}", f"{v * 100:g}", f"{abs(v):g}", f"{abs(v) * 100:g}"}
         return any(s in snip for s in candidates)
 
+    def ev(c: dict) -> dict:
+        return c.get("evidence") or {}
+
+    matched_ids = {id(ch) for _, ch, _ in matches}
     return {
+        "with_page": sum(1 for c in extracted if ev(c).get("page") is not None),
+        "with_bbox": sum(1 for c in extracted if ev(c).get("has_bbox")),
+        "with_table_cell": sum(1 for c in extracted if ev(c).get("table_id") and ev(c).get("row") is not None),
+        "with_value_quote": sum(1 for c in extracted if ev(c).get("quote_contains_value")),
+        "matched_with_page": sum(1 for c in extracted if id(c) in matched_ids and ev(c).get("page") is not None),
         "doc_id": expected["doc_id"],
         "expected_zero": bool(expected.get("expected_zero")),
         "expected": len(records),
@@ -212,7 +224,8 @@ def aggregate(docs: list[dict]) -> dict:
     agg = defaultdict(float)
     for d in docs:
         for k in ("expected", "extracted", "value_matched", "unit_ok", "class_checked", "totals_expected",
-                  "totals_found", "snippets", "snippets_with_value", "seconds"):
+                  "totals_found", "snippets", "snippets_with_value", "seconds", "with_page",
+                  "with_bbox", "with_table_cell", "with_value_quote", "matched_with_page"):
             agg[k] += d[k] or 0
         agg["class_ok"] += d["class_ok"] or 0
         agg["false_positives"] += d["false_positives"]
@@ -236,6 +249,11 @@ def aggregate(docs: list[dict]) -> dict:
         "total_reconciliation": ratio("totals_found", "totals_expected"),
         "evidence_snippet_rate": ratio("snippets", "extracted"),
         "evidence_value_in_snippet_rate": ratio("snippets_with_value", "extracted"),
+        "provenance_page_rate": ratio("with_page", "extracted"),
+        "provenance_bbox_rate": ratio("with_bbox", "extracted"),
+        "provenance_table_cell_rate": ratio("with_table_cell", "extracted"),
+        "provenance_value_quote_rate": ratio("with_value_quote", "extracted"),
+        "matched_with_page_rate": ratio("matched_with_page", "value_matched"),
     }
 
 
@@ -265,7 +283,9 @@ def main() -> None:
     labels = list(scored)
     keys = ["expected", "extracted", "value_matched", "value_accuracy (recall)", "precision", "unit_accuracy",
             "rate_class_accuracy (summaries)", "effective_date_accuracy", "total_reconciliation",
-            "zero_doc_false_positives", "evidence_snippet_rate", "evidence_value_in_snippet_rate", "seconds"]
+            "zero_doc_false_positives", "evidence_snippet_rate", "evidence_value_in_snippet_rate",
+            "provenance_page_rate", "provenance_bbox_rate", "provenance_table_cell_rate",
+            "provenance_value_quote_rate", "matched_with_page_rate", "seconds"]
     lines = ["# Extraction benchmark v0", "", "| metric | " + " | ".join(labels) + " |", "|---|" + "---:|" * len(labels)]
     for k in keys:
         lines.append(f"| {k} | " + " | ".join(str(scored[l]["aggregate"].get(k)) for l in labels) + " |")

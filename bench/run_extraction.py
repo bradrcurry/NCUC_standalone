@@ -15,6 +15,14 @@ artifacts and page artifacts).  The script refuses ``data/db/duke_rates.db``.
 Redline/fingerprint skip flags are forced off so every document is actually
 extracted; whole-document redlines (blk13) are therefore scored as extracted.
 
+``--mode`` (Phase 2B) selects the structured input the profiles see:
+``legacy`` (text only, the Phase 0 pipeline), ``docling`` (structured Docling
+tables from ``bench/docling/``, the committed cache built by
+``build_docling_cache.py``), ``native`` (pdfplumber text layer with geometry
+tables) or ``hybrid`` (Docling when cached, otherwise native, merged with the
+legacy parse block by block). Code trees older than Phase 2B only support
+``legacy``.
+
 Usage::
 
     python bench/run_extraction.py --src <tree>/src --db <scratch.db> --label repaired \
@@ -23,6 +31,7 @@ Usage::
 from __future__ import annotations
 
 import argparse
+import gzip
 import json
 import logging
 import sqlite3
@@ -88,6 +97,65 @@ def build_doc(entry: dict, conn: sqlite3.Connection) -> dict:
     return doc
 
 
+def make_representation_provider(entries: dict[str, dict]):
+    """Representations for benchmark docs: committed Docling cache, else native PDF."""
+    from duke_rates.document_intelligence.adapters import (
+        representation_from_docling,
+        representation_from_native_pdf,
+    )
+
+    def provider(doc: dict, mode: str):
+        entry = entries[doc["_bench_doc_id"]]
+        start, end = doc.get("start_page"), doc.get("end_page")
+        page_range = (int(start), int(end or start)) if start else None
+        cache = BENCH / "docling" / f"{entry['doc_id']}.docling.json.gz"
+        if mode in ("docling", "hybrid") and cache.exists():
+            with gzip.open(cache, "rt", encoding="utf-8") as handle:
+                envelope = json.load(handle)
+            return representation_from_docling(
+                envelope["document"],
+                source_pdf=doc["local_path"],
+                file_sha256=envelope["file_sha256"],
+                backend_version=envelope.get("backend_version"),
+                docling_package_version=envelope.get("docling_package_version"),
+                page_range=page_range,
+                page_offset=int(envelope.get("page_offset") or 0),
+            )
+        if mode == "docling":
+            return None
+        return representation_from_native_pdf(doc["local_path"], page_range=page_range,
+                                               file_sha256=entry["sha256"])
+
+    return provider
+
+
+def evidence_summary(evidence: dict | None, value_text: str | None = None) -> dict | None:
+    if not evidence:
+        return None
+    printed = evidence.get("printed_value_text")
+    if printed is None:
+        cells = evidence.get("values") or evidence.get("cells") or []
+        printed = cells[0].get("text") if cells else None
+    text = evidence.get("text") or " ".join(
+        str(c.get("text", "")) for c in (evidence.get("values") or evidence.get("cells") or [])
+    )
+    label = evidence.get("label") or {}
+    if isinstance(label, dict) and label.get("text"):
+        text = f"{label['text']} {text}"
+    cells = evidence.get("values") or evidence.get("cells") or []
+    bbox = evidence.get("bbox") or (cells[0].get("bbox") if cells else None)
+    return {
+        "method": evidence.get("method") or evidence.get("backend"),
+        "page": evidence.get("page") or (cells[0].get("page") if cells else None),
+        "table_id": evidence.get("table_id") or (cells[0].get("table_id") if cells else None),
+        "row": evidence.get("row"),
+        "has_bbox": bbox is not None,
+        "printed_value_text": printed,
+        "quote": text[:200] if text else None,
+        "quote_contains_value": bool(printed and text and printed in text),
+    }
+
+
 def detect_effective_date(extractor, doc: dict) -> str | None:
     """Document effective date as the ingest heuristics read it (ISO), or None."""
     from dateutil import parser as dateparser
@@ -111,6 +179,7 @@ def main() -> None:
     ap.add_argument("--corpus", default=str(BENCH / "corpus.yaml"))
     ap.add_argument("--label", required=True)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--mode", default="legacy", choices=("legacy", "docling", "native", "hybrid"))
     args = ap.parse_args()
 
     if Path(args.db).resolve() == PRODUCTION_DB:
@@ -120,16 +189,24 @@ def main() -> None:
 
     from duke_rates.historical.ncuc.pipeline.bulk_extractor import BulkExtractor
 
-    extractor = BulkExtractor(db_path=args.db)
+    if args.mode == "legacy":
+        extractor = BulkExtractor(db_path=args.db)
+    else:
+        extractor = BulkExtractor(db_path=args.db, structured_mode=args.mode)
     for name in _RECORDERS:
         if hasattr(extractor, name):
             setattr(extractor, name, lambda *a, **k: None)
 
     corpus = yaml.safe_load(Path(args.corpus).read_text(encoding="utf-8"))["docs"]
+    if args.mode != "legacy":
+        extractor.representation_provider = make_representation_provider(
+            {entry["doc_id"]: entry for entry in corpus}
+        )
     conn = sqlite3.connect(f"file:{Path(args.db).as_posix()}?mode=ro", uri=True)
     results = []
     for entry in corpus:
         doc = build_doc(entry, conn)
+        doc["_bench_doc_id"] = entry["doc_id"]
         t0 = time.perf_counter()
         error = None
         try:
@@ -161,6 +238,7 @@ def main() -> None:
                     "tier_max": c.tier_max,
                     "customer_class": getattr(c, "customer_class", None),
                     "source_snippet": c.source_snippet,
+                    "evidence": evidence_summary(getattr(c, "evidence", None)),
                 }
                 for c in charges
             ],
@@ -168,7 +246,8 @@ def main() -> None:
         print(f"{entry['doc_id']:32} {status:22} {str(profile):40} n={len(charges):4} {elapsed:6.2f}s")
     conn.close()
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
-    Path(args.out).write_text(json.dumps({"label": args.label, "src": args.src, "results": results}, indent=1),
+    Path(args.out).write_text(json.dumps({"label": args.label, "src": args.src, "mode": args.mode,
+                                          "results": results}, indent=1),
                               encoding="utf-8")
 
 

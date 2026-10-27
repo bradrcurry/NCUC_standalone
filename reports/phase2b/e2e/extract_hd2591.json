@@ -1,0 +1,22 @@
+{
+  "run_id": 1070,
+  "version_id": 5891,
+  "extractor_status": "parsed",
+  "profile": "progress_rider_adjustment_matrix",
+  "status": "ok",
+  "validation_status": "passed",
+  "run_issues": [
+    {
+      "level": "info",
+      "code": "revision_rows_dropped",
+      "detail": "1 rows of the previous revision are absent",
+      "refs": [
+        "large general service schedules total rider adjustments"
+      ],
+      "needs_review": false
+    }
+  ],
+  "charges_with_errors": 0,
+  "charges_with_warnings": 0,
+  "output_count": 124
+}
