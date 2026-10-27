@@ -23,8 +23,32 @@ class HistoricalRiderSelection(BaseModel):
     parse_result: DocumentParseResult | None = None
 
 
+class IncompleteTariffCoverageError(ValueError):
+    """No parsed version of the schedule was in effect on the service date.
+
+    Raised instead of pricing earlier service with a tariff that was not yet
+    effective. Subclasses ValueError so existing callers that report selection
+    failures keep doing so.
+    """
+
+    def __init__(self, *, schedule_code: str, service_date: date, earliest_effective: date | None):
+        self.schedule_code = schedule_code
+        self.service_date = service_date
+        self.earliest_effective = earliest_effective
+        super().__init__(
+            "Incomplete coverage: no Progress NC parsed version of "
+            f"schedule_code={schedule_code} was in effect on {service_date.isoformat()}; "
+            f"the earliest parsed version is effective "
+            f"{earliest_effective.isoformat() if earliest_effective else 'unknown'}."
+        )
+
+
 class HistoricalTariffSelection(BaseModel):
     requested_service_date: date
+    # How the version was chosen: "covering" (its start/end bracket the
+    # service date), "latest_prior" (latest start on or before it) or
+    # "undated" (no usable dates; chosen without confirming it was in effect).
+    selection_basis: Literal["covering", "latest_prior", "undated"] = "covering"
     version: HistoryVersion
     parse_result: DocumentParseResult
     schedule: RateScheduleData
@@ -71,6 +95,18 @@ class ProgressNCHistoricalTariffSelector:
             candidates,
             key=lambda item: _selection_score(item[0], service_date),
         )
+        tier = _selection_score(version, service_date)[0]
+        if tier == 1:
+            # Only future versions are dated: never price earlier service with them.
+            starts = [
+                parse_effective_date(item[0].effective_start) for item in candidates
+            ]
+            raise IncompleteTariffCoverageError(
+                schedule_code=normalized_code,
+                service_date=service_date,
+                earliest_effective=min((d for d in starts if d), default=None),
+            )
+        selection_basis = {3: "covering", 2: "latest_prior"}.get(tier, "undated")
         schedule = _merge_schedule_metadata(parse_result.schedule, version)
         riders, unresolved_rider_codes, future_rider_codes = self._select_riders(
             schedule, service_date
@@ -78,6 +114,7 @@ class ProgressNCHistoricalTariffSelector:
         supporting_notices = self._supporting_notices(version, riders)
         return HistoricalTariffSelection(
             requested_service_date=service_date,
+            selection_basis=selection_basis,
             version=version,
             parse_result=parse_result,
             schedule=schedule,

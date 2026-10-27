@@ -22,6 +22,13 @@ log = logging.getLogger(__name__)
 
 from pydantic import BaseModel, Field
 
+from duke_rates.billing.charge_types import (
+    ENGINE_PRICED_TYPES,
+    classify_charge,
+    has_unconverted_cent_unit,
+    is_potentially_billable,
+)
+
 if TYPE_CHECKING:
     from duke_rates.db.repository import Repository
 
@@ -83,6 +90,11 @@ class BillResult(BaseModel):
     warnings: list[str] = Field(default_factory=list)
     source_confidence: float = 0.0  # min confidence across all charges used
     optional_riders_applied: list[str] = Field(default_factory=list)  # family_keys of non-mandatory riders included
+    # "complete" unless no tariff version was in effect for the service date.
+    coverage_status: str = "complete"
+    # Stored charges that may belong on the bill but were not priced
+    # (unknown or free-text charge_type). Never included in the totals.
+    unsupported_charges: list[dict] = Field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------
@@ -669,6 +681,60 @@ def _parse_date_str(d_str: str | None) -> datetime.date | None:
     return None
 
 
+def _unsupported_charge_report(charges, source_key: str) -> list[dict]:
+    """Describe charges the engine skips that may belong on the bill."""
+    report: list[dict] = []
+    for c in charges:
+        if c.charge_type in ENGINE_PRICED_TYPES:
+            continue
+        classification = classify_charge(
+            c.charge_type,
+            tou_period=c.tou_period,
+            rate_unit=c.rate_unit,
+            charge_label=c.charge_label,
+        )
+        if not is_potentially_billable(classification):
+            continue
+        report.append(
+            {
+                "source": source_key,
+                "charge_id": c.id,
+                "charge_type": c.charge_type,
+                "charge_label": c.charge_label,
+                "rate_value": c.rate_value,
+                "rate_unit": c.rate_unit,
+                "tou_period": c.tou_period,
+                "customer_class": c.customer_class,
+                "category": classification.category,
+                "suggested_type": classification.suggested_type,
+                "reason": classification.reason,
+            }
+        )
+    return report
+
+
+def _unsupported_charge_warnings(report: list[dict], source_key: str) -> list[str]:
+    if not report:
+        return []
+    types = sorted({str(item["charge_type"]) for item in report})
+    return [
+        f"Unsupported charges not priced for {source_key}: {len(report)} charge(s) with "
+        f"charge_type {', '.join(repr(t) for t in types)}. They may be billable; "
+        "the total excludes them."
+    ]
+
+
+def _cent_unit_warnings(charges, source_key: str) -> list[str]:
+    flagged = [c for c in charges if has_unconverted_cent_unit(c.rate_unit)]
+    if not flagged:
+        return []
+    return [
+        f"Unit warning for {source_key}: {len(flagged)} charge(s) use "
+        f"{flagged[0].rate_unit!r}, which is priced as dollars, not cents; "
+        "those amounts may be 100x too high."
+    ]
+
+
 class TariffBillingEngine:
     """Calculates bills from the tariff_charges and rider_applicability DB tables.
 
@@ -719,13 +785,33 @@ class TariffBillingEngine:
 
         # --- Get the best tariff version ---
         versions = self._repo.list_tariff_versions(family_key)
-        version = _select_version(versions, ref_date)
+        version, coverage = select_version_with_coverage(versions, ref_date)
         if version is None:
+            if coverage == "not_yet_effective":
+                message = (
+                    f"Incomplete coverage: no version of {family_key} was in effect on "
+                    f"{ref_date}; the earliest version on file is effective "
+                    f"{_earliest_effective_start(versions)}. Not priced."
+                )
+            else:
+                message = f"No tariff version found for {family_key} as of {ref_date}"
             return BillResult(
                 family_key=family_key,
                 schedule_title=family.title,
                 monthly_kwh=usage.monthly_kwh,
-                warnings=[f"No tariff version found for {family_key} as of {ref_date}"],
+                coverage_status="incomplete",
+                warnings=[message],
+            )
+        if coverage == "expired":
+            warnings.append(
+                f"Version of {family_key} effective {version.effective_start} ended "
+                f"{version.effective_end}, before {ref_date}, and no later version is on file; "
+                "coverage may be incomplete."
+            )
+        if coverage == "undated_fallback":
+            warnings.append(
+                f"Version of {family_key} has no effective date; it was used for "
+                f"{ref_date} without confirming it was in effect."
             )
 
         # --- Get charges for this version ---
@@ -754,6 +840,15 @@ class TariffBillingEngine:
                     "Seasonal rate schedule but no service_date provided; "
                     "using all-year charges only. Provide service_date for accurate seasonal rates."
                 )
+
+        # Charge types the engine does not price are reported, never added.
+        unsupported = _unsupported_charge_report(applicable, family_key)
+        warnings.extend(_unsupported_charge_warnings(unsupported, family_key))
+        warnings.extend(
+            _cent_unit_warnings(
+                [c for c in applicable if c.charge_type in ENGINE_PRICED_TYPES], family_key
+            )
+        )
 
         # Group by charge type
         fixed_charges = [c for c in applicable if c.charge_type == "fixed"]
@@ -887,6 +982,7 @@ class TariffBillingEngine:
                 extra_riders=extra_riders,
                 base_subtotal=base_subtotal,
                 energy_subtotal=energy_subtotal,
+                unsupported_out=unsupported,
             )
             line_items.extend(rider_items)
             rider_subtotal = round(sum(item.amount for item in rider_items), 2)
@@ -923,6 +1019,7 @@ class TariffBillingEngine:
             warnings=warnings,
             source_confidence=round(min_confidence, 3),
             optional_riders_applied=optional_riders_applied,
+            unsupported_charges=unsupported,
         )
 
     def _apply_riders(
@@ -935,6 +1032,7 @@ class TariffBillingEngine:
         extra_riders: list[str] | None = None,
         base_subtotal: float = 0.0,
         energy_subtotal: float = 0.0,
+        unsupported_out: list[dict] | None = None,
     ) -> tuple[list[BillLineItem], list[str], list[str]]:
         """Look up and apply riders applicable to this base rate schedule.
 
@@ -994,19 +1092,39 @@ class TariffBillingEngine:
         }
 
         not_found: list[str] = []
+        not_yet_effective: list[str] = []
 
         for rider_key, link in active_links.items():
             is_optional = not link.mandatory
             versions = self._repo.list_tariff_versions(rider_key)
-            rider_version = _select_version(versions, ref_date)
+            rider_version, rider_coverage = select_version_with_coverage(versions, ref_date)
             if rider_version is None:
-                not_found.append(rider_key)
+                if rider_coverage == "not_yet_effective":
+                    not_yet_effective.append(
+                        f"{rider_key} (earliest {_earliest_effective_start(versions)})"
+                    )
+                else:
+                    not_found.append(rider_key)
                 continue
 
             rider_charges = self._repo.list_tariff_charges(rider_version.id)
             if not rider_charges:
                 not_found.append(rider_key)
                 continue
+
+            applicable_rider = [
+                c for c in rider_charges
+                if _class_matches(c.customer_class or _label_class(c.charge_label), customer_class)
+            ]
+            rider_unsupported = _unsupported_charge_report(applicable_rider, rider_key)
+            if unsupported_out is not None:
+                unsupported_out.extend(rider_unsupported)
+            warnings.extend(_unsupported_charge_warnings(rider_unsupported, rider_key))
+            warnings.extend(
+                _cent_unit_warnings(
+                    [c for c in applicable_rider if c.charge_type == "adjustment"], rider_key
+                )
+            )
 
             rider_adj = [c for c in rider_charges if c.charge_type == "adjustment"]
             if rider_adj:
@@ -1054,6 +1172,11 @@ class TariffBillingEngine:
                 f"Rider charges not yet parsed for: {', '.join(not_found)}. "
                 "Rider adjustments for these riders are not included in this estimate."
             )
+        if not_yet_effective:
+            warnings.append(
+                f"Incomplete coverage: no version in effect on {ref_date} for rider(s) "
+                f"{', '.join(not_yet_effective)}. Not included in this estimate."
+            )
 
         # Cross-check total per-kWh rider rate against leaf-600 authoritative sum (TD-V4-001)
         check_warning = validate_rider_total(
@@ -1071,18 +1194,34 @@ class TariffBillingEngine:
 # ---------------------------------------------------------------------------
 
 
-def _select_version(versions, ref_date: datetime.date, *, include_proposed: bool = False):
-    """Pick the version in effect as of ref_date.
+#: Coverage outcomes of select_version_with_coverage().
+#:   effective          a dated version in effect on ref_date
+#:   expired            the latest prior version has an effective_end before
+#:                      ref_date and nothing newer is on file (version returned)
+#:   undated_fallback   no version carries a date; the first one is used
+#:   not_yet_effective  every dated version starts after ref_date -> no version
+#:   no_versions        the family has no versions
+VersionCoverage = str
 
-    Prefers the most recent version with effective_start <= ref_date.
-    Falls back to the latest version if none have a known effective_start.
+
+def select_version_with_coverage(
+    versions, ref_date: datetime.date, *, include_proposed: bool = False
+) -> tuple[object | None, VersionCoverage]:
+    """Pick the version in effect as of ref_date and say how it was chosen.
+
+    Prefers the most recent version with effective_start <= ref_date. When
+    every dated version starts after ref_date, returns ``(None,
+    "not_yet_effective")``: a tariff that was not yet in effect must never
+    price earlier service. When no version carries a date, the first version
+    is returned as ``"undated_fallback"`` (unchanged behaviour; callers should
+    surface it).
 
     By default, only approved versions are eligible. Pass include_proposed=True
     to also consider proposed/withdrawn/superseded versions (e.g. for
     rate-comparison use cases that need to model a pending filing).
     """
     if not versions:
-        return None
+        return None, "no_versions"
     if not include_proposed:
         approved = [v for v in versions if getattr(v, "status", "approved") == "approved"]
         # If filtering yields nothing, fall back to the unfiltered list rather
@@ -1094,11 +1233,31 @@ def _select_version(versions, ref_date: datetime.date, *, include_proposed: bool
     if dated:
         eligible = [v for v in dated if v.effective_start <= str(ref_date)]
         if eligible:
-            return max(eligible, key=lambda v: v.effective_start)
-        # All versions are future-dated; return the earliest
-        return min(dated, key=lambda v: v.effective_start)
+            chosen = max(eligible, key=lambda v: v.effective_start)
+            end = getattr(chosen, "effective_end", None)
+            if end and end < str(ref_date):
+                return chosen, "expired"
+            return chosen, "effective"
+        # All versions are future-dated: none was in effect on ref_date.
+        return None, "not_yet_effective"
     # No dated versions — return the first (usually only one)
-    return versions[0]
+    return versions[0], "undated_fallback"
+
+
+def _select_version(versions, ref_date: datetime.date, *, include_proposed: bool = False):
+    """Pick the version in effect as of ref_date (None if none was in effect).
+
+    See select_version_with_coverage(). Future-only families return None.
+    """
+    version, _coverage = select_version_with_coverage(
+        versions, ref_date, include_proposed=include_proposed
+    )
+    return version
+
+
+def _earliest_effective_start(versions) -> str | None:
+    dated = [v.effective_start for v in versions if v.effective_start]
+    return min(dated) if dated else None
 
 
 # ---------------------------------------------------------------------------

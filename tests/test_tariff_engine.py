@@ -62,7 +62,7 @@ def seeded_repo(repo):
     version_id = repo.upsert_tariff_version(
         TariffVersionRecord(
             family_key="test-leaf-500",
-            effective_start="2025-10-01",
+            effective_start="2024-10-01",  # Phase 2A: precedes the service dates billed below
             revision_label="NC Second Revised Leaf No. 500",
             source_type="utility_current",
             confidence_score=0.95,
@@ -108,7 +108,7 @@ def seeded_repo(repo):
     rider_version_id = repo.upsert_tariff_version(
         TariffVersionRecord(
             family_key="test-leaf-601",
-            effective_start="2026-01-01",
+            effective_start="2024-10-01",  # Phase 2A: precedes the service dates billed below
             revision_label="NC Sixth Revised Leaf No. 601",
             source_type="utility_current",
             confidence_score=0.80,
@@ -173,10 +173,11 @@ class TestVersionSelection:
         v = _select_version(versions, datetime.date(2025, 11, 1))
         assert v.effective_start == "2025-10-01"
 
-    def test_future_only_returns_earliest(self):
+    def test_future_only_returns_none(self):
+        # Phase 2A: a tariff that was not yet in effect must never price
+        # earlier service (this used to return the 2026-01-01 version).
         versions = [self._v("2026-01-01"), self._v("2027-01-01")]
-        v = _select_version(versions, datetime.date(2025, 1, 1))
-        assert v.effective_start == "2026-01-01"
+        assert _select_version(versions, datetime.date(2025, 1, 1)) is None
 
     def test_empty_returns_none(self):
         assert _select_version([], datetime.date(2025, 1, 1)) is None
@@ -343,7 +344,7 @@ def tou_repo(db_path):
     ))
     version_id = repo.upsert_tariff_version(TariffVersionRecord(
         family_key="test-leaf-502",
-        effective_start="2025-10-01",
+        effective_start="2024-10-01",  # Phase 2A: precedes the service dates billed below
         source_type="utility_current",
         confidence_score=0.90,
     ))
@@ -430,7 +431,7 @@ def demand_repo(db_path):
     ))
     version_id = repo.upsert_tariff_version(TariffVersionRecord(
         family_key="test-leaf-520",
-        effective_start="2025-10-01",
+        effective_start="2024-10-01",  # Phase 2A: precedes the service dates billed below
         source_type="utility_current",
         confidence_score=0.90,
     ))
