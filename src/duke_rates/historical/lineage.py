@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from datetime import UTC
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -201,11 +202,16 @@ def _family_key(document_url: str) -> str:
 
 def _history_version_sort_key(version: HistoryVersion) -> tuple[int, object, int, object]:
     effective = parse_effective_date(version.effective_start)
+    retrieved = version.retrieved_at
+    # Stored timestamps mix naive and UTC-aware values; they tie-break versions
+    # sharing an effective date, so compare them all as UTC.
+    if retrieved.tzinfo is None:
+        retrieved = retrieved.replace(tzinfo=UTC)
     return (
         1 if effective else 0,
-        effective or version.retrieved_at.date(),
+        effective or retrieved.date(),
         1 if version.source_kind == "current" else 0,
-        version.retrieved_at,
+        retrieved,
     )
 
 

@@ -45,7 +45,9 @@ def build_tariff_id(
 def parse_effective_date(value: str | None):
     if not value:
         return None
-    for fmt in ("%B %d, %Y", "%B %Y"):
+    # ISO is the canonical stored form (normalize-nc-effective-dates rewrites
+    # historical_documents to it); the long forms come from tariff text.
+    for fmt in ("%Y-%m-%d", "%B %d, %Y", "%B %Y"):
         try:
             return datetime.strptime(value, fmt).date()
         except ValueError:

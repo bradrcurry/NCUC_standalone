@@ -37,6 +37,23 @@ def test_progress_nc_historical_tariff_selector_picks_covered_version(tmp_path: 
     assert current.schedule.effective_end is None
 
 
+def test_progress_nc_historical_tariff_selector_reads_iso_stored_dates(tmp_path: Path) -> None:
+    # normalize-nc-effective-dates rewrites historical_documents dates to ISO.
+    # They must still win over the current document for an older service date;
+    # treating them as undated mispriced Apr-Sep 2025 bills at the 2025-10-01 rate.
+    repo, _, historical_id = _seed_progress_res_history(
+        tmp_path, historical_start="2024-10-01", historical_end="2025-09-30"
+    )
+    selector = ProgressNCHistoricalTariffSelector(repo)
+
+    historical = selector.select_schedule(schedule_code="RES", service_date=date(2025, 5, 16))
+
+    assert historical.version.source_kind == "historical"
+    assert historical.version.document_id == historical_id
+    assert historical.schedule.effective_start == date(2024, 10, 1)
+    assert historical.schedule.effective_end == date(2025, 9, 30)
+
+
 def test_progress_nc_historical_tariff_selector_matches_schedule_family_code(
     tmp_path: Path,
 ) -> None:
@@ -90,7 +107,12 @@ def test_progress_nc_historical_tariff_selector_includes_riders_and_notice_links
     assert selection.unresolved_rider_codes == []
 
 
-def _seed_progress_res_history(tmp_path: Path) -> tuple[Repository, int, int]:
+def _seed_progress_res_history(
+    tmp_path: Path,
+    *,
+    historical_start: str = "October 1, 2024",
+    historical_end: str = "September 30, 2025",
+) -> tuple[Repository, int, int]:
     repo = Repository(tmp_path / "test.db")
     current_pdf = tmp_path / "leaf-no-500-schedule-res.pdf"
     current_pdf.write_bytes(b"%PDF-1.4\n")
@@ -170,8 +192,8 @@ def _seed_progress_res_history(tmp_path: Path) -> tuple[Repository, int, int]:
             revision_label="NC First Revised Leaf No. 500",
             supersedes_label="NC Original Leaf No. 500",
             leaf_no="500",
-            effective_start="October 1, 2024",
-            effective_end="September 30, 2025",
+            effective_start=historical_start,
+            effective_end=historical_end,
             retrieved_at=datetime(2024, 11, 18, 19, 3, 7, tzinfo=UTC),
         )
     )

@@ -118,3 +118,31 @@ def test_progress_nc_lineage_builds_current_and_historical_chain(tmp_path: Path)
 
 def test_load_current_text_handles_placeholder_path() -> None:
     assert _load_current_text(Path(".")) == ""
+
+
+def test_history_version_sort_key_orders_mixed_naive_and_aware_timestamps() -> None:
+    # Two ISO-dated versions with the same effective date tie-break on
+    # retrieved_at; stored timestamps mix naive and UTC-aware values.
+    from duke_rates.historical.lineage import _history_version_sort_key
+    from duke_rates.models.history_chain import HistoryVersion
+
+    def version(retrieved_at: datetime) -> HistoryVersion:
+        return HistoryVersion(
+            source_kind="historical",
+            document_id=1,
+            family_key="nc-progress-leaf-500",
+            title="Residential Service",
+            category="rate",
+            kind="pdf",
+            effective_start="2024-10-01",
+            source_url="local-file://res.pdf",
+            local_path=Path("res.pdf"),
+            retrieved_at=retrieved_at,
+        )
+
+    naive = version(datetime(2026, 3, 16, 17, 33))
+    aware = version(datetime(2026, 5, 29, 15, 0, tzinfo=UTC))
+
+    ordered = sorted([aware, naive], key=_history_version_sort_key)
+
+    assert ordered == [naive, aware]
