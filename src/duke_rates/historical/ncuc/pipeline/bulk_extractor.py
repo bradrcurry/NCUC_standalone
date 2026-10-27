@@ -14,6 +14,8 @@ from collections import Counter
 from pathlib import Path
 from typing import Any, List, Optional, Tuple
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import dataclass, field
+import copy
 import json
 from datetime import UTC, datetime
 
@@ -153,6 +155,59 @@ _HISTORICAL_DOC_DISCOVERY_TIER = """
 """
 
 
+#: Environment switch for the destructive legacy persistence (Phase 2C).
+LEGACY_REPLACE_ENV = "DUKE_RATES_LEGACY_REPLACE"
+
+
+def legacy_replace_requested(value: bool | None = None) -> bool:
+    """Explicit argument first, else ``DUKE_RATES_LEGACY_REPLACE`` (1/true/yes)."""
+    if value is not None:
+        return bool(value)
+    return os.environ.get(LEGACY_REPLACE_ENV, "").strip().lower() in ("1", "true", "yes")
+
+
+@dataclass
+class DocumentExtraction:
+    """Output of :meth:`BulkExtractor.extract_document`. Nothing is persisted yet."""
+
+    doc: dict
+    version_id: int | None
+    structured_mode: str
+    charges: List[ExtractedCharge]
+    parser_profile: str | None
+    ranked_candidates: list
+    status: str
+    signals: Any
+    text_metrics: dict
+    selection_details: dict
+    recorders_disabled: bool = False
+
+
+@dataclass
+class ProcessResult:
+    """What :meth:`BulkExtractor.process_document_result` did with one document."""
+
+    doc_id: int
+    family_key: str | None
+    status: str
+    parser_profile: str | None
+    structured_mode: str | None = None
+    extracted: int = 0
+    run_id: int | None = None
+    validation_status: str | None = None
+    needs_review: bool = False
+    persistence: str = "candidate"
+    #: Rows written to tariff_charges (only with an explicit legacy replace).
+    inserted: int = 0
+    promotion: dict | None = None
+    error: str | None = None
+    issues: list = field(default_factory=list)
+
+    def as_tuple(self) -> Tuple[int, str, int, str, str | None]:
+        """The pre-Phase 2C return shape: (doc_id, family_key, inserted, status, profile)."""
+        return self.doc_id, self.family_key, self.inserted, self.status, self.parser_profile
+
+
 class BulkExtractor:
     """Extract charges from all historical NC documents with proper versioning."""
 
@@ -216,10 +271,15 @@ class BulkExtractor:
 
     def __init__(self, db_path: str, structured_mode: str | None = None):
         self.db_path = db_path
-        mode = (structured_mode or os.environ.get("DUKE_RATES_STRUCTURED_MODE") or "legacy").lower()
+        explicit = structured_mode or os.environ.get("DUKE_RATES_STRUCTURED_MODE")
+        mode = (explicit or "legacy").lower()
         if mode not in self.STRUCTURED_MODES:
             raise ValueError(f"structured_mode must be one of {self.STRUCTURED_MODES}, not {mode!r}")
+        # Direct extract_charges_from_document callers keep "legacy" unless a
+        # mode is chosen; candidate persistence uses hybrid by default
+        # (see candidate_mode).
         self.structured_mode = mode
+        self._explicit_mode = mode if explicit else None
         # Optional override: callable(doc, mode) -> DocumentRepresentation | None
         # (the benchmark uses it to read its own Docling cache).
         self.representation_provider = None
@@ -2113,7 +2173,11 @@ class BulkExtractor:
     def insert_charges(self, version_id: int, family_key: str,
                       charges: List[ExtractedCharge],
                       force_clear: bool = False) -> int:
-        """Insert extracted charges into tariff_charges table.
+        """Insert extracted charges into tariff_charges table (low-level legacy writer).
+
+        Phase 2C: no pipeline path calls this; ``process_document`` stores
+        candidate runs and replaces charges only through ``provenance.promote``.
+        It is kept for callers that manage their own scratch tables.
 
         Clears existing charges for this (version_id, family_key) before inserting
         so that reprocessing replaces rather than appends.
@@ -2680,81 +2744,211 @@ class BulkExtractor:
         finally:
             conn.close()
 
-    def process_document(self, doc: dict, force_clear: bool = False) -> Tuple[int, str, int, str, str | None]:
-        """Process a single document: extract and insert charges.
+    # ------------------------------------------------------------------
+    # Extraction and persistence (Phase 2C: separate steps)
+    # ------------------------------------------------------------------
 
-        Returns: (doc_id, family_key, num_inserted, status, parser_profile)
+    def candidate_mode(self, *, legacy_replace: bool = False) -> str:
+        """Structured mode for persisted extraction.
 
-        When ``force_clear`` is True, stale charges from prior runs are
-        deleted even if this extraction produces 0 charges. Use this
-        for reprocess runs intended to clean up cross-attributed or
-        otherwise-stale rows that previously survived because
-        ``insert_charges`` skipped its DELETE when given an empty list.
+        An explicitly chosen mode always wins. Otherwise candidates use
+        ``hybrid``; a legacy replace reproduces ``legacy`` so the active
+        billing interpretation does not silently change.
         """
-        # Get tariff_version for this document
-        version_id = doc.get("version_id") or self.get_tariff_version_for_document(doc['id'])
-        if not version_id:
-            logger.warning(f"No tariff_version found for doc {doc['id']}")
-            return doc['id'], doc['family_key'], 0, "missing_version", None
+        if self._explicit_mode:
+            return self._explicit_mode
+        return "legacy" if legacy_replace else "hybrid"
 
-        # Extract charges from document
-        charges, parser_profile, ranked_candidates, status, signals, text_metrics, selection_details = self.extract_charges_from_document(doc)
+    def _in_mode(self, mode: str) -> "BulkExtractor":
+        if mode == self.structured_mode:
+            return self
+        clone = copy.copy(self)  # shares classifiers and registries; safe per call
+        clone.structured_mode = mode
+        return clone
+
+    def extract_document(
+        self, doc: dict, *, structured_mode: str | None = None, version_id: int | None = None
+    ) -> DocumentExtraction:
+        """Run extraction only. ``tariff_charges`` and the run tables are not written.
+
+        Classification recorders inside ``extract_charges_from_document``
+        still run unless disabled (``candidate_runs.disable_recorders``).
+        """
+        mode = structured_mode or self.structured_mode
+        version_id = (
+            version_id or doc.get("version_id") or self.get_tariff_version_for_document(doc["id"])
+        )
+        (charges, profile, ranked, status, signals, text_metrics, selection) = self._in_mode(
+            mode
+        ).extract_charges_from_document(doc)
+        return DocumentExtraction(
+            doc=doc,
+            version_id=version_id,
+            structured_mode=mode,
+            charges=charges,
+            parser_profile=profile,
+            ranked_candidates=ranked,
+            status=status,
+            signals=signals,
+            text_metrics=text_metrics or {},
+            selection_details=selection or {},
+        )
+
+    def persist_candidate(
+        self, extraction: DocumentExtraction, *, created_by: str, persistence: str = "candidate"
+    ) -> dict:
+        """Store an extraction as an immutable, sealed candidate run (never promoted here)."""
+        from duke_rates.historical.ncuc.pipeline.candidate_runs import record_candidate_run
+
+        return record_candidate_run(
+            self.db_path, extraction, created_by=created_by, persistence=persistence
+        )
+
+    def require_provenance_schema(self) -> None:
+        from duke_rates.db.provenance import ProvenanceError
+        from duke_rates.db.provenance_schema import provenance_schema_installed
+
+        conn = self._get_connection()
+        try:
+            installed = provenance_schema_installed(conn)
+        finally:
+            conn.close()
+        if not installed:
+            raise ProvenanceError(
+                f"{self.db_path} has no provenance schema. Bulk extraction stores candidate "
+                "runs; install it first with `duke-rates provenance migrate --db <path>`."
+            )
+
+    def _record_bookkeeping(self, extraction: DocumentExtraction) -> None:
+        """Fingerprint, parse attempt, review outcome and processing run (append-only logs)."""
+        doc = extraction.doc
+        charge_count = len(extraction.charges)
+        common = dict(
+            parser_profile=extraction.parser_profile,
+            ranked_candidates=extraction.ranked_candidates,
+            signals=extraction.signals,
+            charge_count=charge_count,
+            status=extraction.status,
+            selection_details=extraction.selection_details,
+        )
         document_intelligence = self._analyze_document_intelligence(
             doc,
-            raw_text=str(text_metrics.get("full_text") or ""),
-            parser_profile=parser_profile,
-            charge_count=len(charges),
-            status=status,
+            raw_text=str(extraction.text_metrics.get("full_text") or ""),
+            parser_profile=extraction.parser_profile,
+            charge_count=charge_count,
+            status=extraction.status,
         )
-        self.record_document_fingerprint(
-            doc,
-            signals=signals,
-            text_metrics=text_metrics,
-            parser_profile=parser_profile,
-            ranked_candidates=ranked_candidates,
-            status=status,
-            charge_count=len(charges),
-            selection_details=selection_details,
-        )
+        self.record_document_fingerprint(doc, text_metrics=extraction.text_metrics, **common)
         parse_attempt_id = self.record_parse_attempt(
             doc,
-            parser_profile=parser_profile,
-            ranked_candidates=ranked_candidates,
-            signals=signals,
-            text_metrics=text_metrics,
-            charge_count=len(charges),
-            status=status,
-            selection_details=selection_details,
+            text_metrics=extraction.text_metrics,
             document_intelligence=document_intelligence,
+            **common,
         )
-        self.record_review_outcome(
-            doc,
-            parse_attempt_id=parse_attempt_id,
-            parser_profile=parser_profile,
-            ranked_candidates=ranked_candidates,
-            signals=signals,
-            charge_count=len(charges),
-            status=status,
-            selection_details=selection_details,
-        )
+        self.record_review_outcome(doc, parse_attempt_id=parse_attempt_id, **common)
         self.record_processing_run(
             doc,
-            parser_profile=parser_profile,
-            ranked_candidates=ranked_candidates,
-            signals=signals,
-            text_metrics=text_metrics,
-            charge_count=len(charges),
-            status=status,
-            selection_details=selection_details,
+            text_metrics=extraction.text_metrics,
             document_intelligence=document_intelligence,
+            **common,
         )
 
-        # Insert into database
-        num_inserted = self.insert_charges(
-            version_id, doc['family_key'], charges, force_clear=force_clear
-        )
+    def process_document_result(
+        self,
+        doc: dict,
+        force_clear: bool = False,
+        *,
+        legacy_replace: bool | None = None,
+        created_by: str = "bulk_extractor",
+    ) -> ProcessResult:
+        """Extract one document and store it as a candidate run.
 
-        return doc['id'], doc['family_key'], num_inserted, status, parser_profile
+        Default: an immutable, sealed candidate; ``tariff_charges`` is not
+        touched, so reprocessing never deletes accepted charges. With
+        ``legacy_replace`` (or ``DUKE_RATES_LEGACY_REPLACE=1``) the candidate
+        is then promoted through ``provenance.promote``: the prior rows are
+        logged and ``provenance rollback`` restores them, curated rows
+        (notes, LLM promotions, overrides) are kept, and a run that failed
+        validation is refused. ``force_clear`` allows promoting an empty run
+        (clearing stale charges), as it did for the in-place replace.
+        """
+        replace = legacy_replace_requested(legacy_replace)
+        version_id = doc.get("version_id") or self.get_tariff_version_for_document(doc["id"])
+        if not version_id:
+            logger.warning(f"No tariff_version found for doc {doc['id']}")
+            return ProcessResult(doc["id"], doc.get("family_key"), "missing_version", None)
+        self.require_provenance_schema()
+        persistence = "legacy_replace" if replace else "candidate"
+        extraction = self.extract_document(
+            doc, structured_mode=self.candidate_mode(legacy_replace=replace), version_id=version_id
+        )
+        self._record_bookkeeping(extraction)
+        run = self.persist_candidate(extraction, created_by=created_by, persistence=persistence)
+        result = ProcessResult(
+            doc_id=doc["id"],
+            family_key=doc.get("family_key"),
+            status=extraction.status,
+            parser_profile=extraction.parser_profile,
+            structured_mode=extraction.structured_mode,
+            extracted=len(extraction.charges),
+            run_id=run["run_id"],
+            validation_status=run["validation_status"],
+            needs_review=run["needs_review"],
+            persistence=persistence,
+            issues=run["run_issues"],
+        )
+        if replace:
+            self._legacy_promote(result, force_clear=force_clear, created_by=created_by)
+        return result
+
+    def _legacy_promote(self, result: ProcessResult, *, force_clear: bool, created_by: str) -> None:
+        from duke_rates.db.provenance import ProvenanceError, promote
+
+        if result.extracted == 0 and not force_clear:
+            return  # the in-place replace also left rows alone on an empty extraction
+        logger.warning(
+            "LEGACY REPLACE: promoting run %s over tariff_charges of doc %s (%s) without "
+            "review%s. Undo with `duke-rates provenance rollback`.",
+            result.run_id,
+            result.doc_id,
+            result.family_key,
+            " (review flags overridden)" if result.needs_review else "",
+        )
+        conn = sqlite3.connect(self.db_path, timeout=60.0)
+        conn.row_factory = sqlite3.Row
+        try:
+            result.promotion = promote(
+                conn,
+                result.run_id,
+                promoted_by=created_by,
+                reason=f"legacy_replace (bulk_extractor, doc {result.doc_id})",
+                allow_empty=force_clear,
+                acknowledge_review=True,
+            )
+            result.inserted = int(result.promotion.get("inserted", 0))
+        except ProvenanceError as exc:
+            result.error = f"legacy replace refused: {exc}"
+            logger.error("doc %s: %s", result.doc_id, result.error)
+        finally:
+            conn.close()
+
+    def process_document(
+        self,
+        doc: dict,
+        force_clear: bool = False,
+        *,
+        legacy_replace: bool | None = None,
+        created_by: str = "bulk_extractor",
+    ) -> Tuple[int, str, int, str, str | None]:
+        """Compatibility wrapper: (doc_id, family_key, num_inserted, status, parser_profile).
+
+        Phase 2C: stores a candidate run and leaves ``tariff_charges`` alone,
+        so ``num_inserted`` is 0 unless ``legacy_replace`` is requested. Use
+        :meth:`process_document_result` for the run id and validation.
+        """
+        return self.process_document_result(
+            doc, force_clear, legacy_replace=legacy_replace, created_by=created_by
+        ).as_tuple()
 
     def run_extraction(
         self,
@@ -2763,13 +2957,24 @@ class BulkExtractor:
         family_key: str | None = None,
         progress: bool = False,
         progress_interval_seconds: int = 30,
+        *,
+        legacy_replace: bool | None = None,
+        created_by: str = "bulk_extractor",
     ) -> dict:
         """Run bulk extraction across all documents.
+
+        Phase 2C: each document becomes a sealed candidate run
+        (``candidate_runs``); ``tariff_charges`` changes only with
+        ``legacy_replace``. ``total_charges_inserted`` counts rows written to
+        ``tariff_charges`` (0 for candidate runs); ``total_charges_extracted``
+        counts candidate charges.
 
         When `progress` is True, emits a periodic stderr line every
         `progress_interval_seconds` showing N/total processed and elapsed time.
         Useful for long runs where stdout is buffered or piped.
         """
+        self.require_provenance_schema()
+        replace = legacy_replace_requested(legacy_replace)
         if family_key is None:
             documents = self.get_documents_needing_extraction()
             missing_version_count = self.count_documents_missing_versions()
@@ -2786,6 +2991,11 @@ class BulkExtractor:
             'documents_missing_versions': missing_version_count,
             'documents_processed': 0,
             'total_charges_inserted': 0,
+            'total_charges_extracted': 0,
+            'persistence': 'legacy_replace' if replace else 'candidate',
+            'structured_mode': self.candidate_mode(legacy_replace=replace),
+            'candidate_runs': [],
+            'runs_needing_review': 0,
             'by_family': {},
             'status_counts': {},
             'zero_charge_documents': [],
@@ -2803,16 +3013,33 @@ class BulkExtractor:
 
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = {
-                executor.submit(self.process_document, doc): doc['id']
+                executor.submit(
+                    self.process_document_result,
+                    doc,
+                    legacy_replace=replace,
+                    created_by=created_by,
+                ): doc['id']
                 for doc in documents
             }
 
             for future in as_completed(futures):
                 source_doc = docs_by_id.get(int(futures[future]))
                 try:
-                    doc_id, family_key, num_inserted, status, parser_profile = future.result()
+                    outcome = future.result()
+                    doc_id, family_key, num_inserted, status, parser_profile = outcome.as_tuple()
                     results['documents_processed'] += 1
                     results['total_charges_inserted'] += num_inserted
+                    results['total_charges_extracted'] += outcome.extracted
+                    results['runs_needing_review'] += int(outcome.needs_review)
+                    if outcome.run_id is not None:
+                        results['candidate_runs'].append({
+                            "doc_id": doc_id,
+                            "run_id": outcome.run_id,
+                            "extracted": outcome.extracted,
+                            "validation_status": outcome.validation_status,
+                            "needs_review": outcome.needs_review,
+                            **({"error": outcome.error} if outcome.error else {}),
+                        })
                     status_counter[status] += 1
 
                     if progress and progress_total > 0:
@@ -2834,9 +3061,9 @@ class BulkExtractor:
 
                     if family_key not in results['by_family']:
                         results['by_family'][family_key] = 0
-                    results['by_family'][family_key] += num_inserted
+                    results['by_family'][family_key] += outcome.extracted
 
-                    if num_inserted == 0:
+                    if outcome.extracted == 0:
                         zero_row = {
                             "id": doc_id,
                             "family_key": family_key,
@@ -2864,6 +3091,7 @@ class BulkExtractor:
             key=lambda row: (str(row.get("family_key") or ""), str(row.get("effective_start") or ""), int(row["id"]))
         )
         results["failed_documents"].sort(key=lambda row: int(row["id"]))
+        results["candidate_runs"].sort(key=lambda row: int(row["doc_id"]))
         return results
 
 
@@ -2874,16 +3102,22 @@ def bulk_extract_rates(
     family_key: str | None = None,
     progress: bool = False,
     progress_interval_seconds: int = 30,
+    *,
+    structured_mode: str | None = None,
+    legacy_replace: bool | None = None,
+    created_by: str = "bulk_extractor",
 ) -> dict:
-    """Main entry point for bulk rate extraction.
+    """Main entry point for bulk rate extraction (candidate runs by default).
 
     Pass progress=True for periodic stderr status during long runs.
     """
-    extractor = BulkExtractor(db_path)
+    extractor = BulkExtractor(db_path, structured_mode=structured_mode)
     return extractor.run_extraction(
         max_workers=4,
         limit=limit,
         family_key=family_key,
         progress=progress,
         progress_interval_seconds=progress_interval_seconds,
+        legacy_replace=legacy_replace,
+        created_by=created_by,
     )

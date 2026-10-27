@@ -14,6 +14,8 @@ from pathlib import Path
 
 import typer
 
+from duke_rates.cli_commands.extraction_options import announce_persistence, legacy_replace_option
+
 from duke_rates.config import get_settings
 from duke_rates.db.repository import Repository
 from duke_rates.db.sqlite import connect as connect_sqlite
@@ -223,6 +225,7 @@ def mine_docling_nc(
     dry_run: bool = typer.Option(False, "--dry-run", help="Show what would be processed without running."),
     record_id: int | None = typer.Option(None, help="Process a single discovery record only."),
     skip_extraction: bool = typer.Option(False, "--skip-extraction", help="Skip BulkExtractor after family matching (pipeline only)."),
+    legacy_replace: bool = legacy_replace_option(),
 ) -> None:
     """Bridge stored Docling artifacts into the NCUC page-aware parsing pipeline.
 
@@ -230,11 +233,14 @@ def mine_docling_nc(
     1. Reconstructs PageEvidence from stored Docling JSON
     2. Feeds pages through NcucPipelineImporter (family match + historical doc creation
        with all guardrails: provisional family filters, weak-match rejection, hint recovery)
-    3. Runs BulkExtractor.process_document() on each created historical doc
-       (creates document_fingerprints, parse_attempt_logs, parse_review_outcomes, tariff_charges)
+    3. Runs BulkExtractor.process_document_result() on each created historical doc
+       (creates document_fingerprints, parse_attempt_logs, parse_review_outcomes and a
+       candidate extraction run; tariff_charges only with --legacy-replace)
 
     This is a selective operator path — not run by default on every import.
     """
+    if not skip_extraction and not dry_run:
+        legacy_replace = announce_persistence(legacy_replace)
     import sqlite3 as _sqlite3
     import time as _time
     from datetime import UTC, datetime
@@ -392,8 +398,10 @@ def mine_docling_nc(
                     doc = extractor.get_document_for_extraction(doc_id)
                     if doc:
                         try:
-                            _, _, num_inserted, *_ = extractor.process_document(doc)
-                            charges_this += num_inserted
+                            outcome = extractor.process_document_result(
+                                doc, legacy_replace=legacy_replace, created_by="cli:mine-docling"
+                            )
+                            charges_this += outcome.inserted if legacy_replace else outcome.extracted
                         except Exception as exc:
                             typer.echo(f"\n    WARN extraction failed for doc {doc_id}: {exc}")
 

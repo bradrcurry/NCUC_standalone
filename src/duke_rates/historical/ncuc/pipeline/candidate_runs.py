@@ -1,11 +1,9 @@
 """Run the bulk extractor as a non-destructive *candidate* extraction.
 
-``BulkExtractor.process_document`` replaces a version's ``tariff_charges``
-in place. :func:`extract_candidate` runs the same extraction code
-(``extract_charges_from_document``) but stores the output as a sealed
-``extraction_runs`` candidate. ``tariff_charges`` and the classification
-tables are not written; only an explicit ``provenance.promote`` changes what
-billing reads.
+Every bulk extraction is stored as a sealed ``extraction_runs`` candidate
+(Phase 2C: ``BulkExtractor.process_document`` uses :func:`record_candidate_run`
+too). ``tariff_charges`` is not written here; only an explicit
+``provenance.promote`` changes what billing reads.
 """
 
 from __future__ import annotations
@@ -216,39 +214,40 @@ def _validation_context(db_path: str | Path, version_id: int, family_key: str) -
         conn.close()
 
 
-def extract_candidate(
+def _is_redline(doc: dict, text: str | None) -> bool:
+    """Redline copy by classification, ingest flag or the struck/inserted header text."""
+    from duke_rates.parse.rider_summary import _REDLINE_TEXT_RE
+
+    if doc.get("classification_is_redline") == "true" or doc.get("is_redline_candidate"):
+        return True
+    return bool(text and _REDLINE_TEXT_RE.search(text))
+
+
+def record_candidate_run(
     db_path: str | Path,
-    historical_document_id: int,
+    extraction: Any,
     *,
     created_by: str,
-    version_id: int | None = None,
-    structured_mode: str = "hybrid",
+    persistence: str = "candidate",
+    notes: str | None = None,
 ) -> dict[str, Any]:
-    """Extract one historical document into a sealed candidate run.
+    """Store one ``DocumentExtraction`` as a sealed candidate run.
 
-    ``structured_mode`` defaults to ``hybrid``: structured tables where the
-    document has them, merged with the text parse section by section, with
-    page/table evidence attached. Pass ``legacy`` for the Phase 0 behaviour.
+    The single persistence path for the bulk extractor and
+    ``provenance extract-candidate``. Writes only the Phase 2A run tables;
+    ``tariff_charges`` changes only through ``provenance.promote``.
     """
     from duke_rates.document_intelligence.charge_validators import run_charge_validators
-    from duke_rates.historical.ncuc.pipeline.bulk_extractor import BulkExtractor
     from duke_rates.historical.ncuc.pipeline.stage_versions import HISTORICAL_BULK_PARSER_VERSION
 
-    extractor = BulkExtractor(db_path=str(db_path), structured_mode=structured_mode)
-    for name in _RECORDERS:
-        if hasattr(extractor, name):
-            setattr(extractor, name, lambda *a, **k: None)
-    doc = extractor.get_document_for_extraction(historical_document_id)
-    if doc is None:
-        raise ValueError(f"historical document {historical_document_id} does not exist")
-    version_id = version_id or extractor.get_tariff_version_for_document(historical_document_id)
+    doc, version_id = extraction.doc, extraction.version_id
     if not version_id:
-        raise ValueError(f"historical document {historical_document_id} has no tariff version")
-
-    charges, profile, _candidates, status, _signals, text_metrics, selection = (
-        extractor.extract_charges_from_document(doc)
-    )
-    text_source = (text_metrics or {}).get("text_source") or (selection or {}).get("text_source")
+        raise ValueError(f"historical document {doc['id']} has no tariff version")
+    charges, profile, status = extraction.charges, extraction.parser_profile, extraction.status
+    text_metrics, selection = extraction.text_metrics or {}, extraction.selection_details or {}
+    text_source = text_metrics.get("text_source") or selection.get("text_source")
+    start, end = doc.get("start_page"), doc.get("end_page")
+    page_span = (int(start), int(end or start)) if start else None
     conn = connect(Path(db_path))
     try:
         run_id = start_run(
@@ -262,18 +261,21 @@ def extract_candidate(
             family_key=doc["family_key"],
             version_id=version_id,
             source_document_kind="historical_document",
-            source_document_id=historical_document_id,
+            source_document_id=int(doc["id"]),
             source_path=doc["local_path"],
             code_fingerprint=code_fingerprint(PRODUCER_MODULES),
             config={
                 "pipeline_stage_version": HISTORICAL_BULK_PARSER_VERSION,
-                "start_page": doc.get("start_page"),
-                "end_page": doc.get("end_page"),
-                "recorders_disabled": list(_RECORDERS),
-                "structured_mode": structured_mode,
+                "start_page": start,
+                "end_page": end,
+                "recorders_disabled": list(_RECORDERS) if extraction.recorders_disabled else [],
+                "structured_mode": extraction.structured_mode,
+                "persistence": persistence,
+                "bounded": selection.get("bounded_extraction"),
             },
             text_source=text_source,
             interpreted_effective_start=doc.get("effective_start"),
+            notes=notes,
         )
         sha = conn.execute(
             "SELECT document_sha256 FROM extraction_runs WHERE id = ?", (run_id,)
@@ -295,6 +297,22 @@ def extract_candidate(
             family_type=context["family_type"],
             document_effective=doc.get("effective_start"),
             previous=context["previous"],
+            parse_warnings=selection.get("parse_warnings"),
+            page_span=page_span,
+            is_redline=_is_redline(doc, text_metrics.get("full_text")),
+        )
+        # Partial structured input is recorded, never treated as complete.
+        structured = selection.get("structured_input") or {}
+        findings_extra = (
+            [
+                {
+                    "level": "review",
+                    "code": "degraded_structured_input",
+                    "detail": structured.get("degraded_reason") or "structured input degraded",
+                }
+            ]
+            if structured.get("degraded")
+            else []
         )
         validation = seal_run(
             conn,
@@ -304,14 +322,14 @@ def extract_candidate(
                 "extractor_status": status,
                 "profile": profile,
                 "charge_count": len(charges),
-                "structured_input": (selection or {}).get("structured_input"),
+                "structured_input": selection.get("structured_input"),
                 "charges_with_page": sum(
                     1
                     for c in charges
                     if (c.evidence or {}).get("page") or (c.evidence or {}).get("values")
                 ),
             },
-            extra_issues=[f.as_dict() for f in findings],
+            extra_issues=[f.as_dict() for f in findings] + findings_extra,
         )
     finally:
         conn.close()
@@ -320,5 +338,42 @@ def extract_candidate(
         "version_id": version_id,
         "extractor_status": status,
         "profile": profile,
+        "structured_mode": extraction.structured_mode,
+        "needs_review": any(i.get("needs_review") for i in validation["run_issues"]),
         **validation,
     }
+
+
+def extract_candidate(
+    db_path: str | Path,
+    historical_document_id: int,
+    *,
+    created_by: str,
+    version_id: int | None = None,
+    structured_mode: str = "hybrid",
+) -> dict[str, Any]:
+    """Extract one historical document into a sealed candidate run.
+
+    ``structured_mode`` defaults to ``hybrid``: structured tables where the
+    document has them, merged with the text parse section by section, with
+    page/table evidence attached. Pass ``legacy`` for the Phase 0 behaviour.
+    Classification recorders are disabled, so nothing but the run tables is
+    written.
+    """
+    from duke_rates.historical.ncuc.pipeline.bulk_extractor import BulkExtractor
+
+    extractor = BulkExtractor(db_path=str(db_path), structured_mode=structured_mode)
+    disable_recorders(extractor)
+    doc = extractor.get_document_for_extraction(historical_document_id)
+    if doc is None:
+        raise ValueError(f"historical document {historical_document_id} does not exist")
+    extraction = extractor.extract_document(doc, version_id=version_id)
+    extraction.recorders_disabled = True
+    return record_candidate_run(db_path, extraction, created_by=created_by)
+
+
+def disable_recorders(extractor: Any) -> None:
+    """Turn off the classification-table side effects of ``extract_charges_from_document``."""
+    for name in _RECORDERS:
+        if hasattr(extractor, name):
+            setattr(extractor, name, lambda *a, **k: None)

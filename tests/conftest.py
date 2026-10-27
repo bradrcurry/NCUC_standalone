@@ -79,3 +79,27 @@ requires_live_db = pytest.mark.skipif(
     LIVE_DB_PATH is None or not LIVE_DB_PATH.exists(),
     reason="set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db",
 )
+
+
+@pytest.fixture
+def legacy_replace_persistence(monkeypatch):
+    """Run the pre-Phase 2C persistence contract through the Phase 2C pipeline.
+
+    Tests written against ``process_document`` writing ``tariff_charges``
+    keep their assertions: the fixture DB gets the provenance schema on first
+    use and every extraction is promoted (``DUKE_RATES_LEGACY_REPLACE=1``),
+    i.e. candidate run -> validation -> promote. A test that passes here
+    shows the legacy behaviour is reproduced by the candidate path.
+    """
+    from duke_rates.db.provenance_schema import ensure_provenance_schema
+    from duke_rates.historical.ncuc.pipeline.bulk_extractor import BulkExtractor
+
+    def install_schema(self):
+        conn = sqlite3.connect(self.db_path)
+        try:
+            ensure_provenance_schema(conn)
+        finally:
+            conn.close()
+
+    monkeypatch.setattr(BulkExtractor, "require_provenance_schema", install_schema)
+    monkeypatch.setenv("DUKE_RATES_LEGACY_REPLACE", "1")

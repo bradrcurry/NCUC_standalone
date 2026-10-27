@@ -317,7 +317,8 @@ def test_process_reprocess_queue_nc_workers(monkeypatch, tmp_path) -> None:
     state = {"calls": 0}
     lock = threading.Lock()
 
-    def _fake_process(_database_path, force_clear=False):
+    def _fake_process(_database_path, force_clear=False, legacy_replace=False):
+        assert legacy_replace is False  # Phase 2C: candidate runs unless --legacy-replace
         with lock:
             state["calls"] += 1
             call_no = state["calls"]

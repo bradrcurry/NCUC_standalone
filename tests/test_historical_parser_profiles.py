@@ -50,6 +50,10 @@ from duke_rates.historical.ncuc.pipeline.parser_profiles import (
 )
 
 
+# Phase 2C: these tests assert tariff_charges, so they run with legacy replace.
+pytestmark = pytest.mark.usefixtures("legacy_replace_persistence")
+
+
 TOU_SEASONAL_TEXT = """\
 Progress Energy Carolinas
 Residential All-Energy Time-of-Use
@@ -4573,12 +4577,20 @@ def test_bulk_extractor_run_extraction_respects_limit(tmp_path) -> None:
 
     extractor.get_documents_needing_extraction = lambda: list(docs)
     extractor.count_documents_missing_versions = lambda: 0
-    extractor.process_document = lambda doc: (doc["id"], doc["family_key"], 1, "ok", "test_profile")
+    # Phase 2C: run_extraction drives process_document_result.
+    from duke_rates.historical.ncuc.pipeline.bulk_extractor import ProcessResult
+
+    extractor.require_provenance_schema = lambda: None  # no database behind this test
+    extractor.process_document_result = lambda doc, **kw: ProcessResult(
+        doc["id"], doc["family_key"], "ok", "test_profile", extracted=1, inserted=1, run_id=7
+    )
 
     results = extractor.run_extraction(max_workers=1, limit=1)
 
     assert results["total_documents"] == 1
     assert results["documents_processed"] == 1
     assert results["total_charges_inserted"] == 1
+    assert results["total_charges_extracted"] == 1
+    assert results["candidate_runs"][0]["run_id"] == 7
     assert results["by_family"] == {"family-a": 1}
     assert results["status_counts"] == {"ok": 1}

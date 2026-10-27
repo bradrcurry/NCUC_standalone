@@ -58,7 +58,9 @@ PAYLOAD_TARGETS: dict[str, tuple[str, str, str]] = {
     "historical_document": ("historical_documents", "parsed_result_json", "parsed_result_json"),
     "bill_statement": ("bill_statements", "statement_json", "statement_json"),
 }
-TARGET_KINDS = ("tariff_version", *PAYLOAD_TARGETS)
+#: Rider-summary sources (Phase 2C): blocks + line items, see rider_summary_provenance.
+RIDER_TARGET = "rider_summary_source"
+TARGET_KINDS = ("tariff_version", *PAYLOAD_TARGETS, RIDER_TARGET)
 
 _UNSET: Any = object()
 _FLOAT_TOLERANCE = 1e-9
@@ -642,6 +644,11 @@ def seal_run(
                 }
             )
         count = len(rows)
+    elif run["target_kind"] == RIDER_TARGET:
+        from duke_rates.db import rider_summary_provenance as rsp
+
+        count, rider_issues = rsp.validate_run(conn, run_id)
+        run_issues.extend(rider_issues)
     else:
         doc = conn.execute(
             "SELECT payload_json FROM extracted_documents WHERE run_id = ?", (run_id,)
@@ -758,6 +765,17 @@ def active_run(conn: sqlite3.Connection, target_kind: str, target_id: int) -> sq
         "SELECT * FROM active_results WHERE target_kind = ? AND target_id = ?",
         (target_kind, target_id),
     ).fetchone()
+
+
+def review_findings(conn: sqlite3.Connection, run_id: int) -> list[dict[str, Any]]:
+    """Run-level findings a person must decide (validators' ``review`` level)."""
+    run = _run(conn, run_id)
+    try:
+        detail = json.loads(run["validation_json"] or "{}")
+    except ValueError:
+        return []
+    issues = detail.get("summary", {}).get("run_issues", []) if isinstance(detail, dict) else []
+    return [i for i in issues if i.get("needs_review")]
 
 
 def run_review_status(conn: sqlite3.Connection, run_id: int) -> str:
@@ -991,6 +1009,10 @@ def compare_run(conn: sqlite3.Connection, run_id: int) -> dict[str, Any]:
         "active_run_id": current["run_id"] if current else None,
         "candidate_validation_status": run["validation_status"],
     }
+    if target_kind == RIDER_TARGET:
+        from duke_rates.db import rider_summary_provenance as rsp
+
+        return {**base, **rsp.compare_run(conn, run_id)}
     if target_kind in PAYLOAD_TARGETS:
         live = _payload_value(conn, target_kind, target_id)
         doc = conn.execute(
@@ -1221,12 +1243,14 @@ def promote(
     supersede_protected_ids: Sequence[int] = (),
     allow_empty: bool = False,
     dry_run: bool = False,
+    acknowledge_review: bool = False,
 ) -> dict[str, Any]:
     """Make ``run_id`` the active result and materialise it into the read model.
 
     Atomic: either the legacy table, ``active_results`` and the log all
     change, or nothing does. Refuses unsealed, failed or validation-failed
-    runs, empty runs (unless ``allow_empty``), and a stale
+    runs, empty runs (unless ``allow_empty``), runs with findings that need
+    a person (unless ``acknowledge_review``) and a stale
     ``expected_active_run_id``.
     """
     _require_schema(conn)
@@ -1243,6 +1267,13 @@ def promote(
         raise ProvenanceError(f"run {run_id} failed validation and cannot be promoted")
     if run_review_status(conn, run_id) == "rejected":
         raise ProvenanceError(f"run {run_id} was rejected")
+    review = review_findings(conn, run_id)
+    if review and not acknowledge_review and not dry_run:
+        raise ProvenanceError(
+            f"run {run_id} has {len(review)} finding(s) that need review "
+            f"({', '.join(sorted({f.get('code', '?') for f in review}))}); "
+            "inspect them and pass acknowledge_review to promote anyway"
+        )
     target_kind, target_id = run["target_kind"], run["target_id"]
     current = active_run(conn, target_kind, target_id)
     current_run_id = current["run_id"] if current else None
@@ -1264,7 +1295,13 @@ def promote(
             conn, f"provenance.promote:{promoted_by}", operation_id=operation, evidence=reason
         ),
     ):
-        if target_kind in PAYLOAD_TARGETS:
+        if target_kind == RIDER_TARGET:
+            from duke_rates.db import rider_summary_provenance as rsp
+
+            result = rsp.promote_rider_run(
+                conn, run, current_run_id, promoted_by, reason, diff, operation
+            )
+        elif target_kind in PAYLOAD_TARGETS:
             result = _promote_payload(
                 conn, run, current_run_id, promoted_by, reason, diff, operation
             )
@@ -1499,7 +1536,11 @@ def rollback(
         atomic(conn),
         write_context(conn, f"provenance.rollback:{by}", operation_id=operation, evidence=reason),
     ):
-        if target_kind in PAYLOAD_TARGETS:
+        if target_kind == RIDER_TARGET:
+            from duke_rates.db import rider_summary_provenance as rsp
+
+            restored_sha = rsp.rollback_rider(conn, entry)
+        elif target_kind in PAYLOAD_TARGETS:
             table, column, _ = PAYLOAD_TARGETS[target_kind]
             live = _payload_value(conn, target_kind, target_id)
             if sha256_text(live) != entry["after_state_sha256"]:
@@ -2004,6 +2045,18 @@ def verify_materialization(conn: sqlite3.Connection) -> dict[str, Any]:
                         "target_id": tid,
                         "run_id": a["run_id"],
                         "detail": "live rows changed since promotion",
+                    }
+                )
+        elif kind == RIDER_TARGET:
+            from duke_rates.db import rider_summary_provenance as rsp
+
+            if rsp.state_sha(conn, tid) != a["after_state_sha256"]:
+                report["mismatches"].append(
+                    {
+                        "target_kind": kind,
+                        "target_id": tid,
+                        "run_id": a["run_id"],
+                        "detail": "live rider summary changed since promotion",
                     }
                 )
         else:

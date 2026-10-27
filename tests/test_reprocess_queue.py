@@ -30,6 +30,11 @@ from duke_rates.historical.ncuc.pipeline.bulk_extractor import BulkExtractor
 from duke_rates.historical.ncuc.pipeline.stage_versions import OCR_NORMALIZATION_VERSION
 from duke_rates.models.pipeline import PageEvidence, PipelineRoute, TariffSpan
 
+import pytest
+
+# Phase 2C: these tests assert tariff_charges, so they run with legacy replace.
+pytestmark = pytest.mark.usefixtures("legacy_replace_persistence")
+
 
 GENERIC_RESIDENTIAL_TEXT = """
 Schedule RES

@@ -122,7 +122,19 @@ def persist_rider_summary_records(
     replace: bool = False,
     utility: str | None = None,
 ) -> tuple[int, int]:
-    """Persist serialized rider summary records directly into SQLite."""
+    """Persist serialized rider summary records into SQLite.
+
+    ``replace=False`` only inserts blocks that are not stored yet (nothing is
+    overwritten). ``replace=True`` (Phase 2C) no longer updates blocks in
+    place: it records one candidate run per source PDF
+    (``rider_summary_provenance``) and leaves the read model alone, so a
+    reparse cannot delete rider-summary history. With
+    ``DUKE_RATES_LEGACY_REPLACE=1`` each run is then promoted (logged,
+    reversible with ``provenance rollback``). Returns ``(blocks, skipped)``:
+    blocks recorded (or promoted) and blocks not stored.
+    """
+    if replace:
+        return _replace_through_runs(conn, records, utility=utility)
     blocks_inserted = 0
     blocks_skipped = 0
 
@@ -224,6 +236,47 @@ def persist_rider_summary_records(
 
     conn.commit()
     return blocks_inserted, blocks_skipped
+
+
+def _replace_through_runs(
+    conn: sqlite3.Connection, records: list[dict], *, utility: str | None
+) -> tuple[int, int]:
+    """``replace=True``: candidate runs, promoted only on an explicit legacy replace."""
+    from duke_rates.db import provenance as pv
+    from duke_rates.db.provenance_schema import provenance_schema_installed
+    from duke_rates.db.rider_summary_provenance import record_rider_summary_runs
+    from duke_rates.historical.ncuc.pipeline.bulk_extractor import legacy_replace_requested
+
+    if not provenance_schema_installed(conn):
+        raise pv.ProvenanceError(
+            "replacing rider summaries needs the provenance schema (it keeps the replaced "
+            "blocks); run `duke-rates provenance migrate --db <path>` first"
+        )
+    conn.commit()
+    run_ids = record_rider_summary_runs(
+        conn, records, created_by="ncuc_loader", utility=utility, parser_name="ncuc_loader:rider_summary"
+    )
+    skipped = sum(
+        1 for rec in records for rc in rec.get("rate_classes", []) if rc.get("ambiguous_rate_class")
+    )
+    blocks = 0
+    for run_id in run_ids:
+        if not legacy_replace_requested():
+            blocks += json.loads(
+                conn.execute("SELECT metrics_json FROM extraction_runs WHERE id = ?", (run_id,)).fetchone()[0]
+            ).get("blocks", 0)
+            continue
+        log.warning("LEGACY REPLACE: promoting rider summary run %s without review", run_id)
+        result = pv.promote(
+            conn,
+            run_id,
+            promoted_by="ncuc_loader",
+            reason="legacy_replace (persist_rider_summary_records)",
+            allow_empty=True,
+            acknowledge_review=True,
+        )
+        blocks += result["inserted_blocks"]
+    return blocks, skipped
 
 
 def seed_rider_descriptions(conn: sqlite3.Connection) -> int:

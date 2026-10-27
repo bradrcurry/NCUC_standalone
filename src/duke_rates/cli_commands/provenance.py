@@ -36,6 +36,22 @@ _ALLOW_PROD = typer.Option(
 )
 
 
+_MODE_OPTION = typer.Option(
+    "hybrid", "--mode", help="legacy | docling | native | hybrid (structured input mode)."
+)
+_RUN_SUMMARY_KEYS = (
+    "run_id",
+    "version_id",
+    "extractor_status",
+    "profile",
+    "structured_mode",
+    "status",
+    "validation_status",
+    "needs_review",
+    "output_count",
+)
+
+
 def _open(db: Path, *, write: bool, allow_production: bool = False) -> sqlite3.Connection:
     if not db.exists():
         raise typer.BadParameter(f"{db} does not exist")
@@ -100,12 +116,205 @@ def extract_candidate_cmd(
     allow_production: bool = _ALLOW_PROD,
     by: str = typer.Option(..., help="Who requested the run."),
     version_id: int | None = typer.Option(None, "--version-id"),
+    mode: str = _MODE_OPTION,
 ) -> None:
     """Run the bulk extractor into a sealed candidate run (tariff_charges untouched)."""
     from duke_rates.historical.ncuc.pipeline.candidate_runs import extract_candidate
 
     _open(db, write=True, allow_production=allow_production).close()
-    _echo(extract_candidate(db, historical_document_id, created_by=by, version_id=version_id))
+    _echo(
+        extract_candidate(
+            db, historical_document_id, created_by=by, version_id=version_id, structured_mode=mode
+        )
+    )
+
+
+@provenance_app.command("extract-candidates")
+def extract_candidates_cmd(
+    db: Path = _DB_OPTION,
+    allow_production: bool = _ALLOW_PROD,
+    by: str = typer.Option(..., help="Who requested the runs."),
+    historical_document_id: list[int] = typer.Option(
+        [], "--historical-document-id", help="Documents to extract (repeatable); default: all eligible."
+    ),
+    family_key: str | None = typer.Option(None, "--family-key"),
+    limit: int | None = typer.Option(None, help="At most this many documents."),
+    mode: str = _MODE_OPTION,
+    workers: int = typer.Option(2, min=1, help="Parallel documents."),
+    out: Path | None = typer.Option(None, help="Also write the full JSON report here."),
+) -> None:
+    """Bulk candidate extraction: one sealed run per document; nothing is promoted.
+
+    Classification recorders are disabled, so only the run tables are written.
+    """
+    from concurrent.futures import ThreadPoolExecutor
+
+    from duke_rates.historical.ncuc.pipeline.bulk_extractor import BulkExtractor
+    from duke_rates.historical.ncuc.pipeline.candidate_runs import extract_candidate
+
+    conn = _open(db, write=True, allow_production=allow_production)
+    if not provenance_schema_installed(conn):
+        raise typer.BadParameter(f"{db} has no provenance schema; run `provenance migrate` first")
+    conn.close()
+    ids = list(historical_document_id) or [
+        int(d["id"])
+        for d in BulkExtractor(str(db)).get_documents_needing_extraction(family_key=family_key)
+    ]
+    ids = ids[:limit] if limit is not None else ids
+
+    def one(hd_id: int) -> dict:
+        try:
+            r = extract_candidate(db, hd_id, created_by=by, structured_mode=mode)
+            return {"historical_document_id": hd_id, **{k: r[k] for k in _RUN_SUMMARY_KEYS if k in r}}
+        except Exception as exc:  # reported per document; the batch continues
+            return {"historical_document_id": hd_id, "error": str(exc)}
+
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        rows = list(pool.map(one, ids))
+    report = {
+        "documents": len(rows),
+        "runs": sum(1 for r in rows if "run_id" in r),
+        "errors": sum(1 for r in rows if "error" in r),
+        "needs_review": sum(1 for r in rows if r.get("needs_review")),
+        "validation": dict(Counter(r.get("validation_status", "error") for r in rows)),
+        "structured_mode": mode,
+        "promoted": 0,
+    }
+    _echo({**report, "results": rows if len(rows) <= 50 else rows[:50]})
+    if out:
+        out.write_text(json.dumps({**report, "results": rows}, indent=2, default=str), encoding="utf-8")
+
+
+@provenance_app.command("candidates")
+def candidates_cmd(
+    db: Path = _DB_OPTION,
+    version_id: int | None = typer.Option(None, "--version-id"),
+    family_key: str | None = typer.Option(None, "--family-key"),
+    target_kind: str | None = typer.Option(None, "--target-kind"),
+    review: str | None = typer.Option(
+        None, help="candidate | active | previously_active | rejected"
+    ),
+    needs_review: bool = typer.Option(False, "--needs-review", help="Only runs with review findings."),
+    limit: int = typer.Option(50),
+) -> None:
+    """List extraction runs with their review state and validation summary."""
+    conn = _open(db, write=False)
+    where, params = ["sealed_at IS NOT NULL"], []
+    for column, value in (("target_id", version_id), ("family_key", family_key), ("target_kind", target_kind)):
+        if value is not None:
+            where.append(f"{column} = ?")
+            params.append(value)
+    if version_id is not None and target_kind is None:
+        where.append("target_kind = 'tariff_version'")
+    rows = conn.execute(
+        f"SELECT * FROM extraction_runs WHERE {' AND '.join(where)} ORDER BY id DESC LIMIT ?",
+        [*params, limit * 5 if (review or needs_review) else limit],
+    ).fetchall()
+    out = []
+    for run in rows:
+        state = pv.run_review_status(conn, run["id"])
+        flagged = pv.review_findings(conn, run["id"])
+        if (review and state != review) or (needs_review and not flagged):
+            continue
+        config = json.loads(run["config_json"] or "{}")
+        out.append(
+            {
+                "run_id": run["id"],
+                "target": f"{run['target_kind']}:{run['target_id']}",
+                "family_key": run["family_key"],
+                "source_document_id": run["source_document_id"],
+                "parser": run["parser_name"],
+                "structured_mode": config.get("structured_mode"),
+                "persistence": config.get("persistence"),
+                "status": run["status"],
+                "validation_status": run["validation_status"],
+                "review_state": state,
+                "review_findings": len(flagged),
+                "output_count": json.loads(run["metrics_json"] or "{}").get("charge_count"),
+                "created_by": run["created_by"],
+                "started_at": run["started_at"],
+            }
+        )
+        if len(out) >= limit:
+            break
+    _echo(out)
+
+
+@provenance_app.command("issues")
+def issues_cmd(
+    run_id: int = typer.Option(..., "--run-id"),
+    db: Path = _DB_OPTION,
+    level: str | None = typer.Option(None, help="error | warning | info | review"),
+) -> None:
+    """Validation findings for a run: run-level, then per charge (with the charge label)."""
+    conn = _open(db, write=False)
+    run = conn.execute("SELECT validation_json, validation_status FROM extraction_runs WHERE id = ?", (run_id,)).fetchone()
+    if run is None:
+        raise typer.BadParameter(f"run {run_id} does not exist")
+    detail = json.loads(run["validation_json"] or "{}")
+    run_issues = (detail.get("summary") or {}).get("run_issues", []) if isinstance(detail, dict) else []
+    labels = {
+        str(r["id"]): (r["charge_label"], r["rate_value"], r["rate_unit"])
+        for r in conn.execute("SELECT id, charge_label, rate_value, rate_unit FROM extracted_charges WHERE run_id = ?", (run_id,))
+    }
+    per_charge = [
+        {"extracted_charge_id": int(cid), "charge": labels.get(cid), **issue}
+        for cid, issues in ((detail.get("charges") or {}) if isinstance(detail, dict) else {}).items()
+        for issue in issues
+    ]
+
+    def keep(issue: dict) -> bool:
+        if level is None:
+            return True
+        return (level == "review" and issue.get("needs_review")) or issue.get("level") == level
+
+    _echo(
+        {
+            "run_id": run_id,
+            "validation_status": run["validation_status"],
+            "needs_review": [i for i in run_issues if i.get("needs_review")],
+            "run_issues": [i for i in run_issues if keep(i)],
+            "charge_issues": [i for i in per_charge if keep(i)],
+        }
+    )
+
+
+@provenance_app.command("evidence")
+def evidence_cmd(
+    run_id: int = typer.Option(..., "--run-id"),
+    db: Path = _DB_OPTION,
+    charge_id: int | None = typer.Option(None, "--charge-id", help="One extracted_charges id."),
+    label: str | None = typer.Option(None, help="Substring of the charge label."),
+) -> None:
+    """Source evidence per candidate charge: PDF hash, page, bbox, quote, table cell, printed value."""
+    conn = _open(db, write=False)
+    sql = "SELECT * FROM extracted_charges WHERE run_id = ?"
+    params: list = [run_id]
+    if charge_id is not None:
+        sql += " AND id = ?"
+        params.append(charge_id)
+    if label:
+        sql += " AND charge_label LIKE ?"
+        params.append(f"%{label}%")
+    rows = conn.execute(sql + " ORDER BY ordinal", params).fetchall()
+    _echo(
+        [
+            {
+                "extracted_charge_id": r["id"],
+                "charge": f"{r['charge_label']} = {r['rate_value']} {r['rate_unit']}",
+                "canonical": f"{r['canonical_value']} {r['canonical_unit']} ({r['unit_normalization']})",
+                "printed": {"value": r["printed_value_text"], "unit": r["printed_unit"]},
+                "source_pdf": {"path": r["source_pdf_path"], "sha256": r["source_pdf_sha256"], "status": r["source_pdf_status"]},
+                "page": {"number": r["page_number"], "status": r["page_status"]},
+                "bbox": json.loads(r["bbox_json"]) if r["bbox_json"] else None,
+                "quote": {"text": r["source_quote"], "status": r["quote_status"]},
+                "table_ref": json.loads(r["table_ref_json"]) if r["table_ref_json"] else None,
+                "effective_start": r["effective_start"],
+                "method": r["extraction_method"],
+            }
+            for r in rows
+        ]
+    )
 
 
 @provenance_app.command("compare")
@@ -129,6 +338,9 @@ def promote_cmd(
     ),
     allow_empty: bool = typer.Option(False),
     dry_run: bool = typer.Option(False, help="Show the diff without changing anything."),
+    acknowledge_review: bool = typer.Option(
+        False, "--acknowledge-review", help="Promote although the run has findings that need review."
+    ),
 ) -> None:
     """Make a reviewed candidate run the active result."""
     conn = _open(db, write=not dry_run, allow_production=allow_production)
@@ -142,6 +354,7 @@ def promote_cmd(
             supersede_protected_ids=supersede,
             allow_empty=allow_empty,
             dry_run=dry_run,
+            acknowledge_review=acknowledge_review,
         )
     )
 

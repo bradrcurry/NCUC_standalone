@@ -248,11 +248,15 @@ progress show-search-pack
 promote-llm-charge-proposals-nc
 propose-llm-charge-promotions-nc
 provenance backfill
+provenance candidates
 provenance compare
 provenance completeness
 provenance drop-schema
+provenance evidence
 provenance extract-candidate
+provenance extract-candidates
 provenance history
+provenance issues
 provenance migrate
 provenance promote
 provenance reject

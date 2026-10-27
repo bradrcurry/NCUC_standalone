@@ -39,7 +39,7 @@ from __future__ import annotations
 
 import sqlite3
 
-PROVENANCE_SCHEMA_VERSION = 1
+PROVENANCE_SCHEMA_VERSION = 2  # 2: rider-summary runs (Phase 2C)
 
 # Columns whose changes are audited, per legacy table.
 AUDITED_METADATA_COLUMNS: dict[str, tuple[str, ...]] = {
@@ -110,6 +110,11 @@ PROVENANCE_TABLES: tuple[str, ...] = (
     "active_results",
     "promotion_log",
     "materialized_charges",
+    "rider_summary_sources",
+    "extracted_rider_blocks",
+    "extracted_rider_line_items",
+    "materialized_rider_blocks",
+    "rider_summary_revisions",
     "charge_overrides",
     "metadata_revisions",
     "document_payload_revisions",
@@ -125,6 +130,45 @@ _REVISION_OP = (
 _NOW = "strftime('%Y-%m-%dT%H:%M:%fZ', 'now')"
 
 _STATUS_CHECK = "IN ('available', 'unavailable', 'legacy_unverified', 'not_applicable')"
+
+#: Every run target. Schema v1 lacked 'rider_summary_source'; see _widen_target_kinds.
+RUN_TARGET_KINDS: tuple[str, ...] = (
+    "tariff_version",
+    "historical_document",
+    "bill_statement",
+    "rider_summary_source",
+)
+_TARGET_KIND_LIST = ", ".join(f"'{k}'" for k in RUN_TARGET_KINDS)
+
+RIDER_BLOCK_COLUMNS: tuple[str, ...] = (
+    "id",
+    "docket_dir",
+    "source_pdf",
+    "leaf_no",
+    "effective_date",
+    "docket_number",
+    "order_date",
+    "supersedes",
+    "rate_class",
+    "applicable_schedules_json",
+    "total_cents_per_kwh",
+    "total_dollars_per_kw",
+    "utility",
+    "created_at",
+)
+RIDER_ITEM_COLUMNS: tuple[str, ...] = (
+    "id",
+    "block_id",
+    "label",
+    "rider_code",
+    "cents_per_kwh",
+    "dollars_per_kw",
+    "line_effective_date",
+    "is_section_header",
+    "is_subtotal",
+    "is_total",
+    "created_at",
+)
 
 PROVENANCE_DDL = f"""
 CREATE TABLE IF NOT EXISTS provenance_schema_meta (
@@ -152,7 +196,7 @@ CREATE TABLE IF NOT EXISTS extraction_runs (
     id                     INTEGER PRIMARY KEY AUTOINCREMENT,
     run_uuid               TEXT NOT NULL UNIQUE,
     target_kind            TEXT NOT NULL
-        CHECK (target_kind IN ('tariff_version', 'historical_document', 'bill_statement')),
+        CHECK (target_kind IN ({_TARGET_KIND_LIST})),
     target_id              INTEGER NOT NULL,
     family_key             TEXT,
     version_id             INTEGER,
@@ -293,6 +337,88 @@ CREATE TABLE IF NOT EXISTS materialized_charges (
     promotion_log_id    INTEGER NOT NULL REFERENCES promotion_log(id)
 );
 
+-- Rider summaries (Phase 2C). A run's target is one (docket_dir, source_pdf):
+-- every rider_summary_blocks row of that source, with its line items.
+CREATE TABLE IF NOT EXISTS rider_summary_sources (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    docket_dir TEXT NOT NULL,
+    source_pdf TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    UNIQUE (docket_dir, source_pdf)
+);
+
+CREATE TABLE IF NOT EXISTS extracted_rider_blocks (
+    id                        INTEGER PRIMARY KEY AUTOINCREMENT,
+    run_id                    INTEGER NOT NULL REFERENCES extraction_runs(id),
+    ordinal                   INTEGER NOT NULL,
+    docket_dir                TEXT NOT NULL,
+    source_pdf                TEXT NOT NULL,
+    leaf_no                   TEXT,
+    effective_date            TEXT,
+    docket_number             TEXT,
+    order_date                TEXT,
+    supersedes                TEXT,
+    rate_class                TEXT NOT NULL,
+    applicable_schedules_json TEXT NOT NULL DEFAULT '[]',
+    total_cents_per_kwh       REAL,
+    total_dollars_per_kw      REAL,
+    utility                   TEXT,
+    checksum_ok               INTEGER,
+    evidence_json             TEXT,
+    legacy_block_id           INTEGER,
+    UNIQUE (run_id, ordinal)
+);
+CREATE INDEX IF NOT EXISTS idx_extracted_rider_blocks_run ON extracted_rider_blocks(run_id);
+
+CREATE TABLE IF NOT EXISTS extracted_rider_line_items (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    run_id              INTEGER NOT NULL REFERENCES extraction_runs(id),
+    block_id            INTEGER NOT NULL REFERENCES extracted_rider_blocks(id),
+    ordinal             INTEGER NOT NULL,
+    label               TEXT NOT NULL,
+    rider_code          TEXT,
+    cents_per_kwh       REAL,
+    dollars_per_kw      REAL,
+    line_effective_date TEXT,
+    is_section_header   INTEGER NOT NULL DEFAULT 0,
+    is_subtotal         INTEGER NOT NULL DEFAULT 0,
+    is_total            INTEGER NOT NULL DEFAULT 0,
+    page_number         INTEGER,
+    page_status         TEXT NOT NULL CHECK (page_status {_STATUS_CHECK}),
+    bbox_json           TEXT,
+    source_quote        TEXT,
+    quote_status        TEXT NOT NULL CHECK (quote_status {_STATUS_CHECK}),
+    evidence_json       TEXT,
+    legacy_item_id      INTEGER,
+    UNIQUE (block_id, ordinal),
+    CHECK ((page_status IN ('available', 'legacy_unverified')) = (page_number IS NOT NULL)),
+    CHECK ((quote_status IN ('available', 'legacy_unverified')) = (source_quote IS NOT NULL))
+);
+CREATE INDEX IF NOT EXISTS idx_extracted_rider_items_block ON extracted_rider_line_items(block_id);
+
+CREATE TABLE IF NOT EXISTS materialized_rider_blocks (
+    rider_summary_block_id INTEGER PRIMARY KEY,
+    extracted_block_id     INTEGER NOT NULL REFERENCES extracted_rider_blocks(id),
+    promotion_log_id       INTEGER NOT NULL REFERENCES promotion_log(id)
+);
+
+-- Every change to the rider read model, whoever made it (promotion, loader,
+-- cleanup script), so no reprocessing path can lose a reading silently.
+CREATE TABLE IF NOT EXISTS rider_summary_revisions (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    table_name   TEXT NOT NULL,
+    row_id       INTEGER NOT NULL,
+    block_id     INTEGER,
+    operation    TEXT NOT NULL CHECK (operation IN ('update', 'delete')),
+    old_row_json TEXT NOT NULL,
+    new_row_json TEXT,
+    changed_at   TEXT NOT NULL,
+    changed_by   TEXT NOT NULL,
+    operation_id TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_rider_summary_revisions_row
+ON rider_summary_revisions(table_name, row_id, id);
+
 CREATE TABLE IF NOT EXISTS charge_overrides (
     id                  INTEGER PRIMARY KEY AUTOINCREMENT,
     version_id          INTEGER NOT NULL,
@@ -362,8 +488,8 @@ ON tariff_charge_revisions(version_id, id);
 """
 
 
-def _row_json(prefix: str) -> str:
-    pairs = ", ".join(f"'{col}', {prefix}.{col}" for col in TARIFF_CHARGE_COLUMNS)
+def _row_json(prefix: str, columns: tuple[str, ...] = TARIFF_CHARGE_COLUMNS) -> str:
+    pairs = ", ".join(f"'{col}', {prefix}.{col}" for col in columns)
     return f"json_object({pairs})"
 
 
@@ -387,6 +513,9 @@ def _immutability_triggers() -> list[str]:
         "document_payload_revisions",
         "tariff_charge_revisions",
         "charge_overrides",
+        "extracted_rider_blocks",
+        "extracted_rider_line_items",
+        "rider_summary_revisions",
     ):
         stmts.append(
             f"""
@@ -401,6 +530,9 @@ def _immutability_triggers() -> list[str]:
         "promotion_log",
         "document_payload_revisions",
         "tariff_charge_revisions",
+        "extracted_rider_blocks",
+        "extracted_rider_line_items",
+        "rider_summary_revisions",
     ):
         stmts.append(
             f"""
@@ -409,7 +541,12 @@ def _immutability_triggers() -> list[str]:
             BEGIN SELECT RAISE(ABORT, '{table} is immutable'); END;
             """
         )
-    for table in ("extracted_charges", "extracted_documents"):
+    for table in (
+        "extracted_charges",
+        "extracted_documents",
+        "extracted_rider_blocks",
+        "extracted_rider_line_items",
+    ):
         stmts.append(
             f"""
             CREATE TRIGGER IF NOT EXISTS trg_{table}_run_open
@@ -540,7 +677,69 @@ def _audit_triggers(conn: sqlite3.Connection) -> list[str]:
             END;
             """
         )
+    for table, columns, block_col in (
+        ("rider_summary_blocks", RIDER_BLOCK_COLUMNS, "id"),
+        ("rider_line_items", RIDER_ITEM_COLUMNS, "block_id"),
+    ):
+        present = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
+        if not present:
+            continue
+        cols = tuple(c for c in columns if c in present)
+        for operation, new_json in (("update", _row_json("NEW", cols)), ("delete", "NULL")):
+            stmts.append(
+                f"""
+                CREATE TRIGGER IF NOT EXISTS trg_rider_audit_{table}_{operation}
+                AFTER {operation.upper()} ON {table}
+                BEGIN
+                    INSERT INTO rider_summary_revisions
+                        (table_name, row_id, block_id, operation, old_row_json, new_row_json,
+                         changed_at, changed_by, operation_id)
+                    VALUES ('{table}', OLD.id, OLD.{block_col}, '{operation}',
+                            {_row_json("OLD", cols)}, {new_json}, {_NOW}, {_ACTOR}, {_OPERATION});
+                END;
+                """
+            )
     return stmts
+
+
+def _widen_target_kinds(conn: sqlite3.Connection) -> None:
+    """Rebuild a schema-v1 ``extraction_runs`` so its CHECK admits every target kind.
+
+    SQLite cannot alter a CHECK constraint, so the table is copied into a new
+    one with the current definition (same columns, ids and rows) and renamed.
+    Its triggers and index are recreated by the caller. Atomic.
+    """
+    row = conn.execute(
+        "SELECT sql FROM sqlite_master WHERE type='table' AND name='extraction_runs'"
+    ).fetchone()
+    if row is None or "rider_summary_source" in row[0]:
+        return
+    start = PROVENANCE_DDL.index("CREATE TABLE IF NOT EXISTS extraction_runs (")
+    ddl = PROVENANCE_DDL[start : PROVENANCE_DDL.index(");", start) + 2]
+    ddl = ddl.replace("IF NOT EXISTS extraction_runs (", "extraction_runs__v2 (")
+    columns = [r[1] for r in conn.execute("PRAGMA table_info(extraction_runs)")]
+    cols = ", ".join(columns)
+    conn.commit()
+    conn.execute("PRAGMA foreign_keys=OFF")
+    # Keep other tables' REFERENCES/trigger text pointing at "extraction_runs".
+    conn.execute("PRAGMA legacy_alter_table=ON")
+    try:
+        conn.execute("BEGIN IMMEDIATE")
+        before = conn.execute("SELECT COUNT(*), COALESCE(MAX(id), 0) FROM extraction_runs").fetchone()
+        conn.execute(ddl)
+        conn.execute(f"INSERT INTO extraction_runs__v2 ({cols}) SELECT {cols} FROM extraction_runs")
+        conn.execute("DROP TABLE extraction_runs")
+        conn.execute("ALTER TABLE extraction_runs__v2 RENAME TO extraction_runs")
+        after = conn.execute("SELECT COUNT(*), COALESCE(MAX(id), 0) FROM extraction_runs").fetchone()
+        if tuple(before) != tuple(after):
+            raise RuntimeError(f"extraction_runs rebuild lost rows: {tuple(before)} -> {tuple(after)}")
+        conn.execute("COMMIT")
+    except BaseException:
+        conn.execute("ROLLBACK")
+        raise
+    finally:
+        conn.execute("PRAGMA legacy_alter_table=OFF")
+        conn.execute("PRAGMA foreign_keys=ON")
 
 
 def provenance_schema_installed(conn: sqlite3.Connection) -> bool:
@@ -562,7 +761,12 @@ _ADDED_COLUMNS: tuple[tuple[str, str, str], ...] = (
 
 
 def ensure_provenance_schema(conn: sqlite3.Connection) -> None:
-    """Create the provenance tables and triggers (idempotent, additive)."""
+    """Create the provenance tables and triggers (idempotent, additive).
+
+    Upgrading a v1 schema rebuilds ``extraction_runs`` to widen its target
+    CHECK (rows and ids unchanged); everything else is added.
+    """
+    _widen_target_kinds(conn)
     conn.executescript(PROVENANCE_DDL)
     for table, column, typedef in _ADDED_COLUMNS:
         present = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
@@ -571,7 +775,8 @@ def ensure_provenance_schema(conn: sqlite3.Connection) -> None:
     for stmt in _immutability_triggers() + _audit_triggers(conn):
         conn.execute(stmt)
     conn.execute(
-        "INSERT OR IGNORE INTO provenance_schema_meta(key, value) VALUES ('schema_version', ?)",
+        "INSERT INTO provenance_schema_meta(key, value) VALUES ('schema_version', ?) "
+        "ON CONFLICT(key) DO UPDATE SET value = excluded.value",
         (str(PROVENANCE_SCHEMA_VERSION),),
     )
     conn.execute(
@@ -600,6 +805,9 @@ def provenance_usage(conn: sqlite3.Connection) -> dict[str, int]:
         "metadata_revisions": q("SELECT COUNT(*) FROM metadata_revisions").fetchone()[0],
         "payload_revisions": q("SELECT COUNT(*) FROM document_payload_revisions").fetchone()[0],
         "charge_revisions": q("SELECT COUNT(*) FROM tariff_charge_revisions").fetchone()[0],
+        "rider_revisions": q("SELECT COUNT(*) FROM rider_summary_revisions").fetchone()[0]
+        if q("SELECT 1 FROM sqlite_master WHERE name='rider_summary_revisions'").fetchone()
+        else 0,
         "overrides": q("SELECT COUNT(*) FROM charge_overrides").fetchone()[0],
     }
 
@@ -621,6 +829,7 @@ def drop_provenance_schema(conn: sqlite3.Connection, *, force: bool = False) -> 
         for row in conn.execute(
             "SELECT name FROM sqlite_master WHERE type='trigger' AND "
             "(name LIKE 'trg_audit_%' OR name LIKE 'trg_payload_%' OR name LIKE 'trg_tariff_charges_%' "
+            " OR name LIKE 'trg_rider_audit_%' "
             " OR tbl_name IN (" + ",".join("?" * len(PROVENANCE_TABLES)) + "))",
             PROVENANCE_TABLES,
         )
