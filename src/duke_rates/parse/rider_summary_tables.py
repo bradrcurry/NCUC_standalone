@@ -651,6 +651,45 @@ def _item_keys(items: list[RiderLineItem]) -> list[str]:
     return keys
 
 
+_EXACT_RESIDUAL = 1e-6
+
+
+def block_residual(block: RiderRateClassBlock) -> float | None:
+    """Largest |component sum - printed TOTAL| over the block's TOTALs, or None."""
+    components = [
+        li for li in block.line_items if not li.is_total and not li.is_section_header and not li.indented
+    ]
+    residuals = []
+    for total, attr in (
+        (block.total_cents_per_kwh, "cents_per_kwh"),
+        (block.total_incremental_cents_per_kwh, "incremental_cents_per_kwh"),
+        (block.total_dollars_per_kw, "dollars_per_kw"),
+    ):
+        values = [getattr(li, attr) for li in components if getattr(li, attr) is not None]
+        if total is not None and values:
+            residuals.append(abs(sum(values) - total))
+    return max(residuals) if residuals else None
+
+
+def _is_zero_row(item: RiderLineItem) -> bool:
+    values = [v for v in _item_values(item) if v is not None]
+    return bool(values) and all(v == 0 for v in values)
+
+
+def _with_rows(block: RiderRateClassBlock, rows: list[RiderLineItem]) -> RiderRateClassBlock:
+    """A copy of ``block`` with ``rows`` inserted before its TOTAL rows, re-checked."""
+    from copy import deepcopy
+
+    candidate = deepcopy(block)
+    totals_at = next(
+        (n for n, li in enumerate(candidate.line_items) if li.is_total),
+        len(candidate.line_items),
+    )
+    candidate.line_items[totals_at:totals_at] = deepcopy(rows)
+    _check_block_totals(candidate)
+    return candidate
+
+
 def _item_values(item: RiderLineItem) -> tuple:
     return tuple(
         None if v is None else round(v, 6)
@@ -703,22 +742,41 @@ def _merge_items(
         and (i.cents_per_kwh is not None or i.dollars_per_kw is not None)
     ]
     if extra:
-        candidate = deepcopy(merged)
-        totals_at = next(
-            (n for n, li in enumerate(candidate.line_items) if li.is_total),
-            len(candidate.line_items),
-        )
-        candidate.line_items[totals_at:totals_at] = deepcopy(extra)
         before = merged.checksum_ok
-        _check_block_totals(candidate)
-        if candidate.checksum_ok is True or (
-            before is not True and candidate.checksum_ok is not False
+        candidate = _with_rows(merged, extra)
+        after_residual = block_residual(candidate)
+        # The printed TOTAL vouches for added rows only if it reconciles
+        # because of them, or reconciles exactly with them. A block that
+        # already reconciled within tolerance cannot vouch for a non-zero row
+        # smaller than the tolerance (redline "0.0002" for a printed 0.002,
+        # blk13). Rows printed as exactly zero leave the component sum, and
+        # so every billed amount, unchanged; they are still added.
+        if candidate.checksum_ok is True and (
+            before is not True
+            or (after_residual is not None and after_residual <= _EXACT_RESIDUAL)
         ):
-            merged = candidate
+            merged, unvouched = candidate, []
         else:
-            merged.warnings.append(
-                f"table parse rows {[i.label for i in extra]} not added: block would not reconcile"
+            zeros = [i for i in extra if _is_zero_row(i)] if before is True else []
+            unvouched = [i for i in extra if i not in zeros]
+            if zeros:
+                merged = _with_rows(merged, zeros)
+        if unvouched:
+            reason = (
+                "block would not reconcile"
+                if candidate.checksum_ok is False
+                else "printed TOTAL cannot vouch for them"
             )
+            merged.warnings.append(
+                f"table parse rows {[i.label for i in unvouched]} not added: {reason}; needs review"
+            )
+            merged.evidence = {
+                **(merged.evidence or {}),
+                "unvouched_table_rows": [
+                    {"label": i.label, "values": _item_values(i), "evidence": i.evidence}
+                    for i in unvouched
+                ],
+            }
     for attr in ("total_cents_per_kwh", "total_dollars_per_kw", "total_incremental_cents_per_kwh"):
         if getattr(merged, attr) is not None and getattr(merged, attr) == getattr(structured, attr):
             merged.evidence = {

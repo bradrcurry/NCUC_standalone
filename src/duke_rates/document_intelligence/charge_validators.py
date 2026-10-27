@@ -419,6 +419,171 @@ def validate_revision_changes(
     return findings
 
 
+# ---------------------------------------------------------------------------
+# Conflicting evidence (Phase 2C): structured vs text parses, pages, redlines
+# ---------------------------------------------------------------------------
+
+_DECIMAL_TOKEN_RE = re.compile(r"(?<![\d/])\d*\.(\d+)(?![\d/])")
+
+
+def _evidence(charge: Any) -> dict:
+    ev = charge.get("evidence") if isinstance(charge, dict) else getattr(charge, "evidence", None)
+    return ev if isinstance(ev, dict) else {}
+
+
+def _printed(ev: dict) -> str | None:
+    values = ev.get("values") or ev.get("cells") or []
+    return ev.get("printed_value_text") or (values[0].get("text") if values else None)
+
+
+def _page(ev: dict) -> int | None:
+    values = ev.get("values") or ev.get("cells") or []
+    page = ev.get("page") or (values[0].get("page") if values else None)
+    return int(page) if page is not None else None
+
+
+def validate_parser_disagreements(charges: Iterable[Any]) -> list[Finding]:
+    """The structured and text parses read different values for one row.
+
+    ``merge_with_legacy`` keeps the text value and records both readings; the
+    choice is not made here either, so each one needs a person.
+    """
+    findings = []
+    for raw in charges:
+        ev = _evidence(raw)
+        if "disagreement" in ev:
+            c = as_charge_dict(raw)
+            findings.append(
+                Finding(
+                    "review",
+                    "parser_disagreement",
+                    f"{c.get('charge_label')!r}: text {ev['disagreement'].get('legacy')} vs "
+                    f"table {ev['disagreement'].get('structured')}; text value kept",
+                    (c.get("charge_label"),),
+                )
+            )
+    return findings
+
+
+def validate_parse_warnings(parse_warnings: Iterable[str]) -> list[Finding]:
+    """Profile warnings that say a person must decide (rows not added, unreconciled sections)."""
+    return [
+        Finding("review", "parser_conflict", w, ())
+        for w in parse_warnings or []
+        if "needs review" in w
+    ]
+
+
+def validate_printed_precision(charges: Iterable[Any]) -> list[Finding]:
+    """A value printed with more decimals than every other value in its unit.
+
+    Redline copies fuse struck and inserted digits ("0.002" -> "0.0002"). The
+    structured parser checks this per column, which needs 3+ values in the
+    table; this repeats the check across the whole document per printed unit.
+    """
+    by_unit: dict[str, list[tuple[int, Any]]] = defaultdict(list)
+    for raw in charges:
+        ev = _evidence(raw)
+        printed = _printed(ev)
+        match = _DECIMAL_TOKEN_RE.search(printed or "")
+        if not match:
+            continue
+        values = ev.get("values") or ev.get("cells") or []
+        unit = (values[0].get("printed_unit") if values else None) or ev.get("printed_unit") or ""
+        by_unit[unit.lower()].append((len(match.group(1)), raw))
+    findings = []
+    for unit, rows in by_unit.items():
+        if len(rows) < 5:
+            continue
+        counts: dict[int, int] = defaultdict(int)
+        for places, _ in rows:
+            counts[places] += 1
+        common, n = max(counts.items(), key=lambda kv: kv[1])
+        if n * 4 < len(rows) * 3:  # no clearly dominant precision
+            continue
+        for places, raw in rows:
+            if places > common:
+                c = as_charge_dict(raw)
+                findings.append(
+                    Finding(
+                        "review",
+                        "printed_precision_outlier",
+                        f"{c.get('charge_label')!r} printed {_printed(_evidence(raw))!r}: "
+                        f"{places} decimals where {n}/{len(rows)} {unit or 'unitless'} values "
+                        f"print {common} (possible fused redline digits)",
+                        (c.get("charge_label"),),
+                    )
+                )
+    return findings
+
+
+def validate_redline_superseded(charges: Iterable[Any], *, is_redline: bool) -> list[Finding]:
+    """On a redline copy, a quote printing more numbers than the row has value cells.
+
+    That is how a struck (superseded) value next to its replacement reads in
+    extracted text; which one the parser took cannot be told from the text.
+    """
+    if not is_redline:
+        return []
+    findings = []
+    for raw in charges:
+        ev = _evidence(raw)
+        quote = ev.get("quote") or ev.get("text")
+        if not quote:
+            continue
+        cells = len(ev.get("values") or ev.get("cells") or []) or 1
+        numbers = _DECIMAL_TOKEN_RE.findall(quote)
+        if len(numbers) > cells:
+            c = as_charge_dict(raw)
+            findings.append(
+                Finding(
+                    "review",
+                    "redline_superseded_value",
+                    f"{c.get('charge_label')!r}: quote {quote[:120]!r} prints {len(numbers)} "
+                    f"numbers for {cells} value cell(s); struck value may have been read",
+                    (c.get("charge_label"),),
+                )
+            )
+    return findings
+
+
+def validate_source_pages(
+    charges: Iterable[Any], *, page_span: tuple[int, int] | None = None
+) -> list[Finding]:
+    """Evidence outside the document's page span, or one charge read from two pages."""
+    findings = []
+    by_key: dict[tuple, list[tuple[int, Any]]] = defaultdict(list)
+    for raw in charges:
+        page = _page(_evidence(raw))
+        if page is None:
+            continue
+        c = as_charge_dict(raw)
+        if page_span and not (page_span[0] <= page <= page_span[1]):
+            findings.append(
+                Finding(
+                    "review",
+                    "page_outside_span",
+                    f"{c.get('charge_label')!r} evidence on page {page}, document spans "
+                    f"{page_span[0]}-{page_span[1]}",
+                    (c.get("charge_label"),),
+                )
+            )
+        by_key[_key(c)].append((page, c.get("rate_value")))
+    for key, hits in by_key.items():
+        pages = {p for p, _ in hits}
+        values = {repr(v) for _, v in hits}
+        if len(pages) > 1 and len(values) > 1:
+            findings.append(
+                Finding(
+                    "review",
+                    "source_page_disagreement",
+                    f"{key[-1]!r} read from pages {sorted(pages)} with values {sorted(values)}",
+                    (key[-1],),
+                )
+            )
+    return findings
+
+
 def run_charge_validators(
     charges: list[Any],
     *,
@@ -426,6 +591,9 @@ def run_charge_validators(
     document_effective: str | None = None,
     previous: list[Any] | None = None,
     summary=None,
+    parse_warnings: list[str] | None = None,
+    page_span: tuple[int, int] | None = None,
+    is_redline: bool = False,
 ) -> list[Finding]:
     findings: list[Finding] = []
     findings += validate_units(charges)
@@ -433,6 +601,11 @@ def run_charge_validators(
     findings += validate_effective_dates(charges, document_effective=document_effective)
     findings += validate_duplicates(charges)
     findings += validate_family_contamination(charges, family_type=family_type)
+    findings += validate_parser_disagreements(charges)
+    findings += validate_parse_warnings(parse_warnings or [])
+    findings += validate_printed_precision(charges)
+    findings += validate_redline_superseded(charges, is_redline=is_redline)
+    findings += validate_source_pages(charges, page_span=page_span)
     if previous:
         findings += validate_revision_changes(charges, previous)
     if summary is not None:
