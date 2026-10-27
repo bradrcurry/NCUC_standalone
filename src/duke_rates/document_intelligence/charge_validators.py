@@ -451,17 +451,23 @@ def validate_parser_disagreements(charges: Iterable[Any]) -> list[Finding]:
     findings = []
     for raw in charges:
         ev = _evidence(raw)
-        if "disagreement" in ev:
-            c = as_charge_dict(raw)
-            findings.append(
-                Finding(
-                    "review",
-                    "parser_disagreement",
-                    f"{c.get('charge_label')!r}: text {ev['disagreement'].get('legacy')} vs "
-                    f"table {ev['disagreement'].get('structured')}; text value kept",
-                    (c.get("charge_label"),),
-                )
+        if "disagreement" not in ev:
+            continue
+        c = as_charge_dict(raw)
+        text, table = ev["disagreement"].get("legacy"), ev["disagreement"].get("structured")
+        # One parse finding the row without a value is a missing reading, not
+        # a conflicting one (e.g. the table parse lost a fused value cell).
+        missing = not any(v is not None for v in (text or ())) or not any(
+            v is not None for v in (table or ())
+        )
+        findings.append(
+            Finding(
+                "info" if missing else "review",
+                "parser_value_missing" if missing else "parser_disagreement",
+                f"{c.get('charge_label')!r}: text {text} vs table {table}; text value kept",
+                (c.get("charge_label"),),
             )
+        )
     return findings
 
 

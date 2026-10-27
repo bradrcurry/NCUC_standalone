@@ -170,3 +170,10 @@ def test_run_charge_validators_wires_new_checks():
         )
     }
     assert {"parser_disagreement", "parser_conflict"} <= codes
+
+
+def test_one_sided_reading_is_info_not_review():
+    # hd 2591: the table parse found the JAA row but no value; the text read 0.92 $/kW.
+    ev = {"disagreement": {"legacy": (None, 0.92, None), "structured": (None, None, None)}}
+    findings = validate_parser_disagreements([_charge("MGS - JAA", 0.92, "$/kW", evidence=ev)])
+    assert [(f.level, f.code) for f in findings] == [("info", "parser_value_missing")]
