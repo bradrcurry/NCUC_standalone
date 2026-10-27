@@ -1,0 +1,140 @@
+####################################################################################
+seg 5973  eff=2018-09-01  rev=Fifty-First Revised  pages=54-54  docket=E-7, Sub 1146
+parsed energy_json=[{"label": "Kilowatt-Hour Charge", "rate": 0.093826, "unit": "$/kWh", "season": "July - October", "period": null, "block_from": null, "block_to": null}, {"label": "Kilowatt-Hour Charge", "rate": 0.093826, "unit": "$/kWh", "season": "November - June", "period": null, "block_from": null, "block_to": null}]
+parsed fixed_json =[{"label": "Basic Facilities Charge", "amount": 14.0, "unit": "$/month"}]
+pdf on disk: data\historical\ncuc\e-7-sub-1146\c59be01b-89e9-4c21-8ccc-95dc97d2b244.pdf
+pdf pages total=140; showing segment page range text:
+    | Duke Energy Carolinas, LLC Electricity No. 4
+    | North Carolina Fifty-Fourth Revised Leaf No. 11
+    | Superseding North Carolina Fifty-Third Revised Leaf No. 11
+    | I. Basic Facilities Charge per month $ 14.00
+    | II. Energy Charges
+    | For all kWh used per month, per kWh* 9.3826¢
+    | For all kWh used per month, per kWh* 9.3826¢
+    | Administration and who are blind, disabled, or 65 years of age or over, the rate for the f
+    | shall be 8.4772 cents per kWh. This is an experimental rate authorized by the North Caroli
+    | The Renewable Energy Portfolio Standard (REPS) Rider charge as shown on Leaf No. 68 will b
+    | The following Riders are applicable to service supplied under this schedule. The currently
+    | decrement must be added to the cents/kWh rates shown above to determine the monthly bill.
+    | Leaf No. 60 Fuel Cost Adjustment Rider
+    | Leaf No. 62 Energy Efficiency Rider
+    | Leaf No. 64 Existing DSM Program Costs Adjustment Rider
+    | Leaf No. 105 BPM Prospective Rider
+    | North Carolina Fifty-Fourth Revised Leaf No. 11
+    | Effective for service rendered on and after August 1, 2022
+
+####################################################################################
+seg 5873  eff=2021-12-01  rev=None  pages=5-6  docket=E-7, Sub 1243
+parsed energy_json=[{"label": "Kilowatt-Hour Charge", "rate": 0.093826, "unit": "$/kWh", "season": "July - October", "period": null, "block_from": null, "block_to": null}, {"label": "Kilowatt-Hour Charge", "rate": 0.093826, "unit": "$/kWh", "season": "November - June", "period": null, "block_from": null, "block_to": null}]
+parsed fixed_json =[{"label": "Basic Facilities Charge", "amount": 14.0, "unit": "$/month"}]
+pdf on disk: data\historical\ncuc\e-7-sub-1243\4e0c2c78-3f6f-47b5-8ae0-25aed12fe82f.pdf
+pdf pages total=147; showing segment page range text:
+    | Duke Energy Carolinas, LLC Electricity No. 4
+    | North Carolina Fifty-Second Revised Leaf No. 11
+    | Superseding North Carolina Fifty-First Revised Leaf No. 11
+    | I. Basic Facilities Charge per month $ 14.00
+    | II. Energy Charges
+    | For all kWh used per month, per kWh* 9.3826¢
+    | For all kWh used per month, per kWh* 9.3826¢
+    | Administration and who are blind, disabled, or 65 years of age or over, the rate for the f
+    | shall be 8.4772 cents per kWh. This is an experimental rate authorized by the North Caroli
+    | The Renewable Energy Portfolio Standard (REPS) Rider charge as shown on Leaf No. 68 will b
+    | The following Riders are applicable to service supplied under this schedule. The currently
+    | decrement must be added to the cents/kWh rates shown above to determine the monthly bill.
+    | Leaf No. 59 EDIT-1 Rider
+    | Leaf No. 60 Fuel Cost Adjustment Rider
+    | Leaf No. 62 Energy Efficiency Rider
+    | Leaf No. 64 Existing DSM Program Costs Adjustment Rider
+    | North Carolina Fifty-Second Revised Leaf No. 11
+    | Effective for service rendered on and after December 1, 2021
+    | Duke Energy Carolinas, LLC Electricity No. 4
+    | North Carolina Fifty-Second Revised Leaf No. 11
+    | Superseding North Carolina Fifty-First Revised Leaf No. 11
+    | Leaf No. 105 BPM Prospective Rider
+    | Leaf No. 106 BPM True-Up Rider
+    | Leaf No. 127 CPRE Rider
+    | Leaf No. 129 EDIT-3 Rider
+    | Leaf No. 131 EDIT-4 Rider
+    | Leaf No. 135 Storm Cost Recovery Rider
+    | A Storm Securitization Rider charge will be added to the monthly bill based on the current
+    | as shown in Leaf No. 133.
+    | be subject to a one percent (1%) late payment charge on the unpaid amount. This late payme
+    | North Carolina Fifty-Second Revised Leaf No. 11
+    | Effective for service rendered on and after December 1, 2021
+
+####################################################################################
+seg 2452  eff=2022-02-01  rev=None  pages=13-14  docket=E-7, Sub 1214
+parsed energy_json=[{"label": "Kilowatt-Hour Charge", "rate": 0.093826, "unit": "$/kWh", "season": "July - October", "period": null, "block_from": null, "block_to": null}, {"label": "Kilowatt-Hour Charge", "rate": 0.093826, "unit": "$/kWh", "season": "November - June", "period": null, "block_from": null, "block_to": null}]
+parsed fixed_json =[{"label": "Basic Facilities Charge", "amount": 14.0, "unit": "$/month"}]
+pdf on disk: data\historical\ncuc\e-7-sub-1214\bd980ae4-9963-4ee3-ae4e-b043653227c8.pdf
+pdf pages total=75; showing segment page range text:
+    | Duke Energy Carolinas, LLC Electricity No. 4
+    | North Carolina Fifty-Third Revised Leaf No. 11
+    | Superseding North Carolina Fifty-Second Revised Leaf No. 11
+    | I. Basic Facilities Charge per month $ 14.00
+    | II. Energy Charges
+    | For all kWh used per month, per kWh* 9.3826¢
+    | For all kWh used per month, per kWh* 9.3826¢
+    | Administration and who are blind, disabled, or 65 years of age or over, the rate for the f
+    | shall be 8.4772 cents per kWh. This is an experimental rate authorized by the North Caroli
+    | The Renewable Energy Portfolio Standard (REPS) Rider charge as shown on Leaf No. 68 will b
+    | The following Riders are applicable to service supplied under this schedule. The currently
+    | decrement must be added to the cents/kWh rates shown above to determine the monthly bill.
+    | Leaf No. 59 EDIT-1 Rider
+    | Leaf No. 60 Fuel Cost Adjustment Rider
+    | Leaf No. 62 Energy Efficiency Rider
+    | Leaf No. 64 Existing DSM Program Costs Adjustment Rider
+    | North Carolina Fifty-Third Revised Leaf No. 11
+    | Effective for service rendered on and after February 1, 2022
+    | Duke Energy Carolinas, LLC Electricity No. 4
+    | North Carolina Fifty-Third Revised Leaf No. 11
+    | Superseding North Carolina Fifty-Second Revised Leaf No. 11
+    | Leaf No. 105 BPM Prospective Rider
+    | Leaf No. 106 BPM True-Up Rider
+    | Leaf No. 127 CPRE Rider
+    | Leaf No. 129 EDIT-3 Rider
+    | Leaf No. 131 EDIT-4 Rider
+    | Leaf No. 135 Storm Cost Recovery Rider
+    | A Storm Securitization Rider charge will be added to the monthly bill based on the current
+    | as shown in Leaf No. 133.
+    | be subject to a one percent (1%) late payment charge on the unpaid amount. This late payme
+    | North Carolina Fifty-Third Revised Leaf No. 11
+    | Effective for service rendered on and after February 1, 2022
+
+####################################################################################
+seg 6823  eff=2022-08-01  rev=None  pages=54-55  docket=E-7, Sub 1146
+parsed energy_json=[{"label": "Kilowatt-Hour Charge", "rate": 0.093826, "unit": "$/kWh", "season": "July - October", "period": null, "block_from": null, "block_to": null}, {"label": "Kilowatt-Hour Charge", "rate": 0.093826, "unit": "$/kWh", "season": "November - June", "period": null, "block_from": null, "block_to": null}]
+parsed fixed_json =[{"label": "Basic Facilities Charge", "amount": 14.0, "unit": "$/month"}]
+pdf on disk: data\historical\ncuc\e-7-sub-1146\c59be01b-89e9-4c21-8ccc-95dc97d2b244.pdf
+pdf pages total=140; showing segment page range text:
+    | Duke Energy Carolinas, LLC Electricity No. 4
+    | North Carolina Fifty-Fourth Revised Leaf No. 11
+    | Superseding North Carolina Fifty-Third Revised Leaf No. 11
+    | I. Basic Facilities Charge per month $ 14.00
+    | II. Energy Charges
+    | For all kWh used per month, per kWh* 9.3826¢
+    | For all kWh used per month, per kWh* 9.3826¢
+    | Administration and who are blind, disabled, or 65 years of age or over, the rate for the f
+    | shall be 8.4772 cents per kWh. This is an experimental rate authorized by the North Caroli
+    | The Renewable Energy Portfolio Standard (REPS) Rider charge as shown on Leaf No. 68 will b
+    | The following Riders are applicable to service supplied under this schedule. The currently
+    | decrement must be added to the cents/kWh rates shown above to determine the monthly bill.
+    | Leaf No. 60 Fuel Cost Adjustment Rider
+    | Leaf No. 62 Energy Efficiency Rider
+    | Leaf No. 64 Existing DSM Program Costs Adjustment Rider
+    | Leaf No. 105 BPM Prospective Rider
+    | North Carolina Fifty-Fourth Revised Leaf No. 11
+    | Effective for service rendered on and after August 1, 2022
+    | Duke Energy Carolinas, LLC Electricity No. 4
+    | North Carolina Fifty-Fourth Revised Leaf No. 11
+    | Superseding North Carolina Fifty-Third Revised Leaf No. 11
+    | Leaf No. 106 BPM True-Up Rider
+    | Leaf No. 127 CPRE Rider
+    | Leaf No. 129 EDIT-3 Rider
+    | Leaf No. 131 EDIT-4 Rider
+    | Leaf No. 135 Storm Cost Recovery Rider
+    | A Storm Securitization Rider charge will be added to the monthly bill based on the current
+    | as shown in Leaf No. 133.
+    | be subject to a one percent (1%) late payment charge on the unpaid amount. This late payme
+    | North Carolina Fifty-Fourth Revised Leaf No. 11
+    | Effective for service rendered on and after August 1, 2022
