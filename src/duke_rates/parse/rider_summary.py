@@ -56,6 +56,9 @@ class RiderLineItem:
     # True when the row's value(s) could not be tied to a unit column; the
     # values are then left unset instead of guessed.
     unit_ambiguous: bool = False
+    # Structured parses only: where the row came from (page, table, row,
+    # cells with bboxes, printed text). None for text/coordinate parses.
+    evidence: dict | None = None
 
 
 @dataclass
@@ -77,6 +80,8 @@ class RiderRateClassBlock:
     # rate_class is a placeholder and applicable_schedules is empty.
     ambiguous_rate_class: bool = False
     warnings: list[str] = field(default_factory=list)
+    # Structured parses only: evidence for the header and the TOTAL row(s).
+    evidence: dict | None = None
 
 
 @dataclass

@@ -65,7 +65,11 @@ def test_parse_decimal(text, expected):
 def test_supported_units(unit, canonical, factor, basis):
     parsed = parse_unit(unit)
     assert (parsed.canonical, parsed.factor, parsed.basis, parsed.warning) == (
-        canonical, factor, basis, None)
+        canonical,
+        factor,
+        basis,
+        None,
+    )
 
 
 @pytest.mark.parametrize(
@@ -88,8 +92,9 @@ def test_unknown_or_ambiguous_units_are_never_assumed(unit, warning):
 
 def test_storm_recovery_cents_convert_exactly():
     # Phase 2A finding: leaf-607 stores "0.321 cents per kWh" as 0.321 '¢/kWh'.
-    charge = canonicalize_charge("adjustment", 0.321, "¢/kWh",
-                                 label="Storm Recovery Charge - Small General Service")
+    charge = canonicalize_charge(
+        "adjustment", 0.321, "¢/kWh", label="Storm Recovery Charge - Small General Service"
+    )
     assert charge.canonical_value == Decimal("0.00321")
     assert charge.canonical_unit == CanonicalUnit.DOLLARS_PER_KWH
     assert charge.charge_type == CanonicalChargeType.ENERGY_ADJUSTMENT
@@ -98,8 +103,9 @@ def test_storm_recovery_cents_convert_exactly():
 
 
 def test_printed_text_wins_over_float_and_is_kept():
-    charge = canonicalize_charge("adjustment", 0.0024899999, "cents/kWh",
-                                 printed_value_text="(0.249)")
+    charge = canonicalize_charge(
+        "adjustment", 0.0024899999, "cents/kWh", printed_value_text="(0.249)"
+    )
     assert charge.value == Decimal("-0.249")
     assert charge.canonical_value == Decimal("-0.00249")
     assert charge.printed_value_text == "(0.249)"
@@ -133,7 +139,10 @@ def test_charge_type_aliases(stored, unit, label, expected):
 
 
 def test_negative_fixed_is_a_fixed_credit():
-    assert canonicalize_charge("fixed", -5.0, "$/month").charge_type == CanonicalChargeType.FIXED_CREDIT
+    assert (
+        canonicalize_charge("fixed", -5.0, "$/month").charge_type
+        == CanonicalChargeType.FIXED_CREDIT
+    )
 
 
 def test_energy_and_demand_are_never_confused():
@@ -144,8 +153,9 @@ def test_energy_and_demand_are_never_confused():
 
 
 def test_rider_summary_totals_are_informational_not_billable():
-    total = canonicalize_charge("adjustment_total", 0.02108, "$/kWh",
-                                label="Residential Total Rider Adjustments")
+    total = canonicalize_charge(
+        "adjustment_total", 0.02108, "$/kWh", label="Residential Total Rider Adjustments"
+    )
     assert total.charge_type == CanonicalChargeType.ADJUSTMENT_TOTAL
     assert not total.billable
     labelled = canonicalize_charge("rider_adjustment", 0.0007, "$/kWh", label="Total Adjustment")

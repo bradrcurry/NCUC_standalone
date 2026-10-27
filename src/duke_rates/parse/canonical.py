@@ -75,10 +75,25 @@ _UNIT_RULES: tuple[tuple[re.Pattern[str], CanonicalUnit, Decimal, Basis], ...] =
         (r"^\$/kw(-?month|/month)?$", CanonicalUnit.DOLLARS_PER_KW, _ONE, Basis.DEMAND),
         (r"^\$/kvar$", CanonicalUnit.DOLLARS_PER_KVAR, _ONE, Basis.REACTIVE),
         (r"^\$/kva$", CanonicalUnit.DOLLARS_PER_KW, _ONE, Basis.DEMAND),
-        (r"^\$/(month|bill|customer/month|account-month)$", CanonicalUnit.DOLLARS_PER_MONTH, _ONE, Basis.FIXED),
-        (r"^\$/(fixture|signal|block|device)(/|-)month$", CanonicalUnit.DOLLARS_PER_UNIT_MONTH, _ONE, Basis.FIXED),
+        (
+            r"^\$/(month|bill|customer/month|account-month)$",
+            CanonicalUnit.DOLLARS_PER_MONTH,
+            _ONE,
+            Basis.FIXED,
+        ),
+        (
+            r"^\$/(fixture|signal|block|device)(/|-)month$",
+            CanonicalUnit.DOLLARS_PER_UNIT_MONTH,
+            _ONE,
+            Basis.FIXED,
+        ),
         (r"^\$/block$", CanonicalUnit.DOLLARS_PER_UNIT_MONTH, _ONE, Basis.FIXED),
-        (r"^\$/(year|device-year|thermostat-year)$", CanonicalUnit.DOLLARS_PER_YEAR, _ONE, Basis.OTHER),
+        (
+            r"^\$/(year|device-year|thermostat-year)$",
+            CanonicalUnit.DOLLARS_PER_YEAR,
+            _ONE,
+            Basis.OTHER,
+        ),
         (r"^\$/(w|watt)$", CanonicalUnit.DOLLARS_PER_WATT, _ONE, Basis.ONE_TIME),
         (r"^\$/event$", CanonicalUnit.DOLLARS_PER_EVENT, _ONE, Basis.OTHER),
         (r"^\$(/(enrollment|referral))?$", CanonicalUnit.DOLLARS, _ONE, Basis.ONE_TIME),
@@ -229,17 +244,24 @@ class CanonicalCharge:
 
     @property
     def billable(self) -> bool:
-        return self.charge_type not in _INFORMATIONAL and self.charge_type != CanonicalChargeType.UNKNOWN
+        return (
+            self.charge_type not in _INFORMATIONAL
+            and self.charge_type != CanonicalChargeType.UNKNOWN
+        )
 
 
 def _adjustment_type(basis: Basis | None) -> CanonicalChargeType | None:
-    return {
-        Basis.ENERGY: CanonicalChargeType.ENERGY_ADJUSTMENT,
-        Basis.DEMAND: CanonicalChargeType.DEMAND_ADJUSTMENT,
-        Basis.REACTIVE: CanonicalChargeType.DEMAND_ADJUSTMENT,
-        Basis.FIXED: CanonicalChargeType.FIXED_ADJUSTMENT,
-        Basis.PERCENT: CanonicalChargeType.PERCENT_ADJUSTMENT,
-    }.get(basis) if basis else None
+    return (
+        {
+            Basis.ENERGY: CanonicalChargeType.ENERGY_ADJUSTMENT,
+            Basis.DEMAND: CanonicalChargeType.DEMAND_ADJUSTMENT,
+            Basis.REACTIVE: CanonicalChargeType.DEMAND_ADJUSTMENT,
+            Basis.FIXED: CanonicalChargeType.FIXED_ADJUSTMENT,
+            Basis.PERCENT: CanonicalChargeType.PERCENT_ADJUSTMENT,
+        }.get(basis)
+        if basis
+        else None
+    )
 
 
 def canonicalize_charge(
@@ -295,8 +317,13 @@ def canonicalize_charge(
         ctype = CanonicalChargeType.TOU_ENERGY
     else:
         ctype = CanonicalChargeType(
-            {"fixed": "fixed", "energy": "energy", "tou_energy": "tou_energy",
-             "demand": "demand", "minimum": "minimum"}[family]
+            {
+                "fixed": "fixed",
+                "energy": "energy",
+                "tou_energy": "tou_energy",
+                "demand": "demand",
+                "minimum": "minimum",
+            }[family]
         )
         if family == "fixed" and number is not None and number < 0:
             ctype = CanonicalChargeType.FIXED_CREDIT
