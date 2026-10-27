@@ -1,0 +1,21 @@
+{
+ "applied": {
+  "charges": "b6a1e0e3327a855266698f8745faf64307a21d99b96ec94c33953313fa789994",
+  "hd_json": "10c6130410104fd051a3daaf2e96138c2ff7359b5f841e864b09b627dfcc41e7",
+  "bill12": "6c802077e0524a73c1782ef16f2bfe99522aabedbae0b834f6dec35dcf2f75f0",
+  "n_charges": 5208
+ },
+ "reverted": {
+  "charges": "d7419cc9e383a32c54c9286f283aa52800d232dbe080cf42b5150cf347f21769",
+  "hd_json": "f500238eecf0453f7605306573a92badbb52661c18f233d84763b9d84b5d3bc6",
+  "bill12": "ef8ecf70715b72f071ac061625ea0fcfeaa09dc881f2154c5768dbd75f5d85d5",
+  "n_charges": 5198
+ },
+ "production_readonly": {
+  "charges": "d7419cc9e383a32c54c9286f283aa52800d232dbe080cf42b5150cf347f21769",
+  "hd_json": "f500238eecf0453f7605306573a92badbb52661c18f233d84763b9d84b5d3bc6",
+  "bill12": "ef8ecf70715b72f071ac061625ea0fcfeaa09dc881f2154c5768dbd75f5d85d5",
+  "n_charges": 5198
+ },
+ "reverted_equals_production": true
+}

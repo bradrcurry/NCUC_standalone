@@ -1,0 +1,226 @@
+{
+ "manifest_id": "2026-10-27_billing_integrity",
+ "items": [
+  {
+   "id": "C1-leaf502-2024-parsed-json-artifacts",
+   "source_pdf": "data/historical/raw/nc/progress/rate/residential-time-of-use-energy-leaf-no-502-eff-2024-10-01-data-historical-manual.pdf",
+   "pdf_exists": true,
+   "pdf_sha256": "c22ed609063deeb1f447dce44791886ac133f4baa6a0363f06c7beb38e6ac0f8",
+   "tokens_found": {
+    "Basic Customer Charge: $14.00": true,
+    "28.821": true,
+    "10.911": true,
+    "7.105": true,
+    "plus $9.00": true
+   },
+   "absent_tokens_absent": {},
+   "effective_phrase_found": true,
+   "precondition_holds": true,
+   "match_counts": [
+    1,
+    1,
+    1
+   ],
+   "version_effective_start": "2024-10-01",
+   "effective_date_matches": true,
+   "verified": true
+  },
+  {
+   "id": "C2-leaf502-2025-parsed-json-artifacts",
+   "source_pdf": "data/historical/raw/nc/progress/rate/residential-time-of-use-energy-leaf-no-502-eff-2025-10-01-data-historical-manual.pdf",
+   "pdf_exists": true,
+   "pdf_sha256": "49ae234477998d02ea3d4cdc353c41d7a99b846cee165f1ef4216bcfb8299796",
+   "tokens_found": {
+    "Basic Customer Charge: $14.00": true,
+    "29.905": true,
+    "11.321": true,
+    "7.372": true,
+    "plus $9.00": true
+   },
+   "absent_tokens_absent": {},
+   "effective_phrase_found": true,
+   "precondition_holds": true,
+   "match_counts": [
+    1,
+    1,
+    1
+   ],
+   "version_effective_start": "2025-10-01",
+   "effective_date_matches": true,
+   "verified": true
+  },
+  {
+   "id": "C3-leaf502-2024-missing-charges",
+   "source_pdf": "data/historical/raw/nc/progress/rate/residential-time-of-use-energy-leaf-no-502-eff-2024-10-01-data-historical-manual.pdf",
+   "pdf_exists": true,
+   "pdf_sha256": "c22ed609063deeb1f447dce44791886ac133f4baa6a0363f06c7beb38e6ac0f8",
+   "tokens_found": {
+    "Basic Customer Charge: $14.00": true,
+    "10.911": true,
+    "7.105": true,
+    "plus $9.00": true
+   },
+   "absent_tokens_absent": {},
+   "effective_phrase_found": true,
+   "precondition_holds": true,
+   "row_count": 1,
+   "expected_count": 1,
+   "version_effective_start": "2024-10-01",
+   "effective_date_matches": true,
+   "verified": true
+  },
+  {
+   "id": "C4-leaf502-2025-missing-charges",
+   "source_pdf": "data/historical/raw/nc/progress/rate/residential-time-of-use-energy-leaf-no-502-eff-2025-10-01-data-historical-manual.pdf",
+   "pdf_exists": true,
+   "pdf_sha256": "49ae234477998d02ea3d4cdc353c41d7a99b846cee165f1ef4216bcfb8299796",
+   "tokens_found": {
+    "Basic Customer Charge: $14.00": true,
+    "11.321": true,
+    "7.372": true,
+    "plus $9.00": true
+   },
+   "absent_tokens_absent": {},
+   "effective_phrase_found": true,
+   "precondition_holds": true,
+   "row_count": 1,
+   "expected_count": 1,
+   "version_effective_start": "2025-10-01",
+   "effective_date_matches": true,
+   "verified": true
+  },
+  {
+   "id": "C5-leaf503-2025-season-tag",
+   "source_pdf": "data/raw/nc/progress/rate/leaf-no-503-schedule-r-tou-cpp-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no.pdf",
+   "pdf_exists": true,
+   "pdf_sha256": "5152239e2557764fc64498af67a63b10ca91d13222da6c3b031366f8df236080",
+   "tokens_found": {
+    "41.002": true,
+    "21.952": true,
+    "11.000": true,
+    "8.274": true
+   },
+   "absent_tokens_absent": {
+    "May through September": true
+   },
+   "effective_phrase_found": true,
+   "precondition_holds": true,
+   "rows": [
+    {
+     "id": 753113,
+     "stored": "summer",
+     "before": "summer",
+     "version_effective_start": "2025-10-01"
+    },
+    {
+     "id": 753114,
+     "stored": "summer",
+     "before": "summer",
+     "version_effective_start": "2025-10-01"
+    },
+    {
+     "id": 753115,
+     "stored": "summer",
+     "before": "summer",
+     "version_effective_start": "2025-10-01"
+    },
+    {
+     "id": 753116,
+     "stored": "summer",
+     "before": "summer",
+     "version_effective_start": "2025-10-01"
+    }
+   ],
+   "version_effective_start": "2025-10-01",
+   "effective_date_matches": true,
+   "verified": true
+  },
+  {
+   "id": "C6-leaf503-2025-missing-bcc",
+   "source_pdf": "data/raw/nc/progress/rate/leaf-no-503-schedule-r-tou-cpp-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no.pdf",
+   "pdf_exists": true,
+   "pdf_sha256": "5152239e2557764fc64498af67a63b10ca91d13222da6c3b031366f8df236080",
+   "tokens_found": {
+    "Basic Customer Charge: $14.00": true,
+    "plus $9.00": true
+   },
+   "absent_tokens_absent": {},
+   "effective_phrase_found": true,
+   "precondition_holds": true,
+   "row_count": 4,
+   "expected_count": 4,
+   "version_effective_start": "2025-10-01",
+   "effective_date_matches": true,
+   "verified": true
+  },
+  {
+   "id": "C7-leaf571-led420-ocr5",
+   "source_pdf": "data/historical/raw/nc/progress/rate/street-lighting-service-leaf-no-571-eff-2025-10-01-data-historical-manual-leaf-n.pdf",
+   "pdf_exists": true,
+   "pdf_sha256": "3563663b02b53a531e167f2f325d24fd3355147c620f92bec554d06b2d92a23e",
+   "tokens_found": {
+    "LED 420 420 51.09 142": true
+   },
+   "absent_tokens_absent": {},
+   "effective_phrase_found": true,
+   "precondition_holds": true,
+   "rows": [
+    {
+     "id": 753649,
+     "stored": 1.09,
+     "before": 1.09,
+     "version_effective_start": "2025-10-01"
+    }
+   ],
+   "version_effective_start": "2025-10-01",
+   "effective_date_matches": true,
+   "verified": true
+  },
+  {
+   "id": "C8-leaf656-customer-charge-ocr5",
+   "source_pdf": "data/raw/nc/progress/rider/leaf-no-656-rider-68-ry1-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no-656-r.pdf",
+   "pdf_exists": true,
+   "pdf_sha256": "f9c99d500f197daa2f0617d9105b986e8e4ab7ee9fb2642014642e734d99ee10",
+   "tokens_found": {
+    "Basic Customer Charge in the rate schedule: $55.00": true
+   },
+   "absent_tokens_absent": {},
+   "effective_phrase_found": true,
+   "precondition_holds": true,
+   "rows": [
+    {
+     "id": 755536,
+     "stored": 5.0,
+     "before": 5.0,
+     "version_effective_start": "2023-10-01"
+    }
+   ],
+   "version_effective_start": "2023-10-01",
+   "effective_date_matches": true,
+   "verified": true
+  },
+  {
+   "id": "C9-bill-2026-03-20-continued-electric-section",
+   "source_pdf": "../version_3/Actual Duke Bills/2026-03-20.pdf",
+   "pdf_exists": true,
+   "pdf_sha256": "7b1fee057b1e23f831b2081bcf598285883ee252ce45fc8d32b09ea90a48bedd",
+   "tokens_found": {
+    "Billing details - Electric continued": true,
+    "Storm Recovery Charge $4.93": true,
+    "Summary of Rider Adjustments 27.06": true,
+    "Total Current Charges $177.97": true
+   },
+   "absent_tokens_absent": {},
+   "effective_phrase_found": null,
+   "precondition_holds": true,
+   "stored_total": null,
+   "labels_missing": [
+    "Storm Recovery Charge",
+    "Summary of Rider Adjustments"
+   ],
+   "version_effective_start": null,
+   "effective_date_matches": null,
+   "verified": true
+  }
+ ]
+}

@@ -1,0 +1,9 @@
+E         comparison failed
+FAILED tests/test_tariff_engine_live.py::TestRTouLive::test_on_peak_rate_is_highest_tou_rate
+FAILED tests/test_tariff_engine_live.py::TestSgsToueLive::test_tou_with_full_period_breakdown
+FAILED tests/test_tariff_engine_live.py::TestSgsToueLive::test_sgs_toue_fixed_is_22_dollars
+FAILED tests/test_tariff_engine_live.py::TestSgsLive::test_winter_energy_charge_applied
+FAILED tests/test_tariff_engine_live.py::TestSgsLive::test_no_service_date_uses_all_year_charges_only
+FAILED tests/test_tariff_engine_live.py::TestCrossScheduleSanity::test_all_tou_schedules_return_results
+FAILED tests/test_tariff_engine_live.py::TestCrossScheduleSanity::test_partial_tou_coverage_warns_and_reduces_confidence
+7 failed, 17 passed in 8.61s
