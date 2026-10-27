@@ -1,0 +1,4270 @@
+[
+ {
+  "bill_id": 1,
+  "bill_date": "2025-04-21",
+  "source": "..\\version_3\\Actual Duke Bills\\2025-04-21.pdf",
+  "rate_code": "RES",
+  "kwh": 821.0,
+  "actual": 121.15,
+  "est": 121.14,
+  "delta": 0.01,
+  "version": {
+   "source_kind": "historical",
+   "document_id": 29,
+   "current_document_id": null,
+   "family_key": "nc-progress-leaf-500",
+   "title": "Residential Service (Leaf No. 500, eff. 2024-10-01)",
+   "state": "NC",
+   "company": "progress",
+   "category": "rate",
+   "kind": "pdf",
+   "leaf_no": "500",
+   "revision_label": "NC First Revised Leaf No. 500",
+   "supersedes_label": "NC Original Leaf No. 500",
+   "effective_start": "2024-10-01",
+   "effective_end": "2025-09-30",
+   "tariff_id": "nc_progress_res_residential-service",
+   "schedule_code": "RES",
+   "rider_id": null,
+   "source_url": "local-file://leaf-no-500-schedule-res_2024-10-01.pdf",
+   "archived_url": "local-file://leaf-no-500-schedule-res_2024-10-01.pdf",
+   "local_path": "data\\historical\\raw\\nc\\progress\\rate\\residential-service-leaf-no-500-eff-2024-10-01-data-historical-manual-leaf-no-50.pdf",
+   "direct_downloadable": false,
+   "retrieved_at": "2026-03-16T17:33:10.230275Z"
+  },
+  "schedule": {
+   "tariff_id": "nc_progress_res_residential-service",
+   "utility": "Duke Energy",
+   "state": "NC",
+   "company": "progress",
+   "schedule_code": "RES",
+   "schedule_title": "Residential Service",
+   "customer_class": "residential",
+   "effective_start": "2024-10-01",
+   "effective_end": "2025-09-30",
+   "fixed_charges": [
+    {
+     "label": "Basic Customer Charge",
+     "amount": 14.0,
+     "unit": "month"
+    }
+   ],
+   "energy_charges": [
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.12119,
+     "unit": "kWh",
+     "block_from": 0.0,
+     "block_to": null,
+     "season": "May - September",
+     "period": null
+    },
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.12119,
+     "unit": "kWh",
+     "block_from": 0.0,
+     "block_to": 800.0,
+     "season": "October - April",
+     "period": null
+    },
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.11119,
+     "unit": "kWh",
+     "block_from": 800.0,
+     "block_to": null,
+     "season": "October - April",
+     "period": null
+    }
+   ],
+   "demand_charges": [],
+   "tou_periods": [],
+   "riders": [
+    {
+     "code": "BA",
+     "title": "Annual Billing Adjustments Rider",
+     "role": "rider"
+    },
+    {
+     "code": "BA",
+     "title": "Rider BA",
+     "role": "rider"
+    },
+    {
+     "code": "JAA",
+     "title": "Rider JAA",
+     "role": "rider"
+    },
+    {
+     "code": "EDIT-4",
+     "title": "Rider EDIT-4",
+     "role": "rider"
+    },
+    {
+     "code": "CPRE",
+     "title": "Rider CPRE",
+     "role": "rider"
+    },
+    {
+     "code": "RDM",
+     "title": "Rider RDM",
+     "role": "rider"
+    },
+    {
+     "code": "ESM",
+     "title": "Rider ESM",
+     "role": "rider"
+    },
+    {
+     "code": "PIM",
+     "title": "Rider PIM",
+     "role": "rider"
+    },
+    {
+     "code": "CAR",
+     "title": "Rider CAR",
+     "role": "rider"
+    },
+    {
+     "code": "STS",
+     "title": "Rider STS",
+     "role": "rider"
+    }
+   ],
+   "credits": [],
+   "adjustments": [],
+   "eligibility": "all electric service of the same available type supplied to Customer's premises",
+   "raw_summary": "Duke Energy Progress, LLC \nNC First Revised Leaf No. 500 \n (North Carolina Only)  \n \n \n \n \n  Superseding NC Original Leaf No. 500 \n \nNC First Revised Leaf No. 500 \nEffective for service rendered from October 1, 2024 through September 30, 2025 \nNCUC Docket No. E-2, Sub 1300, Order dated August 18, 2023 \n \nPage 1 of 3 \n \n \n \nRESIDENTIAL SERVICE \n \nSCHEDULE RES \nAVAILABILITY \n \nThis Schedule is available when electric service is used for domestic purposes in and about (1) a residential \ndwelling unit, including electric service used on a farm and in the preparation of the farm's products for market, \nor (2) a family care home.  A residential dwelling unit served under this Schedule may be used as a boarding \nhouse, fraternity house, tourist home, or like establishment, provided such residenti"
+  },
+  "est_lines": [
+   {
+    "label": "Basic Customer Charge",
+    "amount": 7.93,
+    "details": "per month; prorated 17/30"
+   },
+   {
+    "label": "Kilowatt-Hour Charge",
+    "amount": 96.95,
+    "details": "800.0 kWh @ 0.12119"
+   },
+   {
+    "label": "Kilowatt-Hour Charge",
+    "amount": 2.33,
+    "details": "21.0 kWh @ 0.11119"
+   },
+   {
+    "label": "Energy Conservation Credit",
+    "amount": -4.96,
+    "details": "Energy Conservation Discount:Energy Conservation Credit"
+   },
+   {
+    "label": "Summary of Rider Adjustments",
+    "amount": 16.01,
+    "details": "Summary of Rider Adjustments (Leaf No. 600, eff. 2024-04-01):Summary of Rider Adjustments"
+   },
+   {
+    "label": "Clean Energy Rider",
+    "amount": 0.86,
+    "details": "observed history 1.520 per month"
+   },
+   {
+    "label": "Storm Recovery Charge",
+    "amount": 2.02,
+    "details": "observed history 0.246 cents/kWh"
+   }
+  ],
+  "recon": [
+   {
+    "key": "clean_energy_rider",
+    "label": "Clean Energy Rider",
+    "actual_amount": 0.86,
+    "estimated_amount": 0.86,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Clean Energy Rider"
+    ],
+    "estimated_labels": [
+     "Clean Energy Rider"
+    ]
+   },
+   {
+    "key": "customer_charge",
+    "label": "Basic Customer Charge",
+    "actual_amount": 7.93,
+    "estimated_amount": 7.93,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Basic Customer Charge"
+    ],
+    "estimated_labels": [
+     "Basic Customer Charge"
+    ]
+   },
+   {
+    "key": "energy_charge",
+    "label": "Energy Charge",
+    "actual_amount": 99.28,
+    "estimated_amount": 99.28,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Energy Charge"
+    ],
+    "estimated_labels": [
+     "Kilowatt-Hour Charge",
+     "Kilowatt-Hour Charge"
+    ]
+   },
+   {
+    "key": "energy_conservation_credit",
+    "label": "Energy Conservation Credit",
+    "actual_amount": -4.96,
+    "estimated_amount": -4.96,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Energy Conservation Credit"
+    ],
+    "estimated_labels": [
+     "Energy Conservation Credit"
+    ]
+   },
+   {
+    "key": "storm_recovery_charge",
+    "label": "Storm Recovery Charge",
+    "actual_amount": 2.02,
+    "estimated_amount": 2.02,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Storm Recovery Charge"
+    ],
+    "estimated_labels": [
+     "Storm Recovery Charge"
+    ]
+   },
+   {
+    "key": "summary_rider_adjustments",
+    "label": "Summary of Rider Adjustments",
+    "actual_amount": 16.02,
+    "estimated_amount": 16.01,
+    "delta": 0.01,
+    "status": "matched",
+    "actual_labels": [
+     "Summary of Rider Adjustments"
+    ],
+    "estimated_labels": [
+     "Summary of Rider Adjustments"
+    ]
+   }
+  ],
+  "actual_lines": [
+   {
+    "label": "Basic Customer Charge",
+    "amount": 7.93,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Energy Charge",
+    "amount": 96.95,
+    "quantity": 800.0,
+    "unit": "kWh",
+    "rate": 0.12119,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Energy Charge",
+    "amount": 2.33,
+    "quantity": 21.0,
+    "unit": "kWh",
+    "rate": 0.11119,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Storm Recovery Charge",
+    "amount": 2.02,
+    "quantity": 821.0,
+    "unit": "kWh",
+    "rate": 0.00246,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Summary of Rider Adjustments",
+    "amount": 14.1,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Summary of Rider Adjustments",
+    "amount": 1.92,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": "2025-04-01",
+    "period_end": "2025-04-16",
+    "is_subperiod_detail": true
+   },
+   {
+    "label": "Clean Energy Rider",
+    "amount": 0.86,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Energy Conservation Credit",
+    "amount": -4.96,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   }
+  ],
+  "notes": [
+   "Applied rider adjustments from parsed historical rider tables.",
+   "Applied observed-history fallback for clean energy rider.",
+   "Applied observed-history fallback for storm recovery charge.",
+   "Electric total delta = actual 121.15 - estimated 121.14."
+  ]
+ },
+ {
+  "bill_id": 2,
+  "bill_date": "2025-05-20",
+  "source": "..\\version_3\\Actual Duke Bills\\2025-05-20.pdf",
+  "rate_code": "RES",
+  "kwh": 1460.0,
+  "actual": 215.67,
+  "est": 215.67,
+  "delta": 0.0,
+  "version": {
+   "source_kind": "historical",
+   "document_id": 29,
+   "current_document_id": null,
+   "family_key": "nc-progress-leaf-500",
+   "title": "Residential Service (Leaf No. 500, eff. 2024-10-01)",
+   "state": "NC",
+   "company": "progress",
+   "category": "rate",
+   "kind": "pdf",
+   "leaf_no": "500",
+   "revision_label": "NC First Revised Leaf No. 500",
+   "supersedes_label": "NC Original Leaf No. 500",
+   "effective_start": "2024-10-01",
+   "effective_end": "2025-09-30",
+   "tariff_id": "nc_progress_res_residential-service",
+   "schedule_code": "RES",
+   "rider_id": null,
+   "source_url": "local-file://leaf-no-500-schedule-res_2024-10-01.pdf",
+   "archived_url": "local-file://leaf-no-500-schedule-res_2024-10-01.pdf",
+   "local_path": "data\\historical\\raw\\nc\\progress\\rate\\residential-service-leaf-no-500-eff-2024-10-01-data-historical-manual-leaf-no-50.pdf",
+   "direct_downloadable": false,
+   "retrieved_at": "2026-03-16T17:33:10.230275Z"
+  },
+  "schedule": {
+   "tariff_id": "nc_progress_res_residential-service",
+   "utility": "Duke Energy",
+   "state": "NC",
+   "company": "progress",
+   "schedule_code": "RES",
+   "schedule_title": "Residential Service",
+   "customer_class": "residential",
+   "effective_start": "2024-10-01",
+   "effective_end": "2025-09-30",
+   "fixed_charges": [
+    {
+     "label": "Basic Customer Charge",
+     "amount": 14.0,
+     "unit": "month"
+    }
+   ],
+   "energy_charges": [
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.12119,
+     "unit": "kWh",
+     "block_from": 0.0,
+     "block_to": null,
+     "season": "May - September",
+     "period": null
+    },
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.12119,
+     "unit": "kWh",
+     "block_from": 0.0,
+     "block_to": 800.0,
+     "season": "October - April",
+     "period": null
+    },
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.11119,
+     "unit": "kWh",
+     "block_from": 800.0,
+     "block_to": null,
+     "season": "October - April",
+     "period": null
+    }
+   ],
+   "demand_charges": [],
+   "tou_periods": [],
+   "riders": [
+    {
+     "code": "BA",
+     "title": "Annual Billing Adjustments Rider",
+     "role": "rider"
+    },
+    {
+     "code": "BA",
+     "title": "Rider BA",
+     "role": "rider"
+    },
+    {
+     "code": "JAA",
+     "title": "Rider JAA",
+     "role": "rider"
+    },
+    {
+     "code": "EDIT-4",
+     "title": "Rider EDIT-4",
+     "role": "rider"
+    },
+    {
+     "code": "CPRE",
+     "title": "Rider CPRE",
+     "role": "rider"
+    },
+    {
+     "code": "RDM",
+     "title": "Rider RDM",
+     "role": "rider"
+    },
+    {
+     "code": "ESM",
+     "title": "Rider ESM",
+     "role": "rider"
+    },
+    {
+     "code": "PIM",
+     "title": "Rider PIM",
+     "role": "rider"
+    },
+    {
+     "code": "CAR",
+     "title": "Rider CAR",
+     "role": "rider"
+    },
+    {
+     "code": "STS",
+     "title": "Rider STS",
+     "role": "rider"
+    }
+   ],
+   "credits": [],
+   "adjustments": [],
+   "eligibility": "all electric service of the same available type supplied to Customer's premises",
+   "raw_summary": "Duke Energy Progress, LLC \nNC First Revised Leaf No. 500 \n (North Carolina Only)  \n \n \n \n \n  Superseding NC Original Leaf No. 500 \n \nNC First Revised Leaf No. 500 \nEffective for service rendered from October 1, 2024 through September 30, 2025 \nNCUC Docket No. E-2, Sub 1300, Order dated August 18, 2023 \n \nPage 1 of 3 \n \n \n \nRESIDENTIAL SERVICE \n \nSCHEDULE RES \nAVAILABILITY \n \nThis Schedule is available when electric service is used for domestic purposes in and about (1) a residential \ndwelling unit, including electric service used on a farm and in the preparation of the farm's products for market, \nor (2) a family care home.  A residential dwelling unit served under this Schedule may be used as a boarding \nhouse, fraternity house, tourist home, or like establishment, provided such residenti"
+  },
+  "est_lines": [
+   {
+    "label": "Basic Customer Charge",
+    "amount": 14.0,
+    "details": "per month"
+   },
+   {
+    "label": "Kilowatt-Hour Charge",
+    "amount": 82.53,
+    "details": "681.0 kWh @ 0.12119"
+   },
+   {
+    "label": "Kilowatt-Hour Charge",
+    "amount": 94.41,
+    "details": "779.0 kWh @ 0.12119"
+   },
+   {
+    "label": "Energy Conservation Credit",
+    "amount": -8.85,
+    "details": "Energy Conservation Discount:Energy Conservation Credit"
+   },
+   {
+    "label": "Summary of Rider Adjustments",
+    "amount": 28.47,
+    "details": "Summary of Rider Adjustments (Leaf No. 600, eff. 2024-04-01):Summary of Rider Adjustments"
+   },
+   {
+    "label": "Clean Energy Rider",
+    "amount": 1.52,
+    "details": "observed history 1.520 per month"
+   },
+   {
+    "label": "Storm Recovery Charge",
+    "amount": 3.59,
+    "details": "observed history 0.246 cents/kWh"
+   }
+  ],
+  "recon": [
+   {
+    "key": "clean_energy_rider",
+    "label": "Clean Energy Rider",
+    "actual_amount": 1.52,
+    "estimated_amount": 1.52,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Clean Energy Rider"
+    ],
+    "estimated_labels": [
+     "Clean Energy Rider"
+    ]
+   },
+   {
+    "key": "customer_charge",
+    "label": "Basic Customer Charge",
+    "actual_amount": 14.0,
+    "estimated_amount": 14.0,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Basic Customer Charge"
+    ],
+    "estimated_labels": [
+     "Basic Customer Charge"
+    ]
+   },
+   {
+    "key": "energy_charge",
+    "label": "Energy Charge",
+    "actual_amount": 176.94,
+    "estimated_amount": 176.94,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Energy Charge"
+    ],
+    "estimated_labels": [
+     "Kilowatt-Hour Charge",
+     "Kilowatt-Hour Charge"
+    ]
+   },
+   {
+    "key": "energy_conservation_credit",
+    "label": "Energy Conservation Credit",
+    "actual_amount": -8.85,
+    "estimated_amount": -8.85,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Energy Conservation Credit"
+    ],
+    "estimated_labels": [
+     "Energy Conservation Credit"
+    ]
+   },
+   {
+    "key": "storm_recovery_charge",
+    "label": "Storm Recovery Charge",
+    "actual_amount": 3.59,
+    "estimated_amount": 3.59,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Storm Recovery Charge"
+    ],
+    "estimated_labels": [
+     "Storm Recovery Charge"
+    ]
+   },
+   {
+    "key": "summary_rider_adjustments",
+    "label": "Summary of Rider Adjustments",
+    "actual_amount": 28.47,
+    "estimated_amount": 28.47,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Summary of Rider Adjustments"
+    ],
+    "estimated_labels": [
+     "Summary of Rider Adjustments"
+    ]
+   }
+  ],
+  "actual_lines": [
+   {
+    "label": "Basic Customer Charge",
+    "amount": 14.0,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Energy Charge",
+    "amount": 94.41,
+    "quantity": 779.0,
+    "unit": "kWh",
+    "rate": 0.12119,
+    "detail": null,
+    "period_start": "2025-05-01",
+    "period_end": "2025-05-16",
+    "is_subperiod_detail": true
+   },
+   {
+    "label": "Energy Charge",
+    "amount": 82.53,
+    "quantity": 681.0,
+    "unit": "kWh",
+    "rate": 0.12119,
+    "detail": null,
+    "period_start": "2025-04-17",
+    "period_end": "2025-04-30",
+    "is_subperiod_detail": true
+   },
+   {
+    "label": "Storm Recovery Charge",
+    "amount": 3.59,
+    "quantity": 1460.0,
+    "unit": "kWh",
+    "rate": 0.00246,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Summary of Rider Adjustments",
+    "amount": 28.47,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Clean Energy Rider",
+    "amount": 1.52,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Energy Conservation Credit",
+    "amount": -8.85,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   }
+  ],
+  "notes": [
+   "Formula-based rider calculations are not yet implemented.",
+   "Applied rider adjustments from parsed historical rider tables.",
+   "Used billed split energy rows to validate tariff changes within the billing period.",
+   "Applied observed-history fallback for clean energy rider.",
+   "Applied observed-history fallback for storm recovery charge.",
+   "Electric total delta = actual 215.67 - estimated 215.67."
+  ]
+ },
+ {
+  "bill_id": 3,
+  "bill_date": "2025-06-19",
+  "source": "..\\version_3\\Actual Duke Bills\\2025-06-19.pdf",
+  "rate_code": "RES",
+  "kwh": 1316.0,
+  "actual": 195.94,
+  "est": 195.94,
+  "delta": 0.0,
+  "version": {
+   "source_kind": "historical",
+   "document_id": 29,
+   "current_document_id": null,
+   "family_key": "nc-progress-leaf-500",
+   "title": "Residential Service (Leaf No. 500, eff. 2024-10-01)",
+   "state": "NC",
+   "company": "progress",
+   "category": "rate",
+   "kind": "pdf",
+   "leaf_no": "500",
+   "revision_label": "NC First Revised Leaf No. 500",
+   "supersedes_label": "NC Original Leaf No. 500",
+   "effective_start": "2024-10-01",
+   "effective_end": "2025-09-30",
+   "tariff_id": "nc_progress_res_residential-service",
+   "schedule_code": "RES",
+   "rider_id": null,
+   "source_url": "local-file://leaf-no-500-schedule-res_2024-10-01.pdf",
+   "archived_url": "local-file://leaf-no-500-schedule-res_2024-10-01.pdf",
+   "local_path": "data\\historical\\raw\\nc\\progress\\rate\\residential-service-leaf-no-500-eff-2024-10-01-data-historical-manual-leaf-no-50.pdf",
+   "direct_downloadable": false,
+   "retrieved_at": "2026-03-16T17:33:10.230275Z"
+  },
+  "schedule": {
+   "tariff_id": "nc_progress_res_residential-service",
+   "utility": "Duke Energy",
+   "state": "NC",
+   "company": "progress",
+   "schedule_code": "RES",
+   "schedule_title": "Residential Service",
+   "customer_class": "residential",
+   "effective_start": "2024-10-01",
+   "effective_end": "2025-09-30",
+   "fixed_charges": [
+    {
+     "label": "Basic Customer Charge",
+     "amount": 14.0,
+     "unit": "month"
+    }
+   ],
+   "energy_charges": [
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.12119,
+     "unit": "kWh",
+     "block_from": 0.0,
+     "block_to": null,
+     "season": "May - September",
+     "period": null
+    },
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.12119,
+     "unit": "kWh",
+     "block_from": 0.0,
+     "block_to": 800.0,
+     "season": "October - April",
+     "period": null
+    },
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.11119,
+     "unit": "kWh",
+     "block_from": 800.0,
+     "block_to": null,
+     "season": "October - April",
+     "period": null
+    }
+   ],
+   "demand_charges": [],
+   "tou_periods": [],
+   "riders": [
+    {
+     "code": "BA",
+     "title": "Annual Billing Adjustments Rider",
+     "role": "rider"
+    },
+    {
+     "code": "BA",
+     "title": "Rider BA",
+     "role": "rider"
+    },
+    {
+     "code": "JAA",
+     "title": "Rider JAA",
+     "role": "rider"
+    },
+    {
+     "code": "EDIT-4",
+     "title": "Rider EDIT-4",
+     "role": "rider"
+    },
+    {
+     "code": "CPRE",
+     "title": "Rider CPRE",
+     "role": "rider"
+    },
+    {
+     "code": "RDM",
+     "title": "Rider RDM",
+     "role": "rider"
+    },
+    {
+     "code": "ESM",
+     "title": "Rider ESM",
+     "role": "rider"
+    },
+    {
+     "code": "PIM",
+     "title": "Rider PIM",
+     "role": "rider"
+    },
+    {
+     "code": "CAR",
+     "title": "Rider CAR",
+     "role": "rider"
+    },
+    {
+     "code": "STS",
+     "title": "Rider STS",
+     "role": "rider"
+    }
+   ],
+   "credits": [],
+   "adjustments": [],
+   "eligibility": "all electric service of the same available type supplied to Customer's premises",
+   "raw_summary": "Duke Energy Progress, LLC \nNC First Revised Leaf No. 500 \n (North Carolina Only)  \n \n \n \n \n  Superseding NC Original Leaf No. 500 \n \nNC First Revised Leaf No. 500 \nEffective for service rendered from October 1, 2024 through September 30, 2025 \nNCUC Docket No. E-2, Sub 1300, Order dated August 18, 2023 \n \nPage 1 of 3 \n \n \n \nRESIDENTIAL SERVICE \n \nSCHEDULE RES \nAVAILABILITY \n \nThis Schedule is available when electric service is used for domestic purposes in and about (1) a residential \ndwelling unit, including electric service used on a farm and in the preparation of the farm's products for market, \nor (2) a family care home.  A residential dwelling unit served under this Schedule may be used as a boarding \nhouse, fraternity house, tourist home, or like establishment, provided such residenti"
+  },
+  "est_lines": [
+   {
+    "label": "Basic Customer Charge",
+    "amount": 14.0,
+    "details": "per month"
+   },
+   {
+    "label": "Kilowatt-Hour Charge",
+    "amount": 159.49,
+    "details": "1316.0 kWh @ 0.12119"
+   },
+   {
+    "label": "Energy Conservation Credit",
+    "amount": -7.97,
+    "details": "Energy Conservation Discount:Energy Conservation Credit"
+   },
+   {
+    "label": "Summary of Rider Adjustments",
+    "amount": 25.66,
+    "details": "Summary of Rider Adjustments (Leaf No. 600, eff. 2024-04-01):Summary of Rider Adjustments"
+   },
+   {
+    "label": "Clean Energy Rider",
+    "amount": 1.52,
+    "details": "observed history 1.520 per month"
+   },
+   {
+    "label": "Storm Recovery Charge",
+    "amount": 3.24,
+    "details": "observed history 0.246 cents/kWh"
+   }
+  ],
+  "recon": [
+   {
+    "key": "clean_energy_rider",
+    "label": "Clean Energy Rider",
+    "actual_amount": 1.52,
+    "estimated_amount": 1.52,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Clean Energy Rider"
+    ],
+    "estimated_labels": [
+     "Clean Energy Rider"
+    ]
+   },
+   {
+    "key": "customer_charge",
+    "label": "Basic Customer Charge",
+    "actual_amount": 14.0,
+    "estimated_amount": 14.0,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Basic Customer Charge"
+    ],
+    "estimated_labels": [
+     "Basic Customer Charge"
+    ]
+   },
+   {
+    "key": "energy_charge",
+    "label": "Energy Charge",
+    "actual_amount": 159.49,
+    "estimated_amount": 159.49,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Energy Charge"
+    ],
+    "estimated_labels": [
+     "Kilowatt-Hour Charge"
+    ]
+   },
+   {
+    "key": "energy_conservation_credit",
+    "label": "Energy Conservation Credit",
+    "actual_amount": -7.97,
+    "estimated_amount": -7.97,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Energy Conservation Credit"
+    ],
+    "estimated_labels": [
+     "Energy Conservation Credit"
+    ]
+   },
+   {
+    "key": "storm_recovery_charge",
+    "label": "Storm Recovery Charge",
+    "actual_amount": 3.24,
+    "estimated_amount": 3.24,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Storm Recovery Charge"
+    ],
+    "estimated_labels": [
+     "Storm Recovery Charge"
+    ]
+   },
+   {
+    "key": "summary_rider_adjustments",
+    "label": "Summary of Rider Adjustments",
+    "actual_amount": 25.66,
+    "estimated_amount": 25.66,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Summary of Rider Adjustments"
+    ],
+    "estimated_labels": [
+     "Summary of Rider Adjustments"
+    ]
+   }
+  ],
+  "actual_lines": [
+   {
+    "label": "Basic Customer Charge",
+    "amount": 14.0,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Energy Charge",
+    "amount": 159.49,
+    "quantity": 1316.0,
+    "unit": "kWh",
+    "rate": 0.12119,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Storm Recovery Charge",
+    "amount": 3.24,
+    "quantity": 1316.0,
+    "unit": "kWh",
+    "rate": 0.00246,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Summary of Rider Adjustments",
+    "amount": 25.66,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Clean Energy Rider",
+    "amount": 1.52,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Energy Conservation Credit",
+    "amount": -7.97,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   }
+  ],
+  "notes": [
+   "Applied rider adjustments from parsed historical rider tables.",
+   "Applied observed-history fallback for clean energy rider.",
+   "Applied observed-history fallback for storm recovery charge.",
+   "Electric total delta = actual 195.94 - estimated 195.94."
+  ]
+ },
+ {
+  "bill_id": 4,
+  "bill_date": "2025-07-21",
+  "source": "..\\version_3\\Actual Duke Bills\\2025-07-21.pdf",
+  "rate_code": "RES",
+  "kwh": 1520.0,
+  "actual": 223.61,
+  "est": 223.59,
+  "delta": 0.02,
+  "version": {
+   "source_kind": "historical",
+   "document_id": 29,
+   "current_document_id": null,
+   "family_key": "nc-progress-leaf-500",
+   "title": "Residential Service (Leaf No. 500, eff. 2024-10-01)",
+   "state": "NC",
+   "company": "progress",
+   "category": "rate",
+   "kind": "pdf",
+   "leaf_no": "500",
+   "revision_label": "NC First Revised Leaf No. 500",
+   "supersedes_label": "NC Original Leaf No. 500",
+   "effective_start": "2024-10-01",
+   "effective_end": "2025-09-30",
+   "tariff_id": "nc_progress_res_residential-service",
+   "schedule_code": "RES",
+   "rider_id": null,
+   "source_url": "local-file://leaf-no-500-schedule-res_2024-10-01.pdf",
+   "archived_url": "local-file://leaf-no-500-schedule-res_2024-10-01.pdf",
+   "local_path": "data\\historical\\raw\\nc\\progress\\rate\\residential-service-leaf-no-500-eff-2024-10-01-data-historical-manual-leaf-no-50.pdf",
+   "direct_downloadable": false,
+   "retrieved_at": "2026-03-16T17:33:10.230275Z"
+  },
+  "schedule": {
+   "tariff_id": "nc_progress_res_residential-service",
+   "utility": "Duke Energy",
+   "state": "NC",
+   "company": "progress",
+   "schedule_code": "RES",
+   "schedule_title": "Residential Service",
+   "customer_class": "residential",
+   "effective_start": "2024-10-01",
+   "effective_end": "2025-09-30",
+   "fixed_charges": [
+    {
+     "label": "Basic Customer Charge",
+     "amount": 14.0,
+     "unit": "month"
+    }
+   ],
+   "energy_charges": [
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.12119,
+     "unit": "kWh",
+     "block_from": 0.0,
+     "block_to": null,
+     "season": "May - September",
+     "period": null
+    },
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.12119,
+     "unit": "kWh",
+     "block_from": 0.0,
+     "block_to": 800.0,
+     "season": "October - April",
+     "period": null
+    },
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.11119,
+     "unit": "kWh",
+     "block_from": 800.0,
+     "block_to": null,
+     "season": "October - April",
+     "period": null
+    }
+   ],
+   "demand_charges": [],
+   "tou_periods": [],
+   "riders": [
+    {
+     "code": "BA",
+     "title": "Annual Billing Adjustments Rider",
+     "role": "rider"
+    },
+    {
+     "code": "BA",
+     "title": "Rider BA",
+     "role": "rider"
+    },
+    {
+     "code": "JAA",
+     "title": "Rider JAA",
+     "role": "rider"
+    },
+    {
+     "code": "EDIT-4",
+     "title": "Rider EDIT-4",
+     "role": "rider"
+    },
+    {
+     "code": "CPRE",
+     "title": "Rider CPRE",
+     "role": "rider"
+    },
+    {
+     "code": "RDM",
+     "title": "Rider RDM",
+     "role": "rider"
+    },
+    {
+     "code": "ESM",
+     "title": "Rider ESM",
+     "role": "rider"
+    },
+    {
+     "code": "PIM",
+     "title": "Rider PIM",
+     "role": "rider"
+    },
+    {
+     "code": "CAR",
+     "title": "Rider CAR",
+     "role": "rider"
+    },
+    {
+     "code": "STS",
+     "title": "Rider STS",
+     "role": "rider"
+    }
+   ],
+   "credits": [],
+   "adjustments": [],
+   "eligibility": "all electric service of the same available type supplied to Customer's premises",
+   "raw_summary": "Duke Energy Progress, LLC \nNC First Revised Leaf No. 500 \n (North Carolina Only)  \n \n \n \n \n  Superseding NC Original Leaf No. 500 \n \nNC First Revised Leaf No. 500 \nEffective for service rendered from October 1, 2024 through September 30, 2025 \nNCUC Docket No. E-2, Sub 1300, Order dated August 18, 2023 \n \nPage 1 of 3 \n \n \n \nRESIDENTIAL SERVICE \n \nSCHEDULE RES \nAVAILABILITY \n \nThis Schedule is available when electric service is used for domestic purposes in and about (1) a residential \ndwelling unit, including electric service used on a farm and in the preparation of the farm's products for market, \nor (2) a family care home.  A residential dwelling unit served under this Schedule may be used as a boarding \nhouse, fraternity house, tourist home, or like establishment, provided such residenti"
+  },
+  "est_lines": [
+   {
+    "label": "Basic Customer Charge",
+    "amount": 14.0,
+    "details": "per month"
+   },
+   {
+    "label": "Kilowatt-Hour Charge",
+    "amount": 184.21,
+    "details": "1520.0 kWh @ 0.12119"
+   },
+   {
+    "label": "Energy Conservation Credit",
+    "amount": -9.21,
+    "details": "Energy Conservation Discount:Energy Conservation Credit"
+   },
+   {
+    "label": "Summary of Rider Adjustments",
+    "amount": 29.64,
+    "details": "Summary of Rider Adjustments (Leaf No. 600, eff. 2024-04-01):Summary of Rider Adjustments"
+   },
+   {
+    "label": "Clean Energy Rider",
+    "amount": 1.52,
+    "details": "observed history 1.520 per month"
+   },
+   {
+    "label": "Storm Recovery Charge",
+    "amount": 1.62,
+    "details": "observed history 0.246 cents/kWh"
+   },
+   {
+    "label": "Storm Recovery Charge",
+    "amount": 1.81,
+    "details": "observed history 0.210 cents/kWh"
+   }
+  ],
+  "recon": [
+   {
+    "key": "clean_energy_rider",
+    "label": "Clean Energy Rider",
+    "actual_amount": 1.52,
+    "estimated_amount": 1.52,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Clean Energy Rider"
+    ],
+    "estimated_labels": [
+     "Clean Energy Rider"
+    ]
+   },
+   {
+    "key": "customer_charge",
+    "label": "Basic Customer Charge",
+    "actual_amount": 14.0,
+    "estimated_amount": 14.0,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Basic Customer Charge"
+    ],
+    "estimated_labels": [
+     "Basic Customer Charge"
+    ]
+   },
+   {
+    "key": "energy_charge",
+    "label": "Energy Charge",
+    "actual_amount": 184.21,
+    "estimated_amount": 184.21,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Energy Charge"
+    ],
+    "estimated_labels": [
+     "Kilowatt-Hour Charge"
+    ]
+   },
+   {
+    "key": "energy_conservation_credit",
+    "label": "Energy Conservation Credit",
+    "actual_amount": -9.21,
+    "estimated_amount": -9.21,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Energy Conservation Credit"
+    ],
+    "estimated_labels": [
+     "Energy Conservation Credit"
+    ]
+   },
+   {
+    "key": "storm_recovery_charge",
+    "label": "Storm Recovery Charge",
+    "actual_amount": 3.43,
+    "estimated_amount": 3.43,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Storm Recovery Charge"
+    ],
+    "estimated_labels": [
+     "Storm Recovery Charge",
+     "Storm Recovery Charge"
+    ]
+   },
+   {
+    "key": "summary_rider_adjustments",
+    "label": "Summary of Rider Adjustments",
+    "actual_amount": 29.66,
+    "estimated_amount": 29.64,
+    "delta": 0.02,
+    "status": "matched",
+    "actual_labels": [
+     "Summary of Rider Adjustments"
+    ],
+    "estimated_labels": [
+     "Summary of Rider Adjustments"
+    ]
+   }
+  ],
+  "actual_lines": [
+   {
+    "label": "Basic Customer Charge",
+    "amount": 14.0,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Energy Charge",
+    "amount": 184.21,
+    "quantity": 1520.0,
+    "unit": "kWh",
+    "rate": 0.12119,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Storm Recovery Charge",
+    "amount": 1.62,
+    "quantity": 658.0,
+    "unit": "kWh",
+    "rate": 0.00246,
+    "detail": null,
+    "period_start": "2025-06-18",
+    "period_end": "2025-06-30",
+    "is_subperiod_detail": true
+   },
+   {
+    "label": "Storm Recovery Charge",
+    "amount": 1.81,
+    "quantity": 862.0,
+    "unit": "kWh",
+    "rate": 0.0021,
+    "detail": null,
+    "period_start": "2025-07-01",
+    "period_end": "2025-07-17",
+    "is_subperiod_detail": true
+   },
+   {
+    "label": "Summary of Rider Adjustments",
+    "amount": 29.66,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Clean Energy Rider",
+    "amount": 1.52,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Energy Conservation Credit",
+    "amount": -9.21,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   }
+  ],
+  "notes": [
+   "Applied rider adjustments from parsed historical rider tables.",
+   "Storm rider mid-period proration uses a linear day-fraction of monthly kWh (approximation; actual billing uses meter reads).",
+   "Applied observed-history fallback for clean energy rider.",
+   "Applied observed-history fallback for storm recovery charge.",
+   "Electric total delta = actual 223.61 - estimated 223.59."
+  ]
+ },
+ {
+  "bill_id": 5,
+  "bill_date": "2025-08-20",
+  "source": "..\\version_3\\Actual Duke Bills\\2025-08-20.pdf",
+  "rate_code": "RES",
+  "kwh": 1379.0,
+  "actual": 204.08,
+  "est": 204.07,
+  "delta": 0.01,
+  "version": {
+   "source_kind": "historical",
+   "document_id": 29,
+   "current_document_id": null,
+   "family_key": "nc-progress-leaf-500",
+   "title": "Residential Service (Leaf No. 500, eff. 2024-10-01)",
+   "state": "NC",
+   "company": "progress",
+   "category": "rate",
+   "kind": "pdf",
+   "leaf_no": "500",
+   "revision_label": "NC First Revised Leaf No. 500",
+   "supersedes_label": "NC Original Leaf No. 500",
+   "effective_start": "2024-10-01",
+   "effective_end": "2025-09-30",
+   "tariff_id": "nc_progress_res_residential-service",
+   "schedule_code": "RES",
+   "rider_id": null,
+   "source_url": "local-file://leaf-no-500-schedule-res_2024-10-01.pdf",
+   "archived_url": "local-file://leaf-no-500-schedule-res_2024-10-01.pdf",
+   "local_path": "data\\historical\\raw\\nc\\progress\\rate\\residential-service-leaf-no-500-eff-2024-10-01-data-historical-manual-leaf-no-50.pdf",
+   "direct_downloadable": false,
+   "retrieved_at": "2026-03-16T17:33:10.230275Z"
+  },
+  "schedule": {
+   "tariff_id": "nc_progress_res_residential-service",
+   "utility": "Duke Energy",
+   "state": "NC",
+   "company": "progress",
+   "schedule_code": "RES",
+   "schedule_title": "Residential Service",
+   "customer_class": "residential",
+   "effective_start": "2024-10-01",
+   "effective_end": "2025-09-30",
+   "fixed_charges": [
+    {
+     "label": "Basic Customer Charge",
+     "amount": 14.0,
+     "unit": "month"
+    }
+   ],
+   "energy_charges": [
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.12119,
+     "unit": "kWh",
+     "block_from": 0.0,
+     "block_to": null,
+     "season": "May - September",
+     "period": null
+    },
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.12119,
+     "unit": "kWh",
+     "block_from": 0.0,
+     "block_to": 800.0,
+     "season": "October - April",
+     "period": null
+    },
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.11119,
+     "unit": "kWh",
+     "block_from": 800.0,
+     "block_to": null,
+     "season": "October - April",
+     "period": null
+    }
+   ],
+   "demand_charges": [],
+   "tou_periods": [],
+   "riders": [
+    {
+     "code": "BA",
+     "title": "Annual Billing Adjustments Rider",
+     "role": "rider"
+    },
+    {
+     "code": "BA",
+     "title": "Rider BA",
+     "role": "rider"
+    },
+    {
+     "code": "JAA",
+     "title": "Rider JAA",
+     "role": "rider"
+    },
+    {
+     "code": "EDIT-4",
+     "title": "Rider EDIT-4",
+     "role": "rider"
+    },
+    {
+     "code": "CPRE",
+     "title": "Rider CPRE",
+     "role": "rider"
+    },
+    {
+     "code": "RDM",
+     "title": "Rider RDM",
+     "role": "rider"
+    },
+    {
+     "code": "ESM",
+     "title": "Rider ESM",
+     "role": "rider"
+    },
+    {
+     "code": "PIM",
+     "title": "Rider PIM",
+     "role": "rider"
+    },
+    {
+     "code": "CAR",
+     "title": "Rider CAR",
+     "role": "rider"
+    },
+    {
+     "code": "STS",
+     "title": "Rider STS",
+     "role": "rider"
+    }
+   ],
+   "credits": [],
+   "adjustments": [],
+   "eligibility": "all electric service of the same available type supplied to Customer's premises",
+   "raw_summary": "Duke Energy Progress, LLC \nNC First Revised Leaf No. 500 \n (North Carolina Only)  \n \n \n \n \n  Superseding NC Original Leaf No. 500 \n \nNC First Revised Leaf No. 500 \nEffective for service rendered from October 1, 2024 through September 30, 2025 \nNCUC Docket No. E-2, Sub 1300, Order dated August 18, 2023 \n \nPage 1 of 3 \n \n \n \nRESIDENTIAL SERVICE \n \nSCHEDULE RES \nAVAILABILITY \n \nThis Schedule is available when electric service is used for domestic purposes in and about (1) a residential \ndwelling unit, including electric service used on a farm and in the preparation of the farm's products for market, \nor (2) a family care home.  A residential dwelling unit served under this Schedule may be used as a boarding \nhouse, fraternity house, tourist home, or like establishment, provided such residenti"
+  },
+  "est_lines": [
+   {
+    "label": "Basic Customer Charge",
+    "amount": 14.0,
+    "details": "per month"
+   },
+   {
+    "label": "Kilowatt-Hour Charge",
+    "amount": 167.12,
+    "details": "1379.0 kWh @ 0.12119"
+   },
+   {
+    "label": "Energy Conservation Credit",
+    "amount": -8.36,
+    "details": "Energy Conservation Discount:Energy Conservation Credit"
+   },
+   {
+    "label": "Summary of Rider Adjustments",
+    "amount": 26.89,
+    "details": "Summary of Rider Adjustments (Leaf No. 600, eff. 2024-04-01):Summary of Rider Adjustments"
+   },
+   {
+    "label": "Storm Recovery Charge",
+    "amount": 2.9,
+    "details": "Storm Securitization:2025-07-18-2025-08-18"
+   },
+   {
+    "label": "Clean Energy Rider",
+    "amount": 1.52,
+    "details": "observed history 1.520 per month"
+   }
+  ],
+  "recon": [
+   {
+    "key": "clean_energy_rider",
+    "label": "Clean Energy Rider",
+    "actual_amount": 1.52,
+    "estimated_amount": 1.52,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Clean Energy Rider"
+    ],
+    "estimated_labels": [
+     "Clean Energy Rider"
+    ]
+   },
+   {
+    "key": "customer_charge",
+    "label": "Basic Customer Charge",
+    "actual_amount": 14.0,
+    "estimated_amount": 14.0,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Basic Customer Charge"
+    ],
+    "estimated_labels": [
+     "Basic Customer Charge"
+    ]
+   },
+   {
+    "key": "energy_charge",
+    "label": "Energy Charge",
+    "actual_amount": 167.12,
+    "estimated_amount": 167.12,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Energy Charge"
+    ],
+    "estimated_labels": [
+     "Kilowatt-Hour Charge"
+    ]
+   },
+   {
+    "key": "energy_conservation_credit",
+    "label": "Energy Conservation Credit",
+    "actual_amount": -8.36,
+    "estimated_amount": -8.36,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Energy Conservation Credit"
+    ],
+    "estimated_labels": [
+     "Energy Conservation Credit"
+    ]
+   },
+   {
+    "key": "storm_recovery_charge",
+    "label": "Storm Recovery Charge",
+    "actual_amount": 2.9,
+    "estimated_amount": 2.9,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Storm Recovery Charge"
+    ],
+    "estimated_labels": [
+     "Storm Recovery Charge"
+    ]
+   },
+   {
+    "key": "summary_rider_adjustments",
+    "label": "Summary of Rider Adjustments",
+    "actual_amount": 26.9,
+    "estimated_amount": 26.89,
+    "delta": 0.01,
+    "status": "matched",
+    "actual_labels": [
+     "Summary of Rider Adjustments"
+    ],
+    "estimated_labels": [
+     "Summary of Rider Adjustments"
+    ]
+   }
+  ],
+  "actual_lines": [
+   {
+    "label": "Basic Customer Charge",
+    "amount": 14.0,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Energy Charge",
+    "amount": 167.12,
+    "quantity": 1379.0,
+    "unit": "kWh",
+    "rate": 0.12119,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Storm Recovery Charge",
+    "amount": 2.9,
+    "quantity": 1379.0,
+    "unit": "kWh",
+    "rate": 0.0021,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Summary of Rider Adjustments",
+    "amount": 26.9,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Clean Energy Rider",
+    "amount": 1.52,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Energy Conservation Credit",
+    "amount": -8.36,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   }
+  ],
+  "notes": [
+   "Applied rider adjustments from parsed historical rider tables.",
+   "Storm rider mid-period proration uses a linear day-fraction of monthly kWh (approximation; actual billing uses meter reads).",
+   "Applied observed-history fallback for clean energy rider.",
+   "Electric total delta = actual 204.08 - estimated 204.07."
+  ]
+ },
+ {
+  "bill_id": 6,
+  "bill_date": "2025-09-19",
+  "source": "..\\version_3\\Actual Duke Bills\\2025-09-19.pdf",
+  "rate_code": "RES",
+  "kwh": 1130.0,
+  "actual": 170.01,
+  "est": 170.02,
+  "delta": -0.01,
+  "version": {
+   "source_kind": "historical",
+   "document_id": 29,
+   "current_document_id": null,
+   "family_key": "nc-progress-leaf-500",
+   "title": "Residential Service (Leaf No. 500, eff. 2024-10-01)",
+   "state": "NC",
+   "company": "progress",
+   "category": "rate",
+   "kind": "pdf",
+   "leaf_no": "500",
+   "revision_label": "NC First Revised Leaf No. 500",
+   "supersedes_label": "NC Original Leaf No. 500",
+   "effective_start": "2024-10-01",
+   "effective_end": "2025-09-30",
+   "tariff_id": "nc_progress_res_residential-service",
+   "schedule_code": "RES",
+   "rider_id": null,
+   "source_url": "local-file://leaf-no-500-schedule-res_2024-10-01.pdf",
+   "archived_url": "local-file://leaf-no-500-schedule-res_2024-10-01.pdf",
+   "local_path": "data\\historical\\raw\\nc\\progress\\rate\\residential-service-leaf-no-500-eff-2024-10-01-data-historical-manual-leaf-no-50.pdf",
+   "direct_downloadable": false,
+   "retrieved_at": "2026-03-16T17:33:10.230275Z"
+  },
+  "schedule": {
+   "tariff_id": "nc_progress_res_residential-service",
+   "utility": "Duke Energy",
+   "state": "NC",
+   "company": "progress",
+   "schedule_code": "RES",
+   "schedule_title": "Residential Service",
+   "customer_class": "residential",
+   "effective_start": "2024-10-01",
+   "effective_end": "2025-09-30",
+   "fixed_charges": [
+    {
+     "label": "Basic Customer Charge",
+     "amount": 14.0,
+     "unit": "month"
+    }
+   ],
+   "energy_charges": [
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.12119,
+     "unit": "kWh",
+     "block_from": 0.0,
+     "block_to": null,
+     "season": "May - September",
+     "period": null
+    },
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.12119,
+     "unit": "kWh",
+     "block_from": 0.0,
+     "block_to": 800.0,
+     "season": "October - April",
+     "period": null
+    },
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.11119,
+     "unit": "kWh",
+     "block_from": 800.0,
+     "block_to": null,
+     "season": "October - April",
+     "period": null
+    }
+   ],
+   "demand_charges": [],
+   "tou_periods": [],
+   "riders": [
+    {
+     "code": "BA",
+     "title": "Annual Billing Adjustments Rider",
+     "role": "rider"
+    },
+    {
+     "code": "BA",
+     "title": "Rider BA",
+     "role": "rider"
+    },
+    {
+     "code": "JAA",
+     "title": "Rider JAA",
+     "role": "rider"
+    },
+    {
+     "code": "EDIT-4",
+     "title": "Rider EDIT-4",
+     "role": "rider"
+    },
+    {
+     "code": "CPRE",
+     "title": "Rider CPRE",
+     "role": "rider"
+    },
+    {
+     "code": "RDM",
+     "title": "Rider RDM",
+     "role": "rider"
+    },
+    {
+     "code": "ESM",
+     "title": "Rider ESM",
+     "role": "rider"
+    },
+    {
+     "code": "PIM",
+     "title": "Rider PIM",
+     "role": "rider"
+    },
+    {
+     "code": "CAR",
+     "title": "Rider CAR",
+     "role": "rider"
+    },
+    {
+     "code": "STS",
+     "title": "Rider STS",
+     "role": "rider"
+    }
+   ],
+   "credits": [],
+   "adjustments": [],
+   "eligibility": "all electric service of the same available type supplied to Customer's premises",
+   "raw_summary": "Duke Energy Progress, LLC \nNC First Revised Leaf No. 500 \n (North Carolina Only)  \n \n \n \n \n  Superseding NC Original Leaf No. 500 \n \nNC First Revised Leaf No. 500 \nEffective for service rendered from October 1, 2024 through September 30, 2025 \nNCUC Docket No. E-2, Sub 1300, Order dated August 18, 2023 \n \nPage 1 of 3 \n \n \n \nRESIDENTIAL SERVICE \n \nSCHEDULE RES \nAVAILABILITY \n \nThis Schedule is available when electric service is used for domestic purposes in and about (1) a residential \ndwelling unit, including electric service used on a farm and in the preparation of the farm's products for market, \nor (2) a family care home.  A residential dwelling unit served under this Schedule may be used as a boarding \nhouse, fraternity house, tourist home, or like establishment, provided such residenti"
+  },
+  "est_lines": [
+   {
+    "label": "Basic Customer Charge",
+    "amount": 14.0,
+    "details": "per month"
+   },
+   {
+    "label": "Kilowatt-Hour Charge",
+    "amount": 136.94,
+    "details": "1130.0 kWh @ 0.12119"
+   },
+   {
+    "label": "Energy Conservation Credit",
+    "amount": -6.85,
+    "details": "Energy Conservation Discount:Energy Conservation Credit"
+   },
+   {
+    "label": "Summary of Rider Adjustments",
+    "amount": 22.04,
+    "details": "Summary of Rider Adjustments (Leaf No. 600, eff. 2024-04-01):Summary of Rider Adjustments"
+   },
+   {
+    "label": "Storm Recovery Charge",
+    "amount": 2.37,
+    "details": "Storm Securitization:2025-08-19-2025-09-17"
+   },
+   {
+    "label": "Clean Energy Rider",
+    "amount": 1.52,
+    "details": "observed history 1.520 per month"
+   }
+  ],
+  "recon": [
+   {
+    "key": "clean_energy_rider",
+    "label": "Clean Energy Rider",
+    "actual_amount": 1.52,
+    "estimated_amount": 1.52,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Clean Energy Rider"
+    ],
+    "estimated_labels": [
+     "Clean Energy Rider"
+    ]
+   },
+   {
+    "key": "customer_charge",
+    "label": "Basic Customer Charge",
+    "actual_amount": 14.0,
+    "estimated_amount": 14.0,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Basic Customer Charge"
+    ],
+    "estimated_labels": [
+     "Basic Customer Charge"
+    ]
+   },
+   {
+    "key": "energy_charge",
+    "label": "Energy Charge",
+    "actual_amount": 136.94,
+    "estimated_amount": 136.94,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Energy Charge"
+    ],
+    "estimated_labels": [
+     "Kilowatt-Hour Charge"
+    ]
+   },
+   {
+    "key": "energy_conservation_credit",
+    "label": "Energy Conservation Credit",
+    "actual_amount": -6.85,
+    "estimated_amount": -6.85,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Energy Conservation Credit"
+    ],
+    "estimated_labels": [
+     "Energy Conservation Credit"
+    ]
+   },
+   {
+    "key": "storm_recovery_charge",
+    "label": "Storm Recovery Charge",
+    "actual_amount": 2.37,
+    "estimated_amount": 2.37,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Storm Recovery Charge"
+    ],
+    "estimated_labels": [
+     "Storm Recovery Charge"
+    ]
+   },
+   {
+    "key": "summary_rider_adjustments",
+    "label": "Summary of Rider Adjustments",
+    "actual_amount": 22.03,
+    "estimated_amount": 22.04,
+    "delta": -0.01,
+    "status": "matched",
+    "actual_labels": [
+     "Summary of Rider Adjustments"
+    ],
+    "estimated_labels": [
+     "Summary of Rider Adjustments"
+    ]
+   }
+  ],
+  "actual_lines": [
+   {
+    "label": "Basic Customer Charge",
+    "amount": 14.0,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Energy Charge",
+    "amount": 136.94,
+    "quantity": 1130.0,
+    "unit": "kWh",
+    "rate": 0.12119,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Storm Recovery Charge",
+    "amount": 2.37,
+    "quantity": 1130.0,
+    "unit": "kWh",
+    "rate": 0.0021,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Summary of Rider Adjustments",
+    "amount": 22.03,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Clean Energy Rider",
+    "amount": 1.52,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Energy Conservation Credit",
+    "amount": -6.85,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   }
+  ],
+  "notes": [
+   "Applied rider adjustments from parsed historical rider tables.",
+   "Storm rider mid-period proration uses a linear day-fraction of monthly kWh (approximation; actual billing uses meter reads).",
+   "Applied observed-history fallback for clean energy rider.",
+   "Electric total delta = actual 170.01 - estimated 170.02."
+  ]
+ },
+ {
+  "bill_id": 7,
+  "bill_date": "2025-10-21",
+  "source": "..\\version_3\\Actual Duke Bills\\2025-10-21.pdf",
+  "rate_code": "RES",
+  "kwh": 876.0,
+  "actual": 136.94,
+  "est": 136.95,
+  "delta": -0.01,
+  "version": {
+   "source_kind": "current",
+   "document_id": 343,
+   "current_document_id": 343,
+   "family_key": "/-/media/pdfs/for-your-home/rates/dep-nc/leaf-no-500-schedule-res.pdf",
+   "title": "leaf-no-500-schedule-res.pdf",
+   "state": "NC",
+   "company": "progress",
+   "category": "rate",
+   "kind": "pdf",
+   "leaf_no": "500",
+   "revision_label": "NC Second Revised Leaf No. 500",
+   "supersedes_label": "NC First Revised Leaf No. 500",
+   "effective_start": "October 1, 2025",
+   "effective_end": null,
+   "tariff_id": "nc_progress_res_residential-service",
+   "schedule_code": "RES",
+   "rider_id": null,
+   "source_url": "https://www.duke-energy.com/-/media/pdfs/for-your-home/rates/dep-nc/leaf-no-500-schedule-res.pdf",
+   "archived_url": null,
+   "local_path": "data\\raw\\nc\\progress\\rate\\leaf-no-500-schedule-res-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no-500-s.pdf",
+   "direct_downloadable": true,
+   "retrieved_at": "2026-03-16T18:06:22.553351Z"
+  },
+  "schedule": {
+   "tariff_id": "nc_progress_res_residential-service",
+   "utility": "Duke Energy",
+   "state": "NC",
+   "company": "progress",
+   "schedule_code": "RES",
+   "schedule_title": "Residential Service",
+   "customer_class": "residential",
+   "effective_start": "2025-10-01",
+   "effective_end": null,
+   "fixed_charges": [
+    {
+     "label": "Basic Customer Charge",
+     "amount": 14.0,
+     "unit": "month"
+    }
+   ],
+   "energy_charges": [
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.12623,
+     "unit": "kWh",
+     "block_from": 0.0,
+     "block_to": null,
+     "season": "May - September",
+     "period": null
+    },
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.12623,
+     "unit": "kWh",
+     "block_from": 0.0,
+     "block_to": 800.0,
+     "season": "October - April",
+     "period": null
+    },
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.11623,
+     "unit": "kWh",
+     "block_from": 800.0,
+     "block_to": null,
+     "season": "October - April",
+     "period": null
+    }
+   ],
+   "demand_charges": [],
+   "tou_periods": [],
+   "riders": [
+    {
+     "code": "BA",
+     "title": "Annual Billing Adjustments Rider",
+     "role": "rider"
+    },
+    {
+     "code": "BA",
+     "title": "Rider BA",
+     "role": "rider"
+    },
+    {
+     "code": "JAA",
+     "title": "Rider JAA",
+     "role": "rider"
+    },
+    {
+     "code": "EDIT-4",
+     "title": "Rider EDIT-4",
+     "role": "rider"
+    },
+    {
+     "code": "CPRE",
+     "title": "Rider CPRE",
+     "role": "rider"
+    },
+    {
+     "code": "RDM",
+     "title": "Rider RDM",
+     "role": "rider"
+    },
+    {
+     "code": "ESM",
+     "title": "Rider ESM",
+     "role": "rider"
+    },
+    {
+     "code": "PIM",
+     "title": "Rider PIM",
+     "role": "rider"
+    },
+    {
+     "code": "CAR",
+     "title": "Rider CAR",
+     "role": "rider"
+    },
+    {
+     "code": "STS",
+     "title": "Rider STS",
+     "role": "rider"
+    }
+   ],
+   "credits": [],
+   "adjustments": [],
+   "eligibility": "all electric service of the same available type supplied to Customer's premises",
+   "raw_summary": "Duke Energy Progress, LLC \nNC Second Revised Leaf No. 500 \n (North Carolina Only)  \n \n \n \n       Superseding NC First Revised Leaf No. 500 \n \nNC Second Revised Leaf No. 500 \nEffective for service rendered on and after October 1, 2025 \nNCUC Docket No. E-2, Sub 1300, Order dated August 18, 2023 \n \nPage 1 of 2 \n \n \n \nRESIDENTIAL SERVICE \n \nSCHEDULE RES \nAVAILABILITY \n \nThis Schedule is available when electric service is used for domestic purposes in and about (1) a residential \ndwelling unit, including electric service used on a farm and in the preparation of the farm's products for market, \nor (2) a family care home.  A residential dwelling unit served under this Schedule may be used as a boarding \nhouse, fraternity house, tourist home, or like establishment, provided such residential dwelli"
+  },
+  "est_lines": [
+   {
+    "label": "Basic Customer Charge",
+    "amount": 14.0,
+    "details": "per month"
+   },
+   {
+    "label": "Kilowatt-Hour Charge",
+    "amount": 45.93,
+    "details": "379.0 kWh @ 0.12119"
+   },
+   {
+    "label": "Kilowatt-Hour Charge",
+    "amount": 9.59,
+    "details": "76.0 kWh @ 0.12623"
+   },
+   {
+    "label": "Kilowatt-Hour Charge",
+    "amount": 43.55,
+    "details": "345.0 kWh @ 0.12623"
+   },
+   {
+    "label": "Kilowatt-Hour Charge",
+    "amount": 8.83,
+    "details": "76.0 kWh @ 0.11623"
+   },
+   {
+    "label": "Energy Conservation Credit",
+    "amount": -5.39,
+    "details": "Energy Conservation Discount:Energy Conservation Credit"
+   },
+   {
+    "label": "Summary of Rider Adjustments",
+    "amount": 17.08,
+    "details": "Summary of Rider Adjustments (Leaf No. 600, eff. 2024-04-01):Summary of Rider Adjustments"
+   },
+   {
+    "label": "Storm Recovery Charge",
+    "amount": 1.84,
+    "details": "Storm Securitization:Storm Recovery Charge"
+   },
+   {
+    "label": "Clean Energy Rider",
+    "amount": 1.52,
+    "details": "observed history 1.520 per month"
+   }
+  ],
+  "recon": [
+   {
+    "key": "clean_energy_rider",
+    "label": "Clean Energy Rider",
+    "actual_amount": 1.52,
+    "estimated_amount": 1.52,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Clean Energy Rider"
+    ],
+    "estimated_labels": [
+     "Clean Energy Rider"
+    ]
+   },
+   {
+    "key": "customer_charge",
+    "label": "Basic Customer Charge",
+    "actual_amount": 14.0,
+    "estimated_amount": 14.0,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Basic Customer Charge"
+    ],
+    "estimated_labels": [
+     "Basic Customer Charge"
+    ]
+   },
+   {
+    "key": "energy_charge",
+    "label": "Energy Charge",
+    "actual_amount": 107.9,
+    "estimated_amount": 107.9,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Energy Charge"
+    ],
+    "estimated_labels": [
+     "Kilowatt-Hour Charge",
+     "Kilowatt-Hour Charge",
+     "Kilowatt-Hour Charge",
+     "Kilowatt-Hour Charge"
+    ]
+   },
+   {
+    "key": "energy_conservation_credit",
+    "label": "Energy Conservation Credit",
+    "actual_amount": -5.4,
+    "estimated_amount": -5.39,
+    "delta": -0.01,
+    "status": "matched",
+    "actual_labels": [
+     "Energy Conservation Credit"
+    ],
+    "estimated_labels": [
+     "Energy Conservation Credit"
+    ]
+   },
+   {
+    "key": "storm_recovery_charge",
+    "label": "Storm Recovery Charge",
+    "actual_amount": 1.84,
+    "estimated_amount": 1.84,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Storm Recovery Charge"
+    ],
+    "estimated_labels": [
+     "Storm Recovery Charge"
+    ]
+   },
+   {
+    "key": "summary_rider_adjustments",
+    "label": "Summary of Rider Adjustments",
+    "actual_amount": 17.08,
+    "estimated_amount": 17.08,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Summary of Rider Adjustments"
+    ],
+    "estimated_labels": [
+     "Summary of Rider Adjustments"
+    ]
+   }
+  ],
+  "actual_lines": [
+   {
+    "label": "Basic Customer Charge",
+    "amount": 14.0,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Energy Charge",
+    "amount": 45.93,
+    "quantity": 379.0,
+    "unit": "kWh",
+    "rate": 0.12119,
+    "detail": null,
+    "period_start": "2025-09-18",
+    "period_end": "2025-09-30",
+    "is_subperiod_detail": true
+   },
+   {
+    "label": "Energy Charge",
+    "amount": 53.14,
+    "quantity": 421.0,
+    "unit": "kWh",
+    "rate": 0.12623,
+    "detail": null,
+    "period_start": "2025-10-01",
+    "period_end": "2025-10-17",
+    "is_subperiod_detail": true
+   },
+   {
+    "label": "Energy Charge",
+    "amount": 8.83,
+    "quantity": 76.0,
+    "unit": "kWh",
+    "rate": 0.11623,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Storm Recovery Charge",
+    "amount": 1.84,
+    "quantity": 876.0,
+    "unit": "kWh",
+    "rate": 0.0021,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Summary of Rider Adjustments",
+    "amount": 17.08,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Clean Energy Rider",
+    "amount": 1.52,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Energy Conservation Credit",
+    "amount": -5.4,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   }
+  ],
+  "notes": [
+   "Formula-based rider calculations are not yet implemented.",
+   "Applied rider adjustments from parsed historical rider tables.",
+   "Used billed split energy rows to validate tariff changes within the billing period.",
+   "Applied observed-history fallback for clean energy rider.",
+   "Electric total delta = actual 136.94 - estimated 136.95."
+  ]
+ },
+ {
+  "bill_id": 8,
+  "bill_date": "2025-11-19",
+  "source": "..\\version_3\\Actual Duke Bills\\2025-11-19.pdf",
+  "rate_code": "RES",
+  "kwh": 813.0,
+  "actual": 131.22,
+  "est": 131.19,
+  "delta": 0.03,
+  "version": {
+   "source_kind": "current",
+   "document_id": 343,
+   "current_document_id": 343,
+   "family_key": "/-/media/pdfs/for-your-home/rates/dep-nc/leaf-no-500-schedule-res.pdf",
+   "title": "leaf-no-500-schedule-res.pdf",
+   "state": "NC",
+   "company": "progress",
+   "category": "rate",
+   "kind": "pdf",
+   "leaf_no": "500",
+   "revision_label": "NC Second Revised Leaf No. 500",
+   "supersedes_label": "NC First Revised Leaf No. 500",
+   "effective_start": "October 1, 2025",
+   "effective_end": null,
+   "tariff_id": "nc_progress_res_residential-service",
+   "schedule_code": "RES",
+   "rider_id": null,
+   "source_url": "https://www.duke-energy.com/-/media/pdfs/for-your-home/rates/dep-nc/leaf-no-500-schedule-res.pdf",
+   "archived_url": null,
+   "local_path": "data\\raw\\nc\\progress\\rate\\leaf-no-500-schedule-res-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no-500-s.pdf",
+   "direct_downloadable": true,
+   "retrieved_at": "2026-03-16T18:06:22.553351Z"
+  },
+  "schedule": {
+   "tariff_id": "nc_progress_res_residential-service",
+   "utility": "Duke Energy",
+   "state": "NC",
+   "company": "progress",
+   "schedule_code": "RES",
+   "schedule_title": "Residential Service",
+   "customer_class": "residential",
+   "effective_start": "2025-10-01",
+   "effective_end": null,
+   "fixed_charges": [
+    {
+     "label": "Basic Customer Charge",
+     "amount": 14.0,
+     "unit": "month"
+    }
+   ],
+   "energy_charges": [
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.12623,
+     "unit": "kWh",
+     "block_from": 0.0,
+     "block_to": null,
+     "season": "May - September",
+     "period": null
+    },
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.12623,
+     "unit": "kWh",
+     "block_from": 0.0,
+     "block_to": 800.0,
+     "season": "October - April",
+     "period": null
+    },
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.11623,
+     "unit": "kWh",
+     "block_from": 800.0,
+     "block_to": null,
+     "season": "October - April",
+     "period": null
+    }
+   ],
+   "demand_charges": [],
+   "tou_periods": [],
+   "riders": [
+    {
+     "code": "BA",
+     "title": "Annual Billing Adjustments Rider",
+     "role": "rider"
+    },
+    {
+     "code": "BA",
+     "title": "Rider BA",
+     "role": "rider"
+    },
+    {
+     "code": "JAA",
+     "title": "Rider JAA",
+     "role": "rider"
+    },
+    {
+     "code": "EDIT-4",
+     "title": "Rider EDIT-4",
+     "role": "rider"
+    },
+    {
+     "code": "CPRE",
+     "title": "Rider CPRE",
+     "role": "rider"
+    },
+    {
+     "code": "RDM",
+     "title": "Rider RDM",
+     "role": "rider"
+    },
+    {
+     "code": "ESM",
+     "title": "Rider ESM",
+     "role": "rider"
+    },
+    {
+     "code": "PIM",
+     "title": "Rider PIM",
+     "role": "rider"
+    },
+    {
+     "code": "CAR",
+     "title": "Rider CAR",
+     "role": "rider"
+    },
+    {
+     "code": "STS",
+     "title": "Rider STS",
+     "role": "rider"
+    }
+   ],
+   "credits": [],
+   "adjustments": [],
+   "eligibility": "all electric service of the same available type supplied to Customer's premises",
+   "raw_summary": "Duke Energy Progress, LLC \nNC Second Revised Leaf No. 500 \n (North Carolina Only)  \n \n \n \n       Superseding NC First Revised Leaf No. 500 \n \nNC Second Revised Leaf No. 500 \nEffective for service rendered on and after October 1, 2025 \nNCUC Docket No. E-2, Sub 1300, Order dated August 18, 2023 \n \nPage 1 of 2 \n \n \n \nRESIDENTIAL SERVICE \n \nSCHEDULE RES \nAVAILABILITY \n \nThis Schedule is available when electric service is used for domestic purposes in and about (1) a residential \ndwelling unit, including electric service used on a farm and in the preparation of the farm's products for market, \nor (2) a family care home.  A residential dwelling unit served under this Schedule may be used as a boarding \nhouse, fraternity house, tourist home, or like establishment, provided such residential dwelli"
+  },
+  "est_lines": [
+   {
+    "label": "Basic Customer Charge",
+    "amount": 14.0,
+    "details": "per month"
+   },
+   {
+    "label": "Kilowatt-Hour Charge",
+    "amount": 100.98,
+    "details": "800.0 kWh @ 0.12623"
+   },
+   {
+    "label": "Kilowatt-Hour Charge",
+    "amount": 1.51,
+    "details": "13.0 kWh @ 0.11623"
+   },
+   {
+    "label": "Energy Conservation Credit",
+    "amount": -5.12,
+    "details": "Energy Conservation Discount:Energy Conservation Credit"
+   },
+   {
+    "label": "Storm Recovery Charge",
+    "amount": 0.74,
+    "details": "Storm Securitization:2025-11-01-2025-11-17"
+   },
+   {
+    "label": "Summary of Rider Adjustments",
+    "amount": 15.85,
+    "details": "Summary of Rider Adjustments (Leaf No. 600, eff. 2024-04-01):Summary of Rider Adjustments"
+   },
+   {
+    "label": "Storm Recovery Charge",
+    "amount": 1.71,
+    "details": "Storm Securitization:2025-10-18-2025-11-17"
+   },
+   {
+    "label": "Clean Energy Rider",
+    "amount": 1.52,
+    "details": "observed history 1.520 per month"
+   }
+  ],
+  "recon": [
+   {
+    "key": "clean_energy_rider",
+    "label": "Clean Energy Rider",
+    "actual_amount": 1.52,
+    "estimated_amount": 1.52,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Clean Energy Rider"
+    ],
+    "estimated_labels": [
+     "Clean Energy Rider"
+    ]
+   },
+   {
+    "key": "customer_charge",
+    "label": "Basic Customer Charge",
+    "actual_amount": 14.0,
+    "estimated_amount": 14.0,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Basic Customer Charge"
+    ],
+    "estimated_labels": [
+     "Basic Customer Charge"
+    ]
+   },
+   {
+    "key": "energy_charge",
+    "label": "Energy Charge",
+    "actual_amount": 102.49,
+    "estimated_amount": 102.49,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Energy Charge"
+    ],
+    "estimated_labels": [
+     "Kilowatt-Hour Charge",
+     "Kilowatt-Hour Charge"
+    ]
+   },
+   {
+    "key": "energy_conservation_credit",
+    "label": "Energy Conservation Credit",
+    "actual_amount": -5.12,
+    "estimated_amount": -5.12,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Energy Conservation Credit"
+    ],
+    "estimated_labels": [
+     "Energy Conservation Credit"
+    ]
+   },
+   {
+    "key": "storm_recovery_charge",
+    "label": "Storm Recovery Charge",
+    "actual_amount": 2.45,
+    "estimated_amount": 2.45,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Storm Recovery Charge"
+    ],
+    "estimated_labels": [
+     "Storm Recovery Charge",
+     "Storm Recovery Charge"
+    ]
+   },
+   {
+    "key": "summary_rider_adjustments",
+    "label": "Summary of Rider Adjustments",
+    "actual_amount": 15.88,
+    "estimated_amount": 15.85,
+    "delta": 0.03,
+    "status": "matched",
+    "actual_labels": [
+     "Summary of Rider Adjustments"
+    ],
+    "estimated_labels": [
+     "Summary of Rider Adjustments"
+    ]
+   }
+  ],
+  "actual_lines": [
+   {
+    "label": "Basic Customer Charge",
+    "amount": 14.0,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Energy Charge",
+    "amount": 100.98,
+    "quantity": 800.0,
+    "unit": "kWh",
+    "rate": 0.12623,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Energy Charge",
+    "amount": 1.51,
+    "quantity": 13.0,
+    "unit": "kWh",
+    "rate": 0.11623,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Clean Energy Rider",
+    "amount": 1.52,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Energy Conservation Credit",
+    "amount": -5.12,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Storm Recovery Charge",
+    "amount": 2.45,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Summary of Rider Adjustments",
+    "amount": 15.88,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   }
+  ],
+  "notes": [
+   "Applied rider adjustments from parsed historical rider tables.",
+   "Storm rider mid-period proration uses a linear day-fraction of monthly kWh (approximation; actual billing uses meter reads).",
+   "Applied observed-history fallback for clean energy rider.",
+   "Electric total delta = actual 131.22 - estimated 131.19."
+  ]
+ },
+ {
+  "bill_id": 9,
+  "bill_date": "2025-12-18",
+  "source": "..\\version_3\\Actual Duke Bills\\2025-12-18.pdf",
+  "rate_code": "RES",
+  "kwh": 1234.0,
+  "actual": 188.78,
+  "est": 189.23,
+  "delta": -0.45,
+  "version": {
+   "source_kind": "current",
+   "document_id": 343,
+   "current_document_id": 343,
+   "family_key": "/-/media/pdfs/for-your-home/rates/dep-nc/leaf-no-500-schedule-res.pdf",
+   "title": "leaf-no-500-schedule-res.pdf",
+   "state": "NC",
+   "company": "progress",
+   "category": "rate",
+   "kind": "pdf",
+   "leaf_no": "500",
+   "revision_label": "NC Second Revised Leaf No. 500",
+   "supersedes_label": "NC First Revised Leaf No. 500",
+   "effective_start": "October 1, 2025",
+   "effective_end": null,
+   "tariff_id": "nc_progress_res_residential-service",
+   "schedule_code": "RES",
+   "rider_id": null,
+   "source_url": "https://www.duke-energy.com/-/media/pdfs/for-your-home/rates/dep-nc/leaf-no-500-schedule-res.pdf",
+   "archived_url": null,
+   "local_path": "data\\raw\\nc\\progress\\rate\\leaf-no-500-schedule-res-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no-500-s.pdf",
+   "direct_downloadable": true,
+   "retrieved_at": "2026-03-16T18:06:22.553351Z"
+  },
+  "schedule": {
+   "tariff_id": "nc_progress_res_residential-service",
+   "utility": "Duke Energy",
+   "state": "NC",
+   "company": "progress",
+   "schedule_code": "RES",
+   "schedule_title": "Residential Service",
+   "customer_class": "residential",
+   "effective_start": "2025-10-01",
+   "effective_end": null,
+   "fixed_charges": [
+    {
+     "label": "Basic Customer Charge",
+     "amount": 14.0,
+     "unit": "month"
+    }
+   ],
+   "energy_charges": [
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.12623,
+     "unit": "kWh",
+     "block_from": 0.0,
+     "block_to": null,
+     "season": "May - September",
+     "period": null
+    },
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.12623,
+     "unit": "kWh",
+     "block_from": 0.0,
+     "block_to": 800.0,
+     "season": "October - April",
+     "period": null
+    },
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.11623,
+     "unit": "kWh",
+     "block_from": 800.0,
+     "block_to": null,
+     "season": "October - April",
+     "period": null
+    }
+   ],
+   "demand_charges": [],
+   "tou_periods": [],
+   "riders": [
+    {
+     "code": "BA",
+     "title": "Annual Billing Adjustments Rider",
+     "role": "rider"
+    },
+    {
+     "code": "BA",
+     "title": "Rider BA",
+     "role": "rider"
+    },
+    {
+     "code": "JAA",
+     "title": "Rider JAA",
+     "role": "rider"
+    },
+    {
+     "code": "EDIT-4",
+     "title": "Rider EDIT-4",
+     "role": "rider"
+    },
+    {
+     "code": "CPRE",
+     "title": "Rider CPRE",
+     "role": "rider"
+    },
+    {
+     "code": "RDM",
+     "title": "Rider RDM",
+     "role": "rider"
+    },
+    {
+     "code": "ESM",
+     "title": "Rider ESM",
+     "role": "rider"
+    },
+    {
+     "code": "PIM",
+     "title": "Rider PIM",
+     "role": "rider"
+    },
+    {
+     "code": "CAR",
+     "title": "Rider CAR",
+     "role": "rider"
+    },
+    {
+     "code": "STS",
+     "title": "Rider STS",
+     "role": "rider"
+    }
+   ],
+   "credits": [],
+   "adjustments": [],
+   "eligibility": "all electric service of the same available type supplied to Customer's premises",
+   "raw_summary": "Duke Energy Progress, LLC \nNC Second Revised Leaf No. 500 \n (North Carolina Only)  \n \n \n \n       Superseding NC First Revised Leaf No. 500 \n \nNC Second Revised Leaf No. 500 \nEffective for service rendered on and after October 1, 2025 \nNCUC Docket No. E-2, Sub 1300, Order dated August 18, 2023 \n \nPage 1 of 2 \n \n \n \nRESIDENTIAL SERVICE \n \nSCHEDULE RES \nAVAILABILITY \n \nThis Schedule is available when electric service is used for domestic purposes in and about (1) a residential \ndwelling unit, including electric service used on a farm and in the preparation of the farm's products for market, \nor (2) a family care home.  A residential dwelling unit served under this Schedule may be used as a boarding \nhouse, fraternity house, tourist home, or like establishment, provided such residential dwelli"
+  },
+  "est_lines": [
+   {
+    "label": "Basic Customer Charge",
+    "amount": 14.0,
+    "details": "per month"
+   },
+   {
+    "label": "Kilowatt-Hour Charge",
+    "amount": 100.98,
+    "details": "800.0 kWh @ 0.12623"
+   },
+   {
+    "label": "Kilowatt-Hour Charge",
+    "amount": 50.44,
+    "details": "434.0 kWh @ 0.11623"
+   },
+   {
+    "label": "Energy Conservation Credit",
+    "amount": -7.57,
+    "details": "Energy Conservation Discount:Energy Conservation Credit"
+   },
+   {
+    "label": "Storm Recovery Charge",
+    "amount": 2.05,
+    "details": "Storm Securitization:2025-11-18-2025-12-16"
+   },
+   {
+    "label": "Summary of Rider Adjustments",
+    "amount": 25.06,
+    "details": "Summary of Rider Adjustments (Leaf No. 600, eff. 2025-12-01):Summary of Rider Adjustments"
+   },
+   {
+    "label": "Storm Recovery Charge",
+    "amount": 2.59,
+    "details": "Storm Securitization:2025-11-18-2025-12-16"
+   },
+   {
+    "label": "Clean Energy Rider",
+    "amount": 0.68,
+    "details": "observed history 1.520 per month"
+   },
+   {
+    "label": "Clean Energy Rider",
+    "amount": 1.0,
+    "details": "observed history 1.810 per month"
+   }
+  ],
+  "recon": [
+   {
+    "key": "clean_energy_rider",
+    "label": "Clean Energy Rider",
+    "actual_amount": 1.68,
+    "estimated_amount": 1.68,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Clean Energy Rider"
+    ],
+    "estimated_labels": [
+     "Clean Energy Rider",
+     "Clean Energy Rider"
+    ]
+   },
+   {
+    "key": "customer_charge",
+    "label": "Basic Customer Charge",
+    "actual_amount": 14.0,
+    "estimated_amount": 14.0,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Basic Customer Charge"
+    ],
+    "estimated_labels": [
+     "Basic Customer Charge"
+    ]
+   },
+   {
+    "key": "energy_charge",
+    "label": "Energy Charge",
+    "actual_amount": 151.42,
+    "estimated_amount": 151.42,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Energy Charge"
+    ],
+    "estimated_labels": [
+     "Kilowatt-Hour Charge",
+     "Kilowatt-Hour Charge"
+    ]
+   },
+   {
+    "key": "energy_conservation_credit",
+    "label": "Energy Conservation Credit",
+    "actual_amount": -7.57,
+    "estimated_amount": -7.57,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Energy Conservation Credit"
+    ],
+    "estimated_labels": [
+     "Energy Conservation Credit"
+    ]
+   },
+   {
+    "key": "storm_recovery_charge",
+    "label": "Storm Recovery Charge",
+    "actual_amount": 4.64,
+    "estimated_amount": 4.64,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Storm Recovery Charge"
+    ],
+    "estimated_labels": [
+     "Storm Recovery Charge",
+     "Storm Recovery Charge"
+    ]
+   },
+   {
+    "key": "summary_rider_adjustments",
+    "label": "Summary of Rider Adjustments",
+    "actual_amount": 24.61,
+    "estimated_amount": 25.06,
+    "delta": -0.45,
+    "status": "matched",
+    "actual_labels": [
+     "Summary of Rider Adjustments"
+    ],
+    "estimated_labels": [
+     "Summary of Rider Adjustments"
+    ]
+   }
+  ],
+  "actual_lines": [
+   {
+    "label": "Basic Customer Charge",
+    "amount": 14.0,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Energy Charge",
+    "amount": 100.98,
+    "quantity": 800.0,
+    "unit": "kWh",
+    "rate": 0.12623,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Energy Charge",
+    "amount": 50.44,
+    "quantity": 434.0,
+    "unit": "kWh",
+    "rate": 0.11623,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Clean Energy Rider",
+    "amount": 0.68,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": "2025-11-18",
+    "period_end": "2025-11-30",
+    "is_subperiod_detail": true
+   },
+   {
+    "label": "Clean Energy Rider",
+    "amount": 1.0,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": "2025-12-01",
+    "period_end": "2025-12-16",
+    "is_subperiod_detail": true
+   },
+   {
+    "label": "Energy Conservation Credit",
+    "amount": -7.57,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Storm Recovery Charge",
+    "amount": 4.64,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Summary of Rider Adjustments",
+    "amount": 9.69,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Summary of Rider Adjustments",
+    "amount": 6.44,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": "2025-11-18",
+    "period_end": "2025-11-30",
+    "is_subperiod_detail": true
+   },
+   {
+    "label": "Summary of Rider Adjustments",
+    "amount": 8.48,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": "2025-12-01",
+    "period_end": "2025-12-16",
+    "is_subperiod_detail": true
+   }
+  ],
+  "notes": [
+   "Applied rider adjustments from parsed historical rider tables.",
+   "Storm rider mid-period proration uses a linear day-fraction of monthly kWh (approximation; actual billing uses meter reads).",
+   "Applied observed-history fallback for clean energy rider.",
+   "Electric total delta = actual 188.78 - estimated 189.23."
+  ]
+ },
+ {
+  "bill_id": 10,
+  "bill_date": "2026-01-21",
+  "source": "..\\version_3\\Actual Duke Bills\\2026-01-21.pdf",
+  "rate_code": "RES",
+  "kwh": 1300.0,
+  "actual": 198.74,
+  "est": 199.14,
+  "delta": -0.4,
+  "version": {
+   "source_kind": "current",
+   "document_id": 343,
+   "current_document_id": 343,
+   "family_key": "/-/media/pdfs/for-your-home/rates/dep-nc/leaf-no-500-schedule-res.pdf",
+   "title": "leaf-no-500-schedule-res.pdf",
+   "state": "NC",
+   "company": "progress",
+   "category": "rate",
+   "kind": "pdf",
+   "leaf_no": "500",
+   "revision_label": "NC Second Revised Leaf No. 500",
+   "supersedes_label": "NC First Revised Leaf No. 500",
+   "effective_start": "October 1, 2025",
+   "effective_end": null,
+   "tariff_id": "nc_progress_res_residential-service",
+   "schedule_code": "RES",
+   "rider_id": null,
+   "source_url": "https://www.duke-energy.com/-/media/pdfs/for-your-home/rates/dep-nc/leaf-no-500-schedule-res.pdf",
+   "archived_url": null,
+   "local_path": "data\\raw\\nc\\progress\\rate\\leaf-no-500-schedule-res-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no-500-s.pdf",
+   "direct_downloadable": true,
+   "retrieved_at": "2026-03-16T18:06:22.553351Z"
+  },
+  "schedule": {
+   "tariff_id": "nc_progress_res_residential-service",
+   "utility": "Duke Energy",
+   "state": "NC",
+   "company": "progress",
+   "schedule_code": "RES",
+   "schedule_title": "Residential Service",
+   "customer_class": "residential",
+   "effective_start": "2025-10-01",
+   "effective_end": null,
+   "fixed_charges": [
+    {
+     "label": "Basic Customer Charge",
+     "amount": 14.0,
+     "unit": "month"
+    }
+   ],
+   "energy_charges": [
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.12623,
+     "unit": "kWh",
+     "block_from": 0.0,
+     "block_to": null,
+     "season": "May - September",
+     "period": null
+    },
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.12623,
+     "unit": "kWh",
+     "block_from": 0.0,
+     "block_to": 800.0,
+     "season": "October - April",
+     "period": null
+    },
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.11623,
+     "unit": "kWh",
+     "block_from": 800.0,
+     "block_to": null,
+     "season": "October - April",
+     "period": null
+    }
+   ],
+   "demand_charges": [],
+   "tou_periods": [],
+   "riders": [
+    {
+     "code": "BA",
+     "title": "Annual Billing Adjustments Rider",
+     "role": "rider"
+    },
+    {
+     "code": "BA",
+     "title": "Rider BA",
+     "role": "rider"
+    },
+    {
+     "code": "JAA",
+     "title": "Rider JAA",
+     "role": "rider"
+    },
+    {
+     "code": "EDIT-4",
+     "title": "Rider EDIT-4",
+     "role": "rider"
+    },
+    {
+     "code": "CPRE",
+     "title": "Rider CPRE",
+     "role": "rider"
+    },
+    {
+     "code": "RDM",
+     "title": "Rider RDM",
+     "role": "rider"
+    },
+    {
+     "code": "ESM",
+     "title": "Rider ESM",
+     "role": "rider"
+    },
+    {
+     "code": "PIM",
+     "title": "Rider PIM",
+     "role": "rider"
+    },
+    {
+     "code": "CAR",
+     "title": "Rider CAR",
+     "role": "rider"
+    },
+    {
+     "code": "STS",
+     "title": "Rider STS",
+     "role": "rider"
+    }
+   ],
+   "credits": [],
+   "adjustments": [],
+   "eligibility": "all electric service of the same available type supplied to Customer's premises",
+   "raw_summary": "Duke Energy Progress, LLC \nNC Second Revised Leaf No. 500 \n (North Carolina Only)  \n \n \n \n       Superseding NC First Revised Leaf No. 500 \n \nNC Second Revised Leaf No. 500 \nEffective for service rendered on and after October 1, 2025 \nNCUC Docket No. E-2, Sub 1300, Order dated August 18, 2023 \n \nPage 1 of 2 \n \n \n \nRESIDENTIAL SERVICE \n \nSCHEDULE RES \nAVAILABILITY \n \nThis Schedule is available when electric service is used for domestic purposes in and about (1) a residential \ndwelling unit, including electric service used on a farm and in the preparation of the farm's products for market, \nor (2) a family care home.  A residential dwelling unit served under this Schedule may be used as a boarding \nhouse, fraternity house, tourist home, or like establishment, provided such residential dwelli"
+  },
+  "est_lines": [
+   {
+    "label": "Basic Customer Charge",
+    "amount": 14.0,
+    "details": "per month"
+   },
+   {
+    "label": "Kilowatt-Hour Charge",
+    "amount": 100.98,
+    "details": "800.0 kWh @ 0.12623"
+   },
+   {
+    "label": "Kilowatt-Hour Charge",
+    "amount": 58.12,
+    "details": "500.0 kWh @ 0.11623"
+   },
+   {
+    "label": "Energy Conservation Credit",
+    "amount": -7.96,
+    "details": "Energy Conservation Discount:Energy Conservation Credit"
+   },
+   {
+    "label": "Storm Recovery Charge",
+    "amount": 2.16,
+    "details": "Storm Securitization:2025-12-17-2026-01-17"
+   },
+   {
+    "label": "Storm Recovery Charge",
+    "amount": 2.77,
+    "details": "Storm Securitization:2025-12-17-2025-12-31; Storm Securitization:2026-01-01-2026-01-17"
+   },
+   {
+    "label": "Clean Energy Rider",
+    "amount": 1.81,
+    "details": "Annual Billing Adjustments:Clean Energy Rider"
+   },
+   {
+    "label": "Summary of Rider Adjustments",
+    "amount": 27.26,
+    "details": "Summary of Rider Adjustments:Summary of Rider Adjustments"
+   }
+  ],
+  "recon": [
+   {
+    "key": "clean_energy_rider",
+    "label": "Clean Energy Rider",
+    "actual_amount": 1.81,
+    "estimated_amount": 1.81,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Clean Energy Rider"
+    ],
+    "estimated_labels": [
+     "Clean Energy Rider"
+    ]
+   },
+   {
+    "key": "customer_charge",
+    "label": "Basic Customer Charge",
+    "actual_amount": 14.0,
+    "estimated_amount": 14.0,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Basic Customer Charge"
+    ],
+    "estimated_labels": [
+     "Basic Customer Charge"
+    ]
+   },
+   {
+    "key": "energy_charge",
+    "label": "Energy Charge",
+    "actual_amount": 159.1,
+    "estimated_amount": 159.1,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Energy Charge"
+    ],
+    "estimated_labels": [
+     "Kilowatt-Hour Charge",
+     "Kilowatt-Hour Charge"
+    ]
+   },
+   {
+    "key": "energy_conservation_credit",
+    "label": "Energy Conservation Credit",
+    "actual_amount": -7.96,
+    "estimated_amount": -7.96,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Energy Conservation Credit"
+    ],
+    "estimated_labels": [
+     "Energy Conservation Credit"
+    ]
+   },
+   {
+    "key": "storm_recovery_charge",
+    "label": "Storm Recovery Charge",
+    "actual_amount": 4.93,
+    "estimated_amount": 4.93,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Storm Recovery Charge"
+    ],
+    "estimated_labels": [
+     "Storm Recovery Charge",
+     "Storm Recovery Charge"
+    ]
+   },
+   {
+    "key": "summary_rider_adjustments",
+    "label": "Summary of Rider Adjustments",
+    "actual_amount": 26.86,
+    "estimated_amount": 27.26,
+    "delta": -0.4,
+    "status": "matched",
+    "actual_labels": [
+     "Summary of Rider Adjustments"
+    ],
+    "estimated_labels": [
+     "Summary of Rider Adjustments"
+    ]
+   }
+  ],
+  "actual_lines": [
+   {
+    "label": "Basic Customer Charge",
+    "amount": 14.0,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Energy Charge",
+    "amount": 100.98,
+    "quantity": 800.0,
+    "unit": "kWh",
+    "rate": 0.12623,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Energy Charge",
+    "amount": 58.12,
+    "quantity": 500.0,
+    "unit": "kWh",
+    "rate": 0.11623,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Clean Energy Rider",
+    "amount": 1.81,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Energy Conservation Credit",
+    "amount": -7.96,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Storm Recovery Charge",
+    "amount": 4.93,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Summary of Rider Adjustments",
+    "amount": 15.99,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Summary of Rider Adjustments",
+    "amount": 4.88,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": "2025-12-17",
+    "period_end": "2025-12-31",
+    "is_subperiod_detail": true
+   },
+   {
+    "label": "Summary of Rider Adjustments",
+    "amount": 5.99,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": "2026-01-01",
+    "period_end": "2026-01-17",
+    "is_subperiod_detail": true
+   }
+  ],
+  "notes": [
+   "Applied rider adjustments from parsed historical rider tables.",
+   "Storm rider mid-period proration uses a linear day-fraction of monthly kWh (approximation; actual billing uses meter reads).",
+   "Electric total delta = actual 198.74 - estimated 199.14."
+  ]
+ },
+ {
+  "bill_id": 11,
+  "bill_date": "2026-02-18",
+  "source": "..\\version_3\\Actual Duke Bills\\2026-02-18.pdf",
+  "rate_code": "RES",
+  "kwh": 2405.0,
+  "actual": 348.57,
+  "est": 348.57,
+  "delta": 0.0,
+  "version": {
+   "source_kind": "current",
+   "document_id": 343,
+   "current_document_id": 343,
+   "family_key": "/-/media/pdfs/for-your-home/rates/dep-nc/leaf-no-500-schedule-res.pdf",
+   "title": "leaf-no-500-schedule-res.pdf",
+   "state": "NC",
+   "company": "progress",
+   "category": "rate",
+   "kind": "pdf",
+   "leaf_no": "500",
+   "revision_label": "NC Second Revised Leaf No. 500",
+   "supersedes_label": "NC First Revised Leaf No. 500",
+   "effective_start": "October 1, 2025",
+   "effective_end": null,
+   "tariff_id": "nc_progress_res_residential-service",
+   "schedule_code": "RES",
+   "rider_id": null,
+   "source_url": "https://www.duke-energy.com/-/media/pdfs/for-your-home/rates/dep-nc/leaf-no-500-schedule-res.pdf",
+   "archived_url": null,
+   "local_path": "data\\raw\\nc\\progress\\rate\\leaf-no-500-schedule-res-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no-500-s.pdf",
+   "direct_downloadable": true,
+   "retrieved_at": "2026-03-16T18:06:22.553351Z"
+  },
+  "schedule": {
+   "tariff_id": "nc_progress_res_residential-service",
+   "utility": "Duke Energy",
+   "state": "NC",
+   "company": "progress",
+   "schedule_code": "RES",
+   "schedule_title": "Residential Service",
+   "customer_class": "residential",
+   "effective_start": "2025-10-01",
+   "effective_end": null,
+   "fixed_charges": [
+    {
+     "label": "Basic Customer Charge",
+     "amount": 14.0,
+     "unit": "month"
+    }
+   ],
+   "energy_charges": [
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.12623,
+     "unit": "kWh",
+     "block_from": 0.0,
+     "block_to": null,
+     "season": "May - September",
+     "period": null
+    },
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.12623,
+     "unit": "kWh",
+     "block_from": 0.0,
+     "block_to": 800.0,
+     "season": "October - April",
+     "period": null
+    },
+    {
+     "label": "Kilowatt-Hour Charge",
+     "rate": 0.11623,
+     "unit": "kWh",
+     "block_from": 800.0,
+     "block_to": null,
+     "season": "October - April",
+     "period": null
+    }
+   ],
+   "demand_charges": [],
+   "tou_periods": [],
+   "riders": [
+    {
+     "code": "BA",
+     "title": "Annual Billing Adjustments Rider",
+     "role": "rider"
+    },
+    {
+     "code": "BA",
+     "title": "Rider BA",
+     "role": "rider"
+    },
+    {
+     "code": "JAA",
+     "title": "Rider JAA",
+     "role": "rider"
+    },
+    {
+     "code": "EDIT-4",
+     "title": "Rider EDIT-4",
+     "role": "rider"
+    },
+    {
+     "code": "CPRE",
+     "title": "Rider CPRE",
+     "role": "rider"
+    },
+    {
+     "code": "RDM",
+     "title": "Rider RDM",
+     "role": "rider"
+    },
+    {
+     "code": "ESM",
+     "title": "Rider ESM",
+     "role": "rider"
+    },
+    {
+     "code": "PIM",
+     "title": "Rider PIM",
+     "role": "rider"
+    },
+    {
+     "code": "CAR",
+     "title": "Rider CAR",
+     "role": "rider"
+    },
+    {
+     "code": "STS",
+     "title": "Rider STS",
+     "role": "rider"
+    }
+   ],
+   "credits": [],
+   "adjustments": [],
+   "eligibility": "all electric service of the same available type supplied to Customer's premises",
+   "raw_summary": "Duke Energy Progress, LLC \nNC Second Revised Leaf No. 500 \n (North Carolina Only)  \n \n \n \n       Superseding NC First Revised Leaf No. 500 \n \nNC Second Revised Leaf No. 500 \nEffective for service rendered on and after October 1, 2025 \nNCUC Docket No. E-2, Sub 1300, Order dated August 18, 2023 \n \nPage 1 of 2 \n \n \n \nRESIDENTIAL SERVICE \n \nSCHEDULE RES \nAVAILABILITY \n \nThis Schedule is available when electric service is used for domestic purposes in and about (1) a residential \ndwelling unit, including electric service used on a farm and in the preparation of the farm's products for market, \nor (2) a family care home.  A residential dwelling unit served under this Schedule may be used as a boarding \nhouse, fraternity house, tourist home, or like establishment, provided such residential dwelli"
+  },
+  "est_lines": [
+   {
+    "label": "Basic Customer Charge",
+    "amount": 14.0,
+    "details": "per month"
+   },
+   {
+    "label": "Kilowatt-Hour Charge",
+    "amount": 100.98,
+    "details": "800.0 kWh @ 0.12623"
+   },
+   {
+    "label": "Kilowatt-Hour Charge",
+    "amount": 186.55,
+    "details": "1605.0 kWh @ 0.11623"
+   },
+   {
+    "label": "Energy Conservation Credit",
+    "amount": -14.38,
+    "details": "Energy Conservation Discount:Energy Conservation Credit"
+   },
+   {
+    "label": "Storm Recovery Charge",
+    "amount": 3.99,
+    "details": "Storm Securitization:2026-01-18-2026-02-16"
+   },
+   {
+    "label": "Storm Recovery Charge",
+    "amount": 5.19,
+    "details": "Storm Securitization:2026-01-18-2026-02-16"
+   },
+   {
+    "label": "Clean Energy Rider",
+    "amount": 1.81,
+    "details": "Annual Billing Adjustments:Clean Energy Rider"
+   },
+   {
+    "label": "Summary of Rider Adjustments",
+    "amount": 50.43,
+    "details": "Summary of Rider Adjustments:Summary of Rider Adjustments"
+   }
+  ],
+  "recon": [
+   {
+    "key": "clean_energy_rider",
+    "label": "Clean Energy Rider",
+    "actual_amount": 1.81,
+    "estimated_amount": 1.81,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Clean Energy Rider"
+    ],
+    "estimated_labels": [
+     "Clean Energy Rider"
+    ]
+   },
+   {
+    "key": "customer_charge",
+    "label": "Basic Customer Charge",
+    "actual_amount": 14.0,
+    "estimated_amount": 14.0,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Basic Customer Charge"
+    ],
+    "estimated_labels": [
+     "Basic Customer Charge"
+    ]
+   },
+   {
+    "key": "energy_charge",
+    "label": "Energy Charge",
+    "actual_amount": 287.53,
+    "estimated_amount": 287.53,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Energy Charge"
+    ],
+    "estimated_labels": [
+     "Kilowatt-Hour Charge",
+     "Kilowatt-Hour Charge"
+    ]
+   },
+   {
+    "key": "energy_conservation_credit",
+    "label": "Energy Conservation Credit",
+    "actual_amount": -14.38,
+    "estimated_amount": -14.38,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Energy Conservation Credit"
+    ],
+    "estimated_labels": [
+     "Energy Conservation Credit"
+    ]
+   },
+   {
+    "key": "storm_recovery_charge",
+    "label": "Storm Recovery Charge",
+    "actual_amount": 9.18,
+    "estimated_amount": 9.18,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Storm Recovery Charge"
+    ],
+    "estimated_labels": [
+     "Storm Recovery Charge",
+     "Storm Recovery Charge"
+    ]
+   },
+   {
+    "key": "summary_rider_adjustments",
+    "label": "Summary of Rider Adjustments",
+    "actual_amount": 50.43,
+    "estimated_amount": 50.43,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Summary of Rider Adjustments"
+    ],
+    "estimated_labels": [
+     "Summary of Rider Adjustments"
+    ]
+   }
+  ],
+  "actual_lines": [
+   {
+    "label": "Basic Customer Charge",
+    "amount": 14.0,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Energy Charge",
+    "amount": 100.98,
+    "quantity": 800.0,
+    "unit": "kWh",
+    "rate": 0.12623,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Energy Charge",
+    "amount": 186.55,
+    "quantity": 1605.0,
+    "unit": "kWh",
+    "rate": 0.11623,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Clean Energy Rider",
+    "amount": 1.81,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Energy Conservation Credit",
+    "amount": -14.38,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Storm Recovery Charge",
+    "amount": 9.18,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Summary of Rider Adjustments",
+    "amount": 50.43,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   }
+  ],
+  "notes": [
+   "Applied rider adjustments from parsed historical rider tables.",
+   "Storm rider mid-period proration uses a linear day-fraction of monthly kWh (approximation; actual billing uses meter reads).",
+   "Electric total delta = actual 348.57 - estimated 348.57."
+  ]
+ },
+ {
+  "bill_id": 12,
+  "bill_date": "2026-03-20",
+  "source": "..\\version_3\\Actual Duke Bills\\2026-03-20.pdf",
+  "rate_code": "R-TOU-CPP",
+  "kwh": 1290.583,
+  "actual": null,
+  "est": 145.99,
+  "delta": null,
+  "version": {
+   "source_kind": "current",
+   "document_id": 346,
+   "current_document_id": 346,
+   "family_key": "/-/media/pdfs/for-your-home/rates/dep-nc/leaf-no-503-schedule-r-tou-cpp.pdf",
+   "title": "leaf-no-503-schedule-r-tou-cpp.pdf",
+   "state": "NC",
+   "company": "progress",
+   "category": "rate",
+   "kind": "pdf",
+   "leaf_no": "503",
+   "revision_label": "NC Second Revised Leaf No. 503",
+   "supersedes_label": "NC First Revised Leaf No. 503",
+   "effective_start": "October 1, 2025",
+   "effective_end": null,
+   "tariff_id": "nc_progress_r-tou-cpp_time-of-use-with-critical-peak-pricing",
+   "schedule_code": "R-TOU-CPP",
+   "rider_id": null,
+   "source_url": "https://www.duke-energy.com/-/media/pdfs/for-your-home/rates/dep-nc/leaf-no-503-schedule-r-tou-cpp.pdf",
+   "archived_url": null,
+   "local_path": "data\\raw\\nc\\progress\\rate\\leaf-no-503-schedule-r-tou-cpp-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no.pdf",
+   "direct_downloadable": true,
+   "retrieved_at": "2026-03-16T18:06:22.553369Z"
+  },
+  "schedule": {
+   "tariff_id": "nc_progress_r-tou-cpp_time-of-use-with-critical-peak-pricing",
+   "utility": "Duke Energy",
+   "state": "NC",
+   "company": "progress",
+   "schedule_code": "R-TOU-CPP",
+   "schedule_title": "TIME OF USE WITH Critical PEAK Pricing",
+   "customer_class": "residential",
+   "effective_start": "2025-10-01",
+   "effective_end": null,
+   "fixed_charges": [
+    {
+     "label": "Basic Customer Charge",
+     "amount": 14.0,
+     "unit": "month"
+    }
+   ],
+   "energy_charges": [
+    {
+     "label": "Energy Charge - Critical Peak",
+     "rate": 0.41002,
+     "unit": "kWh",
+     "block_from": null,
+     "block_to": null,
+     "season": null,
+     "period": "Critical Peak"
+    },
+    {
+     "label": "Energy Charge - On-Peak",
+     "rate": 0.21952,
+     "unit": "kWh",
+     "block_from": null,
+     "block_to": null,
+     "season": null,
+     "period": "On-Peak"
+    },
+    {
+     "label": "Energy Charge - Off-Peak",
+     "rate": 0.11,
+     "unit": "kWh",
+     "block_from": null,
+     "block_to": null,
+     "season": null,
+     "period": "Off-Peak"
+    },
+    {
+     "label": "Energy Charge - Discount",
+     "rate": 0.08274,
+     "unit": "kWh",
+     "block_from": null,
+     "block_to": null,
+     "season": null,
+     "period": "Discount"
+    }
+   ],
+   "demand_charges": [],
+   "tou_periods": [
+    {
+     "name": "On-Peak",
+     "months": [
+      "May through September"
+     ],
+     "weekday_hours": "6:00 pm \u2013 9:00 pm",
+     "weekend_hours": null
+    },
+    {
+     "name": "On-Peak",
+     "months": [
+      "October through April"
+     ],
+     "weekday_hours": "6:00 am \u2013 9:00 am",
+     "weekend_hours": null
+    },
+    {
+     "name": "Discount",
+     "months": [
+      "May through September"
+     ],
+     "weekday_hours": "1:00 am \u2013 6:00 am",
+     "weekend_hours": "1:00 am \u2013 6:00 am"
+    },
+    {
+     "name": "Discount",
+     "months": [
+      "October through April"
+     ],
+     "weekday_hours": "1:00 am \u2013 3:00 am; 11:00 am \u2013 4:00 pm",
+     "weekend_hours": "1:00 am \u2013 3:00 am; 11:00 am \u2013 4:00 pm"
+    },
+    {
+     "name": "Off-Peak",
+     "months": [
+      "all calendar months"
+     ],
+     "weekday_hours": null,
+     "weekend_hours": null
+    }
+   ],
+   "riders": [
+    {
+     "code": "BA",
+     "title": "Rider BA",
+     "role": "rider"
+    },
+    {
+     "code": "JAA",
+     "title": "Rider JAA",
+     "role": "rider"
+    },
+    {
+     "code": "EDIT-4",
+     "title": "Rider EDIT-4",
+     "role": "rider"
+    },
+    {
+     "code": "CPRE",
+     "title": "Rider CPRE",
+     "role": "rider"
+    },
+    {
+     "code": "RDM",
+     "title": "Rider RDM",
+     "role": "rider"
+    },
+    {
+     "code": "ESM",
+     "title": "Rider ESM",
+     "role": "rider"
+    },
+    {
+     "code": "PIM",
+     "title": "Rider PIM",
+     "role": "rider"
+    },
+    {
+     "code": "CAR",
+     "title": "Rider CAR",
+     "role": "rider"
+    },
+    {
+     "code": "STS",
+     "title": "Rider STS",
+     "role": "rider"
+    }
+   ],
+   "credits": [],
+   "adjustments": [],
+   "eligibility": "all electric service of the same available type supplied to Customer's premises",
+   "raw_summary": "Duke Energy Progress, LLC \nNC Second Revised Leaf No. 503 \n(North Carolina Only)  \n \n \n \n         Superseding NC First Revised Leaf No. 503 \nNC Second Revised Leaf No. 503 \nEffective for service rendered on and after October 1, 2025 \nNCUC Docket No. E-2, Sub 1300, Order dated August 18, 2023 \n \nPage 1 of 4 \n  \n \nRESIDENTIAL SERVICE \nTIME OF USE WITH CRITICAL PEAK PRICING \nSCHEDULE R-TOU-CPP \n \nAVAILABILITY \nThis Schedule is available when electric service is used for domestic purposes in and about (1) a residential \ndwelling unit, including electric service used on a farm and in the preparation of the farm's products for \nmarket, or (2) a family care home.  A residential dwelling unit served under this Schedule may be used as \na boarding house, fraternity house, tourist home, or like estab"
+  },
+  "est_lines": [
+   {
+    "label": "Basic Customer Charge",
+    "amount": 14.0,
+    "details": "per month"
+   },
+   {
+    "label": "Energy Charge - Critical Peak",
+    "amount": 0.0,
+    "details": "0.0 kWh @ 0.41002"
+   },
+   {
+    "label": "Energy Charge - On-Peak",
+    "amount": 20.1,
+    "details": "91.573 kWh @ 0.21952"
+   },
+   {
+    "label": "Energy Charge - Off-Peak",
+    "amount": 71.52,
+    "details": "650.145 kWh @ 0.11"
+   },
+   {
+    "label": "Energy Charge - Discount",
+    "amount": 45.41,
+    "details": "548.865 kWh @ 0.08274"
+   },
+   {
+    "label": "Energy Conservation Credit",
+    "amount": -6.85,
+    "details": "Energy Conservation Discount:Energy Conservation Credit"
+   },
+   {
+    "label": "Clean Energy Rider",
+    "amount": 1.81,
+    "details": "Annual Billing Adjustments:Clean Energy Rider"
+   }
+  ],
+  "recon": [
+   {
+    "key": "clean_energy_rider",
+    "label": "Clean Energy Rider",
+    "actual_amount": 1.81,
+    "estimated_amount": 1.81,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Clean Energy Rider"
+    ],
+    "estimated_labels": [
+     "Clean Energy Rider"
+    ]
+   },
+   {
+    "key": "customer_charge",
+    "label": "Basic Customer Charge",
+    "actual_amount": 14.0,
+    "estimated_amount": 14.0,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Basic Customer Charge"
+    ],
+    "estimated_labels": [
+     "Basic Customer Charge"
+    ]
+   },
+   {
+    "key": "energy_charge",
+    "label": "Critical Peak Energy Charge",
+    "actual_amount": 137.03,
+    "estimated_amount": 137.03,
+    "delta": 0.0,
+    "status": "matched",
+    "actual_labels": [
+     "Critical Peak Energy Charge",
+     "On-Peak Energy Charge",
+     "Off-Peak Energy Charge",
+     "Discount Energy Charge"
+    ],
+    "estimated_labels": [
+     "Energy Charge - Critical Peak",
+     "Energy Charge - On-Peak",
+     "Energy Charge - Off-Peak",
+     "Energy Charge - Discount"
+    ]
+   },
+   {
+    "key": "energy_conservation_credit",
+    "label": "Energy Conservation Credit",
+    "actual_amount": -6.86,
+    "estimated_amount": -6.85,
+    "delta": -0.01,
+    "status": "matched",
+    "actual_labels": [
+     "Energy Conservation Credit"
+    ],
+    "estimated_labels": [
+     "Energy Conservation Credit"
+    ]
+   }
+  ],
+  "actual_lines": [
+   {
+    "label": "Basic Customer Charge",
+    "amount": 14.0,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Critical Peak Energy Charge",
+    "amount": 0.0,
+    "quantity": 0.0,
+    "unit": "kWh",
+    "rate": 0.41002,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "On-Peak Energy Charge",
+    "amount": 20.1,
+    "quantity": 91.573,
+    "unit": "kWh",
+    "rate": 0.21952,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Off-Peak Energy Charge",
+    "amount": 71.52,
+    "quantity": 650.145,
+    "unit": "kWh",
+    "rate": 0.11,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Discount Energy Charge",
+    "amount": 45.41,
+    "quantity": 548.865,
+    "unit": "kWh",
+    "rate": 0.08274,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Clean Energy Rider",
+    "amount": 1.81,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   },
+   {
+    "label": "Energy Conservation Credit",
+    "amount": -6.86,
+    "quantity": null,
+    "unit": null,
+    "rate": null,
+    "detail": null,
+    "period_start": null,
+    "period_end": null,
+    "is_subperiod_detail": false
+   }
+  ],
+  "notes": [
+   "TOU structure detected; current estimate does not allocate interval usage by period.",
+   "Formula-based rider calculations are not yet implemented.",
+   "Applied rider adjustments from parsed historical rider tables.",
+   "Used billed TOU period quantities to validate parsed TOU energy rates."
+  ]
+ }
+]
