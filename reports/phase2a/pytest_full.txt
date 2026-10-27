@@ -1,0 +1,35 @@
+........................................................................ [  4%]
+...............ss....................................................... [  8%]
+......sssssssssssssssssssssssssssssssss................................. [ 13%]
+..............................................sssss......ssss........... [ 17%]
+......ss................................................................ [ 21%]
+........................................................................ [ 26%]
+........................................................................ [ 30%]
+........................................................................ [ 35%]
+........................................................................ [ 39%]
+........................................................................ [ 43%]
+........................................................................ [ 48%]
+...................................................xxxx................. [ 52%]
+........................................................................ [ 57%]
+........................................................................ [ 61%]
+........................................................................ [ 65%]
+........................................................................ [ 70%]
+........................................................................ [ 74%]
+..............sssssssssssssssssssss..................................... [ 79%]
+........................................................................ [ 83%]
+........................................................................ [ 87%]
+........................................................................ [ 92%]
+..............................ssssssssssssssssssssssss.................. [ 96%]
+........................................................                 [100%]
+============================== warnings summary ===============================
+tests/test_missing_clean_doc_search.py: 44 warnings
+tests/test_ncuc_portal_harvester.py: 3 warnings
+  C:\Python\Duke\Standalone\src\duke_rates\historical\ncuc\result_harvester.py:69: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    discovered_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+tests/test_missing_clean_doc_search.py: 44 warnings
+  C:\Python\Duke\Standalone\src\duke_rates\historical\ncuc\result_harvester.py:527: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    executed_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1545 passed, 91 skipped, 4 xfailed, 91 warnings in 670.62s (0:11:10)

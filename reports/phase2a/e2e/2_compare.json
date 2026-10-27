@@ -1,0 +1,393 @@
+{
+  "target_kind": "tariff_version",
+  "target_id": 5299,
+  "candidate_run_id": 1064,
+  "active_run_id": 496,
+  "candidate_validation_status": "passed",
+  "version_effective_start": "2024-10-01",
+  "target_effective_date_changes": {},
+  "summary": {
+    "active_rows": 5,
+    "candidate_rows": 5,
+    "unchanged": 0,
+    "added": 0,
+    "removed": 0,
+    "removed_but_protected": 0,
+    "value_changes": 0,
+    "unit_changes": 0,
+    "effective_date_changes": 0,
+    "rate_class_changes": 5,
+    "applicability_changes": 0,
+    "provenance_differences": 5
+  },
+  "added": [],
+  "removed": [],
+  "value_changes": [],
+  "unit_changes": [],
+  "effective_date_changes": [],
+  "rate_class_changes": [
+    {
+      "active": {
+        "charge_type": "fixed",
+        "charge_label": "Basic Customer Charge",
+        "rate_value": 14.0,
+        "rate_unit": "$/month",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "residential",
+        "tariff_charge_id": 753021,
+        "protected": false
+      },
+      "candidate": {
+        "charge_type": "fixed",
+        "charge_label": "Basic Customer Charge",
+        "rate_value": 14.0,
+        "rate_unit": "$/month",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 5199
+      },
+      "change": [
+        "residential",
+        null
+      ]
+    },
+    {
+      "active": {
+        "charge_type": "fixed",
+        "charge_label": "Three-Phase Surcharge",
+        "rate_value": 9.0,
+        "rate_unit": "$/month",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "residential",
+        "tariff_charge_id": 753022,
+        "protected": false
+      },
+      "candidate": {
+        "charge_type": "fixed",
+        "charge_label": "Three-Phase Surcharge",
+        "rate_value": 9.0,
+        "rate_unit": "$/month",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 5200
+      },
+      "change": [
+        "residential",
+        null
+      ]
+    },
+    {
+      "active": {
+        "charge_type": "energy_block",
+        "charge_label": "Energy Charge - Summer",
+        "rate_value": 0.12119,
+        "rate_unit": "$/kWh",
+        "tier_min": 0.0,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "summer",
+        "customer_class": "residential",
+        "tariff_charge_id": 753023,
+        "protected": false
+      },
+      "candidate": {
+        "charge_type": "energy_block",
+        "charge_label": "Energy Charge - Summer",
+        "rate_value": 0.12119,
+        "rate_unit": "$/kWh",
+        "tier_min": 0.0,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "summer",
+        "customer_class": null,
+        "extracted_charge_id": 5201
+      },
+      "change": [
+        "residential",
+        null
+      ]
+    },
+    {
+      "active": {
+        "charge_type": "energy_block",
+        "charge_label": "Energy Charge - Winter (first block)",
+        "rate_value": 0.12119,
+        "rate_unit": "$/kWh",
+        "tier_min": 0.0,
+        "tier_max": 800.0,
+        "tou_period": null,
+        "season": "winter",
+        "customer_class": "residential",
+        "tariff_charge_id": 753024,
+        "protected": false
+      },
+      "candidate": {
+        "charge_type": "energy_block",
+        "charge_label": "Energy Charge - Winter (first block)",
+        "rate_value": 0.12119,
+        "rate_unit": "$/kWh",
+        "tier_min": 0.0,
+        "tier_max": 800.0,
+        "tou_period": null,
+        "season": "winter",
+        "customer_class": null,
+        "extracted_charge_id": 5202
+      },
+      "change": [
+        "residential",
+        null
+      ]
+    },
+    {
+      "active": {
+        "charge_type": "energy_block",
+        "charge_label": "Energy Charge - Winter (additional)",
+        "rate_value": 0.11119,
+        "rate_unit": "$/kWh",
+        "tier_min": 800.0,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "winter",
+        "customer_class": "residential",
+        "tariff_charge_id": 753025,
+        "protected": false
+      },
+      "candidate": {
+        "charge_type": "energy_block",
+        "charge_label": "Energy Charge - Winter (additional)",
+        "rate_value": 0.11119,
+        "rate_unit": "$/kWh",
+        "tier_min": 800.0,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "winter",
+        "customer_class": null,
+        "extracted_charge_id": 5203
+      },
+      "change": [
+        "residential",
+        null
+      ]
+    }
+  ],
+  "applicability_changes": [],
+  "provenance_differences": [
+    {
+      "active": {
+        "charge_type": "fixed",
+        "charge_label": "Basic Customer Charge",
+        "rate_value": 14.0,
+        "rate_unit": "$/month",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "residential",
+        "tariff_charge_id": 753021,
+        "protected": false
+      },
+      "candidate": {
+        "charge_type": "fixed",
+        "charge_label": "Basic Customer Charge",
+        "rate_value": 14.0,
+        "rate_unit": "$/month",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 5199
+      },
+      "change": {
+        "source_pdf_status": [
+          "legacy_unverified",
+          "available"
+        ],
+        "quote_status": [
+          "legacy_unverified",
+          "available"
+        ],
+        "extraction_method": [
+          "legacy_backfill",
+          "parser_profile:progress_residential_flat"
+        ]
+      }
+    },
+    {
+      "active": {
+        "charge_type": "fixed",
+        "charge_label": "Three-Phase Surcharge",
+        "rate_value": 9.0,
+        "rate_unit": "$/month",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "residential",
+        "tariff_charge_id": 753022,
+        "protected": false
+      },
+      "candidate": {
+        "charge_type": "fixed",
+        "charge_label": "Three-Phase Surcharge",
+        "rate_value": 9.0,
+        "rate_unit": "$/month",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 5200
+      },
+      "change": {
+        "source_pdf_status": [
+          "legacy_unverified",
+          "available"
+        ],
+        "quote_status": [
+          "legacy_unverified",
+          "available"
+        ],
+        "extraction_method": [
+          "legacy_backfill",
+          "parser_profile:progress_residential_flat"
+        ]
+      }
+    },
+    {
+      "active": {
+        "charge_type": "energy_block",
+        "charge_label": "Energy Charge - Summer",
+        "rate_value": 0.12119,
+        "rate_unit": "$/kWh",
+        "tier_min": 0.0,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "summer",
+        "customer_class": "residential",
+        "tariff_charge_id": 753023,
+        "protected": false
+      },
+      "candidate": {
+        "charge_type": "energy_block",
+        "charge_label": "Energy Charge - Summer",
+        "rate_value": 0.12119,
+        "rate_unit": "$/kWh",
+        "tier_min": 0.0,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "summer",
+        "customer_class": null,
+        "extracted_charge_id": 5201
+      },
+      "change": {
+        "source_pdf_status": [
+          "legacy_unverified",
+          "available"
+        ],
+        "quote_status": [
+          "legacy_unverified",
+          "available"
+        ],
+        "extraction_method": [
+          "legacy_backfill",
+          "parser_profile:progress_residential_flat"
+        ]
+      }
+    },
+    {
+      "active": {
+        "charge_type": "energy_block",
+        "charge_label": "Energy Charge - Winter (first block)",
+        "rate_value": 0.12119,
+        "rate_unit": "$/kWh",
+        "tier_min": 0.0,
+        "tier_max": 800.0,
+        "tou_period": null,
+        "season": "winter",
+        "customer_class": "residential",
+        "tariff_charge_id": 753024,
+        "protected": false
+      },
+      "candidate": {
+        "charge_type": "energy_block",
+        "charge_label": "Energy Charge - Winter (first block)",
+        "rate_value": 0.12119,
+        "rate_unit": "$/kWh",
+        "tier_min": 0.0,
+        "tier_max": 800.0,
+        "tou_period": null,
+        "season": "winter",
+        "customer_class": null,
+        "extracted_charge_id": 5202
+      },
+      "change": {
+        "source_pdf_status": [
+          "legacy_unverified",
+          "available"
+        ],
+        "quote_status": [
+          "legacy_unverified",
+          "available"
+        ],
+        "extraction_method": [
+          "legacy_backfill",
+          "parser_profile:progress_residential_flat"
+        ]
+      }
+    },
+    {
+      "active": {
+        "charge_type": "energy_block",
+        "charge_label": "Energy Charge - Winter (additional)",
+        "rate_value": 0.11119,
+        "rate_unit": "$/kWh",
+        "tier_min": 800.0,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "winter",
+        "customer_class": "residential",
+        "tariff_charge_id": 753025,
+        "protected": false
+      },
+      "candidate": {
+        "charge_type": "energy_block",
+        "charge_label": "Energy Charge - Winter (additional)",
+        "rate_value": 0.11119,
+        "rate_unit": "$/kWh",
+        "tier_min": 800.0,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "winter",
+        "customer_class": null,
+        "extracted_charge_id": 5203
+      },
+      "change": {
+        "source_pdf_status": [
+          "legacy_unverified",
+          "available"
+        ],
+        "quote_status": [
+          "legacy_unverified",
+          "available"
+        ],
+        "extraction_method": [
+          "legacy_backfill",
+          "parser_profile:progress_residential_flat"
+        ]
+      }
+    }
+  ]
+}
