@@ -25,9 +25,9 @@ from pydantic import BaseModel, Field
 from duke_rates.billing.charge_types import (
     ENGINE_PRICED_TYPES,
     classify_charge,
-    has_unconverted_cent_unit,
     is_potentially_billable,
 )
+from duke_rates.parse.canonical import dollars_factor, parse_decimal, parse_unit
 
 if TYPE_CHECKING:
     from duke_rates.db.repository import Repository
@@ -209,14 +209,17 @@ def _demand_quantity_for_charge(charge, usage: BillInput) -> float | None:
 
 
 def _rate_in_dollars(rate_value: float, rate_unit: str | None) -> float:
-    """Return rate_value converted to dollars.
+    """Return rate_value converted to dollars, using the canonical unit rules.
 
-    Rates stored as cents/kWh or cents/kW are divided by 100.
-    All other units ($/kWh, $/kW, $/month, etc.) are returned unchanged.
+    Cents (``cents/kWh``, ``¢/kWh``, ``¢/kW``) are multiplied by exactly 0.01.
+    Dollar and percentage units are returned unchanged. A unit the canonical
+    rules do not recognize is also returned unchanged (priced as written);
+    ``calculate`` warns about those charges.
     """
-    if rate_unit and "cent" in rate_unit.lower():
-        return rate_value / 100.0
-    return rate_value
+    factor = dollars_factor(rate_unit)
+    if factor is None or factor == 1:
+        return rate_value
+    return float(parse_decimal(rate_value) * factor)
 
 
 # ---------------------------------------------------------------------------
@@ -724,14 +727,14 @@ def _unsupported_charge_warnings(report: list[dict], source_key: str) -> list[st
     ]
 
 
-def _cent_unit_warnings(charges, source_key: str) -> list[str]:
-    flagged = [c for c in charges if has_unconverted_cent_unit(c.rate_unit)]
+def _unit_warnings(charges, source_key: str) -> list[str]:
+    flagged = [c for c in charges if not parse_unit(c.rate_unit).recognized]
     if not flagged:
         return []
+    units = sorted({repr(c.rate_unit) for c in flagged})
     return [
-        f"Unit warning for {source_key}: {len(flagged)} charge(s) use "
-        f"{flagged[0].rate_unit!r}, which is priced as dollars, not cents; "
-        "those amounts may be 100x too high."
+        f"Unit warning for {source_key}: {len(flagged)} charge(s) use unrecognized "
+        f"unit(s) {', '.join(units)}; they were priced as written."
     ]
 
 
@@ -845,7 +848,7 @@ class TariffBillingEngine:
         unsupported = _unsupported_charge_report(applicable, family_key)
         warnings.extend(_unsupported_charge_warnings(unsupported, family_key))
         warnings.extend(
-            _cent_unit_warnings(
+            _unit_warnings(
                 [c for c in applicable if c.charge_type in ENGINE_PRICED_TYPES], family_key
             )
         )
@@ -1121,7 +1124,7 @@ class TariffBillingEngine:
                 unsupported_out.extend(rider_unsupported)
             warnings.extend(_unsupported_charge_warnings(rider_unsupported, rider_key))
             warnings.extend(
-                _cent_unit_warnings(
+                _unit_warnings(
                     [c for c in applicable_rider if c.charge_type == "adjustment"], rider_key
                 )
             )

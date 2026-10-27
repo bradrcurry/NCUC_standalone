@@ -10,7 +10,6 @@ import pytest
 
 from duke_rates.billing.charge_types import (
     classify_charge,
-    has_unconverted_cent_unit,
     is_potentially_billable,
 )
 from duke_rates.billing.tariff_engine import (
@@ -225,19 +224,20 @@ def test_unsupported_charges_are_reported_not_billed(repo):
     assert "adjustment_total" not in warning and "incentive" not in warning
 
 
-def test_rider_path_reports_unsupported_types_cent_units_and_future_riders(repo):
+def test_rider_path_reports_unsupported_types_and_future_riders(repo):
     result = TariffBillingEngine(repo).calculate(
         "base", BillInput(monthly_kwh=1000, service_date=datetime.date(2025, 11, 1))
     )
     storm_items = [i for i in result.line_items if i.source == "storm"]
-    # Only the 'adjustment' row is priced; existing (dollar-as-written) behaviour is unchanged.
+    # Only the 'adjustment' row is priced. Phase 2B: 0.246 ¢/kWh is $0.00246/kWh,
+    # so 1000 kWh is $2.46 (Phase 2A priced it as dollars: $246.00).
     assert [i.label for i in storm_items] == ["Storm Securitization - Residential"]
-    assert storm_items[0].amount == pytest.approx(246.0)
+    assert storm_items[0].amount == pytest.approx(2.46)
     assert any(
         c["charge_type"] == "Rider Adjustment" and c["source"] == "storm"
         for c in result.unsupported_charges
     )
-    assert any(w.startswith("Unit warning for storm") and "100x" in w for w in result.warnings)
+    assert not any(w.startswith("Unit warning for storm") for w in result.warnings)
     assert any("late-rider (earliest 2027-01-01)" in w for w in result.warnings)
     assert not any("late-rider" in i.source for i in result.line_items)
 
@@ -278,8 +278,13 @@ def test_classify_charge(ctype, kwargs, category, suggested):
     assert is_potentially_billable(result) == (category not in ("priced", "excluded_informational"))
 
 
-def test_cent_sign_units_are_detected():
-    assert has_unconverted_cent_unit("¢/kWh")
-    assert not has_unconverted_cent_unit("cents/kWh")
-    assert not has_unconverted_cent_unit("$/kWh")
-    assert not has_unconverted_cent_unit(None)
+def test_cent_sign_and_cents_units_convert_identically():
+    from duke_rates.billing.tariff_engine import _rate_in_dollars
+
+    assert _rate_in_dollars(0.321, "¢/kWh") == pytest.approx(0.00321)
+    assert _rate_in_dollars(0.321, "cents/kWh") == pytest.approx(0.00321)
+    assert _rate_in_dollars(12.623, "cents/kWh") == 0.12623
+    assert _rate_in_dollars(0.12, "$/kWh") == 0.12
+    assert _rate_in_dollars(14.0, "$/month") == 14.0
+    # Unrecognized units are priced as written (unchanged behaviour), never guessed.
+    assert _rate_in_dollars(0.3, "�/kWh") == 0.3

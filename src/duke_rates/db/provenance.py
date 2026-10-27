@@ -49,6 +49,7 @@ from duke_rates.db.provenance_schema import (
     TARIFF_CHARGE_COLUMNS,
     provenance_schema_installed,
 )
+from duke_rates.parse.canonical import parse_decimal, parse_unit
 
 LEGACY_PARSER = "legacy"
 
@@ -197,31 +198,25 @@ def write_context(
 # Units and natural keys
 # ---------------------------------------------------------------------------
 
-_CENT_RE = re.compile(r"(cents?|¢)", re.IGNORECASE)
-
-
 def canonicalize_unit(
     value: float | None, unit: str | None
 ) -> tuple[float | None, str | None, str]:
     """Return ``(canonical_value, canonical_unit, method)``.
 
-    Cents are converted to dollars. Units that are not recognised are left
-    without a canonical form (``method='unrecognized_unit'``) rather than
-    guessed.
+    Delegates to ``duke_rates.parse.canonical``: cents become dollars exactly,
+    and units that are not recognised are left without a canonical form
+    (``method='unrecognized_unit'``) rather than guessed.
     """
     if value is None:
         return None, None, "no_value"
-    if not unit or not unit.strip():
+    parsed = parse_unit(unit)
+    if parsed.warning == "unit_missing":
         return None, None, "unit_unavailable"
-    raw = unit.strip()
-    if _CENT_RE.search(raw):
-        per = raw.split("/", 1)[1].strip() if "/" in raw else ""
-        if not per:
-            return None, None, "unrecognized_unit"
-        return value / 100.0, f"$/{per}", "cents_to_dollars"
-    if raw.startswith("$") or raw.startswith("%"):
-        return value, raw, "identity"
-    return None, None, "unrecognized_unit"
+    if not parsed.recognized:
+        return None, None, "unrecognized_unit"
+    canonical = parse_decimal(value) * parsed.factor
+    method = "identity" if parsed.factor == 1 else "cents_to_dollars"
+    return float(canonical), parsed.canonical.value, method
 
 
 _LABEL_NORMALIZE_RE = re.compile(r"[^a-z0-9]+")

@@ -59,11 +59,6 @@ MISMAPPED_TYPE_ALIASES: dict[str, str] = {
 # period (R-TOU-EV) have no engine equivalent at all.
 _ENERGY_TOU_PERIODS = {"on_peak", "off_peak", "discount", "shoulder", "mid_peak", "super_off_peak"}
 
-# Units the engine prices correctly as written. '¢/kWh' is not one of them:
-# _rate_in_dollars only divides by 100 when the unit contains "cent".
-_CENT_SIGN_UNITS = ("¢",)
-
-
 @dataclass(frozen=True)
 class ChargeTypeClassification:
     category: ChargeTypeCategory
@@ -171,14 +166,3 @@ def is_potentially_billable(classification: ChargeTypeClassification) -> bool:
         "billable_unsupported",
         "ambiguous_or_invalid",
     )
-
-
-def has_unconverted_cent_unit(rate_unit: str | None) -> bool:
-    """True when a unit is in cents but would be priced as dollars.
-
-    ``_rate_in_dollars`` converts only units containing the word "cent".
-    A '¢/kWh' unit is priced as $/kWh, i.e. 100x too high.
-    """
-    if not rate_unit:
-        return False
-    return any(sign in rate_unit for sign in _CENT_SIGN_UNITS) and "cent" not in rate_unit.lower()

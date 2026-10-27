@@ -201,11 +201,8 @@ def unsupported_charges_cmd(
     out: Path | None = typer.Option(None, help="Also write the full JSON report here."),
 ) -> None:
     """Classify every stored charge_type the billing engine does not price."""
-    from duke_rates.billing.charge_types import (
-        ENGINE_PRICED_TYPES,
-        classify_charge,
-        has_unconverted_cent_unit,
-    )
+    from duke_rates.billing.charge_types import ENGINE_PRICED_TYPES, classify_charge
+    from duke_rates.parse.canonical import parse_unit
 
     path = (db or get_settings().database_path).resolve()
     conn = sqlite3.connect(f"file:{path.as_posix()}?mode=ro", uri=True)
@@ -216,11 +213,11 @@ def unsupported_charges_cmd(
         "FROM tariff_charges tc LEFT JOIN tariff_versions tv ON tv.id = tc.version_id"
     ).fetchall()
     report = []
-    cent_units = []
+    unrecognized_units = []
     for r in rows:
         if r["charge_type"] in ENGINE_PRICED_TYPES:
-            if r["charge_type"] == "adjustment" and has_unconverted_cent_unit(r["rate_unit"]):
-                cent_units.append(dict(r))
+            if not parse_unit(r["rate_unit"]).recognized:
+                unrecognized_units.append(dict(r))
             continue
         c = classify_charge(
             r["charge_type"],
@@ -243,13 +240,13 @@ def unsupported_charges_cmd(
         "by_category": dict(by_category),
         "by_type": {f"{cat} / {ctype}": n for (cat, ctype), n in sorted(by_type.items())},
         "families": len({item["family_key"] for item in report}),
-        "priced_adjustments_with_cent_sign_unit": len(cent_units),
+        "priced_charges_with_unrecognized_unit": len(unrecognized_units),
     }
     _echo(summary)
     if out:
         out.write_text(
             json.dumps(
-                {"summary": summary, "charges": report, "cent_sign_adjustments": cent_units},
+                {"summary": summary, "charges": report, "priced_unrecognized_units": unrecognized_units},
                 indent=2,
                 default=str,
                 ensure_ascii=False,
