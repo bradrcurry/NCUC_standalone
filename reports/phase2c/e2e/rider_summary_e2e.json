@@ -1,0 +1,33 @@
+{
+  "source_pdf": "data\\historical\\ncuc\\e-2-sub-1300\\f76e6a9b-98de-4704-b456-8c20214bd981.pdf",
+  "docket_dir": "e-2-sub-1300",
+  "run_id": 1069,
+  "run_target_matches_live_docket": true,
+  "live_blocks": 26,
+  "live_items": 484,
+  "validation_status": "warnings",
+  "review_findings": [],
+  "read_model_unchanged_after_record": true,
+  "compare": {
+    "active_blocks": 26,
+    "candidate_blocks": 11,
+    "unchanged_blocks": 0,
+    "added_blocks": 2,
+    "removed_blocks": 17,
+    "value_changes": 148,
+    "total_changes": 10,
+    "added_items": 12,
+    "removed_items": 67
+  },
+  "promote": {
+    "deleted_blocks": 26,
+    "deleted_items": 484,
+    "inserted_blocks": 11,
+    "inserted_items": 136
+  },
+  "verify_after_promote": [],
+  "revisions_logged_by_promote": 510,
+  "read_model_restored_after_rollback": true,
+  "verify_after_rollback": [],
+  "review_state": "previously_active"
+}

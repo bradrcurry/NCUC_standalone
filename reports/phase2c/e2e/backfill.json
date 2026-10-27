@@ -1,0 +1,19 @@
+{
+  "backfill": {
+    "versions_backfilled": 1001,
+    "charges_backfilled": 5198,
+    "orphan_versions_backfilled": 13,
+    "historical_document_backfilled": 50,
+    "bill_statement_backfilled": 12
+  },
+  "verify": {
+    "checked": {
+      "tariff_version": 1001,
+      "historical_document": 50,
+      "bill_statement": 12
+    },
+    "mismatches": [],
+    "versions_with_charges_but_no_active_run": 0,
+    "ok": true
+  }
+}

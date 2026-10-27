@@ -1,0 +1,62 @@
+{
+  "documents": 4,
+  "runs": 4,
+  "errors": 0,
+  "needs_review": 1,
+  "validation": {
+    "warnings": 2,
+    "passed": 2
+  },
+  "structured_mode": "hybrid",
+  "promoted": 0,
+  "results": [
+    {
+      "historical_document_id": 2591,
+      "run_id": 1064,
+      "version_id": 5891,
+      "extractor_status": "parsed",
+      "profile": "progress_rider_adjustment_matrix",
+      "structured_mode": "hybrid",
+      "status": "ok",
+      "validation_status": "warnings",
+      "needs_review": true,
+      "output_count": 124
+    },
+    {
+      "historical_document_id": 47,
+      "run_id": 1065,
+      "version_id": 5412,
+      "extractor_status": "parsed",
+      "profile": "progress_storm_securitization",
+      "structured_mode": "hybrid",
+      "status": "ok",
+      "validation_status": "passed",
+      "needs_review": false,
+      "output_count": 5
+    },
+    {
+      "historical_document_id": 2253,
+      "run_id": 1066,
+      "version_id": 6540,
+      "extractor_status": "parsed",
+      "profile": "progress_jaa_rider",
+      "structured_mode": "hybrid",
+      "status": "ok",
+      "validation_status": "passed",
+      "needs_review": false,
+      "output_count": 8
+    },
+    {
+      "historical_document_id": 5324,
+      "run_id": 1067,
+      "version_id": 7176,
+      "extractor_status": "empty",
+      "profile": "progress_jaa_rider",
+      "structured_mode": "hybrid",
+      "status": "empty",
+      "validation_status": "warnings",
+      "needs_review": false,
+      "output_count": 0
+    }
+  ]
+}
