@@ -283,6 +283,13 @@ class BulkExtractor:
         # Optional override: callable(doc, mode) -> DocumentRepresentation | None
         # (the benchmark uses it to read its own Docling cache).
         self.representation_provider = None
+        # Phase 2C: when a docling/hybrid document has no cached Docling
+        # artifact, convert only its page span, chunk by chunk
+        # (document_intelligence.bounded). Off by default: extraction normally
+        # reads cached representations only. Env DUKE_RATES_BOUNDED_CONVERT=1.
+        self.bounded_conversion = os.environ.get("DUKE_RATES_BOUNDED_CONVERT", "") in ("1", "true")
+        self.bounded_chunk_pages = 8
+        self.bounded_converter = None  # callable(pdf_path) -> docling result; default backend
         self.classifier = DocumentClassifier()
         self.extractor = ResidentialRateExtractor()
         self.date_extractor = DateExtractor()
@@ -1741,6 +1748,16 @@ class BulkExtractor:
                 "backend_version": rep.backend_version if rep is not None else None,
                 "charges_with_evidence": sum(1 for c in charges if c.evidence),
             }
+            bounded = (rep.document_metadata or {}).get("bounded") if rep is not None else None
+            if bounded:
+                # Partial structured input is recorded as such, never as complete.
+                selection_details["bounded_extraction"] = bounded
+                selection_details["structured_input"]["degraded"] = bounded["degraded"]
+                if bounded["degraded"]:
+                    selection_details["structured_input"]["degraded_reason"] = "; ".join(
+                        f"pages {c['pages'][0]}-{c['pages'][1]}: {c['reason']} (fallback {c.get('fallback')})"
+                        for c in bounded["degraded_chunks"]
+                    )
         nonblank_lines = [line for line in text.splitlines() if line.strip()]
         text_metrics = {
             "text_length": len(text),
@@ -1801,6 +1818,8 @@ class BulkExtractor:
         page_range = (int(start), int(end or start)) if start else None
         if self.structured_mode in ("docling", "hybrid"):
             rep = self._docling_representation(pdf_path, page_range)
+            if rep is None and self.bounded_conversion:
+                rep = self._bounded_representation(doc, pdf_path, page_range)
             if rep is not None or self.structured_mode == "docling":
                 return rep
         from duke_rates.document_intelligence.adapters import representation_from_native_pdf
@@ -1810,6 +1829,24 @@ class BulkExtractor:
         except Exception as exc:  # unreadable PDF: structured input is optional
             logger.warning("native representation failed for %s: %s", pdf_path, exc)
             return None
+
+    def _bounded_representation(self, doc: dict, pdf_path: str, page_range):
+        """Convert only the document's span with Docling, a few pages at a time."""
+        from duke_rates.document_intelligence.bounded import bounded_representation
+
+        try:
+            result = bounded_representation(
+                pdf_path,
+                page_range,
+                chunk_pages=self.bounded_chunk_pages,
+                converter=self.bounded_converter,
+                native_fallback=True,
+                file_sha256=doc.get("content_hash"),
+            )
+        except Exception as exc:  # structured input is optional; text parse still runs
+            logger.warning("bounded conversion failed for %s: %s", pdf_path, exc)
+            return None
+        return result.representation
 
     def _docling_representation(self, pdf_path: str, page_range):
         from duke_rates.document_intelligence.adapters import representation_from_docling

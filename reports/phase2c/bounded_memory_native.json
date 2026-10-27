@@ -1,0 +1,33 @@
+{
+  "pdf": "data/historical/ncuc/e-2-sub-1207/32b7c724-edef-4a3a-bb45-85058c2ec503.pdf",
+  "span": [
+    17,
+    31
+  ],
+  "results": [
+    {
+      "scenario": "native_span",
+      "pdf_pages": 110,
+      "pages": 15,
+      "tables": 20,
+      "degraded": false,
+      "seconds": 1.78,
+      "peak_rss_mb": 97.8,
+      "status": "ok",
+      "min_free_gb": 1.27,
+      "description": "native text layer + geometry tables, span pages only"
+    },
+    {
+      "scenario": "native_full",
+      "pdf_pages": 110,
+      "pages": 110,
+      "tables": 262,
+      "degraded": false,
+      "seconds": 11.37,
+      "peak_rss_mb": 128.9,
+      "status": "ok",
+      "min_free_gb": 2.21,
+      "description": "native text layer + geometry tables, every page"
+    }
+  ]
+}

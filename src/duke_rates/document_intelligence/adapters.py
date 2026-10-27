@@ -519,9 +519,11 @@ def representation_from_native_pdf(
 
     pages: list[PageRepresentation] = []
     with pdfplumber.open(str(pdf_path)) as pdf:
-        for index, page in enumerate(pdf.pages, start=1):
-            if not _in_range(index, page_range):
-                continue
+        # Only the requested pages are parsed, and each page's layout cache is
+        # released after use, so a span of a large filing stays bounded.
+        first, last = page_range or (1, len(pdf.pages))
+        for index in range(max(first, 1), min(last, len(pdf.pages)) + 1):
+            page = pdf.pages[index - 1]
             words = page.extract_words(keep_blank_chars=False, use_text_flow=False)
             line_words = _lines_from_words(words)
             line_cells = _merge_wrapped_labels([_cells_from_line(line) for line in line_words])
@@ -555,6 +557,7 @@ def representation_from_native_pdf(
                     tables=tables,
                 )
             )
+            page.close()
     raw_text = "\f".join(p.text for p in pages)
     return DocumentRepresentation(
         source_pdf=str(pdf_path),
