@@ -6,6 +6,7 @@ using improved metadata (effective_start dates from Step 1).
 """
 
 import hashlib
+import os
 import sqlite3
 import logging
 import re
@@ -210,8 +211,18 @@ class BulkExtractor:
         "nc-progress-leaf-723": ("smart $aver", "tobr"),
     }
 
-    def __init__(self, db_path: str):
+    #: Structured-input modes (Phase 2B). "legacy" keeps the text-only pipeline.
+    STRUCTURED_MODES = ("legacy", "docling", "native", "hybrid")
+
+    def __init__(self, db_path: str, structured_mode: str | None = None):
         self.db_path = db_path
+        mode = (structured_mode or os.environ.get("DUKE_RATES_STRUCTURED_MODE") or "legacy").lower()
+        if mode not in self.STRUCTURED_MODES:
+            raise ValueError(f"structured_mode must be one of {self.STRUCTURED_MODES}, not {mode!r}")
+        self.structured_mode = mode
+        # Optional override: callable(doc, mode) -> DocumentRepresentation | None
+        # (the benchmark uses it to read its own Docling cache).
+        self.representation_provider = None
         self.classifier = DocumentClassifier()
         self.extractor = ResidentialRateExtractor()
         self.date_extractor = DateExtractor()
@@ -1555,7 +1566,8 @@ class BulkExtractor:
         # numbers like '1.631.88') so we record actionable context instead of failing
         # the entire document. Any other exception still propagates.
         parse_warnings: list[dict[str, str]] = []
-        charges = self._safe_profile_extract(profile, doc, text, parse_warnings)
+        profile_doc = self._with_structure(doc)
+        charges = self._safe_profile_extract(profile, profile_doc, text, parse_warnings)
         initial_status = "parsed" if charges else "empty"
         initial_selected_score = self._score_for_profile(initial_profile_name, ranked_candidates)
         initial_outcome_quality, initial_review_flags = self._assess_extraction_outcome(
@@ -1586,7 +1598,9 @@ class BulkExtractor:
             fallback_profile = self.parser_registry.get_profile(candidate.name)
             if fallback_profile is None:
                 continue
-            candidate_charges = self._safe_profile_extract(fallback_profile, doc, text, parse_warnings)
+            candidate_charges = self._safe_profile_extract(
+                fallback_profile, profile_doc, text, parse_warnings
+            )
             candidate_status = "parsed" if candidate_charges else "empty"
             candidate_outcome_quality, _ = self._assess_extraction_outcome(
                 parser_profile=candidate.name,
@@ -1658,6 +1672,15 @@ class BulkExtractor:
                 self._serialize_candidate(candidate) for candidate in ranked_candidates[:5]
             ],
         }
+        if self.structured_mode != "legacy":
+            charges = self._attach_located_evidence(charges, profile_doc)
+            rep = profile_doc.get("_representation")
+            selection_details["structured_input"] = {
+                "mode": self.structured_mode,
+                "backend": rep.normalizer_backend.value if rep is not None else None,
+                "backend_version": rep.backend_version if rep is not None else None,
+                "charges_with_evidence": sum(1 for c in charges if c.evidence),
+            }
         nonblank_lines = [line for line in text.splitlines() if line.strip()]
         text_metrics = {
             "text_length": len(text),
@@ -1684,6 +1707,92 @@ class BulkExtractor:
             )
 
         return charges, final_profile_name, ranked_candidates, status, signals, text_metrics, selection_details
+
+    # ------------------------------------------------------------------
+    # Structured document input (Phase 2B)
+    # ------------------------------------------------------------------
+
+    def _with_structure(self, doc: dict) -> dict:
+        """A copy of ``doc`` that lets profiles load its structured representation."""
+        if self.structured_mode == "legacy":
+            return doc
+        cache: dict = {}
+
+        def loader():
+            if "rep" not in cache:
+                cache["rep"] = self._structured_representation(doc)
+            return cache["rep"]
+
+        return {**doc, "_structured_mode": self.structured_mode, "_representation_loader": loader}
+
+    def _structured_representation(self, doc: dict):
+        """DocumentRepresentation for ``doc`` under the current mode, or None.
+
+        docling: the cached Docling artifact for the bytes on disk (never a new
+        conversion). native: pdfplumber text layer with geometry tables.
+        hybrid: Docling when cached, otherwise native.
+        """
+        if self.representation_provider is not None:
+            return self.representation_provider(doc, self.structured_mode)
+        pdf_path = doc.get("local_path") or ""
+        if not pdf_path or not Path(pdf_path).exists():
+            return None
+        start, end = doc.get("start_page"), doc.get("end_page")
+        page_range = (int(start), int(end or start)) if start else None
+        if self.structured_mode in ("docling", "hybrid"):
+            rep = self._docling_representation(pdf_path, page_range)
+            if rep is not None or self.structured_mode == "docling":
+                return rep
+        from duke_rates.document_intelligence.adapters import representation_from_native_pdf
+
+        try:
+            return representation_from_native_pdf(pdf_path, page_range=page_range)
+        except Exception as exc:  # unreadable PDF: structured input is optional
+            logger.warning("native representation failed for %s: %s", pdf_path, exc)
+            return None
+
+    def _docling_representation(self, pdf_path: str, page_range):
+        from duke_rates.document_intelligence.adapters import representation_from_docling
+
+        row = self._load_docling_artifact(pdf_path, want_doc_json=True)
+        if not row or not row.get("doc_json_content"):
+            return None
+        conn = self._get_connection()
+        try:
+            version = conn.execute(
+                "SELECT backend_version FROM docling_artifacts WHERE id = ?", (row["id"],)
+            ).fetchone()
+        finally:
+            conn.close()
+        try:
+            document = json.loads(row["doc_json_content"])
+        except (TypeError, ValueError):
+            return None
+        return representation_from_docling(
+            document,
+            source_pdf=pdf_path,
+            file_sha256=row.get("file_hash"),
+            backend_version=version[0] if version else None,
+            page_range=page_range,
+        )
+
+    @staticmethod
+    def _attach_located_evidence(charges: List[ExtractedCharge], profile_doc: dict) -> List[ExtractedCharge]:
+        """Give charges without evidence the location of their printed value, when unambiguous."""
+        missing = [c for c in charges if c.evidence is None]
+        if not missing:
+            return charges
+        loader = profile_doc.get("_representation_loader")
+        rep = profile_doc.get("_representation") or (loader() if callable(loader) else None)
+        if rep is None:
+            return charges
+        from duke_rates.document_intelligence.evidence import locate_value_evidence
+
+        for charge in missing:
+            charge.evidence = locate_value_evidence(
+                rep, value=charge.rate_value, unit=charge.rate_unit, label=charge.charge_label
+            )
+        return charges
 
     def _find_tariff_type_in_pages(self, pdf_path: str, title: str,
                                    max_pages: int = 20) -> str:

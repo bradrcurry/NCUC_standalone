@@ -23,6 +23,76 @@ from duke_rates.parse.rider_summary import (
 from duke_rates.utils.duke_company import detect_duke_company
 
 
+# ---------------------------------------------------------------------------
+# Structured document input (Phase 2B)
+#
+# BulkExtractor passes ``_structured_mode`` ("legacy" | "docling" | "native" |
+# "hybrid") and a lazy ``_representation_loader`` in the doc dict. Profiles
+# that understand structure call these helpers; every other profile ignores
+# them, so legacy behaviour is unchanged unless a mode is chosen.
+# ---------------------------------------------------------------------------
+
+
+def structured_representation(doc: dict):
+    """The document's ``DocumentRepresentation``, built on first use (or None)."""
+    rep = doc.get("_representation")
+    loader = doc.get("_representation_loader")
+    if rep is None and callable(loader):
+        rep = loader()
+        doc["_representation"] = rep
+    return rep
+
+
+def structured_policy(doc: dict) -> str:
+    """'legacy', 'structured' (structured replaces legacy when it finds data) or 'hybrid'."""
+    mode = (doc.get("_structured_mode") or "legacy").lower()
+    if mode == "legacy":
+        return "legacy"
+    return "hybrid" if mode == "hybrid" else "structured"
+
+
+def _rider_summary_with_structure(doc: dict, legacy_summary, leaf_no: str | None):
+    from duke_rates.parse.rider_summary_tables import (
+        merge_with_legacy,
+        parse_rider_summary_from_representation,
+    )
+
+    policy = structured_policy(doc)
+    if policy == "legacy":
+        return legacy_summary
+    rep = structured_representation(doc)
+    if rep is None:
+        return legacy_summary
+    structured = parse_rider_summary_from_representation(rep, leaf_no=leaf_no)
+    if policy == "structured":
+        return structured if structured.rate_classes else legacy_summary
+    return merge_with_legacy(structured, legacy_summary)
+
+
+def _total_evidence(block, unit_word: str) -> dict | None:
+    """Evidence for a block's printed TOTAL row in ``unit_word`` ('kwh' or 'kw')."""
+    for total in (block.evidence or {}).get("totals", []):
+        label = str(total.get("label", "")).lower()
+        if unit_word == "kwh" and ("kwh" in label or "cents" in label):
+            return {**total, "block_header": (block.evidence or {}).get("header")}
+        if unit_word == "kw" and ("/kw" in label.replace(" ", "") and "kwh" not in label
+                                  or "dollars" in label):
+            return {**total, "block_header": (block.evidence or {}).get("header")}
+    return None
+
+
+def _class_rate_rows(doc: dict):
+    """Class-rate table rows from the structured representation (or [])."""
+    if structured_policy(doc) == "legacy":
+        return []
+    rep = structured_representation(doc)
+    if rep is None:
+        return []
+    from duke_rates.parse.class_rate_tables import parse_class_rate_tables
+
+    return [row for row in parse_class_rate_tables(rep) if row.unit is not None]
+
+
 class HistoricalRateParserProfile(Protocol):
     """Strategy interface for historical rate extraction."""
 
@@ -2596,7 +2666,34 @@ class ProgressJaaRiderProfile:
             return 0.82
         return 0.0
 
+    def _structured_charges(self, doc: dict) -> list[ExtractedCharge]:
+        charges: list[ExtractedCharge] = []
+        for row in _class_rate_rows(doc):
+            basis = row.unit.basis.value if row.unit.basis else None
+            if basis not in ("energy", "demand"):
+                continue
+            label = next((name for name, _ in self._CLASS_LABELS
+                          if row.class_label.lower().startswith(name.lower())), row.class_label)
+            canonical = row.value * row.unit.factor
+            charges.append(ExtractedCharge(
+                charge_type="adjustment" if basis == "energy" else "demand",
+                charge_label=f"JAA Rate - {label}",
+                rate_value=float(canonical),
+                rate_unit=row.unit.canonical.value,
+                season="all_year",
+                tou_period=None,
+                tier_min=None,
+                tier_max=None,
+                source_snippet=row.evidence["text"][:120],
+                confidence_score=0.95,
+                evidence=row.evidence,
+            ))
+        return charges
+
     def extract(self, doc: dict, text: str) -> list[ExtractedCharge]:
+        structured = self._structured_charges(doc)
+        if structured:
+            return structured
         charges: list[ExtractedCharge] = []
 
         def _parse_section(section_text: str, rate_unit: str, charge_type: str) -> None:
@@ -2918,6 +3015,32 @@ class ProgressSingleValueRiderProfile:
         return min(score, 0.98)
 
     def extract(self, doc: dict, text: str) -> list[ExtractedCharge]:
+        legacy = self._legacy_extract(doc, text)
+        rows = [r for r in _class_rate_rows(doc) if r.unit.basis and r.unit.basis.value == "energy"]
+        if not rows:
+            return legacy
+        if structured_policy(doc) == "hybrid" and not legacy:
+            # Structure may refine what the text parse found; it never adds
+            # rates to a document the text parse reads as rate-free.
+            return legacy
+        return [
+            ExtractedCharge(
+                charge_type="adjustment",
+                charge_label=f"Rider Adjustment - {row.class_label}",
+                rate_value=float(row.value * row.unit.factor),
+                rate_unit=row.unit.canonical.value,
+                season="all_year",
+                tou_period=None,
+                tier_min=None,
+                tier_max=None,
+                source_snippet=row.evidence["text"][:120],
+                confidence_score=0.93,
+                evidence=row.evidence,
+            )
+            for row in rows
+        ]
+
+    def _legacy_extract(self, doc: dict, text: str) -> list[ExtractedCharge]:
         _, charges, _ = parse_nc_progress_leaf(
             text,
             version_id=0,
@@ -3131,6 +3254,7 @@ class ProgressRiderAdjustmentMatrixProfile:
                     summary = text_summary
         else:
             summary = parse_rider_summary(text, source_pdf=local_path, leaf_no=leaf_no)
+        summary = _rider_summary_with_structure(doc, summary, leaf_no)
 
         charges: list[ExtractedCharge] = []
         for block in summary.rate_classes:
@@ -3161,6 +3285,7 @@ class ProgressRiderAdjustmentMatrixProfile:
                             tier_max=None,
                             source_snippet=item.label[:100],
                             confidence_score=0.95 if item.rider_code else 0.9,
+                            evidence=item.evidence,
                         )
                     )
                 if item.dollars_per_kw is not None:
@@ -3176,6 +3301,7 @@ class ProgressRiderAdjustmentMatrixProfile:
                             tier_max=None,
                             source_snippet=item.label[:100],
                             confidence_score=0.95 if item.rider_code else 0.9,
+                            evidence=item.evidence,
                         )
                     )
 
@@ -3192,6 +3318,7 @@ class ProgressRiderAdjustmentMatrixProfile:
                         tier_max=None,
                         source_snippet=f"{block.rate_class} total cents/kWh",
                         confidence_score=0.97,
+                        evidence=_total_evidence(block, "kwh"),
                     )
                 )
             if block.total_dollars_per_kw is not None:
@@ -3207,6 +3334,7 @@ class ProgressRiderAdjustmentMatrixProfile:
                         tier_max=None,
                         source_snippet=f"{block.rate_class} total dollars/kW",
                         confidence_score=0.97,
+                        evidence=_total_evidence(block, "kw"),
                     )
                 )
 
@@ -3276,6 +3404,7 @@ class CarolinasRiderAdjustmentMatrixProfile:
             source_pdf=doc.get("local_path", "") or "",
             leaf_no=leaf_no,
         )
+        summary = _rider_summary_with_structure(doc, summary, leaf_no)
 
         charges: list[ExtractedCharge] = []
         for block in summary.rate_classes:
@@ -3306,6 +3435,7 @@ class CarolinasRiderAdjustmentMatrixProfile:
                             tier_max=None,
                             source_snippet=item.label[:100],
                             confidence_score=0.95 if item.rider_code else 0.9,
+                            evidence=item.evidence,
                         )
                     )
                 if item.dollars_per_kw is not None:
@@ -3321,6 +3451,7 @@ class CarolinasRiderAdjustmentMatrixProfile:
                             tier_max=None,
                             source_snippet=item.label[:100],
                             confidence_score=0.95 if item.rider_code else 0.9,
+                            evidence=item.evidence,
                         )
                     )
 
@@ -3337,6 +3468,7 @@ class CarolinasRiderAdjustmentMatrixProfile:
                         tier_max=None,
                         source_snippet=f"{block.rate_class} total cents/kWh",
                         confidence_score=0.97,
+                        evidence=_total_evidence(block, "kwh"),
                     )
                 )
             if block.total_dollars_per_kw is not None:
@@ -3352,6 +3484,7 @@ class CarolinasRiderAdjustmentMatrixProfile:
                         tier_max=None,
                         source_snippet=f"{block.rate_class} total dollars/kW",
                         confidence_score=0.97,
+                        evidence=_total_evidence(block, "kw"),
                     )
                 )
         if charges:

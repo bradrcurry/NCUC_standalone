@@ -50,6 +50,9 @@ class ExtractedCharge:
     tier_max: Optional[float] = None
     source_snippet: str = ""
     confidence_score: float = 0.0
+    # Phase 2B: where the value was printed (page, table cell, bbox, quote),
+    # when the producer knows. None means unavailable, never a placeholder.
+    evidence: Optional[dict] = None
 
 
 def _norm_tou(text: str) -> Optional[str]:

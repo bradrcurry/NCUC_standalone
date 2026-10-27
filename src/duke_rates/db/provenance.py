@@ -231,7 +231,11 @@ def _norm_season(season: str | None) -> str:
 
 
 def natural_key(row: dict[str, Any], *, with_class: bool = True) -> str:
+    # The canonical unit separates a section's kWh and kW TOTAL rows, which
+    # share a label (Phase 2B).
+    unit = parse_unit(row.get("rate_unit")).canonical
     parts = [
+        unit.value if unit else (row.get("rate_unit") or ""),
         row.get("customer_class") or "" if with_class else "*",
         row.get("charge_type") or "",
         row.get("tou_period") or "",
@@ -278,6 +282,8 @@ class CandidateCharge:
     bbox: dict[str, Any] | None = None
     source_quote: str | None = None
     extractor_snippet: str | None = None
+    # Structured source location: table id, row, column, backend and version.
+    table_ref: dict[str, Any] | None = None
     extraction_method: str | None = None
     confidence_score: float = 0.0
     # Legacy backfill only.
@@ -397,6 +403,20 @@ def _status(value: Any, legacy: bool) -> str:
     return "legacy_unverified" if legacy else "available"
 
 
+def _canonical_from_printed(charge: "CandidateCharge") -> tuple[float, str] | None:
+    """(value, unit) computed from the printed value and printed unit, if both parse."""
+    if not charge.printed_value_text or not charge.printed_unit:
+        return None
+    number = parse_decimal(charge.printed_value_text.split()[0])
+    header = charge.printed_unit.lower()
+    for word in ("baseline", "incremental"):
+        header = header.replace(word, "")
+    parsed = parse_unit(" ".join(header.split()).replace(" /", "/"))
+    if number is None or not parsed.recognized:
+        return None
+    return float(number * parsed.factor), parsed.canonical.value
+
+
 def record_charges(
     conn: sqlite3.Connection, run_id: int, charges: Sequence[CandidateCharge]
 ) -> list[int]:
@@ -412,6 +432,13 @@ def record_charges(
             canonical_value, canonical_unit, method = canonicalize_unit(
                 charge.rate_value, charge.rate_unit
             )
+            exact = _canonical_from_printed(charge)
+            if exact is not None and canonical_unit == exact[1]:
+                if canonical_value is not None and abs(canonical_value - exact[0]) > 1e-9:
+                    method = f"{method}:printed_disagrees"
+                else:
+                    # Exact Decimal from the printed text, not the float.
+                    canonical_value, method = exact[0], f"{method}:from_printed"
             legacy = charge.legacy_fields
             cursor = conn.execute(
                 """
@@ -424,9 +451,10 @@ def record_charges(
                     source_pdf_path, source_pdf_sha256, source_pdf_status,
                     page_number, page_status, bbox_json, bbox_status,
                     source_quote, quote_status, extractor_snippet, extraction_method,
-                    confidence_score, natural_key, legacy_tariff_charge_id, legacy_row_json
+                    confidence_score, natural_key, legacy_tariff_charge_id, legacy_row_json,
+                    table_ref_json
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     run_id,
@@ -467,6 +495,7 @@ def record_charges(
                     natural_key(charge.as_row()),
                     charge.legacy_tariff_charge_id,
                     canonical_json(charge.legacy_row) if charge.legacy_row is not None else None,
+                    canonical_json(charge.table_ref) if charge.table_ref is not None else None,
                 ),
             )
             ids.append(int(cursor.lastrowid))
@@ -582,8 +611,13 @@ def seal_run(
     *,
     status: str | None = None,
     metrics: dict[str, Any] | None = None,
+    extra_issues: list[dict[str, str]] | None = None,
 ) -> dict[str, Any]:
-    """Validate a run and make it immutable. Returns the validation summary."""
+    """Validate a run and make it immutable. Returns the validation summary.
+
+    ``extra_issues`` are run-level findings from the producer (structural
+    validators); level ``review`` counts as a warning that needs a person.
+    """
     run = _run(conn, run_id)
     if run["sealed_at"]:
         raise ProvenanceError(f"run {run_id} is already sealed")
@@ -629,6 +663,11 @@ def seal_run(
                     "detail": f"interpreted effective date {value!r} does not parse",
                 }
             )
+    for issue in extra_issues or []:
+        level = issue.get("level", "warning")
+        # "review" rolls up as a warning, but the flag keeps it visible.
+        run_issues.append({**issue, "level": "warning" if level == "review" else level,
+                           "needs_review": level == "review"})
     final_status = status or ("ok" if count else "empty")
     if count == 0:
         run_issues.append(

@@ -331,7 +331,8 @@ def test_unknown_provenance_is_stored_as_unavailable_never_fabricated(migrated):
     ) == ("available", "available", "available", "available")
     assert full["canonical_unit"] == "$/kWh"
     assert full["canonical_value"] == pytest.approx(0.12119)
-    assert full["unit_normalization"] == "cents_to_dollars"
+    # Phase 2B: exact canonical value computed from the printed text and unit.
+    assert full["unit_normalization"] == "cents_to_dollars:from_printed"
     assert (
         bare["page_status"],
         bare["bbox_status"],
@@ -608,6 +609,7 @@ def test_overrides_apply_on_promotion(migrated):
         "tier_min": None,
         "tier_max": None,
         "tou_period": None,
+        "rate_unit": "$/kWh",  # Phase 2B: the unit is part of a charge's identity
     }
     pv.add_override(
         conn,
@@ -626,6 +628,7 @@ def test_overrides_apply_on_promotion(migrated):
         "charge_label": "Footer",
         "customer_class": "residential",
         "season": "all_year",
+        "rate_unit": "$/month",
     }
     pv.add_override(
         conn,

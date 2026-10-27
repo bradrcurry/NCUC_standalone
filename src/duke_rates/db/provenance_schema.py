@@ -221,6 +221,7 @@ CREATE TABLE IF NOT EXISTS extracted_charges (
     source_quote            TEXT,
     quote_status            TEXT NOT NULL CHECK (quote_status {_STATUS_CHECK}),
     extractor_snippet       TEXT,
+    table_ref_json          TEXT,
     extraction_method       TEXT NOT NULL,
     validation_status       TEXT NOT NULL DEFAULT 'pending'
         CHECK (validation_status IN ('pending', 'passed', 'warnings', 'failed')),
@@ -554,9 +555,19 @@ def provenance_schema_installed(conn: sqlite3.Connection) -> bool:
     return bool(version)
 
 
+#: Columns added after a schema version shipped: (table, column, type).
+_ADDED_COLUMNS: tuple[tuple[str, str, str], ...] = (
+    ("extracted_charges", "table_ref_json", "TEXT"),  # Phase 2B: table/row/col/backend
+)
+
+
 def ensure_provenance_schema(conn: sqlite3.Connection) -> None:
     """Create the provenance tables and triggers (idempotent, additive)."""
     conn.executescript(PROVENANCE_DDL)
+    for table, column, typedef in _ADDED_COLUMNS:
+        present = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
+        if column not in present:
+            conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {typedef}")
     for stmt in _immutability_triggers() + _audit_triggers(conn):
         conn.execute(stmt)
     conn.execute(
