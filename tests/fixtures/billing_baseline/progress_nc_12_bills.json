@@ -1,0 +1,1174 @@
+{
+ "bills": [
+  {
+   "bill_id": 1,
+   "bill_date": "2025-04-21",
+   "service_start": "2025-03-31",
+   "service_end": "2025-04-16",
+   "rate_code": "RES",
+   "billed_kwh": 821.0,
+   "printed_electric_total": 121.15,
+   "front_page_current_electric_charges": 121.15,
+   "actual_line_items": [
+    {
+     "label": "Basic Customer Charge",
+     "amount": 7.93,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Energy Charge",
+     "amount": 96.95,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Energy Charge",
+     "amount": 2.33,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Storm Recovery Charge",
+     "amount": 2.02,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Summary of Rider Adjustments",
+     "amount": 14.1,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Summary of Rider Adjustments",
+     "amount": 1.92,
+     "is_subperiod_detail": true
+    },
+    {
+     "label": "Clean Energy Rider",
+     "amount": 0.86,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Energy Conservation Credit",
+     "amount": -4.96,
+     "is_subperiod_detail": false
+    }
+   ],
+   "estimated_electric_total": 121.14,
+   "total_delta": 0.01,
+   "base_tariff": {
+    "family_key": "nc-progress-leaf-500",
+    "source_kind": "historical",
+    "document_id": 29,
+    "effective_start": "2024-10-01"
+   },
+   "components": {
+    "clean_energy_rider": {
+     "actual": 0.86,
+     "estimated": 0.86,
+     "delta": 0.0,
+     "estimate_source": "observed_history"
+    },
+    "customer_charge": {
+     "actual": 7.93,
+     "estimated": 7.93,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "energy_charge": {
+     "actual": 99.28,
+     "estimated": 99.28,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "energy_conservation_credit": {
+     "actual": -4.96,
+     "estimated": -4.96,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "storm_recovery_charge": {
+     "actual": 2.02,
+     "estimated": 2.02,
+     "delta": 0.0,
+     "estimate_source": "observed_history"
+    },
+    "summary_rider_adjustments": {
+     "actual": 16.02,
+     "estimated": 16.01,
+     "delta": 0.01,
+     "estimate_source": "tariff"
+    }
+   },
+   "source_pdf": "2025-04-21.pdf",
+   "source_pdf_sha256": "779c00c05a43161e243d28a00ee6facd4d48c2689c44447d74df8df4a63561aa"
+  },
+  {
+   "bill_id": 2,
+   "bill_date": "2025-05-20",
+   "service_start": "2025-04-17",
+   "service_end": "2025-05-16",
+   "rate_code": "RES",
+   "billed_kwh": 1460.0,
+   "printed_electric_total": 215.67,
+   "front_page_current_electric_charges": 215.67,
+   "actual_line_items": [
+    {
+     "label": "Basic Customer Charge",
+     "amount": 14.0,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Energy Charge",
+     "amount": 94.41,
+     "is_subperiod_detail": true
+    },
+    {
+     "label": "Energy Charge",
+     "amount": 82.53,
+     "is_subperiod_detail": true
+    },
+    {
+     "label": "Storm Recovery Charge",
+     "amount": 3.59,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Summary of Rider Adjustments",
+     "amount": 28.47,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Clean Energy Rider",
+     "amount": 1.52,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Energy Conservation Credit",
+     "amount": -8.85,
+     "is_subperiod_detail": false
+    }
+   ],
+   "estimated_electric_total": 215.67,
+   "total_delta": 0.0,
+   "base_tariff": {
+    "family_key": "nc-progress-leaf-500",
+    "source_kind": "historical",
+    "document_id": 29,
+    "effective_start": "2024-10-01"
+   },
+   "components": {
+    "clean_energy_rider": {
+     "actual": 1.52,
+     "estimated": 1.52,
+     "delta": 0.0,
+     "estimate_source": "observed_history"
+    },
+    "customer_charge": {
+     "actual": 14.0,
+     "estimated": 14.0,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "energy_charge": {
+     "actual": 176.94,
+     "estimated": 176.94,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "energy_conservation_credit": {
+     "actual": -8.85,
+     "estimated": -8.85,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "storm_recovery_charge": {
+     "actual": 3.59,
+     "estimated": 3.59,
+     "delta": 0.0,
+     "estimate_source": "observed_history"
+    },
+    "summary_rider_adjustments": {
+     "actual": 28.47,
+     "estimated": 28.47,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    }
+   },
+   "source_pdf": "2025-05-20.pdf",
+   "source_pdf_sha256": "d59351097502953d012b311e9e28b4990a00aca00cf490040d3097d4d8114843"
+  },
+  {
+   "bill_id": 3,
+   "bill_date": "2025-06-19",
+   "service_start": "2025-05-17",
+   "service_end": "2025-06-17",
+   "rate_code": "RES",
+   "billed_kwh": 1316.0,
+   "printed_electric_total": 195.94,
+   "front_page_current_electric_charges": 195.94,
+   "actual_line_items": [
+    {
+     "label": "Basic Customer Charge",
+     "amount": 14.0,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Energy Charge",
+     "amount": 159.49,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Storm Recovery Charge",
+     "amount": 3.24,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Summary of Rider Adjustments",
+     "amount": 25.66,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Clean Energy Rider",
+     "amount": 1.52,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Energy Conservation Credit",
+     "amount": -7.97,
+     "is_subperiod_detail": false
+    }
+   ],
+   "estimated_electric_total": 195.94,
+   "total_delta": 0.0,
+   "base_tariff": {
+    "family_key": "nc-progress-leaf-500",
+    "source_kind": "historical",
+    "document_id": 29,
+    "effective_start": "2024-10-01"
+   },
+   "components": {
+    "clean_energy_rider": {
+     "actual": 1.52,
+     "estimated": 1.52,
+     "delta": 0.0,
+     "estimate_source": "observed_history"
+    },
+    "customer_charge": {
+     "actual": 14.0,
+     "estimated": 14.0,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "energy_charge": {
+     "actual": 159.49,
+     "estimated": 159.49,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "energy_conservation_credit": {
+     "actual": -7.97,
+     "estimated": -7.97,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "storm_recovery_charge": {
+     "actual": 3.24,
+     "estimated": 3.24,
+     "delta": 0.0,
+     "estimate_source": "observed_history"
+    },
+    "summary_rider_adjustments": {
+     "actual": 25.66,
+     "estimated": 25.66,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    }
+   },
+   "source_pdf": "2025-06-19.pdf",
+   "source_pdf_sha256": "978fa88f1ee5f4c22b12067c359381a2e82b3b016a2e303009c436d6ff44df8f"
+  },
+  {
+   "bill_id": 4,
+   "bill_date": "2025-07-21",
+   "service_start": "2025-06-18",
+   "service_end": "2025-07-17",
+   "rate_code": "RES",
+   "billed_kwh": 1520.0,
+   "printed_electric_total": 223.61,
+   "front_page_current_electric_charges": 223.61,
+   "actual_line_items": [
+    {
+     "label": "Basic Customer Charge",
+     "amount": 14.0,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Energy Charge",
+     "amount": 184.21,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Storm Recovery Charge",
+     "amount": 1.62,
+     "is_subperiod_detail": true
+    },
+    {
+     "label": "Storm Recovery Charge",
+     "amount": 1.81,
+     "is_subperiod_detail": true
+    },
+    {
+     "label": "Summary of Rider Adjustments",
+     "amount": 29.66,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Clean Energy Rider",
+     "amount": 1.52,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Energy Conservation Credit",
+     "amount": -9.21,
+     "is_subperiod_detail": false
+    }
+   ],
+   "estimated_electric_total": 223.59,
+   "total_delta": 0.02,
+   "base_tariff": {
+    "family_key": "nc-progress-leaf-500",
+    "source_kind": "historical",
+    "document_id": 29,
+    "effective_start": "2024-10-01"
+   },
+   "components": {
+    "clean_energy_rider": {
+     "actual": 1.52,
+     "estimated": 1.52,
+     "delta": 0.0,
+     "estimate_source": "observed_history"
+    },
+    "customer_charge": {
+     "actual": 14.0,
+     "estimated": 14.0,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "energy_charge": {
+     "actual": 184.21,
+     "estimated": 184.21,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "energy_conservation_credit": {
+     "actual": -9.21,
+     "estimated": -9.21,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "storm_recovery_charge": {
+     "actual": 3.43,
+     "estimated": 3.43,
+     "delta": 0.0,
+     "estimate_source": "observed_history"
+    },
+    "summary_rider_adjustments": {
+     "actual": 29.66,
+     "estimated": 29.64,
+     "delta": 0.02,
+     "estimate_source": "tariff"
+    }
+   },
+   "source_pdf": "2025-07-21.pdf",
+   "source_pdf_sha256": "5dc4dd9b6d3861e3d4e7df56057456a841f6216079a158b72c1ba0dbffb60275"
+  },
+  {
+   "bill_id": 5,
+   "bill_date": "2025-08-20",
+   "service_start": "2025-07-18",
+   "service_end": "2025-08-18",
+   "rate_code": "RES",
+   "billed_kwh": 1379.0,
+   "printed_electric_total": 204.08,
+   "front_page_current_electric_charges": 204.08,
+   "actual_line_items": [
+    {
+     "label": "Basic Customer Charge",
+     "amount": 14.0,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Energy Charge",
+     "amount": 167.12,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Storm Recovery Charge",
+     "amount": 2.9,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Summary of Rider Adjustments",
+     "amount": 26.9,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Clean Energy Rider",
+     "amount": 1.52,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Energy Conservation Credit",
+     "amount": -8.36,
+     "is_subperiod_detail": false
+    }
+   ],
+   "estimated_electric_total": 204.07,
+   "total_delta": 0.01,
+   "base_tariff": {
+    "family_key": "nc-progress-leaf-500",
+    "source_kind": "historical",
+    "document_id": 29,
+    "effective_start": "2024-10-01"
+   },
+   "components": {
+    "clean_energy_rider": {
+     "actual": 1.52,
+     "estimated": 1.52,
+     "delta": 0.0,
+     "estimate_source": "observed_history"
+    },
+    "customer_charge": {
+     "actual": 14.0,
+     "estimated": 14.0,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "energy_charge": {
+     "actual": 167.12,
+     "estimated": 167.12,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "energy_conservation_credit": {
+     "actual": -8.36,
+     "estimated": -8.36,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "storm_recovery_charge": {
+     "actual": 2.9,
+     "estimated": 2.9,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "summary_rider_adjustments": {
+     "actual": 26.9,
+     "estimated": 26.89,
+     "delta": 0.01,
+     "estimate_source": "tariff"
+    }
+   },
+   "source_pdf": "2025-08-20.pdf",
+   "source_pdf_sha256": "7a4e2cd87b22e9c376082050e55c4f21e71ef8da9fe5093bb0631326493c4bf5"
+  },
+  {
+   "bill_id": 6,
+   "bill_date": "2025-09-19",
+   "service_start": "2025-08-19",
+   "service_end": "2025-09-17",
+   "rate_code": "RES",
+   "billed_kwh": 1130.0,
+   "printed_electric_total": 170.01,
+   "front_page_current_electric_charges": 170.01,
+   "actual_line_items": [
+    {
+     "label": "Basic Customer Charge",
+     "amount": 14.0,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Energy Charge",
+     "amount": 136.94,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Storm Recovery Charge",
+     "amount": 2.37,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Summary of Rider Adjustments",
+     "amount": 22.03,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Clean Energy Rider",
+     "amount": 1.52,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Energy Conservation Credit",
+     "amount": -6.85,
+     "is_subperiod_detail": false
+    }
+   ],
+   "estimated_electric_total": 170.02,
+   "total_delta": -0.01,
+   "base_tariff": {
+    "family_key": "nc-progress-leaf-500",
+    "source_kind": "historical",
+    "document_id": 29,
+    "effective_start": "2024-10-01"
+   },
+   "components": {
+    "clean_energy_rider": {
+     "actual": 1.52,
+     "estimated": 1.52,
+     "delta": 0.0,
+     "estimate_source": "observed_history"
+    },
+    "customer_charge": {
+     "actual": 14.0,
+     "estimated": 14.0,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "energy_charge": {
+     "actual": 136.94,
+     "estimated": 136.94,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "energy_conservation_credit": {
+     "actual": -6.85,
+     "estimated": -6.85,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "storm_recovery_charge": {
+     "actual": 2.37,
+     "estimated": 2.37,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "summary_rider_adjustments": {
+     "actual": 22.03,
+     "estimated": 22.04,
+     "delta": -0.01,
+     "estimate_source": "tariff"
+    }
+   },
+   "source_pdf": "2025-09-19.pdf",
+   "source_pdf_sha256": "eea157da5183bd65565bafd980f4c1bb58368cbac30796a1cf1538554b8a04ea"
+  },
+  {
+   "bill_id": 7,
+   "bill_date": "2025-10-21",
+   "service_start": "2025-09-18",
+   "service_end": "2025-10-17",
+   "rate_code": "RES",
+   "billed_kwh": 876.0,
+   "printed_electric_total": 136.94,
+   "front_page_current_electric_charges": 136.94,
+   "actual_line_items": [
+    {
+     "label": "Basic Customer Charge",
+     "amount": 14.0,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Energy Charge",
+     "amount": 45.93,
+     "is_subperiod_detail": true
+    },
+    {
+     "label": "Energy Charge",
+     "amount": 53.14,
+     "is_subperiod_detail": true
+    },
+    {
+     "label": "Energy Charge",
+     "amount": 8.83,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Storm Recovery Charge",
+     "amount": 1.84,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Summary of Rider Adjustments",
+     "amount": 17.08,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Clean Energy Rider",
+     "amount": 1.52,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Energy Conservation Credit",
+     "amount": -5.4,
+     "is_subperiod_detail": false
+    }
+   ],
+   "estimated_electric_total": 136.95,
+   "total_delta": -0.01,
+   "base_tariff": {
+    "family_key": "/-/media/pdfs/for-your-home/rates/dep-nc/leaf-no-500-schedule-res.pdf",
+    "source_kind": "current",
+    "document_id": 343,
+    "effective_start": "October 1, 2025"
+   },
+   "components": {
+    "clean_energy_rider": {
+     "actual": 1.52,
+     "estimated": 1.52,
+     "delta": 0.0,
+     "estimate_source": "observed_history"
+    },
+    "customer_charge": {
+     "actual": 14.0,
+     "estimated": 14.0,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "energy_charge": {
+     "actual": 107.9,
+     "estimated": 107.9,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "energy_conservation_credit": {
+     "actual": -5.4,
+     "estimated": -5.39,
+     "delta": -0.01,
+     "estimate_source": "tariff"
+    },
+    "storm_recovery_charge": {
+     "actual": 1.84,
+     "estimated": 1.84,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "summary_rider_adjustments": {
+     "actual": 17.08,
+     "estimated": 17.08,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    }
+   },
+   "source_pdf": "2025-10-21.pdf",
+   "source_pdf_sha256": "989ef06ad3d5ff119cf9e2cb3a2e978ac5d09dbd23254cc02749ad01ea6a7d4b"
+  },
+  {
+   "bill_id": 8,
+   "bill_date": "2025-11-19",
+   "service_start": "2025-10-18",
+   "service_end": "2025-11-17",
+   "rate_code": "RES",
+   "billed_kwh": 813.0,
+   "printed_electric_total": 131.22,
+   "front_page_current_electric_charges": 131.22,
+   "actual_line_items": [
+    {
+     "label": "Basic Customer Charge",
+     "amount": 14.0,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Energy Charge",
+     "amount": 100.98,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Energy Charge",
+     "amount": 1.51,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Clean Energy Rider",
+     "amount": 1.52,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Energy Conservation Credit",
+     "amount": -5.12,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Storm Recovery Charge",
+     "amount": 2.45,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Summary of Rider Adjustments",
+     "amount": 15.88,
+     "is_subperiod_detail": false
+    }
+   ],
+   "estimated_electric_total": 131.19,
+   "total_delta": 0.03,
+   "base_tariff": {
+    "family_key": "/-/media/pdfs/for-your-home/rates/dep-nc/leaf-no-500-schedule-res.pdf",
+    "source_kind": "current",
+    "document_id": 343,
+    "effective_start": "October 1, 2025"
+   },
+   "components": {
+    "clean_energy_rider": {
+     "actual": 1.52,
+     "estimated": 1.52,
+     "delta": 0.0,
+     "estimate_source": "observed_history"
+    },
+    "customer_charge": {
+     "actual": 14.0,
+     "estimated": 14.0,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "energy_charge": {
+     "actual": 102.49,
+     "estimated": 102.49,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "energy_conservation_credit": {
+     "actual": -5.12,
+     "estimated": -5.12,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "storm_recovery_charge": {
+     "actual": 2.45,
+     "estimated": 2.45,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "summary_rider_adjustments": {
+     "actual": 15.88,
+     "estimated": 15.85,
+     "delta": 0.03,
+     "estimate_source": "tariff"
+    }
+   },
+   "source_pdf": "2025-11-19.pdf",
+   "source_pdf_sha256": "a0b4d47f7437f641f83aaa9ceccd1bd0560c498dac385ab3b19aafa1f376d1c5"
+  },
+  {
+   "bill_id": 9,
+   "bill_date": "2025-12-18",
+   "service_start": "2025-11-18",
+   "service_end": "2025-12-16",
+   "rate_code": "RES",
+   "billed_kwh": 1234.0,
+   "printed_electric_total": 188.78,
+   "front_page_current_electric_charges": 188.78,
+   "actual_line_items": [
+    {
+     "label": "Basic Customer Charge",
+     "amount": 14.0,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Energy Charge",
+     "amount": 100.98,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Energy Charge",
+     "amount": 50.44,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Clean Energy Rider",
+     "amount": 0.68,
+     "is_subperiod_detail": true
+    },
+    {
+     "label": "Clean Energy Rider",
+     "amount": 1.0,
+     "is_subperiod_detail": true
+    },
+    {
+     "label": "Energy Conservation Credit",
+     "amount": -7.57,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Storm Recovery Charge",
+     "amount": 4.64,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Summary of Rider Adjustments",
+     "amount": 9.69,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Summary of Rider Adjustments",
+     "amount": 6.44,
+     "is_subperiod_detail": true
+    },
+    {
+     "label": "Summary of Rider Adjustments",
+     "amount": 8.48,
+     "is_subperiod_detail": true
+    }
+   ],
+   "estimated_electric_total": 189.23,
+   "total_delta": -0.45,
+   "base_tariff": {
+    "family_key": "/-/media/pdfs/for-your-home/rates/dep-nc/leaf-no-500-schedule-res.pdf",
+    "source_kind": "current",
+    "document_id": 343,
+    "effective_start": "October 1, 2025"
+   },
+   "components": {
+    "clean_energy_rider": {
+     "actual": 1.68,
+     "estimated": 1.68,
+     "delta": 0.0,
+     "estimate_source": "observed_history"
+    },
+    "customer_charge": {
+     "actual": 14.0,
+     "estimated": 14.0,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "energy_charge": {
+     "actual": 151.42,
+     "estimated": 151.42,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "energy_conservation_credit": {
+     "actual": -7.57,
+     "estimated": -7.57,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "storm_recovery_charge": {
+     "actual": 4.64,
+     "estimated": 4.64,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "summary_rider_adjustments": {
+     "actual": 24.61,
+     "estimated": 25.06,
+     "delta": -0.45,
+     "estimate_source": "tariff"
+    }
+   },
+   "source_pdf": "2025-12-18.pdf",
+   "source_pdf_sha256": "484607601b3013025fddfc950754c81901ed1b9bb78d22c4d859d87843e0ec25"
+  },
+  {
+   "bill_id": 10,
+   "bill_date": "2026-01-21",
+   "service_start": "2025-12-17",
+   "service_end": "2026-01-17",
+   "rate_code": "RES",
+   "billed_kwh": 1300.0,
+   "printed_electric_total": 198.74,
+   "front_page_current_electric_charges": 198.74,
+   "actual_line_items": [
+    {
+     "label": "Basic Customer Charge",
+     "amount": 14.0,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Energy Charge",
+     "amount": 100.98,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Energy Charge",
+     "amount": 58.12,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Clean Energy Rider",
+     "amount": 1.81,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Energy Conservation Credit",
+     "amount": -7.96,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Storm Recovery Charge",
+     "amount": 4.93,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Summary of Rider Adjustments",
+     "amount": 15.99,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Summary of Rider Adjustments",
+     "amount": 4.88,
+     "is_subperiod_detail": true
+    },
+    {
+     "label": "Summary of Rider Adjustments",
+     "amount": 5.99,
+     "is_subperiod_detail": true
+    }
+   ],
+   "estimated_electric_total": 199.14,
+   "total_delta": -0.4,
+   "base_tariff": {
+    "family_key": "/-/media/pdfs/for-your-home/rates/dep-nc/leaf-no-500-schedule-res.pdf",
+    "source_kind": "current",
+    "document_id": 343,
+    "effective_start": "October 1, 2025"
+   },
+   "components": {
+    "clean_energy_rider": {
+     "actual": 1.81,
+     "estimated": 1.81,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "customer_charge": {
+     "actual": 14.0,
+     "estimated": 14.0,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "energy_charge": {
+     "actual": 159.1,
+     "estimated": 159.1,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "energy_conservation_credit": {
+     "actual": -7.96,
+     "estimated": -7.96,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "storm_recovery_charge": {
+     "actual": 4.93,
+     "estimated": 4.93,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "summary_rider_adjustments": {
+     "actual": 26.86,
+     "estimated": 27.26,
+     "delta": -0.4,
+     "estimate_source": "tariff"
+    }
+   },
+   "source_pdf": "2026-01-21.pdf",
+   "source_pdf_sha256": "91276963f7b29a961e0175665e2915e60d67fb7ecb98465150f067fa74e5cf59"
+  },
+  {
+   "bill_id": 11,
+   "bill_date": "2026-02-18",
+   "service_start": "2026-01-18",
+   "service_end": "2026-02-16",
+   "rate_code": "RES",
+   "billed_kwh": 2405.0,
+   "printed_electric_total": 348.57,
+   "front_page_current_electric_charges": 348.57,
+   "actual_line_items": [
+    {
+     "label": "Basic Customer Charge",
+     "amount": 14.0,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Energy Charge",
+     "amount": 100.98,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Energy Charge",
+     "amount": 186.55,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Clean Energy Rider",
+     "amount": 1.81,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Energy Conservation Credit",
+     "amount": -14.38,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Storm Recovery Charge",
+     "amount": 9.18,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Summary of Rider Adjustments",
+     "amount": 50.43,
+     "is_subperiod_detail": false
+    }
+   ],
+   "estimated_electric_total": 348.57,
+   "total_delta": 0.0,
+   "base_tariff": {
+    "family_key": "/-/media/pdfs/for-your-home/rates/dep-nc/leaf-no-500-schedule-res.pdf",
+    "source_kind": "current",
+    "document_id": 343,
+    "effective_start": "October 1, 2025"
+   },
+   "components": {
+    "clean_energy_rider": {
+     "actual": 1.81,
+     "estimated": 1.81,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "customer_charge": {
+     "actual": 14.0,
+     "estimated": 14.0,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "energy_charge": {
+     "actual": 287.53,
+     "estimated": 287.53,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "energy_conservation_credit": {
+     "actual": -14.38,
+     "estimated": -14.38,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "storm_recovery_charge": {
+     "actual": 9.18,
+     "estimated": 9.18,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "summary_rider_adjustments": {
+     "actual": 50.43,
+     "estimated": 50.43,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    }
+   },
+   "source_pdf": "2026-02-18.pdf",
+   "source_pdf_sha256": "b30f5b0f9b1b4b65e339d2b3c54e8de855c79c779e5efb547e6df153fc7a2b87"
+  },
+  {
+   "bill_id": 12,
+   "bill_date": "2026-03-20",
+   "service_start": "2026-02-17",
+   "service_end": "2026-03-17",
+   "rate_code": "R-TOU-CPP",
+   "billed_kwh": 1290.583,
+   "printed_electric_total": 177.97,
+   "front_page_current_electric_charges": 177.97,
+   "actual_line_items": [
+    {
+     "label": "Basic Customer Charge",
+     "amount": 14.0,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Critical Peak Energy Charge",
+     "amount": 0.0,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "On-Peak Energy Charge",
+     "amount": 20.1,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Off-Peak Energy Charge",
+     "amount": 71.52,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Discount Energy Charge",
+     "amount": 45.41,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Clean Energy Rider",
+     "amount": 1.81,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Energy Conservation Credit",
+     "amount": -6.86,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Storm Recovery Charge",
+     "amount": 4.93,
+     "is_subperiod_detail": false
+    },
+    {
+     "label": "Summary of Rider Adjustments",
+     "amount": 27.06,
+     "is_subperiod_detail": false
+    }
+   ],
+   "estimated_electric_total": 177.98,
+   "total_delta": -0.01,
+   "base_tariff": {
+    "family_key": "/-/media/pdfs/for-your-home/rates/dep-nc/leaf-no-503-schedule-r-tou-cpp.pdf",
+    "source_kind": "current",
+    "document_id": 346,
+    "effective_start": "October 1, 2025"
+   },
+   "components": {
+    "clean_energy_rider": {
+     "actual": 1.81,
+     "estimated": 1.81,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "customer_charge": {
+     "actual": 14.0,
+     "estimated": 14.0,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "energy_charge": {
+     "actual": 137.03,
+     "estimated": 137.03,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "energy_conservation_credit": {
+     "actual": -6.86,
+     "estimated": -6.85,
+     "delta": -0.01,
+     "estimate_source": "tariff"
+    },
+    "storm_recovery_charge": {
+     "actual": 4.93,
+     "estimated": 4.93,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    },
+    "summary_rider_adjustments": {
+     "actual": 27.06,
+     "estimated": 27.06,
+     "delta": 0.0,
+     "estimate_source": "tariff"
+    }
+   },
+   "source_pdf": "2026-03-20.pdf",
+   "source_pdf_sha256": "7b1fee057b1e23f831b2081bcf598285883ee252ce45fc8d32b09ea90a48bedd"
+  }
+ ]
+}
