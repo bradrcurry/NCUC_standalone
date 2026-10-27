@@ -247,6 +247,18 @@ progress show-regulator-gaps
 progress show-search-pack
 promote-llm-charge-proposals-nc
 propose-llm-charge-promotions-nc
+provenance backfill
+provenance compare
+provenance completeness
+provenance drop-schema
+provenance extract-candidate
+provenance history
+provenance migrate
+provenance promote
+provenance reject
+provenance rollback
+provenance unsupported-charges
+provenance verify
 reclassify-llm-row-conflicts-nc
 recommend-missing-dockets-nc
 recommend-overnight-lane-nc

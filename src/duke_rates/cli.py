@@ -151,6 +151,8 @@ from duke_rates.cli_commands.billing import billing_app, data_app
 from duke_rates.cli_commands.progress import progress_app
 # Doc-intel sub-app — Docling, classification, embedding, LLM probe, gold-set.
 from duke_rates.cli_commands.doc_intel import doc_intel_app
+# Phase 2A provenance commands -- see cli_commands/provenance.py
+from duke_rates.cli_commands.provenance import provenance_app
 
 app = typer.Typer(help="Duke Energy tariff discovery and analysis CLI.")
 app.add_typer(ocr_app, name="ocr")
@@ -165,6 +167,7 @@ app.add_typer(billing_app, name="billing")
 app.add_typer(data_app, name="data")
 app.add_typer(progress_app, name="progress")
 app.add_typer(doc_intel_app, name="doc-intel")
+app.add_typer(provenance_app, name="provenance")
 
 
 def _safe_cli_text(value: object) -> str:
