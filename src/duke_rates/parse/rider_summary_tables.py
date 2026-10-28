@@ -349,13 +349,31 @@ def _fused_date(text: str) -> str | None:
 
 
 def _header_columns(
-    view: TableView, row_index: int, label_rows: list[list[CellRef]]
+    view: TableView,
+    row_index: int,
+    label_rows: list[list[CellRef]],
+    current: list[ColumnRole] | None = None,
+    warnings: list[str] | None = None,
 ) -> list[ColumnRole]:
-    """Column roles from a header row found inside a table body."""
+    """Column roles from a header row found inside a table body.
+
+    A header cell OCR left unreadable ("ccnts/k Vh") takes the role of the
+    same column in ``current``, the header this table printed above it, and
+    the substitution is recorded in ``warnings``.
+    """
     row = view.grid[row_index]
     roles = [ColumnRole(0, "label", " ".join(r[0].text for r in label_rows + [row]))]
+    above = {c.index: c for c in current or []}
     for cell in row[1:]:
         role, unit, qualifier = classify_header_text(cell.text)
+        prior = above.get(cell.col)
+        if role == "other" and prior is not None and prior.role in ("value", "effective_date"):
+            role, unit, qualifier = prior.role, prior.unit, prior.qualifier
+            if warnings is not None:
+                warnings.append(
+                    f"column header {cell.text!r} unreadable; role taken from {prior.header!r} "
+                    "printed above it in the same table"
+                )
         roles.append(ColumnRole(cell.col, role, cell.text, unit, qualifier))
     return roles
 
@@ -364,7 +382,16 @@ def _is_inline_header(row: list[CellRef]) -> bool:
     rest = [c.text for c in row[1:] if c.text]
     if not rest or any(is_value_text(t) or is_date_text(t) for t in rest):
         return False
-    return all(classify_header_text(t)[0] in ("value", "effective_date") for t in rest)
+    roles = [classify_header_text(t)[0] for t in rest]
+    if all(r in ("value", "effective_date") for r in roles):
+        return True
+    # OCR-damaged header ("EfTeclivc", "ccnts/k\Vh"): a rate-class title with
+    # at least one readable column header and no digits in the other cells.
+    return (
+        looks_like_rate_class(row[0].text)
+        and any(r in ("value", "effective_date") for r in roles)
+        and not any(ch.isdigit() for t in rest for ch in t)
+    )
 
 
 def _total(
@@ -513,7 +540,8 @@ def parse_rider_summary_from_representation(
                 label = " ".join(label_cell.text.split())
                 if _is_inline_header(row):
                     header_label = " ".join(r[0].text for r in pending + [row] if r[0].text)
-                    columns = _header_columns(view, row_index, pending)
+                    substituted: list[str] = []
+                    columns = _header_columns(view, row_index, pending, columns, substituted)
                     if looks_like_rate_class(header_label):
                         state.start(
                             header_label,
@@ -527,6 +555,7 @@ def parse_rider_summary_from_representation(
                                 ],
                             },
                         )
+                        state.block.warnings.extend(substituted)
                     pending = []
                     continue
                 values = [
