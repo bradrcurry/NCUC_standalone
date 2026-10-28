@@ -29,6 +29,8 @@ Objects created:
 * ``tariff_charge_revisions`` -- every insert/update/delete on
   ``tariff_charges``, with the full old row, so a destructive re-extraction
   can always be reconstructed.
+* ``regulatory_clues`` ... ``search_attempts`` (schema v3) -- the Phase 2E D1
+  clue ledger; see ``duke_rates.db.clue_ledger_schema``.
 * ``provenance_write_context`` -- a single-row table that explicit write APIs
   fill for the duration of a transaction, so trigger-written receipts carry
   the originating process. Writers that do not set it are recorded as
@@ -39,7 +41,9 @@ from __future__ import annotations
 
 import sqlite3
 
-PROVENANCE_SCHEMA_VERSION = 2  # 2: rider-summary runs (Phase 2C)
+from duke_rates.db.clue_ledger_schema import CLUE_LEDGER_DDL, CLUE_LEDGER_TABLES, clue_ledger_usage
+
+PROVENANCE_SCHEMA_VERSION = 3  # 2: rider-summary runs (Phase 2C); 3: clue ledger (Phase 2E D1)
 
 # Columns whose changes are audited, per legacy table.
 AUDITED_METADATA_COLUMNS: dict[str, tuple[str, ...]] = {
@@ -119,7 +123,7 @@ PROVENANCE_TABLES: tuple[str, ...] = (
     "metadata_revisions",
     "document_payload_revisions",
     "tariff_charge_revisions",
-)
+) + CLUE_LEDGER_TABLES
 
 _ACTOR = "COALESCE((SELECT actor FROM provenance_write_context WHERE id = 1), 'unattributed')"
 _OPERATION = "(SELECT operation_id FROM provenance_write_context WHERE id = 1)"
@@ -768,6 +772,7 @@ def ensure_provenance_schema(conn: sqlite3.Connection) -> None:
     """
     _widen_target_kinds(conn)
     conn.executescript(PROVENANCE_DDL)
+    conn.executescript(CLUE_LEDGER_DDL)
     for table, column, typedef in _ADDED_COLUMNS:
         present = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
         if column not in present:
@@ -809,6 +814,7 @@ def provenance_usage(conn: sqlite3.Connection) -> dict[str, int]:
         if q("SELECT 1 FROM sqlite_master WHERE name='rider_summary_revisions'").fetchone()
         else 0,
         "overrides": q("SELECT COUNT(*) FROM charge_overrides").fetchone()[0],
+        **clue_ledger_usage(conn),
     }
 
 
