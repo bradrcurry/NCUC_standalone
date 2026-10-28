@@ -1741,13 +1741,14 @@ class BulkExtractor:
         }
         if self.structured_mode != "legacy":
             charges = self._attach_located_evidence(charges, profile_doc)
+            integrity_details = self._structured_integrity_details(charges, profile_doc)
             rep = profile_doc.get("_representation")
             selection_details["structured_input"] = {
                 "mode": self.structured_mode,
                 "backend": rep.normalizer_backend.value if rep is not None else None,
                 "backend_version": rep.backend_version if rep is not None else None,
                 "charges_with_evidence": sum(1 for c in charges if c.evidence),
-            }
+            } | integrity_details
             bounded = (rep.document_metadata or {}).get("bounded") if rep is not None else None
             if bounded:
                 # Partial structured input is recorded as such, never as complete.
@@ -1794,21 +1795,34 @@ class BulkExtractor:
         if self.structured_mode == "legacy":
             return doc
         cache: dict = {}
+        diagnostics: dict = {}
 
         def loader():
             if "rep" not in cache:
-                cache["rep"] = self._structured_representation(doc)
+                cache["rep"] = self._structured_representation(doc, diagnostics)
             return cache["rep"]
 
-        return {**doc, "_structured_mode": self.structured_mode, "_representation_loader": loader}
+        return {
+            **doc,
+            "_structured_mode": self.structured_mode,
+            "_representation_loader": loader,
+            "_structured_diagnostics": diagnostics,
+        }
 
-    def _structured_representation(self, doc: dict):
+    def _structured_representation(self, doc: dict, diagnostics: dict | None = None):
         """DocumentRepresentation for ``doc`` under the current mode, or None.
 
         docling: the cached Docling artifact for the bytes on disk (never a new
         conversion). native: pdfplumber text layer with geometry tables.
-        hybrid: Docling when cached, otherwise native.
+        hybrid: Docling when cached and it covers the span with original page
+        numbers, otherwise native.
+
+        A Docling artifact whose page numbers cannot be verified against the
+        PDF is never used (see ``page_integrity``). ``diagnostics``, when
+        given, receives the integrity verdict and the reason for any fallback.
         """
+        if diagnostics is None:
+            diagnostics = {}
         if self.representation_provider is not None:
             return self.representation_provider(doc, self.structured_mode)
         pdf_path = doc.get("local_path") or ""
@@ -1817,7 +1831,27 @@ class BulkExtractor:
         start, end = doc.get("start_page"), doc.get("end_page")
         page_range = (int(start), int(end or start)) if start else None
         if self.structured_mode in ("docling", "hybrid"):
-            rep = self._docling_representation(pdf_path, page_range)
+            rep, integrity = self._docling_selection(pdf_path, page_range)
+            diagnostics["docling_page_integrity"] = integrity
+            reason = None
+            if rep is None:
+                reason = integrity.get("reason") or "no_artifact"
+            elif integrity.get("status") == "partial":
+                reason = "span_partially_covered"
+            elif not rep.pages:
+                reason = "empty_slice"
+            if reason:
+                diagnostics["docling_fallback_reason"] = reason
+                if self.structured_mode == "hybrid":
+                    # Partial or empty Docling structure must not stand in for
+                    # the complete native read of the span.
+                    rep = None
+                elif reason == "span_partially_covered":
+                    diagnostics["degraded"] = True
+                    diagnostics["degraded_reason"] = (
+                        "docling artifact lacks pages "
+                        + ", ".join(f"{a}-{b}" for a, b in integrity.get("missing_pages") or [])
+                    )
             if rep is None and self.bounded_conversion:
                 rep = self._bounded_representation(doc, pdf_path, page_range)
             if rep is not None or self.structured_mode == "docling":
@@ -1849,11 +1883,24 @@ class BulkExtractor:
         return result.representation
 
     def _docling_representation(self, pdf_path: str, page_range):
+        return self._docling_selection(pdf_path, page_range)[0]
+
+    def _docling_selection(self, pdf_path: str, page_range):
+        """(representation or None, page-integrity verdict) from the cached Docling artifact.
+
+        The representation is built only when the artifact's page numbers are
+        verified original-PDF numbers; it is None for chunk-relative or
+        otherwise unverifiable artifacts and for spans the artifact lacks.
+        """
         from duke_rates.document_intelligence.adapters import representation_from_docling
+        from duke_rates.document_intelligence.page_integrity import (
+            PARTIAL,
+            assess_docling_page_integrity,
+        )
 
         row = self._load_docling_artifact(pdf_path, want_doc_json=True)
         if not row or not row.get("doc_json_content"):
-            return None
+            return None, {"status": "missing", "reason": "no_artifact"}
         conn = self._get_connection()
         try:
             version = conn.execute(
@@ -1864,14 +1911,122 @@ class BulkExtractor:
         try:
             document = json.loads(row["doc_json_content"])
         except (TypeError, ValueError):
-            return None
-        return representation_from_docling(
+            document = None
+        integrity = assess_docling_page_integrity(
+            document,
+            pdf_page_count=self._pdf_page_count(pdf_path),
+            requested=page_range,
+            metadata=row.get("metadata_json"),
+            artifact_page_count=row.get("page_count"),
+        )
+        verdict = integrity.as_dict() | {
+            "artifact_id": row["id"],
+            "file_hash_match": row.get("file_hash") == self._current_file_hash(pdf_path),
+        }
+        if not (integrity.usable or integrity.status == PARTIAL):
+            logger.info(
+                "Docling artifact %s for %s not used for pages %s: %s",
+                row["id"], pdf_path, page_range, integrity.reason,
+            )
+            return None, verdict
+        rep = representation_from_docling(
             document,
             source_pdf=pdf_path,
             file_sha256=row.get("file_hash"),
             backend_version=version[0] if version else None,
             page_range=page_range,
+            page_offset=integrity.page_offset,
         )
+        rep.document_metadata["page_integrity"] = verdict
+        return rep, verdict
+
+    def _pdf_page_count(self, pdf_path: str) -> int | None:
+        """Page count of ``pdf_path`` as it is on disk now (memoized by size/mtime)."""
+        try:
+            stat = Path(pdf_path).stat()
+        except OSError:
+            return None
+        cache = self.__dict__.setdefault("_pdf_page_count_cache", {})
+        key = (pdf_path, stat.st_size, stat.st_mtime_ns)
+        if key not in cache:
+            try:
+                import fitz
+                with fitz.open(pdf_path) as pdf:
+                    cache[key] = pdf.page_count
+            except Exception:
+                cache[key] = None
+        return cache[key]
+
+    def _structured_integrity_details(self, charges: List[ExtractedCharge], profile_doc: dict) -> dict:
+        """Page-integrity diagnostics for ``structured_input``; drops unverifiable evidence.
+
+        Records the Docling artifact verdict and fallback reason gathered while
+        the representation was chosen, and removes evidence citing pages the
+        representation in use does not hold.
+        """
+        loader = profile_doc.get("_representation_loader")
+        rep = profile_doc.get("_representation")
+        if rep is None and callable(loader) and any(c.evidence for c in charges):
+            rep = loader()  # cached; evidence was derived from it
+        details: dict[str, Any] = {}
+        rejected = self._reject_unverified_evidence(charges, rep)
+        diagnostics = profile_doc.get("_structured_diagnostics") or {}
+        integrity = diagnostics.get("docling_page_integrity")
+        if integrity:
+            details["docling_page_integrity"] = {
+                k: integrity[k]
+                for k in (
+                    "status", "reason", "numbering", "chunked", "requested",
+                    "pdf_page_count", "missing_pages", "artifact_id", "file_hash_match",
+                )
+                if k in integrity
+            }
+            if rep is not None and rep.normalizer_backend.value == "docling":
+                details["docling_page_integrity"]["tables"] = sum(len(p.tables) for p in rep.pages)
+        for key in ("docling_fallback_reason", "degraded", "degraded_reason"):
+            if key in diagnostics:
+                details[key] = diagnostics[key]
+        if rejected:
+            details["rejected_evidence"] = rejected
+        return details
+
+    @staticmethod
+    def _evidence_pages(evidence: Any) -> set[int]:
+        """Every page number an evidence record cites, at any nesting level."""
+        pages: set[int] = set()
+        stack = [evidence]
+        while stack:
+            item = stack.pop()
+            if isinstance(item, dict):
+                page = item.get("page")
+                if isinstance(page, int) and not isinstance(page, bool):
+                    pages.add(page)
+                stack.extend(item.values())
+            elif isinstance(item, (list, tuple)):
+                stack.extend(item)
+        return pages
+
+    @classmethod
+    def _reject_unverified_evidence(cls, charges: List[ExtractedCharge], rep) -> list[dict]:
+        """Drop evidence that cites a page the verified representation does not hold.
+
+        Evidence is only ever derived from ``rep``, so for a verified
+        representation this removes nothing. It guards against page references
+        reaching a candidate from any other source.
+        """
+        allowed = {p.page_number for p in rep.pages} if rep is not None else set()
+        rejected = []
+        for charge in charges:
+            if not charge.evidence:
+                continue
+            pages = cls._evidence_pages(charge.evidence)
+            stray = sorted(pages - allowed)
+            if stray:
+                rejected.append(
+                    {"charge_label": charge.charge_label, "rate_value": charge.rate_value, "pages": stray}
+                )
+                charge.evidence = None
+        return rejected
 
     @staticmethod
     def _attach_located_evidence(charges: List[ExtractedCharge], profile_doc: dict) -> List[ExtractedCharge]:

@@ -115,7 +115,7 @@ def test_bulk_extractor_marks_degraded_bounded_input(tmp_path):
     ext = BulkExtractor(str(tmp_path / "x.db"), structured_mode="hybrid")
     ext.bounded_conversion = True
     ext.bounded_converter = lambda path: None  # Docling fails on every chunk
-    ext._docling_representation = lambda pdf_path, page_range: None  # nothing cached
+    ext._docling_selection = lambda pdf_path, page_range: (None, {"status": "missing", "reason": "no_artifact"})
     rep = ext._structured_representation({"local_path": str(pdf), "start_page": 3, "end_page": 6})
     assert [p.page_number for p in rep.pages] == [3, 4, 5, 6]
     assert rep.document_metadata["bounded"]["degraded"] is True

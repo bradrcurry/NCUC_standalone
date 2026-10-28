@@ -314,6 +314,28 @@ def record_candidate_run(
             if structured.get("degraded")
             else []
         )
+        # A Docling artifact that could not serve the span is reported; the
+        # structure actually used (native, bounded, or none) is complete for its backend.
+        fallback = structured.get("docling_fallback_reason")
+        if fallback and fallback != "no_artifact":
+            integrity = structured.get("docling_page_integrity") or {}
+            findings_extra.append(
+                {
+                    "level": "info",
+                    "code": "docling_artifact_unusable",
+                    "detail": f"docling artifact {integrity.get('artifact_id')} not used: {fallback}"
+                    f" (structure from {structured.get('backend') or 'none'})",
+                }
+            )
+        if structured.get("rejected_evidence"):
+            findings_extra.append(
+                {
+                    "level": "review",
+                    "code": "structured_evidence_rejected",
+                    "detail": f"{len(structured['rejected_evidence'])} charge(s) cited pages the "
+                    "verified representation does not hold; their evidence was dropped",
+                }
+            )
         validation = seal_run(
             conn,
             run_id,
