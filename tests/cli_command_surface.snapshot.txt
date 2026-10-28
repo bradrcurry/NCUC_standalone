@@ -249,6 +249,8 @@ promote-llm-charge-proposals-nc
 propose-llm-charge-promotions-nc
 provenance audit-docling-coverage
 provenance backfill
+provenance binding-check
+provenance build-clue-ledger
 provenance candidates
 provenance compare
 provenance completeness
@@ -261,7 +263,10 @@ provenance issues
 provenance migrate
 provenance promote
 provenance reject
+provenance resolve-gaps-local
 provenance rollback
+provenance search-ledger
+provenance typed-gaps
 provenance unsupported-charges
 provenance verify
 reclassify-llm-row-conflicts-nc

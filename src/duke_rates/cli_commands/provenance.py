@@ -487,3 +487,109 @@ def unsupported_charges_cmd(
             ),
             encoding="utf-8",
         )
+
+
+# ---------------------------------------------------------------------------
+# Phase 2E D1: regulatory clue ledger, lineage links, typed gaps, search ledger
+# ---------------------------------------------------------------------------
+
+
+def _ledger_conn(db: Path, allow_production: bool) -> sqlite3.Connection:
+    conn = _open(db, write=True, allow_production=allow_production)
+    if not conn.execute("SELECT 1 FROM sqlite_master WHERE name = 'regulatory_clues'").fetchone():
+        raise typer.BadParameter(f"{db} has no clue ledger; run `provenance migrate` on it first")
+    return conn
+
+
+def _write_json(path: Path | None, payload) -> None:
+    if path:
+        path.write_text(json.dumps(payload, indent=1, default=str, ensure_ascii=False), encoding="utf-8")
+
+
+@provenance_app.command("build-clue-ledger")
+def build_clue_ledger_cmd(
+    db: Path = _DB_OPTION,
+    allow_production: bool = _ALLOW_PROD,
+    historical_document_id: list[int] = typer.Option(
+        [], "--historical-document-id", help="Limit to these documents (repeatable); default: all bound."),
+    scope: str = typer.Option("bound", help="bound: pages inside bound spans; pdf: every page of bound PDFs."),
+    bbox: bool = typer.Option(True, "--bbox/--no-bbox", help="Locate clue boxes in the PDF text layer."),
+    json_out: Path | None = typer.Option(None, "--json", help="Also write the full JSON report here."),
+) -> None:
+    """Record every printed regulatory clue with its page (idempotent; reads page artifacts only)."""
+    from duke_rates.historical.ncuc import clue_ledger
+
+    conn = _ledger_conn(db, allow_production)
+    report = clue_ledger.build_clue_ledger(
+        conn, historical_document_ids=historical_document_id or None, scope=scope, locate_bbox=bbox)
+    report["summary"] = clue_ledger.ledger_summary(conn)
+    report["source_grounding"] = clue_ledger.verify_source_grounding(conn)
+    _write_json(json_out, report)
+    _echo({"stats": report["stats"], "skipped_pdfs": len(report["skipped"]), "summary": report["summary"],
+           "source_grounding": report["source_grounding"]})
+    raise typer.Exit(code=0 if report["source_grounding"]["ok"] else 1)
+
+
+@provenance_app.command("typed-gaps")
+def typed_gaps_cmd(
+    db: Path = _DB_OPTION,
+    allow_production: bool = _ALLOW_PROD,
+    json_out: Path | None = typer.Option(None, "--json", help="Also write every link and gap here."),
+) -> None:
+    """Rebuild supersession links and typed gaps from the clue ledger (review columns kept)."""
+    from duke_rates.historical.ncuc import clue_lineage
+
+    conn = _ledger_conn(db, allow_production)
+    report = clue_lineage.rebuild_lineage(conn)
+    if json_out:
+        report["link_rows"] = [dict(r) for r in conn.execute("SELECT * FROM lineage_links ORDER BY id")]
+        report["gap_rows"] = [dict(r) for r in conn.execute(
+            "SELECT * FROM lineage_gaps_typed WHERE active = 1 ORDER BY family_key, gap_type, id")]
+        _write_json(json_out, report)
+    _echo({k: report[k] for k in ("versions_with_scanned_pages", "identity_status", "links", "gaps")})
+
+
+@provenance_app.command("resolve-gaps-local")
+def resolve_gaps_local_cmd(
+    db: Path = _DB_OPTION,
+    allow_production: bool = _ALLOW_PROD,
+    by: str = typer.Option(..., help="Who is running the search."),
+    gap_id: list[int] = typer.Option([], "--gap-id", help="Limit to these gaps (repeatable)."),
+    force: bool = typer.Option(False, help="Search again even if an equivalent search already completed."),
+    json_out: Path | None = typer.Option(None, "--json", help="Also write candidates here."),
+) -> None:
+    """Search the local archive for each typed gap; record candidates and search attempts (no binding)."""
+    from duke_rates.historical.ncuc import local_gap_resolution as lr
+
+    conn = _ledger_conn(db, allow_production)
+    report = lr.resolve_gaps_locally(conn, created_by=by, gap_ids=gap_id or None, force=force)
+    report["summary"] = lr.resolution_summary(conn)
+    if json_out:
+        report["candidate_rows"] = [dict(r) for r in conn.execute("SELECT * FROM gap_candidates ORDER BY gap_id, id")]
+        _write_json(json_out, report)
+    _echo({"stats": report["stats"], "summary": report["summary"]})
+
+
+@provenance_app.command("binding-check")
+def binding_check_cmd(
+    db: Path = _DB_OPTION,
+    allow_production: bool = _ALLOW_PROD,
+    json_out: Path | None = typer.Option(None, "--json", help="Also write the findings here."),
+) -> None:
+    """Bound spans that are an index page or print only other leaves, with proposed page runs (read-only)."""
+    from duke_rates.historical.ncuc import clue_ledger, clue_lineage
+
+    conn = _ledger_conn(db, allow_production)
+    leaves = clue_lineage.all_family_leaves(conn)
+    findings = clue_ledger.check_bound_spans(conn, family_leaves=leaves)
+    _write_json(json_out, findings)
+    _echo([{k: f[k] for k in ("historical_document_id", "family_key", "bound_span", "proposed_runs")}
+           for f in findings])
+
+
+@provenance_app.command("search-ledger")
+def search_ledger_cmd(db: Path = _DB_OPTION) -> None:
+    """Summarise recorded search attempts by channel and outcome."""
+    from duke_rates.historical.ncuc.search_ledger import search_ledger_summary
+
+    _echo(search_ledger_summary(_open(db, write=False)))
