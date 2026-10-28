@@ -1,0 +1,356 @@
+{
+ "stats": {
+  "pages_scanned": 5360,
+  "clue_rows_seen": 23451,
+  "pdfs_scanned": 431,
+  "artifact_rows_rejected_hash_mismatch": 9715,
+  "artifact_rows_rejected_non_native_artifact": 7983,
+  "historical_documents_considered": 682
+ },
+ "skipped": [
+  {
+   "source_pdf": "data\\historical\\raw\\nc\\progress\\other\\descriptions-of-riders-dep-nc-january-2024-data-historical-manual-rider-descript.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    54
+   ]
+  },
+  {
+   "source_pdf": "data\\raw\\nc\\progress\\rider\\leaf-no-600-summary-of-riders-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no-.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    361,
+    2591
+   ]
+  },
+  {
+   "source_pdf": "data\\raw\\nc\\progress\\rider\\leaf-no-608-rider-rdm-ry1-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no-608-.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    368
+   ]
+  },
+  {
+   "source_pdf": "data\\raw\\nc\\progress\\rider\\leaf-no-610-rider-pim-ry1-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no-610-.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    370
+   ]
+  },
+  {
+   "source_pdf": "data\\raw\\nc\\progress\\rider\\leaf-no-669-rider-nmb-ry1-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no-669-.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    401
+   ]
+  },
+  {
+   "source_pdf": "data\\raw\\nc\\progress\\rider\\leaf-no-670-rider-rsc-ry1-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no-670-.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    402
+   ]
+  },
+  {
+   "source_pdf": "data\\raw\\nc\\carolinas\\rate\\nc-ol-service-regs-pdf-media-pdfs-for-your-home-rates-electric-nc-nc-ol-service-.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    447
+   ]
+  },
+  {
+   "source_pdf": "data\\raw\\nc\\carolinas\\rate\\nccarbonoffset-pdf-media-pdfs-for-your-home-rates-electric-nc-nccarbonoffset-pdf.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    459
+   ]
+  },
+  {
+   "source_pdf": "data\\raw\\nc\\carolinas\\rate\\ncresmultifamily-pdf-media-pdfs-for-your-home-rates-electric-nc-ncresmultifamily.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    462
+   ]
+  },
+  {
+   "source_pdf": "data\\raw\\nc\\carolinas\\other\\nc-ev-managed-charging-orig-09012023-pdf-media-pdfs-for-your-home-nc-ev-managed-.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    463
+   ]
+  },
+  {
+   "source_pdf": "data\\raw\\nc\\carolinas\\rider\\ncridermrm-pdf-media-pdfs-for-your-home-rates-electric-nc-ncridermrm-pdf.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    470
+   ]
+  },
+  {
+   "source_pdf": "data\\raw\\nc\\carolinas\\rider\\ncridernmb-pdf-media-pdfs-for-your-home-rates-electric-nc-ncridernmb-pdf.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    472
+   ]
+  },
+  {
+   "source_pdf": "data\\raw\\nc\\carolinas\\rider\\nc-rider-nsc-pdf-media-pdfs-for-your-home-rates-electric-nc-nc-rider-nsc-pdf.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    473
+   ]
+  },
+  {
+   "source_pdf": "data\\raw\\nc\\carolinas\\rider\\nc-rider-pim-pdf-media-pdfs-for-your-home-rates-electric-nc-nc-rider-pim-pdf.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    474
+   ]
+  },
+  {
+   "source_pdf": "data\\raw\\nc\\carolinas\\rider\\nc-rider-rdm-pdf-media-pdfs-for-your-home-rates-electric-nc-nc-rider-rdm-pdf.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    475
+   ]
+  },
+  {
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1214\\687a5e89-0924-4b54-bd62-264488246e1a.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    476
+   ]
+  },
+  {
+   "source_pdf": "data\\raw\\nc\\carolinas\\rider\\ncriderssr-pdf-media-pdfs-for-your-home-rates-electric-nc-ncriderssr-pdf.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    479
+   ]
+  },
+  {
+   "source_pdf": "data\\raw\\nc\\carolinas\\rate\\ncscheduleppbe-pdf-media-pdfs-for-your-home-rates-electric-nc-ncscheduleppbe-pdf.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    481
+   ]
+  },
+  {
+   "source_pdf": "data\\raw\\nc\\carolinas\\rider\\ncrideredit4-pdf-media-pdfs-for-your-home-rates-electric-nc-ncrideredit4-pdf.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    482
+   ]
+  },
+  {
+   "source_pdf": "data\\raw\\nc\\carolinas\\rate\\ncfuelcostadjrdr-pdf-media-pdfs-for-your-home-rates-electric-nc-ncfuelcostadjrdr.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    483
+   ]
+  },
+  {
+   "source_pdf": "data/historical/ncuc/e-7-sub-1058/tax_reform_tariffs_jan2015.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    1823,
+    1824,
+    1825,
+    1826,
+    1827,
+    1828,
+    1829
+   ]
+  },
+  {
+   "source_pdf": "data/historical/ncuc/e-7-sub-1058/filing_letter_july2014.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    1837,
+    1838,
+    1839,
+    1840,
+    1841,
+    1842,
+    1843
+   ]
+  },
+  {
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1262\\ac44edb4-12a2-4554-9bd6-fe852e6bb067.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    1854,
+    1855
+   ]
+  },
+  {
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1262\\4b35549f-e0f2-412b-a07a-13f057b53798.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    1856
+   ]
+  },
+  {
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1262\\94421793-f6a6-406c-8837-9063d4854d33.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    1857
+   ]
+  },
+  {
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1262\\231b8283-7b65-43ea-967c-2cf43dc9e616.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    1858
+   ]
+  },
+  {
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1262\\d50e4801-93fe-464e-ab72-a9493c2b357c.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    1860
+   ]
+  },
+  {
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1262\\29bf152a-bcb0-463f-8c12-21e0e3b124f7.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    1861
+   ]
+  },
+  {
+   "source_pdf": "data/historical/ncuc/e-7-sub-1152/ddb530b1-9dcf-4c08-b480-5684455fe4ea.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    2525
+   ]
+  },
+  {
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1058\\compliance_rate_schedules_dec2015.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    2572
+   ]
+  },
+  {
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1044\\32e921d3-7055-4672-8ef7-949ed489030a.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    2588
+   ]
+  },
+  {
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\dep-dsm-compliance-2022-2024\\E-2_Sub_1293\\11-17-2022_8b6b3fe3_E-2_Sub_1293_Compliance_Tariffs_11.17.2022.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    2629,
+    2630,
+    2631,
+    2632,
+    2633
+   ]
+  },
+  {
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\dep-dsm-compliance-2022-2024\\E-2_Sub_1294\\1-11-2023_81fe2e7f_E-2_Sub_1294_DEP_DSM_EE_Compliance_Tariffs.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    2634,
+    2635,
+    2636,
+    2637,
+    2638
+   ]
+  },
+  {
+   "source_pdf": "C:\\Users\\bradr\\AppData\\Local\\Temp\\pytest-of-bradr\\pytest-1284\\test_add_historical_document_n0\\sub1023_2013_corrections.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    3114
+   ]
+  },
+  {
+   "source_pdf": "data\\raw\\historical\\ncuc\\e-2\\e-2-nodate-e-2-sub-1380-candidate-proposed-tariff-filing.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    7815
+   ]
+  },
+  {
+   "source_pdf": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-e-7-sub-1329-dec-proposed-tariff-changes-candidate.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    7816
+   ]
+  },
+  {
+   "source_pdf": "data\\raw\\nc\\progress\\rider\\leaf-600-eff-2026-06-01.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    7817
+   ]
+  },
+  {
+   "source_pdf": "data\\raw\\nc\\carolinas\\rider\\leaf-99-eff-2026-06-01.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    7818
+   ]
+  },
+  {
+   "source_pdf": "data\\raw\\nc\\progress\\rider\\leaf-604-eff-2026-06-01.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    7819
+   ]
+  },
+  {
+   "source_pdf": "data\\raw\\nc\\carolinas\\rider\\leaf-131-eff-2026-06-01.pdf",
+   "reason": "no_native_page_artifacts",
+   "historical_document_ids": [
+    7820
+   ]
+  }
+ ],
+ "summary": {
+  "clues_by_kind": {
+   "approval_reference": 1420,
+   "docket": 4381,
+   "effective_date": 1823,
+   "leaf": 3220,
+   "order_date": 1603,
+   "revision": 3220,
+   "schedule_code": 1754,
+   "supersedes": 1500,
+   "utility": 4014
+  },
+  "clues_by_label_source": {
+   "ocr_observed": 468,
+   "source_observed": 22467
+  },
+  "clues_by_normalization": {
+   "blank": 389,
+   "exact": 2752,
+   "normalized": 18032,
+   "ocr_repaired": 303,
+   "redline_ambiguous": 1399,
+   "unparsed": 60
+  },
+  "bbox_status": {
+   "ambiguous": 1170,
+   "located": 21276,
+   "no_text_layer": 468,
+   "not_found": 21
+  },
+  "pages_scanned": 5292,
+  "pdfs_scanned": 414,
+  "historical_documents_with_clues": 617,
+  "versions_with_clues": 475,
+  "versions_with_docket_clue": 450
+ },
+ "source_grounding": {
+  "checked": 22935,
+  "failures": 0,
+  "examples": [],
+  "ok": true
+ }
+}

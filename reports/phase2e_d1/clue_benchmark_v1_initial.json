@@ -1,0 +1,534 @@
+{
+ "documents": 50,
+ "evidence_failures": [],
+ "per_kind": {
+  "revision": {
+   "tp": 57,
+   "fp": 0,
+   "fn": 4,
+   "precision": 1.0,
+   "recall": 0.9344
+  },
+  "supersedes": {
+   "tp": 25,
+   "fp": 1,
+   "fn": 2,
+   "precision": 0.9615,
+   "recall": 0.9259
+  },
+  "effective_date": {
+   "tp": 29,
+   "fp": 6,
+   "fn": 3,
+   "precision": 0.8286,
+   "recall": 0.9062
+  },
+  "docket": {
+   "tp": 40,
+   "fp": 4,
+   "fn": 1,
+   "precision": 0.9091,
+   "recall": 0.9756
+  },
+  "order_date": {
+   "tp": 27,
+   "fp": 0,
+   "fn": 7,
+   "precision": 1.0,
+   "recall": 0.7941
+  }
+ },
+ "page_attribution": {
+  "attributed": 178
+ },
+ "normalization_accuracy": {
+  "revision": {
+   "right": 57
+  },
+  "supersedes": {
+   "right": 25
+  },
+  "effective_date": {
+   "right": 29
+  },
+  "docket": {
+   "right": 40
+  },
+  "order_date": {
+   "right": 27
+  }
+ },
+ "by_text_layer": {
+  "native_text": {
+   "tp": 173,
+   "fp": 11,
+   "fn": 16
+  },
+  "ocr": {
+   "tp": 5,
+   "fn": 1
+  }
+ },
+ "family_identity": {
+  "correct": 46,
+  "wrong": 3
+ },
+ "links": {
+  "tally": {
+   "verified:confirmed": 10
+  },
+  "reviews": [
+   {
+    "link_id": 38,
+    "from_version_id": 5357,
+    "to_version_id": 6548,
+    "verdict": "confirmed",
+    "basis": "successor prints 'Superseding NC Fifth Revised Leaf No. 600' (eff 2025-04-01); predecessor prints 'NC Fifth Revised Leaf No. 600' (eff 2025-01-01)",
+    "found": true,
+    "status": "verified"
+   },
+   {
+    "link_id": 121,
+    "from_version_id": 6057,
+    "to_version_id": 6548,
+    "verdict": "confirmed",
+    "basis": "same Sixth Revised Leaf 600 sheet as link 38 (second copy, f76e6a9b p.8)",
+    "found": true,
+    "status": "verified"
+   },
+   {
+    "link_id": 146,
+    "from_version_id": 6737,
+    "to_version_id": 5997,
+    "verdict": "confirmed",
+    "basis": "DEC Sixty-Second Revised Leaf 99 (eff 2024-09-01) supersedes Sixty-First; predecessor prints Sixty-First (eff 2024-07-01)",
+    "found": true,
+    "status": "verified"
+   },
+   {
+    "link_id": 7,
+    "from_version_id": 5300,
+    "to_version_id": 5299,
+    "verdict": "confirmed",
+    "basis": "Leaf 500 Second Revised (2025-10-01) supersedes First Revised; predecessor First Revised (2024-10-01)",
+    "found": true,
+    "status": "verified"
+   },
+   {
+    "link_id": 20,
+    "from_version_id": 5329,
+    "to_version_id": 6825,
+    "verdict": "confirmed",
+    "basis": "Leaf 528 Second Revised supersedes First Revised; predecessor First Revised (2024-10-01)",
+    "found": true,
+    "status": "verified"
+   },
+   {
+    "link_id": 128,
+    "from_version_id": 6181,
+    "to_version_id": 6176,
+    "verdict": "confirmed",
+    "basis": "R-TOUD-12 sheet 3 prints 'Supersedes Schedule R-TOUD-10B'; predecessor is SCHEDULE R-TOUD-10B (CP&L)",
+    "found": true,
+    "status": "verified"
+   },
+   {
+    "link_id": 91,
+    "from_version_id": 5608,
+    "to_version_id": 5596,
+    "verdict": "confirmed",
+    "basis": "TSS sheet p.51 footer 'Supersedes Schedule TSS-47' (eff 2018-06-01); predecessor SCHEDULE TSS-47",
+    "found": true,
+    "status": "verified"
+   },
+   {
+    "link_id": 98,
+    "from_version_id": 5716,
+    "to_version_id": 7274,
+    "verdict": "confirmed",
+    "basis": "Leaf 605 First Revised (2023-12-01) supersedes Original; predecessor Original Leaf 605 (2022-12-01)",
+    "found": true,
+    "status": "verified"
+   },
+   {
+    "link_id": 88,
+    "from_version_id": 5565,
+    "to_version_id": 6924,
+    "verdict": "confirmed",
+    "basis": "Original Leaf 663 prints 'Superseding NC Rider SRR-7'; predecessor RIDER SRR-7",
+    "found": true,
+    "status": "verified"
+   },
+   {
+    "link_id": 170,
+    "from_version_id": 7189,
+    "to_version_id": 7272,
+    "verdict": "confirmed",
+    "basis": "Rider CPRE-2 prints 'Supersedes Schedule CPRE-1'; predecessor Rider CPRE-1 (eff 2020-12-07)",
+    "found": true,
+    "status": "verified"
+   }
+  ]
+ },
+ "discrepancies": [
+  {
+   "sample": 3,
+   "hd_id": 3687,
+   "type": "false_positive",
+   "kind": "docket",
+   "printed_text": "NCUC Docket No. E-2, Subs 1219 and 1280",
+   "normalized_value": "E-2 Sub 1219",
+   "normalization": "normalized"
+  },
+  {
+   "sample": 3,
+   "hd_id": 3687,
+   "type": "false_positive",
+   "kind": "docket",
+   "printed_text": "NCUC Docket No. E-2, Subs 1219 and 1280",
+   "normalized_value": "E-2 Sub 1280",
+   "normalization": "normalized"
+  },
+  {
+   "sample": 3,
+   "hd_id": 3687,
+   "type": "false_positive",
+   "kind": "effective_date",
+   "printed_text": "Effective for service rendered on and after March 1, 2022",
+   "normalized_value": "2022-03-01",
+   "normalization": "exact"
+  },
+  {
+   "sample": 3,
+   "hd_id": 3687,
+   "type": "false_positive",
+   "kind": "supersedes",
+   "printed_text": "Supersedes Schedule JAA-6",
+   "normalized_value": "schedule:JAA-6",
+   "normalization": "normalized"
+  },
+  {
+   "sample": 4,
+   "hd_id": 7612,
+   "type": "false_positive",
+   "kind": "docket",
+   "printed_text": "NCUC Docket No. E-2, Subs 1219 and 1262",
+   "normalized_value": "E-2 Sub 1219",
+   "normalization": "normalized"
+  },
+  {
+   "sample": 4,
+   "hd_id": 7612,
+   "type": "false_positive",
+   "kind": "docket",
+   "printed_text": "NCUC Docket No. E-2, Subs 1219 and 1262",
+   "normalized_value": "E-2 Sub 1262",
+   "normalization": "normalized"
+  },
+  {
+   "sample": 4,
+   "hd_id": 7612,
+   "type": "false_positive",
+   "kind": "effective_date",
+   "printed_text": "Effective for service rendered on and after June 1, 2021",
+   "normalized_value": "2021-06-01",
+   "normalization": "exact"
+  },
+  {
+   "sample": 4,
+   "hd_id": 7612,
+   "type": "false_positive",
+   "kind": "effective_date",
+   "printed_text": "Effective for service rendered on and after June 1, 2021",
+   "normalized_value": "2021-06-01",
+   "normalization": "exact"
+  },
+  {
+   "sample": 6,
+   "hd_id": 478,
+   "type": "false_positive",
+   "kind": "effective_date",
+   "printed_text": "Effective for service rendered on and after January 1, 2025",
+   "normalized_value": "2025-01-01",
+   "normalization": "exact"
+  },
+  {
+   "sample": 7,
+   "hd_id": 7675,
+   "type": "false_positive",
+   "kind": "effective_date",
+   "printed_text": "Effective for service on and after October 1, 2021",
+   "normalized_value": "2021-10-01",
+   "normalization": "exact"
+  },
+  {
+   "sample": 9,
+   "hd_id": 536,
+   "type": "missed",
+   "kind": "order_date",
+   "gold": {
+    "kind": "order_date",
+    "text": "Order dated",
+    "value": null,
+    "blank": true
+   },
+   "ledger_same_kind": null
+  },
+  {
+   "sample": 10,
+   "hd_id": 2020,
+   "type": "missed",
+   "kind": "docket",
+   "gold": {
+    "kind": "docket",
+    "text": "and 1276",
+    "value": "E-7 Sub 1276"
+   },
+   "ledger_same_kind": null
+  },
+  {
+   "sample": 10,
+   "hd_id": 2020,
+   "type": "missed",
+   "kind": "order_date",
+   "gold": {
+    "kind": "order_date",
+    "text": "June 12, 2024",
+    "value": "2024-06-12"
+   },
+   "ledger_same_kind": null
+  },
+  {
+   "sample": 10,
+   "hd_id": 2020,
+   "type": "missed",
+   "kind": "order_date",
+   "gold": {
+    "kind": "order_date",
+    "text": "June 13, 2024",
+    "value": "2024-06-13"
+   },
+   "ledger_same_kind": null
+  },
+  {
+   "sample": 11,
+   "hd_id": 7175,
+   "type": "missed",
+   "kind": "order_date",
+   "gold": {
+    "kind": "order_date",
+    "text": "Order dated",
+    "value": null,
+    "blank": true
+   },
+   "ledger_same_kind": null
+  },
+  {
+   "sample": 24,
+   "hd_id": 7485,
+   "type": "missed",
+   "kind": "order_date",
+   "gold": {
+    "kind": "order_date",
+    "text": "Order dated ___",
+    "value": null,
+    "blank": true
+   },
+   "ledger_same_kind": null
+  },
+  {
+   "sample": 28,
+   "hd_id": 7769,
+   "type": "family_identity",
+   "sheet_of_family": true,
+   "ledger_identity": "redline_only"
+  },
+  {
+   "sample": 37,
+   "hd_id": 7599,
+   "type": "missed",
+   "kind": "revision",
+   "gold": {
+    "kind": "revision",
+    "text": "North Carolina Fourth Revised Leaf A",
+    "value": "NC:leaf-A:rev-4",
+    "struck": true
+   },
+   "ledger_same_kind": {
+    "id": 20355,
+    "clue_uid": "9aac5779e7521737d077c152273bedb8232009b97e2ac75a0d8cdcbab0e8214b",
+    "source_pdf": "data\\historical\\ncuc\\e-7-sub-1300\\25ea8bc3-bfbb-48ca-8bfd-2b47fdbb0674.pdf",
+    "file_sha256": "32722e717cdac1008d82057c6db4895b6532b34446490908176635f325cd6639",
+    "file_sha256_status": "computed",
+    "page": 59,
+    "page_artifact_id": 306169,
+    "artifact_version": "page_miner_v6",
+    "text_layer": "native_text",
+    "page_text_sha256": "a99f9656949d4df43482334c1053ea12c34f03756c37b735ccd0b074d767ae5e",
+    "char_start": 3835,
+    "char_end": 3865,
+    "bbox_json": "{\"page\": 59, \"x0\": 420.09, \"y0\": 36.38, \"x1\": 540.07, \"y1\": 46.34, \"unit\": \"pt\", \"origin\": \"top-left\", \"covers\": \"first_printed_line\", \"engine\": \"pymupdf.search_for\"}",
+    "bbox_status": "located",
+    "clue_kind": "revision",
+    "role": "header",
+    "printed_text": "NC Eighth Revised Leaf No. 401",
+    "normalized_value": "NC:leaf-401:rev-8",
+    "normalized_json": null,
+    "normalization": "normalized",
+    "label_source": "source_observed",
+    "verification_status": "unverified",
+    "verified_by": null,
+    "verified_at": null,
+    "verification_ref": null,
+    "extractor": "regulatory_clues",
+    "extractor_version": "1.0.0",
+    "created_at": "2026-10-28T17:56:14.814061Z"
+   }
+  },
+  {
+   "sample": 37,
+   "hd_id": 7599,
+   "type": "missed",
+   "kind": "supersedes",
+   "gold": {
+    "kind": "supersedes",
+    "text": "Superseding North Carolina Third Revised Leaf A",
+    "value": "NC:leaf-A:rev-3",
+    "struck": true
+   },
+   "ledger_same_kind": null
+  },
+  {
+   "sample": 40,
+   "hd_id": 176,
+   "type": "false_positive",
+   "kind": "effective_date",
+   "printed_text": "Effective April 1, 2021",
+   "normalized_value": "2021-04-01",
+   "normalization": "exact"
+  },
+  {
+   "sample": 41,
+   "hd_id": 2036,
+   "type": "missed",
+   "kind": "revision",
+   "gold": {
+    "kind": "revision",
+    "text": "North Carolina Fifth (Proposed) Revised Leaf No. 63",
+    "value": "NC:leaf-63:rev-5"
+   },
+   "ledger_same_kind": null
+  },
+  {
+   "sample": 41,
+   "hd_id": 2036,
+   "type": "missed",
+   "kind": "revision",
+   "gold": {
+    "kind": "revision",
+    "text": "North Carolina Fifth (Proposed) Revised Leaf No. 63",
+    "value": "NC:leaf-63:rev-5"
+   },
+   "ledger_same_kind": null
+  },
+  {
+   "sample": 41,
+   "hd_id": 2036,
+   "type": "family_identity",
+   "sheet_of_family": true,
+   "ledger_identity": "none"
+  },
+  {
+   "sample": 43,
+   "hd_id": 2097,
+   "type": "missed",
+   "kind": "supersedes",
+   "gold": {
+    "kind": "supersedes",
+    "text": "Superseding North Carolinas Second Revised Leaf No. 62",
+    "value": "NC:leaf-62:rev-2"
+   },
+   "ledger_same_kind": null
+  },
+  {
+   "sample": 43,
+   "hd_id": 2097,
+   "type": "missed",
+   "kind": "revision",
+   "gold": {
+    "kind": "revision",
+    "text": "North Carolina Third Revised Leaf No. 62",
+    "value": "NC:leaf-62:rev-3"
+   },
+   "ledger_same_kind": null
+  },
+  {
+   "sample": 43,
+   "hd_id": 2097,
+   "type": "missed",
+   "kind": "effective_date",
+   "gold": {
+    "kind": "effective_date",
+    "text": "Effective for service on and after September 1, 2010",
+    "value": "2010-09-01"
+   },
+   "ledger_same_kind": null
+  },
+  {
+   "sample": 43,
+   "hd_id": 2097,
+   "type": "missed",
+   "kind": "order_date",
+   "gold": {
+    "kind": "order_date",
+    "text": "June 3, 2010",
+    "value": "2010-06-03"
+   },
+   "ledger_same_kind": null
+  },
+  {
+   "sample": 46,
+   "hd_id": 7293,
+   "type": "missed",
+   "kind": "effective_date",
+   "gold": {
+    "kind": "effective_date",
+    "text": "Effective on or after November 25, 2020",
+    "value": "2020-11-25"
+   },
+   "ledger_same_kind": null
+  },
+  {
+   "sample": 46,
+   "hd_id": 7293,
+   "type": "family_identity",
+   "sheet_of_family": false,
+   "ledger_identity": "single"
+  },
+  {
+   "sample": 49,
+   "hd_id": 7171,
+   "type": "missed",
+   "kind": "effective_date",
+   "gold": {
+    "kind": "effective_date",
+    "text": "Effective November 1, 2013",
+    "value": "2013-11-01"
+   },
+   "ledger_same_kind": null
+  },
+  {
+   "sample": 49,
+   "hd_id": 7171,
+   "type": "missed",
+   "kind": "order_date",
+   "gold": {
+    "kind": "order_date",
+    "text": "Order dated",
+    "value": null,
+    "blank": true
+   },
+   "ledger_same_kind": null
+  }
+ ]
+}

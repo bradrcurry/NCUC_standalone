@@ -1,0 +1,451 @@
+[
+ {
+  "historical_document_id": 298,
+  "family_key": "nc-progress-leaf-590",
+  "leaf": "590",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-duke-s-rate-schedule-riders-summary-of-rider-adjustments-effective-july-1-2011.pdf",
+  "file_sha256": "4cb6c4fc662adeb5f14997d380cc1c036825bbc5bcfc1250d9778eb538ed4f9d",
+  "bound_span": [
+   60,
+   62
+  ],
+  "span_page_verdicts": {
+   "60": "other_leaf",
+   "61": "other_leaf",
+   "62": "other_leaf"
+  },
+  "proposed_runs": [],
+  "version_ids": [
+   5352
+  ]
+ },
+ {
+  "historical_document_id": 1968,
+  "family_key": "nc-progress-leaf-665",
+  "leaf": "665",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-duke-energy-carolinas-and-duke-energy-progress-rider-gsa-4-nc-tariffs.pdf",
+  "file_sha256": "6ec1c71ca96199de00bbdb0da9d030977cd1606e30186e98c0a114247a0c0a11",
+  "bound_span": [
+   7,
+   9
+  ],
+  "span_page_verdicts": {
+   "7": "other_leaf",
+   "8": "other_leaf",
+   "9": "other_leaf"
+  },
+  "proposed_runs": [],
+  "version_ids": [
+   6096
+  ]
+ },
+ {
+  "historical_document_id": 2045,
+  "family_key": "nc-progress-leaf-610",
+  "leaf": "610",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-2\\e-2-nodate-joint-request-by-dec-llc-and-dep-llc-for-approval-of-tariff-revisions.pdf",
+  "file_sha256": "32722e717cdac1008d82057c6db4895b6532b34446490908176635f325cd6639",
+  "bound_span": [
+   29,
+   36
+  ],
+  "span_page_verdicts": {
+   "29": "other_leaf",
+   "30": "other_leaf",
+   "31": "other_leaf",
+   "32": "other_leaf",
+   "33": "other_leaf",
+   "34": "other_leaf",
+   "35": "other_leaf",
+   "36": "other_leaf"
+  },
+  "proposed_runs": [],
+  "version_ids": [
+   6607
+  ]
+ },
+ {
+  "historical_document_id": 2053,
+  "family_key": "nc-progress-leaf-520",
+  "leaf": "520",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-duke-s-rate-schedule.pdf",
+  "file_sha256": "328cb256e17dfb6d37510ceb5c0b91ea78ae6f2c13b885a8daf71c5d7f5cc55a",
+  "bound_span": [
+   15,
+   17
+  ],
+  "span_page_verdicts": {
+   "15": "other_leaf",
+   "16": "other_leaf",
+   "17": "other_leaf"
+  },
+  "proposed_runs": [],
+  "version_ids": [
+   7257
+  ]
+ },
+ {
+  "historical_document_id": 2275,
+  "family_key": "nc-progress-leaf-600",
+  "leaf": "600",
+  "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\1b72e8de-c435-43b7-9b88-dfc4c0a8a97b.pdf",
+  "file_sha256": "b61e294063addfaa3e9ad3e156869ad69daffcd441c265613882a7d280621583",
+  "bound_span": [
+   1,
+   1
+  ],
+  "span_page_verdicts": {
+   "1": "index"
+  },
+  "proposed_runs": [
+   [
+    100,
+    105
+   ]
+  ],
+  "version_ids": [
+   6056
+  ]
+ },
+ {
+  "historical_document_id": 2485,
+  "family_key": "nc-carolinas-rider-SUMMARY",
+  "leaf": "99",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-duke-energy-carolinas-llc-s-revised-schedule-pg-rider-scg-and-summary-of-ride.pdf",
+  "file_sha256": "d09b0cbeaafe11a84770a10bd15a7bf0d1b2bc72e6a1d635724ee0ccac48893e",
+  "bound_span": [
+   1,
+   3
+  ],
+  "span_page_verdicts": {
+   "1": "other_leaf",
+   "2": "other_leaf",
+   "3": "other_leaf"
+  },
+  "proposed_runs": [],
+  "version_ids": []
+ },
+ {
+  "historical_document_id": 2595,
+  "family_key": "nc-progress-leaf-669",
+  "leaf": "669",
+  "source_pdf": "data/raw/nc/progress/rider/net-metering-bridge-rider-nmb-media-pdfs-for-your-home-rates-dep-nc-leaf-no-669-.pdf",
+  "file_sha256": "f2101354a5185416b874c0ce335c8523ef6ffc44638b41985c2315c5c7e8448a",
+  "bound_span": [
+   1,
+   4
+  ],
+  "span_page_verdicts": {
+   "1": "other_leaf",
+   "2": "other_leaf",
+   "3": "other_leaf",
+   "4": "other_leaf"
+  },
+  "proposed_runs": [],
+  "version_ids": [
+   5895
+  ]
+ },
+ {
+  "historical_document_id": 7250,
+  "family_key": "nc-progress-leaf-601",
+  "leaf": "601",
+  "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\26982660-9ab3-42fc-a68c-a6a63d386c2a.pdf",
+  "file_sha256": "76a855fa58f2509377bcc6995ccaa796652e93356e5ef10955b2dfa28750d548",
+  "bound_span": [
+   51,
+   51
+  ],
+  "span_page_verdicts": {
+   "51": "other_leaf"
+  },
+  "proposed_runs": [],
+  "version_ids": [
+   7168
+  ]
+ },
+ {
+  "historical_document_id": 7257,
+  "family_key": "nc-progress-leaf-601",
+  "leaf": "601",
+  "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\1b72e8de-c435-43b7-9b88-dfc4c0a8a97b.pdf",
+  "file_sha256": "b61e294063addfaa3e9ad3e156869ad69daffcd441c265613882a7d280621583",
+  "bound_span": [
+   52,
+   52
+  ],
+  "span_page_verdicts": {
+   "52": "other_leaf"
+  },
+  "proposed_runs": [],
+  "version_ids": []
+ },
+ {
+  "historical_document_id": 7264,
+  "family_key": "nc-progress-leaf-601",
+  "leaf": "601",
+  "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\dcd97697-e6a6-49b3-9f5d-18a4ed66ecb3.pdf",
+  "file_sha256": "7344f2c77b8dd55d0c3fa61d37739dd26e3057ddd4599996a02c73c22cc4caae",
+  "bound_span": [
+   48,
+   48
+  ],
+  "span_page_verdicts": {
+   "48": "other_leaf"
+  },
+  "proposed_runs": [],
+  "version_ids": []
+ },
+ {
+  "historical_document_id": 7265,
+  "family_key": "nc-progress-leaf-600",
+  "leaf": "600",
+  "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\7b9171ff-48d4-46dd-82eb-43bd1ca2cd3d.pdf",
+  "file_sha256": "30d6a3e56f70401f81cd2563c5f2be32778ae7d6b4fe658154432014006d8426",
+  "bound_span": [
+   1,
+   1
+  ],
+  "span_page_verdicts": {
+   "1": "index"
+  },
+  "proposed_runs": [
+   [
+    96,
+    101
+   ]
+  ],
+  "version_ids": [
+   6908
+  ]
+ },
+ {
+  "historical_document_id": 7267,
+  "family_key": "nc-progress-leaf-601",
+  "leaf": "601",
+  "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\7b9171ff-48d4-46dd-82eb-43bd1ca2cd3d.pdf",
+  "file_sha256": "30d6a3e56f70401f81cd2563c5f2be32778ae7d6b4fe658154432014006d8426",
+  "bound_span": [
+   102,
+   102
+  ],
+  "span_page_verdicts": {
+   "102": "other_leaf"
+  },
+  "proposed_runs": [],
+  "version_ids": [
+   7171
+  ]
+ },
+ {
+  "historical_document_id": 7325,
+  "family_key": "nc-progress-leaf-708",
+  "leaf": "708",
+  "source_pdf": "data\\historical\\ncuc\\e-7-sub-1155\\285d1dd2-3de1-43d0-afc3-5b5256744af9.pdf",
+  "file_sha256": "3b762faaa312945e9adea0a0bffbe6668cd64053f4e12c087973b508bc9be749",
+  "bound_span": [
+   16,
+   17
+  ],
+  "span_page_verdicts": {
+   "16": "other_leaf",
+   "17": "other_leaf"
+  },
+  "proposed_runs": [],
+  "version_ids": [
+   6752
+  ]
+ },
+ {
+  "historical_document_id": 7599,
+  "family_key": "nc-progress-leaf-800",
+  "leaf": "800",
+  "source_pdf": "data\\historical\\ncuc\\e-7-sub-1300\\25ea8bc3-bfbb-48ca-8bfd-2b47fdbb0674.pdf",
+  "file_sha256": "32722e717cdac1008d82057c6db4895b6532b34446490908176635f325cd6639",
+  "bound_span": [
+   59,
+   98
+  ],
+  "span_page_verdicts": {
+   "59": "other_leaf",
+   "60": "other_leaf",
+   "61": "other_leaf",
+   "62": "other_leaf",
+   "63": "other_leaf",
+   "64": "other_leaf",
+   "65": "other_leaf",
+   "66": "other_leaf",
+   "67": "other_leaf",
+   "68": "other_leaf",
+   "69": "other_leaf",
+   "70": "other_leaf",
+   "71": "other_leaf",
+   "72": "other_leaf",
+   "73": "other_leaf",
+   "74": "other_leaf",
+   "75": "other_leaf",
+   "76": "other_leaf",
+   "77": "other_leaf",
+   "78": "other_leaf",
+   "79": "other_leaf",
+   "80": "other_leaf",
+   "81": "other_leaf",
+   "82": "other_leaf",
+   "83": "other_leaf",
+   "84": "other_leaf",
+   "85": "other_leaf",
+   "86": "other_leaf",
+   "87": "other_leaf",
+   "88": "other_leaf",
+   "89": "other_leaf",
+   "90": "other_leaf",
+   "91": "other_leaf",
+   "92": "other_leaf",
+   "93": "other_leaf",
+   "94": "other_leaf",
+   "95": "other_leaf",
+   "96": "other_leaf",
+   "97": "other_leaf",
+   "98": "other_leaf"
+  },
+  "proposed_runs": [
+   [
+    37,
+    58
+   ]
+  ],
+  "version_ids": [
+   7196
+  ]
+ },
+ {
+  "historical_document_id": 7698,
+  "family_key": "nc-progress-leaf-669",
+  "leaf": "669",
+  "source_pdf": "data\\historical\\ncuc\\e-7-sub-1276\\19850f46-6d15-4849-ac73-b779abc7af2f.pdf",
+  "file_sha256": "f8c0037b7af22da01e5911944f59c76e25ca4ebf245197201428f3d0541665d9",
+  "bound_span": [
+   3,
+   8
+  ],
+  "span_page_verdicts": {
+   "3": "other_leaf",
+   "4": "other_leaf",
+   "5": "other_leaf",
+   "6": "other_leaf",
+   "7": "other_leaf",
+   "8": "other_leaf"
+  },
+  "proposed_runs": [],
+  "version_ids": [
+   7287
+  ]
+ },
+ {
+  "historical_document_id": 7734,
+  "family_key": "nc-progress-leaf-532",
+  "leaf": "532",
+  "source_pdf": "data\\historical\\ncuc\\e-7-sub-1243\\4e0c2c78-3f6f-47b5-8ae0-25aed12fe82f.pdf",
+  "file_sha256": "d42c8e6a3500f4119a1cedd6bc06c6e07bce3b470ddd7aa5c06732026ea5e192",
+  "bound_span": [
+   21,
+   23
+  ],
+  "span_page_verdicts": {
+   "21": "other_leaf",
+   "22": "other_leaf",
+   "23": "other_leaf"
+  },
+  "proposed_runs": [],
+  "version_ids": [
+   7261
+  ]
+ },
+ {
+  "historical_document_id": 7740,
+  "family_key": "nc-progress-leaf-535",
+  "leaf": "535",
+  "source_pdf": "data\\historical\\ncuc\\e-7-sub-1243\\4e0c2c78-3f6f-47b5-8ae0-25aed12fe82f.pdf",
+  "file_sha256": "d42c8e6a3500f4119a1cedd6bc06c6e07bce3b470ddd7aa5c06732026ea5e192",
+  "bound_span": [
+   50,
+   54
+  ],
+  "span_page_verdicts": {
+   "50": "other_leaf",
+   "51": "other_leaf",
+   "52": "other_leaf",
+   "53": "other_leaf",
+   "54": "other_leaf"
+  },
+  "proposed_runs": [],
+  "version_ids": [
+   7262
+  ]
+ },
+ {
+  "historical_document_id": 7765,
+  "family_key": "nc-progress-leaf-604",
+  "leaf": "604",
+  "source_pdf": "data\\historical\\ncuc\\e-2-sub-1334\\f4e66b67-41c7-4cbb-806a-27c5c574a58d.pdf",
+  "file_sha256": "f821fa182fd13e64ec47f3ee049ba208ba1b60be219b1985d109e2a22d0eef8f",
+  "bound_span": [
+   3,
+   6
+  ],
+  "span_page_verdicts": {
+   "3": "other_leaf",
+   "4": "other_leaf",
+   "5": "other_leaf",
+   "6": "other_leaf"
+  },
+  "proposed_runs": [],
+  "version_ids": []
+ },
+ {
+  "historical_document_id": 7775,
+  "family_key": "nc-progress-leaf-602",
+  "leaf": "602",
+  "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\3f92be50-2f10-4d4c-8952-2bccaa339aba.pdf",
+  "file_sha256": "7a5cbdce496e1dbafd60af074cc80a786dd9087fcd121c65d7e13981bf3c41a0",
+  "bound_span": [
+   259,
+   261
+  ],
+  "span_page_verdicts": {
+   "259": "other_leaf",
+   "260": "other_leaf",
+   "261": "other_leaf"
+  },
+  "proposed_runs": [
+   [
+    135,
+    135
+   ]
+  ],
+  "version_ids": [
+   7270
+  ]
+ },
+ {
+  "historical_document_id": 7794,
+  "family_key": "nc-progress-leaf-669",
+  "leaf": "669",
+  "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\3f92be50-2f10-4d4c-8952-2bccaa339aba.pdf",
+  "file_sha256": "7a5cbdce496e1dbafd60af074cc80a786dd9087fcd121c65d7e13981bf3c41a0",
+  "bound_span": [
+   222,
+   225
+  ],
+  "span_page_verdicts": {
+   "222": "other_leaf",
+   "223": "other_leaf",
+   "224": "other_leaf",
+   "225": "other_leaf"
+  },
+  "proposed_runs": [],
+  "version_ids": [
+   7286
+  ]
+ }
+]

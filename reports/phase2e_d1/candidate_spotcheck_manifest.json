@@ -1,0 +1,418 @@
+[
+ {
+  "i": 1,
+  "candidate_id": 359,
+  "strength": "full",
+  "gap_type": "missing_predecessor_revision",
+  "family": "nc-carolinas-rider-EB",
+  "utility": "DEC",
+  "expected": "NC Second Revised Leaf No. 226",
+  "window": [
+   "2022-09-29",
+   "2025-02-18"
+  ],
+  "pages": [
+   2,
+   9
+  ],
+  "eff_printed": [
+   "2025-01-01"
+  ],
+  "pdf": "1076\\6795e73b-45fd-4fff-9f60-350a484560b3.pdf"
+ },
+ {
+  "i": 2,
+  "candidate_id": 347,
+  "strength": "full",
+  "gap_type": "missing_predecessor_revision",
+  "family": "nc-progress-leaf-706",
+  "utility": "DEP",
+  "expected": "NC First Revised Leaf No. 706",
+  "window": [
+   "2016-01-01",
+   "2025-02-18"
+  ],
+  "pages": [
+   15,
+   19
+  ],
+  "eff_printed": [
+   "2025-01-01"
+  ],
+  "pdf": "1032\\6e4ae48b-996e-4520-9851-d6e8be7b780d.pdf"
+ },
+ {
+  "i": 3,
+  "candidate_id": 375,
+  "strength": "full",
+  "gap_type": "missing_intermediate_revision",
+  "family": "nc-carolinas-schedule-PG",
+  "utility": "DEC",
+  "expected": "NC Fifty-Seventh Revised Leaf No. 55",
+  "window": [
+   "2013-11-01",
+   "2024-09-30"
+  ],
+  "pages": [
+   5,
+   7
+  ],
+  "eff_printed": [
+   "2019-11-16"
+  ],
+  "pdf": "00-nodate-dec-s-schedule-pg-and-rider-scg.pdf"
+ },
+ {
+  "i": 4,
+  "candidate_id": 381,
+  "strength": "full",
+  "gap_type": "missing_predecessor_revision",
+  "family": "nc-progress-leaf-608",
+  "utility": "DEP",
+  "expected": "NC First Revised Leaf No. 608",
+  "window": [
+   "2023-10-01",
+   "2026-04-01"
+  ],
+  "pages": [
+   14,
+   14
+  ],
+  "eff_printed": [
+   "2025-04-01"
+  ],
+  "pdf": "1300\\f76e6a9b-98de-4704-b456-8c20214bd981.pdf"
+ },
+ {
+  "i": 5,
+  "candidate_id": 351,
+  "strength": "full",
+  "gap_type": "missing_predecessor_revision",
+  "family": "nc-progress-leaf-725",
+  "utility": "DEP",
+  "expected": "NC First Revised Leaf No. 725",
+  "window": [
+   null,
+   "2025-02-18"
+  ],
+  "pages": [
+   6,
+   8
+  ],
+  "eff_printed": [
+   "2025-01-01"
+  ],
+  "pdf": "-931\\af54506f-2cd9-4666-bd3a-b3f5133f3943.pdf"
+ },
+ {
+  "i": 6,
+  "candidate_id": 204,
+  "strength": "full",
+  "gap_type": "missing_official_clean_tariff",
+  "family": "nc-carolinas-rider-SUMMARY",
+  "utility": "DEC",
+  "expected": "NC Sixty-Second Revised Leaf No. 99",
+  "window": [
+   "2024-09-01",
+   null
+  ],
+  "pages": [
+   7,
+   8
+  ],
+  "eff_printed": [
+   "2024-09-01"
+  ],
+  "pdf": "1304\\b0d77287-44af-4c44-aaa3-4226369d9514.pdf"
+ },
+ {
+  "i": 7,
+  "candidate_id": 374,
+  "strength": "full",
+  "gap_type": "missing_intermediate_revision",
+  "family": "nc-carolinas-schedule-PG",
+  "utility": "DEC",
+  "expected": "NC Fifty-Seventh Revised Leaf No. 55",
+  "window": [
+   "2013-11-01",
+   "2024-09-30"
+  ],
+  "pages": [
+   64,
+   66
+  ],
+  "eff_printed": [
+   "2019-12-01"
+  ],
+  "pdf": "146_ 1152 DEC JRRR Revised Tariffs_112519.pdf"
+ },
+ {
+  "i": 8,
+  "candidate_id": 234,
+  "strength": "full",
+  "gap_type": "missing_predecessor_revision",
+  "family": "nc-progress-leaf-527",
+  "utility": "DEP",
+  "expected": "NC First Revised Leaf No. 527",
+  "window": [
+   null,
+   "2025-10-01"
+  ],
+  "pages": [
+   37,
+   39
+  ],
+  "eff_printed": [
+   "2024-10-01"
+  ],
+  "pdf": "2023\\7b9171ff-48d4-46dd-82eb-43bd1ca2cd3d.pdf"
+ },
+ {
+  "i": 9,
+  "candidate_id": 203,
+  "strength": "full",
+  "gap_type": "missing_official_clean_tariff",
+  "family": "nc-carolinas-rider-SUMMARY",
+  "utility": "DEC",
+  "expected": "NC Sixty-First Revised Leaf No. 99",
+  "window": [
+   "2024-07-01",
+   null
+  ],
+  "pages": [
+   7,
+   8
+  ],
+  "eff_printed": [
+   "2024-07-01"
+  ],
+  "pdf": "1146\\862c65b6-137d-4008-a941-b29c2c1fdf53.pdf"
+ },
+ {
+  "i": 10,
+  "candidate_id": 328,
+  "strength": "full",
+  "gap_type": "missing_predecessor_revision",
+  "family": "nc-progress-leaf-660",
+  "utility": "DEP",
+  "expected": "NC Original Leaf No. 660",
+  "window": [
+   null,
+   "2023-10-18"
+  ],
+  "pages": [
+   221,
+   225
+  ],
+  "eff_printed": [
+   "2015-08-01"
+  ],
+  "pdf": "2023\\7f394a37-a20d-4da5-b97d-0035c9d9c0c0.pdf"
+ },
+ {
+  "i": 11,
+  "candidate_id": 345,
+  "strength": "full",
+  "gap_type": "missing_official_clean_tariff",
+  "family": "nc-progress-leaf-704",
+  "utility": "DEP",
+  "expected": "NC First Revised Leaf No. 704",
+  "window": [
+   "2019-02-27",
+   null
+  ],
+  "pages": [
+   5,
+   6
+  ],
+  "eff_printed": [
+   "2023-01-01"
+  ],
+  "pdf": "1174\\61cb9753-923f-402d-b1f1-b60deecb34ef.pdf"
+ },
+ {
+  "i": 12,
+  "candidate_id": 222,
+  "strength": "full",
+  "gap_type": "missing_predecessor_revision",
+  "family": "nc-progress-leaf-503",
+  "utility": "DEP",
+  "expected": "NC First Revised Leaf No. 503",
+  "window": [
+   null,
+   "2025-10-01"
+  ],
+  "pages": [
+   12,
+   15
+  ],
+  "eff_printed": [
+   "2024-10-01"
+  ],
+  "pdf": "2023\\7b9171ff-48d4-46dd-82eb-43bd1ca2cd3d.pdf"
+ },
+ {
+  "i": 13,
+  "candidate_id": 246,
+  "strength": "full",
+  "gap_type": "missing_predecessor_revision",
+  "family": "nc-progress-leaf-536",
+  "utility": "DEP",
+  "expected": "NC First Revised Leaf No. 536",
+  "window": [
+   null,
+   "2025-10-01"
+  ],
+  "pages": [
+   69,
+   72
+  ],
+  "eff_printed": [
+   "2024-10-01"
+  ],
+  "pdf": "2023\\7b9171ff-48d4-46dd-82eb-43bd1ca2cd3d.pdf"
+ },
+ {
+  "i": 14,
+  "candidate_id": 192,
+  "strength": "full",
+  "gap_type": "missing_predecessor_revision",
+  "family": "nc-carolinas-schedule-OL",
+  "utility": "DEC",
+  "expected": "NC Thirtieth Revised Leaf No. 32",
+  "window": [
+   "2001-07-01",
+   "2010-09-01"
+  ],
+  "pages": [
+   28,
+   30
+  ],
+  "eff_printed": [
+   "2010-01-01"
+  ],
+  "pdf": "\\ncuc\\e-7\\e-7-nodate-duke-s-rate-schedule.pdf"
+ },
+ {
+  "i": 15,
+  "candidate_id": 288,
+  "strength": "full",
+  "gap_type": "missing_predecessor_revision",
+  "family": "nc-progress-leaf-607",
+  "utility": "DEP",
+  "expected": "NC Third Revised Leaf No. 607",
+  "window": [
+   "2024-01-01",
+   "2025-07-01"
+  ],
+  "pages": [
+   6,
+   6
+  ],
+  "eff_printed": [
+   "2025-01-01"
+  ],
+  "pdf": "1262\\a81a8ce1-fd49-4226-bf44-fba2e4a9e730.pdf"
+ },
+ {
+  "i": 16,
+  "candidate_id": 266,
+  "strength": "partial",
+  "gap_type": "missing_predecessor_revision",
+  "family": "nc-progress-leaf-600",
+  "utility": "DEP",
+  "expected": "NC Fourth Revised Leaf No. 600",
+  "window": [
+   "2023-12-01",
+   "2024-01-24"
+  ],
+  "pages": [
+   9,
+   13
+  ],
+  "eff_printed": [
+   "2024-12-01"
+  ],
+  "pdf": "1345\\0bfd8fc6-0edc-4b81-a331-e48176c521f7.pdf"
+ },
+ {
+  "i": 17,
+  "candidate_id": 333,
+  "strength": "partial",
+  "gap_type": "missing_predecessor_revision",
+  "family": "nc-progress-leaf-664",
+  "utility": "DEP",
+  "expected": "Schedule SSR-3",
+  "window": [
+   null,
+   "2019-04-04"
+  ],
+  "pages": [
+   5,
+   5
+  ],
+  "eff_printed": [],
+  "pdf": "ed-sunsense-program-application-and-rider.pdf"
+ },
+ {
+  "i": 18,
+  "candidate_id": 264,
+  "strength": "partial",
+  "gap_type": "missing_predecessor_revision",
+  "family": "nc-progress-leaf-600",
+  "utility": "DEP",
+  "expected": "NC Fourth Revised Leaf No. 600",
+  "window": [
+   "2023-12-01",
+   "2024-01-24"
+  ],
+  "pages": [
+   13,
+   17
+  ],
+  "eff_printed": [
+   "2024-12-01"
+  ],
+  "pdf": "1341\\211c874c-48ab-4576-bf20-aa71de632d3f.pdf"
+ },
+ {
+  "i": 19,
+  "candidate_id": 330,
+  "strength": "partial",
+  "gap_type": "missing_predecessor_revision",
+  "family": "nc-progress-leaf-661",
+  "utility": "DEP",
+  "expected": "Schedule MROP-16A",
+  "window": [
+   null,
+   "2023-10-01"
+  ],
+  "pages": [
+   226,
+   226
+  ],
+  "eff_printed": [
+   "2023-10-01"
+  ],
+  "pdf": "2023\\7f394a37-a20d-4da5-b97d-0035c9d9c0c0.pdf"
+ },
+ {
+  "i": 20,
+  "candidate_id": 350,
+  "strength": "partial",
+  "gap_type": "missing_predecessor_revision",
+  "family": "nc-progress-leaf-711",
+  "utility": "DEP",
+  "expected": "NC First Revised Leaf No. 711",
+  "window": [
+   "2020-02-25",
+   "2025-01-01"
+  ],
+  "pages": [
+   15,
+   16
+  ],
+  "eff_printed": [],
+  "pdf": "1094\\2d2a4df8-1191-41d7-a9d9-e22535613850.pdf"
+ }
+]
