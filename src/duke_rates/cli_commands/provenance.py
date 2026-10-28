@@ -345,19 +345,34 @@ def promote_cmd(
         False, "--acknowledge-redline",
         help="Promote although the version's bound pages carry redline markup or a redline-duplicate assertion.",
     ),
+    acknowledge_date_conflict: bool = typer.Option(
+        False, "--acknowledge-date-conflict",
+        help="Promote although the run reads an effective date the version's bound pages do not print.",
+    ),
 ) -> None:
     """Make a reviewed candidate run the active result."""
     conn = _open(db, write=not dry_run, allow_production=allow_production)
     target = conn.execute("SELECT target_kind, target_id FROM extraction_runs WHERE id = ?", (run_id,)).fetchone()
-    if not dry_run and target and target[0] == "tariff_version" and not acknowledge_redline \
+    if not dry_run and target and target[0] == "tariff_version" \
             and conn.execute("SELECT 1 FROM sqlite_master WHERE name = 'document_assertions'").fetchone():
-        from duke_rates.historical.ncuc.document_promotion import redline_promotion_block
+        from duke_rates.historical.ncuc.document_promotion import (
+            effective_date_promotion_conflict,
+            redline_promotion_block,
+        )
 
-        block = redline_promotion_block(conn, target[1])
+        block = None if acknowledge_redline else redline_promotion_block(conn, target[1])
         if block:
             raise typer.BadParameter(
                 f"run {run_id} targets version {target[1]}, whose source is a redline ({block['reason']}); "
                 "struck values would become active charges. Pass --acknowledge-redline only after reviewing them."
+            )
+        conflict = None if acknowledge_date_conflict else effective_date_promotion_conflict(conn, run_id)
+        if conflict:
+            raise typer.BadParameter(
+                f"run {run_id} reads version {conflict['version_id']}'s effective date as "
+                f"{conflict['run_interprets']!r} (from historical_documents.effective_start; version stores "
+                f"{conflict['stored']!r}), but its bound pages print {conflict['printed_on_bound_pages']}. "
+                "Correct the source metadata, or pass --acknowledge-date-conflict after review."
             )
     _echo(
         pv.promote(

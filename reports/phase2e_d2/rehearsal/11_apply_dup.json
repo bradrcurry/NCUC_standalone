@@ -1,0 +1,17 @@
+{
+  "asserted": "redline_duplicate_of",
+  "duplicate_of": 7265,
+  "legacy_rows_changed": 0,
+  "snapshot_before": {
+    "historical_documents": 1,
+    "tariff_versions": 1,
+    "tariff_charges": 136,
+    "document_assertions": 0
+  },
+  "snapshot_after": {
+    "historical_documents": 1,
+    "tariff_versions": 1,
+    "tariff_charges": 136,
+    "document_assertions": 1
+  }
+}

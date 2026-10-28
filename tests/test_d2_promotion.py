@@ -151,3 +151,19 @@ def test_legacy_rebind_command_refuses_to_delete_charges_silently(archive, monke
     done = runner.invoke(app, ["lineage", "rebind-historical-page-range", str(ids.hd_index), "--start-page", "2",
                                "--allow-charge-deletion"])
     assert "Deleting 3 tariff_charges" in done.output and len(calls) == 1
+
+
+def test_effective_date_conflict_is_detected_against_printed_pages(archive):  # noqa: F811
+    conn, ids = archive
+    # The rev-1 sheet prints October 1, 2023; give its run a different interpreted date.
+    run = _insert(conn, "extraction_runs", target_kind="tariff_version", target_id=ids.v_rev1,
+                  version_id=ids.v_rev1, interpreted_effective_start="2025-09-01", run_uuid="r-1",
+                  document_sha256_status="unavailable")
+    conn.execute("UPDATE tariff_versions SET effective_start = NULL WHERE id = ?", (ids.v_rev1,))
+    conn.commit()
+    conflict = dp.effective_date_promotion_conflict(conn, run)
+    assert conflict == {"version_id": ids.v_rev1, "stored": None, "run_interprets": "2025-09-01",
+                        "printed_on_bound_pages": ["2023-10-01"]}
+    conn.execute("UPDATE extraction_runs SET interpreted_effective_start = '2023-10-01' WHERE id = ?", (run,))
+    conn.commit()
+    assert dp.effective_date_promotion_conflict(conn, run) is None

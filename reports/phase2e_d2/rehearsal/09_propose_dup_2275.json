@@ -1,0 +1,13 @@
+{
+  "proposal_id": 3,
+  "state": "proposed",
+  "blocking_failures": [],
+  "checks": {
+    "same_family": true,
+    "span_is_redline": true,
+    "target_is_clean": true,
+    "target_prints_family_leaf": true,
+    "revision_consistent": true,
+    "target_effective_printed": true
+  }
+}

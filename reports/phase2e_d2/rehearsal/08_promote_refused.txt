@@ -1,0 +1,6 @@
+Usage: duke-rates provenance promote [OPTIONS]
+Try 'duke-rates provenance promote --help' for help.
+┌─ Error ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ Invalid value: run 1 would set version 6908 effective_start None -> '2025-09-01', but its bound pages print ['2024-10-01']. Correct the source metadata, or pass --acknowledge-date-conflict after  │
+│ review.                                                                                                                                                                                             │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘

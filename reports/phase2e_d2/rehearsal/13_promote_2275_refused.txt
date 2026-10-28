@@ -1,0 +1,6 @@
+Usage: duke-rates provenance promote [OPTIONS]
+Try 'duke-rates provenance promote --help' for help.
+┌─ Error ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ Invalid value: run 2 targets version 6056, whose source is a redline (redline_duplicate_assertion); struck values would become active charges. Pass --acknowledge-redline only after reviewing      │
+│ them.                                                                                                                                                                                               │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘

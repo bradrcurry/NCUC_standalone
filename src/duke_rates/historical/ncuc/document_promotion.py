@@ -433,6 +433,31 @@ def redline_promotion_block(conn: sqlite3.Connection, version_id: int) -> dict |
     return None
 
 
+def effective_date_promotion_conflict(conn: sqlite3.Connection, run_id: int) -> dict | None:
+    """A run whose effective date disagrees with what its version's pages print, or ``None``.
+
+    A candidate run records ``interpreted_effective_start`` from
+    ``historical_documents.effective_start``. The promotion diff reports it as
+    the version's date change, and run validation reads it. ``promote`` does
+    not write it to ``tariff_versions``, but promoting a run whose date reading
+    contradicts its own source is not an evidence-checked promotion. In the D2
+    rehearsal it was 2025-09-01 for hd 7265, whose pages print October 1, 2024.
+    """
+    run = conn.execute("SELECT target_kind, target_id, interpreted_effective_start FROM extraction_runs WHERE id = ?",
+                       (run_id,)).fetchone()
+    if run is None or run[0] != "tariff_version" or not run[2]:
+        return None
+    row = conn.execute(
+        "SELECT tv.effective_start, hd.local_path, hd.start_page, hd.end_page FROM tariff_versions tv "
+        "JOIN historical_documents hd ON hd.id = tv.historical_document_id WHERE tv.id = ?", (run[1],)).fetchone()
+    if row is None or row[0] == run[2] or not row[1]:
+        return None
+    printed = sorted({d for p in read_pages(row[1], row[2] or 1, row[3] or row[2] or 1) for d in p["effective"]})
+    if run[2][:10] in printed:
+        return None
+    return {"version_id": run[1], "stored": row[0], "run_interprets": run[2], "printed_on_bound_pages": printed}
+
+
 def proposals_summary(conn: sqlite3.Connection) -> list[dict]:
     return [dict(r) for r in conn.execute(
         "SELECT id, kind, historical_document_id, tariff_version_id, state, state_reason, proposed_by, approved_by, "

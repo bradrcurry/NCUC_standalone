@@ -1,0 +1,102 @@
+{
+  "run_id": 1,
+  "version_id": 6908,
+  "extractor_status": "parsed",
+  "profile": "progress_rider_adjustment_matrix",
+  "structured_mode": "hybrid",
+  "needs_review": false,
+  "status": "ok",
+  "validation_status": "passed",
+  "run_issues": [
+    {
+      "level": "info",
+      "code": "parser_value_missing",
+      "detail": "'Schedule HP & Schedule LGS-RTP - BA-Fuel': text (0.0, None, 0.0) vs table (None, None, None); text value kept",
+      "refs": [
+        "Schedule HP & Schedule LGS-RTP - BA-Fuel"
+      ],
+      "needs_review": false
+    },
+    {
+      "level": "info",
+      "code": "parser_value_missing",
+      "detail": "'Schedule HP & Schedule LGS-RTP - BA-EMF': text (0.899, None, 0.0) vs table (None, None, None); text value kept",
+      "refs": [
+        "Schedule HP & Schedule LGS-RTP - BA-EMF"
+      ],
+      "needs_review": false
+    },
+    {
+      "level": "info",
+      "code": "parser_value_missing",
+      "detail": "'Schedule HP & Schedule LGS-RTP - BA-DSM': text (0.042, None, 0.042) vs table (None, None, None); text value kept",
+      "refs": [
+        "Schedule HP & Schedule LGS-RTP - BA-DSM"
+      ],
+      "needs_review": false
+    },
+    {
+      "level": "info",
+      "code": "parser_value_missing",
+      "detail": "'Schedule HP & Schedule LGS-RTP - BA-EE': text (0.424, None, 0.424) vs table (None, None, None); text value kept",
+      "refs": [
+        "Schedule HP & Schedule LGS-RTP - BA-EE"
+      ],
+      "needs_review": false
+    },
+    {
+      "level": "info",
+      "code": "parser_value_missing",
+      "detail": "'Schedule HP & Schedule LGS-RTP - BA': text (1.365, None, 0.466) vs table (None, None, None); text value kept",
+      "refs": [
+        "Schedule HP & Schedule LGS-RTP - BA"
+      ],
+      "needs_review": false
+    },
+    {
+      "level": "info",
+      "code": "parser_value_missing",
+      "detail": "'Schedule HP & Schedule LGS-RTP - EDIT-4': text (-0.093, None, 0.0) vs table (None, None, None); text value kept",
+      "refs": [
+        "Schedule HP & Schedule LGS-RTP - EDIT-4"
+      ],
+      "needs_review": false
+    },
+    {
+      "level": "info",
+      "code": "parser_value_missing",
+      "detail": "'Schedule HP & Schedule LGS-RTP - CPRE': text (0.012, None, 0.012) vs table (None, None, None); text value kept",
+      "refs": [
+        "Schedule HP & Schedule LGS-RTP - CPRE"
+      ],
+      "needs_review": false
+    },
+    {
+      "level": "info",
+      "code": "parser_value_missing",
+      "detail": "'Schedule HP & Schedule LGS-RTP - ESM': text (0.0, None, 0.0) vs table (None, None, None); text value kept",
+      "refs": [
+        "Schedule HP & Schedule LGS-RTP - ESM"
+      ],
+      "needs_review": false
+    },
+    {
+      "level": "info",
+      "code": "parser_value_missing",
+      "detail": "'Schedule HP & Schedule LGS-RTP - PIM': text (0.0, None, 0.0) vs table (None, None, None); text value kept",
+      "refs": [
+        "Schedule HP & Schedule LGS-RTP - PIM"
+      ],
+      "needs_review": false
+    },
+    {
+      "level": "info",
+      "code": "docling_artifact_unusable",
+      "detail": "docling artifact 2112 not used: chunk_relative_numbering (structure from native_pdf)",
+      "needs_review": false
+    }
+  ],
+  "charges_with_errors": 0,
+  "charges_with_warnings": 0,
+  "output_count": 125
+}

@@ -1,0 +1,5 @@
+Usage: duke-rates provenance rollback-proposal [OPTIONS]
+Try 'duke-rates provenance rollback-proposal --help' for help.
+┌─ Error ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ Invalid value: tariff_charges changed after this proposal was applied (a charge promotion?); undo that first with `provenance rollback`, then roll back this proposal                               │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
