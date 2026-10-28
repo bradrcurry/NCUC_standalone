@@ -408,6 +408,27 @@ def completeness_cmd(db: Path = _DB_OPTION) -> None:
     _echo(pv.provenance_completeness(_open(db, write=False)))
 
 
+@provenance_app.command("audit-docling-coverage")
+def audit_docling_coverage_cmd(
+    db: Path = typer.Option(None, "--db", help="Defaults to the configured database (read-only)."),
+    json_out: Path | None = typer.Option(None, "--json", help="Also write the full JSON report here."),
+) -> None:
+    """Docling artifacts whose page numbers cannot be verified, and the documents bound to them."""
+    from duke_rates.document_intelligence.page_integrity_audit import (
+        audit_docling_page_integrity,
+        open_read_only,
+    )
+
+    conn = open_read_only((db or get_settings().database_path).resolve())
+    try:
+        report = audit_docling_page_integrity(conn)
+    finally:
+        conn.close()
+    if json_out:
+        json_out.write_text(json.dumps(report, indent=1, default=str), encoding="utf-8")
+    _echo(report["summary"])
+
+
 @provenance_app.command("unsupported-charges")
 def unsupported_charges_cmd(
     db: Path = typer.Option(None, "--db", help="Defaults to the configured database (read-only)."),
