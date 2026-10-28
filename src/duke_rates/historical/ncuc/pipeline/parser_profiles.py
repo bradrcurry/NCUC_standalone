@@ -2692,8 +2692,16 @@ class ProgressJaaRiderProfile:
 
     def extract(self, doc: dict, text: str) -> list[ExtractedCharge]:
         structured = self._structured_charges(doc)
-        if structured:
-            return structured
+        if not structured:
+            return self._text_charges(text)
+        # A table read that misses rows (a split or partial table) must not
+        # drop classes the text parse finds; those keep their text reading.
+        found = {(c.charge_type, c.charge_label) for c in structured}
+        return structured + [
+            c for c in self._text_charges(text) if (c.charge_type, c.charge_label) not in found
+        ]
+
+    def _text_charges(self, text: str) -> list[ExtractedCharge]:
         charges: list[ExtractedCharge] = []
 
         def _parse_section(section_text: str, rate_unit: str, charge_type: str) -> None:

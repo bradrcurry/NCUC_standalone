@@ -312,6 +312,23 @@ def _is_short_label(cells: list[_Cell]) -> bool:
     return len(cells) == 1 and len(cells[0].text) < 90
 
 
+def _is_wrapped_row_label(prev: list[_Cell], line: list[_Cell]) -> bool:
+    """``line`` finishes the first-column label of the value-less multi-cell ``prev``.
+
+    Both lines start at the same x, sit closer together than rows do, and fill
+    different columns: ``prev`` carries text cells (e.g. schedules) left of the
+    values, ``line`` carries the values.
+    """
+    if len(prev) < 2 or len(line) < 2 or any(c.is_value for c in prev) or line[0].is_value:
+        return False
+    values = [c for c in line[1:] if c.is_value]
+    if not values or line[0].top - prev[0].bottom >= 4 or abs(line[0].x0 - prev[0].x0) > 3:
+        return False
+    if any(c.x1 > values[0].x0 for c in prev[1:]):
+        return False
+    return not any(a.x0 < b.x1 and b.x0 < a.x1 for a in prev[1:] for b in line[1:])
+
+
 def _merge_wrapped_labels(lines: list[list[_Cell]]) -> list[list[_Cell]]:
     """Join a label-only line with the next line when that line continues it.
 
@@ -322,6 +339,21 @@ def _merge_wrapped_labels(lines: list[list[_Cell]]) -> list[list[_Cell]]:
     merged: list[list[_Cell]] = []
     for line in lines:
         prev = merged[-1] if merged else None
+        if prev and _is_wrapped_row_label(prev, line):
+            # "Seasonal and Intermittent | SI" + "Service | 0.00651": the class
+            # name wraps inside its row while the schedule column sits on the
+            # first line and the value on the second.
+            head, first = prev[0], line[0]
+            joined = _Cell(
+                f"{head.text} {first.text}",
+                min(head.x0, first.x0),
+                max(head.x1, first.x1),
+                head.top,
+                first.bottom,
+                [*(head.words or []), *(first.words or [])],
+            )
+            merged[-1] = [joined, *sorted([*prev[1:], *line[1:]], key=lambda c: c.x0)]
+            continue
         if (
             prev
             and _is_short_label(prev)
