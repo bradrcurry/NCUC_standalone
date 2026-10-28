@@ -1,0 +1,27 @@
+{
+ "label": "whole_next",
+ "variant": "app",
+ "ocr": "app",
+ "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+ "venv": "C:\\Python\\Duke\\Standalone\\.venv-docling-next",
+ "versions": {
+  "docling": "2.143.1",
+  "docling-core": "2.105.0",
+  "docling-parse": "7.23.1",
+  "docling-ibm-models": "4.0.4",
+  "torch": "2.14.1+cu130",
+  "torchvision": "0.29.1+cu130",
+  "transformers": "5.21.0",
+  "PyMuPDF": "2.0",
+  "pdfplumber": "0.11.10",
+  "pypdfium2": "5.14.0",
+  "rapidocr": "3.10.0",
+  "huggingface_hub": "1.33.0",
+  "accelerate": "1.15.0"
+ },
+ "hf_home": "C:/Python/Duke/Standalone/.cache-docling-next/hf",
+ "whole_source": true,
+ "page_range_native": false,
+ "started": "2026-10-27T17:02:59",
+ "total_seconds": 793.78
+}

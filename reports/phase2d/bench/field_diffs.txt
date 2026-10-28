@@ -1,0 +1,101 @@
+=== cur_legacy vs nextenv_legacy
+VERDICT: IDENTICAL
+=== cur_native vs nextenv_native
+VERDICT: IDENTICAL
+=== docling__committed vs docling__current_app
+VERDICT: IDENTICAL
+=== docling__current_app vs docling__next_app
+## dep_leaf600_2026-06-01: parsed->parsed charges 125->111 only_a=26 only_b=12 evidence_page_diffs=0
+   - Demand: Medium General Service Schedules - JAA 0.92 $/kW class= None
+   - Demand: Medium General Service Schedules Total Rider Adjustments 0.0123 $/kWh class= None
+   - Demand: Medium General Service Schedules Total Rider Adjustments 0.92 $/kW class= None
+   - Seasonal or Intermittent Service Schedule - BA-Fuel 0.00211 $/kWh class= None
+   - Seasonal or Intermittent Service Schedule - BA-EMF 0.0024 $/kWh class= None
+   - Seasonal or Intermittent Service Schedule - BA-DSM 0.00043999999999999996 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - BA-Fuel 0.00361 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - BA-EMF 0.0035299999999999997 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - BA-DSM 0.00043999999999999996 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - BA-EE 0.00196 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - BA 0.00954 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - Quarterly Fuel Adjustment 0.0044800000000000005 $/kWh class= None
+## dep_leaf600_2026-04-01: parsed->parsed charges 122->121 only_a=24 only_b=23 evidence_page_diffs=0
+   - Schedule HP &Schedule LGS-RTP - BA-Fuel 0.00361 $/kWh class= None
+   - Schedule HP &Schedule LGS-RTP - BA-EMF 0.0035299999999999997 $/kWh class= None
+   - Schedule HP &Schedule LGS-RTP - BA-DSM 0.00043999999999999996 $/kWh class= None
+   - Schedule HP &Schedule LGS-RTP - BA-EE 0.00196 $/kWh class= None
+   - Schedule HP &Schedule LGS-RTP - BA 0.00954 $/kWh class= None
+   - Schedule HP &Schedule LGS-RTP - EDIT-4 -0.0009299999999999999 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - BA-Fuel 0.00361 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - BA-EMF 0.0035299999999999997 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - BA-DSM 0.00043999999999999996 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - BA-EE 0.00196 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - BA 0.00954 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - EDIT-4 -0.0009299999999999999 $/kWh class= None
+## dep_blk13_sub1300: parsed->parsed charges 111->111 only_a=11 only_b=11 evidence_page_diffs=0
+   - Schedule HP &Schedule LGS-RTP - BA-Fuel 0.00609 $/kWh class= None
+   - Schedule HP &Schedule LGS-RTP - BA-EMF 0.00557 $/kWh class= None
+   - Schedule HP &Schedule LGS-RTP - BA-DSM 0.00041 $/kWh class= None
+   - Schedule HP &Schedule LGS-RTP - BA-EE 0.00233 $/kWh class= None
+   - Schedule HP &Schedule LGS-RTP - BA 0.0144 $/kWh class= None
+   - Schedule HP &Schedule LGS-RTP - EDIT-4 -0.0009299999999999999 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - BA-Fuel 0.00609 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - BA-EMF 0.00557 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - BA-DSM 0.00041 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - BA-EE 0.00233 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - BA 0.0144 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - EDIT-4 -0.0009299999999999999 $/kWh class= None
+VERDICT: DIFFERENT (3 docs)
+=== docling__next_app vs nextenv_docling__next_app
+VERDICT: IDENTICAL
+=== docling__current_app vs docling__next_egret_m
+   - Schedule HP &Schedule LGS-RTP - BA-Fuel 0.00361 $/kWh class= None
+   - Schedule HP &Schedule LGS-RTP - BA-EMF 0.0035299999999999997 $/kWh class= None
+   - Schedule HP &Schedule LGS-RTP - BA-DSM 0.00043999999999999996 $/kWh class= None
+   - Schedule HP &Schedule LGS-RTP - BA-EE 0.00196 $/kWh class= None
+   - Schedule HP &Schedule LGS-RTP - BA 0.00954 $/kWh class= None
+   - Schedule HP &Schedule LGS-RTP - EDIT-4 -0.0009299999999999999 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - BA-Fuel 0.00361 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - BA-EMF 0.0035299999999999997 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - BA-DSM 0.00043999999999999996 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - BA-EE 0.00196 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - BA 0.00954 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - EDIT-4 -0.0009299999999999999 $/kWh class= None
+## dec_blk304_sub1285: parsed->parsed charges 36->54 only_a=0 only_b=18 evidence_page_diffs=0
+   + Residential Schedules - FCA 0.022957 $/kWh class= None
+   + Residential Schedules - EE 0.003775 $/kWh class= None
+   + Residential Schedules - DSM -2.2000000000000003e-05 $/kWh class= None
+   + Residential Schedules - BPM-P -0.000128 $/kWh class= None
+   + Residential Schedules - BPM-T -7.1e-05 $/kWh class= None
+   + Residential Schedules - CPRE 0.000143 $/kWh class= None
+## dep_blk13_sub1300: parsed->parsed charges 111->111 only_a=11 only_b=11 evidence_page_diffs=0
+   - Schedule HP &Schedule LGS-RTP - BA-Fuel 0.00609 $/kWh class= None
+   - Schedule HP &Schedule LGS-RTP - BA-EMF 0.00557 $/kWh class= None
+   - Schedule HP &Schedule LGS-RTP - BA-DSM 0.00041 $/kWh class= None
+   - Schedule HP &Schedule LGS-RTP - BA-EE 0.00233 $/kWh class= None
+   - Schedule HP &Schedule LGS-RTP - BA 0.0144 $/kWh class= None
+   - Schedule HP &Schedule LGS-RTP - EDIT-4 -0.0009299999999999999 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - BA-Fuel 0.00609 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - BA-EMF 0.00557 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - BA-DSM 0.00041 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - BA-EE 0.00233 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - BA 0.0144 $/kWh class= None
+   + Schedule HP & Schedule LGS-RTP - EDIT-4 -0.0009299999999999999 $/kWh class= None
+## dec_blk361_sub1146_fca: parsed->parsed charges 48->56 only_a=0 only_b=8 evidence_page_diffs=0
+   + Schedule HP - General Service - EDIT-1 -0.001049 $/kWh class= None
+   + Schedule HP - General Service - FCA -0.000765 $/kWh class= None
+   + Schedule HP - General Service - EE 0.0062380000000000005 $/kWh class= None
+   + Schedule HP - General Service - DSM -5.4999999999999995e-05 $/kWh class= None
+   + Schedule HP - General Service - Coal Inventory Rider 4e-06 $/kWh class= None
+   + Schedule HP - General Service - BPM-P -7.8e-05 $/kWh class= None
+VERDICT: DIFFERENT (5 docs)
+=== hybrid__current_app vs hybrid__next_app
+## dep_leaf600_2026-06-01: parsed->parsed charges 125->125 only_a=0 only_b=0 evidence_page_diffs=22
+## dep_leaf600_2026-04-01: parsed->parsed charges 125->125 only_a=0 only_b=0 evidence_page_diffs=20
+VERDICT: DIFFERENT (2 docs)
+=== hybrid__current_app vs hybrid__next_egret_m
+## dec_blk304_sub1285: parsed->parsed charges 54->54 only_a=0 only_b=0 evidence_page_diffs=22
+## dec_blk361_sub1146_fca: parsed->parsed charges 56->56 only_a=0 only_b=0 evidence_page_diffs=16
+## hd0029_dep_res: parsed->parsed charges 5->5 only_a=0 only_b=0 evidence_page_diffs=2
+VERDICT: DIFFERENT (3 docs)
+=== hybrid__next_app vs nextenv_hybrid__next_app
+VERDICT: IDENTICAL
