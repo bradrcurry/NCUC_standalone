@@ -451,10 +451,62 @@ def _is_bold(span: dict) -> bool:
     return "Bold" in span.get("font", "") or bool(span.get("flags", 0) & 16)
 
 
+_HEADER_GROUP_SPAN = 25.0   # "cents" and "dollars" of one header sit within this many pt
+_HEADER_MATCH_DISTANCE = 40.0
+
+
+def _column_header_groups(
+    raw: list[tuple[float, float, str, bool, float]], x_right: dict[tuple[float, str], float]
+) -> list[tuple[float, list[tuple[float, int]]]]:
+    """Column headers on a page: [(top y, [(x center, col)])], top to bottom.
+
+    Each section prints its own header ("cents /kWh", "dollars /kW",
+    "Baseline/Incremental cents /kWh"). Columns follow the parser's layout:
+    the first cents column is col1, a second cents column (incremental) col2,
+    and dollars col2, or col3 after two cents columns.
+    """
+    words = sorted(
+        (y, (x + x_right.get((x, text), x)) / 2, text.lower())
+        for y, x, text, _, _ in raw
+        if text.lower() in ("cents", "dollars") and x >= _X_LABEL_MAX
+    )
+    groups: list[list[tuple[float, float, str]]] = []
+    for word in words:
+        if groups and word[0] - groups[-1][0][0] <= _HEADER_GROUP_SPAN:
+            groups[-1].append(word)
+        else:
+            groups.append([word])
+    out = []
+    for group in groups:
+        heads = sorted((center, kind) for _, center, kind in group)
+        cents = sum(1 for _, kind in heads if kind == "cents")
+        cols, seen_cents = [], 0
+        for center, kind in heads:
+            if kind == "cents":
+                seen_cents += 1
+                cols.append((center, min(seen_cents, 2)))
+            else:
+                cols.append((center, 3 if cents >= 2 else 2))
+        out.append((group[0][0], cols))
+    return out
+
+
+def _column_from_headers(
+    groups: list[tuple[float, list[tuple[float, int]]]], y: float, center: float
+) -> int | None:
+    """Column of a value at ``y`` from the nearest header above it, or None."""
+    above = [cols for top, cols in groups if top < y]
+    if not above:
+        return None
+    distance, col = min((abs(center - c), col) for c, col in above[-1])
+    return col if distance <= _HEADER_MATCH_DISTANCE else None
+
+
 def _extract_span_rows(page) -> list[_SpanRow]:
     """Group same-y spans into logical rows, assign columns by x-coordinate."""
     # Gather all content spans, skip boilerplate (sz>9.5 = header/footer text)
     raw: list[tuple[float, float, str, bool, float]] = []  # y, x, text, bold, size
+    x_right: dict[tuple[float, str], float] = {}  # (x0, text) -> span x1
     for block in page.get_text("dict")["blocks"]:
         if block.get("type") != 0:
             continue
@@ -469,9 +521,14 @@ def _extract_span_rows(page) -> list[_SpanRow]:
                 y = round(span["bbox"][1], 0)
                 x = span["bbox"][0]
                 raw.append((y, x, text, _is_bold(span), size))
+                x_right[(x, text)] = span["bbox"][2]
 
     if not raw:
         return []
+
+    # Value columns come from the "cents" / "dollars" headers above each row
+    # when the page prints them; the fixed x bands are the fallback.
+    header_groups = _column_header_groups(raw, x_right)
 
     # Detect whether this page has a dollars/kW column header
     all_text_lower = " ".join(t for _, _, t, _, _ in raw).lower()
@@ -548,8 +605,18 @@ def _extract_span_rows(page) -> list[_SpanRow]:
             elif _DATE_RE.match(text):
                 date_val = text
             elif _NUM_FRAG_RE.match(text):
+                header_col = _column_from_headers(
+                    header_groups, bucket, (x + x_right.get((x, text), x)) / 2
+                )
+                if header_col is not None:
+                    if header_col == 1:
+                        col1 = _parse_num(text)
+                    elif header_col == 2:
+                        col2 = _parse_num(text)
+                    else:
+                        col3 = _parse_num(text)
                 # Assign to column band by x
-                if x < _X_COL1_MAX:
+                elif x < _X_COL1_MAX:
                     col1 = _parse_num(text)
                 elif x < _X_COL2_MAX:
                     col2 = _parse_num(text)
