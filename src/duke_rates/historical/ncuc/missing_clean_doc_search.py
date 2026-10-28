@@ -238,8 +238,13 @@ def _run_structured_searches(
         with _ledger_attempt(search_ledger, "portal_params", query, lead_row) as attempt:
             raw_rows = searcher.search(page, **query)
             if attempt is not None:
-                attempt.finish(raw_rows, refs=[row.document_id or row.document_detail_url for row in raw_rows],
-                               cap=max_results)
+                refs = [row.document_id or row.document_detail_url for row in raw_rows]
+                outcome = getattr(searcher, "last_outcome", None)
+                if outcome is not None:
+                    # The searcher's own stop reason (last page, stale grid, ...) decides the outcome.
+                    attempt.finish_outcome(outcome, refs=refs)
+                else:
+                    attempt.finish(raw_rows, refs=refs, cap=max_results)
         if enrich_portal_details and raw_rows:
             raw_rows = searcher.enrich_with_document_details(page, raw_rows, delay_seconds=0.2)
         converted = [_doc_param_candidate(lead_row, spec, row) for row in raw_rows]
