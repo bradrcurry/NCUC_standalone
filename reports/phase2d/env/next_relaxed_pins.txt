@@ -1,0 +1,4 @@
+relax sympy:     torch 2.14.1+cu130 depends on sympy>=1.13.3;
+relax requests:     docling-core 2.105.0 depends on requests<3.0.0 and >=2.34.2;
+relax pillow:     torchvision 0.29.1+cu130 depends on pillow!=8.3.* and >=5.3.0;    docling-core 2.105.0 depends on pillow<14.0.0 and >=10.0.0;
+relax click:     streamlit 1.57.0 depends on click<9 and >=7.0;    typer 0.21.2 depends on click>=8.0.0;

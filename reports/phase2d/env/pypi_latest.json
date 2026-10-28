@@ -1,0 +1,1585 @@
+{
+ "docling": {
+  "latest": "2.143.1",
+  "date": "2026-10-27T17:15:04",
+  "requires_python": "<4.0,>=3.10",
+  "requires_dist": [
+   "docling-slim[standard]==2.143.1",
+   "docling-slim[format-audio]==2.143.1; extra == \"asr\"",
+   "docling-slim[feat-ocr-easyocr]==2.143.1; extra == \"easyocr\"",
+   "docling-slim[format-html-render]==2.143.1; extra == \"htmlrender\"",
+   "docling-slim[feat-ocr-mac]==2.143.1; extra == \"ocrmac\"",
+   "docling-slim[models-onnxruntime]==2.143.1; extra == \"onnxruntime\"",
+   "docling-slim[feat-ocr-rapidocr-onnx]==2.143.1; extra == \"rapidocr\"",
+   "docling-slim[models-remote]==2.143.1; extra == \"remote-serving\"",
+   "docling-slim[feat-ocr-tesserocr]==2.143.1; extra == \"tesserocr\"",
+   "docling-slim[models-vlm-inline]==2.143.1; extra == \"vlm\"",
+   "docling-slim[format-xml-xbrl]==2.143.1; extra == \"xbrl\""
+  ],
+  "recent": [
+   [
+    "2026-10-27T17:15:04",
+    "2.143.1"
+   ],
+   [
+    "2026-10-27T00:01:59",
+    "2.143.0"
+   ],
+   [
+    "2026-10-23T08:22:08",
+    "2.142.1"
+   ],
+   [
+    "2026-10-22T14:31:09",
+    "2.142.0"
+   ],
+   [
+    "2026-10-20T21:29:52",
+    "2.141.0"
+   ],
+   [
+    "2026-10-16T09:03:16",
+    "2.140.0"
+   ]
+  ]
+ },
+ "docling-core": {
+  "latest": "2.105.0",
+  "date": "2026-10-27T16:22:10",
+  "requires_python": "<4.0,>=3.10",
+  "requires_dist": [
+   "jsonschema<5.0.0,>=4.16.0",
+   "pydantic!=2.10.0,!=2.10.1,!=2.10.2,<3.0.0,>=2.6.0",
+   "jsonref<2.0.0,>=1.1.0",
+   "tabulate<0.11.0,>=0.9.0",
+   "pandas<4.0.0,>=2.1.4",
+   "pillow<14.0.0,>=10.0.0",
+   "pyyaml<7.0.0,>=5.1",
+   "typing-extensions<5.0.0,>=4.12.2",
+   "typer<0.28.0,>=0.12.5",
+   "latex2mathml<4.0.0,>=3.77.0",
+   "defusedxml<0.8.0,>=0.7.1",
+   "pydantic-settings>=2.14.0",
+   "doclang<0.9,>=0.8",
+   "requests<3.0.0,>=2.34.2",
+   "doclang<0.9,>=0.8; extra == \"dclq\"",
+   "typer<0.28.0,>=0.26.0; extra == \"dclq\"",
+   "lxml>=6.0.2; extra == \"dclq\"",
+   "semchunk<4.0.0,>=2.2.0; extra == \"chunking\"",
+   "tree-sitter<0.27.0,>=0.25.0; extra == \"chunking\"",
+   "tree-sitter-python>=0.23.6; extra == \"chunking\"",
+   "tree-sitter-c>=0.23.4; extra == \"chunking\"",
+   "tree-sitter-javascript>=0.23.1; extra == \"chunking\"",
+   "tree-sitter-typescript>=0.23.2; extra == \"chunking\"",
+   "transformers<6.0.0,>=4.42.0; extra == \"chunking\"",
+   "semchunk<4.0.0,>=2.2.0; extra == \"chunking-openai\"",
+   "tree-sitter<0.27.0,>=0.25.0; extra == \"chunking-openai\"",
+   "tree-sitter-python>=0.23.6; extra == \"chunking-openai\"",
+   "tree-sitter-c>=0.23.4; extra == \"chunking-openai\"",
+   "tree-sitter-javascript>=0.23.1; extra == \"chunking-openai\"",
+   "tree-sitter-typescript>=0.23.2; extra == \"chunking-openai\"",
+   "tiktoken<0.15.0,>=0.9.0; extra == \"chunking-openai\"",
+   "datasets>=4.0.0; extra == \"examples\"",
+   "matplotlib>=3.7.0; extra == \"examples\"",
+   "openpyxl>=3.1.5; extra == \"examples\""
+  ],
+  "recent": [
+   [
+    "2026-10-27T16:22:10",
+    "2.105.0"
+   ],
+   [
+    "2026-10-22T14:02:00",
+    "2.104.0"
+   ],
+   [
+    "2026-10-20T14:45:12",
+    "2.103.1"
+   ],
+   [
+    "2026-10-19T16:32:51",
+    "2.103.0"
+   ],
+   [
+    "2026-10-18T05:31:43",
+    "2.102.0"
+   ],
+   [
+    "2026-10-08T15:12:53",
+    "2.101.1"
+   ]
+  ]
+ },
+ "docling-parse": {
+  "latest": "7.23.1",
+  "date": "2026-10-26T20:02:12",
+  "requires_python": ">=3.10",
+  "requires_dist": [
+   "pillow<14.0.0,>=10.0.0",
+   "pydantic>=2.0.0",
+   "docling-core<3.0.0,>=2.99.0",
+   "pywin32>=305; sys_platform == \"win32\""
+  ],
+  "recent": [
+   [
+    "2026-10-26T20:02:12",
+    "7.23.1"
+   ],
+   [
+    "2026-10-22T14:51:48",
+    "7.23.0"
+   ],
+   [
+    "2026-10-21T11:59:54",
+    "7.22.4"
+   ],
+   [
+    "2026-10-13T04:23:36",
+    "7.22.3"
+   ],
+   [
+    "2026-10-05T07:22:46",
+    "7.22.2"
+   ],
+   [
+    "2026-09-28T16:01:30",
+    "7.22.1"
+   ]
+  ]
+ },
+ "docling-ibm-models": {
+  "latest": "4.0.4",
+  "date": "2026-10-21T11:34:12",
+  "requires_python": "<4.0,>=3.10",
+  "requires_dist": [
+   "torch<3.0.0,>=2.2.2",
+   "torchvision<1,>=0",
+   "Pillow<14.0.0,>=10.0.0",
+   "huggingface_hub<2,>=0.23",
+   "safetensors[torch]<1,>=0.4.3",
+   "transformers<6.0.0,>=4.42.0",
+   "numpy<3.0.0,>=1.24.4",
+   "opencv-python-headless<5.0.0.0,>=4.6.0.66; extra == \"opencv-python-headless\"",
+   "opencv-python<5.0.0.0,>=4.6.0.66; extra == \"opencv-python\""
+  ],
+  "recent": [
+   [
+    "2026-10-21T11:34:12",
+    "4.0.4"
+   ],
+   [
+    "2026-09-18T16:15:35",
+    "4.0.3"
+   ],
+   [
+    "2026-09-03T11:25:22",
+    "4.0.2"
+   ],
+   [
+    "2026-09-01T08:20:16",
+    "4.0.1"
+   ],
+   [
+    "2026-08-28T14:43:20",
+    "4.0.0"
+   ],
+   [
+    "2026-08-28T07:04:08",
+    "3.15.0"
+   ]
+  ]
+ },
+ "PyMuPDF": {
+  "latest": "2.0",
+  "date": "2026-10-19T09:44:03",
+  "requires_python": ">=3.11",
+  "requires_dist": [
+   "networkx",
+   "numpy",
+   "onnxruntime",
+   "pyyaml",
+   "pymupdf-layout==2.0",
+   "pymupdf_layout==2.0",
+   "psutil",
+   "tabulate",
+   "pymupdf4llm==2.0"
+  ],
+  "recent": [
+   [
+    "2026-10-19T09:44:03",
+    "2.0"
+   ],
+   [
+    "2026-08-06T21:37:25",
+    "1.28.2"
+   ],
+   [
+    "2026-06-29T09:03:30",
+    "1.28.0"
+   ],
+   [
+    "2026-04-24T14:09:17",
+    "1.27.2.3"
+   ],
+   [
+    "2026-03-19T12:35:42",
+    "1.27.2.2"
+   ],
+   [
+    "2026-03-10T12:37:06",
+    "1.27.2"
+   ]
+  ]
+ },
+ "pdfplumber": {
+  "latest": "0.11.10",
+  "date": "2026-06-15T03:31:29",
+  "requires_python": ">=3.8",
+  "requires_dist": [
+   "pdfminer.six==20260107",
+   "Pillow>=12.2.0",
+   "pypdfium2>=5.9.0"
+  ],
+  "recent": [
+   [
+    "2026-06-15T03:31:29",
+    "0.11.10"
+   ],
+   [
+    "2026-01-05T08:10:27",
+    "0.11.9"
+   ],
+   [
+    "2025-11-08T20:52:00",
+    "0.11.8"
+   ],
+   [
+    "2025-06-12T11:30:48",
+    "0.11.7"
+   ],
+   [
+    "2025-03-28T03:19:00",
+    "0.11.6"
+   ],
+   [
+    "2025-01-01T15:39:12",
+    "0.11.5"
+   ]
+  ]
+ },
+ "pdfminer.six": {
+  "latest": "20260107",
+  "date": "2026-01-07T13:29:10",
+  "requires_python": ">=3.10",
+  "requires_dist": [
+   "charset-normalizer>=2.0.0",
+   "cryptography>=36.0.0",
+   "Pillow; extra == \"image\""
+  ],
+  "recent": [
+   [
+    "2026-01-07T13:29:10",
+    "20260107"
+   ],
+   [
+    "2025-12-30T15:49:10",
+    "20251230"
+   ],
+   [
+    "2025-12-29T20:16:02",
+    "20251229"
+   ],
+   [
+    "2025-12-28T14:32:24",
+    "20251228"
+   ],
+   [
+    "2025-12-27T20:16:21",
+    "20251227"
+   ],
+   [
+    "2025-11-07T20:01:08",
+    "20251107"
+   ]
+  ]
+ },
+ "pypdfium2": {
+  "latest": "5.14.0",
+  "date": "2026-10-04T15:18:40",
+  "requires_python": ">=3.6",
+  "requires_dist": null,
+  "recent": [
+   [
+    "2026-10-04T15:18:40",
+    "5.14.0"
+   ],
+   [
+    "2026-10-02T12:46:15",
+    "5.14.0b1"
+   ],
+   [
+    "2026-08-13T10:57:40",
+    "5.13.0"
+   ],
+   [
+    "2026-07-17T10:00:47",
+    "5.12.1"
+   ],
+   [
+    "2026-07-15T18:56:58",
+    "5.12.0"
+   ],
+   [
+    "2026-06-29T11:11:00",
+    "5.11.0"
+   ]
+  ]
+ },
+ "torch": {
+  "latest": "2.14.1",
+  "date": "2026-09-30T17:43:48",
+  "requires_python": ">=3.10",
+  "requires_dist": [
+   "filelock",
+   "typing-extensions>=4.10.0",
+   "setuptools>=77.0.3",
+   "sympy>=1.13.3",
+   "networkx>=2.5.1",
+   "jinja2",
+   "fsspec>=0.8.5",
+   "cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.3; platform_system == \"Linux\"",
+   "cuda-bindings<14,>=13.0.3; platform_system == \"Linux\" and python_version < \"3.15\"",
+   "nvidia-cudnn-cu13==9.24.0.43; platform_system == \"Linux\"",
+   "nvidia-cusparselt-cu13==0.8.1; platform_system == \"Linux\"",
+   "nvidia-nccl-cu13==2.30.7; platform_system == \"Linux\"",
+   "nvidia-nvshmem-cu13==3.4.5; platform_system == \"Linux\"",
+   "triton~=3.8.0; platform_system == \"Linux\" and python_version < \"3.15\"",
+   "optree>=0.13.0; extra == \"optree\"",
+   "opt-einsum>=3.3; extra == \"opt-einsum\"",
+   "pyyaml; extra == \"pyyaml\""
+  ],
+  "recent": [
+   [
+    "2026-09-30T17:43:48",
+    "2.14.1"
+   ],
+   [
+    "2026-09-02T13:42:48",
+    "2.14.0"
+   ],
+   [
+    "2026-07-08T16:01:59",
+    "2.13.0"
+   ],
+   [
+    "2026-06-17T21:04:57",
+    "2.12.1"
+   ],
+   [
+    "2026-05-13T14:51:07",
+    "2.12.0"
+   ],
+   [
+    "2026-03-23T18:07:18",
+    "2.11.0"
+   ]
+  ]
+ },
+ "torchvision": {
+  "latest": "0.29.1",
+  "date": "2026-09-30T17:56:58",
+  "requires_python": "!=3.14.1,>=3.10",
+  "requires_dist": [
+   "numpy",
+   "torch>=2.14.0",
+   "pillow!=8.3.*,>=5.3.0",
+   "gdown>=4.7.3; extra == \"gdown\"",
+   "scipy; extra == \"scipy\""
+  ],
+  "recent": [
+   [
+    "2026-09-30T17:56:58",
+    "0.29.1"
+   ],
+   [
+    "2026-09-02T13:46:52",
+    "0.29.0"
+   ],
+   [
+    "2026-07-08T16:07:27",
+    "0.28.0"
+   ],
+   [
+    "2026-06-17T21:09:02",
+    "0.27.1"
+   ],
+   [
+    "2026-05-13T14:56:38",
+    "0.27.0"
+   ],
+   [
+    "2026-03-23T18:12:20",
+    "0.26.0"
+   ]
+  ]
+ },
+ "transformers": {
+  "latest": "5.21.0",
+  "date": "2026-10-26T18:17:23",
+  "requires_python": ">=3.11.0",
+  "requires_dist": [
+   "huggingface-hub<3.0,>=1.31.0",
+   "numpy>=1.17",
+   "packaging>=20.0",
+   "pyyaml>=5.1",
+   "regex>=2025.10.22",
+   "tokenizers<0.24.0,>=0.23.1",
+   "typer",
+   "safetensors>=0.8.0",
+   "tqdm>=4.60",
+   "torch>=2.6; extra == \"torch\"",
+   "accelerate>=1.1.0; extra == \"torch\"",
+   "torchvision; extra == \"vision\"",
+   "Pillow<=15.0,>=10.0.1; extra == \"vision\"",
+   "torchaudio; extra == \"audio\"",
+   "librosa; extra == \"audio\"",
+   "pyctcdecode>=0.4.0; extra == \"audio\"",
+   "phonemizer; extra == \"audio\"",
+   "kenlm; extra == \"audio\"",
+   "av; extra == \"video\"",
+   "timm>=1.0.23; extra == \"timm\"",
+   "datasets>=2.15.0; extra == \"quality\"",
+   "ruff==0.14.10; extra == \"quality\"",
+   "GitPython<3.1.19; extra == \"quality\"",
+   "urllib3<2.0.0; extra == \"quality\"",
+   "libcst; extra == \"quality\"",
+   "rich; extra == \"quality\"",
+   "ty==0.0.20; extra == \"quality\"",
+   "transformers-mlinter==0.1.5; extra == \"quality\"",
+   "hf-doc-builder; extra == \"docs\"",
+   "kernels<0.18,>=0.17.2; extra == \"kernels\"",
+   "sentencepiece!=0.1.92,>=0.1.91; extra == \"sentencepiece\"",
+   "protobuf; extra == \"sentencepiece\"",
+   "tiktoken; extra == \"tiktoken\"",
+   "blobfile; extra == \"tiktoken\"",
+   "mistral-common[image]>=1.11.7; extra == \"mistral-common\"",
+   "jinja2>=3.1.0; extra == \"chat-template\"",
+   "scikit-learn; extra == \"sklearn\"",
+   "accelerate>=1.1.0; extra == \"accelerate\"",
+   "faiss-cpu; extra == \"retrieval\"",
+   "datasets>=2.15.0; extra == \"retrieval\"",
+   "sagemaker>=2.31.0; extra == \"sagemaker\"",
+   "deepspeed>=0.9.3; extra == \"deepspeed\"",
+   "accelerate>=1.1.0; extra == \"deepspeed\"",
+   "optuna; extra == \"optuna\"",
+   "kernels<0.18,>=0.17.2; extra == \"integrations\"",
+   "optuna; extra == \"integrations\"",
+   "codecarbon>=2.8.1; extra == \"integrations\"",
+   "ray[tune]>=2.7.0; extra == \"integrations\"",
+   "ray[tune]>=2.7.0; extra == \"ray\"",
+   "codecarbon>=2.8.1; extra == \"codecarbon\"",
+   "openai>=1.98.0; extra == \"serving\"",
+   "pydantic>=2; extra == \"serving\"",
+   "uvicorn; extra == \"serving\"",
+   "fastapi; extra == \"serving\"",
+   "starlette; extra == \"serving\"",
+   "rich; extra == \"serving\"",
+   "torch>=2.6; extra == \"serving\"",
+   "accelerate>=1.1.0; extra == \"serving\"",
+   "num2words; extra == \"num2words\"",
+   "optimum-benchmark>=0.3.0; extra == \"benchmark\"",
+   "fugashi>=1.0; extra == \"ja\"",
+   "ipadic<2.0,>=1.0.0; extra == \"ja\"",
+   "unidic_lite>=1.0.7; extra == \"ja\"",
+   "unidic>=1.0.2; extra == \"ja\"",
+   "rhoknp<1.3.1,>=1.1.0; extra == \"ja\"",
+   "sudachipy>=0.6.6; extra == \"ja\"",
+   "sudachidict_core>=20220729; extra == \"ja\"",
+   "pytest<9.0.0,>=7.2.0; extra == \"testing\"",
+   "pytest-asyncio>=1.2.0; extra == \"testing\"",
+   "pytest-random-order; extra == \"testing\"",
+   "pytest-rich; extra == \"testing\"",
+   "pytest-xdist; extra == \"testing\"",
+   "pytest-order; extra == \"testing\"",
+   "pytest-rerunfailures<16.0; extra == \"testing\"",
+   "pytest-timeout; extra == \"testing\"",
+   "pytest-env; extra == \"testing\"",
+   "timeout-decorator; extra == \"testing\"",
+   "parameterized>=0.9; extra == \"testing\"",
+   "psutil; extra == \"testing\"",
+   "diffusers==0.35.2; extra == \"testing\"",
+   "nltk<=3.8.1; extra == \"testing\"",
+   "sacremoses; extra == \"testing\"",
+   "rjieba; extra == \"testing\"",
+   "beautifulsoup4; extra == \"testing\"",
+   "tensorboard; extra == \"testing\"",
+   "filelock; extra == \"testing\"",
+   "hf-doc-builder; extra == \"testing\"",
+   "datasets>=2.15.0; extra == \"testing\"",
+   "ruff==0.14.10; extra == \"testing\"",
+   "GitPython<3.1.19; extra == \"testing\"",
+   "urllib3<2.0.0; extra == \"testing\"",
+   "libcst; extra == \"testing\"",
+   "rich; extra == \"testing\"",
+   "ty==0.0.20; extra == \"testing\"",
+   "transformers-mlinter==0.1.5; extra == \"testing\"",
+   "faiss-cpu; extra == \"testing\"",
+   "datasets>=2.15.0; extra == \"testing\"",
+   "sentencepiece!=0.1.92,>=0.1.91; extra == \"testing\"",
+   "protobuf; extra == \"testing\"",
+   "openai>=1.98.0; extra == \"testing\"",
+   "pydantic>=2; extra == \"testing\"",
+   "uvicorn; extra == \"testing\"",
+   "fastapi; extra == \"testing\"",
+   "starlette; extra == \"testing\"",
+   "rich; extra == \"testing\"",
+   "torch>=2.6; extra == \"testing\"",
+   "accelerate>=1.1.0; extra == \"testing\"",
+   "mistral-common[image]>=1.11.7; extra == \"testing\"",
+   "deepspeed>=0.9.3; extra == \"deepspeed-testing\"",
+   "accelerate>=1.1.0; extra == \"deepspeed-testing\"",
+   "pytest<9.0.0,>=7.2.0; extra == \"deepspeed-testing\"",
+   "pytest-asyncio>=1.2.0; extra == \"deepspeed-testing\"",
+   "pytest-random-order; extra == \"deepspeed-testing\"",
+   "pytest-rich; extra == \"deepspeed-testing\"",
+   "pytest-xdist; extra == \"deepspeed-testing\"",
+   "pytest-order; extra == \"deepspeed-testing\"",
+   "pytest-rerunfailures<16.0; extra == \"deepspeed-testing\"",
+   "pytest-timeout; extra == \"deepspeed-testing\"",
+   "pytest-env; extra == \"deepspeed-testing\"",
+   "timeout-decorator; extra == \"deepspeed-testing\"",
+   "parameterized>=0.9; extra == \"deepspeed-testing\"",
+   "psutil; extra == \"deepspeed-testing\"",
+   "diffusers==0.35.2; extra == \"deepspeed-testing\"",
+   "nltk<=3.8.1; extra == \"deepspeed-testing\"",
+   "sacremoses; extra == \"deepspeed-testing\"",
+   "rjieba; extra == \"deepspeed-testing\"",
+   "beautifulsoup4; extra == \"deepspeed-testing\"",
+   "tensorboard; extra == \"deepspeed-testing\"",
+   "filelock; extra == \"deepspeed-testing\"",
+   "hf-doc-builder; extra == \"deepspeed-testing\"",
+   "datasets>=2.15.0; extra == \"deepspeed-testing\"",
+   "ruff==0.14.10; extra == \"deepspeed-testing\"",
+   "GitPython<3.1.19; extra == \"deepspeed-testing\"",
+   "urllib3<2.0.0; extra == \"deepspeed-testing\"",
+   "libcst; extra == \"deepspeed-testing\"",
+   "rich; extra == \"deepspeed-testing\"",
+   "ty==0.0.20; extra == \"deepspeed-testing\"",
+   "transformers-mlinter==0.1.5; extra == \"deepspeed-testing\"",
+   "faiss-cpu; extra == \"deepspeed-testing\"",
+   "datasets>=2.15.0; extra == \"deepspeed-testing\"",
+   "sentencepiece!=0.1.92,>=0.1.91; extra == \"deepspeed-testing\"",
+   "protobuf; extra == \"deepspeed-testing\"",
+   "openai>=1.98.0; extra == \"deepspeed-testing\"",
+   "pydantic>=2; extra == \"deepspeed-testing\"",
+   "uvicorn; extra == \"deepspeed-testing\"",
+   "fastapi; extra == \"deepspeed-testing\"",
+   "starlette; extra == \"deepspeed-testing\"",
+   "rich; extra == \"deepspeed-testing\"",
+   "torch>=2.6; extra == \"deepspeed-testing\"",
+   "accelerate>=1.1.0; extra == \"deepspeed-testing\"",
+   "mistral-common[image]>=1.11.7; extra == \"deepspeed-testing\"",
+   "optuna; extra == \"deepspeed-testing\"",
+   "sentencepiece!=0.1.92,>=0.1.91; extra == \"deepspeed-testing\"",
+   "protobuf; extra == \"deepspeed-testing\"",
+   "torch>=2.6; extra == \"all\"",
+   "accelerate>=1.1.0; extra == \"all\"",
+   "torchvision; extra == \"all\"",
+   "Pillow<=15.0,>=10.0.1; extra == \"all\"",
+   "torchaudio; extra == \"all\"",
+   "librosa; extra == \"all\"",
+   "pyctcdecode>=0.4.0; extra == \"all\"",
+   "phonemizer; extra == \"all\"",
+   "kenlm; extra == \"all\"",
+   "av; extra == \"all\"",
+   "kernels<0.18,>=0.17.2; extra == \"all\"",
+   "timm>=1.0.23; extra == \"all\"",
+   "sentencepiece!=0.1.92,>=0.1.91; extra == \"all\"",
+   "protobuf; extra == \"all\"",
+   "tiktoken; extra == \"all\"",
+   "blobfile; extra == \"all\"",
+   "jinja2>=3.1.0; extra == \"all\"",
+   "num2words; extra == \"all\"",
+   "mistral-common[image]>=1.11.7; extra == \"all\"",
+   "torch>=2.6; extra == \"dev\"",
+   "accelerate>=1.1.0; extra == \"dev\"",
+   "torchvision; extra == \"dev\"",
+   "Pillow<=15.0,>=10.0.1; extra == \"dev\"",
+   "torchaudio; extra == \"dev\"",
+   "librosa; extra == \"dev\"",
+   "pyctcdecode>=0.4.0; extra == \"dev\"",
+   "phonemizer; extra == \"dev\"",
+   "kenlm; extra == \"dev\"",
+   "av; extra == \"dev\"",
+   "kernels<0.18,>=0.17.2; extra == \"dev\"",
+   "timm>=1.0.23; extra == \"dev\"",
+   "sentencepiece!=0.1.92,>=0.1.91; extra == \"dev\"",
+   "protobuf; extra == \"dev\"",
+   "tiktoken; extra == \"dev\"",
+   "blobfile; extra == \"dev\"",
+   "jinja2>=3.1.0; extra == \"dev\"",
+   "num2words; extra == \"dev\"",
+   "mistral-common[image]>=1.11.7; extra == \"dev\"",
+   "pytest<9.0.0,>=7.2.0; extra == \"dev\"",
+   "pytest-asyncio>=1.2.0; extra == \"dev\"",
+   "pytest-random-order; extra == \"dev\"",
+   "pytest-rich; extra == \"dev\"",
+   "pytest-xdist; extra == \"dev\"",
+   "pytest-order; extra == \"dev\"",
+   "pytest-rerunfailures<16.0; extra == \"dev\"",
+   "pytest-timeout; extra == \"dev\"",
+   "pytest-env; extra == \"dev\"",
+   "timeout-decorator; extra == \"dev\"",
+   "parameterized>=0.9; extra == \"dev\"",
+   "psutil; extra == \"dev\"",
+   "diffusers==0.35.2; extra == \"dev\"",
+   "nltk<=3.8.1; extra == \"dev\"",
+   "sacremoses; extra == \"dev\"",
+   "rjieba; extra == \"dev\"",
+   "beautifulsoup4; extra == \"dev\"",
+   "tensorboard; extra == \"dev\"",
+   "filelock; extra == \"dev\"",
+   "hf-doc-builder; extra == \"dev\"",
+   "datasets>=2.15.0; extra == \"dev\"",
+   "ruff==0.14.10; extra == \"dev\"",
+   "GitPython<3.1.19; extra == \"dev\"",
+   "urllib3<2.0.0; extra == \"dev\"",
+   "libcst; extra == \"dev\"",
+   "rich; extra == \"dev\"",
+   "ty==0.0.20; extra == \"dev\"",
+   "transformers-mlinter==0.1.5; extra == \"dev\"",
+   "faiss-cpu; extra == \"dev\"",
+   "datasets>=2.15.0; extra == \"dev\"",
+   "sentencepiece!=0.1.92,>=0.1.91; extra == \"dev\"",
+   "protobuf; extra == \"dev\"",
+   "openai>=1.98.0; extra == \"dev\"",
+   "pydantic>=2; extra == \"dev\"",
+   "uvicorn; extra == \"dev\"",
+   "fastapi; extra == \"dev\"",
+   "starlette; extra == \"dev\"",
+   "rich; extra == \"dev\"",
+   "torch>=2.6; extra == \"dev\"",
+   "accelerate>=1.1.0; extra == \"dev\"",
+   "mistral-common[image]>=1.11.7; extra == \"dev\"",
+   "fugashi>=1.0; extra == \"dev\"",
+   "ipadic<2.0,>=1.0.0; extra == \"dev\"",
+   "unidic_lite>=1.0.7; extra == \"dev\"",
+   "unidic>=1.0.2; extra == \"dev\"",
+   "rhoknp<1.3.1,>=1.1.0; extra == \"dev\"",
+   "sudachipy>=0.6.6; extra == \"dev\"",
+   "sudachidict_core>=20220729; extra == \"dev\"",
+   "scikit-learn; extra == \"dev\""
+  ],
+  "recent": [
+   [
+    "2026-10-26T18:17:23",
+    "5.21.0"
+   ],
+   [
+    "2026-10-19T17:45:59",
+    "5.20.2"
+   ],
+   [
+    "2026-10-16T13:02:00",
+    "5.20.1"
+   ],
+   [
+    "2026-10-15T18:01:01",
+    "5.20.0"
+   ],
+   [
+    "2026-10-06T16:38:56",
+    "5.19.0"
+   ],
+   [
+    "2026-09-30T16:45:57",
+    "5.18.0"
+   ]
+  ]
+ },
+ "rapidocr": {
+  "latest": "3.10.0",
+  "date": "2026-10-08T15:07:45",
+  "requires_python": "<4,>=3.8",
+  "requires_dist": [
+   "pyclipper>=1.2.0",
+   "opencv-python-headless>=4.5.1.48",
+   "numpy<3.0.0,>=1.19.5",
+   "six>=1.15.0",
+   "Shapely!=2.0.4,>=1.7.1",
+   "PyYAML",
+   "Pillow",
+   "tqdm",
+   "omegaconf!=2.2.1",
+   "requests",
+   "colorlog",
+   "python-bidi<1.0,>=0.4.2; extra == \"rtl\""
+  ],
+  "recent": [
+   [
+    "2026-10-08T15:07:45",
+    "3.10.0"
+   ],
+   [
+    "2026-07-21T10:59:01",
+    "3.9.2"
+   ],
+   [
+    "2026-07-02T13:37:00",
+    "3.9.1"
+   ],
+   [
+    "2026-06-23T02:33:55",
+    "3.9.0"
+   ],
+   [
+    "2026-06-15T08:55:07",
+    "3.8.4"
+   ],
+   [
+    "2026-06-11T11:13:11",
+    "3.8.3"
+   ]
+  ]
+ },
+ "paddleocr": {
+  "latest": "3.7.0",
+  "date": "2026-06-11T12:09:51",
+  "requires_python": ">=3.8",
+  "requires_dist": [
+   "paddlex[ocr-core]<3.8.0,>=3.7.0",
+   "PyYAML>=6",
+   "requests",
+   "aiohttp>=3.8.0",
+   "typing-extensions>=4.12",
+   "paddlex[genai-client,ie,ocr,trans]<3.8.0,>=3.7.0; extra == \"all\"",
+   "python-docx>=0.8.11; extra == \"all\"",
+   "python-pptx>=0.6.21; extra == \"all\"",
+   "openpyxl>=3.0.0; extra == \"all\"",
+   "paddlex[genai-client,ocr]<3.8.0,>=3.7.0; extra == \"doc-parser\"",
+   "python-docx>=0.8.11; extra == \"doc2md\"",
+   "python-pptx>=0.6.21; extra == \"doc2md\"",
+   "openpyxl>=3.0.0; extra == \"doc2md\"",
+   "pylatexenc<3,>=2.10; extra == \"doc2md\"",
+   "paddlex[ie]<3.8.0,>=3.7.0; extra == \"ie\"",
+   "paddlex[trans]<3.8.0,>=3.7.0; extra == \"trans\""
+  ],
+  "recent": [
+   [
+    "2026-06-11T12:09:51",
+    "3.7.0"
+   ],
+   [
+    "2026-05-28T11:43:29",
+    "3.6.0"
+   ],
+   [
+    "2026-04-21T08:41:18",
+    "3.5.0"
+   ],
+   [
+    "2026-04-14T05:48:05",
+    "3.4.1"
+   ],
+   [
+    "2026-01-29T10:15:22",
+    "3.4.0"
+   ],
+   [
+    "2026-01-20T07:27:40",
+    "3.3.3"
+   ]
+  ]
+ },
+ "paddlepaddle": {
+  "latest": "3.3.1",
+  "date": "2026-03-24T08:01:41",
+  "requires_python": null,
+  "requires_dist": [
+   "httpx",
+   "numpy>=1.21",
+   "protobuf>=3.20.2",
+   "Pillow",
+   "opt_einsum==3.3.0",
+   "networkx",
+   "typing_extensions",
+   "safetensors>=0.6.0",
+   "setuptools; python_version >= \"3.12\""
+  ],
+  "recent": [
+   [
+    "2026-03-24T08:01:41",
+    "3.3.1"
+   ],
+   [
+    "2026-01-13T08:54:12",
+    "3.3.0"
+   ],
+   [
+    "2025-11-14T13:10:44",
+    "3.2.2"
+   ],
+   [
+    "2025-10-30T13:12:08",
+    "3.2.1"
+   ],
+   [
+    "2025-09-08T07:50:35",
+    "3.2.0"
+   ],
+   [
+    "2025-08-20T03:05:21",
+    "3.1.1"
+   ]
+  ]
+ },
+ "paddlex": {
+  "latest": "3.7.2",
+  "date": "2026-06-25T05:50:51",
+  "requires_python": ">=3.8",
+  "requires_dist": [
+   "aistudio-sdk>=0.3.5",
+   "chardet",
+   "colorlog",
+   "filelock",
+   "huggingface-hub",
+   "modelscope<1.29.2,>=1.28.0; python_version == \"3.8\"",
+   "modelscope>=1.28.0; python_version >= \"3.9\"",
+   "numpy<2.4,>=1.24",
+   "packaging",
+   "pandas>=1.3",
+   "pillow",
+   "prettytable",
+   "py-cpuinfo",
+   "pydantic>=2",
+   "PyYAML==6.0.2",
+   "requests",
+   "ruamel.yaml",
+   "typing-extensions",
+   "ujson",
+   "faiss-cpu; extra == \"cv\"",
+   "matplotlib; extra == \"cv\"",
+   "opencv-contrib-python==4.10.0.84; extra == \"cv\"",
+   "pycocotools<=2.0.8; extra == \"cv\"",
+   "pypdfium2>=4; extra == \"cv\"",
+   "scikit-image; extra == \"cv\"",
+   "einops; extra == \"multimodal\"",
+   "ftfy; extra == \"multimodal\"",
+   "GPUtil>=1.4; extra == \"multimodal\"",
+   "Jinja2; extra == \"multimodal\"",
+   "opencv-contrib-python==4.10.0.84; extra == \"multimodal\"",
+   "pypdfium2>=4; extra == \"multimodal\"",
+   "regex; extra == \"multimodal\"",
+   "safetensors>=0.7.0; extra == \"multimodal\"",
+   "sentencepiece; extra == \"multimodal\"",
+   "tiktoken; extra == \"multimodal\"",
+   "ftfy; extra == \"ie\"",
+   "imagesize; extra == \"ie\"",
+   "langchain<1.0,>=0.2; extra == \"ie\"",
+   "langchain-community<1.0,>=0.2; extra == \"ie\"",
+   "langchain-core; extra == \"ie\"",
+   "langchain-openai<1.0,>=0.1; extra == \"ie\"",
+   "langchain-text-splitters<1.0,>=0.2; extra == \"ie\"",
+   "lxml; extra == \"ie\"",
+   "openai>=1.63; extra == \"ie\"",
+   "opencv-contrib-python==4.10.0.84; extra == \"ie\"",
+   "openpyxl; extra == \"ie\"",
+   "premailer; extra == \"ie\"",
+   "pyclipper; extra == \"ie\"",
+   "pypdfium2>=4; extra == \"ie\"",
+   "scikit-learn; extra == \"ie\"",
+   "scipy; extra == \"ie\"",
+   "shapely; extra == \"ie\"",
+   "tokenizers>=0.19; extra == \"ie\"",
+   "beautifulsoup4; extra == \"trans\"",
+   "ftfy; extra == \"trans\"",
+   "imagesize; extra == \"trans\"",
+   "lxml; extra == \"trans\"",
+   "openai>=1.63; extra == \"trans\"",
+   "opencv-contrib-python==4.10.0.84; extra == \"trans\"",
+   "openpyxl; extra == \"trans\"",
+   "premailer; extra == \"trans\"",
+   "pyclipper; extra == \"trans\"",
+   "pypdfium2>=4; extra == \"trans\"",
+   "python-docx; extra == \"trans\"",
+   "scikit-learn; extra == \"trans\"",
+   "scipy; extra == \"trans\"",
+   "shapely; extra == \"trans\"",
+   "tokenizers>=0.19; extra == \"trans\"",
+   "imagesize; extra == \"ocr-core\"",
+   "opencv-contrib-python==4.10.0.84; extra == \"ocr-core\"",
+   "pyclipper; extra == \"ocr-core\"",
+   "pypdfium2>=4; extra == \"ocr-core\"",
+   "python-bidi; extra == \"ocr-core\"",
+   "shapely; extra == \"ocr-core\"",
+   "beautifulsoup4; extra == \"ocr\"",
+   "einops; extra == \"ocr\"",
+   "ftfy; extra == \"ocr\"",
+   "imagesize; extra == \"ocr\"",
+   "Jinja2; extra == \"ocr\"",
+   "latex2mathml; extra == \"ocr\"",
+   "lxml; extra == \"ocr\"",
+   "opencv-contrib-python==4.10.0.84; extra == \"ocr\"",
+   "openpyxl; extra == \"ocr\"",
+   "premailer; extra == \"ocr\"",
+   "pyclipper; extra == \"ocr\"",
+   "pypdfium2>=4; extra == \"ocr\"",
+   "python-bidi; extra == \"ocr\"",
+   "regex; extra == \"ocr\"",
+   "safetensors>=0.7.0; extra == \"ocr\"",
+   "scikit-learn; extra == \"ocr\"",
+   "scipy; extra == \"ocr\"",
+   "sentencepiece; extra == \"ocr\"",
+   "shapely; extra == \"ocr\"",
+   "tiktoken; extra == \"ocr\"",
+   "tokenizers>=0.19; extra == \"ocr\"",
+   "ftfy; extra == \"speech\"",
+   "jieba; extra == \"speech\"",
+   "Jinja2; extra == \"speech\"",
+   "OpenCC; extra == \"speech\"",
+   "pypinyin; extra == \"speech\"",
+   "regex; extra == \"speech\"",
+   "soundfile; extra == \"speech\"",
+   "tqdm; extra == \"speech\"",
+   "chinese-calendar; extra == \"ts\"",
+   "joblib; extra == \"ts\"",
+   "matplotlib; extra == \"ts\"",
+   "scikit-learn; extra == \"ts\"",
+   "decord==0.6.0; ((platform_machine == \"x86_64\" or platform_machine == \"AMD64\") and sys_platform != \"darwin\") and extra == \"video\"",
+   "opencv-contrib-python==4.10.0.84; extra == \"video\"",
+   "beautifulsoup4; extra == \"base\"",
+   "chinese-calendar; extra == \"base\"",
+   "decord==0.6.0; ((platform_machine == \"x86_64\" or platform_machine == \"AMD64\") and sys_platform != \"darwin\") and extra == \"base\"",
+   "einops; extra == \"base\"",
+   "faiss-cpu; extra == \"base\"",
+   "ftfy; extra == \"base\"",
+   "GPUtil>=1.4; extra == \"base\"",
+   "imagesize; extra == \"base\"",
+   "jieba; extra == \"base\"",
+   "Jinja2; extra == \"base\"",
+   "joblib; extra == \"base\"",
+   "langchain<1.0,>=0.2; extra == \"base\"",
+   "langchain-community<1.0,>=0.2; extra == \"base\"",
+   "langchain-core; extra == \"base\"",
+   "langchain-openai<1.0,>=0.1; extra == \"base\"",
+   "langchain-text-splitters<1.0,>=0.2; extra == \"base\"",
+   "latex2mathml; extra == \"base\"",
+   "lxml; extra == \"base\"",
+   "matplotlib; extra == \"base\"",
+   "openai>=1.63; extra == \"base\"",
+   "OpenCC; extra == \"base\"",
+   "opencv-contrib-python==4.10.0.84; extra == \"base\"",
+   "openpyxl; extra == \"base\"",
+   "premailer; extra == \"base\"",
+   "pyclipper; extra == \"base\"",
+   "pycocotools<=2.0.8; extra == \"base\"",
+   "pypdfium2>=4; extra == \"base\"",
+   "pypinyin; extra == \"base\"",
+   "python-bidi; extra == \"base\"",
+   "python-docx; extra == \"base\"",
+   "regex; extra == \"base\"",
+   "safetensors>=0.7.0; extra == \"base\"",
+   "scikit-image; extra == \"base\"",
+   "scikit-learn; extra == \"base\"",
+   "scipy; extra == \"base\"",
+   "sentencepiece; extra == \"base\"",
+   "shapely; extra == \"base\"",
+   "soundfile; extra == \"base\"",
+   "tiktoken; extra == \"base\"",
+   "tokenizers>=0.19; extra == \"base\"",
+   "tqdm; extra == \"base\"",
+   "openai>=1.63; extra == \"genai-client\"",
+   "einops; extra == \"genai-sglang-server\"",
+   "sglang[all]==0.5.2; extra == \"genai-sglang-server\"",
+   "torch==2.8.0; extra == \"genai-sglang-server\"",
+   "transformers; extra == \"genai-sglang-server\"",
+   "einops; extra == \"genai-vllm-server\"",
+   "torch==2.8.0; extra == \"genai-vllm-server\"",
+   "transformers<5.0.0; extra == \"genai-vllm-server\"",
+   "uvloop; extra == \"genai-vllm-server\"",
+   "vllm==0.10.2; extra == \"genai-vllm-server\"",
+   "paddle2onnx==2.0.2rc3; extra == \"paddle2onnx\"",
+   "aiohttp>=3.9; extra == \"serving\"",
+   "bce-python-sdk>=0.9; extra == \"serving\"",
+   "fastapi>=0.110; extra == \"serving\"",
+   "filetype>=1.2; extra == \"serving\"",
+   "opencv-contrib-python==4.10.0.84; extra == \"serving\"",
+   "pypdfium2>=4; extra == \"serving\"",
+   "starlette>=0.36; extra == \"serving\"",
+   "uvicorn>=0.16; extra == \"serving\"",
+   "yarl>=1.9; extra == \"serving\""
+  ],
+  "recent": [
+   [
+    "2026-06-25T05:50:51",
+    "3.7.2"
+   ],
+   [
+    "2026-06-11T10:41:43",
+    "3.7.1"
+   ],
+   [
+    "2026-06-11T09:01:58",
+    "3.7.0"
+   ],
+   [
+    "2026-05-27T14:25:04",
+    "3.6.1"
+   ],
+   [
+    "2026-05-27T13:59:44",
+    "3.6.0"
+   ],
+   [
+    "2026-05-11T04:57:30",
+    "3.5.2"
+   ]
+  ]
+ },
+ "huggingface-hub": {
+  "latest": "2.3.0",
+  "date": "2026-10-23T08:52:04",
+  "requires_python": ">=3.10.0",
+  "requires_dist": [
+   "click<9.0.0,>=8.4.2",
+   "filelock>=3.10.0",
+   "fsspec>=2023.5.0",
+   "hf-xet<2.0.0,>=1.6.0; platform_machine == \"x86_64\" or platform_machine == \"amd64\" or platform_machine == \"AMD64\" or platform_machine == \"arm64\" or platform_machine == \"ARM64\" or platform_machine == \"aarch64\"",
+   "httpx2<3,>=2.0.0",
+   "packaging>=20.9",
+   "pyyaml>=5.1",
+   "tomli>=1.1.0; python_version < \"3.11\"",
+   "tqdm>=4.42.1",
+   "typing-extensions>=4.1.0",
+   "authlib>=1.8.0; extra == \"oauth\"",
+   "fastapi; extra == \"oauth\"",
+   "itsdangerous; extra == \"oauth\"",
+   "torch; extra == \"torch\"",
+   "safetensors[torch]; extra == \"torch\"",
+   "toml; extra == \"fastai\"",
+   "fastai>=2.4; extra == \"fastai\"",
+   "fastcore>=1.3.27; extra == \"fastai\"",
+   "hf-xet<2.0.0,>=1.6.0; extra == \"hf-xet\"",
+   "mcp<2.0.0,>=1.9.4; extra == \"mcp\"",
+   "authlib>=1.8.0; extra == \"testing\"",
+   "fastapi; extra == \"testing\"",
+   "itsdangerous; extra == \"testing\"",
+   "jedi; extra == \"testing\"",
+   "Jinja2; extra == \"testing\"",
+   "pytest>=8.4.2; extra == \"testing\"",
+   "pytest-cov; extra == \"testing\"",
+   "pytest-env; extra == \"testing\"",
+   "pytest-xdist; extra == \"testing\"",
+   "pytest-vcr; extra == \"testing\"",
+   "pytest-asyncio; extra == \"testing\"",
+   "pytest-rerunfailures>=16.2; extra == \"testing\"",
+   "pytest-mock; extra == \"testing\"",
+   "urllib3<2.0; extra == \"testing\"",
+   "soundfile; extra == \"testing\"",
+   "Pillow; extra == \"testing\"",
+   "numpy; extra == \"testing\"",
+   "duckdb; python_version < \"3.15\" and extra == \"testing\"",
+   "fastapi; extra == \"testing\"",
+   "gradio>=5.0.0; extra == \"gradio\"",
+   "requests; extra == \"gradio\"",
+   "typing-extensions>=4.8.0; extra == \"typing\"",
+   "types-PyYAML; extra == \"typing\"",
+   "types-simplejson; extra == \"typing\"",
+   "types-toml; extra == \"typing\"",
+   "types-tqdm; extra == \"typing\"",
+   "types-urllib3; extra == \"typing\"",
+   "ruff>=0.9.0; extra == \"quality\"",
+   "mypy==1.15.0; extra == \"quality\"",
+   "libcst>=1.4.0; extra == \"quality\"",
+   "ty; extra == \"quality\"",
+   "authlib>=1.8.0; extra == \"all\"",
+   "fastapi; extra == \"all\"",
+   "itsdangerous; extra == \"all\"",
+   "jedi; extra == \"all\"",
+   "Jinja2; extra == \"all\"",
+   "pytest>=8.4.2; extra == \"all\"",
+   "pytest-cov; extra == \"all\"",
+   "pytest-env; extra == \"all\"",
+   "pytest-xdist; extra == \"all\"",
+   "pytest-vcr; extra == \"all\"",
+   "pytest-asyncio; extra == \"all\"",
+   "pytest-rerunfailures>=16.2; extra == \"all\"",
+   "pytest-mock; extra == \"all\"",
+   "urllib3<2.0; extra == \"all\"",
+   "soundfile; extra == \"all\"",
+   "Pillow; extra == \"all\"",
+   "numpy; extra == \"all\"",
+   "duckdb; python_version < \"3.15\" and extra == \"all\"",
+   "fastapi; extra == \"all\"",
+   "ruff>=0.9.0; extra == \"all\"",
+   "mypy==1.15.0; extra == \"all\"",
+   "libcst>=1.4.0; extra == \"all\"",
+   "ty; extra == \"all\"",
+   "typing-extensions>=4.8.0; extra == \"all\"",
+   "types-PyYAML; extra == \"all\"",
+   "types-simplejson; extra == \"all\"",
+   "types-toml; extra == \"all\"",
+   "types-tqdm; extra == \"all\"",
+   "types-urllib3; extra == \"all\"",
+   "authlib>=1.8.0; extra == \"dev\"",
+   "fastapi; extra == \"dev\"",
+   "itsdangerous; extra == \"dev\"",
+   "jedi; extra == \"dev\"",
+   "Jinja2; extra == \"dev\"",
+   "pytest>=8.4.2; extra == \"dev\"",
+   "pytest-cov; extra == \"dev\"",
+   "pytest-env; extra == \"dev\"",
+   "pytest-xdist; extra == \"dev\"",
+   "pytest-vcr; extra == \"dev\"",
+   "pytest-asyncio; extra == \"dev\"",
+   "pytest-rerunfailures>=16.2; extra == \"dev\"",
+   "pytest-mock; extra == \"dev\"",
+   "urllib3<2.0; extra == \"dev\"",
+   "soundfile; extra == \"dev\"",
+   "Pillow; extra == \"dev\"",
+   "numpy; extra == \"dev\"",
+   "duckdb; python_version < \"3.15\" and extra == \"dev\"",
+   "fastapi; extra == \"dev\"",
+   "ruff>=0.9.0; extra == \"dev\"",
+   "mypy==1.15.0; extra == \"dev\"",
+   "libcst>=1.4.0; extra == \"dev\"",
+   "ty; extra == \"dev\"",
+   "typing-extensions>=4.8.0; extra == \"dev\"",
+   "types-PyYAML; extra == \"dev\"",
+   "types-simplejson; extra == \"dev\"",
+   "types-toml; extra == \"dev\"",
+   "types-tqdm; extra == \"dev\"",
+   "types-urllib3; extra == \"dev\""
+  ],
+  "recent": [
+   [
+    "2026-10-23T08:52:04",
+    "2.3.0"
+   ],
+   [
+    "2026-10-22T13:22:58",
+    "2.3.0rc1"
+   ],
+   [
+    "2026-10-22T12:06:28",
+    "2.3.0rc0"
+   ],
+   [
+    "2026-10-08T15:30:57",
+    "2.2.0"
+   ],
+   [
+    "2026-10-08T14:42:17",
+    "2.2.0rc0"
+   ],
+   [
+    "2026-10-01T12:32:32",
+    "2.1.1"
+   ]
+  ]
+ },
+ "accelerate": {
+  "latest": "1.15.0",
+  "date": "2026-09-09T13:04:47",
+  "requires_python": ">=3.10.0",
+  "requires_dist": [
+   "numpy>=1.17",
+   "packaging>=20.0",
+   "psutil",
+   "pyyaml",
+   "torch>=2.0.0",
+   "huggingface_hub>=0.21.0",
+   "safetensors>=0.4.3",
+   "ruff==0.13.1; extra == \"quality\"",
+   "pytest>=7.2.0; extra == \"test-prod\"",
+   "pytest-xdist; extra == \"test-prod\"",
+   "pytest-subtests; extra == \"test-prod\"",
+   "parameterized; extra == \"test-prod\"",
+   "pytest-order; extra == \"test-prod\"",
+   "datasets; extra == \"test-dev\"",
+   "diffusers; extra == \"test-dev\"",
+   "evaluate; extra == \"test-dev\"",
+   "peft; extra == \"test-dev\"",
+   "torchdata>=0.8.0; extra == \"test-dev\"",
+   "torchpippy>=0.2.0; extra == \"test-dev\"",
+   "transformers; extra == \"test-dev\"",
+   "scipy; extra == \"test-dev\"",
+   "scikit-learn; extra == \"test-dev\"",
+   "tqdm; extra == \"test-dev\"",
+   "bitsandbytes; extra == \"test-dev\"",
+   "timm; extra == \"test-dev\"",
+   "pytest>=7.2.0; extra == \"testing\"",
+   "pytest-xdist; extra == \"testing\"",
+   "pytest-subtests; extra == \"testing\"",
+   "parameterized; extra == \"testing\"",
+   "pytest-order; extra == \"testing\"",
+   "datasets; extra == \"testing\"",
+   "diffusers; extra == \"testing\"",
+   "evaluate; extra == \"testing\"",
+   "peft; extra == \"testing\"",
+   "torchdata>=0.8.0; extra == \"testing\"",
+   "torchpippy>=0.2.0; extra == \"testing\"",
+   "transformers; extra == \"testing\"",
+   "scipy; extra == \"testing\"",
+   "scikit-learn; extra == \"testing\"",
+   "tqdm; extra == \"testing\"",
+   "bitsandbytes; extra == \"testing\"",
+   "timm; extra == \"testing\"",
+   "deepspeed; extra == \"deepspeed\"",
+   "rich; extra == \"rich\"",
+   "torchao; extra == \"test-fp8\"",
+   "wandb; extra == \"test-trackers\"",
+   "tensorboard; extra == \"test-trackers\"",
+   "dvclive; extra == \"test-trackers\"",
+   "matplotlib; extra == \"test-trackers\"",
+   "swanlab[dashboard]; extra == \"test-trackers\"",
+   "trackio; extra == \"test-trackers\"",
+   "ruff==0.13.1; extra == \"dev\"",
+   "pytest>=7.2.0; extra == \"dev\"",
+   "pytest-xdist; extra == \"dev\"",
+   "pytest-subtests; extra == \"dev\"",
+   "parameterized; extra == \"dev\"",
+   "pytest-order; extra == \"dev\"",
+   "datasets; extra == \"dev\"",
+   "diffusers; extra == \"dev\"",
+   "evaluate; extra == \"dev\"",
+   "peft; extra == \"dev\"",
+   "torchdata>=0.8.0; extra == \"dev\"",
+   "torchpippy>=0.2.0; extra == \"dev\"",
+   "transformers; extra == \"dev\"",
+   "scipy; extra == \"dev\"",
+   "scikit-learn; extra == \"dev\"",
+   "tqdm; extra == \"dev\"",
+   "bitsandbytes; extra == \"dev\"",
+   "timm; extra == \"dev\"",
+   "rich; extra == \"dev\"",
+   "sagemaker; extra == \"sagemaker\""
+  ],
+  "recent": [
+   [
+    "2026-09-09T13:04:47",
+    "1.15.0"
+   ],
+   [
+    "2026-06-11T13:45:50",
+    "1.14.0"
+   ],
+   [
+    "2026-03-04T19:34:10",
+    "1.13.0"
+   ],
+   [
+    "2025-11-21T11:27:44",
+    "1.12.0"
+   ],
+   [
+    "2025-10-20T14:42:23",
+    "1.11.0"
+   ],
+   [
+    "2025-08-25T13:57:04",
+    "1.10.1"
+   ]
+  ]
+ },
+ "easyocr": {
+  "latest": "1.7.2",
+  "date": "2024-09-24T11:34:43",
+  "requires_python": null,
+  "requires_dist": [
+   "torch",
+   "torchvision>=0.5",
+   "opencv-python-headless",
+   "scipy",
+   "numpy",
+   "Pillow",
+   "scikit-image",
+   "python-bidi",
+   "PyYAML",
+   "Shapely",
+   "pyclipper",
+   "ninja"
+  ],
+  "recent": [
+   [
+    "2024-09-24T11:34:43",
+    "1.7.2"
+   ],
+   [
+    "2023-09-04T11:55:27",
+    "1.7.1"
+   ],
+   [
+    "2023-05-26T07:23:42",
+    "1.7.0"
+   ],
+   [
+    "2022-09-16T10:59:15",
+    "1.6.2"
+   ],
+   [
+    "2022-09-05T01:32:29",
+    "1.6.1"
+   ],
+   [
+    "2022-08-24T04:00:10",
+    "1.6.0"
+   ]
+  ]
+ },
+ "tesserocr": {
+  "latest": "2.12.0",
+  "date": "2026-10-22T19:14:29",
+  "requires_python": ">=3.9",
+  "requires_dist": null,
+  "recent": [
+   [
+    "2026-10-22T19:14:29",
+    "2.12.0"
+   ],
+   [
+    "2026-08-04T12:24:57",
+    "2.11.0"
+   ],
+   [
+    "2026-02-12T11:09:24",
+    "2.10.0"
+   ],
+   [
+    "2025-12-18T10:40:47",
+    "2.9.2"
+   ],
+   [
+    "2025-10-10T13:55:28",
+    "2.9.1"
+   ],
+   [
+    "2025-10-09T13:13:39",
+    "2.9.0"
+   ]
+  ]
+ },
+ "docling-slim": {
+  "latest": "2.143.1",
+  "date": "2026-10-27T17:13:40",
+  "requires_python": "<4.0,>=3.10",
+  "requires_dist": [
+   "certifi>=2024.7.4",
+   "docling-core<3.0.0,>=2.103.1",
+   "filetype<2.0.0,>=1.2.0",
+   "langcodes<4.0.0,>=3.5.0",
+   "pluggy<2.0.0,>=1.0.0",
+   "pydantic-settings<3.0.0,>=2.3.0",
+   "pydantic<3.0.0,>=2.0.0",
+   "requests<3.0.0,>=2.32.2",
+   "tqdm<5.0.0,>=4.65.0",
+   "accelerate<2,>=1.0.0; extra == \"all\"",
+   "accelerate<2.0.0,>=1.2.1; extra == \"all\"",
+   "arelle-release<3.0.0,>=2.38.17; extra == \"all\"",
+   "beautifulsoup4<5.0.0,>=4.12.3; extra == \"all\"",
+   "defusedxml<0.8.0,>=0.7.1; extra == \"all\"",
+   "docling-core[chunking]<3.0.0,>=2.103.1; extra == \"all\"",
+   "docling-ibm-models<5,>=4.0.2; extra == \"all\"",
+   "docling-parse<8.0.0,>=7.22.2; extra == \"all\"",
+   "easyocr<2.0,>=1.7; extra == \"all\"",
+   "einops<1.0.0,>=0.8.1; extra == \"all\"",
+   "httpx<1.0.0,>=0.28; extra == \"all\"",
+   "huggingface-hub<3,>=0.23; extra == \"all\"",
+   "lxml<7.0.0,>=4.0.0; extra == \"all\"",
+   "mail-parser<5.0.0,>=4.1.4; extra == \"all\"",
+   "marko<3.0.0,>=2.1.2; extra == \"all\"",
+   "mlx-vlm<1.0.0,>=0.7.0; (python_version >= \"3.10\" and sys_platform == \"darwin\" and platform_machine == \"arm64\") and extra == \"all\"",
+   "mlx-whisper>=0.4.3; (python_version >= \"3.10\" and sys_platform == \"darwin\" and platform_machine == \"arm64\") and extra == \"all\"",
+   "numba>=0.63.0; extra == \"all\"",
+   "numpy<3.0.0,>=1.24.0; extra == \"all\"",
+   "ocrmac<2.0.0,>=1.0.0; sys_platform == \"darwin\" and extra == \"all\"",
+   "onnxruntime-gpu<1.24; (python_version < \"3.11\" and (sys_platform == \"linux\" or sys_platform == \"win32\")) and extra == \"all\"",
+   "pandas<4.0.0,>=2.1.4; extra == \"feat-ocr-tesserocr\"",
+   "onnxruntime-gpu<2.0.0,>=1.24.1; (python_version >= \"3.14\" and (sys_platform == \"linux\" or sys_platform == \"win32\")) and extra == \"all\"",
+   "onnxruntime-gpu<2.0.0; (python_version >= \"3.11\" and python_version < \"3.14\" and (sys_platform == \"linux\" or sys_platform == \"win32\")) and extra == \"all\"",
+   "onnxruntime<1.24; (python_version < \"3.11\" and sys_platform == \"darwin\") and extra == \"all\"",
+   "onnxruntime<2.0.0,>=1.24.1; (python_version >= \"3.14\" and sys_platform == \"darwin\") and extra == \"all\"",
+   "onnxruntime<2.0.0; (python_version >= \"3.11\" and python_version < \"3.14\" and sys_platform == \"darwin\") and extra == \"all\"",
+   "open-clip-torch<4.0.0,>=3.2.0; extra == \"all\"",
+   "openai-whisper>=20250625; extra == \"all\"",
+   "openpyxl<4.0.0,>=3.1.5; extra == \"all\"",
+   "pandas<4.0.0,>=2.1.4; extra == \"all\"",
+   "peft>=0.18.1; extra == \"all\"",
+   "pillow<14.0.0,>=10.0.0; extra == \"all\"",
+   "playwright>=1.58.0; extra == \"all\"",
+   "polyfactory>=2.22.2; extra == \"all\"",
+   "pylatexenc<3.0,>=2.10; extra == \"all\"",
+   "pypdfium2!=4.30.1,<6.0.0,>=4.30.0; extra == \"all\"",
+   "python-docx<2.0.0,>=1.2.0; extra == \"all\"",
+   "python-dotenv~=1.0; extra == \"all\"",
+   "python-oxmsg<0.1.0,>=0.0.2; extra == \"all\"",
+   "python-pptx<2.0.0,>=1.0.2; extra == \"all\"",
+   "qwen-vl-utils>=0.0.11; extra == \"all\"",
+   "rapidocr<4.0.0,>=3.9.1; extra == \"all\"",
+   "rich>=13.0.0; extra == \"all\"",
+   "rtree<2.0.0,>=1.3.0; extra == \"all\"",
+   "scikit-image>=0.19; extra == \"all\"",
+   "scipy<2.0.0,>=1.9.0; extra == \"all\"",
+   "tesserocr<3.0.0,>=2.7.1; extra == \"all\"",
+   "timm<2.0.0,>=1.0.22; extra == \"all\"",
+   "torch<3.0.0,>=2.2.2; extra == \"all\"",
+   "torchvision<1,>=0; extra == \"all\"",
+   "transformers!=5.0.*,!=5.1.*,!=5.10.*,!=5.11.*,!=5.12.*,!=5.13.*,!=5.14.*,!=5.15.*,!=5.2.*,!=5.3.*,!=5.9.*,<6.0.0,>=4.42.0; sys_platform == \"darwin\" and extra == \"all\"",
+   "transformers!=5.0.*,!=5.1.*,!=5.13.0,!=5.2.*,!=5.3.*,<6.0.0,>=4.42.0; sys_platform != \"darwin\" and extra == \"all\"",
+   "tritonclient[grpc]<3.0.0,>=2.65.0; extra == \"all\"",
+   "typer<0.28.0,>=0.19.0; extra == \"all\"",
+   "websockets<18.0,>=14.0; extra == \"all\"",
+   "whisper-s2t-reborn<2.0.0,>=1.8.0; (sys_platform != \"darwin\" or platform_machine != \"arm64\") and extra == \"all\"",
+   "python-dotenv~=1.0; extra == \"cli\"",
+   "rich>=13.0.0; extra == \"cli\"",
+   "typer<0.28.0,>=0.19.0; extra == \"cli\"",
+   "numpy<3.0.0,>=1.24.0; extra == \"convert-core\"",
+   "pillow<14.0.0,>=10.0.0; extra == \"convert-core\"",
+   "rtree<2.0.0,>=1.3.0; extra == \"convert-core\"",
+   "scipy<2.0.0,>=1.9.0; extra == \"convert-core\"",
+   "numpy<3.0.0,>=1.24.0; extra == \"extract-core\"",
+   "pillow<14.0.0,>=10.0.0; extra == \"extract-core\"",
+   "polyfactory>=2.22.2; extra == \"extract-core\"",
+   "rtree<2.0.0,>=1.3.0; extra == \"extract-core\"",
+   "scipy<2.0.0,>=1.9.0; extra == \"extract-core\"",
+   "mlx-whisper>=0.4.3; (python_version >= \"3.10\" and sys_platform == \"darwin\" and platform_machine == \"arm64\") and extra == \"feat-asr-transformers\"",
+   "numba>=0.63.0; extra == \"feat-asr-transformers\"",
+   "openai-whisper>=20250625; extra == \"feat-asr-transformers\"",
+   "torchaudio<3.0.0,>=2.2.2; extra == \"feat-asr-transformers\"",
+   "transformers<6.0.0,>=5.16.0; extra == \"feat-asr-transformers\"",
+   "whisper-s2t-reborn<2.0.0,>=1.8.0; (sys_platform != \"darwin\" or platform_machine != \"arm64\") and extra == \"feat-asr-transformers\"",
+   "docling-core[chunking]<3.0.0,>=2.103.1; extra == \"feat-chunking\"",
+   "easyocr<2.0,>=1.7; extra == \"feat-ocr-easyocr\"",
+   "scikit-image>=0.19; extra == \"feat-ocr-easyocr\"",
+   "ocrmac<2.0.0,>=1.0.0; sys_platform == \"darwin\" and extra == \"feat-ocr-mac\"",
+   "nemotron-ocr>=2.0.0; (python_version == \"3.12\" and sys_platform == \"linux\" and platform_machine == \"x86_64\") and extra == \"feat-ocr-nemotron\"",
+   "rapidocr<4.0.0,>=3.9.1; extra == \"feat-ocr-rapidocr\"",
+   "onnxruntime<1.24,>=1.7.0; python_version < \"3.11\" and extra == \"feat-ocr-rapidocr-onnx\"",
+   "onnxruntime<2.0.0,>=1.24.1; python_version >= \"3.14\" and extra == \"feat-ocr-rapidocr-onnx\"",
+   "onnxruntime<2.0.0,>=1.7.0; (python_version >= \"3.11\" and python_version < \"3.14\") and extra == \"feat-ocr-rapidocr-onnx\"",
+   "rapidocr<4.0.0,>=3.9.1; extra == \"feat-ocr-rapidocr-onnx\"",
+   "tesserocr<3.0.0,>=2.7.1; extra == \"feat-ocr-tesserocr\"",
+   "mlx-whisper>=0.4.3; (python_version >= \"3.10\" and sys_platform == \"darwin\" and platform_machine == \"arm64\") and extra == \"format-audio\"",
+   "numba>=0.63.0; extra == \"format-audio\"",
+   "openai-whisper>=20250625; extra == \"format-audio\"",
+   "whisper-s2t-reborn<2.0.0,>=1.8.0; (sys_platform != \"darwin\" or platform_machine != \"arm64\") and extra == \"format-audio\"",
+   "python-docx<2.0.0,>=1.2.0; extra == \"format-docx\"",
+   "beautifulsoup4<5.0.0,>=4.12.3; extra == \"format-email\"",
+   "mail-parser<5.0.0,>=4.1.4; extra == \"format-email\"",
+   "python-oxmsg<0.1.0,>=0.0.2; extra == \"format-email\"",
+   "beautifulsoup4<5.0.0,>=4.12.3; extra == \"format-html\"",
+   "playwright>=1.58.0; extra == \"format-html-render\"",
+   "defusedxml<0.8.0,>=0.7.1; extra == \"format-iwork\"",
+   "pylatexenc<3.0,>=2.10; extra == \"format-latex\"",
+   "marko<3.0.0,>=2.1.2; extra == \"format-markdown\"",
+   "openpyxl<4.0.0,>=3.1.5; extra == \"format-office\"",
+   "pylatexenc<3.0,>=2.10; extra == \"format-office\"",
+   "python-docx<2.0.0,>=1.2.0; extra == \"format-office\"",
+   "python-pptx<2.0.0,>=1.0.2; extra == \"format-office\"",
+   "odfdo<4.0.0,>=3.22.0; extra == \"format-opendocument\"",
+   "docling-parse<8.0.0,>=7.22.2; extra == \"format-pdf\"",
+   "pypdfium2!=4.30.1,<6.0.0,>=4.30.0; extra == \"format-pdf\"",
+   "docling-parse<8.0.0,>=7.22.2; extra == \"format-pdf-docling\"",
+   "pypdfium2!=4.30.1,<6.0.0,>=4.30.0; extra == \"format-pdf-pypdfium2\"",
+   "pylatexenc<3.0,>=2.10; extra == \"format-pptx\"",
+   "python-pptx<2.0.0,>=1.0.2; extra == \"format-pptx\"",
+   "librosa<2.0.0,>=0.10.0; extra == \"format-video\"",
+   "mlx-whisper>=0.4.3; (python_version >= \"3.10\" and sys_platform == \"darwin\" and platform_machine == \"arm64\") and extra == \"format-video\"",
+   "numba>=0.63.0; extra == \"format-video\"",
+   "openai-whisper>=20250625; extra == \"format-video\"",
+   "resemblyzer<0.2.0,>=0.1.4; extra == \"format-video\"",
+   "scikit-learn<2.0.0,>=1.3.0; extra == \"format-video\"",
+   "soundfile<1.0.0,>=0.12.1; extra == \"format-video\"",
+   "whisper-s2t-reborn<2.0.0,>=1.8.0; (sys_platform != \"darwin\" or platform_machine != \"arm64\") and extra == \"format-video\"",
+   "beautifulsoup4<5.0.0,>=4.12.3; extra == \"format-web\"",
+   "marko<3.0.0,>=2.1.2; extra == \"format-web\"",
+   "openpyxl<4.0.0,>=3.1.5; extra == \"format-xlsx\"",
+   "beautifulsoup4<5.0.0,>=4.12.3; extra == \"format-xml-jats\"",
+   "lxml<7.0.0,>=4.0.0; extra == \"format-xml-jats\"",
+   "beautifulsoup4<5.0.0,>=4.12.3; extra == \"format-xml-uspto\"",
+   "defusedxml<0.8.0,>=0.7.1; extra == \"format-xml-uspto\"",
+   "arelle-release<3.0.0,>=2.38.17; extra == \"format-xml-xbrl\"",
+   "accelerate<2,>=1.0.0; extra == \"models-local\"",
+   "defusedxml<0.8.0,>=0.7.1; extra == \"models-local\"",
+   "docling-ibm-models<5,>=4.0.2; extra == \"models-local\"",
+   "huggingface-hub<3,>=0.23; extra == \"models-local\"",
+   "torch<3.0.0,>=2.2.2; extra == \"models-local\"",
+   "torchvision<1,>=0; extra == \"models-local\"",
+   "onnxruntime-gpu<1.24; (python_version < \"3.11\" and (sys_platform == \"linux\" or sys_platform == \"win32\")) and extra == \"models-onnxruntime\"",
+   "onnxruntime-gpu<2.0.0,>=1.24.1; (python_version >= \"3.14\" and (sys_platform == \"linux\" or sys_platform == \"win32\")) and extra == \"models-onnxruntime\"",
+   "onnxruntime-gpu<2.0.0; (python_version >= \"3.11\" and python_version < \"3.14\" and (sys_platform == \"linux\" or sys_platform == \"win32\")) and extra == \"models-onnxruntime\"",
+   "onnxruntime<1.24; (python_version < \"3.11\" and sys_platform == \"darwin\") and extra == \"models-onnxruntime\"",
+   "onnxruntime<2.0.0,>=1.24.1; (python_version >= \"3.14\" and sys_platform == \"darwin\") and extra == \"models-onnxruntime\"",
+   "onnxruntime<2.0.0; (python_version >= \"3.11\" and python_version < \"3.14\" and sys_platform == \"darwin\") and extra == \"models-onnxruntime\"",
+   "tritonclient[grpc]<3.0.0,>=2.65.0; extra == \"models-remote\"",
+   "accelerate<2.0.0,>=1.2.1; extra == \"models-vlm-inline\"",
+   "einops<1.0.0,>=0.8.1; extra == \"models-vlm-inline\"",
+   "mlx-vlm<1.0.0,>=0.7.0; (python_version >= \"3.10\" and sys_platform == \"darwin\" and platform_machine == \"arm64\") and extra == \"models-vlm-inline\"",
+   "open-clip-torch<4.0.0,>=3.2.0; extra == \"models-vlm-inline\"",
+   "peft>=0.18.1; extra == \"models-vlm-inline\"",
+   "qwen-vl-utils>=0.0.11; extra == \"models-vlm-inline\"",
+   "timm<2.0.0,>=1.0.22; extra == \"models-vlm-inline\"",
+   "transformers!=5.0.*,!=5.1.*,!=5.10.*,!=5.11.*,!=5.12.*,!=5.13.*,!=5.14.*,!=5.15.*,!=5.2.*,!=5.3.*,!=5.9.*,<6.0.0,>=4.42.0; sys_platform == \"darwin\" and extra == \"models-vlm-inline\"",
+   "transformers!=5.0.*,!=5.1.*,!=5.13.0,!=5.2.*,!=5.3.*,<6.0.0,>=4.42.0; sys_platform != \"darwin\" and extra == \"models-vlm-inline\"",
+   "httpx<1.0.0,>=0.28; extra == \"service-client\"",
+   "python-dotenv~=1.0; extra == \"service-client\"",
+   "rich>=13.0.0; extra == \"service-client\"",
+   "typer<0.28.0,>=0.19.0; extra == \"service-client\"",
+   "websockets<18.0,>=14.0; extra == \"service-client\"",
+   "accelerate<2,>=1.0.0; extra == \"standard\"",
+   "beautifulsoup4<5.0.0,>=4.12.3; extra == \"standard\"",
+   "defusedxml<0.8.0,>=0.7.1; extra == \"standard\"",
+   "docling-core[chunking]<3.0.0,>=2.103.1; extra == \"standard\"",
+   "docling-ibm-models<5,>=4.0.2; extra == \"standard\"",
+   "docling-parse<8.0.0,>=7.22.2; extra == \"standard\"",
+   "httpx<1.0.0,>=0.28; extra == \"standard\"",
+   "huggingface-hub<3,>=0.23; extra == \"standard\"",
+   "mail-parser<5.0.0,>=4.1.4; extra == \"standard\"",
+   "marko<3.0.0,>=2.1.2; extra == \"standard\"",
+   "numpy<3.0.0,>=1.24.0; extra == \"standard\"",
+   "openpyxl<4.0.0,>=3.1.5; extra == \"standard\"",
+   "pillow<14.0.0,>=10.0.0; extra == \"standard\"",
+   "polyfactory>=2.22.2; extra == \"standard\"",
+   "pylatexenc<3.0,>=2.10; extra == \"standard\"",
+   "pypdfium2!=4.30.1,<6.0.0,>=4.30.0; extra == \"standard\"",
+   "python-docx<2.0.0,>=1.2.0; extra == \"standard\"",
+   "python-dotenv~=1.0; extra == \"standard\"",
+   "python-oxmsg<0.1.0,>=0.0.2; extra == \"standard\"",
+   "python-pptx<2.0.0,>=1.0.2; extra == \"standard\"",
+   "rapidocr<4.0.0,>=3.9.1; extra == \"standard\"",
+   "rich>=13.0.0; extra == \"standard\"",
+   "rtree<2.0.0,>=1.3.0; extra == \"standard\"",
+   "scipy<2.0.0,>=1.9.0; extra == \"standard\"",
+   "torch<3.0.0,>=2.2.2; extra == \"standard\"",
+   "torchvision<1,>=0; extra == \"standard\"",
+   "typer<0.28.0,>=0.19.0; extra == \"standard\"",
+   "websockets<18.0,>=14.0; extra == \"standard\""
+  ],
+  "recent": [
+   [
+    "2026-10-27T17:13:40",
+    "2.143.1"
+   ],
+   [
+    "2026-10-27T00:00:34",
+    "2.143.0"
+   ],
+   [
+    "2026-10-23T08:20:47",
+    "2.142.1"
+   ],
+   [
+    "2026-10-22T14:29:39",
+    "2.142.0"
+   ],
+   [
+    "2026-10-20T21:28:27",
+    "2.141.0"
+   ],
+   [
+    "2026-10-16T09:01:50",
+    "2.140.0"
+   ]
+  ]
+ }
+}

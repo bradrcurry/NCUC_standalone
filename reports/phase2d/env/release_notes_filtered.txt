@@ -1,0 +1,445 @@
+########## docling-project/docling 2.91.0 -> 2.143.1
+## 2.92.0 (2026-04-29)
+   * Extend the kserve-triton OCR model to have multi-lingual support  ([`8b67fae`]
+## 2.93.0 (2026-05-07)
+   * **vlm:** Upgrade Granite Vision model to 4.1 for table + chart extraction  ([`24f2d14`]
+## 2.94.0 (2026-05-18)
+   * Add image_placeholder and use_markdown_images as fields in the BaseChunkerOptions  ([`5fadc6d`]
+   * Add 2 stage model dowload from hf and call it for threaded layout model.  ([`336f942`]
+## 2.95.0 (2026-05-21)
+   * **html:** Add custom headers support for HTML backend image fetching  ([`0a15088`]
+## 2.96.0 (2026-05-28)
+   * Add threaded docling-parse (v6) PDF backend  ([`3c26f5a`]
+   * Chunk expansion examples  ([`2cea3bb`]
+## 2.97.0 (2026-06-03)
+   * Add email parsing to the backends  ([`b741c4a`]
+   * Row-section support in HTML backend  ([`d9c71cb`]
+## 2.98.0 (2026-06-08)
+   * **service:** Updates for service client, batch endpoint support, and cleanup  ([`b613414`]
+   * Add images_scale for chart extraction and correctly set keep_backend flag in StandardPDFPipeline  ([`37c6a1e`]
+   * Fix copy-paste docstring error in PaginatedDocumentBackend  ([`953b298`]
+## 2.99.0 (2026-06-08)
+   * **service:** Proper failure mode handling and user-interpretable error output  ([`057241c`]
+   * Polish OCR documentation wording  ([`dbae180`]
+## 2.100.0 (2026-06-09)
+   * Add DocLang backend  ([`7c37732`]
+   * Add EPUB document backend with full conversion support  ([`bffe900`]
+   * Propagate the orientation of the TableData  ([`b108ca8`]
+## 2.102.1 (2026-06-12)
+   * **service:** Defaults for image_export_mode  ([`2d2e3dc`]
+## 2.102.2 (2026-06-15)
+   * **service:** Make presigned_url target default on service client, handle HTTP download errors correctly  ([`75733f6`]
+## 2.103.0 (2026-06-17)
+   * Remove the legacy DoclingDocument  ([`147ac25`]
+   * **layout:** Drop PICTURE cluster coinciding with a TABLE  ([`156d854`]
+   * **ocr:** Honor requested languages in RapidOCR model selection  ([`d9ceb41`]
+   * **cli:** Pass accelerator options to VLM pipeline  ([`846f81a`]
+## 2.104.0 (2026-06-19)
+   * Add vLLM support for chandra/glm-ocr + dots bbox fix  ([`2c875ca`]
+   * **xlsx:** Respect page_range in MsExcelDocumentBackend  ([`dc61cdd`]
+## 2.105.0 (2026-06-22)
+   * NVIDIA nemotron-ocr integration  ([`6e4a59b`]
+   * **rapidocr:** Propagate num_threads to OpenVINO backend  ([`733a82e`]
+   * **asciidoc:** Parse table cells with format specifiers  ([`7e0aed9`]
+   * Resolving issue 3655 for rich tables in docx  ([`6fe4fc3`]
+## 2.106.0 (2026-06-23)
+   * Use docling-parse v7  ([`acb156c`]
+## 2.107.0 (2026-06-24)
+   * Structured error categorization and typed backend load errors  ([`4ecde00`]
+   * Improve nemotron's batching and auto-selection  ([`2ec93e1`]
+   * Add OpenDocument backend support and improve ODF image/table handling  ([`e2afe38`]
+   * **docx:** Resolve layout spacer artifacts, missing header images, and metadata extraction  ([`f50c54b`]
+   * **rapidocr:** Propagate num_threads and fix GPU device key for the paddle backend  ([`f4e6a15`]
+## 2.108.0 (2026-07-01)
+   * Add fast ASR backend  ([`ed6a702`]
+   * **md:** Load embedded base64 images in Markdown backend  ([`d876cbc`]
+   * **backend:** Guard optional email and markdown imports for slim installs  ([`2b9fda8`]
+## 2.109.0 (2026-07-03)
+   * Use PP-OCRv6 RapidOCR defaults  ([`01235ce`]
+   * **html:** Parse tables nested inside list items (#3508)  ([`8c162bd`]
+   * **asr:** Document backend selection and WhisperS2T  ([`e0b1ca5`]
+## 2.110.0 (2026-07-04)
+   * Speed up OCR by using OpenCV for dilation  ([`2c47875`]
+## 2.111.0 (2026-07-08)
+   * **msexcel:** Parse native charts into classified pictures  ([`ceeeda9`]
+   * **boxnote:** Add a BoxNote document backend  ([`4b4b9d8`]
+   * **cli:** Extend output formats with chunk in jsonl format  ([`fbd39b8`]
+   * Sanitize subprocess call in tesseract_ocr_cli_model.py  ([`dbaf9ff`]
+   * Guard backend imports to prevent ImportError on slim installs  ([`2ec33bc`]
+   * **deepseekocr:** Fix parse_deepseekocr_markdown Args docstring  ([`d93579a`]
+## 2.112.0 (2026-07-11)
+   * **dclx:** Add DocLang archive input backend  ([`475ce65`]
+   * Unload input backend on pipeline initialization failure  ([`caf6c00`]
+   * **uspto:** Add missing capital X to math-italic entity table  ([`0836f1e`]
+## 2.113.0 (2026-07-14)
+   * **pptx:** Parse native PowerPoint charts as classified pictures with data  ([`3b5891c`]
+   * **asciidoc:** Drop phantom cell from trailing-pipe table rows  ([`f976796`]
+   * **md:** Stop duplicating table cells in the Markdown backend  ([`6cfdc5f`]
+   * **msword:** Preserve cells and merges in DOCX tables with gridBefore rows  ([`1e197a0`]
+## 2.114.0 (2026-07-20)
+   * **msword:** Parse native Word charts as classified pictures with data  ([`26ff0b2`]
+   * **asr:** Add English-only and Distil-Whisper presets to native backend  ([`39b67b6`]
+   * Fix the profiling of NemotronOcrModel  ([`ccd09fb`]
+   * **pptx:** Use a safe XML parser  ([`a71c447`]
+   * Skip empty display formulas in the JATS backend instead of truncating the document  ([`320c517`]
+   * Fall back to default image size for non-numeric AsciiDoc dimensions  ([`e398d5a`]
+   * **vlm:** Use each element's own page for force_backend_text  ([`469e1ad`]
+   * **pptx:** Remove ineffective subtitle label expression  ([`d278116`]
+## 2.115.0 (2026-07-23)
+   * **service-client:** Support generic batch connector sources  ([`4d82545`]
+   * **cli:** Show per-file progress at default verbosity  ([`5ee146c`]
+   * **ocr:** Prefetch EasyOCR models by language  ([`64c0888`]
+   * Add format-specific behavior of table serializers  ([`530d12d`]
+## 2.116.0 (2026-07-29)
+   * Layout-driven OCR pipeline with configurable OCR modes and refactoring of the OCR GT dir structures  ([`9c742b2`]
+   * **uspto:** Guard out-of-range namest in CALS table spans  ([`873f990`]
+   * Cleanup removed examples from nav and fix rendering of Surya OCR example  ([`f8d4528`]
+   * **chunking:** Extend notebook for chunking with OCR text  ([`507cbc0`]
+## 2.117.0 (2026-07-30)
+   * **service datamodels:** Chunking options and targets  ([`0877ac0`]
+   * **tests:** Increase tolerance for fuzzy test on bbox  ([`8f9f2c8`]
+   * **ocr:** Make the OCR render scale configurable instead of hardcoded  ([`e7f9e60`]
+   * Add trivial (pass-through) chunker example  ([`ba8251e`]
+## 2.118.0 (2026-08-03)
+   * Add the ebcdic backend  ([`9bdb2af`]
+   * Refactor RapidOcrModel to support all PP-OCR languages via version/backbone resolution  ([`f7eb9b4`]
+   * **pdf:** Rewind stream inputs in docling-parse  ([`995ae2a`]
+## 2.118.1 (2026-08-07)
+   * **layout:** Normalize hyphenated labels in _build_label_map (#3936)  ([`5a14159`]
+   * Make sure the shapes are rendered in the threaded docling-parse  ([`c79b793`]
+   * **pdf:** Preserve pictures inside table cells  ([`8df76a5`]
+## 2.119.0 (2026-08-10)
+   * **vlm:** Parse Unlimited-OCR grounding output  ([`d4e65ef`]
+## 2.120.0 (2026-08-14)
+   * **cli:** Add --layout-engine and --table-structure-engine  ([`6fee680`]
+   * **cli:** Add --page-range to convert  ([`6c61bee`]
+   * **pptx:** Keep the bbox of shapes positioned at x = 0 EMU  ([`086e965`]
+   * **html:** Stop a header-only rowspan table from crashing the backend  ([`e00be1d`]
+   * **mets-gbs:** Page missing image/coordOCR metadata crashes instead of skipping  ([`df18ae4`]
+## 2.120.2 (2026-08-17)
+   * **md:** Keep the last cell of table rows without a trailing pipe  ([`a4a4556`]
+## 2.120.3 (2026-08-18)
+   * Add coordinate padding to OCRmac results  ([`455fcec`]
+   * Respect DPI in page rendering on ImageBackend  ([`9e974af`]
+   * Do not torch compile models by default  ([`6f6ae4a`]
+## 2.121.0 (2026-08-20)
+   * Extend the PdfPageBackend for better integration with docling-parse and improve the OCR input selection  ([`83fa205`]
+## 2.122.0 (2026-08-25)
+   * Add compact_tables to ConvertDocumentsOptions  ([`e1965bc`]
+   * **iwork:** Recover titles, headings and iWork '09 tables  ([`9e73870`]
+   * **asciidoc:** Stop a dedented list from crashing the backend  ([`72fb46d`]
+   * Skip the native segmented-page decode in full-page OCR mode  ([`963564c`]
+   * **vlm:** Use official Unlimited-OCR prompt  ([`214ac8c`]
+   * Handle various cross-type overlap cleanups in layout processing  ([`d807d37`]
+   * **cli:** Write the --show-layout HTML export as UTF-8  ([`4b74626`]
+   * Speed up layout and table cell matching  ([`6990f2c`]
+## 2.123.0 (2026-08-26)
+   * Default to threaded docling-parse across SDK, CLI, service, and extraction  ([`feb0f26`]
+   * Improvements (layout element shuffling and allow more strategies) in experimental two-stages pipeline + define base prompt as constant  ([`3c77e26`]
+   * **layout:** Nest tables and pictures in form regions  ([`aaa4e28`]
+## 2.124.0 (2026-08-31)
+   * Silence transformers generation-config deprecation warning and add max_new_tokens CLI overrides  ([`01fc722`]
+## 2.125.0 (2026-09-03)
+   * Introduce min-version check for VLM engines (fixes chandra-ocr-v2 MLX)  ([`9876e73`]
+   * **vlm:** Handle tables labeled as forms by Chandra  ([`d6a6de4`]
+   * **html:** Parse tables and captions inside <figure> tags  ([`70eb711`]
+   * Enable CUDA for RapidOCR ONNX Runtime  ([`97bdf30`]
+## 2.126.0 (2026-09-04)
+   * **ocr:** Apply the deprecated force_full_page_ocr flag on assignment (#4082)  ([`cb39dc1`]
+## 2.127.0 (2026-09-14)
+   * **mhtml:** Add MHTML input backend  ([`7e05ed6`]
+   * Canonicalize the OCR languages across all engines according to the BCP-47 standard  ([`9a2d947`]
+   * **html:** Flag pivot-table row headers as row_header, not column_header  ([`5ef4f92`]
+   * **pptx:** Correct paragraph provenance, subtitle labels, and chart caption parenting  ([`1c46705`]
+   * **docx:** Parse table cells wrapped in a content control (#3946)  ([`78caf0a`]
+   * **asciidoc:** Remove dead max_image_data_base64_bytes option  ([`97f73ef`]
+## 2.128.0 (2026-09-16)
+   * Add nvidia/NVIDIA-Nemotron-Parse-2.0 as vlm model  ([`01b5738`]
+   * **pdf:** Refactor the docling-parse backend to remove pypdfium  ([`ca0ecd4`]
+   * Improve Chandra OCR parsing and preserve document structure  ([`b322564`]
+   * **email:** Keep rendered display names parseable and single-line  ([`e8c6092`]
+## 2.129.0 (2026-09-18)
+   * More improvements for chandra ocr parsing  ([`a83926c`]
+   * **html:** Default a zero colspan or rowspan to 1 in HTML tables  ([`6cb036c`]
+   * **backend:** Decode text documents that are not UTF-8  ([`cea4b45`]
+## 2.130.0 (2026-09-22)
+   * **service client:** Omit only unset arguments but keep values set equal to defaults  ([`35c6af5`]
+   * Remove double preset registration of chart extraction  ([`878831c`]
+   * **md:** Honor backslash-escaped pipes in Markdown tables  ([`52e52fd`]
+   * **backend:** Defer the docling-parse import in the PDF backend  ([`1b40928`]
+   * **html:** Emit the <caption> of a table and link it to the TableItem  ([`d6d9da0`]
+   * Force eager attention for Nemotron Parse v2 (#4307)  ([`54c7cf2`]
+   * **docx:** Don't reuse a list group across an intervening table  ([`4141a99`]
+   * **xlsx:** Avoid duplicate sparse table fragments  ([`891de07`]
+   * Skip already downloaded EasyOCR models unless force is set  ([`8522eb7`]
+   * **backend:** Defer pypdfium2 import in office and LaTeX backends  ([`abca4be`]
+   * **ocr:** Fix the dead same-page anchor in OCR.md  ([`6e22317`]
+## 2.131.0 (2026-09-29)
+   * **iwork:** Parse Keynote charts as classified pictures with data  ([`9da6935`]
+   * Clamp oversized table rowspan/colspan to the table size  ([`c5b4429`]
+   * **uspto:** Extract tables in linear time  ([`19e4519`]
+   * **ocr:** Require enable_remote_services for the KServe v2 OCR engine  ([`7d6d0c4`]
+   * **md:** Preserve whitespace around inline emphasis in table cells  ([`d453bb0`]
+   * **latex:** Parse tabular*, tabularx and longtable as tables  ([`20f474b`]
+   * **xlsx:** Keep every message of a threaded comment  ([`62594ff`]
+   * **asciidoc:** Parse nested bullet list items  ([`1d28495`]
+   * **md:** Keep every character-reference spelling of a pipe inside its table cell  ([`2d5c590`]
+   * **backend:** Translate line endings when decoding text from a stream  ([`7928e30`]
+   * **asciidoc:** Skip empty tables after incomplete rows  ([`7e361ab`]
+   * **ocr:** Use configured Tesseract tessdata path  ([`54a6ca4`]
+   * **ocr:** Check ocrmac languages against the configured recognition level  ([`fc4aa7f`]
+   * Example with PaddleOCR-VL structured result adapter  ([`eb17f57`]
+## 2.132.0 (2026-10-01)
+   * **md:** Keep inline code spans inside GFM table cells  ([`ae8db9a`]
+## 2.133.0 (2026-10-03)
+   * **ocr:** Allow configuring RapidOCR model size  ([`a1c5ff2`]
+   * **code-formula:** Keep the extracted text when a batch fails  ([`a25aa1d`]
+   * **latex:** Decode Windows-1252 sources and 8-bit TikZ dependencies  ([`b5aa0ef`]
+## 2.134.0 (2026-10-06)
+   * **docx:** Add use_outline_level_for_headings option to backend  ([`b38ed49`]
+   * **odf:** Respect page_range in ODS and ODP  ([`7bfbdb9`]
+## 2.135.0 (2026-10-07)
+   * **md:** Preserve inline formatting in Markdown table cells  ([`1a264db`]
+   * **html:** Keep the table or image of a list item without text  ([`97307ec`]
+   * **ocr:** Keep tesseract CLI words like "N/A" and numbers verbatim  ([`4faef5b`]
+   * **pptx:** Trim chart data tables to populated rows and cap cell count  ([`e5e109c`]
+   * **html:** Keep HTML comments out of table cell text  ([`3b8db62`]
+   * **asciidoc:** Keep a backslash-escaped pipe inside its table cell  ([`8f6c9ab`]
+   * **models:** Defer the scipy import in the OCR base model  ([`4d4f6f7`]
+   * **ocr:** Scale tesserocr cell confidence to the 0-1 range  ([`64e0737`]
+   * **docs:** Point advanced chunking example link to its generated path  ([`575d891`]
+   * **html:** Close omitted end tags of list items and table cells  ([`1b0db45`]
+   * Fix OpenContracts GIF and remove dead Semantica notebook  ([`f80a79b`]
+## 2.136.0 (2026-10-09)
+   * **ocr:** Do not OCR programmatic text because a vector shape crosses it  ([`c6ef3c4`]
+   * **odf:** Remove the repeated padding of ODS sheets before converting them  ([`3312ed7`]
+   * **pptx:** Respect layout bullet styles  ([`638c43a`]
+   * **html:** Keep the image of a table cell with one plain text run  ([`4f839fe`]
+## 2.137.0 (2026-10-09)
+   * **ocr:** Read PP-OCRv6 languages through rapidocr's list_supported_langs ([`0e1567b`]
+## 2.138.0 (2026-10-12)
+   * **docx:** Emit textboxes in table cells once inside their cell  ([`6bc5770`]
+   * **jats:** Parse ordered lists and list item labels  ([`ad2e0e1`]
+## 2.139.0 (2026-10-14)
+   * Expose max_concurrent_results on ThreadedDoclingParseBackendOptions  ([`ce5621b`]
+   * **iwork:** Read pictures in Numbers table cells  ([`dd477a9`]
+   * **docx:** Keep table rows after a list resumes in a cell  ([`0f23355`]
+   * **md:** Keep the hyperlink of autolinks outside table cells  ([`4757220`]
+   * **email:** Route an Outlook .msg that filetype reports as XLS to the email backend  ([`385ddd4`]
+   * **asciidoc:** Stop an unclosed block delimiter from hanging the parser  ([`2104df5`]
+   * **pdf:** Run threaded pipeline models on long-lived threads  ([`cb1df98`]
+   * **asciidoc:** Keep a table whole across blank and wrapped lines  ([`78d1251`]
+   * **html:** Parse the start of an ordered list by the HTML rules for integers  ([`a057e8d`]
+   * **pdf:** Document parser thread configuration  ([`f951b83`]
+   * **odf:** Cache get_style() lookups in the OpenDocument backend  ([`6329eea`]
+   * **layout:** Move detections to the CPU once before building the output  ([`7e16edc`]
+## 2.140.0 (2026-10-16)
+   * **asciidoc:** Parse bold, italic and monospace in paragraphs  ([`fd24b9e`]
+   * **ocr:** Do not OCR an enclosed region twice  ([`6fadbae`]
+## 2.141.0 (2026-10-20)
+   * Add `nvidia/Nemotron-3.5-Parse` as supported VLM model  ([`2d1d814`]
+   * **iwork:** Apply page_range to Keynote slides  ([`e84e9aa`]
+   * **docx:** Cache style chains and reuse paragraph content (1.6x faster)  ([`7bb935a`]
+## 2.142.0 (2026-10-22)
+   * **nemotron-parse:** Bound work on untrusted model output  ([`3b0f25f`]
+   * Preserve multiline DeepSeek and Unlimited OCR blocks ([`62eeaee`]
+   * **ebcdic:** Report a record length shorter than its layout  ([`6470556`]
+   * Handle truncated PNG chunks in DOCX pictures  ([`10054ec`]
+   * **latex:** Backend updates for better parsing of arxiv papers  ([`29caea8`]
+   * **ocr:** Avoid temporary PNG files in macOS OCR  ([`44c4096`]
+   * **ocr:** Convert PIL crops with numpy.asarray  ([`de7a4ea`]
+## 2.142.1 (2026-10-23)
+   * Clamp page_range bounds to sys.maxsize  ([`0db3aea`]
+## 2.143.0 (2026-10-26)
+   * **ods:** Do not join tables across a blank merged separator row  ([`90661c4`]
+   * **utils:** Split a tuple or range into chunks only once in chunkify  ([`15c67d8`]
+   * **docx:** Leave hidden text out of the default export  ([`36be1d2`]
+## 2.143.1 (2026-10-27)
+   * **table:** Keep OCR word cells in table tokens ([`affa54c`]
+   * **table:** Add OCR cells to table tokens next to native words ([`ce6690b`]
+   * **table:** Read the page's parsed_page for table tokens in full-page OCR ([`a65b29e`]
+   * **pptx:** Count the header row against the chart table cell cap  ([`7331067`]
+   * **ocr:** Pass render resolution to Tesseract CLI  ([`4818833`]
+   * **table:** Skip spatial indexes for empty token inputs ([`103edef`]
+########## docling-project/docling-parse 5.10.1 -> 7.23.1
+## 5.11.0 (2026-05-08)
+   * Rendering of math and latex symbols  ([`ac0a361`]
+   * Locale-independent float parsing (fixes docling#1455)  ([`e56632d`]
+   * **security:** Document security processes  ([`f1316fa`]
+## 6.0.0 (2026-05-11)
+   * Public threaded PDF parser and rendering API  ([`b066b26`]
+   * Upgrade packages for vulnerabilities  ([`1515795`]
+   * Upgraded pillow, requests, pygments, cryptography  ([`a41ef14`]
+   * Public threaded PDF parser and rendering API  ([`b066b26`]
+## 6.1.0 (2026-05-26)
+   * Release unused python memory  ([`537461a`]
+   * Update perf scripts  ([`f53ab21`]
+## 6.2.0 (2026-05-28)
+   * Add materialize_bitmap_bytes flag to skip bitmap byte extraction  ([`918d7b9`]
+## 7.0.0 (2026-06-22)
+   * Improve pages/sec and scalability, new decode configuration shape  ([`1d8f70c`]
+   * improve pages/sec and scalability, new decode configuration shape  ([`1d8f70c`]
+## 7.1.0 (2026-06-26)
+   * Refactoring the parsing of XObjects  ([`163f741`]
+   * Updates for docling-parse v7 usage  ([`a81339e`]
+## 7.2.0 (2026-06-29)
+   * Upgrade bitmap rendering with clipping  ([`b55da56`]
+## 7.3.0 (2026-07-01)
+   * Caching objects  ([`2bc547e`]
+## 7.4.0 (2026-07-01)
+   * Reduce total number of results cached  ([`55d8476`]
+## 7.5.0 (2026-07-03)
+   * Attack embedded fonts  ([`f41aec4`]
+   * Improve font resolver  ([`a7f201f`]
+## 7.6.0 (2026-07-06)
+   * Working on refactoring the parse for shapes  ([`cbe73a8`]
+## 7.7.0 (2026-07-08)
+   * Build wheel for windows arm64  ([`9acdc48`]
+## 7.7.1 (2026-07-10)
+   * Fixing the word extraction with spaces as blockers  ([`66e4c33`]
+   * Arabic pdf-rendering  ([`ff00fcf`]
+## 7.8.0 (2026-07-10)
+   * Adding new top-level methods for page content geometry queries  ([`ef41562`]
+## 7.8.1 (2026-07-20)
+   * Report document load failures instead of deferring them as -1 page count  ([`77eab80`]
+   * Resolve core-14 font aliases to their standard metrics  ([`109ce27`]
+## 7.9.0 (2026-08-04)
+   * Honor /ActualText replacement text of marked-content spans  ([`b1ddc71`]
+   * Resolve core-14 font aliases to their standard metrics (2)  ([`25b9841`]
+   * Comparison with competing packages  ([`481965d`]
+## 7.10.0 (2026-08-05)
+   * Added the rendering-regression with pypdfium  ([`2229782`]
+## 7.11.0 (2026-08-07)
+   * Improve PDF rendering fidelity across color, image, transparency, and writing-mode cases  ([`bc55397`]
+   * Render PDF shadings (sh), parse the full ExtGState, and add rendering quality benchmarks  ([`ee2e265`]
+## 7.12.0 (2026-08-11)
+   * Improving performance and robustness  ([`e955929`]
+   * Avoid 1M cells reserve to reduce memory footprint  ([`e892b85`]
+   * Enable MinGW/GCC build on Windows  ([`83e50c5`]
+## 7.12.1 (2026-08-12)
+   * Make Blend2D font fallback portable across distros  ([`fbb6d9b`]
+## 7.13.0 (2026-08-14)
+   * **render:** Add tiling patterns, clipping, Type3 glyphs and CID text  ([`b425c64`]
+   * Re-sync test data when the pinned dataset revision changes  ([`a06c455`]
+## 7.14.0 (2026-08-18)
+   * **render:** Clip paths, masks, CMYK/Indexed images, font fallback, Symbol brackets  ([`366c913`]
+   * Emit glyph marker instead of fabricated encoding text for symbolic-font cmap misses  ([`13e2ee3`]
+   * Emit glyph marker for glyph-index names instead of leaking them as text  ([`54ad7cc`]
+## 7.15.0 (2026-08-20)
+   * **render:** Clip masks, shading patterns and Coons meshes; CCITT, CMYK-JPEG, tiling-pattern and CJK text fixes  ([`850c3c3`]
+## 7.16.0 (2026-08-25)
+   * Regression-test overhaul, and the parser/renderer fixes it uncovered  ([`0ff4bea`]
+   * Open input PDFs with UTF-8 path semantics on Windows  ([`a006162`]
+## 7.17.0 (2026-09-02)
+   * Optimization of the parse/render with up to 3.84× speedup  ([`0d9cac5`]
+## 7.18.0 (2026-09-08)
+   * Resolve-bookmarks-using-page-aware-PDF-outlines  ([`e6b04ca`]
+## 7.19.0 (2026-09-10)
+   * Adding static page-count methods  ([`b36d823`]
+## 7.19.1 (2026-09-11)
+   * Stray PostScript resource directives no longer poison the next colour operator  ([`38bf252`]
+## 7.20.0 (2026-09-15)
+   * Add-page-range-to-load  ([`52b5d87`]
+   * Answer shape geometry queries in the frame of the text cells  ([`162201f`]
+## 7.21.0 (2026-09-22)
+   * Bbox of brackets, summations, missing font-mappings etc  ([`e64d838`]
+   * Fall back to real metrics when a visible glyph declares zero width  ([`669616c`]
+## 7.22.0 (2026-09-26)
+   * Expose complete AcroForm widget state  ([`824063d`]
+   * Fall back from null cmap mappings  ([`78bfce0`]
+## 7.22.1 (2026-09-28)
+   * Updated the page_item_sanitators/cells.h and its associated ground-truth  ([`96960c3`]
+   * **sanitizer:** Fold curly double quotes to `"`, not `'`  ([`ea4a14d`]
+## 7.22.2 (2026-10-05)
+   * Ignore malformed ToUnicode bfranges instead of reserving ~4G map entries  ([`6d7ccf2`]
+   * Take the pattern name by value in do_pattern_fill  ([`92ee655`]
+   * Read font directory env vars wide on Windows  ([`0c0eff2`]
+   * Translate widget and hyperlink rects to the page boundary  ([`6b5b6fd`]
+## 7.22.3 (2026-10-13)
+   * Unit stroke curves  ([`30ae51f`]
+   * **render:** Decode JBIG2 /Mask stencils  ([`e0e678c`]
+## 7.22.4 (2026-10-21)
+   * Allow Pillow 13  ([`fbe3190`]
+## 7.23.0 (2026-10-22)
+   * Support for py3.15  ([`101de10`]
+## 7.23.1 (2026-10-26)
+   * Transcode non-UTF-8 widget names instead of losing the page  ([`15c3f6a`]
+   * Fail a page whose content the truncated file no longer contains  ([`7b7b273`]
+   * Keep the page when a damaged content stream breaks one operator  ([`1357898`]
+   * Fall back from noncharacter ToUnicode mappings  ([`3c91d2b`]
+   * Treat a space glyph mapped to a control character as a space  ([`6d41900`]
+   * Ignore implausible vertical metrics in a font descriptor  ([`2a9a6f8`]
+   * **render:** Paint Type3 glyphs whose CharProc draws an image  ([`dc69024`]
+   * Update pinned third-party libraries with known CVEs  ([`bbfae48`]
+   * Adding performance numbers  ([`f8512ab`]
+########## docling-project/docling-ibm-models 3.13.2 -> 4.0.4
+## 3.15.0 (2026-08-28)
+   * UnboundLocalError in predict_dummy when no bboxes are detected  ([`6974dfe`]
+   * Cache per-instance logger in _log() to remove millions of get_custom_logger calls  ([`68c83ea`]
+## 4.0.0 (2026-08-28)
+   * Remove unused models  ([`c875daf`]
+   * remove unused models  ([`c875daf`]
+## 4.0.1 (2026-09-01)
+   * **tableformer:** Consolidate post-processing source fixes (#176, #159, #175)  ([`b234bf1`]
+   * **tableformer:** O(1) orphan pdf-cell lookup in recovery fallbacks  ([`bfa5c3c`]
+## 4.0.3 (2026-09-18)
+   * **tableformer:** Downgrade recovered-orphan log messages  ([`2057f3c`]
+########## docling-project/docling-core 2.74.1 -> 2.105.0
+## 2.76.0 (2026-05-18)
+   * Updated the table visualization  ([`b6c3d6f`]
+## 2.77.1 (2026-05-26)
+   * Render RichTableCell descendants inside the cell  ([`01f8d03`]
+## 2.78.0 (2026-05-29)
+   * Support vertical orientation in TableData row/column bounding boxes  ([`c1c9ea8`]
+   * **chunking:** Handle empty TripletTableSerializer output without consuming children  ([`507df71`]
+## 2.83.0 (2026-06-18)
+   * **doclang:** Default `include_version` to `True`  ([`34bd98e`]
+   * Handle page-less documents in table doctags export  ([`8ad52a3`]
+   * Clamp provenance bboxes and DocLang locations to valid page bounds  ([`9dddcf7`]
+## 2.87.1 (2026-07-15)
+   * **chunker:** Preserve table structure across chunks in markdown  ([`7775df1`]
+## 2.88.0 (2026-07-27)
+   * Add enable_chart_tables and traverse_pictures to save_as_markdown  ([`fb9ffbd`]
+   * Lazy load transformers in HybridChunker  ([`9ceb266`]
+## 2.92.0 (2026-08-19)
+   * **chunker:** Forward content layers from serializer params to doc traversal  ([`965a6bb`]
+## 2.94.0 (2026-09-03)
+   * **tokens:** Normalize inverted bbox in get_location instead of asserting  ([`4210158`]
+   * **markdown:** Escape referenced figures' filepaths and ensure cross-platform path handling (Windows / POSIX)  ([`ccdffa7`]
+   * Convert headings to plain text in table cells  ([`bdfca5b`]
+## 2.95.0 (2026-09-04)
+   * Added PdfDestination to PdfTableOfContents  ([`4631492`]
+## 2.96.0 (2026-09-10)
+   * **serializer:** Derive markdown table header rows from column_header flags  ([`9b23d31`]
+   * Reuse table grid during dataframe export  ([`a1945f7`]
+## 2.97.0 (2026-09-16)
+   * **serializer:** Keep row-header rows out of the markdown table header block  ([`b2a768c`]
+## 2.97.2 (2026-09-21)
+   * **doclang:** Honour non-square default_resolution, drop locationless-list artifacts, and scope table-cell text to exclusions  ([`8bba310`]
+## 2.100.0 (2026-10-06)
+   * **serializer:** Render relative hyperlinks with portable separators  ([`cff563f`]
+   * **doclang:** Keep label, provenance, layer and leading text of mixed-content elements  ([`39aec16`]
+   * **chunking:** Make _split_by_doc_items linear in the number of doc items  ([`e551f14`]
+   * Stop building a throwaway serializer for every rich table cell  ([`ed78fd3`]
+## 2.102.0 (2026-10-18)
+   * **doc:** Export field regions and items by default  ([`cbb86ff`]
+   * **serializer:** Repeat the text of a column-spanning RichTableCell in every column  ([`642f20f`]
+   * **chunking:** Make _merge_chunks_with_matching_metadata linear  ([`0a90154`]
+## 2.103.0 (2026-10-19)
+   * **chunker:** Respect contextualized table token limits  ([`2e7f5d5`]
+   * **types_doc:** Deduplicate row indices in TableData.remove_rows  ([`fdc66b3`]
+## 2.103.1 (2026-10-20)
+   * Reject DAG-shaped documents and oversized tables to prevent DoS  ([`67c5109`]
+## 2.105.0 (2026-10-27)
+   * Preserve rich heading context in hierarchical chunks  ([`5634f7c`]
+   * **serializer:** Serialize table footnotes in Markdown and HTML  ([`ba6a6ca`]
+########## pymupdf/PyMuPDF 1.27.2.2 -> 2.0
+## 1.28.0 (2026-06-29)
+   * Support Windows builds with free thread python.
+## 1.28.2 (2026-08-06)
+   * pymupdf.Page.find_tables():
+   * new args `use_layout: bool = True` `union: bool = False` `refine: bool = False`.
+   * Improved speed.
+## 2.0 (2026-10-19)
+   * Remove the debug timing loop from `Annot.update()`.
+   * Warning for use of deprecated `fitz` API now uses `warnings.warn()` with `FutureWarning`.
