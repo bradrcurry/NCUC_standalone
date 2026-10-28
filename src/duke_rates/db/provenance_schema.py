@@ -42,8 +42,14 @@ from __future__ import annotations
 import sqlite3
 
 from duke_rates.db.clue_ledger_schema import CLUE_LEDGER_DDL, CLUE_LEDGER_TABLES, clue_ledger_usage
+from duke_rates.db.discovery_review_schema import (
+    DISCOVERY_REVIEW_DDL,
+    DISCOVERY_REVIEW_TABLES,
+    SEARCH_ATTEMPT_COLUMNS,
+    discovery_review_usage,
+)
 
-PROVENANCE_SCHEMA_VERSION = 3  # 2: rider-summary runs (Phase 2C); 3: clue ledger (Phase 2E D1)
+PROVENANCE_SCHEMA_VERSION = 4  # 2: rider-summary runs (2C); 3: clue ledger (2E D1); 4: review/promotion (2E D2)
 
 # Columns whose changes are audited, per legacy table.
 AUDITED_METADATA_COLUMNS: dict[str, tuple[str, ...]] = {
@@ -123,7 +129,7 @@ PROVENANCE_TABLES: tuple[str, ...] = (
     "metadata_revisions",
     "document_payload_revisions",
     "tariff_charge_revisions",
-) + CLUE_LEDGER_TABLES
+) + CLUE_LEDGER_TABLES + DISCOVERY_REVIEW_TABLES
 
 _ACTOR = "COALESCE((SELECT actor FROM provenance_write_context WHERE id = 1), 'unattributed')"
 _OPERATION = "(SELECT operation_id FROM provenance_write_context WHERE id = 1)"
@@ -761,7 +767,7 @@ def provenance_schema_installed(conn: sqlite3.Connection) -> bool:
 #: Columns added after a schema version shipped: (table, column, type).
 _ADDED_COLUMNS: tuple[tuple[str, str, str], ...] = (
     ("extracted_charges", "table_ref_json", "TEXT"),  # Phase 2B: table/row/col/backend
-)
+) + SEARCH_ATTEMPT_COLUMNS  # Phase 2E D2: pagination outcome of each search
 
 
 def ensure_provenance_schema(conn: sqlite3.Connection) -> None:
@@ -773,6 +779,7 @@ def ensure_provenance_schema(conn: sqlite3.Connection) -> None:
     _widen_target_kinds(conn)
     conn.executescript(PROVENANCE_DDL)
     conn.executescript(CLUE_LEDGER_DDL)
+    conn.executescript(DISCOVERY_REVIEW_DDL)
     for table, column, typedef in _ADDED_COLUMNS:
         present = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
         if column not in present:
@@ -815,6 +822,7 @@ def provenance_usage(conn: sqlite3.Connection) -> dict[str, int]:
         else 0,
         "overrides": q("SELECT COUNT(*) FROM charge_overrides").fetchone()[0],
         **clue_ledger_usage(conn),
+        **discovery_review_usage(conn),
     }
 
 

@@ -14,6 +14,12 @@ Outcomes:
 Only ``hits`` and ``no_results`` count as "already searched": failed and
 incomplete attempts never suppress a retry.
 
+From schema v4 (Phase 2E D2) a portal search also records how it stopped:
+``stop_reason`` (``last_page``, ``stale_grid``, ``blocked_pagination``, ...),
+``pages_reached`` / ``pages_total`` and the portal's own ``items_reported``,
+plus ``filter_verified`` for filtered searches. The outcome then comes from the
+searcher's stop reason, not from whether the result cap was reached.
+
 The ledger only records. It never changes what a searcher does or returns.
 """
 
@@ -70,6 +76,23 @@ class Attempt:
     outcome: str | None = None
     pages_reached: int | None = None
 
+    stop_reason: str | None = None
+    pages_total: int | None = None
+    items_reported: int | None = None
+    filter_verified: bool | None = None
+
+    def finish_outcome(self, outcome: Any, *, refs: list | None = None) -> None:
+        """Record a ``DocParamSearchOutcome``: its own stop reason decides the outcome."""
+        self.result_count = len(outcome.results)
+        self.result_refs = list(refs if refs is not None else
+                                [r.document_id or r.document_detail_url for r in outcome.results])
+        self.outcome = outcome.ledger_outcome
+        self.stop_reason = outcome.stop_reason
+        self.pages_reached = outcome.pages_reached
+        self.pages_total = outcome.pages_total
+        self.items_reported = outcome.items_reported
+        self.filter_verified = outcome.filter_verified
+
     def finish(self, results: list | None = None, *, refs: list | None = None, cap: int | None = None,
                pages_reached: int | None = None) -> None:
         count = len(results) if results is not None else len(refs or [])
@@ -88,6 +111,14 @@ class SearchLedger:
     def __init__(self, conn: sqlite3.Connection, *, created_by: str):
         self.conn = conn
         self.created_by = created_by
+        columns = {row[1] for row in conn.execute("PRAGMA table_info(search_attempts)")}
+        self.records_stop_reason = "stop_reason" in columns  # schema v4
+
+    def completed_hashes(self, channel: str) -> set[str]:
+        """``params_hash`` of every completed search on a channel (for planning without a query each)."""
+        return {row[0] for row in self.conn.execute(
+            "SELECT DISTINCT params_hash FROM search_attempts WHERE channel = ? AND outcome IN ('hits', 'no_results')",
+            (channel,))}
 
     def prior_completed(self, channel: str, params: dict[str, Any]) -> sqlite3.Row | None:
         _, digest = canonical_params(channel, params)
@@ -115,22 +146,34 @@ class SearchLedger:
         try:
             yield attempt
         except BaseException as exc:
-            self._close(attempt.id, classify_error(exc), None, [], None, f"{type(exc).__name__}: {exc}"[:500])
+            portal_outcome = getattr(exc, "outcome", None)  # PortalSearchError carries its outcome
+            if portal_outcome is not None:
+                attempt.finish_outcome(portal_outcome, refs=[])
+                self._close(attempt, portal_outcome.ledger_outcome, f"{type(exc).__name__}: {exc}"[:500])
+            else:
+                attempt.result_count, attempt.result_refs = None, []
+                self._close(attempt, classify_error(exc), f"{type(exc).__name__}: {exc}"[:500])
             raise
         outcome = attempt.outcome or ("incomplete" if attempt.result_count is None else "hits")
-        self._close(attempt.id, outcome, attempt.result_count, attempt.result_refs or [],
-                    attempt.pages_reached, None)
+        self._close(attempt, outcome, None)
 
-    def _close(self, attempt_id: int, outcome: str, count: int | None, refs: list,
-               pages_reached: int | None, error: str | None) -> None:
+    def _close(self, attempt: Attempt, outcome: str, error: str | None) -> None:
         self.conn.execute(
             """
             UPDATE search_attempts SET finished_at = ?, outcome = ?, result_count = ?, result_refs_json = ?,
                    pages_reached = ?, error_detail = ?
             WHERE id = ?
             """,
-            (_now(), outcome, count, json.dumps(refs, default=str), pages_reached, error, attempt_id),
+            (_now(), outcome, attempt.result_count, json.dumps(attempt.result_refs or [], default=str),
+             attempt.pages_reached, error, attempt.id),
         )
+        if self.records_stop_reason:
+            self.conn.execute(
+                "UPDATE search_attempts SET stop_reason = ?, pages_total = ?, items_reported = ?, "
+                "filter_verified = ? WHERE id = ?",
+                (attempt.stop_reason, attempt.pages_total, attempt.items_reported,
+                 None if attempt.filter_verified is None else int(attempt.filter_verified), attempt.id),
+            )
         self.conn.commit()
 
 
@@ -143,4 +186,9 @@ def search_ledger_summary(conn: sqlite3.Connection) -> dict:
             for r in q("SELECT channel, outcome, COUNT(*) FROM search_attempts GROUP BY 1, 2 ORDER BY 1, 2")
         ],
         "distinct_param_hashes": q("SELECT COUNT(DISTINCT params_hash) FROM search_attempts").fetchone()[0],
+        "by_stop_reason": [
+            dict(zip(("channel", "stop_reason", "n"), r))
+            for r in q("SELECT channel, stop_reason, COUNT(*) FROM search_attempts WHERE stop_reason IS NOT NULL "
+                       "GROUP BY 1, 2 ORDER BY 1, 2")
+        ] if {row[1] for row in q("PRAGMA table_info(search_attempts)")} >= {"stop_reason"} else [],
     }
