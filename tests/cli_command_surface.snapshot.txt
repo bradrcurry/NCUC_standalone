@@ -261,11 +261,15 @@ provenance extract-candidates
 provenance history
 provenance issues
 provenance migrate
+provenance plan-network-searches
 provenance promote
 provenance reconcile-effective-dates
 provenance reject
 provenance resolve-gaps-local
+provenance retrieve-remote-candidates
+provenance review-remote-candidate
 provenance rollback
+provenance run-network-searches
 provenance search-ledger
 provenance typed-gaps
 provenance unsupported-charges

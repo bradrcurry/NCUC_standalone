@@ -610,3 +610,131 @@ def reconcile_effective_dates_cmd(
     _write_json(json_out, report)
     _echo({k: report[k] for k in ("versions_assessed", "by_status", "bound_violations")}
           | {"conflicts": len(report["summary"]["conflicts"])})
+
+
+def _plan_conn(db: Path) -> sqlite3.Connection:
+    conn = _open(db, write=False)
+    if not conn.execute("SELECT 1 FROM sqlite_master WHERE name = 'remote_document_candidates'").fetchone():
+        raise typer.BadParameter(f"{db} has no D2 tables; run `provenance migrate` on it first")
+    return conn
+
+
+@provenance_app.command("plan-network-searches")
+def plan_network_searches_cmd(
+    db: Path = _DB_OPTION,
+    explicit_only: bool = typer.Option(False, "--explicit-only", help="Leave out inferred gaps."),
+    blank_order_clues: bool = typer.Option(True, "--blank-order-clues/--no-blank-order-clues",
+                                           help="Also plan order searches for 'Order dated ____' sheets."),
+    json_out: Path | None = typer.Option(None, "--json", help="Also write every planned query here."),
+) -> None:
+    """Plan network searches for gaps the local archive could not close (read-only; no request is made)."""
+    from duke_rates.historical.ncuc import remote_discovery as rd
+
+    plan = rd.plan_network_searches(_plan_conn(db), include_blank_order_clues=blank_order_clues,
+                                    include_inferred=not explicit_only)
+    _write_json(json_out, plan)
+    _echo({k: v for k, v in plan.items() if k != "queries"})
+
+
+@provenance_app.command("run-network-searches")
+def run_network_searches_cmd(
+    db: Path = _DB_OPTION,
+    allow_production: bool = _ALLOW_PROD,
+    by: str = typer.Option(..., help="Who is running the searches."),
+    max_queries: int = typer.Option(10, "--max-queries", min=1, max=200, help="Stop after this many queries."),
+    channel: list[str] = typer.Option(["portal_orders", "portal_params", "zoom"], "--channel"),
+    explicit_only: bool = typer.Option(False, "--explicit-only"),
+    live: bool = typer.Option(False, "--live", help="Required: this logs in to the NCUC portal and sends requests."),
+    json_out: Path | None = typer.Option(None, "--json"),
+) -> None:
+    """Run planned searches against the NCUC portal / public search (bounded, ledgered, stops when blocked)."""
+    from duke_rates.historical.ncuc import remote_discovery as rd
+
+    conn = _ledger_conn(db, allow_production)
+    plan = rd.plan_network_searches(conn, include_inferred=not explicit_only)
+    pending = [q for q in plan["queries"] if q["status"] == "planned" and q["channel"] in channel][:max_queries]
+    if not live:
+        _echo({"dry_run": True, "would_run": len(pending), "queries": [
+            {k: q[k] for k in ("channel", "params", "params_hash")} | {"targets": len(q["targets"])} for q in pending]})
+        return
+
+    from duke_rates.historical.ncuc.discovery import NcucDiscoveryService
+    from duke_rates.historical.ncuc.document_param_search import DocumentParamSearcher
+    from duke_rates.historical.ncuc.session import close_authenticated_context, create_authenticated_context
+    from duke_rates.models.ncuc import NcucSearchQuery
+
+    settings = get_settings()
+    pw = ctx = page = None
+    if any(q["channel"] != "zoom" for q in pending):
+        pw, ctx, page = create_authenticated_context(settings)
+    searcher = DocumentParamSearcher(settings)
+    discovery = NcucDiscoveryService(settings)
+    try:
+        stats = rd.execute_plan(
+            conn, plan, created_by=by, max_queries=max_queries, channels=tuple(channel),
+            portal_search=lambda p: searcher.search_with_outcome(page, **p, max_results=500),
+            public_search=lambda p: list(discovery.search_public_site(
+                NcucSearchQuery(query_text=p["query_text"], docket_hint=p.get("docket_hint")), max_results=50)),
+        )
+    finally:
+        discovery.close()
+        if pw is not None:
+            close_authenticated_context(pw, ctx)
+    report = {"stats": stats, "summary": rd.discovery_summary(conn)}
+    _write_json(json_out, report)
+    _echo(report)
+
+
+@provenance_app.command("retrieve-remote-candidates")
+def retrieve_remote_candidates_cmd(
+    db: Path = _DB_OPTION,
+    allow_production: bool = _ALLOW_PROD,
+    candidate_id: list[int] = typer.Option(..., "--id", help="Remote candidate ids (repeatable)."),
+    dest: Path = typer.Option(Path("data/historical/ncuc/remote_candidates"), "--dest"),
+    live: bool = typer.Option(False, "--live", help="Required: this logs in to the NCUC portal and downloads."),
+) -> None:
+    """Download listed candidates once (dedup by URL and SHA-256) and read their own pages."""
+    from duke_rates.historical.ncuc import remote_discovery as rd
+
+    conn = _ledger_conn(db, allow_production)
+    if not live:
+        rows = conn.execute(
+            f"SELECT id, kind, status, view_file_urls_json FROM remote_document_candidates WHERE id IN "
+            f"({','.join('?' * len(candidate_id))})", candidate_id).fetchall()
+        _echo({"dry_run": True, "candidates": [dict(r) for r in rows]})
+        return
+    from duke_rates.historical.ncuc.session import (
+        close_authenticated_context,
+        create_authenticated_context,
+        download_view_file,
+    )
+
+    pw, ctx, page = create_authenticated_context(get_settings())
+    try:
+        stats = rd.retrieve_and_check(conn, candidate_id, dest_dir=dest,
+                                      download=lambda url, path: download_view_file(page, url, path))
+    finally:
+        close_authenticated_context(pw, ctx)
+    _echo(stats)
+
+
+@provenance_app.command("review-remote-candidate")
+def review_remote_candidate_cmd(
+    db: Path = _DB_OPTION,
+    allow_production: bool = _ALLOW_PROD,
+    candidate_id: int = typer.Option(..., "--id"),
+    decision: str = typer.Option(..., "--decision", help="linked | rejected"),
+    by: str = typer.Option(..., "--by", help="Reviewer name."),
+    version_id: int | None = typer.Option(None, "--version-id", help="Tariff version the document belongs to."),
+    note: str = typer.Option("", "--note"),
+) -> None:
+    """Record a reviewer's decision on a retrieved candidate (the only way to link one)."""
+    from duke_rates.historical.ncuc import remote_discovery as rd
+
+    conn = _ledger_conn(db, allow_production)
+    try:
+        rd.review_candidate(conn, candidate_id, decision=decision, reviewer=by, note=note, version_id=version_id)
+    except ValueError as exc:
+        raise typer.BadParameter(str(exc)) from exc
+    _echo(dict(conn.execute("SELECT id, kind, status, linked_version_id, reviewed_by FROM remote_document_candidates "
+                            "WHERE id = ?", (candidate_id,)).fetchone()))
