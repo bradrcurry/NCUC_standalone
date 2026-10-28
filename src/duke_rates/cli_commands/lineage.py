@@ -1199,9 +1199,34 @@ def rebind_historical_page_range(
     requeue: bool = typer.Option(False, "--requeue", help="Queue the document for re-extraction after rebinding."),
     requested_by: str = typer.Option("operator", "--requested-by", help="Queue requester label when --requeue is used."),
     queue_priority: int = typer.Option(90, "--queue-priority", help="Queue priority when --requeue is used."),
+    allow_charge_deletion: bool = typer.Option(
+        False, "--allow-charge-deletion",
+        help="Required when the version has tariff_charges: this command deletes them. "
+             "Prefer `provenance propose-rebind`, which keeps them until a replacement is promoted.",
+    ),
 ) -> None:
-    """Update an existing historical document's page bounds and optionally requeue it."""
+    """Update an existing historical document's page bounds and optionally requeue it.
+
+    Deletes the document's versions' tariff_charges, processing runs and parse
+    logs. It refuses to do that silently: with charges present it needs
+    --allow-charge-deletion.
+    """
     _, repository = _bootstrap()
+    with repository._connect() as conn:
+        charges = conn.execute(
+            "SELECT COUNT(*) FROM tariff_charges WHERE version_id IN "
+            "(SELECT id FROM tariff_versions WHERE historical_document_id = ?)",
+            (historical_document_id,),
+        ).fetchone()[0]
+    if charges and not allow_charge_deletion:
+        typer.echo(
+            f"Refusing: rebinding historical document {historical_document_id} would delete {charges} "
+            "tariff_charges row(s). Re-run with --allow-charge-deletion, or use "
+            "`provenance propose-rebind` (staged, keeps charges until a validated replacement is promoted)."
+        )
+        raise typer.Exit(1)
+    if charges:
+        typer.echo(f"Deleting {charges} tariff_charges row(s) of historical document {historical_document_id}.")
     try:
         rebound = repository.rebind_historical_page_range(
             historical_document_id,

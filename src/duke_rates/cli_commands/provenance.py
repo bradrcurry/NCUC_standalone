@@ -341,9 +341,24 @@ def promote_cmd(
     acknowledge_review: bool = typer.Option(
         False, "--acknowledge-review", help="Promote although the run has findings that need review."
     ),
+    acknowledge_redline: bool = typer.Option(
+        False, "--acknowledge-redline",
+        help="Promote although the version's bound pages carry redline markup or a redline-duplicate assertion.",
+    ),
 ) -> None:
     """Make a reviewed candidate run the active result."""
     conn = _open(db, write=not dry_run, allow_production=allow_production)
+    target = conn.execute("SELECT target_kind, target_id FROM extraction_runs WHERE id = ?", (run_id,)).fetchone()
+    if not dry_run and target and target[0] == "tariff_version" and not acknowledge_redline \
+            and conn.execute("SELECT 1 FROM sqlite_master WHERE name = 'document_assertions'").fetchone():
+        from duke_rates.historical.ncuc.document_promotion import redline_promotion_block
+
+        block = redline_promotion_block(conn, target[1])
+        if block:
+            raise typer.BadParameter(
+                f"run {run_id} targets version {target[1]}, whose source is a redline ({block['reason']}); "
+                "struck values would become active charges. Pass --acknowledge-redline only after reviewing them."
+            )
     _echo(
         pv.promote(
             conn,
@@ -738,3 +753,130 @@ def review_remote_candidate_cmd(
         raise typer.BadParameter(str(exc)) from exc
     _echo(dict(conn.execute("SELECT id, kind, status, linked_version_id, reviewed_by FROM remote_document_candidates "
                             "WHERE id = ?", (candidate_id,)).fetchone()))
+
+
+def _promotion_conn(db: Path, allow_production: bool) -> sqlite3.Connection:
+    conn = _open(db, write=True, allow_production=allow_production)
+    if not conn.execute("SELECT 1 FROM sqlite_master WHERE name = 'promotion_proposals'").fetchone():
+        raise typer.BadParameter(f"{db} has no promotion tables; run `provenance migrate` on it first")
+    return conn
+
+
+@provenance_app.command("propose-rebind")
+def propose_rebind_cmd(
+    db: Path = _DB_OPTION,
+    allow_production: bool = _ALLOW_PROD,
+    historical_document_id: int = typer.Option(..., "--historical-document-id"),
+    start_page: int = typer.Option(..., "--start-page", min=1),
+    end_page: int = typer.Option(..., "--end-page", min=1),
+    by: str = typer.Option(..., "--by", help="Proposer."),
+    evidence: str = typer.Option("{}", "--evidence", help="JSON: gap / candidate / clue ids this rests on."),
+) -> None:
+    """Propose binding a document to the page run that holds its sheet (checks run; nothing changes)."""
+    from duke_rates.historical.ncuc import document_promotion as dp
+
+    conn = _promotion_conn(db, allow_production)
+    _echo(dp.propose(conn, "rebind_page_range", historical_document_id, proposed_by=by,
+                     params={"start_page": start_page, "end_page": end_page}, evidence=json.loads(evidence)))
+
+
+@provenance_app.command("propose-redline-duplicate")
+def propose_redline_duplicate_cmd(
+    db: Path = _DB_OPTION,
+    allow_production: bool = _ALLOW_PROD,
+    historical_document_id: int = typer.Option(..., "--historical-document-id"),
+    start_page: int = typer.Option(..., "--start-page", min=1, help="The redline page run."),
+    end_page: int = typer.Option(..., "--end-page", min=1),
+    duplicate_of: int = typer.Option(..., "--duplicate-of", help="Historical document holding the clean sheet."),
+    by: str = typer.Option(..., "--by"),
+    evidence: str = typer.Option("{}", "--evidence"),
+) -> None:
+    """Propose recording that a span is the redline of a sheet held clean elsewhere."""
+    from duke_rates.historical.ncuc import document_promotion as dp
+
+    conn = _promotion_conn(db, allow_production)
+    _echo(dp.propose(conn, "mark_redline_duplicate", historical_document_id, proposed_by=by,
+                     params={"start_page": start_page, "end_page": end_page,
+                             "duplicate_of_historical_document_id": duplicate_of},
+                     evidence=json.loads(evidence)))
+
+
+@provenance_app.command("approve-proposal")
+def approve_proposal_cmd(
+    db: Path = _DB_OPTION,
+    allow_production: bool = _ALLOW_PROD,
+    proposal_id: int = typer.Option(..., "--proposal-id"),
+    by: str = typer.Option(..., "--by", help="Reviewer (not the proposer)."),
+    note: str = typer.Option(..., "--note", help="What was reviewed."),
+) -> None:
+    """Approve a proposal whose blocking checks passed."""
+    from duke_rates.historical.ncuc import document_promotion as dp
+
+    conn = _promotion_conn(db, allow_production)
+    try:
+        dp.approve(conn, proposal_id, approved_by=by, note=note)
+    except dp.PromotionError as exc:
+        raise typer.BadParameter(str(exc)) from exc
+    _echo(dict(conn.execute("SELECT id, state, approved_by FROM promotion_proposals WHERE id = ?",
+                            (proposal_id,)).fetchone()))
+
+
+@provenance_app.command("reject-proposal")
+def reject_proposal_cmd(
+    db: Path = _DB_OPTION,
+    allow_production: bool = _ALLOW_PROD,
+    proposal_id: int = typer.Option(..., "--proposal-id"),
+    by: str = typer.Option(..., "--by"),
+    note: str = typer.Option(..., "--note"),
+) -> None:
+    """Record that a proposal was reviewed and will not be applied."""
+    from duke_rates.historical.ncuc import document_promotion as dp
+
+    conn = _promotion_conn(db, allow_production)
+    try:
+        dp.reject(conn, proposal_id, by=by, note=note)
+    except dp.PromotionError as exc:
+        raise typer.BadParameter(str(exc)) from exc
+    _echo({"proposal_id": proposal_id, "state": "rejected"})
+
+
+@provenance_app.command("apply-proposal")
+def apply_proposal_cmd(
+    db: Path = _DB_OPTION,
+    allow_production: bool = _ALLOW_PROD,
+    proposal_id: int = typer.Option(..., "--proposal-id"),
+    by: str = typer.Option(..., "--by"),
+) -> None:
+    """Apply an approved proposal: re-check, snapshot, change, snapshot (one transaction; charges kept)."""
+    from duke_rates.historical.ncuc import document_promotion as dp
+
+    conn = _promotion_conn(db, allow_production)
+    try:
+        _echo(dp.apply(conn, proposal_id, applied_by=by))
+    except dp.PromotionError as exc:
+        raise typer.BadParameter(str(exc)) from exc
+
+
+@provenance_app.command("rollback-proposal")
+def rollback_proposal_cmd(
+    db: Path = _DB_OPTION,
+    allow_production: bool = _ALLOW_PROD,
+    proposal_id: int = typer.Option(..., "--proposal-id"),
+    by: str = typer.Option(..., "--by"),
+) -> None:
+    """Restore the rows an applied proposal changed (refuses while a later charge promotion is in place)."""
+    from duke_rates.historical.ncuc import document_promotion as dp
+
+    conn = _promotion_conn(db, allow_production)
+    try:
+        _echo(dp.rollback(conn, proposal_id, by=by))
+    except dp.PromotionError as exc:
+        raise typer.BadParameter(str(exc)) from exc
+
+
+@provenance_app.command("proposals")
+def proposals_cmd(db: Path = _DB_OPTION) -> None:
+    """List promotion proposals and their states."""
+    from duke_rates.historical.ncuc import document_promotion as dp
+
+    _echo(dp.proposals_summary(_open(db, write=False)))
