@@ -1,0 +1,1318 @@
+version: 1
+transcribed_by: Claude (assistant), 2026-10-28, from rendered PDF page images
+verified_from: 'page image: top 24 % and bottom 22 % bands at 100 dpi (render via bench/clues/render_pages.py --bands)'
+scope:
+- revision
+- supersedes
+- effective_date
+- docket (rate-sheet footer)
+- order_date (rate-sheet footer)
+sampling: bench/clues/select_sample.py, seed 20261028, stratified
+documents:
+- sample: 1
+  hd_id: 1031
+  family_key: nc-progress-leaf-718
+  source_pdf: data\historical\ncuc\e-2-sub-1300\a02cfe2f-7950-4b05-95aa-41eacd45fa88.pdf
+  sha256: 88e61d14c2e19ac99becec4eeb8f6dfe94e1f2250152f65bab299934602dd5f0
+  page: 1
+  strata:
+  - dep_nonresidential
+  - no_clues
+  sheet_of_family: false
+  notes: NCUC order (caption "DOCKET NO. E-2, SUB 1300"); not a tariff sheet. No in-scope clue.
+  clues: []
+- sample: 2
+  hd_id: 7378
+  family_key: nc-progress-leaf-501
+  source_pdf: data\historical\ncuc\e-2-sub-1107\799dff1e-ce9e-4e73-a287-e53d08bc93e7.pdf
+  sha256: a4850072237e9db7195917622402699ef03e72c4f0220597ff7c2dc2c7c98dde
+  page: 59
+  strata:
+  - dep_residential
+  - historical
+  - bundled
+  - no_clues
+  sheet_of_family: false
+  notes: McGee Workpaper 9 (fuel workpaper), "Docket No. E-2, Sub 1107" is a body caption. No in-scope clue.
+  clues: []
+- sample: 3
+  hd_id: 3687
+  family_key: nc-progress-leaf-602
+  source_pdf: C:\Python\Duke\Standalone\data\historical\ncuc\e-2-sub-1300-sept2023\7f394a37-a20d-4da5-b97d-0035c9d9c0c0.pdf
+  sha256: f8216aed05015a20dcc06e177fe51f32322e5a3932d2fb4a2ea2d0b0900e2bb6
+  page: 154
+  strata:
+  - dep_rider
+  - bundled
+  sheet_of_family: true
+  notes: Redline of JAA leaf 602. The inserted header/footer text is underlined red; "RR-24" and "RIDER JAA-6A Sheet 1 of 1" struck. Full-page
+    check - a struck old footer sits mid-page (added after the band-only pass missed it).
+  clues:
+  - kind: revision
+    text: NC Original Leaf No. 602
+    value: NC:leaf-602:rev-0
+  - kind: supersedes
+    text: Superseding NC Rider JAA-6A
+    value: schedule:JAA-6A
+  - kind: revision
+    text: NC Original Leaf No. 602
+    value: NC:leaf-602:rev-0
+  - kind: effective_date
+    text: Effective for bills rendered on and after October 1, 2023
+    value: '2023-10-01'
+  - kind: docket
+    text: NCUC Docket No. E-2, Sub 1300
+    value: E-2 Sub 1300
+  - kind: order_date
+    text: August 18, 2023
+    value: '2023-08-18'
+  - kind: supersedes
+    text: Supersedes Schedule JAA-6
+    value: schedule:JAA-6
+    struck: true
+  - kind: effective_date
+    text: Effective for service rendered on and after March 1, 2022
+    value: '2022-03-01'
+    struck: true
+  - kind: docket
+    text: NCUC Docket No. E-2, Subs 1219
+    value: E-2 Sub 1219
+    struck: true
+  - kind: docket
+    text: '1280'
+    value: E-2 Sub 1280
+    struck: true
+- sample: 4
+  hd_id: 7612
+  family_key: nc-progress-rider-RIDERSCR1
+  source_pdf: data\historical\ncuc\e-7-sub-1243\4e0c2c78-3f6f-47b5-8ae0-25aed12fe82f.pdf
+  sha256: d42c8e6a3500f4119a1cedd6bc06c6e07bce3b470ddd7aa5c06732026ea5e192
+  page: 71
+  strata:
+  - dep_rider
+  - bundled
+  notes: Rider SCR-1 sheet "RR-35", "Sheet 1 of 1"; no revision/supersedes/effective/footer docket printed. Body cites Docket No. E-2, Sub 1219.
+    Full-page check - the footer is printed mid-page and a body sentence restates the effective date (added after the band-only pass missed them).
+  clues:
+  - kind: effective_date
+    text: Effective for service rendered on and after June 1, 2021
+    value: '2021-06-01'
+    role: body
+  - kind: effective_date
+    text: Effective for service rendered on and after June 1, 2021
+    value: '2021-06-01'
+  - kind: docket
+    text: NCUC Docket No. E-2, Subs 1219
+    value: E-2 Sub 1219
+  - kind: docket
+    text: '1262'
+    value: E-2 Sub 1262
+- sample: 5
+  hd_id: 460
+  family_key: nc-carolinas-rider-CEI
+  source_pdf: data\raw\historical\ncuc\e-7\e-7-nodate-dec-dep-compliance-tariffs-rider-clean-energy-impact.pdf
+  sha256: 6928831501fdd4b2e07fa8061a41f0dcbabfd30f8f69f376b3fde2d0e63be062
+  page: 10
+  strata:
+  - dec_rider
+  sheet_of_family: true
+  clues:
+  - kind: revision
+    text: NC Original Leaf No. 242
+    value: NC:leaf-242:rev-0
+  - kind: revision
+    text: NC Original Leaf No. 242
+    value: NC:leaf-242:rev-0
+  - kind: effective_date
+    text: Effective for service rendered on and after January 15, 2025
+    value: '2025-01-15'
+  - kind: docket
+    text: NCUC Docket No. E-7, Sub 1288
+    value: E-7 Sub 1288
+  - kind: order_date
+    text: January 15, 2025
+    value: '2025-01-15'
+- sample: 6
+  hd_id: 478
+  family_key: nc-carolinas-rider-STS
+  source_pdf: data\historical\ncuc\e-7-sub-1243\d9c03aa1-3e27-4c1f-a967-8a09b6eb1316.pdf
+  sha256: 32aa263f82a1558655ec9855ece2df0a47ca0921f8e8b053db82d7598f971eac
+  page: 2
+  strata:
+  - dec_rider
+  - redline
+  sheet_of_family: true
+  notes: Fingerprint flags this PDF as redline; this page shows no red/struck text. Full-page check - body sentence states the rate effective
+    date (January 1, 2025), distinct from the sheet footer date.
+  clues:
+  - kind: revision
+    text: NC Eleventh Revised Leaf No. 133
+    value: NC:leaf-133:rev-11
+  - kind: supersedes
+    text: Superseding NC Tenth Revised Leaf No. 133
+    value: NC:leaf-133:rev-10
+  - kind: revision
+    text: NC Eleventh Revised Leaf No. 133
+    value: NC:leaf-133:rev-11
+  - kind: effective_date
+    text: Effective for service on and after July 1, 2025
+    value: '2025-07-01'
+  - kind: docket
+    text: NCUC Docket No. E-7, Sub 1243
+    value: E-7 Sub 1243
+  - kind: order_date
+    text: July 13, 2021
+    value: '2021-07-13'
+  - kind: effective_date
+    text: Effective for service rendered on and after January 1, 2025
+    value: '2025-01-01'
+    role: body
+- sample: 7
+  hd_id: 7675
+  family_key: nc-carolinas-rider-EDIT4
+  source_pdf: data\historical\ncuc\e-7-sub-1146\2b313fc1-fca0-4b0e-8968-62d470550b16.pdf
+  sha256: e70823224a32a599a83dd6bb730dbc737c392cc169d7fc37f065f8f8d0d09c80
+  page: 6
+  strata:
+  - dec_rider
+  - redline
+  sheet_of_family: true
+  notes: Full-page check - body sentence states the rate effective date.
+  clues:
+  - kind: revision
+    text: North Carolina First Revised Leaf No. 131
+    value: NC:leaf-131:rev-1
+  - kind: supersedes
+    text: Superseding North Carolina Original Leaf No. 131
+    value: NC:leaf-131:rev-0
+  - kind: revision
+    text: North Carolina First Revised Leaf No. 131
+    value: NC:leaf-131:rev-1
+  - kind: effective_date
+    text: Effective for service on and after October 1, 2021
+    value: '2021-10-01'
+  - kind: docket
+    text: NCUC Docket No. E-7, Sub 1253
+    value: E-7 Sub 1253
+  - kind: order_date
+    text: August 25, 2021
+    value: '2021-08-25'
+  - kind: effective_date
+    text: Effective for service rendered on and after October 1, 2021
+    value: '2021-10-01'
+    role: body
+- sample: 8
+  hd_id: 7676
+  family_key: nc-carolinas-rider-SUMMARY
+  source_pdf: data\historical\ncuc\e-7-sub-1146\2b313fc1-fca0-4b0e-8968-62d470550b16.pdf
+  sha256: e70823224a32a599a83dd6bb730dbc737c392cc169d7fc37f065f8f8d0d09c80
+  page: 8
+  strata:
+  - dec_rider_summary
+  - redline
+  sheet_of_family: true
+  clues:
+  - kind: revision
+    text: North Carolina Fifty-First Revised Leaf No. 99
+    value: NC:leaf-99:rev-51
+  - kind: supersedes
+    text: Superseding North Carolina Fiftieth Revised Leaf No. 99
+    value: NC:leaf-99:rev-50
+  - kind: revision
+    text: North Carolina Fifty-First Revised Leaf No. 99
+    value: NC:leaf-99:rev-51
+  - kind: effective_date
+    text: Effective for service rendered on and after January 1, 2021
+    value: '2021-01-01'
+  - kind: docket
+    text: NCUC Docket No. E-7, Sub 1253
+    value: E-7 Sub 1253
+  - kind: order_date
+    text: August 25, 2021
+    value: '2021-08-25'
+- sample: 9
+  hd_id: 536
+  family_key: nc-carolinas-rider-SUMMARY
+  source_pdf: data\raw\historical\ncuc\e-7\e-7-nodate-duke-energy-carolinas-llc-s-revisions-to-rate-compliance-filing-of-approved-tar.pdf
+  sha256: 804562fb6d04d7070851f32a24cd4cd6475134b370fb6c8d958f76f18b93fafe
+  page: 8
+  strata:
+  - dec_rider_summary
+  - historical
+  - bundled
+  sheet_of_family: true
+  notes: Scanned (OCR). Amended sheet. Footer prints "Order dated" with no date, and two dates in the effective line.
+  clues:
+  - kind: revision
+    text: North Carolina Fifteenth Revised Leaf No. 99
+    value: NC:leaf-99:rev-15
+  - kind: supersedes
+    text: Superseding North Carolina Fourteenth Revised Leaf No. 99
+    value: NC:leaf-99:rev-14
+  - kind: revision
+    text: Amended North Carolina Fifteenth Revised Leaf No. 99
+    value: NC:leaf-99:rev-15
+  - kind: effective_date
+    text: Effective November 1, 2013
+    value: '2013-11-01'
+  - kind: docket
+    text: NCUC Docket No. E-7, Sub 1026
+    value: E-7 Sub 1026
+  - kind: order_date
+    text: Order dated
+    value: null
+    blank: true
+- sample: 10
+  hd_id: 2020
+  family_key: nc-carolinas-rider-SUMMARY
+  source_pdf: data\raw\historical\ncuc\e-7\e-7-nodate-dec-compliance-tariff-for-existing-dsm-program-rider-edpr.pdf
+  sha256: b23386c94134f7a6d31d9d1084f58585f0a86dee8b8cea8fcf98b3f8e9654ec4
+  page: 7
+  strata:
+  - dec_rider_summary
+  - redline
+  sheet_of_family: true
+  clues:
+  - kind: revision
+    text: NC Sixty-First Revised Leaf No. 99
+    value: NC:leaf-99:rev-61
+  - kind: supersedes
+    text: Superseding NC Sixtieth Revised Leaf No. 99
+    value: NC:leaf-99:rev-60
+  - kind: revision
+    text: NC Sixty-First Revised Leaf No. 99
+    value: NC:leaf-99:rev-61
+  - kind: effective_date
+    text: Effective for service rendered on and after July 1, 2024
+    value: '2024-07-01'
+  - kind: docket
+    text: E-7, Subs 487
+    value: E-7 Sub 487
+  - kind: docket
+    text: '828'
+    value: E-7 Sub 828
+  - kind: docket
+    text: '1026'
+    value: E-7 Sub 1026
+  - kind: docket
+    text: '1146'
+    value: E-7 Sub 1146
+  - kind: docket
+    text: '1214'
+    value: E-7 Sub 1214
+  - kind: docket
+    text: and 1276
+    value: E-7 Sub 1276
+  - kind: order_date
+    text: June 12, 2024
+    value: '2024-06-12'
+  - kind: order_date
+    text: June 13, 2024
+    value: '2024-06-13'
+- sample: 11
+  hd_id: 7175
+  family_key: nc-carolinas-schedule-RE
+  source_pdf: data\raw\historical\ncuc\e-7\e-7-nodate-duke-energy-carolinas-llc-s-revisions-to-rate-compliance-filing-of-approved-tar.pdf
+  sha256: 804562fb6d04d7070851f32a24cd4cd6475134b370fb6c8d958f76f18b93fafe
+  page: 56
+  strata:
+  - dec_residential
+  - historical
+  - bundled
+  sheet_of_family: true
+  notes: Scanned (OCR). Amended; footer "Order dated" with no date.
+  clues:
+  - kind: revision
+    text: North Carolina Thirty-Fifth Revised Leaf No. 13
+    value: NC:leaf-13:rev-35
+  - kind: supersedes
+    text: Superseding North Carolina Thirty-Fourth Revised Leaf No. 13
+    value: NC:leaf-13:rev-34
+  - kind: revision
+    text: Amended North Carolina Thirty-Fifth Revised Leaf No. 13
+    value: NC:leaf-13:rev-35
+  - kind: effective_date
+    text: Effective November 1, 2013
+    value: '2013-11-01'
+  - kind: docket
+    text: NCUC Docket No. E-7, Sub 1026
+    value: E-7 Sub 1026
+  - kind: order_date
+    text: Order dated
+    value: null
+    blank: true
+- sample: 12
+  hd_id: 7761
+  family_key: nc-carolinas-schedule-RETC
+  source_pdf: data\historical\ncuc\e-7-sub-1253\3d73c0a1-aae9-480c-b96f-10aaae7ddf1d.pdf
+  sha256: 99ee0218614c6739bfe6a4aaf3dc03349dd8fe46b7689ea50e4a64b549734a92
+  page: 16
+  strata:
+  - dec_residential
+  - bundled
+  sheet_of_family: true
+  notes: Proposed sheet ("(Proposed)" in header and footer; order date blank).
+  clues:
+  - kind: revision
+    text: North Carolina (Proposed) Original Leaf No. 136
+    value: NC:leaf-136:rev-0
+  - kind: revision
+    text: North Carolina (Proposed) Original Leaf No. 136
+    value: NC:leaf-136:rev-0
+  - kind: effective_date
+    text: Effective for service rendered on and after July 1, 2021
+    value: '2021-07-01'
+  - kind: docket
+    text: NCUC Docket No. E-7, Sub 1253
+    value: E-7 Sub 1253
+  - kind: order_date
+    text: Order dated ____
+    value: null
+    blank: true
+- sample: 13
+  hd_id: 1875
+  family_key: nc-carolinas-schedule-RS
+  source_pdf: data\historical\ncuc\e-7-sub-1276\a471be0b-5539-4696-999a-d250438b3589.pdf
+  sha256: 85640f78da6e0cf9205741e877ed990a638982d2e5121e767a5641f7d6963bf1
+  page: 1
+  strata:
+  - dec_residential
+  sheet_of_family: true
+  clues:
+  - kind: revision
+    text: NC Fifty-Eighth Revised Leaf No. 11
+    value: NC:leaf-11:rev-58
+  - kind: supersedes
+    text: Superseding NC Fifty-Seventh Revised Leaf No. 11
+    value: NC:leaf-11:rev-57
+  - kind: revision
+    text: NC Fifty-Eighth Revised Leaf No. 11
+    value: NC:leaf-11:rev-58
+  - kind: effective_date
+    text: Effective for service rendered on and after January 1, 2025
+    value: '2025-01-01'
+  - kind: docket
+    text: NCUC Docket No. E-7, Sub 1276
+    value: E-7 Sub 1276
+  - kind: order_date
+    text: December 10, 2024
+    value: '2024-12-10'
+- sample: 14
+  hd_id: 7382
+  family_key: nc-carolinas-schedule-WC
+  source_pdf: data\raw\historical\ncuc\e-7\e-7-nodate-duke-power-s-rate-schedule-riders.pdf
+  sha256: 91560cdc89b92f5c19dabb27dcf2d33100e69923bbbc488b4131309b75acc3b4
+  page: 8
+  strata:
+  - dec_residential
+  - bundled
+  sheet_of_family: true
+  notes: Duke Power era sheet (scanned look); page 1 ends "(Over)", footer clues are on page 2.
+  clues:
+  - kind: revision
+    text: North Carolina Twelfth Revised Leaf No. 17
+    value: NC:leaf-17:rev-12
+  - kind: supersedes
+    text: Superseding North Carolina Eleventh Revised Leaf No. 17
+    value: NC:leaf-17:rev-11
+- sample: 15
+  hd_id: 399
+  family_key: nc-progress-leaf-667
+  source_pdf: C:\Python\Duke\Standalone\data\historical\ncuc\e-2-sub-1300-sept2023\3f92be50-2f10-4d4c-8952-2bccaa339aba.pdf
+  sha256: 7a5cbdce496e1dbafd60af074cc80a786dd9087fcd121c65d7e13981bf3c41a0
+  page: 215
+  strata:
+  - dep_rider
+  - bundled
+  sheet_of_family: true
+  clues:
+  - kind: revision
+    text: NC Original Leaf No. 667
+    value: NC:leaf-667:rev-0
+  - kind: revision
+    text: NC Original Leaf No. 667
+    value: NC:leaf-667:rev-0
+  - kind: effective_date
+    text: Effective for service rendered on and after October 1, 2023
+    value: '2023-10-01'
+  - kind: docket
+    text: NCUC Docket No. E-2, Sub 1300
+    value: E-2 Sub 1300
+  - kind: order_date
+    text: August 18, 2023
+    value: '2023-08-18'
+- sample: 16
+  hd_id: 7782
+  family_key: nc-progress-leaf-611
+  source_pdf: C:\Python\Duke\Standalone\data\historical\ncuc\e-2-sub-1300-sept2023\3f92be50-2f10-4d4c-8952-2bccaa339aba.pdf
+  sha256: 7a5cbdce496e1dbafd60af074cc80a786dd9087fcd121c65d7e13981bf3c41a0
+  page: 143
+  strata:
+  - dep_rider
+  - bundled
+  sheet_of_family: true
+  clues:
+  - kind: revision
+    text: NC Original Leaf No. 611
+    value: NC:leaf-611:rev-0
+  - kind: revision
+    text: NC Original Leaf No. 611
+    value: NC:leaf-611:rev-0
+  - kind: effective_date
+    text: Effective for services rendered on and after January 1, 2024
+    value: '2024-01-01'
+  - kind: docket
+    text: NCUC Docket No. E-2, Sub 1300
+    value: E-2 Sub 1300
+  - kind: order_date
+    text: August 18, 2023
+    value: '2023-08-18'
+- sample: 17
+  hd_id: 2275
+  family_key: nc-progress-leaf-600
+  source_pdf: C:\Python\Duke\Standalone\data\historical\ncuc\e-2-sub-1300-sept2023\1b72e8de-c435-43b7-9b88-dfc4c0a8a97b.pdf
+  sha256: b61e294063addfaa3e9ad3e156869ad69daffcd441c265613882a7d280621583
+  page: 1
+  strata:
+  - dep_rider_summary
+  - bundled
+  - no_clues
+  sheet_of_family: false
+  notes: Index of Tariffs page (the hd 2275 binding defect). No in-scope clue.
+  clues: []
+- sample: 18
+  hd_id: 40
+  family_key: nc-progress-leaf-600
+  source_pdf: data\historical\raw\nc\progress\rider\summary-of-rider-adjustments-leaf-no-600-eff-2024-04-01-data-historical-manual-l.pdf
+  sha256: 1f60957401e02842ec974521b4addf93c6e66968bdb15ac8f721a3664bf2fbee
+  page: 1
+  strata:
+  - dep_rider_summary
+  sheet_of_family: true
+  clues:
+  - kind: revision
+    text: NC Sixth Revised Leaf No. 600
+    value: NC:leaf-600:rev-6
+  - kind: supersedes
+    text: Superseding NC Fifth Revised Leaf No. 600
+    value: NC:leaf-600:rev-5
+  - kind: revision
+    text: NC Sixth Revised Leaf No. 600
+    value: NC:leaf-600:rev-6
+  - kind: effective_date
+    text: Effective for service rendered on and after April 1, 2025
+    value: '2025-04-01'
+  - kind: docket
+    text: NCUC Docket No. E-2, Sub 1300
+    value: E-2 Sub 1300
+  - kind: order_date
+    text: March 12, 2025
+    value: '2025-03-12'
+- sample: 19
+  hd_id: 2498
+  family_key: nc-progress-leaf-600
+  source_pdf: C:\Python\Duke\Standalone\data\historical\ncuc\e-2-sub-1300\f76e6a9b-98de-4704-b456-8c20214bd981.pdf
+  sha256: 3776a33f3a5e9b1a89604075f427e5bf49adeb0d49a1a29594e2db25b9025759
+  page: 3
+  strata:
+  - dep_rider_summary
+  sheet_of_family: true
+  notes: 'Redline (red inserted / struck). Header Fifth->Sixth, supersedes Fourth->Fifth, effective January->April, footer "Subs 1342 and 1300"
+    with "1342 and" struck, order "November 13, 2024 and December 10, 2024" replaced by "March 12, 2025" (glued in the text layer). Struck text
+    is still printed, so it is transcribed with struck: true.'
+  clues:
+  - kind: revision
+    text: NC FifthSixth Revised Leaf No. 600
+    value: null
+    ambiguous: true
+  - kind: supersedes
+    text: Superseding NC FourthFifth Revised Leaf No. 600
+    value: null
+    ambiguous: true
+  - kind: revision
+    text: NC FifthSixth Revised Leaf No. 600
+    value: null
+    ambiguous: true
+  - kind: effective_date
+    text: Effective for service rendered on and after JanuaryApril 1, 2025
+    value: null
+    ambiguous: true
+  - kind: docket
+    text: Subs 1342
+    value: E-2 Sub 1342
+    struck: true
+  - kind: docket
+    text: '1300'
+    value: E-2 Sub 1300
+  - kind: order_date
+    text: NovemberMarch 132, 20245
+    value: null
+    ambiguous: true
+  - kind: order_date
+    text: December 10, 2024
+    value: '2024-12-10'
+    struck: true
+- sample: 20
+  hd_id: 5313
+  family_key: nc-progress-leaf-600
+  source_pdf: data\historical\ncuc\e-2-sub-1300\f5761884-4b3d-4d40-adfe-1a5452ad1f2c.pdf
+  sha256: 9e160dab2ca17da0d621d5e43e67ff0091ada765682e530db190d9ed4a5c36da
+  page: 2
+  strata:
+  - dep_rider_summary
+  - redline
+  sheet_of_family: true
+  notes: Redline. Original->First Revised, supersedes line inserted, year 2024->2025, order date August 18, 2023 -> December 10, 2024.
+  clues:
+  - kind: revision
+    text: NC OriginalFirst Revised Leaf No. 611
+    value: null
+    ambiguous: true
+  - kind: supersedes
+    text: Superseding NC Original Leaf No. 611
+    value: NC:leaf-611:rev-0
+  - kind: revision
+    text: NC OriginalFirst Revised Leaf No. 611
+    value: null
+    ambiguous: true
+  - kind: effective_date
+    text: Effective for services rendered on and after January 1, 20245
+    value: null
+    ambiguous: true
+  - kind: docket
+    text: NCUC Docket No. E-2, Sub 1300
+    value: E-2 Sub 1300
+  - kind: order_date
+    text: August 18, 2023
+    value: null
+    ambiguous: true
+  - kind: order_date
+    text: December 10, 2024
+    value: null
+    ambiguous: true
+- sample: 21
+  hd_id: 7480
+  family_key: nc-carolinas-schedule-PPBE
+  source_pdf: data\historical\ncuc\e-7-sub-1304\8d93cd19-56d4-4522-a23c-a2ab87a354c7.pdf
+  sha256: 06a698ad6e79817900e8777c0243bdb5de28209a9e7c9b7db7b3d0ec901ffec0
+  page: 1
+  strata:
+  - dec_nonresidential
+  - bundled
+  - ocr
+  - no_clues
+  sheet_of_family: false
+  notes: Hearing transcript (E-7, Sub 1304). Not a tariff sheet.
+  clues: []
+- sample: 22
+  hd_id: 7234
+  family_key: nc-progress-leaf-533
+  source_pdf: data\historical\ncuc\e-2-sub-1354\752bbc34-999f-401c-bb1a-4a2f60db4a93.pdf
+  sha256: 58e8f352f4dada260ee2aa57488142f6d64b5faaa1141ac8e2f56955524fa406
+  page: 1
+  strata:
+  - dep_nonresidential
+  - bundled
+  - ocr
+  - no_clues
+  sheet_of_family: false
+  notes: Hearing "Public information sheet" (E-2, Sub 1354). Not a tariff sheet.
+  clues: []
+- sample: 23
+  hd_id: 7247
+  family_key: nc-progress-leaf-602
+  source_pdf: data\historical\ncuc\e-2-sub-1354\752bbc34-999f-401c-bb1a-4a2f60db4a93.pdf
+  sha256: 58e8f352f4dada260ee2aa57488142f6d64b5faaa1141ac8e2f56955524fa406
+  page: 248
+  strata:
+  - dep_rider
+  - bundled
+  - ocr
+  - no_clues
+  sheet_of_family: false
+  notes: Application caption page ("DOCKET NO. E-2, SUB 1354"). Not a tariff sheet.
+  clues: []
+- sample: 24
+  hd_id: 7485
+  family_key: nc-carolinas-rider-EE
+  source_pdf: data\historical\ncuc\e-7-sub-1305\49a98fdc-115f-4b59-84ea-d37fd3401fe6.pdf
+  sha256: 27b885f3db0578bc5f499eae8fe42ba45742c4ba02e02e52fb6b8e57eb3c8783
+  page: 56
+  strata:
+  - dec_rider
+  - bundled
+  - ocr
+  sheet_of_family: true
+  notes: Tariff sheet filed as Miller Exhibit 7 ("Docket No. E-7, Sub 1305" exhibit stamp is out of scope). Order date blank.
+  clues:
+  - kind: revision
+    text: NC Nineteenth Revised Leaf No. 62
+    value: NC:leaf-62:rev-19
+  - kind: supersedes
+    text: Superseding NC Eighteenth Revised Leaf No. 62
+    value: NC:leaf-62:rev-18
+  - kind: revision
+    text: NC Nineteenth Revised Leaf No. 62
+    value: NC:leaf-62:rev-19
+  - kind: effective_date
+    text: Effective for service rendered from January 1, 2025 through December 31, 2025
+    value: 2025-01-01/2025-12-31
+  - kind: docket
+    text: NCUC Docket No. E-7, Sub 1305
+    value: E-7 Sub 1305
+  - kind: order_date
+    text: Order dated ___
+    value: null
+    blank: true
+- sample: 25
+  hd_id: 7387
+  family_key: nc-carolinas-schedule-PL
+  source_pdf: data\raw\historical\ncuc\e-7\e-7-nodate-duke-power-s-rate-schedule-riders.pdf
+  sha256: 91560cdc89b92f5c19dabb27dcf2d33100e69923bbbc488b4131309b75acc3b4
+  page: 26
+  strata:
+  - dec_nonresidential
+  - historical
+  - bundled
+  sheet_of_family: true
+  notes: Duke Power era, page 1 ends "(Over)".
+  clues:
+  - kind: revision
+    text: North Carolina Fourteenth Revised Leaf No. 34
+    value: NC:leaf-34:rev-14
+  - kind: supersedes
+    text: Superseding North Carolina Thirteenth Revised Leaf No. 34
+    value: NC:leaf-34:rev-13
+- sample: 26
+  hd_id: 7148
+  family_key: nc-carolinas-schedule-I
+  source_pdf: data\raw\historical\ncuc\e-7\e-7-nodate-nantahala-s-rate-schedule-riders.pdf
+  sha256: f5ce2e35c7cfa39577dfb2f4e320a06f85fe5822367326e16a939d056019487c
+  page: 22
+  strata:
+  - dec_nonresidential
+  - bundled
+  sheet_of_family: false
+  notes: Nantahala Area Schedule CP (purchased power cost rider), bound to family nc-carolinas-schedule-I. Wrong family. No leaf header.
+  clues:
+  - kind: effective_date
+    text: Effective for bills rendered on and after September 2, 2007
+    value: '2007-09-02'
+  - kind: docket
+    text: NCUC Docket No. E-7, Sub 833
+    value: E-7 Sub 833
+  - kind: order_date
+    text: August 30, 2007
+    value: '2007-08-30'
+- sample: 27
+  hd_id: 920
+  family_key: nc-carolinas-schedule-SGS
+  source_pdf: data\raw\historical\ncuc\e-7\e-7-nodate-nantahala-s-rate-schedule-riders.pdf
+  sha256: f5ce2e35c7cfa39577dfb2f4e320a06f85fe5822367326e16a939d056019487c
+  page: 8
+  strata:
+  - dec_nonresidential
+  - historical
+  - bundled
+  sheet_of_family: false
+  notes: Nantahala Area Schedule SG, bound to DEC family nc-carolinas-schedule-SGS (different tariff book). No leaf header.
+  clues:
+  - kind: effective_date
+    text: Effective for bills rendered on and after September 2, 2007
+    value: '2007-09-02'
+  - kind: docket
+    text: NCUC Docket No. E-7, Sub 833
+    value: E-7 Sub 833
+  - kind: order_date
+    text: August 30, 2007
+    value: '2007-08-30'
+- sample: 28
+  hd_id: 7769
+  family_key: nc-carolinas-schedule-BC
+  source_pdf: data\historical\ncuc\e-7-sub-1276\ce19e513-d58a-4800-86ce-14428d9de5e9.pdf
+  sha256: 378406f577e1b63ec991bf9b702030611e23d86c3383490fd655ba078dd1d0a0
+  page: 1
+  strata:
+  - dec_nonresidential
+  sheet_of_family: true
+  notes: Redline. Fifty-Fourth->Fifty-Fifth, supersedes Fifty-Third->Fifty-Fourth, effective January 15, 2024 -> January 1, 2025, order December
+    15, 2023 -> December 10, 2024.
+  clues:
+  - kind: revision
+    text: NC Fifty-Fourth Fifth Revised Leaf No. 26
+    value: null
+    ambiguous: true
+  - kind: supersedes
+    text: Superseding NC Fifty-Third Fourth Revised Leaf No. 26
+    value: null
+    ambiguous: true
+  - kind: revision
+    text: NC Fifty-Fourth Fifth Revised Leaf No. 26
+    value: null
+    ambiguous: true
+  - kind: effective_date
+    text: Effective for service rendered on and after January 15, 20242025
+    value: null
+    ambiguous: true
+  - kind: docket
+    text: NCUC Docket No. E-7, Sub 1276
+    value: E-7 Sub 1276
+  - kind: order_date
+    text: December 15, 202310, 2024
+    value: null
+    ambiguous: true
+- sample: 29
+  hd_id: 7717
+  family_key: nc-progress-leaf-520
+  source_pdf: C:\Python\Duke\Standalone\data\historical\ncuc\e-2-sub-1250\d6fca175-3eed-4754-bef0-b954a6f6a89a.pdf
+  sha256: 6ee41d80b92452b7f8d4978f6fab43664383b81c3ff775e55cd3c67e010231e1
+  page: 20
+  strata:
+  - dep_nonresidential
+  - bundled
+  - no_clues
+  sheet_of_family: false
+  notes: Pre-leaf DEP sheet "G-5" Schedule SGS-TOU-63, bound to leaf-520 (SGS). SGS-TOU is a different schedule. No in-scope clue.
+  clues: []
+- sample: 30
+  hd_id: 2520
+  family_key: nc-progress-leaf-574
+  source_pdf: data\historical\ncuc\e-2-sub-1252\44d04bff-8457-41d7-924b-74a5f84289fb.pdf
+  sha256: cd3f20b303535802eaee6078a380c71d1d95f9dcb7fce51f3e5c476233607bce
+  page: 51
+  strata:
+  - dep_nonresidential
+  - bundled
+  sheet_of_family: true
+  notes: Pre-leaf DEP sheet "L-1" Schedule TSS-65 ("TSS-65 Sheet 1 of 2"). No in-scope clue.
+  clues: []
+- sample: 31
+  hd_id: 410
+  family_key: nc-progress-leaf-705
+  source_pdf: data\raw\nc\progress\rate\leaf-no-705-program-eel-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no-705-pr.pdf
+  sha256: 5686697b9747e7b15c58319eaefb4761e6d2539757e2f5fded06f6eafc9627bb
+  page: 1
+  strata:
+  - dep_nonresidential
+  sheet_of_family: true
+  clues:
+  - kind: revision
+    text: NC First Revised Leaf No. 705
+    value: NC:leaf-705:rev-1
+  - kind: supersedes
+    text: Superseding NC Original Leaf No. 705
+    value: NC:leaf-705:rev-0
+  - kind: revision
+    text: NC First Revised Leaf No. 705
+    value: NC:leaf-705:rev-1
+  - kind: effective_date
+    text: Effective for service rendered on and after January 1, 2025
+    value: '2025-01-01'
+  - kind: docket
+    text: E-2, Subs 1076
+    value: E-2 Sub 1076
+  - kind: docket
+    text: '931'
+    value: E-2 Sub 931
+  - kind: order_date
+    text: October 21, 2024
+    value: '2024-10-21'
+- sample: 32
+  hd_id: 5459
+  family_key: nc-progress-leaf-501
+  source_pdf: data\historical\ncuc\e-2-sub-1173\05ac9b0f-8607-43aa-8f8f-22ccca0bb594.pdf
+  sha256: 78ec4bc9b4f2644c55f55613b6844cf08b39e26ec534a0482c156bc43360c1ae
+  page: 1
+  strata:
+  - dep_residential
+  - no_clues
+  sheet_of_family: false
+  notes: Hearing transcript cover (E-2, Sub 1173). Not a tariff sheet.
+  clues: []
+- sample: 33
+  hd_id: 335
+  family_key: nc-progress-leaf-503
+  source_pdf: data\raw\nc\progress\rate\leaf-no-503-schedule-r-tou-cpp-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no.pdf
+  sha256: 5152239e2557764fc64498af67a63b10ca91d13222da6c3b031366f8df236080
+  page: 1
+  strata:
+  - dep_residential
+  sheet_of_family: true
+  clues:
+  - kind: revision
+    text: NC Second Revised Leaf No. 503
+    value: NC:leaf-503:rev-2
+  - kind: supersedes
+    text: Superseding NC First Revised Leaf No. 503
+    value: NC:leaf-503:rev-1
+  - kind: revision
+    text: NC Second Revised Leaf No. 503
+    value: NC:leaf-503:rev-2
+  - kind: effective_date
+    text: Effective for service rendered on and after October 1, 2025
+    value: '2025-10-01'
+  - kind: docket
+    text: NCUC Docket No. E-2, Sub 1300
+    value: E-2 Sub 1300
+  - kind: order_date
+    text: August 18, 2023
+    value: '2023-08-18'
+- sample: 34
+  hd_id: 1791
+  family_key: nc-progress-leaf-503
+  source_pdf: data\historical\ncuc\e-2-sub-1219\784821eb-2349-42a7-9622-e619a5ef4a51.pdf
+  sha256: 01506f59267ef4b68c8f0dc1ec19390f20c4d24d9058976386966c4fe6428a79
+  page: 78
+  strata:
+  - dep_residential
+  - bundled
+  sheet_of_family: true
+  notes: Pre-leaf DEP sheet "R-4" Schedule R-TOU-CPP-74 ("Sheet 1 of 3"). No in-scope clue.
+  clues: []
+- sample: 35
+  hd_id: 30
+  family_key: nc-progress-leaf-500
+  source_pdf: data\historical\raw\nc\progress\rate\residential-service-leaf-no-500-eff-2025-10-01-data-historical-manual-leaf-no-50.pdf
+  sha256: 410bc1559d2c75e7fe8f92c51b929b546a998c0b63a274509e257b7ccd79d827
+  page: 1
+  strata:
+  - dep_residential
+  sheet_of_family: true
+  clues:
+  - kind: revision
+    text: NC Second Revised Leaf No. 500
+    value: NC:leaf-500:rev-2
+  - kind: supersedes
+    text: Superseding NC First Revised Leaf No. 500
+    value: NC:leaf-500:rev-1
+  - kind: revision
+    text: NC Second Revised Leaf No. 500
+    value: NC:leaf-500:rev-2
+  - kind: effective_date
+    text: Effective for service rendered on and after October 1, 2025
+    value: '2025-10-01'
+  - kind: docket
+    text: NCUC Docket No. E-2, Sub 1300
+    value: E-2 Sub 1300
+  - kind: order_date
+    text: August 18, 2023
+    value: '2023-08-18'
+- sample: 36
+  hd_id: 496
+  family_key: nc-progress-leaf-601
+  source_pdf: data\raw\historical\ncuc\e-2\e-2-nodate-dep-corrected-compliance-tariff.pdf
+  sha256: 9a812ccf089bfe619785bfc496e192cf433dd7869df72fadfec11e0c555f6bef
+  page: 5
+  strata:
+  - dep_rider
+  - redline
+  sheet_of_family: true
+  notes: Redline of pre-leaf Rider BA-26 -> BA-27 ("RR-1"). No in-scope clue (no supersedes / effective / footer docket).
+  clues: []
+- sample: 37
+  hd_id: 7599
+  family_key: nc-progress-leaf-800
+  source_pdf: data\historical\ncuc\e-7-sub-1300\25ea8bc3-bfbb-48ca-8bfd-2b47fdbb0674.pdf
+  sha256: 32722e717cdac1008d82057c6db4895b6532b34446490908176635f325cd6639
+  page: 59
+  strata:
+  - dep_nonresidential
+  - bundled
+  sheet_of_family: false
+  notes: 'DEC Service Regulations redline (Leaf 401) bound to DEP family nc-progress-leaf-800: wrong utility. Struck old header "North Carolina
+    Fourth Revised Leaf A / Superseding ... Third Revised Leaf A" and struck old footer; inserted "NC Eighth Revised Leaf No. 401 / Superseding
+    NC Seventh Revised Service Regulations" and new footer.'
+  clues:
+  - kind: revision
+    text: NC Eighth Revised Leaf No. 401
+    value: NC:leaf-401:rev-8
+  - kind: supersedes
+    text: Superseding NC Seventh Revised Service Regulations
+    value: null
+    ambiguous: true
+    note: non-leaf target
+  - kind: revision
+    text: North Carolina Fourth Revised Leaf A
+    value: NC:leaf-A:rev-4
+    struck: true
+  - kind: supersedes
+    text: Superseding North Carolina Third Revised Leaf A
+    value: NC:leaf-A:rev-3
+    struck: true
+  - kind: effective_date
+    text: Effective for service on and after January 1, 2010
+    value: '2010-01-01'
+    struck: true
+  - kind: docket
+    text: NCUC Docket No. E-7, Sub 909
+    value: E-7 Sub 909
+    struck: true
+  - kind: order_date
+    text: December 7, 2009
+    value: '2009-12-07'
+    struck: true
+  - kind: order_date
+    text: December 28, 2009
+    value: '2009-12-28'
+    struck: true
+  - kind: revision
+    text: NC Eighth Revised Leaf No. 401
+    value: NC:leaf-401:rev-8
+  - kind: effective_date
+    text: Effective January 1, 2024
+    value: '2024-01-01'
+  - kind: docket
+    text: NCUC Docket No. E-7, Sub 1276
+    value: E-7 Sub 1276
+  - kind: order_date
+    text: Order dated ____
+    value: null
+    blank: true
+- sample: 38
+  hd_id: 7579
+  family_key: nc-progress-leaf-610
+  source_pdf: C:\Python\Duke\Standalone\data\historical\ncuc\e-2-sub-1300-sept2023\3f92be50-2f10-4d4c-8952-2bccaa339aba.pdf
+  sha256: 7a5cbdce496e1dbafd60af074cc80a786dd9087fcd121c65d7e13981bf3c41a0
+  page: 142
+  strata:
+  - dep_rider
+  - bundled
+  sheet_of_family: true
+  clues:
+  - kind: revision
+    text: NC Original Leaf No. 610
+    value: NC:leaf-610:rev-0
+  - kind: revision
+    text: NC Original Leaf No. 610
+    value: NC:leaf-610:rev-0
+  - kind: effective_date
+    text: Effective for service rendered on and after October 1, 2023
+    value: '2023-10-01'
+  - kind: docket
+    text: NCUC Docket No. E-2, Sub 1300
+    value: E-2 Sub 1300
+  - kind: order_date
+    text: August 18, 2023
+    value: '2023-08-18'
+- sample: 39
+  hd_id: 818
+  family_key: nc-progress-leaf-602
+  source_pdf: data\historical\ncuc\e-2-sub-1253\f596819a-b1ba-447f-985f-f42f2346139f.pdf
+  sha256: c48c62851e56ff653ba2dabe7d54cf2803aed3218a4465a5968e28b93b7018ac
+  page: 1
+  strata:
+  - dep_rider
+  - no_clues
+  sheet_of_family: false
+  notes: Cover letter (June 9, 2020). Not a tariff sheet.
+  clues: []
+- sample: 40
+  hd_id: 176
+  family_key: nc-progress-leaf-572
+  source_pdf: data\historical\raw\nc\progress\rider\street-lighting-service-residential-subdivisions-ncuc-viewfile-aspx-id-f1368a53-.pdf
+  sha256: fc261abb9c1d5a13c8d77e19621a60f172ccb9ec6bbb33b7cfc6054d0584e837
+  page: 1
+  strata:
+  - dep_nonresidential
+  sheet_of_family: false
+  notes: Cover letter (September 20, 2021). Not a tariff sheet.
+  clues: []
+- sample: 41
+  hd_id: 2036
+  family_key: nc-carolinas-rider-BPMPPTTRUEUP
+  source_pdf: data\raw\historical\ncuc\e-7\e-7-nodate-duke-energy-carolinas-llc-s-revised-bpm-rider-tariff-sheet.pdf
+  sha256: 6e4fbab6c9b959560a8d0869409c5f00a5de23435669e7e5458cc69eda97f6b9
+  page: 2
+  strata:
+  - dec_rider
+  - historical
+  sheet_of_family: true
+  notes: Scanned (OCR). "(Proposed)" printed between the ordinal and "Revised". No order date printed.
+  clues:
+  - kind: revision
+    text: North Carolina Fifth (Proposed) Revised Leaf No. 63
+    value: NC:leaf-63:rev-5
+  - kind: supersedes
+    text: Superseding North Carolina Fourth Revised Leaf No. 63
+    value: NC:leaf-63:rev-4
+  - kind: revision
+    text: North Carolina Fifth (Proposed) Revised Leaf No. 63
+    value: NC:leaf-63:rev-5
+  - kind: effective_date
+    text: Effective for service rendered on and after July 1, 2012
+    value: '2012-07-01'
+  - kind: docket
+    text: NCUC Docket No. E-7, Sub 989
+    value: E-7 Sub 989
+- sample: 42
+  hd_id: 341
+  family_key: nc-progress-leaf-524
+  source_pdf: data\raw\nc\progress\rate\leaf-no-524-schedule-mgs-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no-524-s.pdf
+  sha256: 39aab6ea29512b15fcb483e383ef07cd50e4b2d62affd1f92c475c72127c6286
+  page: 1
+  strata:
+  - dep_nonresidential
+  sheet_of_family: true
+  notes: Supersedes reference wraps ("Superseding NC First Revised Leaf" / "No. 524" on the next line, left column interleaved).
+  clues:
+  - kind: revision
+    text: NC Second Revised Leaf No. 524
+    value: NC:leaf-524:rev-2
+  - kind: supersedes
+    text: Superseding NC First Revised Leaf No. 524
+    value: NC:leaf-524:rev-1
+  - kind: revision
+    text: NC Second Revised Leaf No. 524
+    value: NC:leaf-524:rev-2
+  - kind: effective_date
+    text: Effective for service rendered on and after October 1, 2025
+    value: '2025-10-01'
+  - kind: docket
+    text: NCUC Docket No. E-2, Sub 1300
+    value: E-2 Sub 1300
+  - kind: order_date
+    text: August 18, 2023
+    value: '2023-08-18'
+- sample: 43
+  hd_id: 2097
+  family_key: nc-carolinas-rider-EE
+  source_pdf: data\raw\historical\ncuc\e-7\e-7-nodate-duke-energy-carolinas-revised-tariff-for-vintage-1-of-rider-ee.pdf
+  sha256: e9b6809a0bb284c4849b066cfc2c806221957ed68e086c23efd004324418d12a
+  page: 2
+  strata:
+  - dec_rider
+  - historical
+  sheet_of_family: true
+  notes: Scanned with FILED stamp. Supersedes prints "North Carolinas" (sic).
+  clues:
+  - kind: revision
+    text: North Carolina Third Revised Leaf No. 62
+    value: NC:leaf-62:rev-3
+  - kind: supersedes
+    text: Superseding North Carolinas Second Revised Leaf No. 62
+    value: NC:leaf-62:rev-2
+  - kind: revision
+    text: North Carolina Third Revised Leaf No. 62
+    value: NC:leaf-62:rev-3
+  - kind: effective_date
+    text: Effective for service on and after September 1, 2010
+    value: '2010-09-01'
+  - kind: docket
+    text: NCUC Docket No. E-7. Sub 938
+    value: E-7 Sub 938
+  - kind: order_date
+    text: June 3, 2010
+    value: '2010-06-03'
+- sample: 44
+  hd_id: 5284
+  family_key: nc-progress-leaf-707
+  source_pdf: data\historical\ncuc\e-2-sub-1145\a111f643-5e3c-446b-b413-af4833130943.pdf
+  sha256: 78ac0c221de6f5fb6da5f5e85cc751d5e6a93986c890450a5dbf3a2026f99b39
+  page: 59
+  strata:
+  - dep_nonresidential
+  - bundled
+  - no_clues
+  sheet_of_family: false
+  notes: Program evaluation exhibit (Evans Exhibit 6). Not a tariff sheet.
+  clues: []
+- sample: 45
+  hd_id: 772
+  family_key: nc-progress-leaf-602
+  source_pdf: data\historical\ncuc\e-2-sub-1176\9c6487be-f8af-4179-94c4-56c03aeecb18.pdf
+  sha256: 70b1a1827a4e2101fdc361e40ffa3bf0b9c093fc2e4d72a27276f757d540a596
+  page: 1
+  strata:
+  - dep_rider
+  - no_clues
+  sheet_of_family: false
+  notes: Cover letter. Not a tariff sheet.
+  clues: []
+- sample: 46
+  hd_id: 7293
+  family_key: nc-progress-leaf-663
+  source_pdf: data\historical\ncuc\e-2-sub-1167\c8fb6991-e250-4d05-b0b1-37ab25882e7c.pdf
+  sha256: 8c6634893eb8048082a5877f3c31f6740e1d1cf291cec699f07daa821dcb0f65
+  page: 3
+  strata:
+  - dep_rider
+  - bundled
+  sheet_of_family: false
+  notes: DEC Solar Rebate Rider SRR (Leaf 331) bound to DEP family nc-progress-leaf-663. Wrong utility. Effective line reads "Effective on or
+    after".
+  clues:
+  - kind: revision
+    text: North Carolina Fourth Revised Leaf No. 331
+    value: NC:leaf-331:rev-4
+  - kind: supersedes
+    text: Superseding North Carolina Third Revised Leaf No. 331
+    value: NC:leaf-331:rev-3
+  - kind: revision
+    text: North Carolina Fourth Revised Leaf No. 331
+    value: NC:leaf-331:rev-4
+  - kind: effective_date
+    text: Effective on or after November 25, 2020
+    value: '2020-11-25'
+  - kind: docket
+    text: NCUC Docket No. E-7, Sub 1166
+    value: E-7 Sub 1166
+  - kind: order_date
+    text: November 25, 2020
+    value: '2020-11-25'
+- sample: 47
+  hd_id: 7341
+  family_key: nc-progress-leaf-713
+  source_pdf: C:\Python\Duke\Standalone\data\historical\ncuc\e-2-sub-1300-sept2023\3f92be50-2f10-4d4c-8952-2bccaa339aba.pdf
+  sha256: 7a5cbdce496e1dbafd60af074cc80a786dd9087fcd121c65d7e13981bf3c41a0
+  page: 254
+  strata:
+  - dep_nonresidential
+  - bundled
+  sheet_of_family: true
+  notes: Footer prints two NCUC dockets with no order date, then the compliance-book "Leaf Indexing ... NCUC Docket No. E-2. Sub 1300" line.
+  clues:
+  - kind: revision
+    text: NC Original Leaf No. 713
+    value: NC:leaf-713:rev-0
+  - kind: supersedes
+    text: Superseding NC Program REEAD-1
+    value: schedule:REEAD-1
+  - kind: revision
+    text: NC Original Leaf No. 713
+    value: NC:leaf-713:rev-0
+  - kind: effective_date
+    text: Effective for service rendered on and after February 27, 2019
+    value: '2019-02-27'
+  - kind: docket
+    text: E-2, Subs 936
+    value: E-2 Sub 936
+  - kind: docket
+    text: '1174'
+    value: E-2 Sub 1174
+  - kind: docket
+    text: NCUC Docket No. E-2. Sub 1300
+    value: E-2 Sub 1300
+- sample: 48
+  hd_id: 337
+  family_key: nc-progress-leaf-520
+  source_pdf: data\raw\nc\progress\rate\leaf-no-520-schedule-sgs-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no-520-s.pdf
+  sha256: 674532e68046e4d3cb3ab372f311bb5390c891f18bf223ddf88504bde00e179b
+  page: 1
+  strata:
+  - dep_nonresidential
+  sheet_of_family: true
+  clues:
+  - kind: revision
+    text: NC Second Revised Leaf No. 520
+    value: NC:leaf-520:rev-2
+  - kind: supersedes
+    text: Superseding NC First Revised Leaf No. 520
+    value: NC:leaf-520:rev-1
+  - kind: revision
+    text: NC Second Revised Leaf No. 520
+    value: NC:leaf-520:rev-2
+  - kind: effective_date
+    text: Effective for service rendered on and after October 1, 2025
+    value: '2025-10-01'
+  - kind: docket
+    text: NCUC Docket No. E-2, Sub 1300
+    value: E-2 Sub 1300
+  - kind: order_date
+    text: August 18, 2023
+    value: '2023-08-18'
+- sample: 49
+  hd_id: 7171
+  family_key: nc-carolinas-schedule-OPT-G
+  source_pdf: data\raw\historical\ncuc\e-7\e-7-nodate-duke-energy-carolinas-llc-s-revisions-to-rate-compliance-filing-of-approved-tar.pdf
+  sha256: 804562fb6d04d7070851f32a24cd4cd6475134b370fb6c8d958f76f18b93fafe
+  page: 40
+  strata:
+  - dec_nonresidential
+  - historical
+  - bundled
+  sheet_of_family: true
+  notes: Scanned (OCR). Amended; "Order dated" with no date.
+  clues:
+  - kind: revision
+    text: North Carolina Thirteenth Revised Leaf No. 23
+    value: NC:leaf-23:rev-13
+  - kind: supersedes
+    text: Superseding North Carolina Twelfth Revised Leaf No. 23
+    value: NC:leaf-23:rev-12
+  - kind: revision
+    text: Amended North Carolina Thirteenth Revised Leaf No. 23
+    value: NC:leaf-23:rev-13
+  - kind: effective_date
+    text: Effective November 1, 2013
+    value: '2013-11-01'
+  - kind: docket
+    text: NCUC Docket No. E-7, Sub 1026
+    value: E-7 Sub 1026
+  - kind: order_date
+    text: Order dated
+    value: null
+    blank: true
+- sample: 50
+  hd_id: 179
+  family_key: nc-progress-leaf-602
+  source_pdf: data\historical\raw\nc\progress\other\joint-agency-asset-rider-jaa-ncuc-viewfile-aspx-id-f9913a14-bbd0-4b63-a2ca-ef142.pdf
+  sha256: 8b0b4361181964cdd36111a0d2b921ed43da1fdc43fcea7c9d765387bf4eba5d
+  page: 1
+  strata:
+  - dep_rider
+  - no_clues
+  sheet_of_family: false
+  notes: Cover letter (September 13, 2018). Not a tariff sheet.
+  clues: []
+link_reviews:
+- link_id: 38
+  from_version_id: 5357
+  to_version_id: 6548
+  verdict: confirmed
+  basis: successor prints 'Superseding NC Fifth Revised Leaf No. 600' (eff 2025-04-01); predecessor prints 'NC Fifth Revised Leaf No. 600' (eff
+    2025-01-01)
+- link_id: 121
+  from_version_id: 6057
+  to_version_id: 6548
+  verdict: confirmed
+  basis: same Sixth Revised Leaf 600 sheet as link 38 (second copy, f76e6a9b p.8)
+- link_id: 146
+  from_version_id: 6737
+  to_version_id: 5997
+  verdict: confirmed
+  basis: DEC Sixty-Second Revised Leaf 99 (eff 2024-09-01) supersedes Sixty-First; predecessor prints Sixty-First (eff 2024-07-01)
+- link_id: 7
+  from_version_id: 5300
+  to_version_id: 5299
+  verdict: confirmed
+  basis: Leaf 500 Second Revised (2025-10-01) supersedes First Revised; predecessor First Revised (2024-10-01)
+- link_id: 20
+  from_version_id: 5329
+  to_version_id: 6825
+  verdict: confirmed
+  basis: Leaf 528 Second Revised supersedes First Revised; predecessor First Revised (2024-10-01)
+- link_id: 128
+  from_version_id: 6181
+  to_version_id: 6176
+  verdict: confirmed
+  basis: R-TOUD-12 sheet 3 prints 'Supersedes Schedule R-TOUD-10B'; predecessor is SCHEDULE R-TOUD-10B (CP&L)
+- link_id: 91
+  from_version_id: 5608
+  to_version_id: 5596
+  verdict: confirmed
+  basis: TSS sheet p.51 footer 'Supersedes Schedule TSS-47' (eff 2018-06-01); predecessor SCHEDULE TSS-47
+- link_id: 98
+  from_version_id: 5716
+  to_version_id: 7274
+  verdict: confirmed
+  basis: Leaf 605 First Revised (2023-12-01) supersedes Original; predecessor Original Leaf 605 (2022-12-01)
+- link_id: 88
+  from_version_id: 5565
+  to_version_id: 6924
+  verdict: confirmed
+  basis: Original Leaf 663 prints 'Superseding NC Rider SRR-7'; predecessor RIDER SRR-7
+- link_id: 170
+  from_version_id: 7189
+  to_version_id: 7272
+  verdict: confirmed
+  basis: Rider CPRE-2 prints 'Supersedes Schedule CPRE-1'; predecessor Rider CPRE-1 (eff 2020-12-07)

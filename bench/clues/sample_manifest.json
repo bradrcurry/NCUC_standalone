@@ -1,0 +1,758 @@
+[
+ {
+  "sample": 1,
+  "hd_id": 1031,
+  "family_key": "nc-progress-leaf-718",
+  "source_pdf": "data\\historical\\ncuc\\e-2-sub-1300\\a02cfe2f-7950-4b05-95aa-41eacd45fa88.pdf",
+  "page": 1,
+  "strata": [
+   "dep_nonresidential",
+   "no_clues"
+  ],
+  "span": [
+   1,
+   4
+  ]
+ },
+ {
+  "sample": 2,
+  "hd_id": 7378,
+  "family_key": "nc-progress-leaf-501",
+  "source_pdf": "data\\historical\\ncuc\\e-2-sub-1107\\799dff1e-ce9e-4e73-a287-e53d08bc93e7.pdf",
+  "page": 59,
+  "strata": [
+   "dep_residential",
+   "historical",
+   "bundled",
+   "no_clues"
+  ],
+  "span": [
+   59,
+   67
+  ]
+ },
+ {
+  "sample": 3,
+  "hd_id": 3687,
+  "family_key": "nc-progress-leaf-602",
+  "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\7f394a37-a20d-4da5-b97d-0035c9d9c0c0.pdf",
+  "page": 154,
+  "strata": [
+   "dep_rider",
+   "bundled"
+  ],
+  "span": [
+   154,
+   154
+  ]
+ },
+ {
+  "sample": 4,
+  "hd_id": 7612,
+  "family_key": "nc-progress-rider-RIDERSCR1",
+  "source_pdf": "data\\historical\\ncuc\\e-7-sub-1243\\4e0c2c78-3f6f-47b5-8ae0-25aed12fe82f.pdf",
+  "page": 71,
+  "strata": [
+   "dep_rider",
+   "bundled"
+  ],
+  "span": [
+   71,
+   71
+  ]
+ },
+ {
+  "sample": 5,
+  "hd_id": 460,
+  "family_key": "nc-carolinas-rider-CEI",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-dec-dep-compliance-tariffs-rider-clean-energy-impact.pdf",
+  "page": 10,
+  "strata": [
+   "dec_rider"
+  ],
+  "span": [
+   10,
+   15
+  ]
+ },
+ {
+  "sample": 6,
+  "hd_id": 478,
+  "family_key": "nc-carolinas-rider-STS",
+  "source_pdf": "data\\historical\\ncuc\\e-7-sub-1243\\d9c03aa1-3e27-4c1f-a967-8a09b6eb1316.pdf",
+  "page": 2,
+  "strata": [
+   "dec_rider",
+   "redline"
+  ],
+  "span": [
+   2,
+   2
+  ]
+ },
+ {
+  "sample": 7,
+  "hd_id": 7675,
+  "family_key": "nc-carolinas-rider-EDIT4",
+  "source_pdf": "data\\historical\\ncuc\\e-7-sub-1146\\2b313fc1-fca0-4b0e-8968-62d470550b16.pdf",
+  "page": 6,
+  "strata": [
+   "dec_rider",
+   "redline"
+  ],
+  "span": [
+   6,
+   7
+  ]
+ },
+ {
+  "sample": 8,
+  "hd_id": 7676,
+  "family_key": "nc-carolinas-rider-SUMMARY",
+  "source_pdf": "data\\historical\\ncuc\\e-7-sub-1146\\2b313fc1-fca0-4b0e-8968-62d470550b16.pdf",
+  "page": 8,
+  "strata": [
+   "dec_rider_summary",
+   "redline"
+  ],
+  "span": [
+   8,
+   11
+  ]
+ },
+ {
+  "sample": 9,
+  "hd_id": 536,
+  "family_key": "nc-carolinas-rider-SUMMARY",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-duke-energy-carolinas-llc-s-revisions-to-rate-compliance-filing-of-approved-tar.pdf",
+  "page": 8,
+  "strata": [
+   "dec_rider_summary",
+   "historical",
+   "bundled"
+  ],
+  "span": [
+   8,
+   12
+  ]
+ },
+ {
+  "sample": 10,
+  "hd_id": 2020,
+  "family_key": "nc-carolinas-rider-SUMMARY",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-dec-compliance-tariff-for-existing-dsm-program-rider-edpr.pdf",
+  "page": 7,
+  "strata": [
+   "dec_rider_summary",
+   "redline"
+  ],
+  "span": [
+   7,
+   10
+  ]
+ },
+ {
+  "sample": 11,
+  "hd_id": 7175,
+  "family_key": "nc-carolinas-schedule-RE",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-duke-energy-carolinas-llc-s-revisions-to-rate-compliance-filing-of-approved-tar.pdf",
+  "page": 56,
+  "strata": [
+   "dec_residential",
+   "historical",
+   "bundled"
+  ],
+  "span": [
+   56,
+   57
+  ]
+ },
+ {
+  "sample": 12,
+  "hd_id": 7761,
+  "family_key": "nc-carolinas-schedule-RETC",
+  "source_pdf": "data\\historical\\ncuc\\e-7-sub-1253\\3d73c0a1-aae9-480c-b96f-10aaae7ddf1d.pdf",
+  "page": 16,
+  "strata": [
+   "dec_residential",
+   "bundled"
+  ],
+  "span": [
+   16,
+   21
+  ]
+ },
+ {
+  "sample": 13,
+  "hd_id": 1875,
+  "family_key": "nc-carolinas-schedule-RS",
+  "source_pdf": "data\\historical\\ncuc\\e-7-sub-1276\\a471be0b-5539-4696-999a-d250438b3589.pdf",
+  "page": 1,
+  "strata": [
+   "dec_residential"
+  ],
+  "span": [
+   1,
+   2
+  ]
+ },
+ {
+  "sample": 14,
+  "hd_id": 7382,
+  "family_key": "nc-carolinas-schedule-WC",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-duke-power-s-rate-schedule-riders.pdf",
+  "page": 8,
+  "strata": [
+   "dec_residential",
+   "bundled"
+  ],
+  "span": [
+   8,
+   9
+  ]
+ },
+ {
+  "sample": 15,
+  "hd_id": 399,
+  "family_key": "nc-progress-leaf-667",
+  "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\3f92be50-2f10-4d4c-8952-2bccaa339aba.pdf",
+  "page": 215,
+  "strata": [
+   "dep_rider",
+   "bundled"
+  ],
+  "span": [
+   215,
+   218
+  ]
+ },
+ {
+  "sample": 16,
+  "hd_id": 7782,
+  "family_key": "nc-progress-leaf-611",
+  "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\3f92be50-2f10-4d4c-8952-2bccaa339aba.pdf",
+  "page": 143,
+  "strata": [
+   "dep_rider",
+   "bundled"
+  ],
+  "span": [
+   143,
+   143
+  ]
+ },
+ {
+  "sample": 17,
+  "hd_id": 2275,
+  "family_key": "nc-progress-leaf-600",
+  "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\1b72e8de-c435-43b7-9b88-dfc4c0a8a97b.pdf",
+  "page": 1,
+  "strata": [
+   "dep_rider_summary",
+   "bundled",
+   "no_clues"
+  ],
+  "span": [
+   1,
+   1
+  ]
+ },
+ {
+  "sample": 18,
+  "hd_id": 40,
+  "family_key": "nc-progress-leaf-600",
+  "source_pdf": "data\\historical\\raw\\nc\\progress\\rider\\summary-of-rider-adjustments-leaf-no-600-eff-2024-04-01-data-historical-manual-l.pdf",
+  "page": 1,
+  "strata": [
+   "dep_rider_summary"
+  ],
+  "span": [
+   1,
+   5
+  ]
+ },
+ {
+  "sample": 19,
+  "hd_id": 2498,
+  "family_key": "nc-progress-leaf-600",
+  "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300\\f76e6a9b-98de-4704-b456-8c20214bd981.pdf",
+  "page": 3,
+  "strata": [
+   "dep_rider_summary"
+  ],
+  "span": [
+   3,
+   12
+  ]
+ },
+ {
+  "sample": 20,
+  "hd_id": 5313,
+  "family_key": "nc-progress-leaf-600",
+  "source_pdf": "data\\historical\\ncuc\\e-2-sub-1300\\f5761884-4b3d-4d40-adfe-1a5452ad1f2c.pdf",
+  "page": 2,
+  "strata": [
+   "dep_rider_summary",
+   "redline"
+  ],
+  "span": [
+   2,
+   14
+  ]
+ },
+ {
+  "sample": 21,
+  "hd_id": 7480,
+  "family_key": "nc-carolinas-schedule-PPBE",
+  "source_pdf": "data\\historical\\ncuc\\e-7-sub-1304\\8d93cd19-56d4-4522-a23c-a2ab87a354c7.pdf",
+  "page": 1,
+  "strata": [
+   "dec_nonresidential",
+   "bundled",
+   "ocr",
+   "no_clues"
+  ],
+  "span": [
+   1,
+   170
+  ]
+ },
+ {
+  "sample": 22,
+  "hd_id": 7234,
+  "family_key": "nc-progress-leaf-533",
+  "source_pdf": "data\\historical\\ncuc\\e-2-sub-1354\\752bbc34-999f-401c-bb1a-4a2f60db4a93.pdf",
+  "page": 1,
+  "strata": [
+   "dep_nonresidential",
+   "bundled",
+   "ocr",
+   "no_clues"
+  ],
+  "span": [
+   1,
+   42
+  ]
+ },
+ {
+  "sample": 23,
+  "hd_id": 7247,
+  "family_key": "nc-progress-leaf-602",
+  "source_pdf": "data\\historical\\ncuc\\e-2-sub-1354\\752bbc34-999f-401c-bb1a-4a2f60db4a93.pdf",
+  "page": 248,
+  "strata": [
+   "dep_rider",
+   "bundled",
+   "ocr",
+   "no_clues"
+  ],
+  "span": [
+   248,
+   254
+  ]
+ },
+ {
+  "sample": 24,
+  "hd_id": 7485,
+  "family_key": "nc-carolinas-rider-EE",
+  "source_pdf": "data\\historical\\ncuc\\e-7-sub-1305\\49a98fdc-115f-4b59-84ea-d37fd3401fe6.pdf",
+  "page": 56,
+  "strata": [
+   "dec_rider",
+   "bundled",
+   "ocr"
+  ],
+  "span": [
+   56,
+   68
+  ]
+ },
+ {
+  "sample": 25,
+  "hd_id": 7387,
+  "family_key": "nc-carolinas-schedule-PL",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-duke-power-s-rate-schedule-riders.pdf",
+  "page": 26,
+  "strata": [
+   "dec_nonresidential",
+   "historical",
+   "bundled"
+  ],
+  "span": [
+   26,
+   27
+  ]
+ },
+ {
+  "sample": 26,
+  "hd_id": 7148,
+  "family_key": "nc-carolinas-schedule-I",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-nantahala-s-rate-schedule-riders.pdf",
+  "page": 22,
+  "strata": [
+   "dec_nonresidential",
+   "bundled"
+  ],
+  "span": [
+   22,
+   22
+  ]
+ },
+ {
+  "sample": 27,
+  "hd_id": 920,
+  "family_key": "nc-carolinas-schedule-SGS",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-nantahala-s-rate-schedule-riders.pdf",
+  "page": 8,
+  "strata": [
+   "dec_nonresidential",
+   "historical",
+   "bundled"
+  ],
+  "span": [
+   8,
+   8
+  ]
+ },
+ {
+  "sample": 28,
+  "hd_id": 7769,
+  "family_key": "nc-carolinas-schedule-BC",
+  "source_pdf": "data\\historical\\ncuc\\e-7-sub-1276\\ce19e513-d58a-4800-86ce-14428d9de5e9.pdf",
+  "page": 1,
+  "strata": [
+   "dec_nonresidential"
+  ],
+  "span": [
+   1,
+   2
+  ]
+ },
+ {
+  "sample": 29,
+  "hd_id": 7717,
+  "family_key": "nc-progress-leaf-520",
+  "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1250\\d6fca175-3eed-4754-bef0-b954a6f6a89a.pdf",
+  "page": 20,
+  "strata": [
+   "dep_nonresidential",
+   "bundled",
+   "no_clues"
+  ],
+  "span": [
+   20,
+   22
+  ]
+ },
+ {
+  "sample": 30,
+  "hd_id": 2520,
+  "family_key": "nc-progress-leaf-574",
+  "source_pdf": "data\\historical\\ncuc\\e-2-sub-1252\\44d04bff-8457-41d7-924b-74a5f84289fb.pdf",
+  "page": 51,
+  "strata": [
+   "dep_nonresidential",
+   "bundled"
+  ],
+  "span": [
+   51,
+   52
+  ]
+ },
+ {
+  "sample": 31,
+  "hd_id": 410,
+  "family_key": "nc-progress-leaf-705",
+  "source_pdf": "data\\raw\\nc\\progress\\rate\\leaf-no-705-program-eel-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no-705-pr.pdf",
+  "page": 1,
+  "strata": [
+   "dep_nonresidential"
+  ],
+  "span": [
+   1,
+   1
+  ]
+ },
+ {
+  "sample": 32,
+  "hd_id": 5459,
+  "family_key": "nc-progress-leaf-501",
+  "source_pdf": "data\\historical\\ncuc\\e-2-sub-1173\\05ac9b0f-8607-43aa-8f8f-22ccca0bb594.pdf",
+  "page": 1,
+  "strata": [
+   "dep_residential",
+   "no_clues"
+  ],
+  "span": [
+   1,
+   89
+  ]
+ },
+ {
+  "sample": 33,
+  "hd_id": 335,
+  "family_key": "nc-progress-leaf-503",
+  "source_pdf": "data\\raw\\nc\\progress\\rate\\leaf-no-503-schedule-r-tou-cpp-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no.pdf",
+  "page": 1,
+  "strata": [
+   "dep_residential"
+  ],
+  "span": [
+   1,
+   4
+  ]
+ },
+ {
+  "sample": 34,
+  "hd_id": 1791,
+  "family_key": "nc-progress-leaf-503",
+  "source_pdf": "data/historical/ncuc/e-2-sub-1219/784821eb-2349-42a7-9622-e619a5ef4a51.pdf",
+  "page": 78,
+  "strata": [
+   "dep_residential",
+   "bundled"
+  ],
+  "span": [
+   78,
+   80
+  ]
+ },
+ {
+  "sample": 35,
+  "hd_id": 30,
+  "family_key": "nc-progress-leaf-500",
+  "source_pdf": "data\\historical\\raw\\nc\\progress\\rate\\residential-service-leaf-no-500-eff-2025-10-01-data-historical-manual-leaf-no-50.pdf",
+  "page": 1,
+  "strata": [
+   "dep_residential"
+  ],
+  "span": [
+   1,
+   2
+  ]
+ },
+ {
+  "sample": 36,
+  "hd_id": 496,
+  "family_key": "nc-progress-leaf-601",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-2\\e-2-nodate-dep-corrected-compliance-tariff.pdf",
+  "page": 5,
+  "strata": [
+   "dep_rider",
+   "redline"
+  ],
+  "span": [
+   5,
+   8
+  ]
+ },
+ {
+  "sample": 37,
+  "hd_id": 7599,
+  "family_key": "nc-progress-leaf-800",
+  "source_pdf": "data\\historical\\ncuc\\e-7-sub-1300\\25ea8bc3-bfbb-48ca-8bfd-2b47fdbb0674.pdf",
+  "page": 59,
+  "strata": [
+   "dep_nonresidential",
+   "bundled"
+  ],
+  "span": [
+   59,
+   98
+  ]
+ },
+ {
+  "sample": 38,
+  "hd_id": 7579,
+  "family_key": "nc-progress-leaf-610",
+  "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\3f92be50-2f10-4d4c-8952-2bccaa339aba.pdf",
+  "page": 142,
+  "strata": [
+   "dep_rider",
+   "bundled"
+  ],
+  "span": [
+   142,
+   142
+  ]
+ },
+ {
+  "sample": 39,
+  "hd_id": 818,
+  "family_key": "nc-progress-leaf-602",
+  "source_pdf": "data\\historical\\ncuc\\e-2-sub-1253\\f596819a-b1ba-447f-985f-f42f2346139f.pdf",
+  "page": 1,
+  "strata": [
+   "dep_rider",
+   "no_clues"
+  ],
+  "span": [
+   1,
+   118
+  ]
+ },
+ {
+  "sample": 40,
+  "hd_id": 176,
+  "family_key": "nc-progress-leaf-572",
+  "source_pdf": "data\\historical\\raw\\nc\\progress\\rider\\street-lighting-service-residential-subdivisions-ncuc-viewfile-aspx-id-f1368a53-.pdf",
+  "page": 1,
+  "strata": [
+   "dep_nonresidential"
+  ],
+  "span": [
+   1,
+   129
+  ]
+ },
+ {
+  "sample": 41,
+  "hd_id": 2036,
+  "family_key": "nc-carolinas-rider-BPMPPTTRUEUP",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-duke-energy-carolinas-llc-s-revised-bpm-rider-tariff-sheet.pdf",
+  "page": 2,
+  "strata": [
+   "dec_rider",
+   "historical"
+  ],
+  "span": [
+   2,
+   4
+  ]
+ },
+ {
+  "sample": 42,
+  "hd_id": 341,
+  "family_key": "nc-progress-leaf-524",
+  "source_pdf": "data\\raw\\nc\\progress\\rate\\leaf-no-524-schedule-mgs-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no-524-s.pdf",
+  "page": 1,
+  "strata": [
+   "dep_nonresidential"
+  ],
+  "span": [
+   1,
+   3
+  ]
+ },
+ {
+  "sample": 43,
+  "hd_id": 2097,
+  "family_key": "nc-carolinas-rider-EE",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-duke-energy-carolinas-revised-tariff-for-vintage-1-of-rider-ee.pdf",
+  "page": 2,
+  "strata": [
+   "dec_rider",
+   "historical"
+  ],
+  "span": [
+   2,
+   5
+  ]
+ },
+ {
+  "sample": 44,
+  "hd_id": 5284,
+  "family_key": "nc-progress-leaf-707",
+  "source_pdf": "data\\historical\\ncuc\\e-2-sub-1145\\a111f643-5e3c-446b-b413-af4833130943.pdf",
+  "page": 59,
+  "strata": [
+   "dep_nonresidential",
+   "bundled",
+   "no_clues"
+  ],
+  "span": [
+   59,
+   63
+  ]
+ },
+ {
+  "sample": 45,
+  "hd_id": 772,
+  "family_key": "nc-progress-leaf-602",
+  "source_pdf": "data\\historical\\ncuc\\e-2-sub-1176\\9c6487be-f8af-4179-94c4-56c03aeecb18.pdf",
+  "page": 1,
+  "strata": [
+   "dep_rider",
+   "no_clues"
+  ],
+  "span": [
+   1,
+   4
+  ]
+ },
+ {
+  "sample": 46,
+  "hd_id": 7293,
+  "family_key": "nc-progress-leaf-663",
+  "source_pdf": "data\\historical\\ncuc\\e-2-sub-1167\\c8fb6991-e250-4d05-b0b1-37ab25882e7c.pdf",
+  "page": 3,
+  "strata": [
+   "dep_rider",
+   "bundled"
+  ],
+  "span": [
+   3,
+   22
+  ]
+ },
+ {
+  "sample": 47,
+  "hd_id": 7341,
+  "family_key": "nc-progress-leaf-713",
+  "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\3f92be50-2f10-4d4c-8952-2bccaa339aba.pdf",
+  "page": 254,
+  "strata": [
+   "dep_nonresidential",
+   "bundled"
+  ],
+  "span": [
+   254,
+   255
+  ]
+ },
+ {
+  "sample": 48,
+  "hd_id": 337,
+  "family_key": "nc-progress-leaf-520",
+  "source_pdf": "data\\raw\\nc\\progress\\rate\\leaf-no-520-schedule-sgs-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no-520-s.pdf",
+  "page": 1,
+  "strata": [
+   "dep_nonresidential"
+  ],
+  "span": [
+   1,
+   2
+  ]
+ },
+ {
+  "sample": 49,
+  "hd_id": 7171,
+  "family_key": "nc-carolinas-schedule-OPT-G",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-duke-energy-carolinas-llc-s-revisions-to-rate-compliance-filing-of-approved-tar.pdf",
+  "page": 40,
+  "strata": [
+   "dec_nonresidential",
+   "historical",
+   "bundled"
+  ],
+  "span": [
+   40,
+   42
+  ]
+ },
+ {
+  "sample": 50,
+  "hd_id": 179,
+  "family_key": "nc-progress-leaf-602",
+  "source_pdf": "data\\historical\\raw\\nc\\progress\\other\\joint-agency-asset-rider-jaa-ncuc-viewfile-aspx-id-f9913a14-bbd0-4b63-a2ca-ef142.pdf",
+  "page": 1,
+  "strata": [
+   "dep_rider",
+   "no_clues"
+  ],
+  "span": [
+   1,
+   19
+  ]
+ }
+]
