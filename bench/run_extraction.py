@@ -97,7 +97,7 @@ def build_doc(entry: dict, conn: sqlite3.Connection) -> dict:
     return doc
 
 
-def make_representation_provider(entries: dict[str, dict]):
+def make_representation_provider(entries: dict[str, dict], docling_dir: Path = BENCH / "docling"):
     """Representations for benchmark docs: committed Docling cache, else native PDF."""
     from duke_rates.document_intelligence.adapters import (
         representation_from_docling,
@@ -108,7 +108,7 @@ def make_representation_provider(entries: dict[str, dict]):
         entry = entries[doc["_bench_doc_id"]]
         start, end = doc.get("start_page"), doc.get("end_page")
         page_range = (int(start), int(end or start)) if start else None
-        cache = BENCH / "docling" / f"{entry['doc_id']}.docling.json.gz"
+        cache = docling_dir / f"{entry['doc_id']}.docling.json.gz"
         if mode in ("docling", "hybrid") and cache.exists():
             with gzip.open(cache, "rt", encoding="utf-8") as handle:
                 envelope = json.load(handle)
@@ -180,6 +180,8 @@ def main() -> None:
     ap.add_argument("--label", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--mode", default="legacy", choices=("legacy", "docling", "native", "hybrid"))
+    ap.add_argument("--docling-cache", default=str(BENCH / "docling"),
+                    help="directory of <doc_id>.docling.json.gz envelopes (default: the committed cache)")
     args = ap.parse_args()
 
     if Path(args.db).resolve() == PRODUCTION_DB:
@@ -200,7 +202,7 @@ def main() -> None:
     corpus = yaml.safe_load(Path(args.corpus).read_text(encoding="utf-8"))["docs"]
     if args.mode != "legacy":
         extractor.representation_provider = make_representation_provider(
-            {entry["doc_id"]: entry for entry in corpus}
+            {entry["doc_id"]: entry for entry in corpus}, Path(args.docling_cache)
         )
     conn = sqlite3.connect(f"file:{Path(args.db).as_posix()}?mode=ro", uri=True)
     results = []

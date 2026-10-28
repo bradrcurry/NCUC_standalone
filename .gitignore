@@ -2,6 +2,8 @@
 .venv/
 .venv312/
 .venv312-ocr/
+.venv-docling-next/
+.cache-docling-next/
 __pycache__/
 .pytest_cache/
 .ruff_cache/
