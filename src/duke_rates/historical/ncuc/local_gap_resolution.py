@@ -10,6 +10,15 @@ Nothing is bound, imported or promoted. A candidate is a pointer for review:
 * ``full`` match: the page prints the expected revision, the gap's utility, and
   an effective date inside the gap's window, and shows no redline/proposal
   marker. The gap moves to ``verification_required``.
+* Redline markup is read from the candidate's **own pages** (D2): coloured
+  text with bars through or under it, strikeout flags or annotations. A page
+  run with redline or suspect markup is never ``full``. When every printed
+  occurrence of the identity text is struck through, the identity is not on
+  the page: the candidate is kept for audit but marked ``identity_struck`` and
+  does not advance the gap.
+* The effective-date check uses the gap window, widened to the anchor
+  versions' observed dates when ``effective_date_assessments`` reports a
+  conflict (D2), so a wrong stored date cannot rule out a candidate.
 * ``partial`` match: the revision is printed but a criterion is unknown or
   fails (other than utility). The gap moves to ``candidate_found``.
 * Pages naming another utility are dropped (counted, never stored).
@@ -37,9 +46,13 @@ from duke_rates.historical.ncuc.clue_ledger import (
     write_page_clues,
 )
 from duke_rates.historical.ncuc.regulatory_clues import EXTRACTOR_VERSION, extract_page_clues
+from duke_rates.historical.ncuc.effective_date_reconciliation import evaluation_window
 from duke_rates.historical.ncuc.search_ledger import SearchLedger
+from duke_rates.parse.redline_detector import PageRedlineReader, summarize_page_evidence
 
-RESOLVER_VERSION = "local_gap_resolution@1.1.0"  # 1.1.0: redline fingerprints block a full match
+# 1.1.0: redline fingerprints block a full match
+# 1.2.0: page-level redline evidence; struck identity text; reconciled date window
+RESOLVER_VERSION = "local_gap_resolution@1.2.0"
 #: Gap types whose target can be recognised on a page.
 PAGE_SEARCHABLE = (
     "missing_predecessor_revision",
@@ -48,7 +61,9 @@ PAGE_SEARCHABLE = (
     "missing_successor_document",
 )
 _NATIVE = re.compile(r"^page_miner_v(\d+)$")
-_LOCKED_STATUSES = ("verification_required", "verified", "resolved")
+#: Set by a reviewer (or later): a rerun never moves a gap out of these.
+#: ``verification_required`` is a machine status and is re-evaluated (1.2.0).
+_LOCKED_STATUSES = ("verified", "resolved")
 
 
 def _now() -> str:
@@ -142,13 +157,31 @@ def _bound_documents_by_pdf(conn: sqlite3.Connection) -> dict[str, list[tuple]]:
     return out
 
 
-def _evaluate(gap: sqlite3.Row, clue_rows: list[sqlite3.Row]) -> dict:
+def reconciled_window(conn: sqlite3.Connection, gap: sqlite3.Row) -> dict:
+    """The gap window, widened where an anchor version's stored date disagrees with its sheet."""
+    ws, we = gap["window_start"], gap["window_end"]
+    basis = []
+    successor = gap["known_successor_version_id"] or gap["anchor_version_id"]
+    for vid, side in ((gap["known_predecessor_version_id"], "start"), (successor, "end")):
+        a = evaluation_window(conn, vid)
+        if not a or a["status"] not in ("conflict", "ambiguous") or not a["window"]:
+            continue
+        if side == "start" and ws is not None and a["window"][0] < ws:
+            ws = a["window"][0]
+            basis.append({"side": "start", "version_id": vid, "status": a["status"], "stored": a["stored"]})
+        if side == "end" and we is not None and a["window"][1] > we:
+            we = a["window"][1]
+            basis.append({"side": "end", "version_id": vid, "status": a["status"], "stored": a["stored"]})
+    return {"window": [ws, we], "widened_by": basis}
+
+
+def _evaluate(gap: sqlite3.Row, clue_rows: list[sqlite3.Row], window: dict | None = None) -> dict:
     utilities = {r["normalized_value"] for r in clue_rows if r["clue_kind"] == "utility" and r["role"] == "header"}
     gap_utility = gap["utility"]
     utility_match = None if not (utilities and gap_utility) else gap_utility in utilities
     dates = [r["normalized_value"].split("/")[0] for r in clue_rows
              if r["clue_kind"] == "effective_date" and r["normalized_value"]]
-    ws, we = gap["window_start"], gap["window_end"]
+    ws, we = (window or {}).get("window") or (gap["window_start"], gap["window_end"])
     in_window = None
     if dates:
         in_window = any((ws is None or d >= ws) and (we is None or d < we) for d in dates)
@@ -156,7 +189,9 @@ def _evaluate(gap: sqlite3.Row, clue_rows: list[sqlite3.Row]) -> dict:
                or (r["clue_kind"] == "revision" and json.loads(r["normalized_json"]).get("proposed_marker"))]
     return {"utility_printed": sorted(utilities), "utility_match": utility_match,
             "effective_dates_printed": sorted(set(dates)), "effective_in_window": in_window,
-            "window": [ws, we], "redline_or_proposal_clue_ids": redline}
+            "window": [ws, we], "stored_window": [gap["window_start"], gap["window_end"]],
+            "window_widened_by": (window or {}).get("widened_by", []),
+            "redline_or_proposal_clue_ids": redline}
 
 
 def resolve_gaps_locally(
@@ -178,6 +213,7 @@ def resolve_gaps_locally(
     index = index or build_archive_index(conn)
     bound = _bound_documents_by_pdf(conn)
     locator = BboxLocator()
+    redline_reader = PageRedlineReader()
     try:
         for gap in gaps:
             if gap["gap_type"] == "missing_regulatory_order":
@@ -197,17 +233,19 @@ def resolve_gaps_locally(
                 stats["repeated_searches_avoided"] += 1
                 continue
             with ledger.attempt("local", search_params, caller=RESOLVER_VERSION, gap_id=gap["id"]) as attempt:
-                candidate_ids = _search_pages(conn, gap, tokens, index, bound, locator, attempt.id, stats)
+                candidate_ids = _search_pages(conn, gap, tokens, index, bound, locator, attempt.id, stats,
+                                              redline_reader)
                 attempt.finish(refs=candidate_ids)
             stats["local_searches_run"] += 1
             _update_status(conn, gap, candidate_ids)
     finally:
         locator.close()
+        redline_reader.close()
         conn.commit()
     return {"stats": dict(stats), "archive_state": index.state, "pages_indexed": index.pages_indexed}
 
 
-def _search_pages(conn, gap, tokens, index, bound, locator, attempt_id, stats) -> list[int]:
+def _search_pages(conn, gap, tokens, index, bound, locator, attempt_id, stats, redline_reader) -> list[int]:
     anchor_pages = set()
     if gap["anchor_version_id"]:
         row = conn.execute(
@@ -224,6 +262,7 @@ def _search_pages(conn, gap, tokens, index, bound, locator, attempt_id, stats) -
                 hits[source_pdf].append(page)
     candidate_ids: list[int] = []
     seen: set[tuple] = set()
+    window = reconciled_window(conn, gap)
     for source_pdf, pages in sorted(hits.items()):
         identity = file_identity(source_pdf)
         if identity.sha256 is None:
@@ -251,15 +290,22 @@ def _search_pages(conn, gap, tokens, index, bound, locator, attempt_id, stats) -
             rows = conn.execute(
                 f"SELECT * FROM regulatory_clues WHERE id IN ({','.join('?' * len(clue_ids))})", clue_ids
             ).fetchall()
-            matched = [r["id"] for r in rows if r["clue_kind"] in ("revision", "schedule_code")
-                       and _row_token(r) in tokens]
-            match = _evaluate(gap, rows)
+            matched_rows = [r for r in rows if r["clue_kind"] in ("revision", "schedule_code")
+                            and _row_token(r) in tokens]
+            matched = [r["id"] for r in matched_rows]
+            struck = [r["id"] for r in matched_rows
+                      if redline_reader.text_struck(source_pdf, r["page"], r["printed_text"]) is True]
+            match = _evaluate(gap, rows, window)
             match["redline_fingerprint"] = _redline_fingerprint(conn, source_pdf, start, end)
+            match["page_redline"] = summarize_page_evidence(redline_reader.pages(source_pdf, start, end))
+            match["struck_identity_clue_ids"] = struck
+            match["identity_struck"] = bool(matched) and len(struck) == len(matched)
             if match["utility_match"] is False:
                 stats["candidates_dropped_other_utility"] += 1
                 continue
             full = match["utility_match"] is True and match["effective_in_window"] is True \
-                and not match["redline_or_proposal_clue_ids"] and not match["redline_fingerprint"]
+                and not match["redline_or_proposal_clue_ids"] and not match["redline_fingerprint"] \
+                and match["page_redline"]["verdict"] not in ("redline", "suspect") and not match["identity_struck"]
             bound_here = [
                 {"historical_document_id": hid, "family_key": fam}
                 for hid, s, e, fam in bound.get(source_pdf, []) if s <= end and e >= start
@@ -268,7 +314,9 @@ def _search_pages(conn, gap, tokens, index, bound, locator, attempt_id, stats) -
             rationale = (
                 f"pages {start}-{end} print {gap['expected_revision'] or tokens[0]}; "
                 f"utility={match['utility_match']}, effective_in_window={match['effective_in_window']}, "
-                f"redline_or_proposal={bool(match['redline_or_proposal_clue_ids'])}"
+                f"redline_or_proposal={bool(match['redline_or_proposal_clue_ids'])}, "
+                f"page_redline={match['page_redline']['verdict']}"
+                + ("; every printed occurrence of the identity is struck through" if match["identity_struck"] else "")
             )
             uid = hashlib.sha256(json.dumps([gap["gap_uid"], identity.sha256, start, end]).encode()).hexdigest()
             conn.execute(
@@ -285,9 +333,14 @@ def _search_pages(conn, gap, tokens, index, bound, locator, attempt_id, stats) -
                  json.dumps([b["historical_document_id"] for b in bound_here]), json.dumps(matched),
                  json.dumps(match), "full" if full else "partial", rationale, _now()),
             )
+            if match["identity_struck"]:
+                stats["candidates_identity_struck"] += 1  # kept for audit; does not advance the gap
+                continue
             candidate_ids.append(
                 conn.execute("SELECT id FROM gap_candidates WHERE candidate_uid = ?", (uid,)).fetchone()[0])
             stats["candidates_full" if full else "candidates_partial"] += 1
+            if match["page_redline"]["verdict"] in ("redline", "suspect"):
+                stats[f"candidates_page_{match['page_redline']['verdict']}"] += 1
     return candidate_ids
 
 

@@ -262,6 +262,7 @@ provenance history
 provenance issues
 provenance migrate
 provenance promote
+provenance reconcile-effective-dates
 provenance reject
 provenance resolve-gaps-local
 provenance rollback

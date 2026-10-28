@@ -593,3 +593,20 @@ def search_ledger_cmd(db: Path = _DB_OPTION) -> None:
     from duke_rates.historical.ncuc.search_ledger import search_ledger_summary
 
     _echo(search_ledger_summary(_open(db, write=False)))
+
+
+@provenance_app.command("reconcile-effective-dates")
+def reconcile_effective_dates_cmd(
+    db: Path = _DB_OPTION,
+    allow_production: bool = _ALLOW_PROD,
+    json_out: Path | None = typer.Option(None, "--json", help="Also write every conflict here."),
+) -> None:
+    """Compare stored effective_start with the dates each version's own sheet prints (writes no version)."""
+    from duke_rates.historical.ncuc import effective_date_reconciliation as edr
+
+    conn = _ledger_conn(db, allow_production)
+    report = edr.build_effective_date_assessments(conn)
+    report["summary"] = edr.assessment_summary(conn)
+    _write_json(json_out, report)
+    _echo({k: report[k] for k in ("versions_assessed", "by_status", "bound_violations")}
+          | {"conflicts": len(report["summary"]["conflicts"])})
