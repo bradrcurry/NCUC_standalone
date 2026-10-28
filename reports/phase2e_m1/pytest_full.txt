@@ -1,0 +1,96 @@
+........................................................................ [  3%]
+.........ss............................................................. [  7%]
+........................................................................ [ 11%]
+........sssssssssssssssssssssssssssssssss............................... [ 15%]
+.......FF.......................................sssss......ssss......... [ 19%]
+........ss.............................................................. [ 23%]
+........................................................................ [ 27%]
+........................................................................ [ 31%]
+........................................................................ [ 35%]
+........................................................................ [ 39%]
+........................................................................ [ 43%]
+........................................................................ [ 47%]
+........................................................................ [ 51%]
+..........xxxx.......................................................... [ 55%]
+........................................................................ [ 59%]
+........................................................................ [ 63%]
+........................................................................ [ 67%]
+........................................................................ [ 71%]
+........................................................................ [ 75%]
+.....sssssssssssssssssssss.............................................. [ 79%]
+........................................................................ [ 83%]
+........................................................................ [ 87%]
+........................................................................ [ 91%]
+.............................................................sssssssssss [ 95%]
+sssssssssssss........................................................... [ 99%]
+...............                                                          [100%]
+================================== FAILURES ===================================
+__________________ test_cli_command_surface_matches_snapshot __________________
+
+    def test_cli_command_surface_matches_snapshot() -> None:
+        """Fail loudly if the command set drifts during the cli.py split.
+    
+        The intent is *not* to forbid changes — it's to force them to be
+        deliberate. If this fails after a legitimate add/rename, update the
+        snapshot file in the same commit as the cli change.
+        """
+        current = _current_command_names()
+        assert SNAPSHOT_PATH.exists(), (
+            f"Snapshot missing. Create it by writing the current command list to "
+            f"{SNAPSHOT_PATH}:\n" + "\n".join(current)
+        )
+        expected = [
+            line.strip()
+            for line in SNAPSHOT_PATH.read_text(encoding="utf-8").splitlines()
+            if line.strip() and not line.strip().startswith("#")
+        ]
+    
+        missing = sorted(set(expected) - set(current))
+        added = sorted(set(current) - set(expected))
+>       assert not missing and not added, (
+            "CLI command surface drift detected.\n"
+            f"  Missing (in snapshot but not registered): {missing}\n"
+            f"  Added   (registered but not in snapshot): {added}\n"
+            f"If intentional, update {SNAPSHOT_PATH.name} in this commit."
+        )
+E       AssertionError: CLI command surface drift detected.
+E           Missing (in snapshot but not registered): []
+E           Added   (registered but not in snapshot): ['provenance audit-docling-coverage']
+E         If intentional, update cli_command_surface.snapshot.txt in this commit.
+E       assert (not [] and not ['provenance audit-docling-coverage'])
+
+tests\test_cli_command_surface.py:59: AssertionError
+______________________ test_cli_command_count_is_stable _______________________
+
+    def test_cli_command_count_is_stable() -> None:
+        """Belt-and-suspenders check that the total count hasn't shifted.
+    
+        Independent of the snapshot — catches the case where someone updates
+        the snapshot file in one direction but a count drift signals an
+        unintended change in another.
+        """
+        expected_count = 353
+        actual = len(_current_command_names())
+>       assert actual == expected_count, (
+            f"Expected {expected_count} CLI commands, got {actual}. "
+            "If intentional, update expected_count and the snapshot file."
+        )
+E       AssertionError: Expected 353 CLI commands, got 354. If intentional, update expected_count and the snapshot file.
+E       assert 354 == 353
+
+tests\test_cli_command_surface.py:76: AssertionError
+============================== warnings summary ===============================
+tests/test_missing_clean_doc_search.py: 44 warnings
+tests/test_ncuc_portal_harvester.py: 3 warnings
+  C:\Python\Duke\Standalone\src\duke_rates\historical\ncuc\result_harvester.py:69: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    discovered_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+tests/test_missing_clean_doc_search.py: 44 warnings
+  C:\Python\Duke\Standalone\src\duke_rates\historical\ncuc\result_harvester.py:527: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    executed_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_cli_command_surface.py::test_cli_command_surface_matches_snapshot
+FAILED tests/test_cli_command_surface.py::test_cli_command_count_is_stable - ...
+2 failed, 1718 passed, 92 skipped, 4 xfailed, 91 warnings in 629.52s (0:10:29)
