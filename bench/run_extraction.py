@@ -23,6 +23,11 @@ tables) or ``hybrid`` (Docling when cached, otherwise native, merged with the
 legacy parse block by block). Code trees older than Phase 2B only support
 ``legacy``.
 
+``--docling-source db`` (Phase 2E M1) skips the committed cache and lets the
+extractor select Docling artifacts from ``--db`` the way production does,
+including the page-integrity check; each result then records the
+``structured_input`` diagnostics (backend used, fallback reason).
+
 Usage::
 
     python bench/run_extraction.py --src <tree>/src --db <scratch.db> --label repaired \
@@ -182,6 +187,9 @@ def main() -> None:
     ap.add_argument("--mode", default="legacy", choices=("legacy", "docling", "native", "hybrid"))
     ap.add_argument("--docling-cache", default=str(BENCH / "docling"),
                     help="directory of <doc_id>.docling.json.gz envelopes (default: the committed cache)")
+    ap.add_argument("--docling-source", default="cache", choices=("cache", "db"),
+                    help="cache: the --docling-cache envelopes (default); db: artifacts in --db, "
+                         "selected by the extractor as in production")
     args = ap.parse_args()
 
     if Path(args.db).resolve() == PRODUCTION_DB:
@@ -200,7 +208,7 @@ def main() -> None:
             setattr(extractor, name, lambda *a, **k: None)
 
     corpus = yaml.safe_load(Path(args.corpus).read_text(encoding="utf-8"))["docs"]
-    if args.mode != "legacy":
+    if args.mode != "legacy" and args.docling_source == "cache":
         extractor.representation_provider = make_representation_provider(
             {entry["doc_id"]: entry for entry in corpus}, Path(args.docling_cache)
         )
@@ -220,7 +228,7 @@ def main() -> None:
             error = f"{type(exc).__name__}: {exc}"
         elapsed = time.perf_counter() - t0
         effective_date = detect_effective_date(extractor, doc)
-        results.append({
+        result = {
             "doc_id": entry["doc_id"],
             "status": status,
             "profile": profile,
@@ -244,11 +252,15 @@ def main() -> None:
                 }
                 for c in charges
             ],
-        })
+        }
+        if args.docling_source == "db":
+            result["structured_input"] = (selection or {}).get("structured_input")
+        results.append(result)
         print(f"{entry['doc_id']:32} {status:22} {str(profile):40} n={len(charges):4} {elapsed:6.2f}s")
     conn.close()
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     Path(args.out).write_text(json.dumps({"label": args.label, "src": args.src, "mode": args.mode,
+                                          "docling_source": args.docling_source,
                                           "results": results}, indent=1),
                               encoding="utf-8")
 
