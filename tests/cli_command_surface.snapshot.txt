@@ -247,6 +247,7 @@ progress show-regulator-gaps
 progress show-search-pack
 promote-llm-charge-proposals-nc
 propose-llm-charge-promotions-nc
+provenance audit-docling-coverage
 provenance backfill
 provenance candidates
 provenance compare
