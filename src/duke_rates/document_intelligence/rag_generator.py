@@ -121,7 +121,24 @@ def _build_context_blocks(
         excerpt = (h.text_excerpt or "").replace("\f", " ").strip()
         if len(excerpt) > max_excerpt_chars:
             excerpt = excerpt[:max_excerpt_chars].rstrip() + "..."
-        block = f"[{i}] {h.citation()}  (similarity {h.similarity:.3f})\n{excerpt}"
+        # Metadata prefix: tells the LLM what kind of section this is
+        # before it sees the (often OCR-noisy) text. Helps disambiguate
+        # collaborative-meeting slides from actual rate schedules even
+        # when both carry the same schedule_code.
+        meta_bits: list[str] = []
+        if h.section_type:
+            meta_bits.append(f"section_type={h.section_type}")
+        if h.schedule_codes:
+            meta_bits.append(f"schedule_codes={','.join(h.schedule_codes[:5])}")
+        if h.rider_codes:
+            meta_bits.append(f"rider_codes={','.join(h.rider_codes[:5])}")
+        if h.leaf_numbers:
+            meta_bits.append(f"leaf={','.join(h.leaf_numbers[:5])}")
+        meta_line = " | ".join(meta_bits) if meta_bits else ""
+        block = f"[{i}] {h.citation()}  (similarity {h.similarity:.3f})"
+        if meta_line:
+            block += f"\n{meta_line}"
+        block += f"\n{excerpt}"
         if running > 0 and running + len(block) > max_context_chars:
             break
         chunks.append(block)
