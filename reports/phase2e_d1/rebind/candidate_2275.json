@@ -1,0 +1,129 @@
+{
+  "run_id": 2,
+  "version_id": 6056,
+  "extractor_status": "parsed",
+  "profile": "progress_rider_adjustment_matrix",
+  "structured_mode": "hybrid",
+  "needs_review": true,
+  "status": "ok",
+  "validation_status": "failed",
+  "run_issues": [
+    {
+      "level": "info",
+      "code": "parser_value_missing",
+      "detail": "'Schedule HP & Schedule LGS-RTP - BA-Fuel': text (0.0, None, 0.0) vs table (None, None, None); text value kept",
+      "refs": [
+        "Schedule HP & Schedule LGS-RTP - BA-Fuel"
+      ],
+      "needs_review": false
+    },
+    {
+      "level": "info",
+      "code": "parser_value_missing",
+      "detail": "'Schedule HP & Schedule LGS-RTP - BA-EMF': text (0.899, None, 0.0) vs table (None, None, None); text value kept",
+      "refs": [
+        "Schedule HP & Schedule LGS-RTP - BA-EMF"
+      ],
+      "needs_review": false
+    },
+    {
+      "level": "info",
+      "code": "parser_value_missing",
+      "detail": "'Schedule HP & Schedule LGS-RTP - BA-DSM': text (0.042, None, 0.042) vs table (None, None, None); text value kept",
+      "refs": [
+        "Schedule HP & Schedule LGS-RTP - BA-DSM"
+      ],
+      "needs_review": false
+    },
+    {
+      "level": "info",
+      "code": "parser_value_missing",
+      "detail": "'Schedule HP & Schedule LGS-RTP - BA-EE': text (0.424, None, 0.424) vs table (None, None, None); text value kept",
+      "refs": [
+        "Schedule HP & Schedule LGS-RTP - BA-EE"
+      ],
+      "needs_review": false
+    },
+    {
+      "level": "info",
+      "code": "parser_value_missing",
+      "detail": "'Schedule HP & Schedule LGS-RTP - BA': text (1.365, None, 0.466) vs table (None, None, None); text value kept",
+      "refs": [
+        "Schedule HP & Schedule LGS-RTP - BA"
+      ],
+      "needs_review": false
+    },
+    {
+      "level": "info",
+      "code": "parser_value_missing",
+      "detail": "'Schedule HP & Schedule LGS-RTP - RAL-2': text (-0.009, None, 0.0) vs table (None, None, None); text value kept",
+      "refs": [
+        "Schedule HP & Schedule LGS-RTP - RAL-2"
+      ],
+      "needs_review": false
+    },
+    {
+      "level": "info",
+      "code": "parser_value_missing",
+      "detail": "'Schedule HP & Schedule LGS-RTP - EDIT-4': text (-0.093, None, 0.0) vs table (None, None, None); text value kept",
+      "refs": [
+        "Schedule HP & Schedule LGS-RTP - EDIT-4"
+      ],
+      "needs_review": false
+    },
+    {
+      "level": "info",
+      "code": "parser_value_missing",
+      "detail": "'Schedule HP & Schedule LGS-RTP - CPRE': text (0.012, None, 0.012) vs table (None, None, None); text value kept",
+      "refs": [
+        "Schedule HP & Schedule LGS-RTP - CPRE"
+      ],
+      "needs_review": false
+    },
+    {
+      "level": "info",
+      "code": "parser_value_missing",
+      "detail": "'Schedule HP & Schedule LGS-RTP - ESM': text (0.0, None, 0.0) vs table (None, None, None); text value kept",
+      "refs": [
+        "Schedule HP & Schedule LGS-RTP - ESM"
+      ],
+      "needs_review": false
+    },
+    {
+      "level": "info",
+      "code": "parser_value_missing",
+      "detail": "'Schedule HP & Schedule LGS-RTP - PIM': text (0.0, None, 0.0) vs table (None, None, None); text value kept",
+      "refs": [
+        "Schedule HP & Schedule LGS-RTP - PIM"
+      ],
+      "needs_review": false
+    },
+    {
+      "level": "warning",
+      "code": "printed_precision_outlier",
+      "detail": "'Demand: Medium General Service Schedules Total Rider Adjustments' printed '0.9190': 4 decimals where 109/111 cents /kwh values print 3 (possible fused redline digits)",
+      "refs": [
+        "Demand: Medium General Service Schedules Total Rider Adjustments"
+      ],
+      "needs_review": true
+    },
+    {
+      "level": "warning",
+      "code": "printed_precision_outlier",
+      "detail": "'Large General Service Schedules Total Rider Adjustments' printed '1.28475': 5 decimals where 109/111 cents /kwh values print 3 (possible fused redline digits)",
+      "refs": [
+        "Large General Service Schedules Total Rider Adjustments"
+      ],
+      "needs_review": true
+    },
+    {
+      "level": "info",
+      "code": "docling_artifact_unusable",
+      "detail": "docling artifact 1661 not used: chunk_relative_numbering (structure from native_pdf)",
+      "needs_review": false
+    }
+  ],
+  "charges_with_errors": 10,
+  "charges_with_warnings": 0,
+  "output_count": 136
+}

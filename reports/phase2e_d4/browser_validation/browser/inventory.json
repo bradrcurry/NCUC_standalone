@@ -1,0 +1,21 @@
+{
+  "docket_number": "E-7 Sub 1026",
+  "docket_id": "8903f042-4167-4b27-971e-be19e44b0240",
+  "method": "playwright_docket_inventory",
+  "retrieved_pages": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "advertised_pages": 6,
+  "unique_documents": 568,
+  "complete": true,
+  "retriever": "docket_inventory@1.0.0",
+  "observed_page_bound": 6,
+  "restricted_entries": 11,
+  "stop_reason": "inventory_complete",
+  "error": null
+}

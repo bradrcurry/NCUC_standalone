@@ -1,0 +1,8 @@
+{
+  "docket": "E-7 Sub 1026",
+  "max_pages_per_transport": 6,
+  "pdf_downloads": 0,
+  "http_requests": 0,
+  "error_type": "Error",
+  "error": "Page.content: Unable to retrieve content because the page is navigating and changing the content."
+}

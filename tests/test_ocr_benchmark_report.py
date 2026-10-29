@@ -8,6 +8,7 @@ from duke_rates.db.sqlite import connect
 from duke_rates.historical.ncuc.pipeline.stage_versions import (
     OCR_BACKEND_VERSION,
     OCR_NORMALIZATION_VERSION,
+    SPAN_ARTIFACT_VERSION,
 )
 
 
@@ -221,7 +222,7 @@ def test_build_ocr_benchmark_nc_report_groups_backend_and_outcomes(tmp_path) -> 
             None,
             str(tmp_path / "doc.pdf"),
             "hash-ocr-bench",
-            "segmentation_v8",
+            SPAN_ARTIFACT_VERSION,
             0,
             1,
             1,
@@ -421,7 +422,7 @@ def test_build_ocr_benchmark_nc_report_groups_backend_and_outcomes(tmp_path) -> 
     ]
     assert report["span_artifact_version_summary"] == [
         {"span_artifact_version": "segmentation_old", "count": 1},
-        {"span_artifact_version": "segmentation_v8", "count": 1},
+        {"span_artifact_version": SPAN_ARTIFACT_VERSION, "count": 1},
     ]
     assert report["review_outcome_summary"] == [
         {"review_outcome": "accepted", "count": 1},

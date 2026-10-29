@@ -1,0 +1,14 @@
+{
+ "doc_id": "hd7819_edit4_term",
+ "sha256": "1e663d08a8c84ca17edd4da95e92e596bcb5df9cdf1b3bb1492fec6a0ff3804b",
+ "effective_date": "2026-06-01",
+ "effective_date_source_text": "Effective for bills rendered on and after June 1, 2026",
+ "expected_zero": true,
+ "charges": [],
+ "rider_summary_totals": [],
+ "notes": "DEP NC First Revised Leaf No. 604, EDIT-4 rider: 'This Rider is terminated and not applicable for service on and after June 1, 2026.' No charges. Expected zero (an extractor must not carry forward prior EDIT-4 values).",
+ "pages_transcribed": [
+  1,
+  1
+ ]
+}

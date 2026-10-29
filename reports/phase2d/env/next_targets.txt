@@ -1,0 +1,11 @@
+docling==2.143.1
+docling-slim==2.143.1
+docling-core==2.105.0
+docling-parse==7.23.1
+docling-ibm-models==4.0.4
+PyMuPDF==2.0
+pdfplumber==0.11.10
+pdfminer.six==20260107
+pypdfium2==5.14.0
+transformers==5.21.0
+rapidocr==3.10.0

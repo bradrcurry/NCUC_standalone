@@ -1,0 +1,249 @@
+{
+  "read_only": true,
+  "base_commit": "7dc5caa",
+  "tables": {
+    "regulatory_clues": 30027,
+    "clue_associations": 25085,
+    "clue_scan_pages": 6084,
+    "lineage_links": 201,
+    "lineage_gaps_typed": 691,
+    "gap_candidates": 628,
+    "search_attempts": 1120,
+    "remote_document_candidates": 1419,
+    "document_blobs": 1,
+    "evidence_review_items": 248
+  },
+  "archive_state": {
+    "native_page_artifacts": 153911,
+    "max_page_artifact_id": 362970,
+    "extractor": "1.1.0"
+  },
+  "resolution_summary": {
+    "gap_status": [
+      {
+        "gap_type": "conflicting_supersession",
+        "status": "open",
+        "n": 10
+      },
+      {
+        "gap_type": "missing_effective_date_evidence",
+        "status": "open",
+        "n": 108
+      },
+      {
+        "gap_type": "missing_intermediate_revision",
+        "status": "candidate_found",
+        "n": 3
+      },
+      {
+        "gap_type": "missing_intermediate_revision",
+        "status": "searched_not_found",
+        "n": 102
+      },
+      {
+        "gap_type": "missing_intermediate_revision",
+        "status": "verification_required",
+        "n": 15
+      },
+      {
+        "gap_type": "missing_intermediate_revision",
+        "status": "verified",
+        "n": 1
+      },
+      {
+        "gap_type": "missing_official_clean_tariff",
+        "status": "candidate_found",
+        "n": 5
+      },
+      {
+        "gap_type": "missing_official_clean_tariff",
+        "status": "open",
+        "n": 42
+      },
+      {
+        "gap_type": "missing_official_clean_tariff",
+        "status": "searched_not_found",
+        "n": 5
+      },
+      {
+        "gap_type": "missing_official_clean_tariff",
+        "status": "verification_required",
+        "n": 10
+      },
+      {
+        "gap_type": "missing_official_clean_tariff",
+        "status": "verified",
+        "n": 3
+      },
+      {
+        "gap_type": "missing_predecessor_revision",
+        "status": "candidate_found",
+        "n": 38
+      },
+      {
+        "gap_type": "missing_predecessor_revision",
+        "status": "searched_not_found",
+        "n": 29
+      },
+      {
+        "gap_type": "missing_predecessor_revision",
+        "status": "verification_required",
+        "n": 32
+      },
+      {
+        "gap_type": "missing_predecessor_revision",
+        "status": "verified",
+        "n": 12
+      },
+      {
+        "gap_type": "missing_regulatory_order",
+        "status": "candidate_found",
+        "n": 84
+      },
+      {
+        "gap_type": "missing_regulatory_order",
+        "status": "searched_not_found",
+        "n": 29
+      },
+      {
+        "gap_type": "missing_successor_document",
+        "status": "candidate_found",
+        "n": 1
+      },
+      {
+        "gap_type": "missing_successor_document",
+        "status": "open",
+        "n": 1
+      },
+      {
+        "gap_type": "missing_successor_document",
+        "status": "verification_required",
+        "n": 1
+      },
+      {
+        "gap_type": "unresolved_version_identity",
+        "status": "open",
+        "n": 160
+      }
+    ],
+    "candidates": {
+      "full": 87,
+      "partial": 541
+    },
+    "gaps_with_candidates": 206,
+    "resolved_gaps": 16
+  },
+  "link_kinds": [
+    {
+      "link_kind": "supersedes",
+      "status": "candidate",
+      "n": 5
+    },
+    {
+      "link_kind": "supersedes",
+      "status": "conflict",
+      "n": 10
+    },
+    {
+      "link_kind": "supersedes",
+      "status": "explicit_unresolved",
+      "n": 141
+    },
+    {
+      "link_kind": "supersedes",
+      "status": "verified",
+      "n": 45
+    }
+  ],
+  "clue_kinds": [
+    {
+      "clue_kind": "approval_reference",
+      "n": 1920
+    },
+    {
+      "clue_kind": "docket",
+      "n": 5441
+    },
+    {
+      "clue_kind": "effective_date",
+      "n": 2414
+    },
+    {
+      "clue_kind": "leaf",
+      "n": 4413
+    },
+    {
+      "clue_kind": "order_date",
+      "n": 2249
+    },
+    {
+      "clue_kind": "revision",
+      "n": 4413
+    },
+    {
+      "clue_kind": "schedule_code",
+      "n": 2324
+    },
+    {
+      "clue_kind": "supersedes",
+      "n": 2059
+    },
+    {
+      "clue_kind": "utility",
+      "n": 4794
+    }
+  ],
+  "local_attempt_outcomes": [
+    {
+      "channel": "local",
+      "outcome": "hits",
+      "n": 448
+    },
+    {
+      "channel": "local",
+      "outcome": "no_results",
+      "n": 662
+    },
+    {
+      "channel": "portal_orders",
+      "outcome": "incomplete",
+      "n": 10
+    }
+  ],
+  "order_records": [
+    {
+      "filing_classification": "order",
+      "fetch_status": "failed",
+      "n": 1
+    },
+    {
+      "filing_classification": "order",
+      "fetch_status": "pending",
+      "n": 20
+    },
+    {
+      "filing_classification": "order",
+      "fetch_status": "success",
+      "n": 730
+    }
+  ],
+  "network_plan_seconds": 13.76481719998992,
+  "network_plan_summary": {
+    "planner": "remote_discovery@1.2.0",
+    "gaps_considered": 165,
+    "skipped": {},
+    "targets": 325,
+    "distinct_queries": 245,
+    "by_channel": {
+      "portal_orders": {
+        "planned": 58
+      },
+      "zoom": {
+        "planned": 134
+      },
+      "portal_params": {
+        "planned": 53
+      }
+    }
+  }
+}

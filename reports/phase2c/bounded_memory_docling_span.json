@@ -1,0 +1,15 @@
+{
+  "pdf": "data/historical/ncuc/e-2-sub-1207/32b7c724-edef-4a3a-bb45-85058c2ec503.pdf",
+  "span": [
+    17,
+    31
+  ],
+  "results": [
+    {
+      "scenario": "bounded_docling_span",
+      "status": "aborted_low_memory",
+      "min_free_gb": 0.47,
+      "description": "Docling on the span, 8-page chunks, original page numbers"
+    }
+  ]
+}

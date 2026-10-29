@@ -1,0 +1,14 @@
+{
+ "doc_id": "hd7378_dep_rtoud_2014",
+ "sha256": "a4850072237e9db7195917622402699ef03e72c4f0220597ff7c2dc2c7c98dde",
+ "effective_date": null,
+ "effective_date_source_text": null,
+ "expected_zero": true,
+ "charges": [],
+ "rider_summary_totals": [],
+ "notes": "hd 7378 is titled 'Residential Service Time-of-Use Schedule R-TOUD (Smart Usage Select Option) (Span 59-67)' but PDF pages 59-67 of e-2-sub-1107/799dff1e...pdf are McGee Workpapers 9-13a (annualized revenues, weather/customer-growth MWh adjustments, reagents, 2% test) and the Supplemental Testimony of T. Preston Gillespie, Jr. There is NO R-TOUD tariff in this span; a text search of all 67 pages finds no 'R-TOUD'/'Smart Usage'. Expected zero tariff charges: the span is mis-bounded/mis-titled. Dollar and kWh figures on these pages are revenue workpaper data, not charges.",
+ "pages_transcribed": [
+  59,
+  67
+ ]
+}

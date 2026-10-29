@@ -5,7 +5,11 @@ from pathlib import Path
 from duke_rates.analytics.dep_provisional_riders import load_dep_res_provisional_rider_history
 
 
-DB_PATH = Path("data/db/duke_rates.db")
+from conftest import LIVE_DB_PATH, requires_live_db  # noqa: E402
+
+# Live-data tests read a frozen snapshot (DUKE_RATES_TEST_LIVE_DB), never production.
+DB_PATH = LIVE_DB_PATH
+pytestmark = requires_live_db
 
 
 def test_dep_res_provisional_rider_history_has_pre_2023_rows() -> None:

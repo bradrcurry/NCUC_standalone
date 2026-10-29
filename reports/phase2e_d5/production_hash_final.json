@@ -1,0 +1,8 @@
+{
+  "read_only": true,
+  "sha256": "0f6f8f3551f21908533019c5f568d49e254fdd0149fa65ceedef9aa37031b6ca",
+  "size_bytes": 5845692416,
+  "mtime_ns": 1793255717771976700,
+  "matches_post_d4_incident_hash": true,
+  "validated_after_all_benchmarks": true
+}

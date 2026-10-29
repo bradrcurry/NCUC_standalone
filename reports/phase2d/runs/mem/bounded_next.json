@@ -1,0 +1,37 @@
+{
+  "pdf": "data/historical/ncuc/e-2-sub-1207/32b7c724-edef-4a3a-bb45-85058c2ec503.pdf",
+  "span": [
+    17,
+    31
+  ],
+  "results": [
+    {
+      "scenario": "native_span",
+      "pdf_pages": 110,
+      "pages": 15,
+      "tables": 20,
+      "degraded": false,
+      "seconds": 2.03,
+      "peak_rss_mb": 177.0,
+      "status": "ok",
+      "min_free_gb": 10.58,
+      "description": "native text layer + geometry tables, span pages only"
+    },
+    {
+      "scenario": "bounded_docling_span",
+      "pdf_pages": 110,
+      "pages": 15,
+      "first_page": 17,
+      "last_page": 31,
+      "tables": 27,
+      "chunks": 2,
+      "degraded": false,
+      "degraded_chunks": [],
+      "seconds": 155.47,
+      "peak_rss_mb": 2310.0,
+      "status": "ok",
+      "min_free_gb": 8.15,
+      "description": "Docling on the span, 8-page chunks, original page numbers"
+    }
+  ]
+}

@@ -1,0 +1,270 @@
+{
+  "pages_checked": 29,
+  "source_documents_checked": 11,
+  "all_passed": true,
+  "coordinate_precision_points": 0.001,
+  "source_files_written": false,
+  "checks": [
+    {
+      "id": "dec_blk304_sub1285_p1",
+      "original_page": 1,
+      "source_hash_matches": true,
+      "fixture_hash_matches": true,
+      "native_text_and_spans_match": true,
+      "native_drawing_geometry_matches": true,
+      "annotations_match": true
+    },
+    {
+      "id": "dec_blk304_sub1285_p2",
+      "original_page": 2,
+      "source_hash_matches": true,
+      "fixture_hash_matches": true,
+      "native_text_and_spans_match": true,
+      "native_drawing_geometry_matches": true,
+      "annotations_match": true
+    },
+    {
+      "id": "dec_blk304_sub1285_p3",
+      "original_page": 3,
+      "source_hash_matches": true,
+      "fixture_hash_matches": true,
+      "native_text_and_spans_match": true,
+      "native_drawing_geometry_matches": true,
+      "annotations_match": true
+    },
+    {
+      "id": "dec_blk304_sub1285_p4",
+      "original_page": 4,
+      "source_hash_matches": true,
+      "fixture_hash_matches": true,
+      "native_text_and_spans_match": true,
+      "native_drawing_geometry_matches": true,
+      "annotations_match": true
+    },
+    {
+      "id": "dec_blk304_sub1285_p5",
+      "original_page": 5,
+      "source_hash_matches": true,
+      "fixture_hash_matches": true,
+      "native_text_and_spans_match": true,
+      "native_drawing_geometry_matches": true,
+      "annotations_match": true
+    },
+    {
+      "id": "dec_blk304_sub1285_p6",
+      "original_page": 6,
+      "source_hash_matches": true,
+      "fixture_hash_matches": true,
+      "native_text_and_spans_match": true,
+      "native_drawing_geometry_matches": true,
+      "annotations_match": true
+    },
+    {
+      "id": "dep_blk13_sub1300_p1",
+      "original_page": 1,
+      "source_hash_matches": true,
+      "fixture_hash_matches": true,
+      "native_text_and_spans_match": true,
+      "native_drawing_geometry_matches": true,
+      "annotations_match": true
+    },
+    {
+      "id": "dep_blk13_sub1300_p2",
+      "original_page": 2,
+      "source_hash_matches": true,
+      "fixture_hash_matches": true,
+      "native_text_and_spans_match": true,
+      "native_drawing_geometry_matches": true,
+      "annotations_match": true
+    },
+    {
+      "id": "dep_blk13_sub1300_p3",
+      "original_page": 3,
+      "source_hash_matches": true,
+      "fixture_hash_matches": true,
+      "native_text_and_spans_match": true,
+      "native_drawing_geometry_matches": true,
+      "annotations_match": true
+    },
+    {
+      "id": "dep_blk13_sub1300_p4",
+      "original_page": 4,
+      "source_hash_matches": true,
+      "fixture_hash_matches": true,
+      "native_text_and_spans_match": true,
+      "native_drawing_geometry_matches": true,
+      "annotations_match": true
+    },
+    {
+      "id": "dep_blk13_sub1300_p5",
+      "original_page": 5,
+      "source_hash_matches": true,
+      "fixture_hash_matches": true,
+      "native_text_and_spans_match": true,
+      "native_drawing_geometry_matches": true,
+      "annotations_match": true
+    },
+    {
+      "id": "dec_blk361_sub1146_fca_p1",
+      "original_page": 1,
+      "source_hash_matches": true,
+      "fixture_hash_matches": true,
+      "native_text_and_spans_match": true,
+      "native_drawing_geometry_matches": true,
+      "annotations_match": true
+    },
+    {
+      "id": "dec_blk361_sub1146_fca_p2",
+      "original_page": 2,
+      "source_hash_matches": true,
+      "fixture_hash_matches": true,
+      "native_text_and_spans_match": true,
+      "native_drawing_geometry_matches": true,
+      "annotations_match": true
+    },
+    {
+      "id": "dec_blk361_sub1146_fca_p3",
+      "original_page": 3,
+      "source_hash_matches": true,
+      "fixture_hash_matches": true,
+      "native_text_and_spans_match": true,
+      "native_drawing_geometry_matches": true,
+      "annotations_match": true
+    },
+    {
+      "id": "dec_blk361_sub1146_fca_p4",
+      "original_page": 4,
+      "source_hash_matches": true,
+      "fixture_hash_matches": true,
+      "native_text_and_spans_match": true,
+      "native_drawing_geometry_matches": true,
+      "annotations_match": true
+    },
+    {
+      "id": "dec_blk361_sub1146_fca_p5",
+      "original_page": 5,
+      "source_hash_matches": true,
+      "fixture_hash_matches": true,
+      "native_text_and_spans_match": true,
+      "native_drawing_geometry_matches": true,
+      "annotations_match": true
+    },
+    {
+      "id": "hd0029_dep_res_p1",
+      "original_page": 1,
+      "source_hash_matches": true,
+      "fixture_hash_matches": true,
+      "native_text_and_spans_match": true,
+      "native_drawing_geometry_matches": true,
+      "annotations_match": true
+    },
+    {
+      "id": "hd7380_dec_rs_scan_p4",
+      "original_page": 4,
+      "source_hash_matches": true,
+      "fixture_hash_matches": true,
+      "native_text_and_spans_match": true,
+      "native_drawing_geometry_matches": true,
+      "annotations_match": true
+    },
+    {
+      "id": "hd7380_dec_rs_scan_p5",
+      "original_page": 5,
+      "source_hash_matches": true,
+      "fixture_hash_matches": true,
+      "native_text_and_spans_match": true,
+      "native_drawing_geometry_matches": true,
+      "annotations_match": true
+    },
+    {
+      "id": "hd0179_jaa_p1",
+      "original_page": 1,
+      "source_hash_matches": true,
+      "fixture_hash_matches": true,
+      "native_text_and_spans_match": true,
+      "native_drawing_geometry_matches": true,
+      "annotations_match": true
+    },
+    {
+      "id": "hd0179_jaa_p2",
+      "original_page": 2,
+      "source_hash_matches": true,
+      "fixture_hash_matches": true,
+      "native_text_and_spans_match": true,
+      "native_drawing_geometry_matches": true,
+      "annotations_match": true
+    },
+    {
+      "id": "hd0378_cm_p156",
+      "original_page": 156,
+      "source_hash_matches": true,
+      "fixture_hash_matches": true,
+      "native_text_and_spans_match": true,
+      "native_drawing_geometry_matches": true,
+      "annotations_match": true
+    },
+    {
+      "id": "hd2275_leaf600_redline_p100",
+      "original_page": 100,
+      "source_hash_matches": true,
+      "fixture_hash_matches": true,
+      "native_text_and_spans_match": true,
+      "native_drawing_geometry_matches": true,
+      "annotations_match": true
+    },
+    {
+      "id": "hd7265_leaf600_clean_p96",
+      "original_page": 96,
+      "source_hash_matches": true,
+      "fixture_hash_matches": true,
+      "native_text_and_spans_match": true,
+      "native_drawing_geometry_matches": true,
+      "annotations_match": true
+    },
+    {
+      "id": "leaf660_redline_p221",
+      "original_page": 221,
+      "source_hash_matches": true,
+      "fixture_hash_matches": true,
+      "native_text_and_spans_match": true,
+      "native_drawing_geometry_matches": true,
+      "annotations_match": true
+    },
+    {
+      "id": "leaf661_redline_p226",
+      "original_page": 226,
+      "source_hash_matches": true,
+      "fixture_hash_matches": true,
+      "native_text_and_spans_match": true,
+      "native_drawing_geometry_matches": true,
+      "annotations_match": true
+    },
+    {
+      "id": "dsm_workpaper_v5239_p2",
+      "original_page": 2,
+      "source_hash_matches": true,
+      "fixture_hash_matches": true,
+      "native_text_and_spans_match": true,
+      "native_drawing_geometry_matches": true,
+      "annotations_match": true
+    },
+    {
+      "id": "dsm_workpaper_v5239_p6",
+      "original_page": 6,
+      "source_hash_matches": true,
+      "fixture_hash_matches": true,
+      "native_text_and_spans_match": true,
+      "native_drawing_geometry_matches": true,
+      "annotations_match": true
+    },
+    {
+      "id": "dsm_workpaper_v5239_p7",
+      "original_page": 7,
+      "source_hash_matches": true,
+      "fixture_hash_matches": true,
+      "native_text_and_spans_match": true,
+      "native_drawing_geometry_matches": true,
+      "annotations_match": true
+    }
+  ]
+}

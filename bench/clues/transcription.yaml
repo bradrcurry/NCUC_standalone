@@ -1,0 +1,407 @@
+# Hand transcription of the D1 clue sample, read from rendered PDF page images
+# (header band = top 24 %, footer band = bottom 22 %, 100 dpi), never from the text layer.
+# Scope: revision header, supersedes, effective date, and the rate-sheet footer docket /
+# order date ("NCUC Docket No. ..., Order dated ..."). Body citations are out of scope.
+# value: normalised reading; null + ambiguous: true when the page is a redline whose
+# printed text keeps deleted and inserted values; null + blank: true for "____" placeholders.
+# sheet_of_family: whether the page is a tariff sheet of the bound family (omitted if undecidable).
+1:
+  sheet_of_family: false
+  notes: NCUC order (caption "DOCKET NO. E-2, SUB 1300"); not a tariff sheet. No in-scope clue.
+  clues: []
+2:
+  sheet_of_family: false
+  notes: McGee Workpaper 9 (fuel workpaper), "Docket No. E-2, Sub 1107" is a body caption. No in-scope clue.
+  clues: []
+3:
+  sheet_of_family: true
+  notes: Redline of JAA leaf 602. The inserted header/footer text is underlined red; "RR-24" and "RIDER JAA-6A Sheet 1 of 1" struck. Full-page check - a struck old footer sits mid-page (added after the band-only pass missed it).
+  clues:
+    - {kind: revision, text: "NC Original Leaf No. 602", value: "NC:leaf-602:rev-0"}
+    - {kind: supersedes, text: "Superseding NC Rider JAA-6A", value: "schedule:JAA-6A"}
+    - {kind: revision, text: "NC Original Leaf No. 602", value: "NC:leaf-602:rev-0"}
+    - {kind: effective_date, text: "Effective for bills rendered on and after October 1, 2023", value: "2023-10-01"}
+    - {kind: docket, text: "NCUC Docket No. E-2, Sub 1300", value: "E-2 Sub 1300"}
+    - {kind: order_date, text: "August 18, 2023", value: "2023-08-18"}
+    - {kind: supersedes, text: "Supersedes Schedule JAA-6", value: "schedule:JAA-6", struck: true}
+    - {kind: effective_date, text: "Effective for service rendered on and after March 1, 2022", value: "2022-03-01", struck: true}
+    - {kind: docket, text: "NCUC Docket No. E-2, Subs 1219", value: "E-2 Sub 1219", struck: true}
+    - {kind: docket, text: "1280", value: "E-2 Sub 1280", struck: true}
+4:
+  notes: Rider SCR-1 sheet "RR-35", "Sheet 1 of 1"; no revision/supersedes/effective/footer docket printed. Body cites Docket No. E-2, Sub 1219. Full-page check - the footer is printed mid-page and a body sentence restates the effective date (added after the band-only pass missed them).
+  clues:
+    - {kind: effective_date, text: "Effective for service rendered on and after June 1, 2021", value: "2021-06-01", role: body}
+    - {kind: effective_date, text: "Effective for service rendered on and after June 1, 2021", value: "2021-06-01"}
+    - {kind: docket, text: "NCUC Docket No. E-2, Subs 1219", value: "E-2 Sub 1219"}
+    - {kind: docket, text: "1262", value: "E-2 Sub 1262"}
+5:
+  sheet_of_family: true
+  clues:
+    - {kind: revision, text: "NC Original Leaf No. 242", value: "NC:leaf-242:rev-0"}
+    - {kind: revision, text: "NC Original Leaf No. 242", value: "NC:leaf-242:rev-0"}
+    - {kind: effective_date, text: "Effective for service rendered on and after January 15, 2025", value: "2025-01-15"}
+    - {kind: docket, text: "NCUC Docket No. E-7, Sub 1288", value: "E-7 Sub 1288"}
+    - {kind: order_date, text: "January 15, 2025", value: "2025-01-15"}
+6:
+  sheet_of_family: true
+  notes: Fingerprint flags this PDF as redline; this page shows no red/struck text. Full-page check - body sentence states the rate effective date (January 1, 2025), distinct from the sheet footer date.
+  clues:
+    - {kind: revision, text: "NC Eleventh Revised Leaf No. 133", value: "NC:leaf-133:rev-11"}
+    - {kind: supersedes, text: "Superseding NC Tenth Revised Leaf No. 133", value: "NC:leaf-133:rev-10"}
+    - {kind: revision, text: "NC Eleventh Revised Leaf No. 133", value: "NC:leaf-133:rev-11"}
+    - {kind: effective_date, text: "Effective for service on and after July 1, 2025", value: "2025-07-01"}
+    - {kind: docket, text: "NCUC Docket No. E-7, Sub 1243", value: "E-7 Sub 1243"}
+    - {kind: order_date, text: "July 13, 2021", value: "2021-07-13"}
+    - {kind: effective_date, text: "Effective for service rendered on and after January 1, 2025", value: "2025-01-01", role: body}
+7:
+  notes: Full-page check - body sentence states the rate effective date.
+  sheet_of_family: true
+  clues:
+    - {kind: revision, text: "North Carolina First Revised Leaf No. 131", value: "NC:leaf-131:rev-1"}
+    - {kind: supersedes, text: "Superseding North Carolina Original Leaf No. 131", value: "NC:leaf-131:rev-0"}
+    - {kind: revision, text: "North Carolina First Revised Leaf No. 131", value: "NC:leaf-131:rev-1"}
+    - {kind: effective_date, text: "Effective for service on and after October 1, 2021", value: "2021-10-01"}
+    - {kind: docket, text: "NCUC Docket No. E-7, Sub 1253", value: "E-7 Sub 1253"}
+    - {kind: order_date, text: "August 25, 2021", value: "2021-08-25"}
+    - {kind: effective_date, text: "Effective for service rendered on and after October 1, 2021", value: "2021-10-01", role: body}
+8:
+  sheet_of_family: true
+  clues:
+    - {kind: revision, text: "North Carolina Fifty-First Revised Leaf No. 99", value: "NC:leaf-99:rev-51"}
+    - {kind: supersedes, text: "Superseding North Carolina Fiftieth Revised Leaf No. 99", value: "NC:leaf-99:rev-50"}
+    - {kind: revision, text: "North Carolina Fifty-First Revised Leaf No. 99", value: "NC:leaf-99:rev-51"}
+    - {kind: effective_date, text: "Effective for service rendered on and after January 1, 2021", value: "2021-01-01"}
+    - {kind: docket, text: "NCUC Docket No. E-7, Sub 1253", value: "E-7 Sub 1253"}
+    - {kind: order_date, text: "August 25, 2021", value: "2021-08-25"}
+9:
+  sheet_of_family: true
+  notes: Scanned (OCR). Amended sheet. Footer prints "Order dated" with no date, and two dates in the effective line.
+  clues:
+    - {kind: revision, text: "North Carolina Fifteenth Revised Leaf No. 99", value: "NC:leaf-99:rev-15"}
+    - {kind: supersedes, text: "Superseding North Carolina Fourteenth Revised Leaf No. 99", value: "NC:leaf-99:rev-14"}
+    - {kind: revision, text: "Amended North Carolina Fifteenth Revised Leaf No. 99", value: "NC:leaf-99:rev-15"}
+    - {kind: effective_date, text: "Effective November 1, 2013", value: "2013-11-01"}
+    - {kind: docket, text: "NCUC Docket No. E-7, Sub 1026", value: "E-7 Sub 1026"}
+    - {kind: order_date, text: "Order dated", value: null, blank: true}
+10:
+  sheet_of_family: true
+  clues:
+    - {kind: revision, text: "NC Sixty-First Revised Leaf No. 99", value: "NC:leaf-99:rev-61"}
+    - {kind: supersedes, text: "Superseding NC Sixtieth Revised Leaf No. 99", value: "NC:leaf-99:rev-60"}
+    - {kind: revision, text: "NC Sixty-First Revised Leaf No. 99", value: "NC:leaf-99:rev-61"}
+    - {kind: effective_date, text: "Effective for service rendered on and after July 1, 2024", value: "2024-07-01"}
+    - {kind: docket, text: "E-7, Subs 487", value: "E-7 Sub 487"}
+    - {kind: docket, text: "828", value: "E-7 Sub 828"}
+    - {kind: docket, text: "1026", value: "E-7 Sub 1026"}
+    - {kind: docket, text: "1146", value: "E-7 Sub 1146"}
+    - {kind: docket, text: "1214", value: "E-7 Sub 1214"}
+    - {kind: docket, text: "and 1276", value: "E-7 Sub 1276"}
+    - {kind: order_date, text: "June 12, 2024", value: "2024-06-12"}
+    - {kind: order_date, text: "June 13, 2024", value: "2024-06-13"}
+11:
+  sheet_of_family: true
+  notes: Scanned (OCR). Amended; footer "Order dated" with no date.
+  clues:
+    - {kind: revision, text: "North Carolina Thirty-Fifth Revised Leaf No. 13", value: "NC:leaf-13:rev-35"}
+    - {kind: supersedes, text: "Superseding North Carolina Thirty-Fourth Revised Leaf No. 13", value: "NC:leaf-13:rev-34"}
+    - {kind: revision, text: "Amended North Carolina Thirty-Fifth Revised Leaf No. 13", value: "NC:leaf-13:rev-35"}
+    - {kind: effective_date, text: "Effective November 1, 2013", value: "2013-11-01"}
+    - {kind: docket, text: "NCUC Docket No. E-7, Sub 1026", value: "E-7 Sub 1026"}
+    - {kind: order_date, text: "Order dated", value: null, blank: true}
+12:
+  sheet_of_family: true
+  notes: Proposed sheet ("(Proposed)" in header and footer; order date blank).
+  clues:
+    - {kind: revision, text: "North Carolina (Proposed) Original Leaf No. 136", value: "NC:leaf-136:rev-0"}
+    - {kind: revision, text: "North Carolina (Proposed) Original Leaf No. 136", value: "NC:leaf-136:rev-0"}
+    - {kind: effective_date, text: "Effective for service rendered on and after July 1, 2021", value: "2021-07-01"}
+    - {kind: docket, text: "NCUC Docket No. E-7, Sub 1253", value: "E-7 Sub 1253"}
+    - {kind: order_date, text: "Order dated ____", value: null, blank: true}
+13:
+  sheet_of_family: true
+  clues:
+    - {kind: revision, text: "NC Fifty-Eighth Revised Leaf No. 11", value: "NC:leaf-11:rev-58"}
+    - {kind: supersedes, text: "Superseding NC Fifty-Seventh Revised Leaf No. 11", value: "NC:leaf-11:rev-57"}
+    - {kind: revision, text: "NC Fifty-Eighth Revised Leaf No. 11", value: "NC:leaf-11:rev-58"}
+    - {kind: effective_date, text: "Effective for service rendered on and after January 1, 2025", value: "2025-01-01"}
+    - {kind: docket, text: "NCUC Docket No. E-7, Sub 1276", value: "E-7 Sub 1276"}
+    - {kind: order_date, text: "December 10, 2024", value: "2024-12-10"}
+14:
+  sheet_of_family: true
+  notes: Duke Power era sheet (scanned look); page 1 ends "(Over)", footer clues are on page 2.
+  clues:
+    - {kind: revision, text: "North Carolina Twelfth Revised Leaf No. 17", value: "NC:leaf-17:rev-12"}
+    - {kind: supersedes, text: "Superseding North Carolina Eleventh Revised Leaf No. 17", value: "NC:leaf-17:rev-11"}
+15:
+  sheet_of_family: true
+  clues:
+    - {kind: revision, text: "NC Original Leaf No. 667", value: "NC:leaf-667:rev-0"}
+    - {kind: revision, text: "NC Original Leaf No. 667", value: "NC:leaf-667:rev-0"}
+    - {kind: effective_date, text: "Effective for service rendered on and after October 1, 2023", value: "2023-10-01"}
+    - {kind: docket, text: "NCUC Docket No. E-2, Sub 1300", value: "E-2 Sub 1300"}
+    - {kind: order_date, text: "August 18, 2023", value: "2023-08-18"}
+16:
+  sheet_of_family: true
+  clues:
+    - {kind: revision, text: "NC Original Leaf No. 611", value: "NC:leaf-611:rev-0"}
+    - {kind: revision, text: "NC Original Leaf No. 611", value: "NC:leaf-611:rev-0"}
+    - {kind: effective_date, text: "Effective for services rendered on and after January 1, 2024", value: "2024-01-01"}
+    - {kind: docket, text: "NCUC Docket No. E-2, Sub 1300", value: "E-2 Sub 1300"}
+    - {kind: order_date, text: "August 18, 2023", value: "2023-08-18"}
+17:
+  sheet_of_family: false
+  notes: Index of Tariffs page (the hd 2275 binding defect). No in-scope clue.
+  clues: []
+18:
+  sheet_of_family: true
+  clues:
+    - {kind: revision, text: "NC Sixth Revised Leaf No. 600", value: "NC:leaf-600:rev-6"}
+    - {kind: supersedes, text: "Superseding NC Fifth Revised Leaf No. 600", value: "NC:leaf-600:rev-5"}
+    - {kind: revision, text: "NC Sixth Revised Leaf No. 600", value: "NC:leaf-600:rev-6"}
+    - {kind: effective_date, text: "Effective for service rendered on and after April 1, 2025", value: "2025-04-01"}
+    - {kind: docket, text: "NCUC Docket No. E-2, Sub 1300", value: "E-2 Sub 1300"}
+    - {kind: order_date, text: "March 12, 2025", value: "2025-03-12"}
+19:
+  sheet_of_family: true
+  notes: >-
+    Redline (red inserted / struck). Header Fifth->Sixth, supersedes Fourth->Fifth, effective January->April,
+    footer "Subs 1342 and 1300" with "1342 and" struck, order "November 13, 2024 and December 10, 2024" replaced by
+    "March 12, 2025" (glued in the text layer). Struck text is still printed, so it is transcribed with struck: true.
+  clues:
+    - {kind: revision, text: "NC FifthSixth Revised Leaf No. 600", value: null, ambiguous: true}
+    - {kind: supersedes, text: "Superseding NC FourthFifth Revised Leaf No. 600", value: null, ambiguous: true}
+    - {kind: revision, text: "NC FifthSixth Revised Leaf No. 600", value: null, ambiguous: true}
+    - {kind: effective_date, text: "Effective for service rendered on and after JanuaryApril 1, 2025", value: null, ambiguous: true}
+    - {kind: docket, text: "Subs 1342", value: "E-2 Sub 1342", struck: true}
+    - {kind: docket, text: "1300", value: "E-2 Sub 1300"}
+    - {kind: order_date, text: "NovemberMarch 132, 20245", value: null, ambiguous: true}
+    - {kind: order_date, text: "December 10, 2024", value: "2024-12-10", struck: true}
+20:
+  sheet_of_family: true
+  notes: Redline. Original->First Revised, supersedes line inserted, year 2024->2025, order date August 18, 2023 -> December 10, 2024.
+  clues:
+    - {kind: revision, text: "NC OriginalFirst Revised Leaf No. 611", value: null, ambiguous: true}
+    - {kind: supersedes, text: "Superseding NC Original Leaf No. 611", value: "NC:leaf-611:rev-0"}
+    - {kind: revision, text: "NC OriginalFirst Revised Leaf No. 611", value: null, ambiguous: true}
+    - {kind: effective_date, text: "Effective for services rendered on and after January 1, 20245", value: null, ambiguous: true}
+    - {kind: docket, text: "NCUC Docket No. E-2, Sub 1300", value: "E-2 Sub 1300"}
+    - {kind: order_date, text: "August 18, 2023", value: null, ambiguous: true}
+    - {kind: order_date, text: "December 10, 2024", value: null, ambiguous: true}
+21:
+  sheet_of_family: false
+  notes: Hearing transcript (E-7, Sub 1304). Not a tariff sheet.
+  clues: []
+22:
+  sheet_of_family: false
+  notes: Hearing "Public information sheet" (E-2, Sub 1354). Not a tariff sheet.
+  clues: []
+23:
+  sheet_of_family: false
+  notes: Application caption page ("DOCKET NO. E-2, SUB 1354"). Not a tariff sheet.
+  clues: []
+24:
+  sheet_of_family: true
+  notes: Tariff sheet filed as Miller Exhibit 7 ("Docket No. E-7, Sub 1305" exhibit stamp is out of scope). Order date blank.
+  clues:
+    - {kind: revision, text: "NC Nineteenth Revised Leaf No. 62", value: "NC:leaf-62:rev-19"}
+    - {kind: supersedes, text: "Superseding NC Eighteenth Revised Leaf No. 62", value: "NC:leaf-62:rev-18"}
+    - {kind: revision, text: "NC Nineteenth Revised Leaf No. 62", value: "NC:leaf-62:rev-19"}
+    - {kind: effective_date, text: "Effective for service rendered from January 1, 2025 through December 31, 2025", value: "2025-01-01/2025-12-31"}
+    - {kind: docket, text: "NCUC Docket No. E-7, Sub 1305", value: "E-7 Sub 1305"}
+    - {kind: order_date, text: "Order dated ___", value: null, blank: true}
+25:
+  sheet_of_family: true
+  notes: Duke Power era, page 1 ends "(Over)".
+  clues:
+    - {kind: revision, text: "North Carolina Fourteenth Revised Leaf No. 34", value: "NC:leaf-34:rev-14"}
+    - {kind: supersedes, text: "Superseding North Carolina Thirteenth Revised Leaf No. 34", value: "NC:leaf-34:rev-13"}
+26:
+  sheet_of_family: false
+  notes: >-
+    Nantahala Area Schedule CP (purchased power cost rider), bound to family nc-carolinas-schedule-I.
+    Wrong family. No leaf header.
+  clues:
+    - {kind: effective_date, text: "Effective for bills rendered on and after September 2, 2007", value: "2007-09-02"}
+    - {kind: docket, text: "NCUC Docket No. E-7, Sub 833", value: "E-7 Sub 833"}
+    - {kind: order_date, text: "August 30, 2007", value: "2007-08-30"}
+27:
+  sheet_of_family: false
+  notes: Nantahala Area Schedule SG, bound to DEC family nc-carolinas-schedule-SGS (different tariff book). No leaf header.
+  clues:
+    - {kind: effective_date, text: "Effective for bills rendered on and after September 2, 2007", value: "2007-09-02"}
+    - {kind: docket, text: "NCUC Docket No. E-7, Sub 833", value: "E-7 Sub 833"}
+    - {kind: order_date, text: "August 30, 2007", value: "2007-08-30"}
+28:
+  sheet_of_family: true
+  notes: Redline. Fifty-Fourth->Fifty-Fifth, supersedes Fifty-Third->Fifty-Fourth, effective January 15, 2024 -> January 1, 2025, order December 15, 2023 -> December 10, 2024.
+  clues:
+    - {kind: revision, text: "NC Fifty-Fourth Fifth Revised Leaf No. 26", value: null, ambiguous: true}
+    - {kind: supersedes, text: "Superseding NC Fifty-Third Fourth Revised Leaf No. 26", value: null, ambiguous: true}
+    - {kind: revision, text: "NC Fifty-Fourth Fifth Revised Leaf No. 26", value: null, ambiguous: true}
+    - {kind: effective_date, text: "Effective for service rendered on and after January 15, 20242025", value: null, ambiguous: true}
+    - {kind: docket, text: "NCUC Docket No. E-7, Sub 1276", value: "E-7 Sub 1276"}
+    - {kind: order_date, text: "December 15, 202310, 2024", value: null, ambiguous: true}
+29:
+  sheet_of_family: false
+  notes: Pre-leaf DEP sheet "G-5" Schedule SGS-TOU-63, bound to leaf-520 (SGS). SGS-TOU is a different schedule. No in-scope clue.
+  clues: []
+30:
+  sheet_of_family: true
+  notes: Pre-leaf DEP sheet "L-1" Schedule TSS-65 ("TSS-65 Sheet 1 of 2"). No in-scope clue.
+  clues: []
+31:
+  sheet_of_family: true
+  clues:
+    - {kind: revision, text: "NC First Revised Leaf No. 705", value: "NC:leaf-705:rev-1"}
+    - {kind: supersedes, text: "Superseding NC Original Leaf No. 705", value: "NC:leaf-705:rev-0"}
+    - {kind: revision, text: "NC First Revised Leaf No. 705", value: "NC:leaf-705:rev-1"}
+    - {kind: effective_date, text: "Effective for service rendered on and after January 1, 2025", value: "2025-01-01"}
+    - {kind: docket, text: "E-2, Subs 1076", value: "E-2 Sub 1076"}
+    - {kind: docket, text: "931", value: "E-2 Sub 931"}
+    - {kind: order_date, text: "October 21, 2024", value: "2024-10-21"}
+32:
+  sheet_of_family: false
+  notes: Hearing transcript cover (E-2, Sub 1173). Not a tariff sheet.
+  clues: []
+33:
+  sheet_of_family: true
+  clues:
+    - {kind: revision, text: "NC Second Revised Leaf No. 503", value: "NC:leaf-503:rev-2"}
+    - {kind: supersedes, text: "Superseding NC First Revised Leaf No. 503", value: "NC:leaf-503:rev-1"}
+    - {kind: revision, text: "NC Second Revised Leaf No. 503", value: "NC:leaf-503:rev-2"}
+    - {kind: effective_date, text: "Effective for service rendered on and after October 1, 2025", value: "2025-10-01"}
+    - {kind: docket, text: "NCUC Docket No. E-2, Sub 1300", value: "E-2 Sub 1300"}
+    - {kind: order_date, text: "August 18, 2023", value: "2023-08-18"}
+34:
+  sheet_of_family: true
+  notes: Pre-leaf DEP sheet "R-4" Schedule R-TOU-CPP-74 ("Sheet 1 of 3"). No in-scope clue.
+  clues: []
+35:
+  sheet_of_family: true
+  clues:
+    - {kind: revision, text: "NC Second Revised Leaf No. 500", value: "NC:leaf-500:rev-2"}
+    - {kind: supersedes, text: "Superseding NC First Revised Leaf No. 500", value: "NC:leaf-500:rev-1"}
+    - {kind: revision, text: "NC Second Revised Leaf No. 500", value: "NC:leaf-500:rev-2"}
+    - {kind: effective_date, text: "Effective for service rendered on and after October 1, 2025", value: "2025-10-01"}
+    - {kind: docket, text: "NCUC Docket No. E-2, Sub 1300", value: "E-2 Sub 1300"}
+    - {kind: order_date, text: "August 18, 2023", value: "2023-08-18"}
+36:
+  sheet_of_family: true
+  notes: Redline of pre-leaf Rider BA-26 -> BA-27 ("RR-1"). No in-scope clue (no supersedes / effective / footer docket).
+  clues: []
+37:
+  sheet_of_family: false
+  notes: >-
+    DEC Service Regulations redline (Leaf 401) bound to DEP family nc-progress-leaf-800: wrong utility.
+    Struck old header "North Carolina Fourth Revised Leaf A / Superseding ... Third Revised Leaf A" and struck old footer;
+    inserted "NC Eighth Revised Leaf No. 401 / Superseding NC Seventh Revised Service Regulations" and new footer.
+  clues:
+    - {kind: revision, text: "NC Eighth Revised Leaf No. 401", value: "NC:leaf-401:rev-8"}
+    - {kind: supersedes, text: "Superseding NC Seventh Revised Service Regulations", value: null, ambiguous: true, note: "non-leaf target"}
+    - {kind: revision, text: "North Carolina Fourth Revised Leaf A", value: "NC:leaf-A:rev-4", struck: true}
+    - {kind: supersedes, text: "Superseding North Carolina Third Revised Leaf A", value: "NC:leaf-A:rev-3", struck: true}
+    - {kind: effective_date, text: "Effective for service on and after January 1, 2010", value: "2010-01-01", struck: true}
+    - {kind: docket, text: "NCUC Docket No. E-7, Sub 909", value: "E-7 Sub 909", struck: true}
+    - {kind: order_date, text: "December 7, 2009", value: "2009-12-07", struck: true}
+    - {kind: order_date, text: "December 28, 2009", value: "2009-12-28", struck: true}
+    - {kind: revision, text: "NC Eighth Revised Leaf No. 401", value: "NC:leaf-401:rev-8"}
+    - {kind: effective_date, text: "Effective January 1, 2024", value: "2024-01-01"}
+    - {kind: docket, text: "NCUC Docket No. E-7, Sub 1276", value: "E-7 Sub 1276"}
+    - {kind: order_date, text: "Order dated ____", value: null, blank: true}
+38:
+  sheet_of_family: true
+  clues:
+    - {kind: revision, text: "NC Original Leaf No. 610", value: "NC:leaf-610:rev-0"}
+    - {kind: revision, text: "NC Original Leaf No. 610", value: "NC:leaf-610:rev-0"}
+    - {kind: effective_date, text: "Effective for service rendered on and after October 1, 2023", value: "2023-10-01"}
+    - {kind: docket, text: "NCUC Docket No. E-2, Sub 1300", value: "E-2 Sub 1300"}
+    - {kind: order_date, text: "August 18, 2023", value: "2023-08-18"}
+39:
+  sheet_of_family: false
+  notes: Cover letter (June 9, 2020). Not a tariff sheet.
+  clues: []
+40:
+  sheet_of_family: false
+  notes: Cover letter (September 20, 2021). Not a tariff sheet.
+  clues: []
+41:
+  sheet_of_family: true
+  notes: Scanned (OCR). "(Proposed)" printed between the ordinal and "Revised". No order date printed.
+  clues:
+    - {kind: revision, text: "North Carolina Fifth (Proposed) Revised Leaf No. 63", value: "NC:leaf-63:rev-5"}
+    - {kind: supersedes, text: "Superseding North Carolina Fourth Revised Leaf No. 63", value: "NC:leaf-63:rev-4"}
+    - {kind: revision, text: "North Carolina Fifth (Proposed) Revised Leaf No. 63", value: "NC:leaf-63:rev-5"}
+    - {kind: effective_date, text: "Effective for service rendered on and after July 1, 2012", value: "2012-07-01"}
+    - {kind: docket, text: "NCUC Docket No. E-7, Sub 989", value: "E-7 Sub 989"}
+42:
+  sheet_of_family: true
+  notes: Supersedes reference wraps ("Superseding NC First Revised Leaf" / "No. 524" on the next line, left column interleaved).
+  clues:
+    - {kind: revision, text: "NC Second Revised Leaf No. 524", value: "NC:leaf-524:rev-2"}
+    - {kind: supersedes, text: "Superseding NC First Revised Leaf No. 524", value: "NC:leaf-524:rev-1"}
+    - {kind: revision, text: "NC Second Revised Leaf No. 524", value: "NC:leaf-524:rev-2"}
+    - {kind: effective_date, text: "Effective for service rendered on and after October 1, 2025", value: "2025-10-01"}
+    - {kind: docket, text: "NCUC Docket No. E-2, Sub 1300", value: "E-2 Sub 1300"}
+    - {kind: order_date, text: "August 18, 2023", value: "2023-08-18"}
+43:
+  sheet_of_family: true
+  notes: Scanned with FILED stamp. Supersedes prints "North Carolinas" (sic).
+  clues:
+    - {kind: revision, text: "North Carolina Third Revised Leaf No. 62", value: "NC:leaf-62:rev-3"}
+    - {kind: supersedes, text: "Superseding North Carolinas Second Revised Leaf No. 62", value: "NC:leaf-62:rev-2"}
+    - {kind: revision, text: "North Carolina Third Revised Leaf No. 62", value: "NC:leaf-62:rev-3"}
+    - {kind: effective_date, text: "Effective for service on and after September 1, 2010", value: "2010-09-01"}
+    - {kind: docket, text: "NCUC Docket No. E-7. Sub 938", value: "E-7 Sub 938"}
+    - {kind: order_date, text: "June 3, 2010", value: "2010-06-03"}
+44:
+  sheet_of_family: false
+  notes: Program evaluation exhibit (Evans Exhibit 6). Not a tariff sheet.
+  clues: []
+45:
+  sheet_of_family: false
+  notes: Cover letter. Not a tariff sheet.
+  clues: []
+46:
+  sheet_of_family: false
+  notes: DEC Solar Rebate Rider SRR (Leaf 331) bound to DEP family nc-progress-leaf-663. Wrong utility. Effective line reads "Effective on or after".
+  clues:
+    - {kind: revision, text: "North Carolina Fourth Revised Leaf No. 331", value: "NC:leaf-331:rev-4"}
+    - {kind: supersedes, text: "Superseding North Carolina Third Revised Leaf No. 331", value: "NC:leaf-331:rev-3"}
+    - {kind: revision, text: "North Carolina Fourth Revised Leaf No. 331", value: "NC:leaf-331:rev-4"}
+    - {kind: effective_date, text: "Effective on or after November 25, 2020", value: "2020-11-25"}
+    - {kind: docket, text: "NCUC Docket No. E-7, Sub 1166", value: "E-7 Sub 1166"}
+    - {kind: order_date, text: "November 25, 2020", value: "2020-11-25"}
+47:
+  sheet_of_family: true
+  notes: Footer prints two NCUC dockets with no order date, then the compliance-book "Leaf Indexing ... NCUC Docket No. E-2. Sub 1300" line.
+  clues:
+    - {kind: revision, text: "NC Original Leaf No. 713", value: "NC:leaf-713:rev-0"}
+    - {kind: supersedes, text: "Superseding NC Program REEAD-1", value: "schedule:REEAD-1"}
+    - {kind: revision, text: "NC Original Leaf No. 713", value: "NC:leaf-713:rev-0"}
+    - {kind: effective_date, text: "Effective for service rendered on and after February 27, 2019", value: "2019-02-27"}
+    - {kind: docket, text: "E-2, Subs 936", value: "E-2 Sub 936"}
+    - {kind: docket, text: "1174", value: "E-2 Sub 1174"}
+    - {kind: docket, text: "NCUC Docket No. E-2. Sub 1300", value: "E-2 Sub 1300"}
+48:
+  sheet_of_family: true
+  clues:
+    - {kind: revision, text: "NC Second Revised Leaf No. 520", value: "NC:leaf-520:rev-2"}
+    - {kind: supersedes, text: "Superseding NC First Revised Leaf No. 520", value: "NC:leaf-520:rev-1"}
+    - {kind: revision, text: "NC Second Revised Leaf No. 520", value: "NC:leaf-520:rev-2"}
+    - {kind: effective_date, text: "Effective for service rendered on and after October 1, 2025", value: "2025-10-01"}
+    - {kind: docket, text: "NCUC Docket No. E-2, Sub 1300", value: "E-2 Sub 1300"}
+    - {kind: order_date, text: "August 18, 2023", value: "2023-08-18"}
+49:
+  sheet_of_family: true
+  notes: Scanned (OCR). Amended; "Order dated" with no date.
+  clues:
+    - {kind: revision, text: "North Carolina Thirteenth Revised Leaf No. 23", value: "NC:leaf-23:rev-13"}
+    - {kind: supersedes, text: "Superseding North Carolina Twelfth Revised Leaf No. 23", value: "NC:leaf-23:rev-12"}
+    - {kind: revision, text: "Amended North Carolina Thirteenth Revised Leaf No. 23", value: "NC:leaf-23:rev-13"}
+    - {kind: effective_date, text: "Effective November 1, 2013", value: "2013-11-01"}
+    - {kind: docket, text: "NCUC Docket No. E-7, Sub 1026", value: "E-7 Sub 1026"}
+    - {kind: order_date, text: "Order dated", value: null, blank: true}
+50:
+  sheet_of_family: false
+  notes: Cover letter (September 13, 2018). Not a tariff sheet.
+  clues: []

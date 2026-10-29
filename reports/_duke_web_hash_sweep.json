@@ -1,0 +1,70 @@
+{
+  "total": 151,
+  "same": 144,
+  "changed": [
+    {
+      "family_key": "nc-carolinas-rider-EDIT4",
+      "company": "carolinas",
+      "title": "EDIT-4",
+      "did": 55,
+      "url": "https://www.duke-energy.com/-/media/pdfs/for-your-home/rates/electric-nc/ncrideredit4.pdf",
+      "live_hash": "3f8d83e9e512d3a8733e2860e5ad547fc83d9e689694cc30e15e18ed4a45efda",
+      "stored_hash": "4afffa84ff8b61caae3e490a344f905d90c0241f58e7c733907fcdbd8fc1fe50"
+    },
+    {
+      "family_key": "nc-carolinas-rider-SUMMARY",
+      "company": "carolinas",
+      "title": "Summary of Rider Adjustments",
+      "did": 40,
+      "url": "https://www.duke-energy.com/-/media/pdfs/for-your-home/rates/electric-nc/ncridersummary.pdf",
+      "live_hash": "7cec508961340839ceb2dba57fd916175ced3e4bf93a40f875e2246c9b71fee5",
+      "stored_hash": "a559a1045b22ad409f22f5f393f36f3adcda926d205bcc9e30edb37317b79b4f"
+    },
+    {
+      "family_key": "nc-progress-leaf-600",
+      "company": "progress",
+      "title": "Summary of Rider Adjustments",
+      "did": 257,
+      "url": "https://www.duke-energy.com/-/media/pdfs/for-your-home/rates/dep-nc/leaf-no-600-summary-of-riders.pdf",
+      "live_hash": "84c7962c2fa262e7d5f64d408fdef3deacd080a22ee445eb9ecbd0c7a9f0d474",
+      "stored_hash": "1cf5ad1224568ef56b55abc5a942d133b31aa34391fa590e93c7fc28c1f625a8"
+    },
+    {
+      "family_key": "nc-progress-leaf-604",
+      "company": "progress",
+      "title": "Excess Deferred Income Tax Rider EDIT-4",
+      "did": 261,
+      "url": "https://www.duke-energy.com/-/media/pdfs/for-your-home/rates/dep-nc/leaf-no-604-rider-edit-4-ry1.pdf",
+      "live_hash": "1e663d08a8c84ca17edd4da95e92e596bcb5df9cdf1b3bb1492fec6a0ff3804b",
+      "stored_hash": "0f1ebd80f48e09a0c31c03dfd823fdbcbadaeec3ec90327b5d3e77aaedce2cba"
+    },
+    {
+      "family_key": "nc-progress-leaf-608",
+      "company": "progress",
+      "title": "Residential Decoupling Mechanism Rider RDM",
+      "did": 265,
+      "url": "https://www.duke-energy.com/-/media/pdfs/for-your-home/rates/dep-nc/leaf-no-608-rider-rdm-ry1.pdf",
+      "live_hash": "a92e171ef7be979a5e3c26d7ac1b3e46d0a8af590862eff4e25886dcae4838f7",
+      "stored_hash": "44460edd60e2b8c2b98ce21b2973dce55b555ec0a8ed4675eb42d6a3e82e52f6"
+    },
+    {
+      "family_key": "nc-progress-leaf-609",
+      "company": "progress",
+      "title": "Earnings Sharing Mechanism Rider ESM",
+      "did": 266,
+      "url": "https://www.duke-energy.com/-/media/pdfs/for-your-home/rates/dep-nc/leaf-no-609-rider-esm-ry1.pdf",
+      "live_hash": "c97e65d9044be1b090da8c042154fc5fb7d494bc6b4b65df3db6b3b30c4c1e63",
+      "stored_hash": "3fc2c3cadea5f69083bce81f760b66ae83f0dbe271a67f279cfcaefb57b8a2af"
+    },
+    {
+      "family_key": "nc-progress-leaf-610",
+      "company": "progress",
+      "title": "Performance Incentive Mechanism Rider PIM",
+      "did": 267,
+      "url": "https://www.duke-energy.com/-/media/pdfs/for-your-home/rates/dep-nc/leaf-no-610-rider-pim-ry1.pdf",
+      "live_hash": "fb0ebe191f757bad48537f264d6a4442f51bb5340f7fc2fc645ce41951adcec5",
+      "stored_hash": "90509695c4401f9bfed4a30ba2955a96056e177c3b6c0c81b7eb1dbda4e2a174"
+    }
+  ],
+  "errors": []
+}

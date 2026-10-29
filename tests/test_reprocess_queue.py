@@ -30,6 +30,11 @@ from duke_rates.historical.ncuc.pipeline.bulk_extractor import BulkExtractor
 from duke_rates.historical.ncuc.pipeline.stage_versions import OCR_NORMALIZATION_VERSION
 from duke_rates.models.pipeline import PageEvidence, PipelineRoute, TariffSpan
 
+import pytest
+
+# Phase 2C: these tests assert tariff_charges, so they run with legacy replace.
+pytestmark = pytest.mark.usefixtures("legacy_replace_persistence")
+
 
 GENERIC_RESIDENTIAL_TEXT = """
 Schedule RES
@@ -1000,7 +1005,9 @@ def test_process_reprocess_queue_bootstraps_missing_tariff_version(tmp_path, mon
         lambda: (SimpleNamespace(database_path=db_path), None),
     )
 
-    def _fake_process_document(self, doc: dict) -> tuple[int, str, int, str, str | None]:
+    def _fake_process_document(
+        self, doc: dict, force_clear: bool = False
+    ) -> tuple[int, str, int, str, str | None]:
         return int(doc["id"]), str(doc["family_key"]), 0, "parsed", None
 
     monkeypatch.setattr(BulkExtractor, "process_document", _fake_process_document)

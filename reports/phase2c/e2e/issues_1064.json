@@ -1,0 +1,59 @@
+{
+  "run_id": 1064,
+  "validation_status": "warnings",
+  "needs_review": [
+    {
+      "code": "parser_disagreement",
+      "detail": "'Demand: Medium General Service Schedules - JAA': text (None, 0.92, None) vs table (None, None, None); text value kept",
+      "level": "warning",
+      "needs_review": true,
+      "refs": [
+        "Demand: Medium General Service Schedules - JAA"
+      ]
+    }
+  ],
+  "run_issues": [
+    {
+      "code": "parser_disagreement",
+      "detail": "'Demand: Medium General Service Schedules - JAA': text (None, 0.92, None) vs table (None, None, None); text value kept",
+      "level": "warning",
+      "needs_review": true,
+      "refs": [
+        "Demand: Medium General Service Schedules - JAA"
+      ]
+    },
+    {
+      "code": "revision_rows_dropped",
+      "detail": "1 rows of the previous revision are absent",
+      "level": "info",
+      "needs_review": false,
+      "refs": [
+        "large general service schedules total rider adjustments"
+      ]
+    }
+  ],
+  "charge_issues": [
+    {
+      "extracted_charge_id": 5253,
+      "charge": [
+        "Demand: Medium General Service Schedules - JAA",
+        0.92,
+        "$/kW"
+      ],
+      "code": "provenance_incomplete",
+      "detail": "unavailable: page, quote",
+      "level": "info"
+    },
+    {
+      "extracted_charge_id": 5255,
+      "charge": [
+        "Demand: Medium General Service Schedules Total Rider Adjustments",
+        0.92,
+        "$/kW"
+      ],
+      "code": "provenance_incomplete",
+      "detail": "unavailable: page, quote",
+      "level": "info"
+    }
+  ]
+}

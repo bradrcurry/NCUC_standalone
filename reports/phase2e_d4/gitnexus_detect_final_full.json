@@ -1,0 +1,891 @@
+{
+  "summary": {
+    "changed_count": 89,
+    "affected_count": 16,
+    "changed_files": 46,
+    "risk_level": "critical"
+  },
+  "changed_symbols": [
+    {
+      "id": "Section:docs/NCUC_PORTAL_WORKING_METHOD.md:L18:1. Static prerequisite check (no network calls). ~1s.",
+      "name": "1. Static prerequisite check (no network calls). ~1s.",
+      "type": "Section",
+      "filePath": "docs/NCUC_PORTAL_WORKING_METHOD.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/NCUC_PORTAL_WORKING_METHOD.md:L21:2. Live login + resolve + DocketDetails + inventory probe. ~30s.",
+      "name": "2. Live login + resolve + DocketDetails + inventory probe. ~30s.",
+      "type": "Section",
+      "filePath": "docs/NCUC_PORTAL_WORKING_METHOD.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/design/2026-10-29_phase2e_d4_plan.md:L1:D4: complete NCUC docket inventories",
+      "name": "D4: complete NCUC docket inventories",
+      "type": "Section",
+      "filePath": "docs/design/2026-10-29_phase2e_d4_plan.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/design/2026-10-29_phase2e_d4_plan.md:L5:Observed defect and existing infrastructure",
+      "name": "Observed defect and existing infrastructure",
+      "type": "Section",
+      "filePath": "docs/design/2026-10-29_phase2e_d4_plan.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/design/2026-10-29_phase2e_d4_plan.md:L20:External implementation evaluation",
+      "name": "External implementation evaluation",
+      "type": "Section",
+      "filePath": "docs/design/2026-10-29_phase2e_d4_plan.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/design/2026-10-29_phase2e_d4_plan.md:L49:Implementation acceptance criteria",
+      "name": "Implementation acceptance criteria",
+      "type": "Section",
+      "filePath": "docs/design/2026-10-29_phase2e_d4_plan.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/design/2026-10-29_phase2e_d4_plan.md:L74:Current status",
+      "name": "Current status",
+      "type": "Section",
+      "filePath": "docs/design/2026-10-29_phase2e_d4_plan.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/plans/ncuc_document_intelligence_roadmap.md:L1:NCUC document intelligence roadmap",
+      "name": "NCUC document intelligence roadmap",
+      "type": "Section",
+      "filePath": "docs/plans/ncuc_document_intelligence_roadmap.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/plans/ncuc_document_intelligence_roadmap.md:L5:Baseline",
+      "name": "Baseline",
+      "type": "Section",
+      "filePath": "docs/plans/ncuc_document_intelligence_roadmap.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/plans/ncuc_document_intelligence_roadmap.md:L20:Safety and evidence",
+      "name": "Safety and evidence",
+      "type": "Section",
+      "filePath": "docs/plans/ncuc_document_intelligence_roadmap.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/plans/ncuc_document_intelligence_roadmap.md:L28:Milestones and acceptance gates",
+      "name": "Milestones and acceptance gates",
+      "type": "Section",
+      "filePath": "docs/plans/ncuc_document_intelligence_roadmap.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/plans/ncuc_document_intelligence_roadmap.md:L40:Execution notes",
+      "name": "Execution notes",
+      "type": "Section",
+      "filePath": "docs/plans/ncuc_document_intelligence_roadmap.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/plans/ncuc_document_intelligence_roadmap.md:L131:Next action",
+      "name": "Next action",
+      "type": "Section",
+      "filePath": "docs/plans/ncuc_document_intelligence_roadmap.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/cli_commands/provenance.py:run_network_searches_cmd",
+      "name": "run_network_searches_cmd",
+      "type": "Function",
+      "filePath": "src/duke_rates/cli_commands/provenance.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/cli_commands/provenance.py:run_network_searches_cmd.docket_inventory@735:4",
+      "name": "docket_inventory",
+      "type": "Function",
+      "filePath": "src/duke_rates/cli_commands/provenance.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/document_intelligence/acquisition.py:_inventory_fetch_eligible",
+      "name": "_inventory_fetch_eligible",
+      "type": "Function",
+      "filePath": "src/duke_rates/document_intelligence/acquisition.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Variable:src/duke_rates/historical/ncuc/docket_inventory.py:_POSTBACK",
+      "name": "_POSTBACK",
+      "type": "Variable",
+      "filePath": "src/duke_rates/historical/ncuc/docket_inventory.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Variable:src/duke_rates/historical/ncuc/docket_inventory.py:RETRIEVER_VERSION",
+      "name": "RETRIEVER_VERSION",
+      "type": "Variable",
+      "filePath": "src/duke_rates/historical/ncuc/docket_inventory.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Class:src/duke_rates/historical/ncuc/docket_inventory.py:DocketDocumentList",
+      "name": "DocketDocumentList",
+      "type": "Class",
+      "filePath": "src/duke_rates/historical/ncuc/docket_inventory.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Method:src/duke_rates/historical/ncuc/docket_inventory.py:DocketDocumentList.__init__#1",
+      "name": "__init__",
+      "type": "Method",
+      "filePath": "src/duke_rates/historical/ncuc/docket_inventory.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/docket_inventory.py:inventory_page_state",
+      "name": "inventory_page_state",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/docket_inventory.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/docket_inventory.py:_capture_inventory_page",
+      "name": "_capture_inventory_page",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/docket_inventory.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/docket_inventory.py:walk_docket_inventory",
+      "name": "walk_docket_inventory",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/docket_inventory.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Variable:src/duke_rates/historical/ncuc/remote_discovery.py:PLANNER_VERSION",
+      "name": "PLANNER_VERSION",
+      "type": "Variable",
+      "filePath": "src/duke_rates/historical/ncuc/remote_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/remote_discovery.py:execute_plan",
+      "name": "execute_plan",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/remote_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/remote_discovery.py:parse_docket_inventory",
+      "name": "parse_docket_inventory",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/remote_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/remote_discovery.py:docket_inventory_outcome",
+      "name": "docket_inventory_outcome",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/remote_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/remote_discovery.py:docket_inventory_search",
+      "name": "docket_inventory_search",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/remote_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Class:src/duke_rates/historical/ncuc/search_ledger.py:Attempt",
+      "name": "Attempt",
+      "type": "Class",
+      "filePath": "src/duke_rates/historical/ncuc/search_ledger.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Property:src/duke_rates/historical/ncuc/search_ledger.py:Attempt.error_detail",
+      "name": "error_detail",
+      "type": "Property",
+      "filePath": "src/duke_rates/historical/ncuc/search_ledger.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Method:src/duke_rates/historical/ncuc/search_ledger.py:Attempt.finish_outcome#2",
+      "name": "finish_outcome",
+      "type": "Method",
+      "filePath": "src/duke_rates/historical/ncuc/search_ledger.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Class:src/duke_rates/historical/ncuc/search_ledger.py:SearchLedger",
+      "name": "SearchLedger",
+      "type": "Class",
+      "filePath": "src/duke_rates/historical/ncuc/search_ledger.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Method:src/duke_rates/historical/ncuc/search_ledger.py:SearchLedger._close#3",
+      "name": "_close",
+      "type": "Method",
+      "filePath": "src/duke_rates/historical/ncuc/search_ledger.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/session.py:get_docket_documents",
+      "name": "get_docket_documents",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/session.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/session.py:get_docket_documents_first_page",
+      "name": "get_docket_documents_first_page",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/session.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Variable:tests/test_d4_inventory_pagination.py:CAPTURE",
+      "name": "CAPTURE",
+      "type": "Variable",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Variable:tests/test_d4_inventory_pagination.py:TARGET",
+      "name": "TARGET",
+      "type": "Variable",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_inventory_pagination.py:derived_page",
+      "name": "derived_page",
+      "type": "Function",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Class:tests/test_d4_inventory_pagination.py:InventoryPage",
+      "name": "InventoryPage",
+      "type": "Class",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Method:tests/test_d4_inventory_pagination.py:InventoryPage.__init__#1",
+      "name": "__init__",
+      "type": "Method",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Method:tests/test_d4_inventory_pagination.py:InventoryPage.content#0",
+      "name": "content",
+      "type": "Method",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Method:tests/test_d4_inventory_pagination.py:InventoryPage.title#0",
+      "name": "title",
+      "type": "Method",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Method:tests/test_d4_inventory_pagination.py:InventoryPage.advance#1",
+      "name": "advance",
+      "type": "Method",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_inventory_pagination.py:walk",
+      "name": "walk",
+      "type": "Function",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_inventory_pagination.py:test_all_six_pages_and_stable_ids_are_deduplicated",
+      "name": "test_all_six_pages_and_stable_ids_are_deduplicated",
+      "type": "Function",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_inventory_pagination.py:test_real_capture_is_one_of_six_and_not_empty_evidence",
+      "name": "test_real_capture_is_one_of_six_and_not_empty_evidence",
+      "type": "Function",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_inventory_pagination.py:test_stale_postback_is_bounded_and_retains_verified_rows",
+      "name": "test_stale_postback_is_bounded_and_retains_verified_rows",
+      "type": "Function",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_inventory_pagination.py:test_repeated_rows_with_a_changed_page_number_are_still_stale",
+      "name": "test_repeated_rows_with_a_changed_page_number_are_still_stale",
+      "type": "Function",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_inventory_pagination.py:test_blocked_pagination_stops_without_retry",
+      "name": "test_blocked_pagination_stops_without_retry",
+      "type": "Function",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_inventory_pagination.py:test_page_cap_cannot_be_completed_negative_evidence",
+      "name": "test_page_cap_cannot_be_completed_negative_evidence",
+      "type": "Function",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_inventory_pagination.py:test_item_count_mismatch_and_cross_page_duplicate",
+      "name": "test_item_count_mismatch_and_cross_page_duplicate",
+      "type": "Function",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_inventory_pagination.py:test_changed_portal_item_count_is_partial_even_if_rows_fit",
+      "name": "test_changed_portal_item_count_is_partial_even_if_rows_fit",
+      "type": "Function",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_inventory_pagination.py:test_missing_sequential_link_is_partial",
+      "name": "test_missing_sequential_link_is_partial",
+      "type": "Function",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_inventory_pagination.py:test_unknown_or_unidentified_inventory_is_never_verified_empty",
+      "name": "test_unknown_or_unidentified_inventory_is_never_verified_empty",
+      "type": "Function",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_inventory_pagination.py:test_wrong_docket_identity_is_rejected",
+      "name": "test_wrong_docket_identity_is_rejected",
+      "type": "Function",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_inventory_pagination.py:test_interruption_keeps_checkpoint_and_restart_revalidates",
+      "name": "test_interruption_keeps_checkpoint_and_restart_revalidates",
+      "type": "Function",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_inventory_pagination.py:test_interruption_keeps_checkpoint_and_restart_revalidates.interrupt@161:4",
+      "name": "interrupt",
+      "type": "Function",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_inventory_pagination.py:test_complete_inventory_is_ledgered_and_partial_stays_retryable",
+      "name": "test_complete_inventory_is_ledgered_and_partial_stays_retryable",
+      "type": "Function",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_inventory_pagination.py:test_unrecognized_pager_layout_does_not_silently_complete",
+      "name": "test_unrecognized_pager_layout_does_not_silently_complete",
+      "type": "Function",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_inventory_pagination.py:test_forward_ellipsis_is_only_a_lower_bound",
+      "name": "test_forward_ellipsis_is_only_a_lower_bound",
+      "type": "Function",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_inventory_pagination.py:test_ledger_preserves_partial_retrieval_error",
+      "name": "test_ledger_preserves_partial_retrieval_error",
+      "type": "Function",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_inventory_pagination.py:test_search_path_uses_complete_traversal_with_the_exact_docket",
+      "name": "test_search_path_uses_complete_traversal_with_the_exact_docket",
+      "type": "Function",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Class:tests/test_d4_inventory_pagination.py:NavigatingInventoryPage",
+      "name": "NavigatingInventoryPage",
+      "type": "Class",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Method:tests/test_d4_inventory_pagination.py:NavigatingInventoryPage.__init__#1",
+      "name": "__init__",
+      "type": "Method",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Method:tests/test_d4_inventory_pagination.py:NavigatingInventoryPage.advance#1",
+      "name": "advance",
+      "type": "Method",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Method:tests/test_d4_inventory_pagination.py:NavigatingInventoryPage.content#0",
+      "name": "content",
+      "type": "Method",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_inventory_pagination.py:test_transient_navigation_read_error_does_not_discard_page_two",
+      "name": "test_transient_navigation_read_error_does_not_discard_page_two",
+      "type": "Function",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_inventory_pagination.py:test_persistent_navigation_error_preserves_partial_inventory",
+      "name": "test_persistent_navigation_error_preserves_partial_inventory",
+      "type": "Function",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_inventory_pagination.py:test_real_confidential_entries_have_distinct_listing_identity_only",
+      "name": "test_real_confidential_entries_have_distinct_listing_identity_only",
+      "type": "Function",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_inventory_pagination.py:test_real_second_page_orders_are_candidates_and_restricted_files_are_not",
+      "name": "test_real_second_page_orders_are_candidates_and_restricted_files_are_not",
+      "type": "Function",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_inventory_pagination.py:test_complete_real_six_page_regression_finds_the_2013_rate_order",
+      "name": "test_complete_real_six_page_regression_finds_the_2013_rate_order",
+      "type": "Function",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_inventory_pagination.py:test_form_action_verifies_docket_when_sanitized_hidden_value_is_empty",
+      "name": "test_form_action_verifies_docket_when_sanitized_hidden_value_is_empty",
+      "type": "Function",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_inventory_pagination.py:test_unknown_postback_syntax_does_not_make_inventory_complete",
+      "name": "test_unknown_postback_syntax_does_not_make_inventory_complete",
+      "type": "Function",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_inventory_pagination.py:test_pager_accepts_postback_whitespace_and_both_quote_styles",
+      "name": "test_pager_accepts_postback_whitespace_and_both_quote_styles",
+      "type": "Function",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_inventory_pagination.py:test_pager_windows_do_not_follow_the_backward_ellipsis",
+      "name": "test_pager_windows_do_not_follow_the_backward_ellipsis",
+      "type": "Function",
+      "filePath": "tests/test_d4_inventory_pagination.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_preflight_safety.py:test_fetch_inventory_reads_existing_database_without_migrations",
+      "name": "test_fetch_inventory_reads_existing_database_without_migrations",
+      "type": "Function",
+      "filePath": "tests/test_d4_preflight_safety.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_preflight_safety.py:test_fetch_inventory_reads_existing_database_without_migrations.no_migration@23:4",
+      "name": "no_migration",
+      "type": "Function",
+      "filePath": "tests/test_d4_preflight_safety.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_preflight_safety.py:test_fetch_inventory_does_not_create_missing_database",
+      "name": "test_fetch_inventory_does_not_create_missing_database",
+      "type": "Function",
+      "filePath": "tests/test_d4_preflight_safety.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Variable:tests/test_d4_session_inventory.py:DOCKET_ID",
+      "name": "DOCKET_ID",
+      "type": "Variable",
+      "filePath": "tests/test_d4_session_inventory.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Class:tests/test_d4_session_inventory.py:SessionPage",
+      "name": "SessionPage",
+      "type": "Class",
+      "filePath": "tests/test_d4_session_inventory.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Method:tests/test_d4_session_inventory.py:SessionPage.goto",
+      "name": "goto",
+      "type": "Method",
+      "filePath": "tests/test_d4_session_inventory.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Method:tests/test_d4_session_inventory.py:SessionPage.locator#1",
+      "name": "locator",
+      "type": "Method",
+      "filePath": "tests/test_d4_session_inventory.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_session_inventory.py:test_shared_reader_returns_all_pages_and_the_legacy_list_fields",
+      "name": "test_shared_reader_returns_all_pages_and_the_legacy_list_fields",
+      "type": "Function",
+      "filePath": "tests/test_d4_session_inventory.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_session_inventory.py:test_shared_reader_refuses_a_silently_partial_list",
+      "name": "test_shared_reader_refuses_a_silently_partial_list",
+      "type": "Function",
+      "filePath": "tests/test_d4_session_inventory.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_session_inventory.py:test_explicit_first_page_loader_leaves_traversal_to_the_caller",
+      "name": "test_explicit_first_page_loader_leaves_traversal_to_the_caller",
+      "type": "Function",
+      "filePath": "tests/test_d4_session_inventory.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_session_inventory.py:test_shared_reader_withholds_all_confidential_download_urls",
+      "name": "test_shared_reader_withholds_all_confidential_download_urls",
+      "type": "Function",
+      "filePath": "tests/test_d4_session_inventory.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_session_inventory.py:test_remote_adapter_does_not_traverse_an_already_complete_provider_twice",
+      "name": "test_remote_adapter_does_not_traverse_an_already_complete_provider_twice",
+      "type": "Function",
+      "filePath": "tests/test_d4_session_inventory.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_session_inventory.py:test_remote_adapter_retains_the_shared_readers_partial_outcome",
+      "name": "test_remote_adapter_retains_the_shared_readers_partial_outcome",
+      "type": "Function",
+      "filePath": "tests/test_d4_session_inventory.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d4_session_inventory.py:test_invalid_page_cap_fails_before_any_portal_request",
+      "name": "test_invalid_page_cap_fails_before_any_portal_request",
+      "type": "Function",
+      "filePath": "tests/test_d4_session_inventory.py",
+      "change_type": "touched"
+    }
+  ],
+  "affected_processes": [
+    {
+      "id": "proc_76_ncuc_docket_fetch",
+      "name": "Ncuc_docket_fetch → Items_reported",
+      "process_type": "cross_community",
+      "step_count": 6,
+      "changed_steps": [
+        {
+          "symbol": "walk_docket_inventory",
+          "step": 3
+        },
+        {
+          "symbol": "inventory_page_state",
+          "step": 4
+        },
+        {
+          "symbol": "docket_inventory_outcome",
+          "step": 5
+        },
+        {
+          "symbol": "get_docket_documents",
+          "step": 2
+        }
+      ]
+    },
+    {
+      "id": "proc_77_ncuc_docket_fetch",
+      "name": "Ncuc_docket_fetch → Parse_docket_inventory",
+      "process_type": "cross_community",
+      "step_count": 6,
+      "changed_steps": [
+        {
+          "symbol": "walk_docket_inventory",
+          "step": 3
+        },
+        {
+          "symbol": "inventory_page_state",
+          "step": 4
+        },
+        {
+          "symbol": "docket_inventory_outcome",
+          "step": 5
+        },
+        {
+          "symbol": "parse_docket_inventory",
+          "step": 6
+        },
+        {
+          "symbol": "get_docket_documents",
+          "step": 2
+        }
+      ]
+    },
+    {
+      "id": "proc_126_resolve_gaps_local_c",
+      "name": "Resolve_gaps_local_cmd → _now",
+      "process_type": "cross_community",
+      "step_count": 5,
+      "changed_steps": [
+        {
+          "symbol": "_close",
+          "step": 4
+        }
+      ]
+    },
+    {
+      "id": "proc_173_ncuc_docket_fetch",
+      "name": "Ncuc_docket_fetch → _capture_inventory_page",
+      "process_type": "cross_community",
+      "step_count": 4,
+      "changed_steps": [
+        {
+          "symbol": "walk_docket_inventory",
+          "step": 3
+        },
+        {
+          "symbol": "_capture_inventory_page",
+          "step": 4
+        },
+        {
+          "symbol": "get_docket_documents",
+          "step": 2
+        }
+      ]
+    },
+    {
+      "id": "proc_212_resolve_gaps_local_c",
+      "name": "Resolve_gaps_local_cmd → Finish_outcome",
+      "process_type": "cross_community",
+      "step_count": 4,
+      "changed_steps": [
+        {
+          "symbol": "finish_outcome",
+          "step": 4
+        }
+      ]
+    },
+    {
+      "id": "proc_262_run_continuous_loop_",
+      "name": "Run_continuous_loop_nc → _inventory_fetch_eligible",
+      "process_type": "intra_community",
+      "step_count": 3,
+      "changed_steps": [
+        {
+          "symbol": "_inventory_fetch_eligible",
+          "step": 3
+        }
+      ]
+    },
+    {
+      "id": "proc_324_run_network_searches",
+      "name": "Run_network_searches_cmd → Is_order_row",
+      "process_type": "cross_community",
+      "step_count": 3,
+      "changed_steps": [
+        {
+          "symbol": "execute_plan",
+          "step": 2
+        },
+        {
+          "symbol": "run_network_searches_cmd",
+          "step": 1
+        }
+      ]
+    },
+    {
+      "id": "proc_458_run_network_searches",
+      "name": "Run_network_searches_cmd → _now",
+      "process_type": "cross_community",
+      "step_count": 5,
+      "changed_steps": [
+        {
+          "symbol": "_close",
+          "step": 4
+        },
+        {
+          "symbol": "execute_plan",
+          "step": 2
+        },
+        {
+          "symbol": "run_network_searches_cmd",
+          "step": 1
+        }
+      ]
+    },
+    {
+      "id": "proc_497_run_network_searches",
+      "name": "Run_network_searches_cmd → _mdy",
+      "process_type": "cross_community",
+      "step_count": 4,
+      "changed_steps": [
+        {
+          "symbol": "run_network_searches_cmd",
+          "step": 1
+        }
+      ]
+    },
+    {
+      "id": "proc_498_run_network_searches",
+      "name": "Run_network_searches_cmd → _shift",
+      "process_type": "cross_community",
+      "step_count": 4,
+      "changed_steps": [
+        {
+          "symbol": "run_network_searches_cmd",
+          "step": 1
+        }
+      ]
+    },
+    {
+      "id": "proc_499_run_network_searches",
+      "name": "Run_network_searches_cmd → _version_clue_dates",
+      "process_type": "cross_community",
+      "step_count": 4,
+      "changed_steps": [
+        {
+          "symbol": "run_network_searches_cmd",
+          "step": 1
+        }
+      ]
+    },
+    {
+      "id": "proc_500_run_network_searches",
+      "name": "Run_network_searches_cmd → Archive_state",
+      "process_type": "cross_community",
+      "step_count": 4,
+      "changed_steps": [
+        {
+          "symbol": "run_network_searches_cmd",
+          "step": 1
+        }
+      ]
+    },
+    {
+      "id": "proc_502_run_network_searches",
+      "name": "Run_network_searches_cmd → Finish_outcome",
+      "process_type": "cross_community",
+      "step_count": 4,
+      "changed_steps": [
+        {
+          "symbol": "finish_outcome",
+          "step": 4
+        },
+        {
+          "symbol": "execute_plan",
+          "step": 2
+        },
+        {
+          "symbol": "run_network_searches_cmd",
+          "step": 1
+        }
+      ]
+    },
+    {
+      "id": "proc_519_run_network_searches",
+      "name": "Run_network_searches_cmd → Completed_hashes",
+      "process_type": "cross_community",
+      "step_count": 3,
+      "changed_steps": [
+        {
+          "symbol": "run_network_searches_cmd",
+          "step": 1
+        }
+      ]
+    },
+    {
+      "id": "proc_571_run_network_searches",
+      "name": "Run_network_searches_cmd → Norm",
+      "process_type": "cross_community",
+      "step_count": 5,
+      "changed_steps": [
+        {
+          "symbol": "execute_plan",
+          "step": 2
+        },
+        {
+          "symbol": "run_network_searches_cmd",
+          "step": 1
+        }
+      ]
+    },
+    {
+      "id": "proc_681_ncuc_docket_fetch",
+      "name": "Ncuc_docket_fetch → Is_blocked_page",
+      "process_type": "cross_community",
+      "step_count": 4,
+      "changed_steps": [
+        {
+          "symbol": "walk_docket_inventory",
+          "step": 3
+        },
+        {
+          "symbol": "get_docket_documents",
+          "step": 2
+        }
+      ]
+    }
+  ]
+}

@@ -398,6 +398,36 @@ def load_dep_lgs_canonical_rider_components(
 # ---------------------------------------------------------------------------
 
 
+#: Some real riders are printed on the Leaf-600 summary without a short code in
+#: the first column, so OCR/extraction leaves ``rider_code = NULL``.  Dropping
+#: them understates the all-in stack (e.g. DEC RS 2025-01 was missing the
+#: Nuclear Production Tax Credits Rider -0.0834, reporting 0.1959 instead of the
+#: tariff's printed 0.1125).  Map their descriptive labels to a synthesized
+#: canonical code so they are kept.  Any NULL-code row whose label does NOT match
+#: one of these patterns is OCR garbage (e.g. "Electricity No." = 4.0, mangled
+#: "0.8990.86") and stays excluded.
+_RECOGNIZED_NULLCODE_RIDERS: tuple[tuple[str, str], ...] = (
+    ("NUCLEAR-PTC", "nuclear production tax credit"),
+    ("STORM", "storm cost recovery"),
+    ("COAL", "coal inventory"),
+)
+
+
+def _derive_rider_code(rider_code: str | None, label: str | None) -> str | None:
+    """Return the rider_code to use, deriving one from ``label`` when the stored
+    ``rider_code`` is NULL but the label names a recognized rider.
+
+    Returns ``None`` for rows that should be dropped (genuine NULL-code garbage).
+    """
+    if rider_code is not None:
+        return rider_code
+    haystack = (label or "").lower()
+    for code, needle in _RECOGNIZED_NULLCODE_RIDERS:
+        if needle in haystack:
+            return code
+    return None
+
+
 def _load_clean_leaf600_components(
     *,
     database_path: Path | None,
@@ -410,7 +440,7 @@ def _load_clean_leaf600_components(
         rows = conn.execute(
             """
             SELECT b.effective_date, b.source_pdf, b.docket_dir,
-                   li.rider_code, li.cents_per_kwh, li.line_effective_date
+                   li.rider_code, li.label, li.cents_per_kwh, li.line_effective_date
             FROM rider_line_items li
             JOIN rider_summary_blocks b ON li.block_id = b.id
             WHERE b.rate_class = ?
@@ -420,7 +450,6 @@ def _load_clean_leaf600_components(
               AND li.is_section_header = 0
               AND li.is_subtotal = 0
               AND li.is_total = 0
-              AND li.rider_code IS NOT NULL
               AND li.cents_per_kwh IS NOT NULL
               AND ABS(li.cents_per_kwh) <= 5.0
             ORDER BY b.effective_date, li.id
@@ -431,13 +460,20 @@ def _load_clean_leaf600_components(
     # Dedup: for each (effective_date, rider_code), keep the row from the best
     # block (most recently inserted block for that date, i.e., highest block id).
     # This mirrors the deduplication done in load_dep_res_rider_history.
+    #
+    # rider_code may be NULL when the summary sheet omits the short code; recover
+    # a canonical code from the label for recognized riders (see
+    # ``_derive_rider_code``) and skip rows that remain unidentified (garbage).
     seen: dict[tuple[str, str], dict[str, Any]] = {}
     for row in rows:
-        key = (row["effective_date"], row["rider_code"])
+        rider_code = _derive_rider_code(row["rider_code"], row["label"])
+        if rider_code is None:
+            continue
+        key = (row["effective_date"], rider_code)
         if key not in seen:
             seen[key] = {
                 "effective_date": row["effective_date"],
-                "rider_code": row["rider_code"],
+                "rider_code": rider_code,
                 "rider_effective_date": row["line_effective_date"],
                 "cents_per_kwh": row["cents_per_kwh"],
                 "source_kind": "clean_leaf600",

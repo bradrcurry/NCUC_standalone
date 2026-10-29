@@ -1,0 +1,11 @@
+{
+  "history_commits": 69,
+  "unpublished_history_blobs": 936,
+  "text_or_decompressed_blobs_scanned": 881,
+  "maximum_blob_size": 2320299,
+  "oversized_blobs": [],
+  "sensitive_file_names_in_history": [],
+  "high_confidence_credential_pattern_matches": [],
+  "staged_tree_pattern_match_paths": [],
+  "scope": "Publication review of prerequisite/session history and final staged tree; not a general security certification."
+}

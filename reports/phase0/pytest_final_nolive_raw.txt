@@ -1,0 +1,129 @@
+.......................................................................s [  4%]
+ssssssssssssssssssssssssssssssss........................................ [  9%]
+.......................................sssss......ssss.................s [ 14%]
+s....................................................................... [ 18%]
+........................................................................ [ 23%]
+........................................................................ [ 28%]
+........................................................................ [ 32%]
+........................................................................ [ 37%]
+........................................................................ [ 42%]
+........................................................................ [ 47%]
+............xxxx........................................................ [ 51%]
+........................................................................ [ 56%]
+........................................................................ [ 61%]
+........................................................................ [ 65%]
+........................................................................ [ 70%]
+...............................................sssssssssssssssssssss.... [ 75%]
+........................................................................ [ 80%]
+........................................................................ [ 84%]
+........................................................................ [ 89%]
+...............................................................sssssssss [ 94%]
+sssssssssssssss......................................................... [ 98%]
+.................                                                        [100%]
+============================== warnings summary ===============================
+tests/test_missing_clean_doc_search.py: 44 warnings
+tests/test_ncuc_portal_harvester.py: 3 warnings
+  C:\Python\Duke\Standalone\src\duke_rates\historical\ncuc\result_harvester.py:69: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    discovered_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+tests/test_missing_clean_doc_search.py: 44 warnings
+  C:\Python\Duke\Standalone\src\duke_rates\historical\ncuc\result_harvester.py:527: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    executed_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+SKIPPED [1] tests\test_baseline_classifier.py:12: scikit-learn not installed (optional ML dependency)
+SKIPPED [1] tests\test_canonical_rider_components.py:36: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:39: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:42: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:45: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:49: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:53: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:58: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:63: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:67: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:70: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:75: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:85: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:88: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:91: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:94: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:98: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:101: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:106: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:116: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:119: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:122: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:126: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:130: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:133: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:139: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:144: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:154: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:157: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:160: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:163: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:167: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:170: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_canonical_rider_components.py:175: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_dec_carolinas_analytics.py:19: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_dec_carolinas_analytics.py:27: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_dec_carolinas_analytics.py:35: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_dec_carolinas_analytics.py:47: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_dec_carolinas_analytics.py:66: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_dep_progress_analytics.py:19: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_dep_progress_analytics.py:28: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_dep_progress_analytics.py:37: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_dep_provisional_riders.py:15: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_dep_validation_analytics.py:15: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_dep_validation_analytics.py:25: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_rider_trust.py:40: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_rider_trust.py:43: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_rider_trust.py:46: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_rider_trust.py:49: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_rider_trust.py:53: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_rider_trust.py:57: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_rider_trust.py:60: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_rider_trust.py:63: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_rider_trust.py:69: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_rider_trust.py:89: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_rider_trust.py:96: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_rider_trust.py:101: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_rider_trust.py:110: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_rider_trust.py:114: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_rider_trust.py:123: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_rider_trust.py:138: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_rider_trust.py:145: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_rider_trust.py:148: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_rider_trust.py:153: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_rider_trust.py:156: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_rider_trust.py:164: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_tariff_engine_live.py:53: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_tariff_engine_live.py:58: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_tariff_engine_live.py:77: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_tariff_engine_live.py:91: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_tariff_engine_live.py:106: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_tariff_engine_live.py:115: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_tariff_engine_live.py:141: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_tariff_engine_live.py:158: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_tariff_engine_live.py:187: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_tariff_engine_live.py:191: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_tariff_engine_live.py:206: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_tariff_engine_live.py:227: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_tariff_engine_live.py:232: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_tariff_engine_live.py:248: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_tariff_engine_live.py:262: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_tariff_engine_live.py:277: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_tariff_engine_live.py:311: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_tariff_engine_live.py:315: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_tariff_engine_live.py:328: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_tariff_engine_live.py:341: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_tariff_engine_live.py:356: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_tariff_engine_live.py:378: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_tariff_engine_live.py:399: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+SKIPPED [1] tests\test_tariff_engine_live.py:414: set DUKE_RATES_TEST_LIVE_DB to a snapshot copy of duke_rates.db
+XFAIL tests/test_ncuc_pipeline.py::test_page_miner_extracts_descriptive_rider_heading - c561dbe added _is_likely_code(), which deliberately stops storing descriptive headings as schedule codes. repository.py builds family-match heading_tokens from extracted_schedule_codes, so this may have cost family-matching signal; decide whether to restore descriptive headings (separately from codes) or retire this test.
+XFAIL tests/test_ncuc_pipeline.py::test_page_miner_extracts_descriptive_rider_heading_with_parenthetical - c561dbe added _is_likely_code(), which deliberately stops storing descriptive headings as schedule codes. repository.py builds family-match heading_tokens from extracted_schedule_codes, so this may have cost family-matching signal; decide whether to restore descriptive headings (separately from codes) or retire this test.
+XFAIL tests/test_ncuc_pipeline.py::test_page_miner_extracts_inline_descriptive_heading_from_merged_pdf_text - c561dbe added _is_likely_code(), which deliberately stops storing descriptive headings as schedule codes. repository.py builds family-match heading_tokens from extracted_schedule_codes, so this may have cost family-matching signal; decide whether to restore descriptive headings (separately from codes) or retire this test.
+XFAIL tests/test_ncuc_pipeline.py::test_page_miner_extracts_descriptive_program_heading - c561dbe added _is_likely_code(), which deliberately stops storing descriptive headings as schedule codes. repository.py builds family-match heading_tokens from extracted_schedule_codes, so this may have cost family-matching signal; decide whether to restore descriptive headings (separately from codes) or retire this test.
+1436 passed, 90 skipped, 4 xfailed, 91 warnings in 574.20s (0:09:34)

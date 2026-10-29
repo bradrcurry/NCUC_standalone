@@ -1,0 +1,255 @@
+[
+ {
+  "table": "tariff_charges",
+  "id": 753007,
+  "family": "nc-progress-leaf-500",
+  "eff": "2017-12-01",
+  "label": "Three-Phase Surcharge",
+  "value": 8.71,
+  "unit": "$/month",
+  "class": "residential",
+  "hd_id": 7683,
+  "signals": [
+   "raw_text_5prefix"
+  ],
+  "hit": {
+   "mult": 1,
+   "raw_tokens": [
+    "58.71"
+   ],
+   "n_corrupting": 10,
+   "n_clean": 11
+  },
+  "snippet": "e bill computed for single-phase service plus $8.71. \n \nIII. \nRenewable "
+ },
+ {
+  "table": "tariff_charges",
+  "id": 753649,
+  "family": "nc-progress-leaf-571",
+  "eff": "2025-10-01",
+  "label": "Street Lighting Monthly Charge - LED 420",
+  "value": 1.09,
+  "unit": "$/fixture/month",
+  "class": "lighting",
+  "hd_id": 37,
+  "signals": [
+   "raw_text_5prefix"
+  ],
+  "hit": {
+   "mult": 1,
+   "raw_tokens": [
+    "51.09"
+   ],
+   "n_corrupting": 1,
+   "n_clean": 0
+  },
+  "snippet": "LED 420 420 $1.09 142"
+ },
+ {
+  "table": "tariff_charges",
+  "id": 755417,
+  "family": "nc-progress-leaf-608",
+  "eff": "2023-10-01",
+  "label": "Rider Adjustment",
+  "value": 0.0,
+  "unit": "$/kWh",
+  "class": null,
+  "hd_id": 7577,
+  "signals": [
+   "raw_text_5prefix"
+  ],
+  "hit": {
+   "mult": 1,
+   "raw_tokens": [
+    "50.00"
+   ],
+   "n_corrupting": 2,
+   "n_clean": 39
+  },
+  "snippet": "enue-related\ntaxes and regulatory fees, is 0.000\u00a2 per kilowatt-hour.\nNC Original Leaf No. 608\nEffective for"
+ },
+ {
+  "table": "tariff_charges",
+  "id": 755420,
+  "family": "nc-progress-leaf-609",
+  "eff": "2023-10-01",
+  "label": "Rider Adjustment",
+  "value": 0.0,
+  "unit": "$/kWh",
+  "class": null,
+  "hd_id": 7578,
+  "signals": [
+   "raw_text_5prefix"
+  ],
+  "hit": {
+   "mult": 1,
+   "raw_tokens": [
+    "50.00"
+   ],
+   "n_corrupting": 2,
+   "n_clean": 39
+  },
+  "snippet": "enue-related taxes and regulatory fees, is 0.000\u00a2 per\nkilowatt-hour.\nNC Original Leaf No. 609\nEffective for"
+ },
+ {
+  "table": "tariff_charges",
+  "id": 755423,
+  "family": "nc-progress-leaf-610",
+  "eff": "2023-10-01",
+  "label": "Rider Adjustment",
+  "value": 0.0,
+  "unit": "$/kWh",
+  "class": null,
+  "hd_id": 7579,
+  "signals": [
+   "raw_text_5prefix"
+  ],
+  "hit": {
+   "mult": 1,
+   "raw_tokens": [
+    "50.00"
+   ],
+   "n_corrupting": 2,
+   "n_clean": 39
+  },
+  "snippet": "enue-related taxes and regulatory fees, is\n0.000\u00a2 per kilowatt-hour.\nNC Original Leaf No. 610\nEffective for"
+ },
+ {
+  "table": "tariff_charges",
+  "id": 755509,
+  "family": "nc-progress-leaf-607",
+  "eff": "2023-07-01",
+  "label": "Billing Adjustment - Residential",
+  "value": 4.8e-05,
+  "unit": "$/kWh",
+  "class": "residential",
+  "hd_id": 1859,
+  "signals": [
+   "raw_text_5prefix"
+  ],
+  "hit": {
+   "mult": 0.01,
+   "raw_tokens": [
+    "50.00"
+   ],
+   "n_corrupting": 2,
+   "n_clean": 39
+  },
+  "snippet": "Residential RES, R-TOUD, R-TOU, 0.00482"
+ },
+ {
+  "table": "tariff_charges",
+  "id": 755510,
+  "family": "nc-progress-leaf-607",
+  "eff": "2023-07-01",
+  "label": "Billing Adjustment - Small General Service",
+  "value": 4.6e-05,
+  "unit": "$/kWh",
+  "class": "commercial_small",
+  "hd_id": 1859,
+  "signals": [
+   "raw_text_5prefix"
+  ],
+  "hit": {
+   "mult": 0.01,
+   "raw_tokens": [
+    "50.00"
+   ],
+   "n_corrupting": 2,
+   "n_clean": 39
+  },
+  "snippet": "Small General Service SGS, SGS-TOUE, SGS-TOU-CPP 0.00462"
+ },
+ {
+  "table": "tariff_charges",
+  "id": 755511,
+  "family": "nc-progress-leaf-607",
+  "eff": "2023-07-01",
+  "label": "Billing Adjustment - Medium General Service",
+  "value": 4.1e-05,
+  "unit": "$/kWh",
+  "class": "commercial_medium",
+  "hd_id": 1859,
+  "signals": [
+   "raw_text_5prefix"
+  ],
+  "hit": {
+   "mult": 0.01,
+   "raw_tokens": [
+    "50.00"
+   ],
+   "n_corrupting": 2,
+   "n_clean": 39
+  },
+  "snippet": "Medium General Service CH-TOUE 0.00408"
+ },
+ {
+  "table": "tariff_charges",
+  "id": 755518,
+  "family": "nc-progress-leaf-640",
+  "eff": "2023-01-01",
+  "label": "Rider Percentage Credit",
+  "value": 5.0,
+  "unit": "%",
+  "class": null,
+  "hd_id": 7783,
+  "signals": [
+   "raw_text_5prefix"
+  ],
+  "hit": {
+   "mult": 1,
+   "raw_tokens": [
+    "55.00"
+   ],
+   "n_corrupting": 4,
+   "n_clean": 3
+  },
+  "snippet": " Monthly Bill shall\ninclude an RECD Credit calculated as follows:\nRECD Credit = 5% times the stated kilowatt\nENERGY CONSERVATION STANDARDS\nI. All applicants first applying for service unde"
+ },
+ {
+  "table": "tariff_charges",
+  "id": 755536,
+  "family": "nc-progress-leaf-656",
+  "eff": "2023-10-01",
+  "label": "Basic Customer Charge",
+  "value": 5.0,
+  "unit": "$/month",
+  "class": null,
+  "hd_id": 388,
+  "signals": [
+   "raw_text_5prefix"
+  ],
+  "hit": {
+   "mult": 1,
+   "raw_tokens": [
+    "55.00"
+   ],
+   "n_corrupting": 1,
+   "n_clean": 0
+  },
+  "snippet": "Basic Customer Charge $5.00"
+ },
+ {
+  "table": "tariff_charges",
+  "id": 755962,
+  "family": "nc-progress-leaf-602",
+  "eff": "2021-06-01",
+  "label": "JAA Rate - Outdoor Lighting",
+  "value": 0.0,
+  "unit": "$/kWh",
+  "class": "lighting",
+  "hd_id": 7724,
+  "signals": [
+   "raw_text_5prefix"
+  ],
+  "hit": {
+   "mult": 1,
+   "raw_tokens": [
+    "50.00"
+   ],
+   "n_corrupting": 1,
+   "n_clean": 4
+  },
+  "snippet": "JAA Outdoor Lighting: 0.00000"
+ }
+]

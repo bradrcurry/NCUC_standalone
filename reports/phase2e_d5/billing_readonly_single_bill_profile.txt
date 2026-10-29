@@ -1,0 +1,3 @@
+Timeout (0:00:35)!
+Thread 0x0000c148 (most recent call first):
+  File "C:\Python\Duke\Standalone\src\duke_rates\historical\metadata.py", line 0 in _first_unique_match

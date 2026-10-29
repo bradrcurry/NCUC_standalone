@@ -1,0 +1,117 @@
+{
+  "pre_migration": {
+    "tariff_charges": {
+      "rows": 5198,
+      "sha256": "1c557726c8109e31335fa17c030840f522ce9e4f990fb941d113ceb3892c5823"
+    },
+    "tariff_versions": {
+      "rows": 988,
+      "sha256": "e11110335864812a6e757aacc4253d74c816d49c07f8ab8f3cc49e5d6a461810"
+    },
+    "tariff_families": {
+      "rows": 756,
+      "sha256": "8d8baa965824f594add6ed444ede4e8a7c094362f75130ce1622ccee560bb3ed"
+    },
+    "historical_documents": {
+      "rows": 682,
+      "sha256": "f405b62d9d2b621cc805957bc24d7eee5aa1b49b03718c2ce571199529b060fd"
+    },
+    "bill_statements": {
+      "rows": 12,
+      "sha256": "f0b620ec0c3e732c462479b9595562544dd04eca5e4892942980b75079cfc5dc"
+    },
+    "rider_summary_blocks": {
+      "rows": 365,
+      "sha256": "1611a02500c070dbedf882fff055c2ab94cfcaf97d6d506d10de4ddee841906f"
+    },
+    "rider_line_items": {
+      "rows": 8003,
+      "sha256": "c126c59ec5a0bb322c0780bb0f5d3440323cd66c175dc5288b7f9ffde2b34bde"
+    },
+    "rider_applicability": {
+      "rows": 1798,
+      "sha256": "d2fc17e60f7c481ed7eb072d65e0f099a2f472b785151c1165de596ae400e303"
+    },
+    "schema": "a198a856fdbd349d91de831456c63cfdeaa51e86282149e2afefd7d647f00d8d"
+  },
+  "db_bytes_before": 5845692416,
+  "snapshot_seconds_total": 0.2,
+  "backfill": {
+    "versions_skipped_active": 988,
+    "orphan_versions_backfilled": 13,
+    "versions_backfilled": 13,
+    "charges_backfilled": 116,
+    "historical_document_skipped_active": 50,
+    "bill_statement_skipped_active": 12
+  },
+  "backfill_seconds": 0.0,
+  "verify": {
+    "checked": {
+      "tariff_version": 1001,
+      "historical_document": 50,
+      "bill_statement": 12
+    },
+    "mismatches": [],
+    "versions_with_charges_but_no_active_run": 0,
+    "ok": true
+  },
+  "verify_seconds": 0.1,
+  "completeness": {
+    "legacy": {
+      "n": 5198,
+      "pdf_available": 0,
+      "pdf_legacy": 5082,
+      "page_available": 0,
+      "bbox_available": 0,
+      "quote_available": 0,
+      "quote_legacy": 5163,
+      "canonical_unit": 5198,
+      "effective_start": 0
+    }
+  },
+  "usage_after_backfill": {
+    "non_legacy_runs": 0,
+    "promotions": 0,
+    "metadata_revisions": 0,
+    "payload_revisions": 0,
+    "charge_revisions": 0,
+    "overrides": 0
+  },
+  "post_backfill": {
+    "tariff_charges": {
+      "rows": 5198,
+      "sha256": "1c557726c8109e31335fa17c030840f522ce9e4f990fb941d113ceb3892c5823"
+    },
+    "tariff_versions": {
+      "rows": 988,
+      "sha256": "e11110335864812a6e757aacc4253d74c816d49c07f8ab8f3cc49e5d6a461810"
+    },
+    "tariff_families": {
+      "rows": 756,
+      "sha256": "8d8baa965824f594add6ed444ede4e8a7c094362f75130ce1622ccee560bb3ed"
+    },
+    "historical_documents": {
+      "rows": 682,
+      "sha256": "f405b62d9d2b621cc805957bc24d7eee5aa1b49b03718c2ce571199529b060fd"
+    },
+    "bill_statements": {
+      "rows": 12,
+      "sha256": "f0b620ec0c3e732c462479b9595562544dd04eca5e4892942980b75079cfc5dc"
+    },
+    "rider_summary_blocks": {
+      "rows": 365,
+      "sha256": "1611a02500c070dbedf882fff055c2ab94cfcaf97d6d506d10de4ddee841906f"
+    },
+    "rider_line_items": {
+      "rows": 8003,
+      "sha256": "c126c59ec5a0bb322c0780bb0f5d3440323cd66c175dc5288b7f9ffde2b34bde"
+    },
+    "rider_applicability": {
+      "rows": 1798,
+      "sha256": "d2fc17e60f7c481ed7eb072d65e0f099a2f472b785151c1165de596ae400e303"
+    },
+    "schema": "381546cbba900f1fca768adf4a072574a96ad1e68fee1e4cc29d513f7929c38a"
+  },
+  "db_bytes_after_backfill": 5853876224,
+  "migrate_seconds_total": 0.3
+}

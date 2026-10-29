@@ -5,7 +5,11 @@ from pathlib import Path
 
 from duke_rates.analytics.rider_trust import load_rider_trust_table, trust_summary
 
-DB_PATH = Path("data/db/duke_rates.db")
+from conftest import LIVE_DB_PATH, requires_live_db  # noqa: E402
+
+# Live-data tests read a frozen snapshot (DUKE_RATES_TEST_LIVE_DB), never production.
+DB_PATH = LIVE_DB_PATH
+pytestmark = requires_live_db
 
 _EXPECTED_COLUMNS = {
     "utility",
@@ -23,7 +27,10 @@ _EXPECTED_COLUMNS = {
     "trust_tier",
 }
 _VALID_TIERS = {"high", "medium", "low", "unverified"}
-_VALID_GROUPS = {"dep_residential", "dep_sgs", "dep_sgs_clr", "dec_residential"}
+_VALID_GROUPS = {
+    "dep_residential", "dep_sgs", "dep_sgs_clr", "dep_mgs_nd", "dep_mgs_d", "dep_lgs",
+    "dec_residential",
+}
 
 
 class TestLoadRiderTrustTable:

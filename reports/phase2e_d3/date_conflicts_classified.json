@@ -1,0 +1,1732 @@
+[
+ {
+  "tariff_version_id": 4639,
+  "family_key": "nc-carolinas-schedule-SGS",
+  "stored": "1993-11-01",
+  "printed": [
+   "2007-09-02"
+  ],
+  "pages": [
+   8
+  ],
+  "file_sha256": "f5ce2e35c7cfa39577dfb2f4e320a06f85fe5822367326e16a939d056019487c",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-nantahala-s-rate-schedule-riders.pdf",
+  "bound_pages": [
+   8,
+   8
+  ],
+  "document_effective_start": "1993-11-01",
+  "version_status": "approved",
+  "charges": 5,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": false,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": 5053,
+   "span_pages": 1
+  },
+  "cause": "bound_document_from_other_period",
+  "confidence": "needs_review",
+  "proposed_correction": null,
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 5225,
+  "family_key": "nc-carolinas-rider-CEI",
+  "stored": "2025-01-23",
+  "printed": [
+   "2025-01-15"
+  ],
+  "pages": [
+   10,
+   11
+  ],
+  "file_sha256": "6928831501fdd4b2e07fa8061a41f0dcbabfd30f8f69f376b3fde2d0e63be062",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-dec-dep-compliance-tariffs-rider-clean-energy-impact.pdf",
+  "bound_pages": [
+   10,
+   15
+  ],
+  "document_effective_start": "2025-01-23",
+  "version_status": "approved",
+  "charges": 0,
+  "page_evidence": {
+   "verdict": "redline",
+   "redline_pages": [
+    11
+   ],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [
+   {
+    "id": 5979,
+    "effective_start": "2025-01-15",
+    "status": "approved",
+    "historical_document_id": 3113,
+    "local_path": "data\\downloads\\ncuc_tariff\\authenticated_portal\\dec\\E-7_Sub_1288\\1-23-2025_98f3491a_DEC_DEP_Compliance_Tariffs_Rider_CEI_E-2_Sub_1315_and_E-7_Sub_1288.pdf",
+    "start_page": 10,
+    "end_page": 14,
+    "same_file": false
+   }
+  ],
+  "tests": {
+   "redline_pages": true,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": true,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": -8,
+   "span_pages": 6
+  },
+  "cause": "redline_contamination",
+  "confidence": "needs_review",
+  "proposed_correction": null,
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 5231,
+  "family_key": "nc-carolinas-rider-EDPR",
+  "stored": "2012-02-01",
+  "printed": [
+   "2012-07-01"
+  ],
+  "pages": [
+   5
+  ],
+  "file_sha256": "05b54dd770bd3fe162e62abfcc40bf421b737009fa18e319b40f2d53f9d63f14",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-duke-energy-carolinas-existing-dsm-program-costs-adjustment-rider.pdf",
+  "bound_pages": [
+   5,
+   6
+  ],
+  "document_effective_start": "2012-07-01",
+  "version_status": "approved",
+  "charges": 1,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 2,
+   "year_digit": false,
+   "sibling_holds_printed_date": false,
+   "document_agrees_with_print": true,
+   "stored_is_document_date": false,
+   "days_stored_to_printed": 151,
+   "span_pages": 2
+  },
+  "cause": "proposed_or_unapproved_sheet",
+  "confidence": "needs_review",
+  "proposed_correction": null,
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 5234,
+  "family_key": "nc-carolinas-rider-EDPR",
+  "stored": "2021-06-01",
+  "printed": [
+   "2023-07-01"
+  ],
+  "pages": [
+   2,
+   3
+  ],
+  "file_sha256": "2f87c23a7d62687661984b58b3a05275daffa7a00602c3a2bda6595d759fc144",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-dec-compliance-tariff-for-existing-dsm-program-rider.pdf",
+  "bound_pages": [
+   2,
+   4
+  ],
+  "document_effective_start": "2023-07-01",
+  "version_status": "approved",
+  "charges": 1,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": false,
+   "document_agrees_with_print": true,
+   "stored_is_document_date": false,
+   "days_stored_to_printed": 760,
+   "span_pages": 3
+  },
+  "cause": "version_date_disagrees_with_its_document",
+  "confidence": "high",
+  "proposed_correction": {
+   "table": "tariff_versions",
+   "row_id": 5234,
+   "column": "effective_start",
+   "from": "2021-06-01",
+   "to": "2023-07-01",
+   "via": "provenance revise-metadata (after review)"
+  },
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 5240,
+  "family_key": "nc-carolinas-rider-EE",
+  "stored": "2016-10-05",
+  "printed": [
+   "2017-01-01"
+  ],
+  "pages": [
+   2,
+   3,
+   4,
+   5
+  ],
+  "file_sha256": "5332281e600cd8c8f112f0f0406a7dea833a08f4f53d16719cfa8bb7d7ba6af7",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-duke-energy-carolinas-llc-s-dsm-ee-compliance-tariff.pdf",
+  "bound_pages": [
+   2,
+   5
+  ],
+  "document_effective_start": "2016-10-05",
+  "version_status": "approved",
+  "charges": 2,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [
+   {
+    "id": 5985,
+    "effective_start": "2017-01-01",
+    "status": "approved",
+    "historical_document_id": 1930,
+    "local_path": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-duke-energy-carolinas-llc-s-dsm-ee-compliance-tariff.pdf",
+    "start_page": 2,
+    "end_page": 5,
+    "same_file": true
+   }
+  ],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": true,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": 88,
+   "span_pages": 4
+  },
+  "cause": "observed_period_held_by_sibling",
+  "confidence": "needs_review",
+  "proposed_correction": null,
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 5256,
+  "family_key": "nc-carolinas-rider-SCG",
+  "stored": "2007-12-21",
+  "printed": [
+   "2008-01-01"
+  ],
+  "pages": [
+   3
+  ],
+  "file_sha256": "7d1d4f9c74ea7dfba43e819b93d7624f69b0cf5ce9049232f852226b50bf1e79",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-duke-s-small-customer-generator-rider-effective-1-1-08.pdf",
+  "bound_pages": [
+   1,
+   4
+  ],
+  "document_effective_start": "2007-12-21",
+  "version_status": "approved",
+  "charges": 2,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [
+   {
+    "id": 5992,
+    "effective_start": "2008-01-01",
+    "status": "approved",
+    "historical_document_id": 2065,
+    "local_path": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-duke-s-small-customer-generator-rider-effective-1-1-08.pdf",
+    "start_page": 3,
+    "end_page": 4,
+    "same_file": true
+   }
+  ],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 1,
+   "year_digit": false,
+   "sibling_holds_printed_date": true,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": 11,
+   "span_pages": 4
+  },
+  "cause": "proposed_or_unapproved_sheet",
+  "confidence": "needs_review",
+  "proposed_correction": null,
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 5270,
+  "family_key": "nc-carolinas-schedule-NL",
+  "stored": "2013-10-23",
+  "printed": [
+   "2013-11-01"
+  ],
+  "pages": [
+   33
+  ],
+  "file_sha256": "804562fb6d04d7070851f32a24cd4cd6475134b370fb6c8d958f76f18b93fafe",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-duke-energy-carolinas-llc-s-revisions-to-rate-compliance-filing-of-approved-tar.pdf",
+  "bound_pages": [
+   33,
+   33
+  ],
+  "document_effective_start": "2013-10-23",
+  "version_status": "approved",
+  "charges": 0,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [
+   {
+    "id": 6628,
+    "effective_start": "2013-11-01",
+    "status": "approved",
+    "historical_document_id": 7167,
+    "local_path": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-duke-energy-carolinas-llc-s-revisions-to-rate-compliance-filing-of-approved-tar.pdf",
+    "start_page": 32,
+    "end_page": 33,
+    "same_file": true
+   }
+  ],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 1,
+   "year_digit": false,
+   "sibling_holds_printed_date": true,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": 9,
+   "span_pages": 1
+  },
+  "cause": "proposed_or_unapproved_sheet",
+  "confidence": "needs_review",
+  "proposed_correction": null,
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 5339,
+  "family_key": "nc-progress-leaf-571",
+  "stored": "2019-11-27",
+  "printed": [
+   "2019-12-01"
+  ],
+  "pages": [
+   6,
+   9,
+   11,
+   14,
+   16,
+   18,
+   22,
+   25,
+   28,
+   31,
+   35,
+   39,
+   44,
+   46,
+   48,
+   50,
+   52,
+   54,
+   60,
+   65,
+   70,
+   72,
+   75,
+   76
+  ],
+  "file_sha256": "43d61089faf3704e5d1fdac85f47390d6696cb7f48305fcbea5b2b1dfc8ce89f",
+  "source_pdf": "data\\historical\\ncuc\\e-2-sub-1207\\d8f85cbe-ffbb-4fbe-af70-61d1d1efc2fd.pdf",
+  "bound_pages": [
+   5,
+   78
+  ],
+  "document_effective_start": "2019-11-27",
+  "version_status": "approved",
+  "charges": 20,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": false,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": 4,
+   "span_pages": 74
+  },
+  "cause": "stored_filing_or_order_date",
+  "confidence": "medium",
+  "proposed_correction": {
+   "table": "tariff_versions",
+   "row_id": 5339,
+   "column": "effective_start",
+   "from": "2019-11-27",
+   "to": "2019-12-01",
+   "via": "provenance revise-metadata (after review)"
+  },
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 5363,
+  "family_key": "nc-progress-leaf-601",
+  "stored": "2018-03-16",
+  "printed": [
+   "2020-01-01"
+  ],
+  "pages": [
+   4
+  ],
+  "file_sha256": "c0891fb49a910802a37cc2c622fd225f6af3782334135b640605846ecc8b0e34",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-2\\e-2-nodate-dep-s-corrected-rider-ba-21.pdf",
+  "bound_pages": [
+   2,
+   5
+  ],
+  "document_effective_start": "2018-03-16",
+  "version_status": "approved",
+  "charges": 5,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [
+   {
+    "id": 5364,
+    "effective_start": "2020-01-01",
+    "status": "approved",
+    "historical_document_id": 711,
+    "local_path": "data\\historical\\ncuc\\e-2-sub-1206\\4fd38dd8-ad56-4ab4-8548-b82ea4aaf8c6.pdf",
+    "start_page": 1,
+    "end_page": 5,
+    "same_file": false
+   }
+  ],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": true,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": 656,
+   "span_pages": 4
+  },
+  "cause": "observed_period_held_by_sibling",
+  "confidence": "needs_review",
+  "proposed_correction": null,
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 5442,
+  "family_key": "nc-progress-leaf-642",
+  "stored": "2015-04-01",
+  "printed": [
+   "2013-06-01"
+  ],
+  "pages": [
+   5
+  ],
+  "file_sha256": "4533ad09629ce92fca97df46eedddbf90e71929341cb77d09440b0f131cd40a9",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-100\\e-100-nodate-dep-s-revised-nc-greenpower-program-rider-effective-april-1-2015.pdf",
+  "bound_pages": [
+   1,
+   6
+  ],
+  "document_effective_start": "2015-04-01",
+  "version_status": "approved",
+  "charges": 1,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": false,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": -669,
+   "span_pages": 6
+  },
+  "cause": "bound_document_from_other_period",
+  "confidence": "needs_review",
+  "proposed_correction": null,
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 5466,
+  "family_key": "nc-progress-leaf-661",
+  "stored": "2019-02-01",
+  "printed": [
+   "2019-01-23"
+  ],
+  "pages": [
+   5
+  ],
+  "file_sha256": "82a5443f43011bbe45db3f77554f50158eb1123593bf31bd77de7e1acb92dbeb",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-2\\e-2-nodate-dep-ami-opt-out-rider-compliance-filing.pdf",
+  "bound_pages": [
+   3,
+   9
+  ],
+  "document_effective_start": "2019-02-01",
+  "version_status": "approved",
+  "charges": 7,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": false,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": -9,
+   "span_pages": 7
+  },
+  "cause": "unexplained",
+  "confidence": "needs_review",
+  "proposed_correction": null,
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 5506,
+  "family_key": "nc-progress-leaf-717",
+  "stored": "2014-01-01",
+  "printed": [
+   "2016-01-01"
+  ],
+  "pages": [
+   10
+  ],
+  "file_sha256": "7a42aa42bbe2cea68819e54a4a36fe714bc2cabc60dc7cd46f37aaa0f742aa5f",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-2\\e-2-nodate-duke-energy-progress-llc-s-proposed-revisions-to-dra-program.pdf",
+  "bound_pages": [
+   1,
+   10
+  ],
+  "document_effective_start": "2014-01-01",
+  "version_status": "approved",
+  "charges": 2,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": false,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": 730,
+   "span_pages": 10
+  },
+  "cause": "bound_document_from_other_period",
+  "confidence": "needs_review",
+  "proposed_correction": null,
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 5533,
+  "family_key": "nc-progress-leaf-801",
+  "stored": "2021-06-01",
+  "printed": [
+   "2023-10-01"
+  ],
+  "pages": [
+   1,
+   2,
+   3,
+   4
+  ],
+  "file_sha256": "98b66ee585b8dafdfcae7488d10673536b4ba17e8dacac2af8f2073550522bd2",
+  "source_pdf": "data\\raw\\nc\\progress\\rate\\leaf-no-801-outdoor-lighting-service-regulations-pdf-media-pdfs-for-your-home-ra.pdf",
+  "bound_pages": [
+   1,
+   4
+  ],
+  "document_effective_start": "2021-06-01",
+  "version_status": "approved",
+  "charges": 0,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [
+   {
+    "id": 7309,
+    "effective_start": "2023-10-01",
+    "status": "approved",
+    "historical_document_id": 7813,
+    "local_path": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\3f92be50-2f10-4d4c-8952-2bccaa339aba.pdf",
+    "start_page": 299,
+    "end_page": 303,
+    "same_file": false
+   }
+  ],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": true,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": 852,
+   "span_pages": 4
+  },
+  "cause": "observed_period_held_by_sibling",
+  "confidence": "needs_review",
+  "proposed_correction": null,
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 5565,
+  "family_key": "nc-progress-leaf-663",
+  "stored": "2023-10-01",
+  "printed": [
+   "2021-07-08"
+  ],
+  "pages": [
+   1,
+   2,
+   3
+  ],
+  "file_sha256": "84be00ebedddafaeaca6a35923a715c603a83bd0984be5fe8d26902a0269d34d",
+  "source_pdf": "data\\historical\\raw\\nc\\progress\\rider\\solar-rebate-rider-srr-data-raw-nc-progress-rider-solar-rebate-rider-srr-media-p.pdf",
+  "bound_pages": [
+   1,
+   3
+  ],
+  "document_effective_start": "2023-10-01",
+  "version_status": "approved",
+  "charges": 3,
+  "page_evidence": {
+   "verdict": "suspect",
+   "redline_pages": [],
+   "suspect_pages": [
+    3
+   ]
+  },
+  "siblings_at_printed_date": [
+   {
+    "id": 6924,
+    "effective_start": "2021-07-08",
+    "status": "approved",
+    "historical_document_id": 7494,
+    "local_path": "data\\historical\\ncuc\\e-2-sub-1167\\0b65d157-f528-4968-9d1d-3f0494f31111.pdf",
+    "start_page": 3,
+    "end_page": 23,
+    "same_file": false
+   }
+  ],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": true,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": -815,
+   "span_pages": 3
+  },
+  "cause": "observed_period_held_by_sibling",
+  "confidence": "needs_review",
+  "proposed_correction": null,
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 5647,
+  "family_key": "nc-progress-leaf-503",
+  "stored": "2022-05-18",
+  "printed": [
+   "2022-06-01"
+  ],
+  "pages": [
+   80
+  ],
+  "file_sha256": "01506f59267ef4b68c8f0dc1ec19390f20c4d24d9058976386966c4fe6428a79",
+  "source_pdf": "data/historical/ncuc/e-2-sub-1219/784821eb-2349-42a7-9622-e619a5ef4a51.pdf",
+  "bound_pages": [
+   78,
+   80
+  ],
+  "document_effective_start": "2022-05-18",
+  "version_status": "approved",
+  "charges": 5,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": false,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": 14,
+   "span_pages": 3
+  },
+  "cause": "stored_filing_or_order_date",
+  "confidence": "medium",
+  "proposed_correction": {
+   "table": "tariff_versions",
+   "row_id": 5647,
+   "column": "effective_start",
+   "from": "2022-05-18",
+   "to": "2022-06-01",
+   "via": "provenance revise-metadata (after review)"
+  },
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 5984,
+  "family_key": "nc-carolinas-rider-EE",
+  "stored": "2010-01-01",
+  "printed": [
+   "2010-09-01"
+  ],
+  "pages": [
+   3,
+   4
+  ],
+  "file_sha256": "e9b6809a0bb284c4849b066cfc2c806221957ed68e086c23efd004324418d12a",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-duke-energy-carolinas-revised-tariff-for-vintage-1-of-rider-ee.pdf",
+  "bound_pages": [
+   2,
+   5
+  ],
+  "document_effective_start": "2010-01-01",
+  "version_status": "approved",
+  "charges": 2,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": false,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": 243,
+   "span_pages": 4
+  },
+  "cause": "unexplained",
+  "confidence": "needs_review",
+  "proposed_correction": null,
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 5990,
+  "family_key": "nc-carolinas-rider-PS",
+  "stored": "2026-10-13",
+  "printed": [
+   "2009-10-13"
+  ],
+  "pages": [
+   10
+  ],
+  "file_sha256": "6f1dc53909c5598f01ec95b6d6f67667ad4f0f97bae8ceecb56754dfdb984d6c",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-duke-s-rate-schedule-and-rider-for-powershare-nonresidential-load-curtailment.pdf",
+  "bound_pages": [
+   7,
+   10
+  ],
+  "document_effective_start": "2026-10-13",
+  "version_status": "approved",
+  "charges": 4,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 0,
+   "year_digit": true,
+   "sibling_holds_printed_date": false,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": -6209,
+   "span_pages": 4
+  },
+  "cause": "stored_year_digit_error",
+  "confidence": "high",
+  "proposed_correction": {
+   "table": "tariff_versions",
+   "row_id": 5990,
+   "column": "effective_start",
+   "from": "2026-10-13",
+   "to": "2009-10-13",
+   "via": "provenance revise-metadata (after review)"
+  },
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 6052,
+  "family_key": "nc-progress-leaf-574",
+  "stored": "2016-12-01",
+  "printed": [
+   "2021-01-01"
+  ],
+  "pages": [
+   52
+  ],
+  "file_sha256": "cd3f20b303535802eaee6078a380c71d1d95f9dcb7fce51f3e5c476233607bce",
+  "source_pdf": "data\\historical\\ncuc\\e-2-sub-1252\\44d04bff-8457-41d7-924b-74a5f84289fb.pdf",
+  "bound_pages": [
+   51,
+   52
+  ],
+  "document_effective_start": "2021-01-01",
+  "version_status": "approved",
+  "charges": 24,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": false,
+   "document_agrees_with_print": true,
+   "stored_is_document_date": false,
+   "days_stored_to_printed": 1492,
+   "span_pages": 2
+  },
+  "cause": "version_date_disagrees_with_its_document",
+  "confidence": "high",
+  "proposed_correction": {
+   "table": "tariff_versions",
+   "row_id": 6052,
+   "column": "effective_start",
+   "from": "2016-12-01",
+   "to": "2021-01-01",
+   "via": "provenance revise-metadata (after review)"
+  },
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 6057,
+  "family_key": "nc-progress-leaf-600",
+  "stored": "2025-01-16",
+  "printed": [
+   "2025-04-01"
+  ],
+  "pages": [
+   8,
+   9,
+   10,
+   11,
+   12
+  ],
+  "file_sha256": "3776a33f3a5e9b1a89604075f427e5bf49adeb0d49a1a29594e2db25b9025759",
+  "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300\\f76e6a9b-98de-4704-b456-8c20214bd981.pdf",
+  "bound_pages": [
+   3,
+   12
+  ],
+  "document_effective_start": "2025-01-27",
+  "version_status": "approved",
+  "charges": 136,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [
+   {
+    "id": 5357,
+    "effective_start": "2025-04-01",
+    "status": "approved",
+    "historical_document_id": 40,
+    "local_path": "data\\historical\\raw\\nc\\progress\\rider\\summary-of-rider-adjustments-leaf-no-600-eff-2024-04-01-data-historical-manual-l.pdf",
+    "start_page": 1,
+    "end_page": 5,
+    "same_file": false
+   }
+  ],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": true,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": false,
+   "days_stored_to_printed": 75,
+   "span_pages": 10
+  },
+  "cause": "observed_period_held_by_sibling",
+  "confidence": "needs_review",
+  "proposed_correction": null,
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 6059,
+  "family_key": "nc-progress-leaf-601",
+  "stored": "2024-01-16",
+  "printed": [
+   "2025-01-01"
+  ],
+  "pages": [
+   5,
+   6,
+   7
+  ],
+  "file_sha256": "bf3ff80e0ddfc864fcec66e070c29eda25cf542e3aeb9fd0abeff1d4148b9c6a",
+  "source_pdf": "data\\raw\\historical\\ncuc\\e-2\\e-2-nodate-duke-energy-progress-llc-s-compliance-tariffs.pdf",
+  "bound_pages": [
+   2,
+   18
+  ],
+  "document_effective_start": "2024-01-21",
+  "version_status": "approved",
+  "charges": 10,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [
+   {
+    "id": 5374,
+    "effective_start": "2025-01-01",
+    "status": "approved",
+    "historical_document_id": 43,
+    "local_path": "data\\historical\\raw\\nc\\progress\\rider\\annual-billing-adjustment-rider-leaf-no-601-eff-2025-01-01-data-historical-manua.pdf",
+    "start_page": 1,
+    "end_page": 3,
+    "same_file": false
+   }
+  ],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": true,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": 351,
+   "span_pages": 17
+  },
+  "cause": "observed_period_held_by_sibling",
+  "confidence": "needs_review",
+  "proposed_correction": null,
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 6110,
+  "family_key": "nc-progress-leaf-704",
+  "stored": "2019-02-27",
+  "printed": [
+   "2023-01-01"
+  ],
+  "pages": [
+   5,
+   6
+  ],
+  "file_sha256": "1c0903205bd36f78d1e0d3cba1cb1ca9837df12de4dc6ad7e996ff1488049d44",
+  "source_pdf": "data\\historical\\ncuc\\e-2-sub-1174\\61cb9753-923f-402d-b1f1-b60deecb34ef.pdf",
+  "bound_pages": [
+   3,
+   6
+  ],
+  "document_effective_start": "2019-02-27",
+  "version_status": "approved",
+  "charges": 0,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": false,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": 1404,
+   "span_pages": 4
+  },
+  "cause": "bound_document_from_other_period",
+  "confidence": "needs_review",
+  "proposed_correction": null,
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 6141,
+  "family_key": "nc-progress-leaf-800",
+  "stored": "2014-09-15",
+  "printed": [
+   "2018-12-01"
+  ],
+  "pages": [
+   3,
+   6,
+   9,
+   11,
+   14,
+   16,
+   18,
+   22,
+   25,
+   28,
+   31,
+   35,
+   39,
+   44,
+   46,
+   48,
+   50,
+   52,
+   54,
+   60,
+   65,
+   70,
+   72,
+   75,
+   76
+  ],
+  "file_sha256": "208eedc416efbcb7e5309ab5e18f56e58049060974b00b315fc8dd92a8f8a944",
+  "source_pdf": "data\\historical\\ncuc\\e-2-sub-1176\\b4d1a5ed-82f7-414a-becc-19a12f4f10b5.pdf",
+  "bound_pages": [
+   1,
+   80
+  ],
+  "document_effective_start": "2014-09-15",
+  "version_status": "approved",
+  "charges": 0,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": false,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": 1538,
+   "span_pages": 80
+  },
+  "cause": "bound_document_from_other_period",
+  "confidence": "needs_review",
+  "proposed_correction": null,
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 6548,
+  "family_key": "nc-progress-leaf-600",
+  "stored": "2024-01-24",
+  "printed": [
+   "2025-01-01"
+  ],
+  "pages": [
+   9,
+   10,
+   11,
+   12,
+   13
+  ],
+  "file_sha256": "9e160dab2ca17da0d621d5e43e67ff0091ada765682e530db190d9ed4a5c36da",
+  "source_pdf": "data\\historical\\ncuc\\e-2-sub-1300\\f5761884-4b3d-4d40-adfe-1a5452ad1f2c.pdf",
+  "bound_pages": [
+   2,
+   14
+  ],
+  "document_effective_start": "2024-01-23",
+  "version_status": "approved",
+  "charges": 137,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": false,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": 343,
+   "span_pages": 13
+  },
+  "cause": "stored_filing_or_order_date",
+  "confidence": "medium",
+  "proposed_correction": {
+   "table": "tariff_versions",
+   "row_id": 6548,
+   "column": "effective_start",
+   "from": "2024-01-24",
+   "to": "2025-01-01",
+   "via": "provenance revise-metadata (after review)"
+  },
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 6649,
+  "family_key": "nc-progress-leaf-602",
+  "stored": "2024-12-01",
+  "printed": [
+   "2021-12-01"
+  ],
+  "pages": [
+   77,
+   78
+  ],
+  "file_sha256": "6ae188ba10684c545c551a958a3f250cd462e895b50d259f5ba83d94caf90bf1",
+  "source_pdf": "data\\historical\\ncuc\\e-2-sub-1275\\9c355332-9bfe-4790-8175-140f128a27ea.pdf",
+  "bound_pages": [
+   75,
+   78
+  ],
+  "document_effective_start": "2021-06-01",
+  "version_status": "approved",
+  "charges": 8,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": false,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": false,
+   "days_stored_to_printed": -1096,
+   "span_pages": 4
+  },
+  "cause": "bound_document_from_other_period",
+  "confidence": "needs_review",
+  "proposed_correction": null,
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 6751,
+  "family_key": "nc-progress-leaf-674",
+  "stored": "2025-01-01",
+  "printed": [
+   "2026-01-01"
+  ],
+  "pages": [
+   18,
+   19,
+   20,
+   21,
+   22,
+   23,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37
+  ],
+  "file_sha256": "792200b3155eaa3c586acea38a821628759926c6aa0be62849d8cc41037c223f",
+  "source_pdf": "data\\historical\\ncuc\\e-7-sub-1032\\15555c10-5cbf-48e0-97d8-01c3e68eef40.pdf",
+  "bound_pages": [
+   3,
+   37
+  ],
+  "document_effective_start": "2025-01-01",
+  "version_status": "approved",
+  "charges": 1,
+  "page_evidence": {
+   "verdict": "redline",
+   "redline_pages": [
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27
+   ],
+   "suspect_pages": [
+    30
+   ]
+  },
+  "siblings_at_printed_date": [
+   {
+    "id": 5480,
+    "effective_start": "2026-01-01",
+    "status": "approved",
+    "historical_document_id": 404,
+    "local_path": "data\\raw\\nc\\progress\\rider\\leaf-no-674-rider-ps-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no-674-rider.pdf",
+    "start_page": 1,
+    "end_page": 10,
+    "same_file": false
+   }
+  ],
+  "tests": {
+   "redline_pages": true,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": true,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": 365,
+   "span_pages": 35
+  },
+  "cause": "redline_contamination",
+  "confidence": "needs_review",
+  "proposed_correction": null,
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 7207,
+  "family_key": "nc-progress-leaf-533",
+  "stored": "2024-01-01",
+  "printed": [
+   "2023-10-01"
+  ],
+  "pages": [
+   19,
+   20,
+   21,
+   22,
+   23,
+   24,
+   25,
+   26,
+   27,
+   28
+  ],
+  "file_sha256": "32722e717cdac1008d82057c6db4895b6532b34446490908176635f325cd6639",
+  "source_pdf": "data\\historical\\ncuc\\e-7-sub-1300\\25ea8bc3-bfbb-48ca-8bfd-2b47fdbb0674.pdf",
+  "bound_pages": [
+   19,
+   28
+  ],
+  "document_effective_start": "2024-01-01",
+  "version_status": "approved",
+  "charges": 9,
+  "page_evidence": {
+   "verdict": "redline",
+   "redline_pages": [
+    19
+   ],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [],
+  "tests": {
+   "redline_pages": true,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": false,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": -92,
+   "span_pages": 10
+  },
+  "cause": "redline_contamination",
+  "confidence": "needs_review",
+  "proposed_correction": null,
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 7208,
+  "family_key": "nc-progress-leaf-532",
+  "stored": "2024-01-01",
+  "printed": [
+   "2023-10-01"
+  ],
+  "pages": [
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18
+  ],
+  "file_sha256": "32722e717cdac1008d82057c6db4895b6532b34446490908176635f325cd6639",
+  "source_pdf": "data\\historical\\ncuc\\e-7-sub-1300\\25ea8bc3-bfbb-48ca-8bfd-2b47fdbb0674.pdf",
+  "bound_pages": [
+   11,
+   18
+  ],
+  "document_effective_start": "2024-01-01",
+  "version_status": "approved",
+  "charges": 4,
+  "page_evidence": {
+   "verdict": "redline",
+   "redline_pages": [
+    11
+   ],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [],
+  "tests": {
+   "redline_pages": true,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": false,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": -92,
+   "span_pages": 8
+  },
+  "cause": "redline_contamination",
+  "confidence": "needs_review",
+  "proposed_correction": null,
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 7229,
+  "family_key": "nc-progress-leaf-601",
+  "stored": "2014-12-01",
+  "printed": [
+   "2017-02-01"
+  ],
+  "pages": [
+   74
+  ],
+  "file_sha256": "5a3d7c7c988cf274d6bc74f4e9ec8da3d7eef642644451c9988ce40761a4c911",
+  "source_pdf": "data\\historical\\ncuc\\e-2-sub-1109\\1f1e4f23-6217-453d-9a20-7967ad7ebbdf.pdf",
+  "bound_pages": [
+   72,
+   74
+  ],
+  "document_effective_start": "2014-12-01",
+  "version_status": "approved",
+  "charges": 5,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [
+   {
+    "id": 7266,
+    "effective_start": "2017-02-01",
+    "status": "approved",
+    "historical_document_id": 7720,
+    "local_path": "data\\raw\\historical\\ncuc\\e-2\\e-2-nodate-duke-energy-progress-petition-for-approval-of-job-retention-rider.pdf",
+    "start_page": 13,
+    "end_page": 17,
+    "same_file": false
+   }
+  ],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": true,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": 793,
+   "span_pages": 3
+  },
+  "cause": "observed_period_held_by_sibling",
+  "confidence": "needs_review",
+  "proposed_correction": null,
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 7267,
+  "family_key": "nc-progress-leaf-601",
+  "stored": "2024-01-27",
+  "printed": [
+   "2024-12-01"
+  ],
+  "pages": [
+   5,
+   6,
+   7
+  ],
+  "file_sha256": "9647b1cfa060341a9b7617fb53c1803ca3b3c319b7ff4c6da054c466203474d7",
+  "source_pdf": "data\\historical\\ncuc\\e-2-sub-1343\\c267c0e2-84fb-445f-a3dd-9fae6460cdea.pdf",
+  "bound_pages": [
+   2,
+   8
+  ],
+  "document_effective_start": "2024-01-27",
+  "version_status": "approved",
+  "charges": 7,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": false,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": 309,
+   "span_pages": 7
+  },
+  "cause": "stored_filing_or_order_date",
+  "confidence": "medium",
+  "proposed_correction": {
+   "table": "tariff_versions",
+   "row_id": 7267,
+   "column": "effective_start",
+   "from": "2024-01-27",
+   "to": "2024-12-01",
+   "via": "provenance revise-metadata (after review)"
+  },
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 7269,
+  "family_key": "nc-progress-leaf-602",
+  "stored": "2021-06-01",
+  "printed": [
+   "2021-12-01"
+  ],
+  "pages": [
+   145,
+   146
+  ],
+  "file_sha256": "d42c8e6a3500f4119a1cedd6bc06c6e07bce3b470ddd7aa5c06732026ea5e192",
+  "source_pdf": "data\\historical\\ncuc\\e-7-sub-1243\\4e0c2c78-3f6f-47b5-8ae0-25aed12fe82f.pdf",
+  "bound_pages": [
+   143,
+   146
+  ],
+  "document_effective_start": "2021-06-01",
+  "version_status": "approved",
+  "charges": 8,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": false,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": 183,
+   "span_pages": 4
+  },
+  "cause": "unexplained",
+  "confidence": "needs_review",
+  "proposed_correction": null,
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 7275,
+  "family_key": "nc-progress-leaf-605",
+  "stored": "2024-01-01",
+  "printed": [
+   "2025-01-01"
+  ],
+  "pages": [
+   31,
+   32,
+   33,
+   34
+  ],
+  "file_sha256": "f8c0037b7af22da01e5911944f59c76e25ca4ebf245197201428f3d0541665d9",
+  "source_pdf": "data\\historical\\ncuc\\e-7-sub-1276\\19850f46-6d15-4849-ac73-b779abc7af2f.pdf",
+  "bound_pages": [
+   27,
+   34
+  ],
+  "document_effective_start": "2024-01-01",
+  "version_status": "approved",
+  "charges": 0,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": false,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": 366,
+   "span_pages": 8
+  },
+  "cause": "adjacent_rate_year",
+  "confidence": "needs_review",
+  "proposed_correction": null,
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 7277,
+  "family_key": "nc-progress-leaf-611",
+  "stored": "2023-10-01",
+  "printed": [
+   "2024-01-01"
+  ],
+  "pages": [
+   143
+  ],
+  "file_sha256": "7a5cbdce496e1dbafd60af074cc80a786dd9087fcd121c65d7e13981bf3c41a0",
+  "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\3f92be50-2f10-4d4c-8952-2bccaa339aba.pdf",
+  "bound_pages": [
+   143,
+   143
+  ],
+  "document_effective_start": "2023-10-01",
+  "version_status": "approved",
+  "charges": 4,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": false,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": 92,
+   "span_pages": 1
+  },
+  "cause": "unexplained",
+  "confidence": "needs_review",
+  "proposed_correction": null,
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 7285,
+  "family_key": "nc-progress-leaf-668",
+  "stored": "2023-10-01",
+  "printed": [
+   "2025-01-01"
+  ],
+  "pages": [
+   24,
+   25,
+   26
+  ],
+  "file_sha256": "f8c0037b7af22da01e5911944f59c76e25ca4ebf245197201428f3d0541665d9",
+  "source_pdf": "data\\historical\\ncuc\\e-7-sub-1276\\19850f46-6d15-4849-ac73-b779abc7af2f.pdf",
+  "bound_pages": [
+   21,
+   26
+  ],
+  "document_effective_start": "2023-10-01",
+  "version_status": "approved",
+  "charges": 2,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [
+   {
+    "id": 5472,
+    "effective_start": "2025-01-01",
+    "status": "approved",
+    "historical_document_id": 400,
+    "local_path": "data\\raw\\nc\\progress\\rider\\leaf-no-668-rider-nsc-ry1-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no-668-.pdf",
+    "start_page": 1,
+    "end_page": 3,
+    "same_file": false
+   }
+  ],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": true,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": 458,
+   "span_pages": 6
+  },
+  "cause": "observed_period_held_by_sibling",
+  "confidence": "needs_review",
+  "proposed_correction": null,
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 7289,
+  "family_key": "nc-progress-leaf-670",
+  "stored": "2024-01-01",
+  "printed": [
+   "2025-01-01"
+  ],
+  "pages": [
+   38,
+   39,
+   40
+  ],
+  "file_sha256": "f8c0037b7af22da01e5911944f59c76e25ca4ebf245197201428f3d0541665d9",
+  "source_pdf": "data\\historical\\ncuc\\e-7-sub-1276\\19850f46-6d15-4849-ac73-b779abc7af2f.pdf",
+  "bound_pages": [
+   35,
+   40
+  ],
+  "document_effective_start": "2024-01-01",
+  "version_status": "approved",
+  "charges": 7,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": false,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": 366,
+   "span_pages": 6
+  },
+  "cause": "adjacent_rate_year",
+  "confidence": "needs_review",
+  "proposed_correction": null,
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ },
+ {
+  "tariff_version_id": 7291,
+  "family_key": "nc-progress-leaf-701",
+  "stored": "2020-10-13",
+  "printed": [
+   "2025-01-01"
+  ],
+  "pages": [
+   5,
+   6,
+   7
+  ],
+  "file_sha256": "127e5029fae6e27f24e673a1a6a2daed22707674cd734c1154dabdc44cef0058",
+  "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-931\\cbcb5aa1-4d82-4465-890c-97e43a62a3da.pdf",
+  "bound_pages": [
+   2,
+   7
+  ],
+  "document_effective_start": "2020-10-13",
+  "version_status": "approved",
+  "charges": 0,
+  "page_evidence": {
+   "verdict": "clean",
+   "redline_pages": [],
+   "suspect_pages": []
+  },
+  "siblings_at_printed_date": [
+   {
+    "id": 5482,
+    "effective_start": "2025-01-01",
+    "status": "approved",
+    "historical_document_id": 406,
+    "local_path": "data\\raw\\nc\\progress\\rate\\leaf-no-701-program-sbes-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no-701-p.pdf",
+    "start_page": 1,
+    "end_page": 3,
+    "same_file": false
+   }
+  ],
+  "tests": {
+   "redline_pages": false,
+   "proposal_markers_on_pages": 0,
+   "year_digit": false,
+   "sibling_holds_printed_date": true,
+   "document_agrees_with_print": false,
+   "stored_is_document_date": true,
+   "days_stored_to_printed": 1541,
+   "span_pages": 6
+  },
+  "cause": "observed_period_held_by_sibling",
+  "confidence": "needs_review",
+  "proposed_correction": null,
+  "classifier": "effective_date_conflict_classifier@1.0.0"
+ }
+]

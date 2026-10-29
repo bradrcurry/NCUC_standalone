@@ -2214,7 +2214,7 @@ def _inventory_fetch_eligible(database_path: str) -> dict[str, Any]:
       - ``fetch_status`` is one of ``pending``, ``failed``, ``requires_browser``
       - OR ``fetch_status`` is NULL with no ``local_path``
     """
-    from duke_rates.db.sqlite import connect
+    import sqlite3
 
     out: dict[str, Any] = {
         "total_eligible": 0,
@@ -2223,7 +2223,11 @@ def _inventory_fetch_eligible(database_path: str) -> dict[str, Any]:
         "top_dockets": [],
     }
     try:
-        conn = connect(database_path)
+        # This inventory also runs before a zero-cycle dry run. The ordinary
+        # helper runs migrations on connection, so it must never be used here.
+        conn = sqlite3.connect(Path(database_path).resolve().as_uri() + "?mode=ro", uri=True)
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA query_only=ON")
         try:
             rows = conn.execute(
                 """

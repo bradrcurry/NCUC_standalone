@@ -1,0 +1,37 @@
+{
+ "tariff_versions": {
+  "rows": 988,
+  "sha256": "9bf86b9b6f0e4527ddf58e0247f4da8716b64f25468cbcefd54cd1b7388d19f3"
+ },
+ "historical_documents": {
+  "rows": 682,
+  "sha256": "60517538be2936195f7f2b09d8bbd4742dde607ef3ddd7c53c23a097150c386f"
+ },
+ "tariff_charges": {
+  "rows": 5198,
+  "sha256": "a37f23f99f8ffffb5a2b8bdbef2d11b54418eaf0193219edf5823d8e3b6c2555"
+ },
+ "lineage_links": {
+  "rows": 201,
+  "sha256": "2d616409b4c2c06543465c61b8a5e2baef926ac6ee6c3be0eecba114daddd8bc"
+ },
+ "lineage_gaps_typed": {
+  "rows": 691,
+  "sha256": "822975fd665f6512a2a101454cab0ac73481ed905db664bb63b8c0167a76caea"
+ },
+ "document_assertions": {
+  "rows": 0,
+  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+ },
+ "effective_date_assessments": {
+  "rows": 578,
+  "sha256": "92d33571a2d980a09f2ae92e9b48a26bfcabeba471f8091475d752fba63ee6e5"
+ },
+ "gap_status": {
+  "candidate_found": 131,
+  "open": 321,
+  "searched_not_found": 165,
+  "verification_required": 58,
+  "verified": 16
+ }
+}

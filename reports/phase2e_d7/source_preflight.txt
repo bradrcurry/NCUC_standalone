@@ -1,0 +1,8 @@
+jaa ['data\\historical\\ncuc\\e-2-sub-1207\\32b7c724-edef-4a3a-bb45-85058c2ec503.pdf']
+jaa native pages 110 seconds 0.230312400002731
+tariff_book ['C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\3f92be50-2f10-4d4c-8952-2bccaa339aba.pdf']
+tariff_book native pages 316 seconds 1.108016599988332
+appeal ['data\\historical\\ncuc\\e-2-sub-1300\\32d25655-7a4c-4141-acc0-d675a507e369.pdf', 'data\\historical\\ncuc\\e-7-sub-1276\\32d25655-7a4c-4141-acc0-d675a507e369.pdf']
+appeal native pages 598 seconds 2.2996991999971215
+dsm_ee ['data\\historical\\ncuc\\e-7-sub-1285\\543b80be-7672-4b7c-9897-da915455f6da.pdf']
+dsm_ee native pages 1091 seconds 3.712028400012059

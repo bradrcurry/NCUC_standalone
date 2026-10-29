@@ -1,0 +1,199 @@
+{
+ "doc_id": "hd1882_jaa_rev3",
+ "sha256": "c36cef61e6bc9bbb130c216ffe3de4f6afac25afa7ccfc8bc24fd2a7f74621b2",
+ "effective_date": "2025-12-01",
+ "effective_date_source_text": "Effective for bills rendered on and after December 1, 2025",
+ "expected_zero": false,
+ "charges": [
+  {
+   "family_key": "nc-progress-leaf-602",
+   "rate_class": "Residential",
+   "applicability": [
+    "RES",
+    "R-TOUD",
+    "R-TOU",
+    "R-TOU-CPP"
+   ],
+   "charge_type": "rider_adjustment",
+   "label": "Incremental Rate*",
+   "rider_code": "JAA",
+   "value": "0.00464",
+   "unit": "dollars_per_kwh",
+   "tou_period": null,
+   "season": null,
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 1,
+   "source_text": "Residential RES, R-TOUD, R-TOU, R-TOU-CPP 0.00464",
+   "verified": true,
+   "group": "Non-Demand Rate Class (dollars per kilowatt-hour)"
+  },
+  {
+   "family_key": "nc-progress-leaf-602",
+   "rate_class": "Small General Service",
+   "applicability": [
+    "SGS",
+    "SGS-TOUE",
+    "SGS-TOU-CPP"
+   ],
+   "charge_type": "rider_adjustment",
+   "label": "Incremental Rate*",
+   "rider_code": "JAA",
+   "value": "0.00223",
+   "unit": "dollars_per_kwh",
+   "tou_period": null,
+   "season": null,
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 1,
+   "source_text": "Small General Service SGS, SGS-TOUE, SGS-TOU-CPP 0.00223",
+   "verified": true,
+   "group": "Non-Demand Rate Class (dollars per kilowatt-hour)"
+  },
+  {
+   "family_key": "nc-progress-leaf-602",
+   "rate_class": "Medium General Service",
+   "applicability": [
+    "CH-TOUE"
+   ],
+   "charge_type": "rider_adjustment",
+   "label": "Incremental Rate*",
+   "rider_code": "JAA",
+   "value": "0.00411",
+   "unit": "dollars_per_kwh",
+   "tou_period": null,
+   "season": null,
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 1,
+   "source_text": "Medium General Service CH-TOUE 0.00411",
+   "verified": true,
+   "group": "Non-Demand Rate Class (dollars per kilowatt-hour)"
+  },
+  {
+   "family_key": "nc-progress-leaf-602",
+   "rate_class": "Seasonal and Intermittent Service",
+   "applicability": [
+    "SI"
+   ],
+   "charge_type": "rider_adjustment",
+   "label": "Incremental Rate*",
+   "rider_code": "JAA",
+   "value": "0.01075",
+   "unit": "dollars_per_kwh",
+   "tou_period": null,
+   "season": null,
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 1,
+   "source_text": "Seasonal and Intermittent Service SI 0.01075",
+   "verified": true,
+   "group": "Non-Demand Rate Class (dollars per kilowatt-hour)"
+  },
+  {
+   "family_key": "nc-progress-leaf-602",
+   "rate_class": "Traffic Signal Service",
+   "applicability": [
+    "TSS",
+    "TFS"
+   ],
+   "charge_type": "rider_adjustment",
+   "label": "Incremental Rate*",
+   "rider_code": "JAA",
+   "value": "0.00343",
+   "unit": "dollars_per_kwh",
+   "tou_period": null,
+   "season": null,
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 1,
+   "source_text": "Traffic Signal Service TSS, TFS 0.00343",
+   "verified": true,
+   "group": "Non-Demand Rate Class (dollars per kilowatt-hour)"
+  },
+  {
+   "family_key": "nc-progress-leaf-602",
+   "rate_class": "Outdoor Lighting Service",
+   "applicability": [
+    "ALS",
+    "SLS",
+    "SLR",
+    "SFLS"
+   ],
+   "charge_type": "rider_adjustment",
+   "label": "Incremental Rate*",
+   "rider_code": "JAA",
+   "value": "0.01389",
+   "unit": "dollars_per_kwh",
+   "tou_period": null,
+   "season": null,
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 1,
+   "source_text": "Outdoor Lighting Service ALS, SLS, SLR, SFLS 0.01389",
+   "verified": true,
+   "group": "Non-Demand Rate Class (dollars per kilowatt-hour)"
+  },
+  {
+   "family_key": "nc-progress-leaf-602",
+   "rate_class": "Medium General Service",
+   "applicability": [
+    "MGS",
+    "GS-TES",
+    "APH-TES",
+    "MGS-TOU"
+   ],
+   "charge_type": "rider_adjustment",
+   "label": "Incremental Rate*",
+   "rider_code": "JAA",
+   "value": "0.92",
+   "unit": "dollars_per_kw",
+   "tou_period": null,
+   "season": null,
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 1,
+   "source_text": "Medium General Service MGS, GS-TES, APH-TES, MGS-TOU 0.92",
+   "verified": true,
+   "group": "Demand Rate Classes (dollars per kilowatt)",
+   "note": "** for MGS-TOU / LGS-TOU the incremental demand rate applies only to the Mid-Peak demand charge"
+  },
+  {
+   "family_key": "nc-progress-leaf-602",
+   "rate_class": "Large General Service",
+   "applicability": [
+    "LGS",
+    "LGS-TOU",
+    "LGS-HLF"
+   ],
+   "charge_type": "rider_adjustment",
+   "label": "Incremental Rate*",
+   "rider_code": "JAA",
+   "value": "3.03",
+   "unit": "dollars_per_kw",
+   "tou_period": null,
+   "season": null,
+   "tier": null,
+   "line_effective_date": null,
+   "is_total": false,
+   "source_page": 1,
+   "source_text": "Large General Service LGS, LGS-TOU, LGS-HLF 3.03",
+   "verified": true,
+   "group": "Demand Rate Classes (dollars per kilowatt)",
+   "note": "** for MGS-TOU / LGS-TOU the incremental demand rate applies only to the Mid-Peak demand charge"
+  }
+ ],
+ "rider_summary_totals": [],
+ "notes": "DEP NC Third Revised Leaf No. 602 (Rider JAA), eff 2025-12-01, E-2 Sub 1354 clean tariff (1 page, native text, bordered table; verified on rendered page). Added as the 'passing JAA version' suggested by audit section 13 because hd 179/7365/5324 contain no tariff sheet. Units are printed in the group headers: dollars per kWh for non-demand classes, dollars per kW for demand classes (Medium GS appears twice: CH-TOUE non-demand $/kWh and MGS demand $/kW). Rates include NC regulatory fee. CROSS-CHECK: these equal the JAA rows (eff 12/1/25) on DEP Leaf 600 eff 2026-06-01 after unit conversion ($0.00464/kWh = 0.464 c/kWh, etc.; $/kW 0.92 and 3.03 identical).",
+ "pages_transcribed": [
+  1,
+  1
+ ]
+}

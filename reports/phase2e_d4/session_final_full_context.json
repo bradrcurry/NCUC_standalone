@@ -1,0 +1,81 @@
+{
+  "status": "found",
+  "symbol": {
+    "uid": "Function:src/duke_rates/historical/ncuc/session.py:get_docket_documents",
+    "name": "get_docket_documents",
+    "kind": "Function",
+    "filePath": "src/duke_rates/historical/ncuc/session.py",
+    "startLine": 217,
+    "endLine": 260
+  },
+  "epistemic": "exact",
+  "incoming": {
+    "calls": [
+      {
+        "uid": "Function:src/duke_rates/cli_commands/ncuc.py:ncuc_docket_fetch",
+        "name": "ncuc_docket_fetch",
+        "filePath": "src/duke_rates/cli_commands/ncuc.py"
+      },
+      {
+        "uid": "Function:src/duke_rates/cli_commands/ncuc.py:ncuc_portal_search",
+        "name": "ncuc_portal_search",
+        "filePath": "src/duke_rates/cli_commands/ncuc.py"
+      },
+      {
+        "uid": "Function:src/duke_rates/cli_commands/ncuc.py:ncuc_portal_smoke_test",
+        "name": "ncuc_portal_smoke_test",
+        "filePath": "src/duke_rates/cli_commands/ncuc.py"
+      },
+      {
+        "uid": "Function:src/duke_rates/document_intelligence/acquisition.py:run_portal_smoke_test",
+        "name": "run_portal_smoke_test",
+        "filePath": "src/duke_rates/document_intelligence/acquisition.py"
+      },
+      {
+        "uid": "Function:src/duke_rates/historical/ncuc/session.py:get_docket_documents_first_page",
+        "name": "get_docket_documents_first_page",
+        "filePath": "src/duke_rates/historical/ncuc/session.py"
+      }
+    ]
+  },
+  "outgoing": {
+    "calls": [
+      {
+        "uid": "Function:src/duke_rates/historical/ncuc/docket_inventory.py:walk_docket_inventory",
+        "name": "walk_docket_inventory",
+        "filePath": "src/duke_rates/historical/ncuc/docket_inventory.py"
+      },
+      {
+        "uid": "Function:src/duke_rates/historical/ncuc/remote_discovery.py:parse_docket_inventory",
+        "name": "parse_docket_inventory",
+        "filePath": "src/duke_rates/historical/ncuc/remote_discovery.py"
+      }
+    ]
+  },
+  "processes": [
+    {
+      "id": "proc_173_ncuc_docket_fetch",
+      "name": "Ncuc_docket_fetch → _capture_inventory_page",
+      "step_index": 2,
+      "step_count": 4
+    },
+    {
+      "id": "proc_681_ncuc_docket_fetch",
+      "name": "Ncuc_docket_fetch → Is_blocked_page",
+      "step_index": 2,
+      "step_count": 4
+    },
+    {
+      "id": "proc_76_ncuc_docket_fetch",
+      "name": "Ncuc_docket_fetch → Items_reported",
+      "step_index": 2,
+      "step_count": 6
+    },
+    {
+      "id": "proc_77_ncuc_docket_fetch",
+      "name": "Ncuc_docket_fetch → Parse_docket_inventory",
+      "step_index": 2,
+      "step_count": 6
+    }
+  ]
+}

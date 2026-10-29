@@ -26,7 +26,7 @@ from duke_rates.billing.reconciliation import ProgressNCBillReconciliationServic
 from duke_rates.billing.usage_io import read_usage_file
 from duke_rates.config import get_settings
 from duke_rates.db.artifact_cache import load_page_artifacts, save_page_artifacts, save_span_artifacts
-from duke_rates.db.repository import Repository
+from duke_rates.db.repository import HistoricalDataLossError, Repository
 from duke_rates.db.sqlite import connect as connect_sqlite
 from duke_rates.discovery.classifier import extract_rev_token
 from duke_rates.discovery.duke_site import DukeDiscoveryService
@@ -99,6 +99,11 @@ from duke_rates.selection import (
 )
 
 from duke_rates.cli_commands._cli_utils import _read_usage_file
+from duke_rates.cli_commands.extraction_options import (
+    announce_persistence,
+    legacy_replace_option,
+    result_line,
+)
 
 # Sub-app imports (registered at end of file)
 from duke_rates.cli_commands.ocr import (
@@ -151,6 +156,8 @@ from duke_rates.cli_commands.billing import billing_app, data_app
 from duke_rates.cli_commands.progress import progress_app
 # Doc-intel sub-app — Docling, classification, embedding, LLM probe, gold-set.
 from duke_rates.cli_commands.doc_intel import doc_intel_app
+# Phase 2A provenance commands -- see cli_commands/provenance.py
+from duke_rates.cli_commands.provenance import provenance_app
 
 app = typer.Typer(help="Duke Energy tariff discovery and analysis CLI.")
 app.add_typer(ocr_app, name="ocr")
@@ -165,6 +172,7 @@ app.add_typer(billing_app, name="billing")
 app.add_typer(data_app, name="data")
 app.add_typer(progress_app, name="progress")
 app.add_typer(doc_intel_app, name="doc-intel")
+app.add_typer(provenance_app, name="provenance")
 
 
 def _safe_cli_text(value: object) -> str:
@@ -1461,8 +1469,14 @@ def parse_tariff_versions(
             n_processed += 1
             continue
 
-        # Atomically replace old data with newly parsed data
-        repository.replace_parsed_tariff_data(family.family_key, version, charges, riders)
+        # Atomically replace old data with newly parsed data.  Families with
+        # historical versions are protected (see replace_parsed_tariff_data).
+        try:
+            repository.replace_parsed_tariff_data(family.family_key, version, charges, riders)
+        except HistoricalDataLossError as exc:
+            log.warning("Skipped %s: %s", family.family_key, exc)
+            typer.echo(f"  [skip] {family.family_key}: protected historical data ({exc})")
+            continue
 
         if version.revision_label is None:
             log.warning("No revision_label parsed for %s", family.family_key)
@@ -1624,6 +1638,7 @@ def mine_tariff_sheets_nc(
     family: str | None = typer.Option(None, help="Filter to one family key, e.g. nc-progress-leaf-605."),
     dry_run: bool = typer.Option(False, "--dry-run", help="List candidates without processing."),
     skip_extraction: bool = typer.Option(False, "--skip-extraction", help="Mine pages only; skip charge extraction."),
+    legacy_replace: bool = legacy_replace_option(),
 ) -> None:
     """Mine standalone tariff sheet PDFs that are in historical_documents but have no page artifacts.
 
@@ -1632,7 +1647,8 @@ def mine_tariff_sheets_nc(
     therefore skipped by the normal pipeline.
 
     For each doc: mines page artifacts, ensures a tariff_version exists, then runs
-    charge extraction via BulkExtractor.process_document().
+    charge extraction via BulkExtractor.process_document_result(), which stores
+    a candidate run (Phase 2C; ``--legacy-replace`` promotes it immediately).
     """
     import sqlite3 as _sqlite3
     import hashlib as _hashlib
@@ -1680,6 +1696,7 @@ def mine_tariff_sheets_nc(
         return
 
     extractor = BulkExtractor(db_path=db_path)
+    replace = announce_persistence(legacy_replace) if not skip_extraction else False
     done = 0
     skipped = 0
     total_charges = 0
@@ -1710,7 +1727,7 @@ def mine_tariff_sheets_nc(
             finally:
                 conn2.close()
 
-            charges_inserted = 0
+            extraction_note = ""
             if not skip_extraction:
                 version_id = _ensure_historical_tariff_version(
                     repository,
@@ -1721,18 +1738,18 @@ def mine_tariff_sheets_nc(
                 doc = extractor.get_document_for_extraction(hd_id)
                 if doc:
                     doc["version_id"] = version_id
-                    _, _, charges_inserted, *_ = extractor.process_document(doc)
-                    total_charges += charges_inserted
+                    outcome = extractor.process_document_result(doc, legacy_replace=replace)
+                    total_charges += outcome.inserted if replace else outcome.extracted
+                    extraction_note = " " + result_line(outcome)
 
             done += 1
-            typer.echo(
-                f"  [{done}/{total}] OK pages={len(pages)} charges={charges_inserted} {fk} ({p.name})"
-            )
+            typer.echo(f"  [{done}/{total}] OK pages={len(pages)}{extraction_note} {fk} ({p.name})")
         except Exception as exc:
             typer.echo(f"  [{done+skipped+1}/{total}] ERROR {fk}: {exc}")
             skipped += 1
 
-    typer.echo(f"\nDone: {done} mined, {skipped} skipped/missing, {total_charges} charges inserted.")
+    what = "charges inserted" if replace else "candidate charges stored"
+    typer.echo(f"\nDone: {done} mined, {skipped} skipped/missing, {total_charges} {what}.")
 
 
 @app.command("extract-rates-nc")
@@ -1742,22 +1759,29 @@ def extract_rates_nc(
     verbose: bool = typer.Option(False, "--verbose", help="Show status buckets and zero-charge document details."),
     progress: bool = typer.Option(False, "--progress", help="Emit periodic stderr status during long runs."),
     progress_interval: int = typer.Option(30, "--progress-interval", help="Seconds between progress lines when --progress is set."),
+    mode: str | None = typer.Option(None, "--mode", help="legacy | docling | native | hybrid (default: hybrid; legacy with --legacy-replace)."),
+    legacy_replace: bool = legacy_replace_option(),
 ) -> None:
-    """Extract rate charges from historical NC documents.
+    """Extract rate charges from historical NC documents into candidate runs.
 
-    Phase 2: Bulk extraction from documents with effective dates.
+    Phase 2C: every document becomes a sealed extraction run; tariff_charges
+    is unchanged unless --legacy-replace. Needs `provenance migrate` first.
     """
     from duke_rates.historical.ncuc.pipeline.bulk_extractor import bulk_extract_rates
 
     settings, _ = _bootstrap()
 
     typer.echo("Starting bulk rate extraction from historical NC documents...")
+    replace = announce_persistence(legacy_replace)
     results = bulk_extract_rates(
         settings.database_path,
         limit=limit,
         family_key=family_key,
         progress=progress,
         progress_interval_seconds=progress_interval,
+        structured_mode=mode,
+        legacy_replace=replace,
+        created_by="cli:extract-rates-nc",
     )
 
     typer.echo(f"\n=== Extraction Results ===")
@@ -1767,7 +1791,13 @@ def extract_rates_nc(
             f"Historical documents skipped before extraction due to missing tariff_version links: "
             f"{results['documents_missing_versions']}"
         )
-    typer.echo(f"Total charges inserted: {results['total_charges_inserted']}")
+    typer.echo(
+        f"Persistence: {results['persistence']} (mode {results['structured_mode']}); "
+        f"candidate runs: {len(results['candidate_runs'])}, "
+        f"needing review: {results['runs_needing_review']}"
+    )
+    typer.echo(f"Total charges extracted: {results['total_charges_extracted']}")
+    typer.echo(f"Total charges inserted into tariff_charges: {results['total_charges_inserted']}")
     if family_key:
         typer.echo(f"Family filter: {family_key}")
     if results.get("status_counts"):
@@ -1776,7 +1806,7 @@ def extract_rates_nc(
             typer.echo(f"  {status}: {count}")
 
     if results['by_family']:
-        typer.echo(f"\nCharges by family:")
+        typer.echo(f"\nCharges extracted by family:")
         for family_key, count in sorted(results['by_family'].items()):
             if count > 0:
                 typer.echo(f"  {family_key}: {count}")

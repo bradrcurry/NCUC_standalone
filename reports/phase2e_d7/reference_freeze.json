@@ -1,0 +1,9 @@
+{
+  "source_reference_sha256": "e537114f799f864d7e18219f44cad67d87b49eaf29784ed072b30684f1157c04",
+  "prediction_outputs_used": false,
+  "tariff_components": 104,
+  "tariff_component_pages": 317,
+  "total_pdf_pages": 2121,
+  "human_verified": false,
+  "scope": "Formal tariff-component boundaries; coarse non-tariff regions. Not an exhaustive boundary gold set for every legal/exhibit document."
+}

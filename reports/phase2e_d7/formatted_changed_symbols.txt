@@ -1,0 +1,6 @@
+src/duke_rates/db/artifact_cache.py ['save_page_artifacts', 'load_page_artifacts', 'save_span_artifacts', 'load_span_artifacts']
+src/duke_rates/historical/ncuc/importer.py ['NcucPipelineImporter']
+src/duke_rates/historical/ncuc/pipeline/segmentation.py ['_classify_page_doc_type', 'segment_document', '_own_sheet_lines', '_page_kind', '_is_table_continuation', '_page_observation', '_merge_boundary_evidence', '_own_leaf_numbers']
+src/duke_rates/historical/ncuc/pipeline/stage_versions.py []
+src/duke_rates/historical/ncuc/pipeline/triage.py ['triage_pdf']
+src/duke_rates/models/pipeline.py ['TariffSpan']

@@ -1,0 +1,41 @@
+{
+ "historical_document_id": 7265,
+ "version_id": 6908,
+ "run_id": 1,
+ "run_status": "ok",
+ "validation_status": "passed",
+ "span": [
+  96,
+  101
+ ],
+ "charge_count": 125,
+ "charges_by_page": {
+  "100": 22,
+  "101": 11,
+  "96": 23,
+  "97": 22,
+  "98": 23,
+  "99": 15,
+  "None": 9
+ },
+ "charges_without_page": 9,
+ "evidence_outside_span": [],
+ "families": {
+  "nc-progress-leaf-600": 125
+ },
+ "units": {
+  "$/kWh": 119,
+  "$/kW": 6
+ },
+ "per_kw_rows_needing_review": [
+  "Large General Service Schedules - JAA",
+  "Schedule HP & Schedule LGS-RTP - JAA"
+ ],
+ "duplicate_natural_keys": [],
+ "total_reconciliation": {
+  "classes_checked": 14,
+  "reconciled": 14,
+  "failures": []
+ },
+ "rows_printed_struck_through": []
+}

@@ -1,0 +1,213 @@
+LAW OFFICE OF
+ROBERT W. KAYLOR, P.A.
+353 EAST SIX FORKS ROAD, SUITE 260
+RALEIGH, NORTH CAROLINA 27609
+(919) 828-5250
+FACSIMILE (919) 828-5240
+November 29, 2023
+VIA ELECTRONIC FILING
+Ms. A. Shonta Dunston
+Chief Clerk
+North Carolina Utilities Commission
+4325 Mail Service Center
+Raleigh, North Carolina 27699-4300
+RE: Duke Energy Carolinas, LLC’s Rider Summary Compliance Tariffs
+Docket No. E-7, Sub 1285
+Dear Ms. Dunston:
+Pursuant to the North Carolina Utilities Commission’s Rule R8-25(a), enclosed is
+Duke Energy Carolinas, LLC’s Rider Summary Compliance Tariffs that have been revised
+to reflect approved changes in rates, incorporating the revised billing factors approved by
+the Commission’s Order Approving DSM/EE Rider and Requiring Filing of Proposed
+Customer Notice issued August 29, 2023 and effective for a service rendered basis on and
+after January 1, 2024. The Rider Summary Compliance Tariffs are provided in both clean
+and redlined forms.
+Please do not hesitate to contact me if you have any questions or need additional
+information.
+Sincerely,
+Robert W. Kaylor
+Enclosure
+cc: Parties of RecordCERTIFICATE OF SERVICE
+I certify that a copy of Duke Energy Carolinas, LLC’s Rider Summary Compliance
+Tariffs, in Docket No. E-7 Sub 1285, has been served by electronic mail, hand delivery or
+by depositing a copy in the United States mail, postage prepaid to the parties of record.
+This the 29th day of November, 2023.
+___________________________
+Robert W. Kaylor
+Law Office of Robert W. Kaylor, P.A.
+353 Six Forks Road, Suite 260
+Raleigh, North Carolina 27609
+Tel: 919-828-5250
+bkaylor@rwkaylorlaw.com
+North Carolina State Bar No. 6237Duke Energy Carolinas, LLC Electricity No. 4
+North Carolina Fifty-Ninth Revised Leaf No. 99
+Superseding North Carolina Fifty-Eighth Revised Leaf No. 99
+SUMMARY OF RIDER ADJUSTMENTS
+The following is a summary of Rider Adjustments that must be added to the bill calculated on the applicable rate schedule in order
+to compute the bill. The factors shown below include revenue-related taxes and regulatory fees. More specific information
+concerning these Riders is contained in the applicable Rider listed below.
+Residential Schedules RS, RE, ES, RT, RSTC, RETC cents/kWh Effective Date
+Fuel Cost Adjustment Rider 2.2957 9/1/23
+Energy Efficiency Rider 0.3775 1/1/24
+Existing DSM Program Costs Adjustment Rider -0.0022 7/1/23
+BPM Prospective Rider -0.0128 7/1/23
+BPM True-Up Rider -0.0071 7/1/23
+CPRE Rider 0.0143 9/1/23
+EDIT-4 Rider -0.4842 10/1/21
+Storm Cost Recovery Rider 0.0000 6/1/21
+TOTAL cents/kWh 2.1812
+General Service Schedules SGS, BC, LGS, TS, S, OPT-E, OPT-V,
+PG, SGSTC cents/kWh Effective Date
+Fuel Cost Adjustment Rider 1.7463 9/1/23
+Energy Efficiency Rider 0.4343 1/1/24
+Existing DSM Program Costs Adjustment Rider -0.0022 7/1/23
+BPM Prospective Rider -0.0128 7/1/23
+BPM True-Up Rider -0.0071 7/1/23
+CPRE Rider 0.0120 9/1/23
+EDIT-4 Rider -0.2893 10/1/21
+Storm Cost Recovery Rider 0.0000 6/1/21
+TOTAL cents/kWh 1.8812
+Lighting Schedules PL, OL, NL cents/kWh Effective Date
+Fuel Cost Adjustment Rider 1.7463 9/1/23
+Energy Efficiency Rider 0.0000 1/1/24
+Existing DSM Program Costs Adjustment Rider -0.0022 7/1/23
+BPM Prospective Rider -0.0128 7/1/23
+BPM True-Up Rider -0.0071 7/1/23
+CPRE Rider 0.0120 9/1/23
+EDIT-4 Rider -1.2461 10/1/21
+Storm Cost Recovery Rider 0.0000 6/1/21
+TOTAL cents/kWh 0.4901
+* Qualifying customers who have opted out of the Company’s Energy Efficiency and/or Demand Side Management Programs are not subject to
+the applicable Energy Efficiency Rider charges based on the individual customer’s opt-out election. Refer to Rider EE to determine the Rider
+EE amount, if any, applicable to customers who have opted out.
+North Carolina Fifty-Ninth Revised Leaf No. 99
+Effective for service rendered on and after January 1, 2024
+NCUC Docket No. E-7, Sub 1285, Order dated August 29, 2023
+Page 1 of 2Duke Energy Carolinas, LLC Electricity No. 4
+North Carolina Fifty-Ninth Revised Leaf No. 99
+Superseding North Carolina Fifty-Eighth Revised Leaf No. 99
+SUMMARY OF RIDER ADJUSTMENTS
+Industrial Schedules I, OPT-E, OPT-V, PG cents/kWh Effective Date
+Fuel Cost Adjustment Rider 1.5793 9/1/23
+Energy Efficiency Rider 0.4343 1/1/24
+Existing DSM Program Costs Adjustment Rider -0.0022 7/1/23
+BPM Prospective Rider -0.0128 7/1/23
+BPM True-Up Rider -0.0071 7/1/23
+CPRE Rider 0.0160 9/1/23
+EDIT-4 Rider -0.2264 10/1/21
+Storm Cost Recovery Rider 0.0000 6/1/21
+TOTAL cents/kWh 1.7811
+cents/kWh cents/kWh
+Schedule HP – General Service Baseline Incremental Effective Date
+Fuel Cost Adjustment Rider 1.7463 0.0000 9/1/23
+Energy Efficiency Rider 0.4343 0.4343 1/1/24
+Existing DSM Program Costs Adjustment Rider -0.0022 -0.0022 7/1/23
+BPM Prospective Rider -0.0128 -0.0128 7/1/23
+BPM True-Up Rider -0.0071 -0.0071 7/1/23
+CPRE Rider 0.0120 0.0120 9/1/23
+EDIT-4 Rider -0.2893 -0.2893 10/1/21
+Storm Cost Recovery Rider 0.0000 0.0000 6/1/21
+TOTAL cents/kWh 1.8812 0.1349
+cents/kWh cents/kWh
+Schedule HP – Industrial Baseline Incremental Effective Date
+Fuel Cost Adjustment Rider 1.5793 0.0000 9/1/23
+Energy Efficiency Rider 0.4343 0.4343 1/1/24
+Existing DSM Program Costs Adjustment Rider -0.0022 -0.0022 7/1/23
+BPM Prospective Rider -0.0128 -0.0128 7/1/23
+BPM True-Up Rider -0.0071 -0.0071 7/1/23
+CPRE Rider 0.0160 0.0160 9/1/23
+EDIT-4 Rider -0.2264 -0.2264 10/1/21
+Storm Cost Recovery Rider 0.0000 0.0000 6/1/21
+TOTAL cents/kWh 1.7811 0.2018
+* Qualifying customers who have opted out of the Company’s Energy Efficiency and/or Demand Side Management Programs are not subject to
+the applicable Energy Efficiency Rider charges based on the individual customer’s opt-out election. Refer to Rider EE to determine the Rider
+EE amount, if any, applicable to customers who have opted out.
+North Carolina Fifty-Ninth Revised Leaf No. 99
+Effective for service rendered on and after January 1, 2024
+NCUC Docket No. E-7, Sub 1285, Order dated August 29, 2023
+Page 2 of 2Duke Energy Carolinas, LLC Electricity No. 4
+North Carolina Fifty-EighthNinth Revised Leaf No. 99
+Superseding North Carolina Fifty-SeventhEighth Revised Leaf No. 99
+SUMMARY OF RIDER ADJUSTMENTS
+The following is a summary of Rider Adjustments that must be added to the bill calculated on the applicable rate schedule in order
+to compute the bill. The factors shown below include revenue-related taxes and regulatory fees. More specific information
+concerning these Riders is contained in the applicable Rider listed below.
+Residential Schedules RS, RE, ES, RT, RSTC, RETC cents/kWh Effective Date
+Fuel Cost Adjustment Rider 2.2957 9/1/23
+Energy Efficiency Rider 0.33893775 1/1/234
+Existing DSM Program Costs Adjustment Rider -0.0022 7/1/23
+BPM Prospective Rider -0.0128 7/1/23
+BPM True-Up Rider -0.0071 7/1/23
+CPRE Rider 0.0143 9/1/23
+EDIT-4 Rider -0.4842 10/1/21
+Storm Cost Recovery Rider 0.0000 6/1/21
+TOTAL cents/kWh 2.14261812
+General Service Schedules SGS, BC, LGS, TS, S, OPT-E, OPT-V,
+PG, SGSTC cents/kWh Effective Date
+Fuel Cost Adjustment Rider 1.7463 9/1/23
+Energy Efficiency Rider 0.62424343 1/1/234
+Existing DSM Program Costs Adjustment Rider -0.0022 7/1/23
+BPM Prospective Rider -0.0128 7/1/23
+BPM True-Up Rider -0.0071 7/1/23
+CPRE Rider 0.0120 9/1/23
+EDIT-4 Rider -0.2893 10/1/21
+Storm Cost Recovery Rider 0.0000 6/1/21
+TOTAL cents/kWh 2.07111.8812
+Lighting Schedules PL, OL, NL cents/kWh Effective Date
+Fuel Cost Adjustment Rider 1.7463 9/1/23
+Energy Efficiency Rider 0.0000 1/1/234
+Existing DSM Program Costs Adjustment Rider -0.0022 7/1/23
+BPM Prospective Rider -0.0128 7/1/23
+BPM True-Up Rider -0.0071 7/1/23
+CPRE Rider 0.0120 9/1/23
+EDIT-4 Rider -1.2461 10/1/21
+Storm Cost Recovery Rider 0.0000 6/1/21
+TOTAL cents/kWh 0.4901
+* Qualifying customers who have opted out of the Company’s Energy Efficiency and/or Demand Side Management Programs are not subject to
+the applicable Energy Efficiency Rider charges based on the individual customer’s opt-out election. Refer to Rider EE to determine the Rider
+EE amount, if any, applicable to customers who have opted out.
+North Carolina Fifty-EighthNinth Revised Leaf No. 99
+Effective for service rendered on and after SeptemberJanuary 1, 20234
+NCUC Docket No. E-7, Subs 12815 and 1282, Orders dated August 16, 2023 and August 239, 2023
+Page 1 of 2Duke Energy Carolinas, LLC Electricity No. 4
+North Carolina Fifty-EighthNinth Revised Leaf No. 99
+Superseding North Carolina Fifty-SeventhEighth Revised Leaf No. 99
+SUMMARY OF RIDER ADJUSTMENTS
+Industrial Schedules I, OPT-E, OPT-V, PG cents/kWh Effective Date
+Fuel Cost Adjustment Rider 1.5793 9/1/23
+Energy Efficiency Rider 0.62424343 1/1/234
+Existing DSM Program Costs Adjustment Rider -0.0022 7/1/23
+BPM Prospective Rider -0.0128 7/1/23
+BPM True-Up Rider -0.0071 7/1/23
+CPRE Rider 0.0160 9/1/23
+EDIT-4 Rider -0.2264 10/1/21
+Storm Cost Recovery Rider 0.0000 6/1/21
+TOTAL cents/kWh 1.97107811
+cents/kWh cents/kWh
+Schedule HP – General Service Baseline Incremental Effective Date
+Fuel Cost Adjustment Rider 1.7463 0.0000 9/1/23
+Energy Efficiency Rider 0.62424343 0.62424343 1/1/234
+Existing DSM Program Costs Adjustment Rider -0.0022 -0.0022 7/1/23
+BPM Prospective Rider -0.0128 -0.0128 7/1/23
+BPM True-Up Rider -0.0071 -0.0071 7/1/23
+CPRE Rider 0.0120 0.0120 9/1/23
+EDIT-4 Rider -0.2893 -0.2893 10/1/21
+Storm Cost Recovery Rider 0.0000 0.0000 6/1/21
+TOTAL cents/kWh 2.07111.8812 0.32481349
+cents/kWh cents/kWh
+Schedule HP – Industrial Baseline Incremental Effective Date
+Fuel Cost Adjustment Rider 1.5793 0.0000 9/1/23
+Energy Efficiency Rider 0.62424343 0.62424343 1/1/234
+Existing DSM Program Costs Adjustment Rider -0.0022 -0.0022 7/1/23
+BPM Prospective Rider -0.0128 -0.0128 7/1/23
+BPM True-Up Rider -0.0071 -0.0071 7/1/23
+CPRE Rider 0.0160 0.0160 9/1/23
+EDIT-4 Rider -0.2264 -0.2264 10/1/21
+Storm Cost Recovery Rider 0.0000 0.0000 6/1/21
+TOTAL cents/kWh 1.97107811 0.39172018
+* Qualifying customers who have opted out of the Company’s Energy Efficiency and/or Demand Side Management Programs are not subject to
+the applicable Energy Efficiency Rider charges based on the individual customer’s opt-out election. Refer to Rider EE to determine the Rider
+EE amount, if any, applicable to customers who have opted out.
+North Carolina Fifty-EighthNinth Revised Leaf No. 99
+Effective for service rendered on and after SeptemberJanuary 1, 20234
+NCUC Docket No. E-7, Subs 12815 and 1282, Orders dated August 16, 2023 and August 239, 2023
+Page 2 of 2

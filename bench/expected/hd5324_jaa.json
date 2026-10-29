@@ -1,0 +1,256 @@
+{
+ "doc_id": "hd5324_jaa",
+ "sha256": "3e8067d223d94eabe1a7f34fb02a47156775ac4403f7cf06e85e6892bd430b05",
+ "effective_date": null,
+ "effective_date_source_text": null,
+ "expected_zero": true,
+ "charges": [],
+ "rider_summary_totals": [],
+ "notes": "hd 5324 (E-2 Sub 1207, pages 17-31 of a 110-page filing; SCANNED with OCR text layer) is the JAA rider calculation exhibits for Dec 2019 - Nov 2020, not a tariff sheet. Expected zero tariff charges. The 'SUMMARY RATE' exhibit (p22) was read from the rendered image (bench_work/png/hd5324z_p22_c.png); transcribed under exhibit_rates. Col A + Col B = Col C holds for every row. Note Seasonal Intermittent combined rate is NEGATIVE (-0.00172). Rolling recovery factors for kW classes print 5 decimals ('(0.49000)', '(0.08000)'). OCR text layer is noisy on other pages ('NOEMPA', 'Descripllon', 'S' for '$').",
+ "pages_transcribed": [
+  17,
+  31
+ ],
+ "exhibit_rates": [
+  {
+   "rate_class": "Residential",
+   "label": "Joint Agency Asset Rider - Prospective Rate (Col. A)",
+   "column": "Prospective Rate (Col. A)",
+   "value": "0.00474",
+   "unit": "dollars_per_kwh",
+   "source_page": 22,
+   "rate_period": "December 2019 - November 2020",
+   "verified": true
+  },
+  {
+   "rate_class": "Residential",
+   "label": "Joint Agency Asset Rider - Rolling Recovery Factor (Col. B)",
+   "column": "Rolling Recovery Factor (Col. B)",
+   "value": "-0.00084",
+   "unit": "dollars_per_kwh",
+   "source_page": 22,
+   "rate_period": "December 2019 - November 2020",
+   "verified": true
+  },
+  {
+   "rate_class": "Residential",
+   "label": "Joint Agency Asset Rider - Combined Rate (Col. C) = A + B",
+   "column": "Combined Rate (Col. C) = A + B",
+   "value": "0.00390",
+   "unit": "dollars_per_kwh",
+   "source_page": 22,
+   "rate_period": "December 2019 - November 2020",
+   "verified": true
+  },
+  {
+   "rate_class": "Small General Service",
+   "label": "Joint Agency Asset Rider - Prospective Rate (Col. A)",
+   "column": "Prospective Rate (Col. A)",
+   "value": "0.00522",
+   "unit": "dollars_per_kwh",
+   "source_page": 22,
+   "rate_period": "December 2019 - November 2020",
+   "verified": true
+  },
+  {
+   "rate_class": "Small General Service",
+   "label": "Joint Agency Asset Rider - Rolling Recovery Factor (Col. B)",
+   "column": "Rolling Recovery Factor (Col. B)",
+   "value": "-0.00179",
+   "unit": "dollars_per_kwh",
+   "source_page": 22,
+   "rate_period": "December 2019 - November 2020",
+   "verified": true
+  },
+  {
+   "rate_class": "Small General Service",
+   "label": "Joint Agency Asset Rider - Combined Rate (Col. C) = A + B",
+   "column": "Combined Rate (Col. C) = A + B",
+   "value": "0.00343",
+   "unit": "dollars_per_kwh",
+   "source_page": 22,
+   "rate_period": "December 2019 - November 2020",
+   "verified": true
+  },
+  {
+   "rate_class": "Medium General Service -KWH",
+   "label": "Joint Agency Asset Rider - Prospective Rate (Col. A)",
+   "column": "Prospective Rate (Col. A)",
+   "value": "0.00415",
+   "unit": "dollars_per_kwh",
+   "source_page": 22,
+   "rate_period": "December 2019 - November 2020",
+   "verified": true
+  },
+  {
+   "rate_class": "Medium General Service -KWH",
+   "label": "Joint Agency Asset Rider - Rolling Recovery Factor (Col. B)",
+   "column": "Rolling Recovery Factor (Col. B)",
+   "value": "-0.00162",
+   "unit": "dollars_per_kwh",
+   "source_page": 22,
+   "rate_period": "December 2019 - November 2020",
+   "verified": true
+  },
+  {
+   "rate_class": "Medium General Service -KWH",
+   "label": "Joint Agency Asset Rider - Combined Rate (Col. C) = A + B",
+   "column": "Combined Rate (Col. C) = A + B",
+   "value": "0.00253",
+   "unit": "dollars_per_kwh",
+   "source_page": 22,
+   "rate_period": "December 2019 - November 2020",
+   "verified": true
+  },
+  {
+   "rate_class": "Seasonal Intermittent",
+   "label": "Joint Agency Asset Rider - Prospective Rate (Col. A)",
+   "column": "Prospective Rate (Col. A)",
+   "value": "0.00251",
+   "unit": "dollars_per_kwh",
+   "source_page": 22,
+   "rate_period": "December 2019 - November 2020",
+   "verified": true
+  },
+  {
+   "rate_class": "Seasonal Intermittent",
+   "label": "Joint Agency Asset Rider - Rolling Recovery Factor (Col. B)",
+   "column": "Rolling Recovery Factor (Col. B)",
+   "value": "-0.00423",
+   "unit": "dollars_per_kwh",
+   "source_page": 22,
+   "rate_period": "December 2019 - November 2020",
+   "verified": true
+  },
+  {
+   "rate_class": "Seasonal Intermittent",
+   "label": "Joint Agency Asset Rider - Combined Rate (Col. C) = A + B",
+   "column": "Combined Rate (Col. C) = A + B",
+   "value": "-0.00172",
+   "unit": "dollars_per_kwh",
+   "source_page": 22,
+   "rate_period": "December 2019 - November 2020",
+   "verified": true
+  },
+  {
+   "rate_class": "Lighting",
+   "label": "Joint Agency Asset Rider - Prospective Rate (Col. A)",
+   "column": "Prospective Rate (Col. A)",
+   "value": "-",
+   "unit": "dollars_per_kwh",
+   "source_page": 22,
+   "rate_period": "December 2019 - November 2020",
+   "verified": true
+  },
+  {
+   "rate_class": "Lighting",
+   "label": "Joint Agency Asset Rider - Rolling Recovery Factor (Col. B)",
+   "column": "Rolling Recovery Factor (Col. B)",
+   "value": "-",
+   "unit": "dollars_per_kwh",
+   "source_page": 22,
+   "rate_period": "December 2019 - November 2020",
+   "verified": true
+  },
+  {
+   "rate_class": "Lighting",
+   "label": "Joint Agency Asset Rider - Combined Rate (Col. C) = A + B",
+   "column": "Combined Rate (Col. C) = A + B",
+   "value": "-",
+   "unit": "dollars_per_kwh",
+   "source_page": 22,
+   "rate_period": "December 2019 - November 2020",
+   "verified": true
+  },
+  {
+   "rate_class": "Traffic Signal",
+   "label": "Joint Agency Asset Rider - Prospective Rate (Col. A)",
+   "column": "Prospective Rate (Col. A)",
+   "value": "0.00236",
+   "unit": "dollars_per_kwh",
+   "source_page": 22,
+   "rate_period": "December 2019 - November 2020",
+   "verified": true
+  },
+  {
+   "rate_class": "Traffic Signal",
+   "label": "Joint Agency Asset Rider - Rolling Recovery Factor (Col. B)",
+   "column": "Rolling Recovery Factor (Col. B)",
+   "value": "-0.00065",
+   "unit": "dollars_per_kwh",
+   "source_page": 22,
+   "rate_period": "December 2019 - November 2020",
+   "verified": true
+  },
+  {
+   "rate_class": "Traffic Signal",
+   "label": "Joint Agency Asset Rider - Combined Rate (Col. C) = A + B",
+   "column": "Combined Rate (Col. C) = A + B",
+   "value": "0.00171",
+   "unit": "dollars_per_kwh",
+   "source_page": 22,
+   "rate_period": "December 2019 - November 2020",
+   "verified": true
+  },
+  {
+   "rate_class": "Medium General Service -KW",
+   "label": "Joint Agency Asset Rider - Prospective Rate (Col. A)",
+   "column": "Prospective Rate (Col. A)",
+   "value": "1.37",
+   "unit": "dollars_per_kw",
+   "source_page": 22,
+   "rate_period": "December 2019 - November 2020",
+   "verified": true
+  },
+  {
+   "rate_class": "Medium General Service -KW",
+   "label": "Joint Agency Asset Rider - Rolling Recovery Factor (Col. B)",
+   "column": "Rolling Recovery Factor (Col. B)",
+   "value": "-0.49000",
+   "unit": "dollars_per_kw",
+   "source_page": 22,
+   "rate_period": "December 2019 - November 2020",
+   "verified": true
+  },
+  {
+   "rate_class": "Medium General Service -KW",
+   "label": "Joint Agency Asset Rider - Combined Rate (Col. C) = A + B",
+   "column": "Combined Rate (Col. C) = A + B",
+   "value": "0.88",
+   "unit": "dollars_per_kw",
+   "source_page": 22,
+   "rate_period": "December 2019 - November 2020",
+   "verified": true
+  },
+  {
+   "rate_class": "Large General Service",
+   "label": "Joint Agency Asset Rider - Prospective Rate (Col. A)",
+   "column": "Prospective Rate (Col. A)",
+   "value": "1.45",
+   "unit": "dollars_per_kw",
+   "source_page": 22,
+   "rate_period": "December 2019 - November 2020",
+   "verified": true
+  },
+  {
+   "rate_class": "Large General Service",
+   "label": "Joint Agency Asset Rider - Rolling Recovery Factor (Col. B)",
+   "column": "Rolling Recovery Factor (Col. B)",
+   "value": "-0.08000",
+   "unit": "dollars_per_kw",
+   "source_page": 22,
+   "rate_period": "December 2019 - November 2020",
+   "verified": true
+  },
+  {
+   "rate_class": "Large General Service",
+   "label": "Joint Agency Asset Rider - Combined Rate (Col. C) = A + B",
+   "column": "Combined Rate (Col. C) = A + B",
+   "value": "1.37",
+   "unit": "dollars_per_kw",
+   "source_page": 22,
+   "rate_period": "December 2019 - November 2020",
+   "verified": true
+  }
+ ]
+}

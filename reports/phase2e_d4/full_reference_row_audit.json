@@ -1,0 +1,412 @@
+{
+  "reference": "C:\\Users\\bradr\\AppData\\Local\\Temp\\claude\\C--Python-Duke-Standalone\\65a06505-b1ef-42ba-b204-b72ff64ddda1\\scratchpad\\d1.db",
+  "caveat": "Historical migrated research reference, not exact pre-command snapshot.",
+  "tables": {
+    "bill_component_observations": {
+      "rows_compared": 163,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "bill_statements": {
+      "rows_compared": 12,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "candidate_url_variants": {
+      "rows_compared": 683,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "database_intelligence_runs": {
+      "rows_compared": 3,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "decision_makers": {
+      "rows_compared": 0,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "dep_provisional_rider_components": {
+      "rows_compared": 32,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "dep_provisional_rider_totals": {
+      "rows_compared": 12,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "docket_appearances": {
+      "rows_compared": 0,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "docket_outcomes": {
+      "rows_compared": 0,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "docling_artifacts": {
+      "rows_compared": 1964,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "document_classifications": {
+      "rows_compared": 30721,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "document_embeddings": {
+      "rows_compared": 1050,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "document_fingerprints": {
+      "rows_compared": 6431,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "document_fingerprints_v2": {
+      "rows_compared": 8812,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "document_identity": {
+      "rows_compared": 4660,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "document_routing_tier": {
+      "rows_compared": 4412,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "document_sections": {
+      "rows_compared": 14360,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "document_specific_rules": {
+      "rows_compared": 1017,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "document_type_gold": {
+      "rows_compared": 441,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "document_type_registry": {
+      "rows_compared": 0,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "document_types": {
+      "rows_compared": 14,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "documents": {
+      "rows_compared": 1709,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "eia_generation_by_fuel": {
+      "rows_compared": 203,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "eia_market_structure_lookup": {
+      "rows_compared": 51,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "eia_retail_sales": {
+      "rows_compared": 1600,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "eia_source_disposition": {
+      "rows_compared": 35,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "eia_state_capability": {
+      "rows_compared": 236,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "eia_state_profile_summary": {
+      "rows_compared": 17,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "eia_state_rates": {
+      "rows_compared": 160,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "eia_state_region_lookup": {
+      "rows_compared": 51,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "employment_history": {
+      "rows_compared": 0,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "entity_relationships": {
+      "rows_compared": 0,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "evidence_anchors": {
+      "rows_compared": 0,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "financial_relationships": {
+      "rows_compared": 0,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "historical_documents": {
+      "rows_compared": 682,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "historical_leads": {
+      "rows_compared": 5844,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "historical_processing_runs": {
+      "rows_compared": 41179,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "historical_reprocess_queue": {
+      "rows_compared": 2967,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "historical_search_packs": {
+      "rows_compared": 0,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "legislative_actions": {
+      "rows_compared": 7,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "llm_candidate_rate_extractions": {
+      "rows_compared": 1460,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "llm_candidate_rate_row_repairs": {
+      "rows_compared": 433,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "llm_candidate_rate_row_validations": {
+      "rows_compared": 2006,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "llm_parse_diagnostics": {
+      "rows_compared": 460,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "llm_promoted_charge_audit": {
+      "rows_compared": 331,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "llm_rate_charge_promotion_proposals": {
+      "rows_compared": 1928,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "llm_regex_shadow_results": {
+      "rows_compared": 2614,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "llm_regex_suggestions": {
+      "rows_compared": 198,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "llm_regex_validation_results": {
+      "rows_compared": 198,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "missing_doc_remediation_runs": {
+      "rows_compared": 0,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "ncuc_discovery_records": {
+      "rows_compared": 4428,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "ncuc_ingest_segments": {
+      "rows_compared": 4490,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "ncuc_page_artifacts": {
+      "rows_compared": 174199,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "ncuc_span_artifacts": {
+      "rows_compared": 15393,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "ocr_artifacts": {
+      "rows_compared": 353,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "ocr_processing_queue": {
+      "rows_compared": 3069,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "ollama_model_runs": {
+      "rows_compared": 9522,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "parse_attempt_logs": {
+      "rows_compared": 64064,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "parse_results": {
+      "rows_compared": 509,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "parse_review_outcomes": {
+      "rows_compared": 61692,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "parser_profile_recommendations": {
+      "rows_compared": 265,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "proposed_tariff_blocks": {
+      "rows_compared": 555,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "proposed_tariff_charge_candidates": {
+      "rows_compared": 782,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "proposed_tariff_documents": {
+      "rows_compared": 2,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "regulatory_docket_leads": {
+      "rows_compared": 6971,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "rider_applicability": {
+      "rows_compared": 1798,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "rider_descriptions": {
+      "rows_compared": 19,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "rider_line_items": {
+      "rows_compared": 8003,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "rider_summary_blocks": {
+      "rows_compared": 365,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "section_classification_conflicts": {
+      "rows_compared": 38,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "section_embeddings": {
+      "rows_compared": 28718,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "section_type_gold": {
+      "rows_compared": 964,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "sqlite_sequence": {
+      "rows_compared": 72,
+      "different_positions": 8,
+      "first_differing_positions": [
+        38,
+        66,
+        67,
+        68,
+        69
+      ]
+    },
+    "tariff_causal_links": {
+      "rows_compared": 0,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "tariff_charges": {
+      "rows_compared": 5198,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "tariff_families": {
+      "rows_compared": 756,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "tariff_versions": {
+      "rows_compared": 988,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "template_promotion_candidates": {
+      "rows_compared": 0,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "tier1_binding": {
+      "rows_compared": 6,
+      "different_positions": 0,
+      "first_differing_positions": []
+    },
+    "workflow_action_receipts": {
+      "rows_compared": 1,
+      "different_positions": 0,
+      "first_differing_positions": []
+    }
+  }
+}

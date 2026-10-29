@@ -1,0 +1,8 @@
+..............................................................           [100%]
+============================== warnings summary ===============================
+tests/test_d1_clue_ledger.py: 44 warnings
+  C:\python\duke\standalone\src\duke_rates\historical\ncuc\result_harvester.py:527: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    executed_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+62 passed, 44 warnings in 7.93s

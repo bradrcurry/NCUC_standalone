@@ -1,0 +1,18 @@
+{
+  "planner": "remote_discovery@1.0.0",
+  "gaps_considered": 249,
+  "skipped": {},
+  "targets": 409,
+  "distinct_queries": 290,
+  "by_channel": {
+    "portal_orders": {
+      "planned": 103
+    },
+    "zoom": {
+      "planned": 134
+    },
+    "portal_params": {
+      "planned": 53
+    }
+  }
+}

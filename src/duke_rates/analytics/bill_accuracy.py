@@ -239,6 +239,10 @@ def _delta_amount(line_items: dict[str, object], key: str) -> float | None:
 
 def _comparison_status(*, rate_code: str, total_delta: float | None, actual_total: float | None) -> str:
     normalized_code = (rate_code or "").replace(" ", "").upper()
+    if actual_total is None:
+        # Without the printed total the "actual" is a sum of whatever lines were
+        # parsed, so a component missing from both sides still matches.
+        return "needs_review"
     if total_delta is None:
         if normalized_code.startswith("R-TOU"):
             return "tou_needs_work"
@@ -247,6 +251,4 @@ def _comparison_status(*, rate_code: str, total_delta: float | None, actual_tota
         return "good_match"
     if abs(total_delta) <= 2.5:
         return "close_match"
-    if actual_total is None:
-        return "needs_review"
     return "poor_match"

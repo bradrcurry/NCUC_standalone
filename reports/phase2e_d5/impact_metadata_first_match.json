@@ -1,0 +1,849 @@
+{
+  "target": {
+    "id": "Function:src/duke_rates/historical/metadata.py:_first_unique_match",
+    "name": "_first_unique_match",
+    "type": "Function",
+    "filePath": "src/duke_rates/historical/metadata.py"
+  },
+  "direction": "upstream",
+  "impactedCount": 19,
+  "risk": "CRITICAL",
+  "riskSharedAxes": "LOW",
+  "riskScale": {
+    "comparableAcrossKinds": true,
+    "unusedAxes": []
+  },
+  "epistemic": "exact",
+  "summary": {
+    "direct": 1,
+    "processes_affected": 8,
+    "modules_affected": 4
+  },
+  "byDepthCounts": {
+    "1": 1,
+    "2": 8,
+    "3": 10
+  },
+  "affected_processes": [
+    {
+      "name": "audit_local_raw_nc",
+      "type": "Function",
+      "filePath": "src/duke_rates/cli.py",
+      "affected_process_count": 9,
+      "total_hits": 16,
+      "earliest_broken_step": 2
+    },
+    {
+      "name": "build_progress_nc_bill_validation_summary",
+      "type": "Function",
+      "filePath": "src/duke_rates/analytics/bill_validation_summary.py",
+      "affected_process_count": 8,
+      "total_hits": 14,
+      "earliest_broken_step": 5
+    },
+    {
+      "name": "estimate_history_bill_progress_nc",
+      "type": "Function",
+      "filePath": "src/duke_rates/cli_commands/progress.py",
+      "affected_process_count": 7,
+      "total_hits": 13,
+      "earliest_broken_step": 3
+    },
+    {
+      "name": "inspect_history_gaps_progress_nc",
+      "type": "Function",
+      "filePath": "src/duke_rates/cli_commands/progress.py",
+      "affected_process_count": 7,
+      "total_hits": 13,
+      "earliest_broken_step": 3
+    },
+    {
+      "name": "recover_history_gaps_progress_nc",
+      "type": "Function",
+      "filePath": "src/duke_rates/cli_commands/progress.py",
+      "affected_process_count": 7,
+      "total_hits": 13,
+      "earliest_broken_step": 3
+    },
+    {
+      "name": "run",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/dork_runner.py",
+      "affected_process_count": 7,
+      "total_hits": 13,
+      "earliest_broken_step": 2
+    },
+    {
+      "name": "import_candidates",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/exhibit_selector.py",
+      "affected_process_count": 8,
+      "total_hits": 8,
+      "earliest_broken_step": 1
+    },
+    {
+      "name": "recover_bill_relevant_openei_progress_nc",
+      "type": "Function",
+      "filePath": "src/duke_rates/cli_commands/progress.py",
+      "affected_process_count": 1,
+      "total_hits": 1,
+      "earliest_broken_step": 2
+    }
+  ],
+  "affected_modules": [
+    {
+      "name": "Historical",
+      "hits": 14,
+      "impact": "direct"
+    },
+    {
+      "name": "Analytics",
+      "hits": 2,
+      "impact": "indirect"
+    },
+    {
+      "name": "Cli_commands",
+      "hits": 2,
+      "impact": "indirect"
+    },
+    {
+      "name": "Ncuc",
+      "hits": 1,
+      "impact": "indirect"
+    }
+  ],
+  "byDepth": {
+    "1": [
+      {
+        "depth": 1,
+        "id": "Function:src/duke_rates/historical/metadata.py:extract_historical_metadata",
+        "name": "extract_historical_metadata",
+        "filePath": "src/duke_rates/historical/metadata.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_530_inspect_history_gaps",
+            "label": "Inspect_history_gaps_progress_nc → _first_unique_match",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_633_audit_local_raw_nc",
+            "label": "Audit_local_raw_nc → _first_unique_match",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_529_inspect_history_gaps",
+            "label": "Inspect_history_gaps_progress_nc → _extract_leaf_no",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_26_build_progress_nc_bi",
+            "label": "Build_progress_nc_bill_validation_summary → _first_unique_match",
+            "processType": "cross_community",
+            "step": 7
+          },
+          {
+            "id": "proc_25_build_progress_nc_bi",
+            "label": "Build_progress_nc_bill_validation_summary → _extract_leaf_no",
+            "processType": "cross_community",
+            "step": 7
+          },
+          {
+            "id": "proc_594_recover_history_gaps",
+            "label": "Recover_history_gaps_progress_nc → _first_unique_match",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_380_estimate_history_bil",
+            "label": "Estimate_history_bill_progress_nc → _extract_leaf_no",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_632_audit_local_raw_nc",
+            "label": "Audit_local_raw_nc → _extract_leaf_no",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_593_recover_history_gaps",
+            "label": "Recover_history_gaps_progress_nc → _extract_leaf_no",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_381_estimate_history_bil",
+            "label": "Estimate_history_bill_progress_nc → _first_unique_match",
+            "processType": "cross_community",
+            "step": 5
+          }
+        ]
+      }
+    ],
+    "2": [
+      {
+        "depth": 2,
+        "id": "Function:src/duke_rates/analytics/local_raw_audit.py:_audit_single_pdf",
+        "name": "_audit_single_pdf",
+        "filePath": "src/duke_rates/analytics/local_raw_audit.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_144_audit_local_raw_nc",
+            "label": "Audit_local_raw_nc → _family_key_from_document",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_632_audit_local_raw_nc",
+            "label": "Audit_local_raw_nc → _extract_leaf_no",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_633_audit_local_raw_nc",
+            "label": "Audit_local_raw_nc → _first_unique_match",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_145_audit_local_raw_nc",
+            "label": "Audit_local_raw_nc → _leaf_no_for_path",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_662_audit_local_raw_nc",
+            "label": "Audit_local_raw_nc → Extract_pdf_text",
+            "processType": "cross_community",
+            "step": 3
+          }
+        ]
+      },
+      {
+        "depth": 2,
+        "id": "Method:src/duke_rates/historical/lineage.py:ProgressNCLineageService._current_version#1",
+        "name": "_current_version",
+        "filePath": "src/duke_rates/historical/lineage.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_1_build_progress_nc_bi",
+            "label": "Build_progress_nc_bill_validation_summary → Migrate",
+            "processType": "cross_community",
+            "step": 6
+          },
+          {
+            "id": "proc_530_inspect_history_gaps",
+            "label": "Inspect_history_gaps_progress_nc → _first_unique_match",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_24_build_progress_nc_bi",
+            "label": "Build_progress_nc_bill_validation_summary → Extract_pdf_text",
+            "processType": "cross_community",
+            "step": 6
+          },
+          {
+            "id": "proc_529_inspect_history_gaps",
+            "label": "Inspect_history_gaps_progress_nc → _extract_leaf_no",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_26_build_progress_nc_bi",
+            "label": "Build_progress_nc_bill_validation_summary → _first_unique_match",
+            "processType": "cross_community",
+            "step": 6
+          },
+          {
+            "id": "proc_658_estimate_history_bil",
+            "label": "Estimate_history_bill_progress_nc → _seed_document_types",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_682_inspect_history_gaps",
+            "label": "Inspect_history_gaps_progress_nc → _seed_document_types",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_25_build_progress_nc_bi",
+            "label": "Build_progress_nc_bill_validation_summary → _extract_leaf_no",
+            "processType": "cross_community",
+            "step": 6
+          },
+          {
+            "id": "proc_528_inspect_history_gaps",
+            "label": "Inspect_history_gaps_progress_nc → Extract_pdf_text",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_702_recover_history_gaps",
+            "label": "Recover_history_gaps_progress_nc → _seed_document_types",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_594_recover_history_gaps",
+            "label": "Recover_history_gaps_progress_nc → _first_unique_match",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_379_estimate_history_bil",
+            "label": "Estimate_history_bill_progress_nc → Extract_pdf_text",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_380_estimate_history_bil",
+            "label": "Estimate_history_bill_progress_nc → _extract_leaf_no",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_593_recover_history_gaps",
+            "label": "Recover_history_gaps_progress_nc → _extract_leaf_no",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_381_estimate_history_bil",
+            "label": "Estimate_history_bill_progress_nc → _first_unique_match",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_592_recover_history_gaps",
+            "label": "Recover_history_gaps_progress_nc → Extract_pdf_text",
+            "processType": "cross_community",
+            "step": 4
+          }
+        ]
+      },
+      {
+        "depth": 2,
+        "id": "Method:src/duke_rates/historical/manual_import.py:ProgressNCHistoricalImportService.import_document#11",
+        "name": "import_document",
+        "filePath": "src/duke_rates/historical/manual_import.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_137_run",
+            "label": "Run → Slugify",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_136_run",
+            "label": "Run → Ensure_parent",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_694_run",
+            "label": "Run → Retry_call",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_543_run",
+            "label": "Run → Normalize_whitespace",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_87_run",
+            "label": "Run → Extract_jss_state",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_631_run",
+            "label": "Run → Extract_pdf_text",
+            "processType": "cross_community",
+            "step": 3
+          }
+        ]
+      },
+      {
+        "depth": 2,
+        "id": "Method:src/duke_rates/historical/openei_progress_nc.py:ProgressNCOpenEIHistoricalRecoveryService._recover_candidate#3",
+        "name": "_recover_candidate",
+        "filePath": "src/duke_rates/historical/openei_progress_nc.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": []
+      },
+      {
+        "depth": 2,
+        "id": "Method:src/duke_rates/historical/progress_nc.py:ProgressNCHistoricalRecoveryService._recover_snapshot#3",
+        "name": "_recover_snapshot",
+        "filePath": "src/duke_rates/historical/progress_nc.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": []
+      },
+      {
+        "depth": 2,
+        "id": "Method:src/duke_rates/historical/public_notices.py:ProgressNCPublicNoticeRecoveryService._recover_current_notice_document#1",
+        "name": "_recover_current_notice_document",
+        "filePath": "src/duke_rates/historical/public_notices.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": []
+      },
+      {
+        "depth": 2,
+        "id": "Method:src/duke_rates/historical/public_notices.py:ProgressNCPublicNoticeRecoveryService._recover_notice_document#3",
+        "name": "_recover_notice_document",
+        "filePath": "src/duke_rates/historical/public_notices.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": []
+      },
+      {
+        "depth": 2,
+        "id": "Method:src/duke_rates/historical/url_archaeology.py:ProgressNCUrlArchaeologyService._recover_variant#3",
+        "name": "_recover_variant",
+        "filePath": "src/duke_rates/historical/url_archaeology.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": []
+      }
+    ],
+    "3": [
+      {
+        "depth": 3,
+        "id": "Function:src/duke_rates/analytics/local_raw_audit.py:audit_local_raw_docs",
+        "name": "audit_local_raw_docs",
+        "filePath": "src/duke_rates/analytics/local_raw_audit.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_632_audit_local_raw_nc",
+            "label": "Audit_local_raw_nc → _extract_leaf_no",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_145_audit_local_raw_nc",
+            "label": "Audit_local_raw_nc → _leaf_no_for_path",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_146_audit_local_raw_nc",
+            "label": "Audit_local_raw_nc → _leaf_from_url",
+            "processType": "intra_community",
+            "step": 2
+          },
+          {
+            "id": "proc_144_audit_local_raw_nc",
+            "label": "Audit_local_raw_nc → _family_key_from_document",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_662_audit_local_raw_nc",
+            "label": "Audit_local_raw_nc → Extract_pdf_text",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_796_audit_local_raw_nc",
+            "label": "Audit_local_raw_nc → _seed_document_types",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_253_audit_local_raw_nc",
+            "label": "Audit_local_raw_nc → _summarize",
+            "processType": "intra_community",
+            "step": 2
+          },
+          {
+            "id": "proc_633_audit_local_raw_nc",
+            "label": "Audit_local_raw_nc → _first_unique_match",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_734_audit_local_raw_nc",
+            "label": "Audit_local_raw_nc → _row_to_document",
+            "processType": "cross_community",
+            "step": 2
+          }
+        ]
+      },
+      {
+        "depth": 3,
+        "id": "Function:src/duke_rates/cli_commands/progress.py:import_history_progress_nc",
+        "name": "import_history_progress_nc",
+        "filePath": "src/duke_rates/cli_commands/progress.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": []
+      },
+      {
+        "depth": 3,
+        "id": "Method:src/duke_rates/historical/dork_runner.py:ProgressNCDorkRunnerService._auto_import#3",
+        "name": "_auto_import",
+        "filePath": "src/duke_rates/historical/dork_runner.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_357_run",
+            "label": "Run → Close",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_543_run",
+            "label": "Run → Normalize_whitespace",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_137_run",
+            "label": "Run → Slugify",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_136_run",
+            "label": "Run → Ensure_parent",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_694_run",
+            "label": "Run → Retry_call",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_87_run",
+            "label": "Run → Extract_jss_state",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_631_run",
+            "label": "Run → Extract_pdf_text",
+            "processType": "cross_community",
+            "step": 2
+          }
+        ]
+      },
+      {
+        "depth": 3,
+        "id": "Method:src/duke_rates/historical/inbox.py:ProgressNCHistoricalInboxService.import_manifest#1",
+        "name": "import_manifest",
+        "filePath": "src/duke_rates/historical/inbox.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": []
+      },
+      {
+        "depth": 3,
+        "id": "Method:src/duke_rates/historical/lineage.py:ProgressNCLineageService.build_chains#2",
+        "name": "build_chains",
+        "filePath": "src/duke_rates/historical/lineage.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_380_estimate_history_bil",
+            "label": "Estimate_history_bill_progress_nc → _extract_leaf_no",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_703_inspect_history_gaps",
+            "label": "Inspect_history_gaps_progress_nc → _coerce_optional_int",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_383_build_progress_nc_bi",
+            "label": "Build_progress_nc_bill_validation_summary → _row_to_document",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_595_recover_history_gaps",
+            "label": "Recover_history_gaps_progress_nc → _parsed_identity",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_702_recover_history_gaps",
+            "label": "Recover_history_gaps_progress_nc → _seed_document_types",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_593_recover_history_gaps",
+            "label": "Recover_history_gaps_progress_nc → _extract_leaf_no",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_663_inspect_history_gaps",
+            "label": "Inspect_history_gaps_progress_nc → _row_to_document",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_26_build_progress_nc_bi",
+            "label": "Build_progress_nc_bill_validation_summary → _first_unique_match",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_682_inspect_history_gaps",
+            "label": "Inspect_history_gaps_progress_nc → _seed_document_types",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_381_estimate_history_bil",
+            "label": "Estimate_history_bill_progress_nc → _first_unique_match",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_592_recover_history_gaps",
+            "label": "Recover_history_gaps_progress_nc → Extract_pdf_text",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_0_build_progress_nc_bi",
+            "label": "Build_progress_nc_bill_validation_summary → _seed_document_types",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_529_inspect_history_gaps",
+            "label": "Inspect_history_gaps_progress_nc → _extract_leaf_no",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_706_recover_history_gaps",
+            "label": "Recover_history_gaps_progress_nc → _row_to_document",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_530_inspect_history_gaps",
+            "label": "Inspect_history_gaps_progress_nc → _first_unique_match",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_634_estimate_history_bil",
+            "label": "Estimate_history_bill_progress_nc → _row_to_document",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_379_estimate_history_bil",
+            "label": "Estimate_history_bill_progress_nc → Extract_pdf_text",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_658_estimate_history_bil",
+            "label": "Estimate_history_bill_progress_nc → _seed_document_types",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_25_build_progress_nc_bi",
+            "label": "Build_progress_nc_bill_validation_summary → _extract_leaf_no",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_528_inspect_history_gaps",
+            "label": "Inspect_history_gaps_progress_nc → Extract_pdf_text",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_589_build_progress_nc_bi",
+            "label": "Build_progress_nc_bill_validation_summary → _coerce_optional_int",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_594_recover_history_gaps",
+            "label": "Recover_history_gaps_progress_nc → _first_unique_match",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_1_build_progress_nc_bi",
+            "label": "Build_progress_nc_bill_validation_summary → Migrate",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_24_build_progress_nc_bi",
+            "label": "Build_progress_nc_bill_validation_summary → Extract_pdf_text",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_382_estimate_history_bil",
+            "label": "Estimate_history_bill_progress_nc → _parsed_identity",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_683_estimate_history_bil",
+            "label": "Estimate_history_bill_progress_nc → _coerce_optional_int",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_761_recover_history_gaps",
+            "label": "Recover_history_gaps_progress_nc → _coerce_optional_int",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_27_build_progress_nc_bi",
+            "label": "Build_progress_nc_bill_validation_summary → _parsed_identity",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_531_inspect_history_gaps",
+            "label": "Inspect_history_gaps_progress_nc → _parsed_identity",
+            "processType": "cross_community",
+            "step": 3
+          }
+        ]
+      },
+      {
+        "depth": 3,
+        "id": "Method:src/duke_rates/historical/ncuc/exhibit_selector.py:NcucExhibitSelector.import_candidates#3",
+        "name": "import_candidates",
+        "filePath": "src/duke_rates/historical/ncuc/exhibit_selector.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_367_import_candidates",
+            "label": "Import_candidates → Connect",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_532_import_candidates",
+            "label": "Import_candidates → _row_to_document",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_372_import_candidates",
+            "label": "Import_candidates → _normalize_historical_leaf",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_560_import_candidates",
+            "label": "Import_candidates → _decode_provenance_notes",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_368_import_candidates",
+            "label": "Import_candidates → _coerce_optional_int",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_44_import_candidates",
+            "label": "Import_candidates → _historical_primary_code",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_45_import_candidates",
+            "label": "Import_candidates → _leaf_from_family_key",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_588_import_candidates",
+            "label": "Import_candidates → _seed_document_types",
+            "processType": "cross_community",
+            "step": 1
+          }
+        ]
+      },
+      {
+        "depth": 3,
+        "id": "Method:src/duke_rates/historical/openei_progress_nc.py:ProgressNCOpenEIHistoricalRecoveryService.recover#4",
+        "name": "recover",
+        "filePath": "src/duke_rates/historical/openei_progress_nc.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_551_recover_bill_relevan",
+            "label": "Recover_bill_relevant_openei_progress_nc → Retry_call",
+            "processType": "cross_community",
+            "step": 2
+          }
+        ]
+      },
+      {
+        "depth": 3,
+        "id": "Method:src/duke_rates/historical/progress_nc.py:ProgressNCHistoricalRecoveryService.recover#6",
+        "name": "recover",
+        "filePath": "src/duke_rates/historical/progress_nc.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": []
+      },
+      {
+        "depth": 3,
+        "id": "Method:src/duke_rates/historical/public_notices.py:ProgressNCPublicNoticeRecoveryService.recover#3",
+        "name": "recover",
+        "filePath": "src/duke_rates/historical/public_notices.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": []
+      },
+      {
+        "depth": 3,
+        "id": "Method:src/duke_rates/historical/url_archaeology.py:ProgressNCUrlArchaeologyService.recover_family#3",
+        "name": "recover_family",
+        "filePath": "src/duke_rates/historical/url_archaeology.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": []
+      }
+    ]
+  }
+}

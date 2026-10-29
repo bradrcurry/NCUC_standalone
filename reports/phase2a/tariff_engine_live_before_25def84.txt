@@ -1,0 +1,277 @@
+.F.F..FF.F..F.F..F.FF..F                                                 [100%]
+================================== FAILURES ===================================
+______________ TestRTouLive.test_tou_with_full_period_breakdown _______________
+
+self = <test_tariff_engine_live.TestRTouLive object at 0x000002AE3D449810>
+engine = <duke_rates.billing.tariff_engine.TariffBillingEngine object at 0x000002AE3D5FDD30>
+
+    def test_tou_with_full_period_breakdown(self, engine):
+        result = engine.calculate(
+            self.FAMILY_KEY,
+            BillInput(
+                monthly_kwh=1000,
+                service_date=datetime.date(2025, 11, 1),
+                on_peak_kwh=300,
+                off_peak_kwh=600,
+                discount_kwh=100,
+            ),
+            include_riders=False,
+        )
+        assert result.total > 0
+        assert len(result.warnings) == 0 or not any("TOU" in w and "average" in w for w in result.warnings)
+    
+        # Expected: $14 fixed + 300*0.29905 + 600*0.11321 + 100*0.07372
+        # = 14 + 89.715 + 67.926 + 7.372 = 179.013
+>       assert result.total == pytest.approx(14.0 + 300*0.29905 + 600*0.11321 + 100*0.07372, abs=0.02)
+E       assert 89.72 == 179.01299999999998 ± 0.02
+E         
+E         comparison failed
+E         Obtained: 89.72
+E         Expected: 179.01299999999998 ± 0.02
+
+tests\test_tariff_engine_live.py:75: AssertionError
+________________ TestRTouLive.test_fixed_charge_is_14_dollars _________________
+
+self = <test_tariff_engine_live.TestRTouLive object at 0x000002AE3D3B2FD0>
+engine = <duke_rates.billing.tariff_engine.TariffBillingEngine object at 0x000002AE3D5FDD30>
+
+    def test_fixed_charge_is_14_dollars(self, engine):
+        result = engine.calculate(
+            self.FAMILY_KEY,
+            BillInput(
+                monthly_kwh=1000,
+                service_date=datetime.date(2025, 11, 1),
+                on_peak_kwh=500,
+                off_peak_kwh=500,
+            ),
+            include_riders=False,
+        )
+        fixed_items = [item for item in result.line_items if item.charge_type == "fixed"]
+>       assert len(fixed_items) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests\test_tariff_engine_live.py:103: AssertionError
+________ TestRTouLive.test_all_tou_line_items_have_correct_charge_type ________
+
+self = <test_tariff_engine_live.TestRTouLive object at 0x000002AE3D59D260>
+engine = <duke_rates.billing.tariff_engine.TariffBillingEngine object at 0x000002AE3D5FDD30>
+
+    def test_all_tou_line_items_have_correct_charge_type(self, engine):
+        result = engine.calculate(
+            self.FAMILY_KEY,
+            BillInput(
+                monthly_kwh=900,
+                service_date=datetime.date(2025, 11, 1),
+                on_peak_kwh=200,
+                off_peak_kwh=600,
+                discount_kwh=100,
+            ),
+            include_riders=False,
+        )
+        base_types = {item.charge_type for item in result.line_items
+                      if item.source == self.FAMILY_KEY}
+        assert "tou_energy" in base_types
+>       assert "fixed" in base_types
+E       AssertionError: assert 'fixed' in {'tou_energy'}
+
+tests\test_tariff_engine_live.py:156: AssertionError
+_____________ TestRTouLive.test_on_peak_rate_is_highest_tou_rate ______________
+
+self = <test_tariff_engine_live.TestRTouLive object at 0x000002AE3D456750>
+engine = <duke_rates.billing.tariff_engine.TariffBillingEngine object at 0x000002AE3D5FDD30>
+
+    def test_on_peak_rate_is_highest_tou_rate(self, engine):
+        # With equal kWh on each period, on_peak contribution should be highest
+        result = engine.calculate(
+            self.FAMILY_KEY,
+            BillInput(
+                monthly_kwh=300,
+                service_date=datetime.date(2025, 11, 1),
+                on_peak_kwh=100,
+                off_peak_kwh=100,
+                discount_kwh=100,
+            ),
+            include_riders=False,
+        )
+        tou_items = [i for i in result.line_items if i.charge_type == "tou_energy" and i.source == self.FAMILY_KEY]
+>       assert len(tou_items) == 3
+E       AssertionError: assert 1 == 3
+E        +  where 1 = len([BillLineItem(label='On Peak Energy Charge', charge_type='tou_energy', source='nc-progress-leaf-502', rate_value=0.299.../kWh', quantity=100.0, amount=29.91, notes='29.905¢ per On-Peak kWh 11.321¢ per Off-Peak kWh 7.372¢ per Discount kWh')])
+
+tests\test_tariff_engine_live.py:172: AssertionError
+________________ TestRToudLive.test_tou_with_period_breakdown _________________
+
+self = <test_tariff_engine_live.TestRToudLive object at 0x000002AE3D449E50>
+engine = <duke_rates.billing.tariff_engine.TariffBillingEngine object at 0x000002AE3D5FDD30>
+
+    def test_tou_with_period_breakdown(self, engine):
+        result = engine.calculate(
+            self.FAMILY_KEY,
+            BillInput(
+                monthly_kwh=1000,
+                service_date=datetime.date(2025, 11, 1),
+                on_peak_kwh=300,
+                off_peak_kwh=600,
+                discount_kwh=100,
+            ),
+            include_riders=False,
+        )
+        # Expected: $14 + 300*0.21952 + 600*0.11 + 100*0.08274
+>       assert result.total == pytest.approx(14.0 + 300*0.21952 + 600*0.11 + 100*0.08274, abs=0.02)
+E       assert 0.0 == 154.13 ± 0.02
+E         
+E         comparison failed
+E         Obtained: 0.0
+E         Expected: 154.13 ± 0.02
+
+tests\test_tariff_engine_live.py:204: AssertionError
+_____________ TestSgsToueLive.test_tou_with_full_period_breakdown _____________
+
+self = <test_tariff_engine_live.TestSgsToueLive object at 0x000002AE3D44A0D0>
+engine = <duke_rates.billing.tariff_engine.TariffBillingEngine object at 0x000002AE3D5FDD30>
+
+    def test_tou_with_full_period_breakdown(self, engine):
+        result = engine.calculate(
+            self.FAMILY_KEY,
+            BillInput(
+                monthly_kwh=2000,
+                service_date=datetime.date(2025, 8, 1),
+                on_peak_kwh=600,
+                off_peak_kwh=1200,
+                discount_kwh=200,
+            ),
+            include_riders=False,
+        )
+        # Expected: $22 + 600*0.19463 + 1200*0.09721 + 200*0.07624
+        expected = 22.0 + 600*0.19463 + 1200*0.09721 + 200*0.07624
+>       assert result.total == pytest.approx(expected, abs=0.02)
+E       assert 0.0 == 270.678 ± 0.02
+E         
+E         comparison failed
+E         Obtained: 0.0
+E         Expected: 270.678 ± 0.02
+
+tests\test_tariff_engine_live.py:246: AssertionError
+______________ TestSgsToueLive.test_sgs_toue_fixed_is_22_dollars ______________
+
+self = <test_tariff_engine_live.TestSgsToueLive object at 0x000002AE3D3B3820>
+engine = <duke_rates.billing.tariff_engine.TariffBillingEngine object at 0x000002AE3D5FDD30>
+
+    def test_sgs_toue_fixed_is_22_dollars(self, engine):
+        result = engine.calculate(
+            self.FAMILY_KEY,
+            BillInput(
+                monthly_kwh=500,
+                service_date=datetime.date(2025, 8, 1),
+                on_peak_kwh=200,
+                off_peak_kwh=300,
+            ),
+            include_riders=False,
+        )
+        fixed_items = [item for item in result.line_items if item.charge_type == "fixed"]
+>       assert len(fixed_items) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests\test_tariff_engine_live.py:274: AssertionError
+________________ TestSgsLive.test_winter_energy_charge_applied ________________
+
+self = <test_tariff_engine_live.TestSgsLive object at 0x000002AE3D44A350>
+engine = <duke_rates.billing.tariff_engine.TariffBillingEngine object at 0x000002AE3D5FDD30>
+
+    def test_winter_energy_charge_applied(self, engine):
+        # SGS has energy_block rate for winter only: 0.13188 $/kWh for first 750 kWh
+        result = engine.calculate(
+            self.FAMILY_KEY,
+            BillInput(monthly_kwh=1000, service_date=datetime.date(2025, 1, 1)),
+            include_riders=False,
+        )
+>       assert result.total > 0
+E       AssertionError: assert 0.0 > 0
+E        +  where 0.0 = BillResult(family_key='nc-progress-leaf-520', schedule_title='Small General Service Schedule SGS', effective_start='20...s=[], base_subtotal=0.0, rider_subtotal=0.0, total=0.0, warnings=[], source_confidence=1.0, optional_riders_applied=[]).total
+
+tests\test_tariff_engine_live.py:322: AssertionError
+_________ TestSgsLive.test_no_service_date_uses_all_year_charges_only _________
+
+self = <test_tariff_engine_live.TestSgsLive object at 0x000002AE3D3B3A80>
+engine = <duke_rates.billing.tariff_engine.TariffBillingEngine object at 0x000002AE3D5FDD30>
+
+    def test_no_service_date_uses_all_year_charges_only(self, engine):
+        result = engine.calculate(
+            self.FAMILY_KEY,
+            BillInput(monthly_kwh=1000),
+            include_riders=False,
+        )
+        # Without service_date, seasonal charges are excluded with a warning
+>       assert any("season" in w.lower() or "service_date" in w.lower() for w in result.warnings)
+E       assert False
+E        +  where False = any(<generator object TestSgsLive.test_no_service_date_uses_all_year_charges_only.<locals>.<genexpr> at 0x000002AE3D687840>)
+
+tests\test_tariff_engine_live.py:348: AssertionError
+________ TestCrossScheduleSanity.test_all_tou_schedules_return_results ________
+
+self = <test_tariff_engine_live.TestCrossScheduleSanity object at 0x000002AE3D44A490>
+engine = <duke_rates.billing.tariff_engine.TariffBillingEngine object at 0x000002AE3D5FDD30>
+
+    def test_all_tou_schedules_return_results(self, engine):
+        tou_families = [
+            "nc-progress-leaf-502",  # R-TOU
+            "nc-progress-leaf-503",  # R-TOUD
+            "nc-progress-leaf-521",  # SGS-TOUE
+            "nc-progress-leaf-523",  # SGS-TOU-CPP
+        ]
+        for fk in tou_families:
+            result = engine.calculate(
+                fk,
+                BillInput(
+                    monthly_kwh=1000,
+                    service_date=datetime.date(2025, 11, 1),
+                    on_peak_kwh=300,
+                    off_peak_kwh=600,
+                    discount_kwh=100,
+                ),
+                include_riders=False,
+            )
+>           assert result.total > 0, f"{fk} returned zero total"
+E           AssertionError: nc-progress-leaf-503 returned zero total
+E           assert 0.0 > 0
+E            +  where 0.0 = BillResult(family_key='nc-progress-leaf-503', schedule_title='Residential Service Time-of-Use with Critical Peak Prici...s=[], base_subtotal=0.0, rider_subtotal=0.0, total=0.0, warnings=[], source_confidence=1.0, optional_riders_applied=[]).total
+
+tests\test_tariff_engine_live.py:375: AssertionError
+_ TestCrossScheduleSanity.test_partial_tou_coverage_warns_and_reduces_confidence _
+
+self = <test_tariff_engine_live.TestCrossScheduleSanity object at 0x000002AE3D3B3CE0>
+engine = <duke_rates.billing.tariff_engine.TariffBillingEngine object at 0x000002AE3D5FDD30>
+
+    def test_partial_tou_coverage_warns_and_reduces_confidence(self, engine):
+        # nc-progress-leaf-504 only has a discount period parsed — on_peak/off_peak kWh
+        # are unmatched, so the engine should warn and cap confidence at 0.5
+        result = engine.calculate(
+            "nc-progress-leaf-504",
+            BillInput(
+                monthly_kwh=1000,
+                service_date=datetime.date(2025, 11, 1),
+                on_peak_kwh=500,
+                off_peak_kwh=500,
+            ),
+            include_riders=False,
+        )
+>       assert any("Partial TOU coverage" in w for w in result.warnings)
+E       assert False
+E        +  where False = any(<generator object TestCrossScheduleSanity.test_partial_tou_coverage_warns_and_reduces_confidence.<locals>.<genexpr> at 0x000002AE3D509700>)
+
+tests\test_tariff_engine_live.py:427: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_tariff_engine_live.py::TestRTouLive::test_tou_with_full_period_breakdown
+FAILED tests/test_tariff_engine_live.py::TestRTouLive::test_fixed_charge_is_14_dollars
+FAILED tests/test_tariff_engine_live.py::TestRTouLive::test_all_tou_line_items_have_correct_charge_type
+FAILED tests/test_tariff_engine_live.py::TestRTouLive::test_on_peak_rate_is_highest_tou_rate
+FAILED tests/test_tariff_engine_live.py::TestRToudLive::test_tou_with_period_breakdown
+FAILED tests/test_tariff_engine_live.py::TestSgsToueLive::test_tou_with_full_period_breakdown
+FAILED tests/test_tariff_engine_live.py::TestSgsToueLive::test_sgs_toue_fixed_is_22_dollars
+FAILED tests/test_tariff_engine_live.py::TestSgsLive::test_winter_energy_charge_applied
+FAILED tests/test_tariff_engine_live.py::TestSgsLive::test_no_service_date_uses_all_year_charges_only
+FAILED tests/test_tariff_engine_live.py::TestCrossScheduleSanity::test_all_tou_schedules_return_results
+FAILED tests/test_tariff_engine_live.py::TestCrossScheduleSanity::test_partial_tou_coverage_warns_and_reduces_confidence
+11 failed, 13 passed in 14.83s

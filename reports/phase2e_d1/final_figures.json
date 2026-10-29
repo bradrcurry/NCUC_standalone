@@ -1,0 +1,197 @@
+{
+ "clues_by_kind": {
+  "approval_reference": 1920,
+  "docket": 5441,
+  "effective_date": 2414,
+  "leaf": 4413,
+  "order_date": 2249,
+  "revision": 4413,
+  "schedule_code": 2324,
+  "supersedes": 2059,
+  "utility": 4794
+ },
+ "clues_by_label": {
+  "ocr_observed": 483,
+  "source_observed": 29544
+ },
+ "clues_by_norm": {
+  "blank": 464,
+  "exact": 3571,
+  "normalized": 23351,
+  "ocr_repaired": 939,
+  "redline_ambiguous": 1616,
+  "unparsed": 86
+ },
+ "bbox": {
+  "ambiguous": 1249,
+  "located": 24486,
+  "no_text_layer": 483,
+  "not_attempted": 3787,
+  "not_found": 22
+ },
+ "clues_total": 30027,
+ "scan_pages_by_reason": {
+  "binding_check": 461,
+  "ledger_bound": 5292,
+  "local_resolution": 331
+ },
+ "pdfs": 461,
+ "hd_with_clues": 617,
+ "hd_with_observed_clues": 594,
+ "versions_with_clues": 475,
+ "versions_with_docket": 450,
+ "versions_with_footer_docket": 393,
+ "versions_with_order_date": 226,
+ "hd_total": 682,
+ "versions_total": 988,
+ "gap_status_by_type": [
+  [
+   "conflicting_supersession",
+   "explicit",
+   "open",
+   10
+  ],
+  [
+   "missing_effective_date_evidence",
+   "explicit",
+   "open",
+   21
+  ],
+  [
+   "missing_effective_date_evidence",
+   "inferred",
+   "open",
+   87
+  ],
+  [
+   "missing_intermediate_revision",
+   "inferred",
+   "candidate_found",
+   3
+  ],
+  [
+   "missing_intermediate_revision",
+   "inferred",
+   "searched_not_found",
+   102
+  ],
+  [
+   "missing_intermediate_revision",
+   "inferred",
+   "verification_required",
+   15
+  ],
+  [
+   "missing_intermediate_revision",
+   "inferred",
+   "verified",
+   1
+  ],
+  [
+   "missing_official_clean_tariff",
+   "explicit",
+   "candidate_found",
+   5
+  ],
+  [
+   "missing_official_clean_tariff",
+   "explicit",
+   "open",
+   42
+  ],
+  [
+   "missing_official_clean_tariff",
+   "explicit",
+   "searched_not_found",
+   5
+  ],
+  [
+   "missing_official_clean_tariff",
+   "explicit",
+   "verification_required",
+   10
+  ],
+  [
+   "missing_official_clean_tariff",
+   "explicit",
+   "verified",
+   3
+  ],
+  [
+   "missing_predecessor_revision",
+   "explicit",
+   "candidate_found",
+   42
+  ],
+  [
+   "missing_predecessor_revision",
+   "explicit",
+   "searched_not_found",
+   28
+  ],
+  [
+   "missing_predecessor_revision",
+   "explicit",
+   "verification_required",
+   29
+  ],
+  [
+   "missing_predecessor_revision",
+   "explicit",
+   "verified",
+   12
+  ],
+  [
+   "missing_regulatory_order",
+   "explicit",
+   "searched_not_found",
+   26
+  ],
+  [
+   "missing_regulatory_order",
+   "inferred",
+   "searched_not_found",
+   87
+  ],
+  [
+   "missing_successor_document",
+   "explicit",
+   "candidate_found",
+   1
+  ],
+  [
+   "missing_successor_document",
+   "explicit",
+   "open",
+   1
+  ],
+  [
+   "missing_successor_document",
+   "explicit",
+   "verification_required",
+   1
+  ],
+  [
+   "unresolved_version_identity",
+   "explicit",
+   "open",
+   41
+  ],
+  [
+   "unresolved_version_identity",
+   "inferred",
+   "open",
+   119
+  ]
+ ],
+ "cand": {
+  "full": 92,
+  "partial": 103
+ },
+ "cand_review": {
+  "rejected": 2,
+  "unreviewed": 175,
+  "verified": 18
+ },
+ "gaps_with_cand": 122
+}

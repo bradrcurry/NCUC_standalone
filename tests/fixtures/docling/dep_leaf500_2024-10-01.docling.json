@@ -1,0 +1,2163 @@
+{
+ "file_hash": "074fa60b12335960627025743859ce31cec59c28d52c4a4d4cb96d8efd21d373",
+ "backend_version": "docling_v2",
+ "accelerator": "cuda",
+ "status": "ConversionStatus.SUCCESS",
+ "page_count": 3,
+ "pipeline": "standard",
+ "plain_text_content": "## AVAILABILITY\n\nThis Schedule is available when electric service is used for domestic purposes in and about (1) a residential dwelling unit, including electric service used on a farm and in the preparation of the farm's products for market, or (2) a family care home.  A residential dwelling unit served under this Schedule may be used as a boarding house, fraternity house, tourist home, or like establishment, provided such residential dwelling unit is one which ordinarily would be used as a private residence.  A family care home is defined as a home with support and supervisory personnel that provides room and board, personal care and habilitation services in a family environment for not more than six resident handicapped persons.  Detached garages, barns, or other structures that are primarily used for residential purposes that are located on the same premise as the separate residential dwelling unit may be served under any applicable Residential Schedule as of October 1, 2023.\n\nService under this Schedule is not available for processing (or handling) for market of farm products produced by others; for separately metered domestic or farm operations; for individual motors in excess of 10 HP (in exceptional cases, motors as large as 15 HP may be served upon approval by the Engineering Department); for commercial or industrial purposes; for other uses not specifically provided for by the provisions herein; or for resale service, except as provided for in Chapter 22 of the Commission Rules regarding the provision of electric service by landlords.\n\nNonfossil energy sources caused by acts of nature such as wind or solar are permitted as supplement to Customer's energy requirement provided Company is granted the right to install, operate, and monitor special equipment at Company's expense to measure Customer's load or any part thereof and to obtain any other data necessary to determine the operating characteristics and effects of the installation.  In situations where special equipment is needed to assure safety, reliability, or metering accuracy, the installation of such equipment shall be at the Customer's expense.\n\n## APPLICABILITY\n\nThis Schedule is applicable to all electric service of the same available type supplied to Customer's premises at one point of delivery through one kilowatt-hour meter.\n\n## TYPE OF SERVICE\n\nThe types of service to which this Schedule is applicable are alternating current, 60 hertz, either single-phase 2 or 3 wires, or three-phase 4 wires, at Company's standard voltages of 240 volts or less.\n\n## MONTHLY RATE\n\n- I. For Single-Phase Service:\n\nService used during May - September\n\nService used during October - April\n\n- A. Basic Customer Charge: $14.00 per month\n\nBasic Customer Charge: $14.00 per month\n\n- B. Kilowatt-Hour Charge: 12.119\u00a2 per kWh  for all kWh\n\nKilowatt-Hour Charge: 12.119\u00a2 per kWh for the first 800 kWh 11.119\u00a2 per kWh for the additional kWh\n\n## RESIDENTIAL SERVICE SCHEDULE RES\n\n## II. For Three-Phase Service:\n\nThe bill computed for single-phase service plus $9.00.\n\n## III. Riders\n\nThe following Riders are applicable to service supplied under this schedule. The currently approved cents/kWh  rider  increment  or  decrement  must  be  added  to  the  cents/kWh  rates  shown  above  to determine the monthly bill.\n\n| Leaf No. 601   | Rider BA     |\n|----------------|--------------|\n| Leaf No. 602   | Rider JAA    |\n| Leaf No. 604   | Rider EDIT-4 |\n| Leaf No. 605   | Rider CPRE   |\n| Leaf No. 608   | RiderRDM     |\n| Leaf No. 609   | Rider ESM    |\n| Leaf No. 610   | Rider PIM    |\n| Leaf No. 611   | Rider CAR    |\n\n## IV. Renewable Energy Portfolio Standard (REPS) Adjustment:\n\nThe monthly bill shall  include  a  REPS  Adjustment  based  upon  the  revenue  classification.  Upon written request, only one REPS Adjustment shall apply to premises serving the same customer for all accounts of the same revenue classification.  If a customer has accounts which serve in an auxiliary role to a main account on the same premises, no REPS charge should apply to the auxiliary accounts regardless of their revenue classification (see Leaf No. 601 Annual Billing Adjustments Rider BA).\n\n## V. Storm Securitization Charge:\n\nA Storm Securitization charge will be added to the monthly bill based on the currently approved cents/kWh incremental rate as shown in the Storm Securitization Rider (Leaf No. 607 Rider STS).\n\n## SALES TAX\n\nTo the above charges will be added any applicable North Carolina Sales Tax.\n\n## PAYMENTS\n\nBills are due when rendered and are payable within 25 days from the date of the bill.  If any bill is not so paid, Company has the right to suspend service in accordance with its Service Regulations.  In addition, any bill not paid on or before the expiration of twenty-five (25) days from the date of the bill is subject to an additional charge of 1% per month as provided in Rule R12-9 of the Rules and Regulations of the North Carolina Utilities Commission.\n\n## CONTRACT PERIOD\n\nThe Contract Period shall not be less than one year.\n\n## GENERAL\n\nService rendered under this Schedule is subject to the provisions of the Service Regulations of the Company on file with the state regulatory commission.",
+ "tables_json_content": "[{\"page\": 2, \"row_count\": 8, \"rows\": [[\"Leaf No. 601\", \"Rider BA\"], [\"Leaf No. 602\", \"Rider JAA\"], [\"Leaf No. 604\", \"Rider EDIT-4\"], [\"Leaf No. 605\", \"Rider CPRE\"], [\"Leaf No. 608\", \"RiderRDM\"], [\"Leaf No. 609\", \"Rider ESM\"], [\"Leaf No. 610\", \"Rider PIM\"], [\"Leaf No. 611\", \"Rider CAR\"]]}]",
+ "doc_json_content": {
+  "schema_name": "DoclingDocument",
+  "version": "1.10.0",
+  "name": "residential-service-leaf-no-500-eff-2024-10-01-data-historical-manual-leaf-no-50",
+  "origin": {
+   "mimetype": "application/pdf",
+   "binary_hash": 5528570478473630579,
+   "filename": "residential-service-leaf-no-500-eff-2024-10-01-data-historical-manual-leaf-no-50.pdf"
+  },
+  "furniture": {
+   "self_ref": "#/furniture",
+   "children": [],
+   "content_layer": "furniture",
+   "name": "_root_",
+   "label": "unspecified"
+  },
+  "body": {
+   "self_ref": "#/body",
+   "children": [
+    {
+     "$ref": "#/texts/0"
+    },
+    {
+     "$ref": "#/texts/1"
+    },
+    {
+     "$ref": "#/texts/2"
+    },
+    {
+     "$ref": "#/texts/3"
+    },
+    {
+     "$ref": "#/texts/4"
+    },
+    {
+     "$ref": "#/texts/5"
+    },
+    {
+     "$ref": "#/texts/6"
+    },
+    {
+     "$ref": "#/texts/7"
+    },
+    {
+     "$ref": "#/texts/8"
+    },
+    {
+     "$ref": "#/texts/9"
+    },
+    {
+     "$ref": "#/texts/10"
+    },
+    {
+     "$ref": "#/groups/0"
+    },
+    {
+     "$ref": "#/groups/1"
+    },
+    {
+     "$ref": "#/texts/18"
+    },
+    {
+     "$ref": "#/texts/19"
+    },
+    {
+     "$ref": "#/texts/20"
+    },
+    {
+     "$ref": "#/texts/21"
+    },
+    {
+     "$ref": "#/texts/22"
+    },
+    {
+     "$ref": "#/texts/23"
+    },
+    {
+     "$ref": "#/texts/24"
+    },
+    {
+     "$ref": "#/texts/25"
+    },
+    {
+     "$ref": "#/texts/26"
+    },
+    {
+     "$ref": "#/tables/0"
+    },
+    {
+     "$ref": "#/texts/27"
+    },
+    {
+     "$ref": "#/texts/28"
+    },
+    {
+     "$ref": "#/texts/29"
+    },
+    {
+     "$ref": "#/texts/30"
+    },
+    {
+     "$ref": "#/texts/31"
+    },
+    {
+     "$ref": "#/texts/32"
+    },
+    {
+     "$ref": "#/texts/33"
+    },
+    {
+     "$ref": "#/texts/34"
+    },
+    {
+     "$ref": "#/texts/35"
+    },
+    {
+     "$ref": "#/texts/36"
+    },
+    {
+     "$ref": "#/texts/37"
+    },
+    {
+     "$ref": "#/texts/38"
+    },
+    {
+     "$ref": "#/texts/39"
+    },
+    {
+     "$ref": "#/texts/40"
+    },
+    {
+     "$ref": "#/texts/41"
+    },
+    {
+     "$ref": "#/texts/42"
+    },
+    {
+     "$ref": "#/texts/43"
+    }
+   ],
+   "content_layer": "body",
+   "name": "_root_",
+   "label": "unspecified"
+  },
+  "groups": [
+   {
+    "self_ref": "#/groups/0",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [
+     {
+      "$ref": "#/texts/11"
+     }
+    ],
+    "content_layer": "body",
+    "name": "list",
+    "label": "list"
+   },
+   {
+    "self_ref": "#/groups/1",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [
+     {
+      "$ref": "#/texts/12"
+     },
+     {
+      "$ref": "#/texts/13"
+     },
+     {
+      "$ref": "#/groups/2"
+     },
+     {
+      "$ref": "#/texts/15"
+     },
+     {
+      "$ref": "#/groups/3"
+     },
+     {
+      "$ref": "#/texts/17"
+     }
+    ],
+    "content_layer": "body",
+    "name": "group",
+    "label": "key_value_area"
+   },
+   {
+    "self_ref": "#/groups/2",
+    "parent": {
+     "$ref": "#/groups/1"
+    },
+    "children": [
+     {
+      "$ref": "#/texts/14"
+     }
+    ],
+    "content_layer": "body",
+    "name": "group",
+    "label": "list"
+   },
+   {
+    "self_ref": "#/groups/3",
+    "parent": {
+     "$ref": "#/groups/1"
+    },
+    "children": [
+     {
+      "$ref": "#/texts/16"
+     }
+    ],
+    "content_layer": "body",
+    "name": "group",
+    "label": "list"
+   }
+  ],
+  "texts": [
+   {
+    "self_ref": "#/texts/0",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "furniture",
+    "label": "page_header",
+    "prov": [
+     {
+      "page_no": 1,
+      "bbox": {
+       "l": 71.98901999999998,
+       "t": 760.2087600000001,
+       "r": 199.96092,
+       "b": 738.1343779615385,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       47
+      ]
+     }
+    ],
+    "orig": "Duke Energy Progress, LLC (North Carolina Only)",
+    "text": "Duke Energy Progress, LLC (North Carolina Only)"
+   },
+   {
+    "self_ref": "#/texts/1",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "furniture",
+    "label": "page_header",
+    "prov": [
+     {
+      "page_no": 1,
+      "bbox": {
+       "l": 359.99442,
+       "t": 760.2087600000001,
+       "r": 541.1215979999995,
+       "b": 738.1343779615385,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       66
+      ]
+     }
+    ],
+    "orig": "NC First Revised Leaf No. 500 Superseding NC Original Leaf No. 500",
+    "text": "NC First Revised Leaf No. 500 Superseding NC Original Leaf No. 500"
+   },
+   {
+    "self_ref": "#/texts/2",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "section_header",
+    "prov": [
+     {
+      "page_no": 1,
+      "bbox": {
+       "l": 72.0,
+       "t": 698.28876,
+       "r": 151.72578000000001,
+       "b": 688.8743179615384,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       12
+      ]
+     }
+    ],
+    "orig": "AVAILABILITY",
+    "text": "AVAILABILITY",
+    "level": 1
+   },
+   {
+    "self_ref": "#/texts/3",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "text",
+    "prov": [
+     {
+      "page_no": 1,
+      "bbox": {
+       "l": 72.0,
+       "t": 672.96882,
+       "r": 542.8300860000005,
+       "b": 562.3846579615383,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       976
+      ]
+     }
+    ],
+    "orig": "This Schedule is available when electric service is used for domestic purposes in and about (1) a residential dwelling unit, including electric service used on a farm and in the preparation of the farm's products for market, or (2) a family care home.  A residential dwelling unit served under this Schedule may be used as a boarding house, fraternity house, tourist home, or like establishment, provided such residential dwelling unit is one which ordinarily would be used as a private residence.  A family care home is defined as a home with support and supervisory personnel that provides room and board, personal care and habilitation services in a family environment for not more than six resident handicapped persons.  Detached garages, barns, or other structures that are primarily used for residential purposes that are located on the same premise as the separate residential dwelling unit may be served under any applicable Residential Schedule as of October 1, 2023.",
+    "text": "This Schedule is available when electric service is used for domestic purposes in and about (1) a residential dwelling unit, including electric service used on a farm and in the preparation of the farm's products for market, or (2) a family care home.  A residential dwelling unit served under this Schedule may be used as a boarding house, fraternity house, tourist home, or like establishment, provided such residential dwelling unit is one which ordinarily would be used as a private residence.  A family care home is defined as a home with support and supervisory personnel that provides room and board, personal care and habilitation services in a family environment for not more than six resident handicapped persons.  Detached garages, barns, or other structures that are primarily used for residential purposes that are located on the same premise as the separate residential dwelling unit may be served under any applicable Residential Schedule as of October 1, 2023."
+   },
+   {
+    "self_ref": "#/texts/4",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "text",
+    "prov": [
+     {
+      "page_no": 1,
+      "bbox": {
+       "l": 72.0,
+       "t": 546.4792199999999,
+       "r": 542.8355759999986,
+       "b": 473.8199779615383,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       574
+      ]
+     }
+    ],
+    "orig": "Service under this Schedule is not available for processing (or handling) for market of farm products produced by others; for separately metered domestic or farm operations; for individual motors in excess of 10 HP (in exceptional cases, motors as large as 15 HP may be served upon approval by the Engineering Department); for commercial or industrial purposes; for other uses not specifically provided for by the provisions herein; or for resale service, except as provided for in Chapter 22 of the Commission Rules regarding the provision of electric service by landlords.",
+    "text": "Service under this Schedule is not available for processing (or handling) for market of farm products produced by others; for separately metered domestic or farm operations; for individual motors in excess of 10 HP (in exceptional cases, motors as large as 15 HP may be served upon approval by the Engineering Department); for commercial or industrial purposes; for other uses not specifically provided for by the provisions herein; or for resale service, except as provided for in Chapter 22 of the Commission Rules regarding the provision of electric service by landlords."
+   },
+   {
+    "self_ref": "#/texts/5",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "text",
+    "prov": [
+     {
+      "page_no": 1,
+      "bbox": {
+       "l": 72.0,
+       "t": 457.96943999999985,
+       "r": 542.8465560000003,
+       "b": 385.31019796153834,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       577
+      ]
+     }
+    ],
+    "orig": "Nonfossil energy sources caused by acts of nature such as wind or solar are permitted as supplement to Customer's energy requirement provided Company is granted the right to install, operate, and monitor special equipment at Company's expense to measure Customer's load or any part thereof and to obtain any other data necessary to determine the operating characteristics and effects of the installation.  In situations where special equipment is needed to assure safety, reliability, or metering accuracy, the installation of such equipment shall be at the Customer's expense.",
+    "text": "Nonfossil energy sources caused by acts of nature such as wind or solar are permitted as supplement to Customer's energy requirement provided Company is granted the right to install, operate, and monitor special equipment at Company's expense to measure Customer's load or any part thereof and to obtain any other data necessary to determine the operating characteristics and effects of the installation.  In situations where special equipment is needed to assure safety, reliability, or metering accuracy, the installation of such equipment shall be at the Customer's expense."
+   },
+   {
+    "self_ref": "#/texts/6",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "section_header",
+    "prov": [
+     {
+      "page_no": 1,
+      "bbox": {
+       "l": 72.0,
+       "t": 369.42876,
+       "r": 155.32722,
+       "b": 360.0143179615385,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       13
+      ]
+     }
+    ],
+    "orig": "APPLICABILITY",
+    "text": "APPLICABILITY",
+    "level": 1
+   },
+   {
+    "self_ref": "#/texts/7",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "text",
+    "prov": [
+     {
+      "page_no": 1,
+      "bbox": {
+       "l": 72.0,
+       "t": 344.10882,
+       "r": 542.7444419999995,
+       "b": 322.03443796153846,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       168
+      ]
+     }
+    ],
+    "orig": "This Schedule is applicable to all electric service of the same available type supplied to Customer's premises at one point of delivery through one kilowatt-hour meter.",
+    "text": "This Schedule is applicable to all electric service of the same available type supplied to Customer's premises at one point of delivery through one kilowatt-hour meter."
+   },
+   {
+    "self_ref": "#/texts/8",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "section_header",
+    "prov": [
+     {
+      "page_no": 1,
+      "bbox": {
+       "l": 72.0,
+       "t": 306.18876,
+       "r": 166.18644,
+       "b": 296.7743179615385,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       15
+      ]
+     }
+    ],
+    "orig": "TYPE OF SERVICE",
+    "text": "TYPE OF SERVICE",
+    "level": 1
+   },
+   {
+    "self_ref": "#/texts/9",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "text",
+    "prov": [
+     {
+      "page_no": 1,
+      "bbox": {
+       "l": 71.98901999999998,
+       "t": 280.86881999999997,
+       "r": 542.7301679999999,
+       "b": 258.7944379615385,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       203
+      ]
+     }
+    ],
+    "orig": "The types of service to which this Schedule is applicable are alternating current, 60 hertz, either single-phase 2 or 3 wires, or three-phase 4 wires, at Company's standard voltages of 240 volts or less.",
+    "text": "The types of service to which this Schedule is applicable are alternating current, 60 hertz, either single-phase 2 or 3 wires, or three-phase 4 wires, at Company's standard voltages of 240 volts or less."
+   },
+   {
+    "self_ref": "#/texts/10",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "section_header",
+    "prov": [
+     {
+      "page_no": 1,
+      "bbox": {
+       "l": 72.0,
+       "t": 242.94876,
+       "r": 160.0047,
+       "b": 233.53431796153848,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       12
+      ]
+     }
+    ],
+    "orig": "MONTHLY RATE",
+    "text": "MONTHLY RATE",
+    "level": 1
+   },
+   {
+    "self_ref": "#/texts/11",
+    "parent": {
+     "$ref": "#/groups/0"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "list_item",
+    "prov": [
+     {
+      "page_no": 1,
+      "bbox": {
+       "l": 86.46066,
+       "t": 217.62882000000002,
+       "r": 222.51384000000002,
+       "b": 208.2143779615385,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       28
+      ]
+     }
+    ],
+    "orig": "I. For Single-Phase Service:",
+    "text": "For Single-Phase Service:",
+    "enumerated": true,
+    "marker": "I."
+   },
+   {
+    "self_ref": "#/texts/12",
+    "parent": {
+     "$ref": "#/groups/1"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "text",
+    "prov": [
+     {
+      "page_no": 1,
+      "bbox": {
+       "l": 107.99244,
+       "t": 192.36876000000007,
+       "r": 273.75750000000005,
+       "b": 182.95431796153844,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       35
+      ]
+     }
+    ],
+    "orig": "Service used during May - September",
+    "text": "Service used during May - September"
+   },
+   {
+    "self_ref": "#/texts/13",
+    "parent": {
+     "$ref": "#/groups/1"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "text",
+    "prov": [
+     {
+      "page_no": 1,
+      "bbox": {
+       "l": 323.99100000000004,
+       "t": 192.36876000000007,
+       "r": 481.11480000000006,
+       "b": 182.95431796153844,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       35
+      ]
+     }
+    ],
+    "orig": "Service used during October - April",
+    "text": "Service used during October - April"
+   },
+   {
+    "self_ref": "#/texts/14",
+    "parent": {
+     "$ref": "#/groups/2"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "list_item",
+    "prov": [
+     {
+      "page_no": 1,
+      "bbox": {
+       "l": 107.99244,
+       "t": 167.04881999999998,
+       "r": 243.10134000000002,
+       "b": 144.97443796153846,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       42
+      ]
+     }
+    ],
+    "orig": "A. Basic Customer Charge: $14.00 per month",
+    "text": "Basic Customer Charge: $14.00 per month",
+    "enumerated": true,
+    "marker": "A."
+   },
+   {
+    "self_ref": "#/texts/15",
+    "parent": {
+     "$ref": "#/groups/1"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "text",
+    "prov": [
+     {
+      "page_no": 1,
+      "bbox": {
+       "l": 324.00198,
+       "t": 167.04881999999998,
+       "r": 432.11106,
+       "b": 144.97443796153846,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       39
+      ]
+     }
+    ],
+    "orig": "Basic Customer Charge: $14.00 per month",
+    "text": "Basic Customer Charge: $14.00 per month"
+   },
+   {
+    "self_ref": "#/texts/16",
+    "parent": {
+     "$ref": "#/groups/3"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "list_item",
+    "prov": [
+     {
+      "page_no": 1,
+      "bbox": {
+       "l": 108.00341999999996,
+       "t": 129.06899999999996,
+       "r": 268.35534,
+       "b": 107.05431796153846,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       53
+      ]
+     }
+    ],
+    "orig": "B. Kilowatt-Hour Charge: 12.119\u00a2 per kWh  for all kWh",
+    "text": "Kilowatt-Hour Charge: 12.119\u00a2 per kWh  for all kWh",
+    "enumerated": true,
+    "marker": "B."
+   },
+   {
+    "self_ref": "#/texts/17",
+    "parent": {
+     "$ref": "#/groups/1"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "text",
+    "prov": [
+     {
+      "page_no": 1,
+      "bbox": {
+       "l": 323.991,
+       "t": 129.06899999999996,
+       "r": 502.2513,
+       "b": 94.39431796153849,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       98
+      ]
+     }
+    ],
+    "orig": "Kilowatt-Hour Charge: 12.119\u00a2 per kWh for the first 800 kWh 11.119\u00a2 per kWh for the additional kWh",
+    "text": "Kilowatt-Hour Charge: 12.119\u00a2 per kWh for the first 800 kWh 11.119\u00a2 per kWh for the additional kWh"
+   },
+   {
+    "self_ref": "#/texts/18",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "section_header",
+    "prov": [
+     {
+      "page_no": 1,
+      "bbox": {
+       "l": 246.00006,
+       "t": 723.6087600000001,
+       "r": 368.79049800000024,
+       "b": 701.5343779615384,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       32
+      ]
+     }
+    ],
+    "orig": "RESIDENTIAL SERVICE SCHEDULE RES",
+    "text": "RESIDENTIAL SERVICE SCHEDULE RES",
+    "level": 1
+   },
+   {
+    "self_ref": "#/texts/19",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "furniture",
+    "label": "page_footer",
+    "prov": [
+     {
+      "page_no": 1,
+      "bbox": {
+       "l": 71.99999999999999,
+       "t": 80.55450000000008,
+       "r": 391.2482220000002,
+       "b": 48.977298576923204,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       167
+      ]
+     }
+    ],
+    "orig": "NC First Revised Leaf No. 500 Effective for service rendered from October 1, 2024 through September 30, 2025 NCUC Docket No. E-2, Sub 1300, Order dated August 18, 2023",
+    "text": "NC First Revised Leaf No. 500 Effective for service rendered from October 1, 2024 through September 30, 2025 NCUC Docket No. E-2, Sub 1300, Order dated August 18, 2023"
+   },
+   {
+    "self_ref": "#/texts/20",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "furniture",
+    "label": "page_footer",
+    "prov": [
+     {
+      "page_no": 1,
+      "bbox": {
+       "l": 283.3719,
+       "t": 47.12778000000003,
+       "r": 328.65227999999996,
+       "b": 38.43421545454555,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       11
+      ]
+     }
+    ],
+    "orig": "Page 1 of 3",
+    "text": "Page 1 of 3"
+   },
+   {
+    "self_ref": "#/texts/21",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "furniture",
+    "label": "page_header",
+    "prov": [
+     {
+      "page_no": 2,
+      "bbox": {
+       "l": 71.98901999999998,
+       "t": 760.2087600000001,
+       "r": 199.96092,
+       "b": 738.1343779615385,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       47
+      ]
+     }
+    ],
+    "orig": "Duke Energy Progress, LLC (North Carolina Only)",
+    "text": "Duke Energy Progress, LLC (North Carolina Only)"
+   },
+   {
+    "self_ref": "#/texts/22",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "furniture",
+    "label": "page_header",
+    "prov": [
+     {
+      "page_no": 2,
+      "bbox": {
+       "l": 359.99442,
+       "t": 760.2087600000001,
+       "r": 541.1215979999995,
+       "b": 738.1343779615385,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       66
+      ]
+     }
+    ],
+    "orig": "NC First Revised Leaf No. 500 Superseding NC Original Leaf No. 500",
+    "text": "NC First Revised Leaf No. 500 Superseding NC Original Leaf No. 500"
+   },
+   {
+    "self_ref": "#/texts/23",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "section_header",
+    "prov": [
+     {
+      "page_no": 2,
+      "bbox": {
+       "l": 82.9251,
+       "t": 710.9488200000001,
+       "r": 220.19706000000002,
+       "b": 701.5343779615384,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       28
+      ]
+     }
+    ],
+    "orig": "II. For Three-Phase Service:",
+    "text": "II. For Three-Phase Service:",
+    "level": 1
+   },
+   {
+    "self_ref": "#/texts/24",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "text",
+    "prov": [
+     {
+      "page_no": 2,
+      "bbox": {
+       "l": 108.01440000000001,
+       "t": 685.6289400000001,
+       "r": 344.51261999999997,
+       "b": 676.2144979615384,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       54
+      ]
+     }
+    ],
+    "orig": "The bill computed for single-phase service plus $9.00.",
+    "text": "The bill computed for single-phase service plus $9.00."
+   },
+   {
+    "self_ref": "#/texts/25",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "section_header",
+    "prov": [
+     {
+      "page_no": 2,
+      "bbox": {
+       "l": 81.19025999999997,
+       "t": 660.36396,
+       "r": 138.90113999999997,
+       "b": 650.9495179615384,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       11
+      ]
+     }
+    ],
+    "orig": "III. Riders",
+    "text": "III. Riders",
+    "level": 1
+   },
+   {
+    "self_ref": "#/texts/26",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "text",
+    "prov": [
+     {
+      "page_no": 2,
+      "bbox": {
+       "l": 108.01439999999997,
+       "t": 635.04408,
+       "r": 542.8344779999986,
+       "b": 600.3097579615384,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       232
+      ]
+     }
+    ],
+    "orig": "The following Riders are applicable to service supplied under this schedule. The currently approved cents/kWh  rider  increment  or  decrement  must  be  added  to  the  cents/kWh  rates  shown  above  to determine the monthly bill.",
+    "text": "The following Riders are applicable to service supplied under this schedule. The currently approved cents/kWh  rider  increment  or  decrement  must  be  added  to  the  cents/kWh  rates  shown  above  to determine the monthly bill."
+   },
+   {
+    "self_ref": "#/texts/27",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "section_header",
+    "prov": [
+     {
+      "page_no": 2,
+      "bbox": {
+       "l": 80.48753999999992,
+       "t": 470.5746599999998,
+       "r": 365.9565599999999,
+       "b": 461.1602179615383,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       58
+      ]
+     }
+    ],
+    "orig": "IV. Renewable Energy Portfolio Standard (REPS) Adjustment:",
+    "text": "IV. Renewable Energy Portfolio Standard (REPS) Adjustment:",
+    "level": 1
+   },
+   {
+    "self_ref": "#/texts/28",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "text",
+    "prov": [
+     {
+      "page_no": 2,
+      "bbox": {
+       "l": 108.03635999999989,
+       "t": 445.30967999999984,
+       "r": 542.8213019999985,
+       "b": 385.31037796153834,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       501
+      ]
+     }
+    ],
+    "orig": "The monthly bill shall  include  a  REPS  Adjustment  based  upon  the  revenue  classification.  Upon written request, only one REPS Adjustment shall apply to premises serving the same customer for all accounts of the same revenue classification.  If a customer has accounts which serve in an auxiliary role to a main account on the same premises, no REPS charge should apply to the auxiliary accounts regardless of their revenue classification (see Leaf No. 601 Annual Billing Adjustments Rider BA).",
+    "text": "The monthly bill shall  include  a  REPS  Adjustment  based  upon  the  revenue  classification.  Upon written request, only one REPS Adjustment shall apply to premises serving the same customer for all accounts of the same revenue classification.  If a customer has accounts which serve in an auxiliary role to a main account on the same premises, no REPS charge should apply to the auxiliary accounts regardless of their revenue classification (see Leaf No. 601 Annual Billing Adjustments Rider BA)."
+   },
+   {
+    "self_ref": "#/texts/29",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "section_header",
+    "prov": [
+     {
+      "page_no": 2,
+      "bbox": {
+       "l": 82.563,
+       "t": 369.591,
+       "r": 230.34314999999995,
+       "b": 360.58811826923073,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       31
+      ]
+     }
+    ],
+    "orig": "V. Storm Securitization Charge:",
+    "text": "V. Storm Securitization Charge:",
+    "level": 1
+   },
+   {
+    "self_ref": "#/texts/30",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "text",
+    "prov": [
+     {
+      "page_no": 2,
+      "bbox": {
+       "l": 108.00450000000001,
+       "t": 345.4095,
+       "r": 542.5963500000005,
+       "b": 324.3421182692307,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       191
+      ]
+     }
+    ],
+    "orig": "A Storm Securitization charge will be added to the monthly bill based on the currently approved cents/kWh incremental rate as shown in the Storm Securitization Rider (Leaf No. 607 Rider STS).",
+    "text": "A Storm Securitization charge will be added to the monthly bill based on the currently approved cents/kWh incremental rate as shown in the Storm Securitization Rider (Leaf No. 607 Rider STS)."
+   },
+   {
+    "self_ref": "#/texts/31",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "section_header",
+    "prov": [
+     {
+      "page_no": 2,
+      "bbox": {
+       "l": 72.0,
+       "t": 308.46876,
+       "r": 132.82920000000001,
+       "b": 299.05431796153846,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       9
+      ]
+     }
+    ],
+    "orig": "SALES TAX",
+    "text": "SALES TAX",
+    "level": 1
+   },
+   {
+    "self_ref": "#/texts/32",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "text",
+    "prov": [
+     {
+      "page_no": 2,
+      "bbox": {
+       "l": 72.0,
+       "t": 283.20372000000003,
+       "r": 412.533719999999,
+       "b": 273.7892779615386,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       75
+      ]
+     }
+    ],
+    "orig": "To the above charges will be added any applicable North Carolina Sales Tax.",
+    "text": "To the above charges will be added any applicable North Carolina Sales Tax."
+   },
+   {
+    "self_ref": "#/texts/33",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "section_header",
+    "prov": [
+     {
+      "page_no": 2,
+      "bbox": {
+       "l": 72.0,
+       "t": 257.88876000000005,
+       "r": 133.24644,
+       "b": 248.47431796153842,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       8
+      ]
+     }
+    ],
+    "orig": "PAYMENTS",
+    "text": "PAYMENTS",
+    "level": 1
+   },
+   {
+    "self_ref": "#/texts/34",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "text",
+    "prov": [
+     {
+      "page_no": 2,
+      "bbox": {
+       "l": 71.98901999999998,
+       "t": 232.56881999999996,
+       "r": 542.7993419999985,
+       "b": 172.5695179615384,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       460
+      ]
+     }
+    ],
+    "orig": "Bills are due when rendered and are payable within 25 days from the date of the bill.  If any bill is not so paid, Company has the right to suspend service in accordance with its Service Regulations.  In addition, any bill not paid on or before the expiration of twenty-five (25) days from the date of the bill is subject to an additional charge of 1% per month as provided in Rule R12-9 of the Rules and Regulations of the North Carolina Utilities Commission.",
+    "text": "Bills are due when rendered and are payable within 25 days from the date of the bill.  If any bill is not so paid, Company has the right to suspend service in accordance with its Service Regulations.  In addition, any bill not paid on or before the expiration of twenty-five (25) days from the date of the bill is subject to an additional charge of 1% per month as provided in Rule R12-9 of the Rules and Regulations of the North Carolina Utilities Commission."
+   },
+   {
+    "self_ref": "#/texts/35",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "section_header",
+    "prov": [
+     {
+      "page_no": 2,
+      "bbox": {
+       "l": 72.0,
+       "t": 156.66876000000002,
+       "r": 175.00338,
+       "b": 147.2543179615385,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       15
+      ]
+     }
+    ],
+    "orig": "CONTRACT PERIOD",
+    "text": "CONTRACT PERIOD",
+    "level": 1
+   },
+   {
+    "self_ref": "#/texts/36",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "text",
+    "prov": [
+     {
+      "page_no": 2,
+      "bbox": {
+       "l": 72.0,
+       "t": 131.40882,
+       "r": 296.20062,
+       "b": 121.99437796153848,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       52
+      ]
+     }
+    ],
+    "orig": "The Contract Period shall not be less than one year.",
+    "text": "The Contract Period shall not be less than one year."
+   },
+   {
+    "self_ref": "#/texts/37",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "furniture",
+    "label": "page_footer",
+    "prov": [
+     {
+      "page_no": 2,
+      "bbox": {
+       "l": 71.99999999999999,
+       "t": 80.55450000000008,
+       "r": 391.2482220000002,
+       "b": 38.43421545454555,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       179
+      ]
+     }
+    ],
+    "orig": "NC First Revised Leaf No. 500 Effective for service rendered from October 1, 2024 through September 30, 2025 NCUC Docket No. E-2, Sub 1300, Order dated August 18, 2023 Page 2 of 3",
+    "text": "NC First Revised Leaf No. 500 Effective for service rendered from October 1, 2024 through September 30, 2025 NCUC Docket No. E-2, Sub 1300, Order dated August 18, 2023 Page 2 of 3"
+   },
+   {
+    "self_ref": "#/texts/38",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "furniture",
+    "label": "page_header",
+    "prov": [
+     {
+      "page_no": 3,
+      "bbox": {
+       "l": 72.0,
+       "t": 760.2087600000001,
+       "r": 199.96092,
+       "b": 750.7943179615385,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       25
+      ]
+     }
+    ],
+    "orig": "Duke Energy Progress, LLC",
+    "text": "Duke Energy Progress, LLC"
+   },
+   {
+    "self_ref": "#/texts/39",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "furniture",
+    "label": "page_header",
+    "prov": [
+     {
+      "page_no": 3,
+      "bbox": {
+       "l": 71.98901999999998,
+       "t": 747.5488200000001,
+       "r": 182.72231999999997,
+       "b": 738.1343779615385,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       21
+      ]
+     }
+    ],
+    "orig": "(North Carolina Only)",
+    "text": "(North Carolina Only)"
+   },
+   {
+    "self_ref": "#/texts/40",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "furniture",
+    "label": "page_header",
+    "prov": [
+     {
+      "page_no": 3,
+      "bbox": {
+       "l": 359.99442,
+       "t": 760.2087600000001,
+       "r": 541.1215979999995,
+       "b": 738.1343779615385,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       66
+      ]
+     }
+    ],
+    "orig": "NC First Revised Leaf No. 500 Superseding NC Original Leaf No. 500",
+    "text": "NC First Revised Leaf No. 500 Superseding NC Original Leaf No. 500"
+   },
+   {
+    "self_ref": "#/texts/41",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "section_header",
+    "prov": [
+     {
+      "page_no": 3,
+      "bbox": {
+       "l": 72.0,
+       "t": 723.6087600000001,
+       "r": 125.38476,
+       "b": 714.1943179615384,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       7
+      ]
+     }
+    ],
+    "orig": "GENERAL",
+    "text": "GENERAL",
+    "level": 1
+   },
+   {
+    "self_ref": "#/texts/42",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "text",
+    "prov": [
+     {
+      "page_no": 3,
+      "bbox": {
+       "l": 72.0,
+       "t": 698.28882,
+       "r": 542.7587159999986,
+       "b": 676.2144379615384,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       153
+      ]
+     }
+    ],
+    "orig": "Service rendered under this Schedule is subject to the provisions of the Service Regulations of the Company on file with the state regulatory commission.",
+    "text": "Service rendered under this Schedule is subject to the provisions of the Service Regulations of the Company on file with the state regulatory commission."
+   },
+   {
+    "self_ref": "#/texts/43",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "furniture",
+    "label": "page_footer",
+    "prov": [
+     {
+      "page_no": 3,
+      "bbox": {
+       "l": 71.99999999999999,
+       "t": 80.55450000000008,
+       "r": 391.2482220000002,
+       "b": 38.43421545454555,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       179
+      ]
+     }
+    ],
+    "orig": "NC First Revised Leaf No. 500 Effective for service rendered from October 1, 2024 through September 30, 2025 NCUC Docket No. E-2, Sub 1300, Order dated August 18, 2023 Page 3 of 3",
+    "text": "NC First Revised Leaf No. 500 Effective for service rendered from October 1, 2024 through September 30, 2025 NCUC Docket No. E-2, Sub 1300, Order dated August 18, 2023 Page 3 of 3"
+   }
+  ],
+  "pictures": [],
+  "tables": [
+   {
+    "self_ref": "#/tables/0",
+    "parent": {
+     "$ref": "#/body"
+    },
+    "children": [],
+    "content_layer": "body",
+    "label": "table",
+    "prov": [
+     {
+      "page_no": 2,
+      "bbox": {
+       "l": 160.6471710205078,
+       "t": 586.6360626220703,
+       "r": 313.5257568359375,
+       "b": 487.3099060058594,
+       "coord_origin": "BOTTOMLEFT"
+      },
+      "charspan": [
+       0,
+       0
+      ]
+     }
+    ],
+    "captions": [],
+    "references": [],
+    "footnotes": [],
+    "data": {
+     "table_cells": [
+      {
+       "bbox": {
+        "l": 162.00305999999995,
+        "t": 207.54078000000004,
+        "r": 219.15396,
+        "b": 216.95522203846167,
+        "coord_origin": "TOPLEFT"
+       },
+       "row_span": 1,
+       "col_span": 1,
+       "start_row_offset_idx": 0,
+       "end_row_offset_idx": 1,
+       "start_col_offset_idx": 0,
+       "end_col_offset_idx": 1,
+       "text": "Leaf No. 601",
+       "column_header": false,
+       "row_header": false,
+       "row_section": false,
+       "fillable": false
+      },
+      {
+       "bbox": {
+        "l": 252.00611999999995,
+        "t": 207.54078000000004,
+        "r": 293.7169439999998,
+        "b": 216.95522203846167,
+        "coord_origin": "TOPLEFT"
+       },
+       "row_span": 1,
+       "col_span": 1,
+       "start_row_offset_idx": 0,
+       "end_row_offset_idx": 1,
+       "start_col_offset_idx": 1,
+       "end_col_offset_idx": 2,
+       "text": "Rider BA",
+       "column_header": false,
+       "row_header": false,
+       "row_section": false,
+       "fillable": false
+      },
+      {
+       "bbox": {
+        "l": 162.00306,
+        "t": 220.20072000000005,
+        "r": 219.15396000000007,
+        "b": 229.61516203846168,
+        "coord_origin": "TOPLEFT"
+       },
+       "row_span": 1,
+       "col_span": 1,
+       "start_row_offset_idx": 1,
+       "end_row_offset_idx": 2,
+       "start_col_offset_idx": 0,
+       "end_col_offset_idx": 1,
+       "text": "Leaf No. 602",
+       "column_header": false,
+       "row_header": false,
+       "row_section": false,
+       "fillable": false
+      },
+      {
+       "bbox": {
+        "l": 252.00612,
+        "t": 220.20072000000005,
+        "r": 298.5130080000001,
+        "b": 229.61516203846168,
+        "coord_origin": "TOPLEFT"
+       },
+       "row_span": 1,
+       "col_span": 1,
+       "start_row_offset_idx": 1,
+       "end_row_offset_idx": 2,
+       "start_col_offset_idx": 1,
+       "end_col_offset_idx": 2,
+       "text": "Rider JAA",
+       "column_header": false,
+       "row_header": false,
+       "row_section": false,
+       "fillable": false
+      },
+      {
+       "bbox": {
+        "l": 162.00305999999998,
+        "t": 232.86066000000005,
+        "r": 219.15396000000004,
+        "b": 242.27510203846168,
+        "coord_origin": "TOPLEFT"
+       },
+       "row_span": 1,
+       "col_span": 1,
+       "start_row_offset_idx": 2,
+       "end_row_offset_idx": 3,
+       "start_col_offset_idx": 0,
+       "end_col_offset_idx": 1,
+       "text": "Leaf No. 604",
+       "column_header": false,
+       "row_header": false,
+       "row_section": false,
+       "fillable": false
+      },
+      {
+       "bbox": {
+        "l": 252.00611999999998,
+        "t": 232.86066000000005,
+        "r": 312.20946,
+        "b": 242.27510203846168,
+        "coord_origin": "TOPLEFT"
+       },
+       "row_span": 1,
+       "col_span": 1,
+       "start_row_offset_idx": 2,
+       "end_row_offset_idx": 3,
+       "start_col_offset_idx": 1,
+       "end_col_offset_idx": 2,
+       "text": "Rider EDIT-4",
+       "column_header": false,
+       "row_header": false,
+       "row_section": false,
+       "fillable": false
+      },
+      {
+       "bbox": {
+        "l": 161.99208,
+        "t": 245.52060000000006,
+        "r": 219.14298000000005,
+        "b": 254.9350420384617,
+        "coord_origin": "TOPLEFT"
+       },
+       "row_span": 1,
+       "col_span": 1,
+       "start_row_offset_idx": 3,
+       "end_row_offset_idx": 4,
+       "start_col_offset_idx": 0,
+       "end_col_offset_idx": 1,
+       "text": "Leaf No. 605",
+       "column_header": false,
+       "row_header": false,
+       "row_section": false,
+       "fillable": false
+      },
+      {
+       "bbox": {
+        "l": 251.99514,
+        "t": 245.52060000000006,
+        "r": 305.7499259999998,
+        "b": 254.9350420384617,
+        "coord_origin": "TOPLEFT"
+       },
+       "row_span": 1,
+       "col_span": 1,
+       "start_row_offset_idx": 3,
+       "end_row_offset_idx": 4,
+       "start_col_offset_idx": 1,
+       "end_col_offset_idx": 2,
+       "text": "Rider CPRE",
+       "column_header": false,
+       "row_header": false,
+       "row_section": false,
+       "fillable": false
+      },
+      {
+       "bbox": {
+        "l": 162.00305999999998,
+        "t": 258.1256400000001,
+        "r": 219.15396000000004,
+        "b": 267.5400820384617,
+        "coord_origin": "TOPLEFT"
+       },
+       "row_span": 1,
+       "col_span": 1,
+       "start_row_offset_idx": 4,
+       "end_row_offset_idx": 5,
+       "start_col_offset_idx": 0,
+       "end_col_offset_idx": 1,
+       "text": "Leaf No. 608",
+       "column_header": false,
+       "row_header": false,
+       "row_section": false,
+       "fillable": false
+      },
+      {
+       "bbox": {
+        "l": 252.00611999999998,
+        "t": 258.1256400000001,
+        "r": 303.41008799999975,
+        "b": 267.5400820384617,
+        "coord_origin": "TOPLEFT"
+       },
+       "row_span": 1,
+       "col_span": 1,
+       "start_row_offset_idx": 4,
+       "end_row_offset_idx": 5,
+       "start_col_offset_idx": 1,
+       "end_col_offset_idx": 2,
+       "text": "RiderRDM",
+       "column_header": false,
+       "row_header": false,
+       "row_section": false,
+       "fillable": false
+      },
+      {
+       "bbox": {
+        "l": 162.01403999999994,
+        "t": 270.7855800000001,
+        "r": 219.16494,
+        "b": 280.20002203846167,
+        "coord_origin": "TOPLEFT"
+       },
+       "row_span": 1,
+       "col_span": 1,
+       "start_row_offset_idx": 5,
+       "end_row_offset_idx": 6,
+       "start_col_offset_idx": 0,
+       "end_col_offset_idx": 1,
+       "text": "Leaf No. 609",
+       "column_header": false,
+       "row_header": false,
+       "row_section": false,
+       "fillable": false
+      },
+      {
+       "bbox": {
+        "l": 252.01709999999994,
+        "t": 270.7855800000001,
+        "r": 300.9527639999997,
+        "b": 280.20002203846167,
+        "coord_origin": "TOPLEFT"
+       },
+       "row_span": 1,
+       "col_span": 1,
+       "start_row_offset_idx": 5,
+       "end_row_offset_idx": 6,
+       "start_col_offset_idx": 1,
+       "end_col_offset_idx": 2,
+       "text": "Rider ESM",
+       "column_header": false,
+       "row_header": false,
+       "row_section": false,
+       "fillable": false
+      },
+      {
+       "bbox": {
+        "l": 162.0250199999999,
+        "t": 283.44552000000016,
+        "r": 219.17591999999996,
+        "b": 292.8599620384617,
+        "coord_origin": "TOPLEFT"
+       },
+       "row_span": 1,
+       "col_span": 1,
+       "start_row_offset_idx": 6,
+       "end_row_offset_idx": 7,
+       "start_col_offset_idx": 0,
+       "end_col_offset_idx": 1,
+       "text": "Leaf No. 610",
+       "column_header": false,
+       "row_header": false,
+       "row_section": false,
+       "fillable": false
+      },
+      {
+       "bbox": {
+        "l": 252.0280799999999,
+        "t": 283.44552000000016,
+        "r": 297.89922599999966,
+        "b": 292.8599620384617,
+        "coord_origin": "TOPLEFT"
+       },
+       "row_span": 1,
+       "col_span": 1,
+       "start_row_offset_idx": 6,
+       "end_row_offset_idx": 7,
+       "start_col_offset_idx": 1,
+       "end_col_offset_idx": 2,
+       "text": "Rider PIM",
+       "column_header": false,
+       "row_header": false,
+       "row_section": false,
+       "fillable": false
+      },
+      {
+       "bbox": {
+        "l": 162.02501999999993,
+        "t": 296.10546000000016,
+        "r": 219.17592,
+        "b": 305.5199020384617,
+        "coord_origin": "TOPLEFT"
+       },
+       "row_span": 1,
+       "col_span": 1,
+       "start_row_offset_idx": 7,
+       "end_row_offset_idx": 8,
+       "start_col_offset_idx": 0,
+       "end_col_offset_idx": 1,
+       "text": "Leaf No. 611",
+       "column_header": false,
+       "row_header": false,
+       "row_section": false,
+       "fillable": false
+      },
+      {
+       "bbox": {
+        "l": 252.02807999999993,
+        "t": 296.10546000000016,
+        "r": 300.9944879999998,
+        "b": 305.5199020384617,
+        "coord_origin": "TOPLEFT"
+       },
+       "row_span": 1,
+       "col_span": 1,
+       "start_row_offset_idx": 7,
+       "end_row_offset_idx": 8,
+       "start_col_offset_idx": 1,
+       "end_col_offset_idx": 2,
+       "text": "Rider CAR",
+       "column_header": false,
+       "row_header": false,
+       "row_section": false,
+       "fillable": false
+      }
+     ],
+     "num_rows": 8,
+     "num_cols": 2,
+     "grid": [
+      [
+       {
+        "bbox": {
+         "l": 162.00305999999995,
+         "t": 207.54078000000004,
+         "r": 219.15396,
+         "b": 216.95522203846167,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 0,
+        "end_row_offset_idx": 1,
+        "start_col_offset_idx": 0,
+        "end_col_offset_idx": 1,
+        "text": "Leaf No. 601",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 252.00611999999995,
+         "t": 207.54078000000004,
+         "r": 293.7169439999998,
+         "b": 216.95522203846167,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 0,
+        "end_row_offset_idx": 1,
+        "start_col_offset_idx": 1,
+        "end_col_offset_idx": 2,
+        "text": "Rider BA",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       }
+      ],
+      [
+       {
+        "bbox": {
+         "l": 162.00306,
+         "t": 220.20072000000005,
+         "r": 219.15396000000007,
+         "b": 229.61516203846168,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 1,
+        "end_row_offset_idx": 2,
+        "start_col_offset_idx": 0,
+        "end_col_offset_idx": 1,
+        "text": "Leaf No. 602",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 252.00612,
+         "t": 220.20072000000005,
+         "r": 298.5130080000001,
+         "b": 229.61516203846168,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 1,
+        "end_row_offset_idx": 2,
+        "start_col_offset_idx": 1,
+        "end_col_offset_idx": 2,
+        "text": "Rider JAA",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       }
+      ],
+      [
+       {
+        "bbox": {
+         "l": 162.00305999999998,
+         "t": 232.86066000000005,
+         "r": 219.15396000000004,
+         "b": 242.27510203846168,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 2,
+        "end_row_offset_idx": 3,
+        "start_col_offset_idx": 0,
+        "end_col_offset_idx": 1,
+        "text": "Leaf No. 604",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 252.00611999999998,
+         "t": 232.86066000000005,
+         "r": 312.20946,
+         "b": 242.27510203846168,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 2,
+        "end_row_offset_idx": 3,
+        "start_col_offset_idx": 1,
+        "end_col_offset_idx": 2,
+        "text": "Rider EDIT-4",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       }
+      ],
+      [
+       {
+        "bbox": {
+         "l": 161.99208,
+         "t": 245.52060000000006,
+         "r": 219.14298000000005,
+         "b": 254.9350420384617,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 3,
+        "end_row_offset_idx": 4,
+        "start_col_offset_idx": 0,
+        "end_col_offset_idx": 1,
+        "text": "Leaf No. 605",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 251.99514,
+         "t": 245.52060000000006,
+         "r": 305.7499259999998,
+         "b": 254.9350420384617,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 3,
+        "end_row_offset_idx": 4,
+        "start_col_offset_idx": 1,
+        "end_col_offset_idx": 2,
+        "text": "Rider CPRE",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       }
+      ],
+      [
+       {
+        "bbox": {
+         "l": 162.00305999999998,
+         "t": 258.1256400000001,
+         "r": 219.15396000000004,
+         "b": 267.5400820384617,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 4,
+        "end_row_offset_idx": 5,
+        "start_col_offset_idx": 0,
+        "end_col_offset_idx": 1,
+        "text": "Leaf No. 608",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 252.00611999999998,
+         "t": 258.1256400000001,
+         "r": 303.41008799999975,
+         "b": 267.5400820384617,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 4,
+        "end_row_offset_idx": 5,
+        "start_col_offset_idx": 1,
+        "end_col_offset_idx": 2,
+        "text": "RiderRDM",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       }
+      ],
+      [
+       {
+        "bbox": {
+         "l": 162.01403999999994,
+         "t": 270.7855800000001,
+         "r": 219.16494,
+         "b": 280.20002203846167,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 5,
+        "end_row_offset_idx": 6,
+        "start_col_offset_idx": 0,
+        "end_col_offset_idx": 1,
+        "text": "Leaf No. 609",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 252.01709999999994,
+         "t": 270.7855800000001,
+         "r": 300.9527639999997,
+         "b": 280.20002203846167,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 5,
+        "end_row_offset_idx": 6,
+        "start_col_offset_idx": 1,
+        "end_col_offset_idx": 2,
+        "text": "Rider ESM",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       }
+      ],
+      [
+       {
+        "bbox": {
+         "l": 162.0250199999999,
+         "t": 283.44552000000016,
+         "r": 219.17591999999996,
+         "b": 292.8599620384617,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 6,
+        "end_row_offset_idx": 7,
+        "start_col_offset_idx": 0,
+        "end_col_offset_idx": 1,
+        "text": "Leaf No. 610",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 252.0280799999999,
+         "t": 283.44552000000016,
+         "r": 297.89922599999966,
+         "b": 292.8599620384617,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 6,
+        "end_row_offset_idx": 7,
+        "start_col_offset_idx": 1,
+        "end_col_offset_idx": 2,
+        "text": "Rider PIM",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       }
+      ],
+      [
+       {
+        "bbox": {
+         "l": 162.02501999999993,
+         "t": 296.10546000000016,
+         "r": 219.17592,
+         "b": 305.5199020384617,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 7,
+        "end_row_offset_idx": 8,
+        "start_col_offset_idx": 0,
+        "end_col_offset_idx": 1,
+        "text": "Leaf No. 611",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       },
+       {
+        "bbox": {
+         "l": 252.02807999999993,
+         "t": 296.10546000000016,
+         "r": 300.9944879999998,
+         "b": 305.5199020384617,
+         "coord_origin": "TOPLEFT"
+        },
+        "row_span": 1,
+        "col_span": 1,
+        "start_row_offset_idx": 7,
+        "end_row_offset_idx": 8,
+        "start_col_offset_idx": 1,
+        "end_col_offset_idx": 2,
+        "text": "Rider CAR",
+        "column_header": false,
+        "row_header": false,
+        "row_section": false,
+        "fillable": false
+       }
+      ]
+     ]
+    },
+    "annotations": []
+   }
+  ],
+  "key_value_items": [],
+  "form_items": [],
+  "pages": {
+   "1": {
+    "size": {
+     "width": 612.0,
+     "height": 792.0
+    },
+    "page_no": 1
+   },
+   "2": {
+    "size": {
+     "width": 612.0,
+     "height": 792.0
+    },
+    "page_no": 2
+   },
+   "3": {
+    "size": {
+     "width": 612.0,
+     "height": 792.0
+    },
+    "page_no": 3
+   }
+  }
+ },
+ "_provenance": {
+  "docling_artifacts.id": 1755,
+  "source_pdf": "data\\historical\\raw\\nc\\progress\\rate\\residential-service-leaf-no-500-eff-2024-10-01-data-historical-manual-leaf-no-50.pdf",
+  "exported_from": "duke_rates.db snapshot 2026-10-26 (read-only)"
+ }
+}

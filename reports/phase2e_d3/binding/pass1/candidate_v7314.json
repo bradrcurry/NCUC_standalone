@@ -1,0 +1,348 @@
+{
+  "run_id": 1,
+  "version_id": 7314,
+  "extractor_status": "parsed",
+  "profile": "progress_rider_adjustment_matrix",
+  "structured_mode": "hybrid",
+  "needs_review": true,
+  "status": "ok",
+  "validation_status": "warnings",
+  "run_issues": [
+    {
+      "level": "info",
+      "code": "parser_value_missing",
+      "detail": "'Schedule HP & Schedule LGS-RTP - BA-Fuel': text (0.609, None, 0.0) vs table (None, None, None); text value kept",
+      "refs": [
+        "Schedule HP & Schedule LGS-RTP - BA-Fuel"
+      ],
+      "needs_review": false
+    },
+    {
+      "level": "info",
+      "code": "parser_value_missing",
+      "detail": "'Schedule HP & Schedule LGS-RTP - BA-EMF': text (0.557, None, 0.0) vs table (None, None, None); text value kept",
+      "refs": [
+        "Schedule HP & Schedule LGS-RTP - BA-EMF"
+      ],
+      "needs_review": false
+    },
+    {
+      "level": "info",
+      "code": "parser_value_missing",
+      "detail": "'Schedule HP & Schedule LGS-RTP - BA-DSM': text (0.042, None, 0.042) vs table (None, None, None); text value kept",
+      "refs": [
+        "Schedule HP & Schedule LGS-RTP - BA-DSM"
+      ],
+      "needs_review": false
+    },
+    {
+      "level": "info",
+      "code": "parser_value_missing",
+      "detail": "'Schedule HP & Schedule LGS-RTP - BA-EE': text (0.345, None, 0.345) vs table (None, None, None); text value kept",
+      "refs": [
+        "Schedule HP & Schedule LGS-RTP - BA-EE"
+      ],
+      "needs_review": false
+    },
+    {
+      "level": "info",
+      "code": "parser_value_missing",
+      "detail": "'Schedule HP & Schedule LGS-RTP - BA': text (1.553, None, 0.387) vs table (None, None, None); text value kept",
+      "refs": [
+        "Schedule HP & Schedule LGS-RTP - BA"
+      ],
+      "needs_review": false
+    },
+    {
+      "level": "info",
+      "code": "parser_value_missing",
+      "detail": "'Schedule HP & Schedule LGS-RTP - EDIT-4': text (-0.093, None, 0.0) vs table (None, None, None); text value kept",
+      "refs": [
+        "Schedule HP & Schedule LGS-RTP - EDIT-4"
+      ],
+      "needs_review": false
+    },
+    {
+      "level": "info",
+      "code": "parser_value_missing",
+      "detail": "'Schedule HP & Schedule LGS-RTP - CPRE': text (0.004, None, 0.004) vs table (None, None, None); text value kept",
+      "refs": [
+        "Schedule HP & Schedule LGS-RTP - CPRE"
+      ],
+      "needs_review": false
+    },
+    {
+      "level": "info",
+      "code": "parser_value_missing",
+      "detail": "'Schedule HP & Schedule LGS-RTP - ESM': text (0.0, None, 0.0) vs table (None, None, None); text value kept",
+      "refs": [
+        "Schedule HP & Schedule LGS-RTP - ESM"
+      ],
+      "needs_review": false
+    },
+    {
+      "level": "info",
+      "code": "parser_value_missing",
+      "detail": "'Schedule HP & Schedule LGS-RTP - PIM': text (0.0, None, 0.0) vs table (None, None, None); text value kept",
+      "refs": [
+        "Schedule HP & Schedule LGS-RTP - PIM"
+      ],
+      "needs_review": false
+    },
+    {
+      "level": "warning",
+      "code": "revision_value_jump",
+      "detail": "'residential service schedules ba dsm': 6297.67 -> 0.0062900000000000005",
+      "refs": [
+        "residential service schedules ba dsm"
+      ],
+      "needs_review": true
+    },
+    {
+      "level": "warning",
+      "code": "revision_value_jump",
+      "detail": "'residential service schedules ba': 2493.87 -> 0.012490000000000001",
+      "refs": [
+        "residential service schedules ba"
+      ],
+      "needs_review": true
+    },
+    {
+      "level": "warning",
+      "code": "revision_value_jump",
+      "detail": "'residential service schedules car': 1570.34 -> 0.00157",
+      "refs": [
+        "residential service schedules car"
+      ],
+      "needs_review": true
+    },
+    {
+      "level": "warning",
+      "code": "revision_value_jump",
+      "detail": "'small general service schedules ba ee': 3452.33 -> 0.00345",
+      "refs": [
+        "small general service schedules ba ee"
+      ],
+      "needs_review": true
+    },
+    {
+      "level": "warning",
+      "code": "revision_value_jump",
+      "detail": "'small general service schedules ba': 7035.9 -> 0.00703",
+      "refs": [
+        "small general service schedules ba"
+      ],
+      "needs_review": true
+    },
+    {
+      "level": "warning",
+      "code": "revision_value_jump",
+      "detail": "'small general service schedules total rider adjustments': 9097.96 -> 0.00909",
+      "refs": [
+        "small general service schedules total rider adjustments"
+      ],
+      "needs_review": true
+    },
+    {
+      "level": "warning",
+      "code": "revision_value_jump",
+      "detail": "'small general service constant load schedule ba ee': 3452.33 -> 0.00345",
+      "refs": [
+        "small general service constant load schedule ba ee"
+      ],
+      "needs_review": true
+    },
+    {
+      "level": "warning",
+      "code": "revision_value_jump",
+      "detail": "'small general service constant load schedule ba': 7035.9 -> 0.00703",
+      "refs": [
+        "small general service constant load schedule ba"
+      ],
+      "needs_review": true
+    },
+    {
+      "level": "warning",
+      "code": "revision_value_jump",
+      "detail": "'small general service constant load schedule total rider adjustments': 9127.99 -> 0.00912",
+      "refs": [
+        "small general service constant load schedule total rider adjustments"
+      ],
+      "needs_review": true
+    },
+    {
+      "level": "warning",
+      "code": "revision_value_jump",
+      "detail": "'non demand medium general service schedules ba ee': 3452.33 -> 0.00345",
+      "refs": [
+        "non demand medium general service schedules ba ee"
+      ],
+      "needs_review": true
+    },
+    {
+      "level": "warning",
+      "code": "revision_value_jump",
+      "detail": "'non demand medium general service schedules ba': 7986.85 -> 0.007980000000000001",
+      "refs": [
+        "non demand medium general service schedules ba"
+      ],
+      "needs_review": true
+    },
+    {
+      "level": "warning",
+      "code": "revision_value_jump",
+      "detail": "'non demand medium general service schedules total rider adjustments': 8727.59 -> 0.00872",
+      "refs": [
+        "non demand medium general service schedules total rider adjustments"
+      ],
+      "needs_review": true
+    },
+    {
+      "level": "warning",
+      "code": "revision_value_jump",
+      "detail": "'demand medium general service schedules ba ee': 3452.33 -> 0.00345",
+      "refs": [
+        "demand medium general service schedules ba ee"
+      ],
+      "needs_review": true
+    },
+    {
+      "level": "warning",
+      "code": "revision_value_jump",
+      "detail": "'demand medium general service schedules ba': 7986.85 -> 0.007980000000000001",
+      "refs": [
+        "demand medium general service schedules ba"
+      ],
+      "needs_review": true
+    },
+    {
+      "level": "warning",
+      "code": "revision_value_jump",
+      "detail": "'demand medium general service schedules total rider adjustments': 6545.41 -> 0.006540000000000001",
+      "refs": [
+        "demand medium general service schedules total rider adjustments"
+      ],
+      "needs_review": true
+    },
+    {
+      "level": "warning",
+      "code": "revision_value_jump",
+      "detail": "'seasonal or intermittent service schedule ba ee': 3452.33 -> 0.00345",
+      "refs": [
+        "seasonal or intermittent service schedule ba ee"
+      ],
+      "needs_review": true
+    },
+    {
+      "level": "warning",
+      "code": "revision_value_jump",
+      "detail": "'seasonal or intermittent service schedule ba': 7986.85 -> 0.007980000000000001",
+      "refs": [
+        "seasonal or intermittent service schedule ba"
+      ],
+      "needs_review": true
+    },
+    {
+      "level": "warning",
+      "code": "revision_value_jump",
+      "detail": "'seasonal or intermittent service schedule total rider adjustments': 3091.96 -> 0.01309",
+      "refs": [
+        "seasonal or intermittent service schedule total rider adjustments"
+      ],
+      "needs_review": true
+    },
+    {
+      "level": "warning",
+      "code": "revision_value_jump",
+      "detail": "'large general service schedules ba ee': 3452.33 -> 0.00345",
+      "refs": [
+        "large general service schedules ba ee"
+      ],
+      "needs_review": true
+    },
+    {
+      "level": "warning",
+      "code": "revision_value_jump",
+      "detail": "'large general service schedules total rider adjustments': 4643.51 -> 0.01464",
+      "refs": [
+        "large general service schedules total rider adjustments"
+      ],
+      "needs_review": true
+    },
+    {
+      "level": "warning",
+      "code": "revision_value_jump",
+      "detail": "'schedule hp schedule lgs rtp ba ee': 3452.33 -> 0.00345",
+      "refs": [
+        "schedule hp schedule lgs rtp ba ee"
+      ],
+      "needs_review": true
+    },
+    {
+      "level": "warning",
+      "code": "revision_value_jump",
+      "detail": "'schedule hp schedule lgs rtp ba': 5534.4 -> 0.015529999999999999",
+      "refs": [
+        "schedule hp schedule lgs rtp ba"
+      ],
+      "needs_review": true
+    },
+    {
+      "level": "warning",
+      "code": "revision_value_jump",
+      "detail": "'schedule hp schedule lgs rtp total rider adjustments': 4643.51 -> 0.01464",
+      "refs": [
+        "schedule hp schedule lgs rtp total rider adjustments"
+      ],
+      "needs_review": true
+    },
+    {
+      "level": "warning",
+      "code": "revision_value_jump",
+      "detail": "'traffic signal schedules ba ee': 3452.33 -> 0.00345",
+      "refs": [
+        "traffic signal schedules ba ee"
+      ],
+      "needs_review": true
+    },
+    {
+      "level": "warning",
+      "code": "revision_value_jump",
+      "detail": "'traffic signal schedules ba': 7035.9 -> 0.00703",
+      "refs": [
+        "traffic signal schedules ba"
+      ],
+      "needs_review": true
+    },
+    {
+      "level": "warning",
+      "code": "revision_value_jump",
+      "detail": "'traffic signal schedules total rider adjustments': 8297.16 -> 0.008289999999999999",
+      "refs": [
+        "traffic signal schedules total rider adjustments"
+      ],
+      "needs_review": true
+    },
+    {
+      "level": "info",
+      "code": "revision_rows_dropped",
+      "detail": "78 rows of the previous revision are absent",
+      "refs": [
+        "residential service schedules ba fuel",
+        "residential service schedules ba emf",
+        "residential service schedules jaa",
+        "residential service schedules cpre",
+        "residential service schedules rdm",
+        "residential service schedules esm",
+        "residential service schedules pim",
+        "small general service schedules ba fuel",
+        "small general service schedules ba emf",
+        "small general service schedules ba dsm"
+      ],
+      "needs_review": false
+    }
+  ],
+  "charges_with_errors": 0,
+  "charges_with_warnings": 0,
+  "output_count": 125
+}

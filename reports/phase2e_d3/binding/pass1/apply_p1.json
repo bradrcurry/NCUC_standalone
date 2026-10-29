@@ -1,0 +1,29 @@
+{
+  "mode": "create_version",
+  "historical_document_id": 7821,
+  "charges_created": 0,
+  "charges_deleted": 0,
+  "tariff_version_id": 7314,
+  "created_version": true,
+  "version_status": "bound_pending_charges",
+  "post_apply_validation": {
+    "ok": true,
+    "pages_read": 5,
+    "printed_revisions": [
+      "NC:leaf-600:rev-4"
+    ]
+  },
+  "gap_before": {
+    "id": 1634,
+    "status": "verified",
+    "status_reason": "candidate identity verified against the page image (not bound; not resolved)"
+  },
+  "snapshot_before": {},
+  "snapshot_after": {
+    "historical_documents": 1,
+    "tariff_versions": 1,
+    "tariff_charges": 0,
+    "document_assertions": 0
+  },
+  "next": "provenance extract-candidate on the bound pages, review, then provenance promote"
+}

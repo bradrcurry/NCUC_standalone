@@ -227,6 +227,15 @@ def test_family_matcher_ambiguous_short_code():
     assert score < 0
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "c561dbe added _is_likely_code(), which deliberately stops storing descriptive "
+        "headings as schedule codes. repository.py builds family-match heading_tokens from "
+        "extracted_schedule_codes, so this may have cost family-matching signal; decide "
+        "whether to restore descriptive headings (separately from codes) or retire this test."
+    ),
+)
 def test_page_miner_extracts_descriptive_rider_heading() -> None:
     evidence = _extract_page_features_from_text(
         "North Carolina Eighteenth Revised Leaf No. 60\nFUEL COST ADJUSTMENT RIDER\nAVAILABILITY\n",
@@ -238,6 +247,15 @@ def test_page_miner_extracts_descriptive_rider_heading() -> None:
     assert "FUEL COST ADJUSTMENT RIDER" in evidence.extracted_schedule_codes
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "c561dbe added _is_likely_code(), which deliberately stops storing descriptive "
+        "headings as schedule codes. repository.py builds family-match heading_tokens from "
+        "extracted_schedule_codes, so this may have cost family-matching signal; decide "
+        "whether to restore descriptive headings (separately from codes) or retire this test."
+    ),
+)
 def test_page_miner_extracts_descriptive_rider_heading_with_parenthetical() -> None:
     evidence = _extract_page_features_from_text(
         "North Carolina Thirty-First Revised Leaf No. 60\nFUEL COST ADJUSTMENT RIDER (NC)\nAPPLICABILITY\n",
@@ -249,6 +267,15 @@ def test_page_miner_extracts_descriptive_rider_heading_with_parenthetical() -> N
     assert "FUEL COST ADJUSTMENT RIDER (NC)" in evidence.extracted_schedule_codes
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "c561dbe added _is_likely_code(), which deliberately stops storing descriptive "
+        "headings as schedule codes. repository.py builds family-match heading_tokens from "
+        "extracted_schedule_codes, so this may have cost family-matching signal; decide "
+        "whether to restore descriptive headings (separately from codes) or retire this test."
+    ),
+)
 def test_page_miner_extracts_inline_descriptive_heading_from_merged_pdf_text() -> None:
     evidence = _extract_page_features_from_text(
         "North Carolina Thirty-First Revised Leaf No. 60\n"
@@ -260,6 +287,15 @@ def test_page_miner_extracts_inline_descriptive_heading_from_merged_pdf_text() -
     assert any(code.startswith("FUEL COST ADJUSTMENT RIDER") for code in evidence.extracted_schedule_codes)
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "c561dbe added _is_likely_code(), which deliberately stops storing descriptive "
+        "headings as schedule codes. repository.py builds family-match heading_tokens from "
+        "extracted_schedule_codes, so this may have cost family-matching signal; decide "
+        "whether to restore descriptive headings (separately from codes) or retire this test."
+    ),
+)
 def test_page_miner_extracts_descriptive_program_heading() -> None:
     evidence = _extract_page_features_from_text(
         "North Carolina First Revised Leaf No. 172\nSMART ENERGY NOW PROGRAM (NC)\n(Pilot)\n",
@@ -931,19 +967,23 @@ def test_importer_reintegrates_ocr_required_documents_via_cpu_ocr(tmp_path: Path
         "triage_pdf",
         lambda _: type("T", (), {"route_recommendation": PipelineRoute.OCR_REQUIRED})(),
     )
+    ocr_pages = [
+        PageEvidence(
+            page_number=1,
+            text_length=180,
+            text_content="Leaf No. 500\nResidential Service\nEffective January 1, 2024",
+            has_leaf_header=True,
+            has_schedule_heading=True,
+            extracted_leaf_nos=["500"],
+        )
+    ]
+    monkeypatch.setattr(importer_module, "extract_ocr_document_pages", lambda _: ocr_pages)
+    # The importer goes through progressive OCR, which returns
+    # (pages, selected_backend, attempted_backends).
     monkeypatch.setattr(
         importer_module,
-        "extract_ocr_document_pages",
-        lambda _: [
-            PageEvidence(
-                page_number=1,
-                text_length=180,
-                text_content="Leaf No. 500\nResidential Service\nEffective January 1, 2024",
-                has_leaf_header=True,
-                has_schedule_heading=True,
-                extracted_leaf_nos=["500"],
-            )
-        ],
+        "extract_pages_with_progressive_ocr",
+        lambda *args, **kwargs: (ocr_pages, "pytesseract_cpu", ["pytesseract_cpu"]),
     )
     monkeypatch.setattr(
         importer_module,

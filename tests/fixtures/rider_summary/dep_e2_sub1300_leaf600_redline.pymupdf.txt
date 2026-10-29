@@ -1,0 +1,567 @@
+Duke Energy Progress, LLC 
+          NC FifthSixth Revised Leaf No. 600 
+(North Carolina Only)  
+Superseding NC FourthFifth Revised Leaf No. 600 
+ 
+ 
+ 
+* Qualifying customers who have opted out of the Company’s DSM and/or EE Programs are not subject to the 
+applicable DSM and EE Adjustment charges based on the individual customer’s opt-out election.  Refer to Leaf 
+No. 601 Rider BA to determine the DSM and EE Adjustment amounts, if any, applicable to customers who have 
+opted out.   
+** The monthly bill for certain non-residential schedules includes the Customer Affordability Recovery (CAR) 
+rider as a fixed charge per bill as noted in Leaf No. 611. 
+   
+ 
+NC FifthSixth Revised Leaf No. 600 
+Effective for service rendered on and after JanuaryApril 1, 2025 
+NCUC Docket No. E-2, Subs 1342 and 1300, Orders dated NovemberMarch 132, 20245 and December 10, 2024 
+ 
+Page 1 of 5 
+SUMMARY OF RIDER ADJUSTMENTS  
+ 
+The following is a summary of Rider Adjustments that must be added to the bill calculated on the applicable 
+rate schedule in order to compute the bill. The factors shown below include revenue-related taxes and 
+regulatory fees. More specific information concerning these Riders is contained in the applicable Rider listed 
+below. 
+Residential Service Schedules  
+cents 
+/kWh 
+Effective 
+ Date 
+Annual Billing Adjustments Rider BA 
+Fuel and Fuel-Related Adjustment Rate 
+0.040 
+12/1/24 
+Fuel and Fuel-Related Adjustment Experience Modification Factor (EMF) 
+0.580 
+12/1/24 
+Demand Side Management DSM & EE Rate 
+0.767 
+1/1/25 
+Annual Billing Adjustments Rider BA - Net Adjustment 
+1.387 
+EDIT-4 Rider 
+-0.249 
+10/1/23 
+Joint Agency Asset Rider JAA 
+0.538 
+12/1/24 
+Competitive Procurement of Renewable Energy Rider CPRE 
+0.006 
+12/1/24 
+Customer Assistance Recovery Rider CAR  
+0.034 
+1/1/25 
+Residential Decoupling Mechanism Rider RDM 
+0.000232 
+104/1/235 
+Earnings Sharing Mechanism Rider ESM 
+0.000 
+104/1/235 
+Performance Incentive Mechanism Rider PIM 
+0.0002 
+104/1/235 
+TOTAL cents/kWh 
+1.716950 
+Small General Service Schedules** 
+cents 
+/kWh 
+Effective 
+ Date 
+Annual Billing Adjustments Rider BA 
+Fuel and Fuel-Related Adjustment Rate 
+0.179 
+12/1/24 
+Fuel and Fuel-Related Adjustment Experience Modification Factor (EMF) 
+0.137 
+12/1/24 
+Demand Side Management (DSM) Rate* 
+0.041 
+1/1/25 
+Energy Efficiency (EE) Rate* 
+0.233 
+1/1/25 
+Annual Billing Adjustments Rider BA - Net Adjustment 
+0.590 
+EDIT-4 Rider 
+-0.259 
+10/1/23 
+Joint Agency Asset Rider JAA 
+0.439 
+12/1/24 
+Competitive Procurement of Renewable Energy Rider CPRE 
+0.026 
+12/1/24 
+Earnings Sharing Mechanism Rider ESM 
+0.000 
+104/1/235 
+Performance Incentive Mechanism Rider PIM 
+0.0002 
+104/1/235 
+TOTAL cents/kWh 
+0.7968 
+ 
+ 
+ 
+Duke Energy Progress, LLC 
+          NC FifthSixth Revised Leaf No. 600 
+(North Carolina Only)  
+Superseding NC FourthFifth Revised Leaf No. 600 
+ 
+ 
+ 
+* Qualifying customers who have opted out of the Company’s DSM and/or EE Programs are not subject to the 
+applicable DSM and EE Adjustment charges based on the individual customer’s opt-out election.  Refer to Leaf 
+No. 601 Rider BA to determine the DSM and EE Adjustment amounts, if any, applicable to customers who have 
+opted out.   
+** The monthly bill for certain non-residential schedules includes the Customer Affordability Recovery (CAR) 
+rider as a fixed charge per bill as noted in Leaf No. 611. 
+   
+ 
+NC FifthSixth Revised Leaf No. 600 
+Effective for service rendered on and after JanuaryApril 1, 2025 
+NCUC Docket No. E-2, Subs 1342 and 1300, Orders dated NovemberMarch 132, 20245 and December 10, 2024 
+ 
+Page 2 of 5 
+Small General Service - Constant Load Schedule** 
+cents 
+/kWh 
+Effective 
+ Date 
+Annual Billing Adjustments Rider BA 
+Fuel and Fuel-Related Adjustment Rate 
+0.179 
+12/1/24 
+Fuel and Fuel-Related Adjustment Experience Modification Factor (EMF) 
+         
+0.137 
+12/1/24 
+Demand Side Management (DSM) Rate* 
+0.041 
+1/1/25 
+Energy Efficiency (EE) Rate* 
+0.233 
+1/1/25 
+Annual Billing Adjustments Rider BA - Net Adjustment 
+0.590 
+EDIT-4 Rider 
+-0.256 
+10/1/23 
+Joint Agency Asset Rider JAA 
+0.439 
+12/1/24 
+Competitive Procurement of Renewable Energy Rider CPRE 
+0.026 
+12/1/24 
+Earnings Sharing Mechanism Rider ESM 
+0.000 
+104/1/235 
+Performance Incentive Mechanism Rider PIM 
+0.0002 
+104/1/235 
+TOTAL cents/kWh 
+0.799801 
+Non-Demand: Medium General Service Schedules** 
+cents 
+/kWh 
+Effective 
+ Date 
+Annual Billing Adjustments Rider BA 
+Fuel and Fuel-Related Adjustment Rate 
+0.165 
+12/1/24 
+Fuel and Fuel-Related Adjustment Experience Modification Factor (EMF) 
+0.246 
+12/1/24 
+Demand Side Management (DSM) Rate* 
+0.041 
+1/1/25 
+Energy Efficiency (EE) Rate* 
+0.233 
+1/1/25 
+Annual Billing Adjustments Rider BA - Net Adjustment 
+0.685 
+EDIT-4 Rider 
+-0.145 
+10/1/23 
+Joint Agency Asset Rider JAA 
+0.218 
+12/1/24 
+Competitive Procurement of Renewable Energy Rider CPRE 
+0.001 
+12/1/24 
+Earnings Sharing Mechanism Rider ESM 
+0.000 
+104/1/235 
+Performance Incentive Mechanism Rider PIM 
+0.0002 
+104/1/235 
+TOTAL cents/kWh 
+0.75961 
+ 
+ 
+Demand: Medium General Service Schedules** 
+ 
+cents 
+/kWh 
+ 
+dollars 
+/kW 
+ 
+Effective 
+ Date 
+Annual Billing Adjustments Rider BA 
+Fuel and Fuel-Related Adjustment Rate 
+0.165 
+12/1/24 
+Fuel and Fuel-Related Adjustment Experience Modification Factor (EMF) 
+0.246 
+12/1/24 
+Demand Side Management (DSM) Rate* 
+0.041 
+1/1/25 
+Energy Efficiency (EE) Rate* 
+0.233 
+1/1/25 
+Annual Billing Adjustments Rider BA - Net Adjustment 
+0.685 
+EDIT-4 Rider 
+-0.145 
+10/1/23 
+Competitive Procurement of Renewable Energy Rider CPRE 
+0.001 
+12/1/24 
+Duke Energy Progress, LLC 
+          NC FifthSixth Revised Leaf No. 600 
+(North Carolina Only)  
+Superseding NC FourthFifth Revised Leaf No. 600 
+ 
+ 
+ 
+* Qualifying customers who have opted out of the Company’s DSM and/or EE Programs are not subject to the 
+applicable DSM and EE Adjustment charges based on the individual customer’s opt-out election.  Refer to Leaf 
+No. 601 Rider BA to determine the DSM and EE Adjustment amounts, if any, applicable to customers who have 
+opted out.   
+** The monthly bill for certain non-residential schedules includes the Customer Affordability Recovery (CAR) 
+rider as a fixed charge per bill as noted in Leaf No. 611. 
+   
+ 
+NC FifthSixth Revised Leaf No. 600 
+Effective for service rendered on and after JanuaryApril 1, 2025 
+NCUC Docket No. E-2, Subs 1342 and 1300, Orders dated NovemberMarch 132, 20245 and December 10, 2024 
+ 
+Page 3 of 5 
+Earnings Sharing Mechanism Rider ESM 
+0.000 
+104/1/235 
+Performance Incentive Mechanism Rider PIM 
+0.0002 
+104/1/235 
+TOTAL cents/kWh 
+0.5413 
+Joint Agency Asset Rider JAA 
+1.12 
+12/1/24 
+TOTAL dollars/kW 
+1.12 
+Seasonal or Intermittent Service Schedule** 
+cents 
+/kWh 
+Effective 
+ Date 
+Annual Billing Adjustments Rider BA 
+Fuel and Fuel-Related Adjustment Rate 
+0.165 
+12/1/24 
+Fuel and Fuel-Related Adjustment Experience Modification Factor (EMF) 
+0.246 
+12/1/24 
+Demand Side Management (DSM) Rate* 
+0.041 
+1/1/25 
+Energy Efficiency (EE) Rate* 
+0.233 
+1/1/25 
+Annual Billing Adjustments Rider BA - Net Adjustment 
+0.685 
+EDIT-4 Rider 
+-0.304 
+10/1/23 
+Joint Agency Asset Rider JAA 
+0.814 
+12/1/24 
+Competitive Procurement of Renewable Energy Rider CPRE 
+0.001 
+12/1/24 
+Earnings Sharing Mechanism Rider ESM 
+0.000 
+104/1/235 
+Performance Incentive Mechanism Rider PIM 
+0.0002 
+104/1/235 
+TOTAL cents/kWh 
+1.1968 
+Large General Service Schedules** 
+ 
+ 
+cents 
+/kWh 
+ 
+ 
+dollars 
+/kW 
+ 
+ 
+Effective 
+ Date 
+Annual Billing Adjustments Rider BA 
+Fuel and Fuel-Related Adjustment Rate 
+0.609 
+12/1/24 
+Fuel and Fuel-Related Adjustment Experience Modification Factor (EMF) 
+0.557 
+12/1/24 
+Demand Side Management (DSM) Rate* 
+0.041 
+1/1/25 
+Energy Efficiency (EE) Rate* 
+0.233 
+1/1/25 
+Annual Billing Adjustments Rider BA - Net Adjustment 
+1.553440 
+EDIT-4 Rider 
+-0.093 
+10/1/23 
+Competitive Procurement of Renewable Energy Rider CPRE 
+0.004 
+12/1/24 
+Earnings Sharing Mechanism Rider ESM 
+0.000 
+104/1/235 
+Performance Incentive Mechanism Rider PIM 
+0.0002 
+104/1/235 
+TOTAL cents/kWh 
+1.3513 
+Joint Agency Asset Rider JAA 
+1.72 
+12/1/24 
+TOTAL dollars/kW 
+1.72 
+Duke Energy Progress, LLC 
+          NC FifthSixth Revised Leaf No. 600 
+(North Carolina Only)  
+Superseding NC FourthFifth Revised Leaf No. 600 
+ 
+ 
+ 
+* Qualifying customers who have opted out of the Company’s DSM and/or EE Programs are not subject to the 
+applicable DSM and EE Adjustment charges based on the individual customer’s opt-out election.  Refer to Leaf 
+No. 601 Rider BA to determine the DSM and EE Adjustment amounts, if any, applicable to customers who have 
+opted out.   
+** The monthly bill for certain non-residential schedules includes the Customer Affordability Recovery (CAR) 
+rider as a fixed charge per bill as noted in Leaf No. 611. 
+   
+ 
+NC FifthSixth Revised Leaf No. 600 
+Effective for service rendered on and after JanuaryApril 1, 2025 
+NCUC Docket No. E-2, Subs 1342 and 1300, Orders dated NovemberMarch 132, 20245 and December 10, 2024 
+ 
+Page 4 of 5 
+Schedule HP & Schedule LGS-RTP** 
+cents 
+/kWh 
+Baseline 
+cents 
+/kWh 
+Incremental 
+dollars 
+/kW 
+Effective 
+ Date 
+Annual Billing Adjustments Rider BA 
+Fuel and Fuel-Related Adjustment Rate 
+0.609 
+0.000 
+12/1/24 
+Fuel and Fuel-Related Adjustment Experience Modification Factor (EMF) 
+0.557 
+0.000 
+12/1/24 
+Demand Side Management (DSM) Rate* 
+0.041 
+0.041 
+1/1/25 
+Energy Efficiency (EE) Rate* 
+0.233 
+0.233 
+1/1/25 
+Annual Billing Adjustments Rider BA - Net Adjustment 
+1.440 
+0.274 
+EDIT-4 Rider 
+-0.093 
+0.000 
+10/1/23 
+Competitive Procurement of Renewable Energy Rider CPRE 
+0.004 
+0.004 
+12/1/24 
+Earnings Sharing Mechanism Rider ESM 
+0.000 
+0.000 
+104/1/235 
+Performance Incentive Mechanism Rider PIM 
+0.0002 
+0.000 
+104/1/235 
+TOTAL cents/kWh 
+1.3513 
+0.278 
+Joint Agency Asset Rider JAA 
+1.72 
+12/1/24 
+TOTAL dollars/kW 
+1.72 
+ 
+ 
+Outdoor Lighting Schedules  
+ 
+cents 
+/kWh 
+ 
+Effective 
+ Date 
+Annual Billing Adjustments Rider BA 
+Fuel and Fuel-Related Adjustment Rate 
+-0.532 
+12/1/24 
+Fuel and Fuel-Related Adjustment Experience Modification Factor (EMF) 
+1.228 
+12/1/24 
+Demand Side Management (DSM) Rate 
+0.000 
+1/1/25 
+Energy Efficiency (EE) Rate 
+-0.022 
+1/1/25 
+Annual Billing Adjustments Rider BA - Net Adjustment 
+0.674 
+EDIT-4 Rider 
+-0.801 
+10/1/23 
+Joint Agency Asset Rider JAA 
+0.966 
+12/1/24 
+Competitive Procurement of Renewable Energy Rider CPRE 
+0.010 
+12/1/24 
+Earnings Sharing Mechanism Rider ESM 
+0.000 
+104/1/235 
+Performance Incentive Mechanism Rider PIM 
+0.0002 
+104/1/235 
+TOTAL cents/kWh 
+0.84951 
+ 
+Sports Field Lighting Schedule 
+cents 
+/kWh 
+Effective 
+ Date 
+Annual Billing Adjustments Rider BA 
+Fuel and Fuel-Related Adjustment Rate 
+-0.532 
+12/1/24 
+Fuel and Fuel-Related Adjustment Experience Modification Factor (EMF) 
+1.228 
+12/1/24 
+Demand Side Management (DSM) Rate 
+0.000 
+1/1/25 
+Energy Efficiency (EE) Rate 
+-0.022 
+1/1/25 
+Duke Energy Progress, LLC 
+          NC FifthSixth Revised Leaf No. 600 
+(North Carolina Only)  
+Superseding NC FourthFifth Revised Leaf No. 600 
+ 
+ 
+ 
+* Qualifying customers who have opted out of the Company’s DSM and/or EE Programs are not subject to the 
+applicable DSM and EE Adjustment charges based on the individual customer’s opt-out election.  Refer to Leaf 
+No. 601 Rider BA to determine the DSM and EE Adjustment amounts, if any, applicable to customers who have 
+opted out.   
+** The monthly bill for certain non-residential schedules includes the Customer Affordability Recovery (CAR) 
+rider as a fixed charge per bill as noted in Leaf No. 611. 
+   
+ 
+NC FifthSixth Revised Leaf No. 600 
+Effective for service rendered on and after JanuaryApril 1, 2025 
+NCUC Docket No. E-2, Subs 1342 and 1300, Orders dated NovemberMarch 132, 20245 and December 10, 2024 
+ 
+Page 5 of 5 
+Annual Billing Adjustments Rider BA - Net Adjustment 
+0.674 
+EDIT-4 Rider 
+-0.692 
+10/1/23 
+Joint Agency Asset Rider JAA 
+0.966 
+12/1/24 
+Competitive Procurement of Renewable Energy Rider CPRE 
+0.010 
+12/1/24 
+Earnings Sharing Mechanism Rider ESM 
+0.000 
+104/1/235 
+Performance Incentive Mechanism Rider PIM 
+0.0002 
+104/1/235 
+TOTAL cents/kWh 
+0.95860 
+ 
+ 
+Traffic Signal Schedules** 
+ 
+cents 
+/kWh 
+ 
+Effective 
+ Date 
+Annual Billing Adjustments Rider BA 
+Fuel and Fuel-Related Adjustment Rate 
+0.179 
+12/1/24 
+Fuel and Fuel-Related Adjustment Experience Modification Factor (EMF) 
+0.137 
+12/1/24 
+Demand Side Management (DSM) Rate* 
+0.041 
+1/1/25 
+Energy Efficiency (EE) Rate* 
+0.233 
+1/1/25 
+Annual Billing Adjustments Rider BA - Net Adjustment 
+0.590 
+EDIT-4 Rider 
+-0.191 
+10/1/23 
+Joint Agency Asset Rider JAA 
+0.291 
+12/1/24 
+Competitive Procurement of Renewable Energy Rider CPRE 
+0.026 
+12/1/24 
+Earnings Sharing Mechanism Rider ESM 
+0.000 
+104/1/235 
+Performance Incentive Mechanism Rider PIM 
+0.0002 
+104/1/235 
+TOTAL cents/kWh 
+0.7168 
+ 

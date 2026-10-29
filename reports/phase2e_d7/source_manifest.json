@@ -1,0 +1,51 @@
+[
+  {
+    "label": "jaa",
+    "source_aliases": [
+      "data\\historical\\ncuc\\e-2-sub-1207\\32b7c724-edef-4a3a-bb45-85058c2ec503.pdf"
+    ],
+    "source_pdf": "data\\historical\\ncuc\\e-2-sub-1207\\32b7c724-edef-4a3a-bb45-85058c2ec503.pdf",
+    "sha256": "3e8067d223d94eabe1a7f34fb02a47156775ac4403f7cf06e85e6892bd430b05",
+    "md5": "b97bdc765171f37453f19f6d07b1eb25",
+    "page_count": 110,
+    "size_bytes": 3480525,
+    "page_text_seconds": 0.230312400002731
+  },
+  {
+    "label": "tariff_book",
+    "source_aliases": [
+      "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\3f92be50-2f10-4d4c-8952-2bccaa339aba.pdf"
+    ],
+    "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\3f92be50-2f10-4d4c-8952-2bccaa339aba.pdf",
+    "sha256": "7a5cbdce496e1dbafd60af074cc80a786dd9087fcd121c65d7e13981bf3c41a0",
+    "md5": "31a080ac1bfc223611fdaaba6a1db3e1",
+    "page_count": 316,
+    "size_bytes": 15732561,
+    "page_text_seconds": 1.108016599988332
+  },
+  {
+    "label": "appeal",
+    "source_aliases": [
+      "data\\historical\\ncuc\\e-2-sub-1300\\32d25655-7a4c-4141-acc0-d675a507e369.pdf",
+      "data\\historical\\ncuc\\e-7-sub-1276\\32d25655-7a4c-4141-acc0-d675a507e369.pdf"
+    ],
+    "source_pdf": "data\\historical\\ncuc\\e-2-sub-1300\\32d25655-7a4c-4141-acc0-d675a507e369.pdf",
+    "sha256": "60276868e964b0e3b5e6270760cddb8895b22dc7fd19863262c73522e718ecbf",
+    "md5": "aea8a3a87f0cc374204f18db39348da8",
+    "page_count": 598,
+    "size_bytes": 13673060,
+    "page_text_seconds": 2.2996991999971215
+  },
+  {
+    "label": "dsm_ee",
+    "source_aliases": [
+      "data\\historical\\ncuc\\e-7-sub-1285\\543b80be-7672-4b7c-9897-da915455f6da.pdf"
+    ],
+    "source_pdf": "data\\historical\\ncuc\\e-7-sub-1285\\543b80be-7672-4b7c-9897-da915455f6da.pdf",
+    "sha256": "77a0da9636cd9f283d87b0e8102be79ab221427054a8f8d7452cf9318b43ee28",
+    "md5": "7cbf28d6e4f1000804b0c8dadc8c9c80",
+    "page_count": 1097,
+    "size_bytes": 54098545,
+    "page_text_seconds": 3.712028400012059
+  }
+]

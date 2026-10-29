@@ -1,0 +1,16 @@
+
+  GitNexus Analyzer (1.6.12)
+Warning: npm 11.x can crash while installing gitnexus via npx (npm/arborist "node.target is null"). Prefer: pnpm --allow-build=@ladybugdb/core --allow-build=gitnexus --allow-build=tree-sitter dlx gitnexus@latest analyze or npm install -g gitnexus@latest. See https://github.com/abhigyanpatwari/GitNexus/issues/1939
+(node:60600) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+{"level":40,"time":1793282338227,"name":"gitnexus","msg":"GitNexus: reclaimed quarantined WAL lbug.wal.missing-shadow.1793282138429-c6fia9n07of from a prior crash"}
+{"level":40,"time":1793282338228,"name":"gitnexus","msg":"GitNexus: reclaimed quarantined WAL lbug.wal.missing-shadow.1793282140450-zxurtodf0jk from a prior crash"}
+
+  Analysis failed: FTS repair failed - missing indexes after rebuild: Category.category_fts, Interface.interface_fts. Run `gitnexus analyze --force` to perform a full graph+FTS rebuild; if that also fails, verify FTS extension availability via `gitnexus doctor`.
+Error: FTS repair failed - missing indexes after rebuild: Category.category_fts, Interface.interface_fts. Run `gitnexus analyze --force` to perform a full graph+FTS rebuild; if that also fails, verify FTS extension availability via `gitnexus doctor`.
+    at runFullAnalysisInner (file:///C:/Users/bradr/AppData/Local/npm-cache/_npx/5e786f48223a616c/node_modules/gitnexus/dist/core/run-analyze.js:836:23)
+    at async runFullAnalysis (file:///C:/Users/bradr/AppData/Local/npm-cache/_npx/5e786f48223a616c/node_modules/gitnexus/dist/core/run-analyze.js:654:16)
+    at async analyzeCommandImpl (file:///C:/Users/bradr/AppData/Local/npm-cache/_npx/5e786f48223a616c/node_modules/gitnexus/dist/cli/analyze.js:1155:24)
+    at async analyzeCommand (file:///C:/Users/bradr/AppData/Local/npm-cache/_npx/5e786f48223a616c/node_modules/gitnexus/dist/cli/analyze.js:585:9)
+    at async analyzeOrWatchCommandWithRunnerIdentity (file:///C:/Users/bradr/AppData/Local/npm-cache/_npx/5e786f48223a616c/node_modules/gitnexus/dist/cli/analyze.js:610:5)
+    at async Command.<anonymous> (file:///C:/Users/bradr/AppData/Local/npm-cache/_npx/5e786f48223a616c/node_modules/gitnexus/dist/cli/lazy-action.js:60:9)

@@ -1,0 +1,43 @@
+{
+  "proposal_id": 10,
+  "state": "proposed",
+  "blocking_failures": [],
+  "checks": {
+    "file_present": true,
+    "file_matches_stored_hash": true,
+    "pages_in_file": true,
+    "first_page_prints_family_leaf": true,
+    "no_other_leaf_in_run": true,
+    "utility_matches_family": true,
+    "single_revision_identity": true,
+    "pages_not_redline": true,
+    "file_is_the_reviewed_file": true,
+    "printed_revision_is_expected": true,
+    "single_printed_effective_date": true,
+    "page_range_complete": true,
+    "supersession_predecessor_on_file": false,
+    "pages_not_already_bound_to_family": true,
+    "source_provenance_known": true,
+    "binding_mode_allowed": true
+  },
+  "plan": {
+    "mode": "create_version",
+    "target_version_id": null,
+    "revision_value": "NC:leaf-503:rev-1",
+    "effective_start": "2024-10-01",
+    "printed_dates": [
+      "2024-10-01"
+    ],
+    "same_revision_versions": [],
+    "same_date_versions": [],
+    "provenance": [
+      {
+        "id": 2750,
+        "docket_number": "E-2-SUB-1300-SEPT2023",
+        "filing_title": "7b9171ff-48d4-46dd-82eb-43bd1ca2cd3d",
+        "filing_date": "October 1, 2023",
+        "discovered_url": "file://C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\7b9171ff-48d4-46dd-82eb-43bd1ca2cd3d.pdf"
+      }
+    ]
+  }
+}

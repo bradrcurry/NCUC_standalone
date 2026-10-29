@@ -10,6 +10,8 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+from duke_rates.historical.ncuc.ingestion_validation import version_source_integrity
+
 
 @dataclass
 class PromotionProposal:
@@ -129,6 +131,33 @@ def promote_llm_charge_proposals(
                         SET promotion_status = 'skipped_duplicate'
                         WHERE id = ?
                         """,
+                        (int(proposal["id"]),),
+                    )
+                continue
+            extraction = conn.execute(
+                "SELECT source_pdf, historical_document_id "
+                "FROM llm_candidate_rate_extractions WHERE id = ?",
+                (proposal["extraction_id"],),
+            ).fetchone()
+            source_failure = version_source_integrity(
+                conn,
+                proposal["version_id"],
+                evidence_path=extraction[0] if extraction else None,
+                evidence_document_id=extraction[1] if extraction else None,
+            )
+            if source_failure:
+                skipped.append(
+                    {
+                        "proposal_id": int(proposal["id"]),
+                        "reason": "source_integrity",
+                        "failed": sorted(source_failure["failed"]),
+                        "source_validation": source_failure,
+                    }
+                )
+                if execute:
+                    conn.execute(
+                        "UPDATE llm_rate_charge_promotion_proposals SET promotion_status = "
+                        "'skipped_source_integrity' WHERE id = ?",
                         (int(proposal["id"]),),
                     )
                 continue

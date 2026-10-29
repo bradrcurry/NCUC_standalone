@@ -1,0 +1,471 @@
+{
+  "manifest_id": "2026-10-27_billing_integrity",
+  "description": "Source-verified data corrections from the 2026-10-27 billing integrity investigation (docs/reports/2026-10-27_billing_integrity_investigation.md). Each item names the source PDF, the published value, and a precondition on the stored value. Apply only to a scratch DB with scripts/corrections/apply_corrections.py; production promotion requires review.",
+  "corrections": [
+    {
+      "id": "C1-leaf502-2024-parsed-json-artifacts",
+      "kind": "parsed_json_remove",
+      "table": "historical_documents",
+      "row_id": 33,
+      "family_key": "nc-progress-leaf-502",
+      "effective": "2024-10-01",
+      "source_pdf": "data/historical/raw/nc/progress/rate/residential-time-of-use-energy-leaf-no-502-eff-2024-10-01-data-historical-manual.pdf",
+      "published": "p2: Basic Customer Charge $14.00; 28.821c per On-Peak kWh; 10.911c per Off-Peak kWh; 7.105c per Discount kWh (same for May-Sep and Oct-Apr)",
+      "defect": "extraction: list numbering '1.' / '2. kWh Energy Charge' parsed as a $1.00 Basic Customer Charge and a 0.02 $/kWh Energy Charge; plus an unperioded duplicate of the on-peak rate. BillingEngine uses fixed_charges[0] only, so an R-TOU estimate would bill $1.00 instead of $14.00.",
+      "remove": [
+        {
+          "path": "schedule.fixed_charges",
+          "match": {
+            "label": "Basic Customer Charge",
+            "amount": 1.0
+          }
+        },
+        {
+          "path": "schedule.energy_charges",
+          "match": {
+            "label": "Energy Charge",
+            "rate": 0.02,
+            "period": null
+          }
+        },
+        {
+          "path": "schedule.energy_charges",
+          "match": {
+            "label": "Energy Charge",
+            "rate": 0.28821,
+            "period": null
+          }
+        }
+      ],
+      "evidence": {
+        "pdf_page": [
+          1,
+          2
+        ],
+        "effective_phrase": "Effective for service rendered from October 1, 2024 through September 30, 2025",
+        "tokens": [
+          "Basic Customer Charge: $14.00",
+          "28.821",
+          "10.911",
+          "7.105",
+          "plus $9.00"
+        ]
+      }
+    },
+    {
+      "id": "C2-leaf502-2025-parsed-json-artifacts",
+      "kind": "parsed_json_remove",
+      "table": "historical_documents",
+      "row_id": 34,
+      "family_key": "nc-progress-leaf-502",
+      "effective": "2025-10-01",
+      "source_pdf": "data/historical/raw/nc/progress/rate/residential-time-of-use-energy-leaf-no-502-eff-2025-10-01-data-historical-manual.pdf",
+      "published": "p2: Basic Customer Charge $14.00; 29.905c per On-Peak kWh; 11.321c per Off-Peak kWh; 7.372c per Discount kWh (same for May-Sep and Oct-Apr)",
+      "defect": "same as C1",
+      "remove": [
+        {
+          "path": "schedule.fixed_charges",
+          "match": {
+            "label": "Basic Customer Charge",
+            "amount": 1.0
+          }
+        },
+        {
+          "path": "schedule.energy_charges",
+          "match": {
+            "label": "Energy Charge",
+            "rate": 0.02,
+            "period": null
+          }
+        },
+        {
+          "path": "schedule.energy_charges",
+          "match": {
+            "label": "Energy Charge",
+            "rate": 0.29905,
+            "period": null
+          }
+        }
+      ],
+      "evidence": {
+        "pdf_page": [
+          1,
+          2
+        ],
+        "effective_phrase": "Effective for service rendered on and after October 1, 2025",
+        "tokens": [
+          "Basic Customer Charge: $14.00",
+          "29.905",
+          "11.321",
+          "7.372",
+          "plus $9.00"
+        ]
+      }
+    },
+    {
+      "id": "C3-leaf502-2024-missing-charges",
+      "kind": "insert_charges",
+      "table": "tariff_charges",
+      "version_id": 5306,
+      "family_key": "nc-progress-leaf-502",
+      "effective": "2024-10-01",
+      "source_pdf": "data/historical/raw/nc/progress/rate/residential-time-of-use-energy-leaf-no-502-eff-2024-10-01-data-historical-manual.pdf",
+      "defect": "extraction/persistence: version holds only the on-peak row (0.28821) in both the 2026-05-11 and current DBs; BCC, off-peak, discount and three-phase rows were never persisted.",
+      "precondition_count": 1,
+      "rows": [
+        {
+          "charge_type": "fixed",
+          "charge_label": "Basic Customer Charge",
+          "rate_value": 14.0,
+          "rate_unit": "$/month",
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "residential",
+          "source_snippet": "Basic Customer Charge: $14.00"
+        },
+        {
+          "charge_type": "tou_energy",
+          "charge_label": "Off Peak Energy Charge",
+          "rate_value": 0.10911,
+          "rate_unit": "$/kWh",
+          "tou_period": "off_peak",
+          "season": "all_year",
+          "customer_class": "residential",
+          "source_snippet": "10.911¢ per Off-Peak kWh"
+        },
+        {
+          "charge_type": "tou_energy",
+          "charge_label": "Discount Energy Charge",
+          "rate_value": 0.07105,
+          "rate_unit": "$/kWh",
+          "tou_period": "discount",
+          "season": "all_year",
+          "customer_class": "residential",
+          "source_snippet": "7.105¢ per Discount kWh"
+        },
+        {
+          "charge_type": "fixed",
+          "charge_label": "Three-Phase Surcharge",
+          "rate_value": 9.0,
+          "rate_unit": "$/month",
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "residential",
+          "source_snippet": "The bill computed for single-phase service plus $9.00."
+        }
+      ],
+      "evidence": {
+        "pdf_page": [
+          1,
+          2
+        ],
+        "effective_phrase": "Effective for service rendered from October 1, 2024 through September 30, 2025",
+        "tokens": [
+          "Basic Customer Charge: $14.00",
+          "10.911",
+          "7.105",
+          "plus $9.00"
+        ]
+      }
+    },
+    {
+      "id": "C4-leaf502-2025-missing-charges",
+      "kind": "insert_charges",
+      "table": "tariff_charges",
+      "version_id": 5307,
+      "family_key": "nc-progress-leaf-502",
+      "effective": "2025-10-01",
+      "source_pdf": "data/historical/raw/nc/progress/rate/residential-time-of-use-energy-leaf-no-502-eff-2025-10-01-data-historical-manual.pdf",
+      "defect": "same as C3",
+      "precondition_count": 1,
+      "rows": [
+        {
+          "charge_type": "fixed",
+          "charge_label": "Basic Customer Charge",
+          "rate_value": 14.0,
+          "rate_unit": "$/month",
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "residential",
+          "source_snippet": "Basic Customer Charge: $14.00"
+        },
+        {
+          "charge_type": "tou_energy",
+          "charge_label": "Off Peak Energy Charge",
+          "rate_value": 0.11321,
+          "rate_unit": "$/kWh",
+          "tou_period": "off_peak",
+          "season": "all_year",
+          "customer_class": "residential",
+          "source_snippet": "11.321¢ per Off-Peak kWh"
+        },
+        {
+          "charge_type": "tou_energy",
+          "charge_label": "Discount Energy Charge",
+          "rate_value": 0.07372,
+          "rate_unit": "$/kWh",
+          "tou_period": "discount",
+          "season": "all_year",
+          "customer_class": "residential",
+          "source_snippet": "7.372¢ per Discount kWh"
+        },
+        {
+          "charge_type": "fixed",
+          "charge_label": "Three-Phase Surcharge",
+          "rate_value": 9.0,
+          "rate_unit": "$/month",
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "residential",
+          "source_snippet": "The bill computed for single-phase service plus $9.00."
+        }
+      ],
+      "evidence": {
+        "pdf_page": [
+          1,
+          2
+        ],
+        "effective_phrase": "Effective for service rendered on and after October 1, 2025",
+        "tokens": [
+          "Basic Customer Charge: $14.00",
+          "11.321",
+          "7.372",
+          "plus $9.00"
+        ]
+      }
+    },
+    {
+      "id": "C5-leaf503-2025-season-tag",
+      "kind": "update_charges",
+      "table": "tariff_charges",
+      "family_key": "nc-progress-leaf-503",
+      "effective": "2025-10-01",
+      "source_pdf": "data/raw/nc/progress/rate/leaf-no-503-schedule-r-tou-cpp-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no.pdf",
+      "published": "p2: B. kWh Energy Charge: 41.002c Critical Peak; 21.952c On-Peak; 11.000c Off-Peak; 8.274c Discount (single, non-seasonal rate set). Bill 2026-03-20 prints the same four rates in March.",
+      "defect": "classification: 2026-05-29 re-extraction tagged all four rows season='summer' (2026-05-11 DB had 'all_year'), so any non-summer estimate filters them all out.",
+      "updates": [
+        {
+          "id": 753113,
+          "column": "season",
+          "before": "summer",
+          "after": "all_year"
+        },
+        {
+          "id": 753114,
+          "column": "season",
+          "before": "summer",
+          "after": "all_year"
+        },
+        {
+          "id": 753115,
+          "column": "season",
+          "before": "summer",
+          "after": "all_year"
+        },
+        {
+          "id": 753116,
+          "column": "season",
+          "before": "summer",
+          "after": "all_year"
+        }
+      ],
+      "evidence": {
+        "pdf_page": [
+          2
+        ],
+        "effective_phrase": "Effective for service rendered on and after October 1, 2025",
+        "tokens": [
+          "41.002",
+          "21.952",
+          "11.000",
+          "8.274"
+        ],
+        "absent_tokens": [
+          "May through September"
+        ]
+      }
+    },
+    {
+      "id": "C6-leaf503-2025-missing-bcc",
+      "kind": "insert_charges",
+      "table": "tariff_charges",
+      "version_id": 5313,
+      "family_key": "nc-progress-leaf-503",
+      "effective": "2025-10-01",
+      "source_pdf": "data/raw/nc/progress/rate/leaf-no-503-schedule-r-tou-cpp-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no.pdf",
+      "defect": "extraction: no fixed rows persisted. Bill 2026-03-20 shows Basic Customer Charge $14.00.",
+      "precondition_count": 4,
+      "rows": [
+        {
+          "charge_type": "fixed",
+          "charge_label": "Basic Customer Charge",
+          "rate_value": 14.0,
+          "rate_unit": "$/month",
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "residential",
+          "source_snippet": "A. Basic Customer Charge: $14.00"
+        },
+        {
+          "charge_type": "fixed",
+          "charge_label": "Three-Phase Surcharge",
+          "rate_value": 9.0,
+          "rate_unit": "$/month",
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "residential",
+          "source_snippet": "The bill computed for single-phase service plus $9.00."
+        }
+      ],
+      "evidence": {
+        "pdf_page": [
+          1,
+          2
+        ],
+        "effective_phrase": "Effective for service rendered on and after October 1, 2025",
+        "tokens": [
+          "Basic Customer Charge: $14.00",
+          "plus $9.00"
+        ]
+      }
+    },
+    {
+      "id": "C7-leaf571-led420-ocr5",
+      "kind": "update_charges",
+      "table": "tariff_charges",
+      "family_key": "nc-progress-leaf-571",
+      "effective": "2025-10-01",
+      "source_pdf": "data/historical/raw/nc/progress/rate/street-lighting-service-leaf-no-571-eff-2025-10-01-data-historical-manual-leaf-n.pdf",
+      "published": "p1 table row: 'LED 420 | 420 | 51.09 | 142'",
+      "defect": "OCR normalization (fixed in 6400551): leading '5' of 51.09 rewritten to '$', stored 1.09.",
+      "updates": [
+        {
+          "id": 753649,
+          "column": "rate_value",
+          "before": 1.09,
+          "after": 51.09
+        }
+      ],
+      "evidence": {
+        "pdf_page": [
+          1
+        ],
+        "effective_phrase": "Effective for service rendered on and after October 1, 2025",
+        "tokens": [
+          "LED 420 420 51.09 142"
+        ]
+      }
+    },
+    {
+      "id": "C8-leaf656-customer-charge-ocr5",
+      "kind": "update_charges",
+      "table": "tariff_charges",
+      "family_key": "nc-progress-leaf-656",
+      "effective": "2023-10-01",
+      "source_pdf": "data/raw/nc/progress/rider/leaf-no-656-rider-68-ry1-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no-656-r.pdf",
+      "published": "p1: 'A. Customer Charge in addition to the Basic Customer Charge in the rate schedule: $55.00.'",
+      "defect": "OCR normalization (fixed in 6400551): '$55.00' became '$$5.00', stored 5.00. The label 'Basic Customer Charge' is also inaccurate (this is an additional customer charge); label left unchanged pending review.",
+      "updates": [
+        {
+          "id": 755536,
+          "column": "rate_value",
+          "before": 5.0,
+          "after": 55.0
+        }
+      ],
+      "evidence": {
+        "pdf_page": [
+          1
+        ],
+        "effective_phrase": "Effective for service rendered on and after October 1, 2023",
+        "tokens": [
+          "Basic Customer Charge in the rate schedule: $55.00"
+        ]
+      }
+    },
+    {
+      "id": "C9-bill-2026-03-20-continued-electric-section",
+      "kind": "bill_statement_patch",
+      "table": "bill_statements",
+      "row_id": 12,
+      "source_pdf": "../version_3/Actual Duke Bills/2026-03-20.pdf",
+      "published": "p4 'Billing details - Electric continued': Storm Recovery Charge $4.93; Summary of Rider Adjustments 27.06; Total Current Charges $177.97",
+      "defect": "bill parsing: the electric section continues across a page break and the parser stopped at the page break, so the stored statement omits Storm Recovery and Summary of Rider Adjustments and has no electric total. Reconciliation then compared the partial line sum (145.98) to an estimate that also omitted those riders (145.99), a false 'good_match'.",
+      "before_total": null,
+      "after_total": 177.97,
+      "append_line_items": [
+        {
+          "amount": 4.93,
+          "detail": null,
+          "is_subperiod_detail": false,
+          "label": "Storm Recovery Charge",
+          "period_end": null,
+          "period_start": null,
+          "quantity": null,
+          "rate": null,
+          "unit": null
+        },
+        {
+          "amount": 27.06,
+          "detail": null,
+          "is_subperiod_detail": false,
+          "label": "Summary of Rider Adjustments",
+          "period_end": null,
+          "period_start": null,
+          "quantity": null,
+          "rate": null,
+          "unit": null
+        }
+      ],
+      "evidence": {
+        "pdf_page": [
+          4
+        ],
+        "effective_phrase": null,
+        "tokens": [
+          "Billing details - Electric continued",
+          "Storm Recovery Charge $4.93",
+          "Summary of Rider Adjustments 27.06",
+          "Total Current Charges $177.97"
+        ]
+      }
+    }
+  ],
+  "flagged_not_applied": [
+    {
+      "id": "F1-dec-ol-2001-metal-halide",
+      "table": "tariff_charges",
+      "row_id": 752064,
+      "family_key": "nc-carolinas-schedule-OL",
+      "effective": "2001-07-01",
+      "stored": 6.05,
+      "suspected": 56.05,
+      "source_pdf": "data/raw/historical/ncuc/e-7/e-7-nodate-duke-power-s-rate-schedule-riders.pdf (p22)",
+      "reason": "Raw text holds '56.05' and no standalone '6.05' token, matching the leading-5 defect, but the OCR table on p22 is garbled ('NewPoIefH') and the row/column binding to 'Metal Halide - Area - New Pole' was not confirmed visually. Needs a rendered-page check."
+    },
+    {
+      "id": "F2-leaf600-hd40-title-date",
+      "table": "historical_documents",
+      "row_id": 40,
+      "reason": "Title/filename say 'eff. 2024-04-01'; the PDF text and parsed rider say 'Effective for service rendered on and after April 1, 2025' (TOTAL 1.950c/kWh, matches bills 2025-04..2025-11). Data is correct; metadata label is wrong. Cosmetic."
+    },
+    {
+      "id": "F3-leaf608-rdm-2025-04-01-lost-version",
+      "table": "tariff_versions / tariff_charges / historical_documents",
+      "row_id": "tariff_versions 5414 (kept), 5415 (deleted between 2026-05-11 and 2026-06-05); historical_documents 368, 48",
+      "reason": "Published RDM residential for service on/after April 1, 2025 = 0.232c/kWh (hd 48 PDF; leaf-600 2025-04-01 summary line 'RDM 0.232 4/1/25'). The 2026-05-11 DB held both vid 5415 (hd 48, 0.00232) and vid 5414 (hd 368, 0.00252). hd 368 is the current-site ry1 PDF whose text says 'on and after April 1, 2026' but is stored as 2025-04-01. The late-May (family, effective_start) dedup kept 5414 and dropped the correct 5415. Proposed: re-date hd 368 / vid 5414 to 2026-04-01 and restore a 2025-04-01 version on hd 48 with 0.00232 $/kWh. Not applied: re-dating changes version selection for every consumer and needs review. No effect on the 12-bill reconciliation path (which prices riders from the leaf-600 summary)."
+    },
+    {
+      "id": "F4-leaf610-pim-misdated-ry1",
+      "table": "tariff_versions / historical_documents",
+      "row_id": "tariff_versions 5424, historical_documents 370",
+      "reason": "hd 370 (leaf-no-610-rider-pim-ry1.pdf) text: 'Effective for service rendered on and after April 1, 2026', 0.005c/kWh; stored effective_start 2025-04-01. Published 2025-04-01 PIM (leaf-600 2025-04-01 summary) = 0.002c/kWh, which no current version holds. Same misdating pattern as F3 (already present in the 2026-05-11 DB)."
+    },
+    {
+      "id": "F5-leaf602-jaa-2024-12-01-misbound",
+      "table": "tariff_versions",
+      "row_id": 6649,
+      "reason": "Version 6649 (effective 2024-12-01) is now bound to hd 5365 (E-2 Sub 1275, 'Effective ... on and after December 1, 2021', stored 2021-06-01) and holds residential 0.00482. Published JAA residential effective 12/1/24 = 0.538c/kWh (leaf-600 2025-04-01 summary). On 2026-05-11 the same version pointed at an E-2 Sub 1354 bundle with 0.00464 (the 2026 rate). Neither binding is the 2024-12-01 JAA sheet; needs the correct source document."
+    }
+  ]
+}

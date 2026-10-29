@@ -107,60 +107,64 @@ def triage_pdf(file_path: str) -> DocumentTriage:
     triage = DocumentTriage(
         file_path=str(file_path),
         file_hash=_compute_hash(file_path),
-        file_size_bytes=path.stat().st_size
+        file_size_bytes=path.stat().st_size,
     )
 
     try:
         import fitz  # PyMuPDF
+
         triage.native_text_backend = "pymupdf"
         doc = fitz.open(str(path))
         triage.page_count = doc.page_count
-        
+
         # Sample first 3 pages
+        sampled_page_count = min(3, doc.page_count)
         first_pages_text = ""
         for i in range(min(3, doc.page_count)):
             first_pages_text += doc[i].get_text("text") + "\n"
-            
+
         triage.text_char_count_first_pages = len(first_pages_text.strip())
-        
+
         # Sample mid and end for large docs
         sampled_text = first_pages_text
         if doc.page_count > 10:
+            sampled_page_count += 2
             mid_idx = doc.page_count // 2
             end_idx = doc.page_count - 1
             sampled_text += doc[mid_idx].get_text("text") + "\n"
             sampled_text += doc[end_idx].get_text("text") + "\n"
-            
+
         triage.text_char_count_sampled = len(sampled_text.strip())
         doc.close()
-        
+
     except ImportError:
         # Fallback to pdfplumber if PyMuPDF not available
         import pdfplumber
+
         triage.native_text_backend = "pdfplumber"
         with pdfplumber.open(str(path)) as pdf:
             triage.page_count = len(pdf.pages)
+            sampled_page_count = min(3, triage.page_count)
             first_pages_text = ""
             for i in range(min(3, triage.page_count)):
                 page_text = pdf.pages[i].extract_text()
                 if page_text:
                     first_pages_text += page_text + "\n"
-            
+
             triage.text_char_count_first_pages = len(first_pages_text.strip())
-            
+
             sampled_text = first_pages_text
             if triage.page_count > 10:
+                sampled_page_count += 2
                 mid_page = pdf.pages[triage.page_count // 2].extract_text() or ""
                 end_page = pdf.pages[-1].extract_text() or ""
                 sampled_text += mid_page + "\n" + end_page + "\n"
-                
+
             triage.text_char_count_sampled = len(sampled_text.strip())
 
     # Assess if scanned (very little text for multiple pages)
     sampled_chars_per_page = (
-        triage.text_char_count_sampled / max(1, min(triage.page_count, 5))
-        if triage.page_count
-        else 0.0
+        triage.text_char_count_sampled / max(1, sampled_page_count) if triage.page_count else 0.0
     )
     triage.sampled_chars_per_page = round(sampled_chars_per_page, 2)
     sparse_text_ratio = 1.0 - min(sampled_chars_per_page / 400.0, 1.0)
@@ -176,11 +180,12 @@ def triage_pdf(file_path: str) -> DocumentTriage:
     tariff_hits = sum(1 for w in TARIFF_VOCAB if w.upper() in sampled_upper)
     procedural_hits = sum(1 for w in PROCEDURAL_VOCAB if w.upper() in sampled_upper)
     table_density = _estimate_table_like_density(sampled_text)
-    
+
     triage.keyword_hits["tariff"] = tariff_hits
     triage.keyword_hits["procedural"] = procedural_hits
     triage.keyword_hits["table_like_lines"] = int(table_density * 100)
     triage.keyword_hits["sampled_chars_per_page"] = int(sampled_chars_per_page)
+    triage.keyword_hits["sampled_pages"] = sampled_page_count
 
     for pattern in LEAF_PHRASES:
         if re.search(pattern, sampled_text, re.IGNORECASE):
@@ -202,7 +207,7 @@ def triage_pdf(file_path: str) -> DocumentTriage:
     if triage.reading_order_risk_score >= 0.45:
         triage.triage_flags.append("reading_order_risk")
 
-    if triage.page_count > 0 and triage.text_char_count_sampled < (triage.page_count * 20):
+    if triage.page_count > 0 and sampled_chars_per_page < 20:
         triage.is_likely_scanned = True
         triage.route_recommendation = PipelineRoute.OCR_REQUIRED
         triage.triage_flags.append("ocr_required_high_confidence")

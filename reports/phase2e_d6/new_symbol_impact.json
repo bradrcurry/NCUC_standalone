@@ -1,0 +1,116 @@
+[
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "extract_document_references",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target 'extract_document_references' not found",
+      "target": {
+        "name": "extract_document_references"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "order_reference_index",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target 'order_reference_index' not found",
+      "target": {
+        "name": "order_reference_index"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "build_document_relationships",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target 'build_document_relationships' not found",
+      "target": {
+        "name": "build_document_relationships"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "document_relationship_usage",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target 'document_relationship_usage' not found",
+      "target": {
+        "name": "document_relationship_usage"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "preserve_pdf_blob",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target 'preserve_pdf_blob' not found",
+      "target": {
+        "name": "preserve_pdf_blob"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "verified_pdf_sha256",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target 'verified_pdf_sha256' not found",
+      "target": {
+        "name": "verified_pdf_sha256"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  }
+]

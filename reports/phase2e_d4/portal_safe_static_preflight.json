@@ -1,0 +1,15 @@
+{
+  "ncid_auth": true,
+  "playwright": true,
+  "real_browser": true,
+  "portal_resolve": true,
+  "portal_fetch": true,
+  "local_import": true,
+  "local_extract": true,
+  "details": {
+    "ncid_source": ".env",
+    "ncid_username_set": true,
+    "ncid_password_set": true,
+    "browser_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+  }
+}

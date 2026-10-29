@@ -1,0 +1,302 @@
+[
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "page",
+        "file_path": "tests/test_d7_segmentation_checkpoint.py",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target 'page' not found",
+      "target": {
+        "name": "page"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "test_body_leaf_reference_cannot_merge_two_distinct_own_leaves",
+        "file_path": "tests/test_d7_segmentation_checkpoint.py",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target 'test_body_leaf_reference_cannot_merge_two_distinct_own_leaves' not found",
+      "target": {
+        "name": "test_body_leaf_reference_cannot_merge_two_distinct_own_leaves"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "test_rate_vocabulary_in_legal_or_calculation_pages_is_not_a_tariff",
+        "file_path": "tests/test_d7_segmentation_checkpoint.py",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target 'test_rate_vocabulary_in_legal_or_calculation_pages_is_not_a_tariff' not found",
+      "target": {
+        "name": "test_rate_vocabulary_in_legal_or_calculation_pages_is_not_a_tariff"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "test_formal_sheet_ends_before_a_following_order",
+        "file_path": "tests/test_d7_segmentation_checkpoint.py",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target 'test_formal_sheet_ends_before_a_following_order' not found",
+      "target": {
+        "name": "test_formal_sheet_ends_before_a_following_order"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "test_headerless_credit_table_keeps_single_leaf_ownership_with_nbsp",
+        "file_path": "tests/test_d7_segmentation_checkpoint.py",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target 'test_headerless_credit_table_keeps_single_leaf_ownership_with_nbsp' not found",
+      "target": {
+        "name": "test_headerless_credit_table_keeps_single_leaf_ownership_with_nbsp"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "test_ambiguous_original_page_ownership_is_rejected",
+        "file_path": "tests/test_d7_segmentation_checkpoint.py",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target 'test_ambiguous_original_page_ownership_is_rejected' not found",
+      "target": {
+        "name": "test_ambiguous_original_page_ownership_is_rejected"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "test_missing_page_gap_is_not_bridged_even_when_the_leaf_matches",
+        "file_path": "tests/test_d7_segmentation_checkpoint.py",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target 'test_missing_page_gap_is_not_bridged_even_when_the_leaf_matches' not found",
+      "target": {
+        "name": "test_missing_page_gap_is_not_bridged_even_when_the_leaf_matches"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "test_cache_roundtrip_preserves_flags_and_separate_segmentation_evidence",
+        "file_path": "tests/test_d7_segmentation_checkpoint.py",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target 'test_cache_roundtrip_preserves_flags_and_separate_segmentation_evidence' not found",
+      "target": {
+        "name": "test_cache_roundtrip_preserves_flags_and_separate_segmentation_evidence"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "test_triage_uses_sampled_pages_instead_of_total_page_count",
+        "file_path": "tests/test_d7_segmentation_checkpoint.py",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target 'test_triage_uses_sampled_pages_instead_of_total_page_count' not found",
+      "target": {
+        "name": "test_triage_uses_sampled_pages_instead_of_total_page_count"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "test_importer_never_binds_non_tariff_span_even_with_a_strong_family_match",
+        "file_path": "tests/test_d7_segmentation_checkpoint.py",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target 'test_importer_never_binds_non_tariff_span_even_with_a_strong_family_match' not found",
+      "target": {
+        "name": "test_importer_never_binds_non_tariff_span_even_with_a_strong_family_match"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "ratio",
+        "file_path": "bench/score_segmentation.py",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target 'ratio' not found",
+      "target": {
+        "name": "ratio"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "boundary_score",
+        "file_path": "bench/score_segmentation.py",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target 'boundary_score' not found",
+      "target": {
+        "name": "boundary_score"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "score_components",
+        "file_path": "bench/score_segmentation.py",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target 'score_components' not found",
+      "target": {
+        "name": "score_components"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "cached_pages",
+        "file_path": "bench/score_segmentation.py",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target 'cached_pages' not found",
+      "target": {
+        "name": "cached_pages"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "main",
+        "file_path": "bench/score_segmentation.py",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target 'main' not found",
+      "target": {
+        "name": "main"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  }
+]

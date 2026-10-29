@@ -1,0 +1,830 @@
+........................................................................ [  4%]
+........................................................................ [  9%]
+....................................................................F... [ 14%]
+.................................F...................................... [ 19%]
+......................................................................F. [ 24%]
+........................................................................ [ 29%]
+....................................F....F.............................. [ 34%]
+........................................................................ [ 39%]
+........................................................................ [ 44%]
+........................................................FFFF............ [ 49%]
+...F.................................................................... [ 54%]
+........................................................................ [ 59%]
+........................................................................ [ 63%]
+........................................................................ [ 68%]
+........................F................................F.............. [ 73%]
+........................................................................ [ 78%]
+........................................................................ [ 83%]
+........................................................................ [ 88%]
+.......................................................................F [ 93%]
+.F..FF.F..F.F..F.FF..F.................................................. [ 98%]
+........................                                                 [100%]
+================================== FAILURES ===================================
+_______ test_dep_validation_report_identifies_expected_clean_rider_gaps _______
+
+    def test_dep_validation_report_identifies_expected_clean_rider_gaps() -> None:
+        report = load_dep_res_validation_report(database_path=DB_PATH)
+    
+        summary = report["summary"]
+>       assert summary["partial_clean_rider_dates"] == []
+E       AssertionError: assert ['2024-12-01', '2026-06-01'] == []
+E         
+E         Left contains 2 more items, first extra item: '2024-12-01'
+E         Use -v to get more diff
+
+tests\test_dep_validation_analytics.py:19: AssertionError
+___ test_bulk_extractor_record_parse_attempt_persists_document_intelligence ___
+
+tmp_path = WindowsPath('C:/Users/bradr/AppData/Local/Temp/pytest-of-bradr/pytest-2483/test_bulk_extractor_record_par0')
+
+    def test_bulk_extractor_record_parse_attempt_persists_document_intelligence(
+        tmp_path: Path,
+    ) -> None:
+        db_path = _make_db(tmp_path)
+        extractor = BulkExtractor(str(db_path))
+        doc = {
+            "id": 7,
+            "family_key": "nc-progress-leaf-503",
+            "company": "progress",
+            "title": "Rider CPP",
+            "local_path": str(tmp_path / "leaf-503.pdf"),
+            "effective_start": "2025-01-01",
+            "start_page": 1,
+            "end_page": 1,
+        }
+    
+>       parse_attempt_id = extractor.record_parse_attempt(
+            doc,
+            parser_profile="progress_single_value_rider",
+            ranked_candidates=[],
+            signals=None,
+            charge_count=1,
+            status="ok",
+            document_intelligence={"fingerprint": {"doc_type": "rider"}},
+        )
+E       TypeError: BulkExtractor.record_parse_attempt() missing 1 required keyword-only argument: 'text_metrics'
+
+tests\test_document_intelligence.py:139: TypeError
+_ test_registry_selects_progress_single_value_rider_for_leaf_602_with_relaxed_family_signal _
+
+    def test_registry_selects_progress_single_value_rider_for_leaf_602_with_relaxed_family_signal() -> None:
+        registry = HistoricalRateParserRegistry()
+        doc = {
+            "family_key": "nc-progress-leaf-602",
+            "company": "progress",
+            "title": "Joint Agency Asset Rider JAA",
+        }
+        text = """
+        Joint Agency Asset Rider JAA
+        Rider JAA
+        Monthly Rate:
+        Leaf No. 602
+        """
+    
+        profile = registry.select(doc, text)
+>       assert isinstance(profile, ProgressSingleValueRiderProfile)
+E       AssertionError: assert False
+E        +  where False = isinstance(ProgressJaaRiderProfile(name='progress_jaa_rider'), ProgressSingleValueRiderProfile)
+
+tests\test_historical_parser_profiles.py:1438: AssertionError
+__ test_bulk_extractor_forces_tariff_for_authenticated_portal_progress_rider __
+
+tmp_path = WindowsPath('C:/Users/bradr/AppData/Local/Temp/pytest-of-bradr/pytest-2483/test_bulk_extractor_forces_tar0')
+
+    def test_bulk_extractor_forces_tariff_for_authenticated_portal_progress_rider(tmp_path) -> None:
+        jaa_text = """\
+    Duke Energy Progress, LLC NC Third Revised Leaf No. 602
+    JOINT AGENCY ASSET RIDER JAA
+    MONTHLY RATE
+    The incremental rider for each rate class as follows:
+    Rate Class Applicable Schedule(s) Incremental Rate*
+    Non-Demand Rate Class (dollars per kilowatt-hour)
+    Residential RES, R-TOUD, R-TOU, R-TOU-CPP 0.00464
+    Small General Service SGS, SGS-TOUE, SGS-TOU-CPP 0.00223
+    Outdoor Lighting Service ALS, SLS, SLR, SFLS 0.01389
+    Demand Rate Classes (dollars per kilowatt)
+    Medium General Service MGS, GS-TES, APH-TES, MGS-TOU 0.92
+    Large General Service LGS, LGS-TOU, LGS-HLF 3.03
+    Effective for bills rendered on and after December 1, 2025
+    """
+        db_path = tmp_path / "authenticated-rider.db"
+        conn = connect(db_path)
+        now = datetime(2026, 4, 7, tzinfo=UTC).isoformat()
+        pdf_path = tmp_path / "11-24-2025_auth_portal_dep_nc_rider_jaa_rev_3.pdf"
+        pdf_path.write_text("placeholder", encoding="utf-8")
+    
+        historical_id = _seed_historical_doc_with_version(
+            conn,
+            family_key="nc-progress-leaf-602",
+            company="progress",
+            title="DEP NC Rider JAA Rev. 3 Eff. 12.01.2025 (Current)",
+            local_path=str(pdf_path),
+            effective_start="2025-12-01",
+            now=now,
+        )
+        conn.commit()
+        conn.close()
+    
+        extractor = BulkExtractor(str(db_path))
+        extractor.extract_text_from_pdf = lambda *args, **kwargs: (jaa_text, "test")
+        extractor.classifier.classify = lambda *args, **kwargs: "other"
+    
+        doc = extractor.get_document_for_extraction(historical_id)
+        assert doc is not None
+        doc_id, family_key, inserted, _, _ = extractor.process_document(doc)
+    
+        assert doc_id == historical_id
+        assert family_key == "nc-progress-leaf-602"
+        assert inserted >= 4
+    
+        check = connect(db_path)
+        row = check.execute(
+            """
+            SELECT parser_profile, status, charge_count
+            FROM parse_attempt_logs
+            ORDER BY id DESC
+            LIMIT 1
+            """
+        ).fetchone()
+        assert row is not None
+>       assert row["parser_profile"] == "progress_single_value_rider"
+E       AssertionError: assert 'progress_jaa_rider' == 'progress_single_value_rider'
+E         
+E         - progress_single_value_rider
+E         + progress_jaa_rider
+
+tests\test_historical_parser_profiles.py:3717: AssertionError
+____ test_bulk_extractor_skips_reference_only_program_families_as_accepted ____
+
+tmp_path = WindowsPath('C:/Users/bradr/AppData/Local/Temp/pytest-of-bradr/pytest-2483/test_bulk_extractor_skips_refe0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002714DF59760>
+
+    def test_bulk_extractor_skips_reference_only_program_families_as_accepted(
+        tmp_path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        db_path = tmp_path / "reference-only.db"
+        conn = connect(db_path)
+        now = datetime(2026, 3, 26, tzinfo=UTC).isoformat()
+        pdf_path = tmp_path / "leaf-740-program.pdf"
+        pdf_path.write_text("placeholder", encoding="utf-8")
+    
+        historical_id = _seed_historical_doc_with_version(
+            conn,
+            family_key="nc-progress-leaf-740",
+            company="progress",
+            title="Electric Vehicle School Bus Charging Station Program EVSB (NC Pilot)",
+            local_path=str(pdf_path),
+            effective_start="2024-01-01",
+            now=now,
+        )
+        conn.commit()
+        conn.close()
+    
+        extractor = BulkExtractor(str(db_path))
+        extractor.extract_text_from_pdf = lambda *args, **kwargs: (
+            (
+                "Electric Vehicle School Bus Charging Station Program EVSB (NC Pilot)\n"
+                "Program Eligibility\n"
+                "Pilot terms and participation requirements.\n"
+            ),
+            "test",
+        )
+        monkeypatch.setattr(extractor, "classify_document", lambda title, text_sample: "tariff")
+    
+        doc = extractor.get_document_for_extraction(historical_id)
+        assert doc is not None
+        _, _, inserted, _, _ = extractor.process_document(doc)
+        assert inserted == 0
+    
+        check = connect(db_path)
+        attempt = check.execute(
+            """
+            SELECT parser_profile, status, charge_count, metadata_json
+            FROM parse_attempt_logs
+            ORDER BY id DESC
+            LIMIT 1
+            """
+        ).fetchone()
+        assert attempt is not None
+        assert attempt["parser_profile"] is None
+>       assert attempt["status"] == "skipped_reference"
+E       AssertionError: assert 'skipped_other' == 'skipped_reference'
+E         
+E         - skipped_reference
+E         + skipped_other
+
+tests\test_historical_parser_profiles.py:4174: AssertionError
+------------------------------ Captured log call ------------------------------
+WARNING  duke_rates.historical.ncuc.pipeline.bulk_extractor:bulk_extractor.py:1609 Error scanning pages of C:\Users\bradr\AppData\Local\Temp\pytest-of-bradr\pytest-2483\test_bulk_extractor_skips_refe0\leaf-740-program.pdf: No /Root object! - Is this really a PDF?
+_____________ test_page_miner_extracts_descriptive_rider_heading ______________
+
+    def test_page_miner_extracts_descriptive_rider_heading() -> None:
+        evidence = _extract_page_features_from_text(
+            "North Carolina Eighteenth Revised Leaf No. 60\nFUEL COST ADJUSTMENT RIDER\nAVAILABILITY\n",
+            1,
+        )
+    
+        assert evidence.has_schedule_heading is True
+        assert "60" in evidence.extracted_leaf_nos
+>       assert "FUEL COST ADJUSTMENT RIDER" in evidence.extracted_schedule_codes
+E       AssertionError: assert 'FUEL COST ADJUSTMENT RIDER' in ['RIDER']
+E        +  where ['RIDER'] = PageEvidence(page_number=1, text_length=85, text_content='North Carolina Eighteenth Revised Leaf No. 60\nFUEL COST ADJ...edule_codes=['RIDER'], has_redline_markers=False, redline_marker_count=0, has_dual_rate_pair=False, has_toc_page=False).extracted_schedule_codes
+
+tests\test_ncuc_pipeline.py:238: AssertionError
+____ test_page_miner_extracts_descriptive_rider_heading_with_parenthetical ____
+
+    def test_page_miner_extracts_descriptive_rider_heading_with_parenthetical() -> None:
+        evidence = _extract_page_features_from_text(
+            "North Carolina Thirty-First Revised Leaf No. 60\nFUEL COST ADJUSTMENT RIDER (NC)\nAPPLICABILITY\n",
+            1,
+        )
+    
+        assert evidence.has_schedule_heading is True
+        assert "60" in evidence.extracted_leaf_nos
+>       assert "FUEL COST ADJUSTMENT RIDER (NC)" in evidence.extracted_schedule_codes
+E       AssertionError: assert 'FUEL COST ADJUSTMENT RIDER (NC)' in ['RIDER']
+E        +  where ['RIDER'] = PageEvidence(page_number=1, text_length=93, text_content='North Carolina Thirty-First Revised Leaf No. 60\nFUEL COST A...edule_codes=['RIDER'], has_redline_markers=False, redline_marker_count=0, has_dual_rate_pair=False, has_toc_page=False).extracted_schedule_codes
+
+tests\test_ncuc_pipeline.py:249: AssertionError
+__ test_page_miner_extracts_inline_descriptive_heading_from_merged_pdf_text ___
+
+    def test_page_miner_extracts_inline_descriptive_heading_from_merged_pdf_text() -> None:
+        evidence = _extract_page_features_from_text(
+            "North Carolina Thirty-First Revised Leaf No. 60\n"
+            "FUEL COST ADJUSTMENT RIDER (NC) APPLICABILITY (North Carolina Only)\n",
+            1,
+        )
+    
+        assert "60" in evidence.extracted_leaf_nos
+>       assert any(code.startswith("FUEL COST ADJUSTMENT RIDER") for code in evidence.extracted_schedule_codes)
+E       assert False
+E        +  where False = any(<generator object test_page_miner_extracts_inline_descriptive_heading_from_merged_pdf_text.<locals>.<genexpr> at 0x0000027192070520>)
+
+tests\test_ncuc_pipeline.py:260: AssertionError
+____________ test_page_miner_extracts_descriptive_program_heading _____________
+
+    def test_page_miner_extracts_descriptive_program_heading() -> None:
+        evidence = _extract_page_features_from_text(
+            "North Carolina First Revised Leaf No. 172\nSMART ENERGY NOW PROGRAM (NC)\n(Pilot)\n",
+            1,
+        )
+    
+        assert "172" in evidence.extracted_leaf_nos
+>       assert "SMART ENERGY NOW PROGRAM (NC)" in evidence.extracted_schedule_codes
+E       AssertionError: assert 'SMART ENERGY NOW PROGRAM (NC)' in []
+E        +  where [] = PageEvidence(page_number=1, text_length=79, text_content='North Carolina First Revised Leaf No. 172\nSMART ENERGY NOW ...ted_schedule_codes=[], has_redline_markers=False, redline_marker_count=0, has_dual_rate_pair=False, has_toc_page=False).extracted_schedule_codes
+
+tests\test_ncuc_pipeline.py:270: AssertionError
+________ test_importer_reintegrates_ocr_required_documents_via_cpu_ocr ________
+
+tmp_path = WindowsPath('C:/Users/bradr/AppData/Local/Temp/pytest-of-bradr/pytest-2483/test_importer_reintegrates_ocr0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002714E2A61E0>
+
+    def test_importer_reintegrates_ocr_required_documents_via_cpu_ocr(tmp_path: Path, monkeypatch) -> None:
+        db_path = tmp_path / "test.db"
+        repo = Repository(db_path)
+        repo.upsert_tariff_family(
+            TariffFamilyRecord(
+                family_key="nc-progress-leaf-500",
+                state="NC",
+                company="progress",
+                tariff_identifier="leaf-500",
+                schedule_code="RES",
+                family_type="rate_schedule",
+                title="Progress Residential Service",
+            )
+        )
+    
+        settings = Settings(database_path=db_path, data_dir=tmp_path / "data")
+        importer = NcucPipelineImporter(settings, repo)
+    
+        pdf_path = tmp_path / "ocr-required.pdf"
+        pdf_path.write_bytes(b"%PDF-1.4\n")
+    
+        monkeypatch.setattr(
+            importer_module,
+            "triage_pdf",
+            lambda _: type("T", (), {"route_recommendation": PipelineRoute.OCR_REQUIRED})(),
+        )
+        monkeypatch.setattr(
+            importer_module,
+            "extract_ocr_document_pages",
+            lambda _: [
+                PageEvidence(
+                    page_number=1,
+                    text_length=180,
+                    text_content="Leaf No. 500\nResidential Service\nEffective January 1, 2024",
+                    has_leaf_header=True,
+                    has_schedule_heading=True,
+                    extracted_leaf_nos=["500"],
+                )
+            ],
+        )
+        monkeypatch.setattr(
+            importer_module,
+            "segment_document",
+            lambda _pages, parent_discovery_id=None: [
+                TariffSpan(
+                    parent_discovery_id=parent_discovery_id,
+                    start_page=1,
+                    end_page=1,
+                    doc_type="tariff",
+                    extracted_leaf_nos={"500"},
+                )
+            ],
+        )
+        monkeypatch.setattr(importer_module, "extract_dates_from_span", lambda span, pages: span)
+    
+        record = NcucDiscoveryRecord(
+            id=2,
+            utility="Duke Energy Progress",
+            filing_title="Progress Energy Carolinas compliance filing",
+            filing_date="2024-01-15",
+            docket_number="E-2",
+            local_path=str(pdf_path),
+            fetch_status=NcucFetchStatus.SUCCESS,
+            discovered_url="https://example.test/e-2-progress.pdf",
+            content_hash="hash-ocr",
+        )
+    
+        created_ids = importer.mine_discovery_record_spans(record)
+    
+>       assert len(created_ids) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests\test_ncuc_pipeline.py:977: AssertionError
+------------------------------ Captured log call ------------------------------
+WARNING  duke_rates.historical.ncuc.pipeline.ocr:ocr.py:292 OCR backend pytesseract_cpu failed for C:\Users\bradr\AppData\Local\Temp\pytest-of-bradr\pytest-2483\test_importer_reintegrates_ocr0\ocr-required.pdf: Failed to open file 'C:\\Users\\bradr\\AppData\\Local\\Temp\\pytest-of-bradr\\pytest-2483\\test_importer_reintegrates_ocr0\\ocr-required.pdf'.
+WARNING  duke_rates.historical.ncuc.pipeline.ocr:ocr.py:299 No OCR backend succeeded for C:\Users\bradr\AppData\Local\Temp\pytest-of-bradr\pytest-2483\test_importer_reintegrates_ocr0\ocr-required.pdf attempted=['ocrmypdf_tesseract', 'pytesseract_cpu']
+ERROR    docling.datamodel.document:document.py:202 An unexpected error occurred while opening the document ocr-required.pdf
+Traceback (most recent call last):
+  File "C:\Python\Duke\Standalone\.venv312\Lib\site-packages\docling\datamodel\document.py", line 177, in __init__
+    self._init_doc(backend, path_or_stream)
+  File "C:\Python\Duke\Standalone\.venv312\Lib\site-packages\docling\datamodel\document.py", line 221, in _init_doc
+    self._backend = backend(self, path_or_stream=path_or_stream)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python\Duke\Standalone\.venv312\Lib\site-packages\docling\backend\docling_parse_backend.py", line 229, in __init__
+    self._pdoc = pdfium.PdfDocument(self.path_or_stream, password=password)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python\Duke\Standalone\.venv312\Lib\site-packages\pypdfium2\_helpers\document.py", line 73, in __init__
+    self.raw, to_hold, to_close = _open_pdf(self._input, self._password, self._autoclose)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python\Duke\Standalone\.venv312\Lib\site-packages\pypdfium2\_helpers\document.py", line 549, in _open_pdf
+    raise PdfiumError(f"Failed to load document (PDFium: {pdfium_i.ErrorToStr.get(err_code)}).", err_code=err_code)
+pypdfium2._helpers.misc.PdfiumError: Failed to load document (PDFium: Data format error).
+ERROR    duke_rates.historical.ncuc.pipeline.docling_backend:docling_backend.py:463 Docling conversion failed for C:\Users\bradr\AppData\Local\Temp\pytest-of-bradr\pytest-2483\test_importer_reintegrates_ocr0\ocr-required.pdf: Input document ocr-required.pdf is not valid.
+WARNING  duke_rates.historical.ncuc.pipeline.ocr:ocr.py:461 GLM-OCR GPU failed for C:\Users\bradr\AppData\Local\Temp\pytest-of-bradr\pytest-2483\test_importer_reintegrates_ocr0\ocr-required.pdf: Failed to open file 'C:\\Users\\bradr\\AppData\\Local\\Temp\\pytest-of-bradr\\pytest-2483\\test_importer_reintegrates_ocr0\\ocr-required.pdf'.
+WARNING  duke_rates.historical.ncuc.pipeline.ocr:ocr.py:524 All OCR backends failed for C:\Users\bradr\AppData\Local\Temp\pytest-of-bradr\pytest-2483\test_importer_reintegrates_ocr0\ocr-required.pdf: attempted=['pytesseract_cpu', 'docling_gpu', 'glm_ocr_gpu']
+_______ test_process_reprocess_queue_bootstraps_missing_tariff_version ________
+
+tmp_path = WindowsPath('C:/Users/bradr/AppData/Local/Temp/pytest-of-bradr/pytest-2483/test_process_reprocess_queue_b0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x00000271B23EC170>
+
+    def test_process_reprocess_queue_bootstraps_missing_tariff_version(tmp_path, monkeypatch) -> None:
+        db_path = tmp_path / "bootstrap-reprocess.db"
+        conn = connect(db_path)
+        now = datetime(2026, 3, 26, tzinfo=UTC).isoformat()
+        pdf_path = tmp_path / "bootstrap-progress-500.pdf"
+        pdf_path.write_text("placeholder", encoding="utf-8")
+    
+        conn.execute(
+            """
+            INSERT INTO tariff_families (
+                family_key, state, company, tariff_identifier, schedule_code,
+                family_type, title, created_at, updated_at
+            ) VALUES (?,?,?,?,?,?,?,?,?)
+            """,
+            (
+                "nc-progress-leaf-500",
+                "NC",
+                "progress",
+                "leaf-500",
+                "RES",
+                "rate_schedule",
+                "Progress Residential",
+                now,
+                now,
+            ),
+        )
+        historical_id = conn.execute(
+            """
+            INSERT INTO historical_documents (
+                family_key, title, state, company, category, kind,
+                canonical_url, archived_url, snapshot_timestamp,
+                local_path, content_hash, effective_start, retrieved_at
+            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+            """,
+            (
+                "nc-progress-leaf-500",
+                "Progress Residential",
+                "NC",
+                "progress",
+                "rate",
+                "pdf",
+                "https://example.test/bootstrap-progress-500.pdf",
+                "https://archive.test/bootstrap-progress-500",
+                "2026-03-26T00:00:00Z",
+                str(pdf_path),
+                "hash-bootstrap-progress-500",
+                "2024-01-01",
+                now,
+            ),
+        ).lastrowid
+        queue_id, inserted = enqueue_historical_reprocess(
+            conn,
+            historical_document_id=historical_id,
+            source_pdf=str(pdf_path),
+            family_key="nc-progress-leaf-500",
+            queue_reason="stale_stage:parser_version",
+            requested_by="test-suite",
+        )
+        conn.commit()
+        conn.close()
+    
+        assert inserted is True
+        assert queue_id is not None
+    
+        monkeypatch.setattr(
+            cli,
+            "_bootstrap",
+            lambda: (SimpleNamespace(database_path=db_path), None),
+        )
+        monkeypatch.setattr(
+            reprocess_module,
+            "_bootstrap",
+            lambda: (SimpleNamespace(database_path=db_path), None),
+        )
+    
+        def _fake_process_document(self, doc: dict) -> tuple[int, str, int, str, str | None]:
+            return int(doc["id"]), str(doc["family_key"]), 0, "parsed", None
+    
+        monkeypatch.setattr(BulkExtractor, "process_document", _fake_process_document)
+    
+        cli.process_reprocess_queue_nc(limit=1)
+    
+        conn = connect(db_path)
+        version_row = conn.execute(
+            """
+            SELECT id, family_key, historical_document_id, effective_start, source_type, confidence_score, notes
+            FROM tariff_versions
+            WHERE historical_document_id = ?
+            """,
+            (historical_id,),
+        ).fetchone()
+        assert version_row is not None
+        assert version_row["family_key"] == "nc-progress-leaf-500"
+        assert version_row["effective_start"] == "2024-01-01"
+        assert version_row["source_type"] == "regulator"
+        assert version_row["confidence_score"] == 0.5
+        assert "Bootstrapped for historical reprocess queue." in (version_row["notes"] or "")
+    
+        completed = conn.execute(
+            """
+            SELECT status, error_message, metadata_json
+            FROM historical_reprocess_queue
+            WHERE id = ?
+            """,
+            (queue_id,),
+        ).fetchone()
+        assert completed is not None
+>       assert completed["status"] == "completed"
+E       AssertionError: assert 'failed' == 'completed'
+E         
+E         - completed
+E         + failed
+
+tests\test_reprocess_queue.py:1035: AssertionError
+---------------------------- Captured stdout call -----------------------------
+Historical reprocess queue processed=1 completed=0 failed=1 workers=1 enforce_cleanup=True
+_________ TestLoadRiderTrustTable.test_all_rate_class_groups_present __________
+
+self = <test_rider_trust.TestLoadRiderTrustTable object at 0x000002714DC802F0>
+
+    def test_all_rate_class_groups_present(self):
+        groups = set(self.df["rate_class_group"].unique())
+>       assert groups == _VALID_GROUPS
+E       AssertionError: assert {'dec_residen...dep_sgs', ...} == {'dec_residen...'dep_sgs_clr'}
+E         
+E         Extra items in the left set:
+E         'dep_lgs'
+E         'dep_mgs_d'
+E         'dep_mgs_nd'
+E         Use -v to get more diff
+
+tests\test_rider_trust.py:48: AssertionError
+______________ TestRTouLive.test_tou_with_full_period_breakdown _______________
+
+self = <test_tariff_engine_live.TestRTouLive object at 0x000002714DB64FE0>
+engine = <duke_rates.billing.tariff_engine.TariffBillingEngine object at 0x00000271B2263E00>
+
+    def test_tou_with_full_period_breakdown(self, engine):
+        result = engine.calculate(
+            self.FAMILY_KEY,
+            BillInput(
+                monthly_kwh=1000,
+                service_date=datetime.date(2025, 11, 1),
+                on_peak_kwh=300,
+                off_peak_kwh=600,
+                discount_kwh=100,
+            ),
+            include_riders=False,
+        )
+        assert result.total > 0
+        assert len(result.warnings) == 0 or not any("TOU" in w and "average" in w for w in result.warnings)
+    
+        # Expected: $14 fixed + 300*0.29905 + 600*0.11321 + 100*0.07372
+        # = 14 + 89.715 + 67.926 + 7.372 = 179.013
+>       assert result.total == pytest.approx(14.0 + 300*0.29905 + 600*0.11321 + 100*0.07372, abs=0.02)
+E       assert 89.72 == 179.01299999999998 ± 0.02
+E         
+E         comparison failed
+E         Obtained: 89.72
+E         Expected: 179.01299999999998 ± 0.02
+
+tests\test_tariff_engine_live.py:75: AssertionError
+________________ TestRTouLive.test_fixed_charge_is_14_dollars _________________
+
+self = <test_tariff_engine_live.TestRTouLive object at 0x000002714DA48830>
+engine = <duke_rates.billing.tariff_engine.TariffBillingEngine object at 0x00000271B2263E00>
+
+    def test_fixed_charge_is_14_dollars(self, engine):
+        result = engine.calculate(
+            self.FAMILY_KEY,
+            BillInput(
+                monthly_kwh=1000,
+                service_date=datetime.date(2025, 11, 1),
+                on_peak_kwh=500,
+                off_peak_kwh=500,
+            ),
+            include_riders=False,
+        )
+        fixed_items = [item for item in result.line_items if item.charge_type == "fixed"]
+>       assert len(fixed_items) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests\test_tariff_engine_live.py:103: AssertionError
+________ TestRTouLive.test_all_tou_line_items_have_correct_charge_type ________
+
+self = <test_tariff_engine_live.TestRTouLive object at 0x000002714DA49880>
+engine = <duke_rates.billing.tariff_engine.TariffBillingEngine object at 0x00000271B2263E00>
+
+    def test_all_tou_line_items_have_correct_charge_type(self, engine):
+        result = engine.calculate(
+            self.FAMILY_KEY,
+            BillInput(
+                monthly_kwh=900,
+                service_date=datetime.date(2025, 11, 1),
+                on_peak_kwh=200,
+                off_peak_kwh=600,
+                discount_kwh=100,
+            ),
+            include_riders=False,
+        )
+        base_types = {item.charge_type for item in result.line_items
+                      if item.source == self.FAMILY_KEY}
+        assert "tou_energy" in base_types
+>       assert "fixed" in base_types
+E       AssertionError: assert 'fixed' in {'tou_energy'}
+
+tests\test_tariff_engine_live.py:156: AssertionError
+_____________ TestRTouLive.test_on_peak_rate_is_highest_tou_rate ______________
+
+self = <test_tariff_engine_live.TestRTouLive object at 0x000002714DA49340>
+engine = <duke_rates.billing.tariff_engine.TariffBillingEngine object at 0x00000271B2263E00>
+
+    def test_on_peak_rate_is_highest_tou_rate(self, engine):
+        # With equal kWh on each period, on_peak contribution should be highest
+        result = engine.calculate(
+            self.FAMILY_KEY,
+            BillInput(
+                monthly_kwh=300,
+                service_date=datetime.date(2025, 11, 1),
+                on_peak_kwh=100,
+                off_peak_kwh=100,
+                discount_kwh=100,
+            ),
+            include_riders=False,
+        )
+        tou_items = [i for i in result.line_items if i.charge_type == "tou_energy" and i.source == self.FAMILY_KEY]
+>       assert len(tou_items) == 3
+E       AssertionError: assert 1 == 3
+E        +  where 1 = len([BillLineItem(label='On Peak Energy Charge', charge_type='tou_energy', source='nc-progress-leaf-502', rate_value=0.299.../kWh', quantity=100.0, amount=29.91, notes='29.905¢ per On-Peak kWh 11.321¢ per Off-Peak kWh 7.372¢ per Discount kWh')])
+
+tests\test_tariff_engine_live.py:172: AssertionError
+________________ TestRToudLive.test_tou_with_period_breakdown _________________
+
+self = <test_tariff_engine_live.TestRToudLive object at 0x000002714DA48F50>
+engine = <duke_rates.billing.tariff_engine.TariffBillingEngine object at 0x00000271B2263E00>
+
+    def test_tou_with_period_breakdown(self, engine):
+        result = engine.calculate(
+            self.FAMILY_KEY,
+            BillInput(
+                monthly_kwh=1000,
+                service_date=datetime.date(2025, 11, 1),
+                on_peak_kwh=300,
+                off_peak_kwh=600,
+                discount_kwh=100,
+            ),
+            include_riders=False,
+        )
+        # Expected: $14 + 300*0.21952 + 600*0.11 + 100*0.08274
+>       assert result.total == pytest.approx(14.0 + 300*0.21952 + 600*0.11 + 100*0.08274, abs=0.02)
+E       assert 0.0 == 154.13 ± 0.02
+E         
+E         comparison failed
+E         Obtained: 0.0
+E         Expected: 154.13 ± 0.02
+
+tests\test_tariff_engine_live.py:204: AssertionError
+_____________ TestSgsToueLive.test_tou_with_full_period_breakdown _____________
+
+self = <test_tariff_engine_live.TestSgsToueLive object at 0x000002714DA4A2D0>
+engine = <duke_rates.billing.tariff_engine.TariffBillingEngine object at 0x00000271B2263E00>
+
+    def test_tou_with_full_period_breakdown(self, engine):
+        result = engine.calculate(
+            self.FAMILY_KEY,
+            BillInput(
+                monthly_kwh=2000,
+                service_date=datetime.date(2025, 8, 1),
+                on_peak_kwh=600,
+                off_peak_kwh=1200,
+                discount_kwh=200,
+            ),
+            include_riders=False,
+        )
+        # Expected: $22 + 600*0.19463 + 1200*0.09721 + 200*0.07624
+        expected = 22.0 + 600*0.19463 + 1200*0.09721 + 200*0.07624
+>       assert result.total == pytest.approx(expected, abs=0.02)
+E       assert 0.0 == 270.678 ± 0.02
+E         
+E         comparison failed
+E         Obtained: 0.0
+E         Expected: 270.678 ± 0.02
+
+tests\test_tariff_engine_live.py:246: AssertionError
+______________ TestSgsToueLive.test_sgs_toue_fixed_is_22_dollars ______________
+
+self = <test_tariff_engine_live.TestSgsToueLive object at 0x000002714DA4B140>
+engine = <duke_rates.billing.tariff_engine.TariffBillingEngine object at 0x00000271B2263E00>
+
+    def test_sgs_toue_fixed_is_22_dollars(self, engine):
+        result = engine.calculate(
+            self.FAMILY_KEY,
+            BillInput(
+                monthly_kwh=500,
+                service_date=datetime.date(2025, 8, 1),
+                on_peak_kwh=200,
+                off_peak_kwh=300,
+            ),
+            include_riders=False,
+        )
+        fixed_items = [item for item in result.line_items if item.charge_type == "fixed"]
+>       assert len(fixed_items) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests\test_tariff_engine_live.py:274: AssertionError
+________________ TestSgsLive.test_winter_energy_charge_applied ________________
+
+self = <test_tariff_engine_live.TestSgsLive object at 0x000002714DA4AED0>
+engine = <duke_rates.billing.tariff_engine.TariffBillingEngine object at 0x00000271B2263E00>
+
+    def test_winter_energy_charge_applied(self, engine):
+        # SGS has energy_block rate for winter only: 0.13188 $/kWh for first 750 kWh
+        result = engine.calculate(
+            self.FAMILY_KEY,
+            BillInput(monthly_kwh=1000, service_date=datetime.date(2025, 1, 1)),
+            include_riders=False,
+        )
+>       assert result.total > 0
+E       AssertionError: assert 0.0 > 0
+E        +  where 0.0 = BillResult(family_key='nc-progress-leaf-520', schedule_title='Small General Service Schedule SGS', effective_start='20...s=[], base_subtotal=0.0, rider_subtotal=0.0, total=0.0, warnings=[], source_confidence=1.0, optional_riders_applied=[]).total
+
+tests\test_tariff_engine_live.py:322: AssertionError
+_________ TestSgsLive.test_no_service_date_uses_all_year_charges_only _________
+
+self = <test_tariff_engine_live.TestSgsLive object at 0x000002714DA48D70>
+engine = <duke_rates.billing.tariff_engine.TariffBillingEngine object at 0x00000271B2263E00>
+
+    def test_no_service_date_uses_all_year_charges_only(self, engine):
+        result = engine.calculate(
+            self.FAMILY_KEY,
+            BillInput(monthly_kwh=1000),
+            include_riders=False,
+        )
+        # Without service_date, seasonal charges are excluded with a warning
+>       assert any("season" in w.lower() or "service_date" in w.lower() for w in result.warnings)
+E       assert False
+E        +  where False = any(<generator object TestSgsLive.test_no_service_date_uses_all_year_charges_only.<locals>.<genexpr> at 0x00000271B274F1D0>)
+
+tests\test_tariff_engine_live.py:348: AssertionError
+________ TestCrossScheduleSanity.test_all_tou_schedules_return_results ________
+
+self = <test_tariff_engine_live.TestCrossScheduleSanity object at 0x000002714DA49250>
+engine = <duke_rates.billing.tariff_engine.TariffBillingEngine object at 0x00000271B2263E00>
+
+    def test_all_tou_schedules_return_results(self, engine):
+        tou_families = [
+            "nc-progress-leaf-502",  # R-TOU
+            "nc-progress-leaf-503",  # R-TOUD
+            "nc-progress-leaf-521",  # SGS-TOUE
+            "nc-progress-leaf-523",  # SGS-TOU-CPP
+        ]
+        for fk in tou_families:
+            result = engine.calculate(
+                fk,
+                BillInput(
+                    monthly_kwh=1000,
+                    service_date=datetime.date(2025, 11, 1),
+                    on_peak_kwh=300,
+                    off_peak_kwh=600,
+                    discount_kwh=100,
+                ),
+                include_riders=False,
+            )
+>           assert result.total > 0, f"{fk} returned zero total"
+E           AssertionError: nc-progress-leaf-503 returned zero total
+E           assert 0.0 > 0
+E            +  where 0.0 = BillResult(family_key='nc-progress-leaf-503', schedule_title='Residential Service Time-of-Use with Critical Peak Prici...s=[], base_subtotal=0.0, rider_subtotal=0.0, total=0.0, warnings=[], source_confidence=1.0, optional_riders_applied=[]).total
+
+tests\test_tariff_engine_live.py:375: AssertionError
+_ TestCrossScheduleSanity.test_partial_tou_coverage_warns_and_reduces_confidence _
+
+self = <test_tariff_engine_live.TestCrossScheduleSanity object at 0x000002714DA4B260>
+engine = <duke_rates.billing.tariff_engine.TariffBillingEngine object at 0x00000271B2263E00>
+
+    def test_partial_tou_coverage_warns_and_reduces_confidence(self, engine):
+        # nc-progress-leaf-504 only has a discount period parsed — on_peak/off_peak kWh
+        # are unmatched, so the engine should warn and cap confidence at 0.5
+        result = engine.calculate(
+            "nc-progress-leaf-504",
+            BillInput(
+                monthly_kwh=1000,
+                service_date=datetime.date(2025, 11, 1),
+                on_peak_kwh=500,
+                off_peak_kwh=500,
+            ),
+            include_riders=False,
+        )
+>       assert any("Partial TOU coverage" in w for w in result.warnings)
+E       assert False
+E        +  where False = any(<generator object TestCrossScheduleSanity.test_partial_tou_coverage_warns_and_reduces_confidence.<locals>.<genexpr> at 0x00000271B274D080>)
+
+tests\test_tariff_engine_live.py:427: AssertionError
+============================== warnings summary ===============================
+tests/test_missing_clean_doc_search.py: 44 warnings
+tests/test_ncuc_portal_harvester.py: 3 warnings
+  C:\Python\Duke\Standalone\src\duke_rates\historical\ncuc\result_harvester.py:69: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    discovered_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+tests/test_missing_clean_doc_search.py: 44 warnings
+  C:\Python\Duke\Standalone\src\duke_rates\historical\ncuc\result_harvester.py:527: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    executed_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================ slowest 15 durations =============================
+39.16s call     tests/test_url_archaeology.py::test_recover_family_continues_after_variant_failure
+32.01s call     tests/test_docling_bridge_integration.py::test_bridge_creates_parse_review_outcome
+31.74s call     tests/test_historical_parser_profiles.py::test_bulk_extractor_skips_reference_only_program_families_as_accepted
+31.63s call     tests/test_docling_bridge_integration.py::test_bridge_creates_document_fingerprint
+31.47s call     tests/test_docling_bridge_integration.py::test_bridge_creates_parse_attempt_log
+31.30s call     tests/test_historical_parser_profiles.py::test_bulk_extractor_filters_to_versioned_documents_and_reports_missing_versions
+31.25s call     tests/test_reprocess_queue.py::test_processing_run_is_recorded_and_queue_item_can_complete
+31.25s call     tests/test_historical_parser_profiles.py::test_bulk_extractor_marks_generic_fallback_parse_as_weak
+31.11s call     tests/test_document_intelligence.py::test_orchestrator_builds_snapshot_and_training_record
+22.28s call     tests/test_solar_sizing.py::TestSweep::test_sweep_default_sizes_2_to_16
+16.80s call     tests/test_ncuc_pipeline.py::test_importer_reintegrates_ocr_required_documents_via_cpu_ocr
+16.51s call     tests/test_solar_sizing.py::TestSweep::test_sweep_savings_non_decreasing
+8.00s call     tests/test_solar_sizing.py::TestSweep::test_sweep_marginal_savings_diminish
+7.24s call     tests/test_solar_sizing.py::TestSweep::test_sweep_returns_ascending_sizes
+5.88s call     tests/test_nc_anomaly_audit.py::test_build_nc_anomaly_audit_flags_zero_charge_and_duplicate_same_start
+=========================== short test summary info ===========================
+FAILED tests/test_dep_validation_analytics.py::test_dep_validation_report_identifies_expected_clean_rider_gaps
+FAILED tests/test_document_intelligence.py::test_bulk_extractor_record_parse_attempt_persists_document_intelligence
+FAILED tests/test_historical_parser_profiles.py::test_registry_selects_progress_single_value_rider_for_leaf_602_with_relaxed_family_signal
+FAILED tests/test_historical_parser_profiles.py::test_bulk_extractor_forces_tariff_for_authenticated_portal_progress_rider
+FAILED tests/test_historical_parser_profiles.py::test_bulk_extractor_skips_reference_only_program_families_as_accepted
+FAILED tests/test_ncuc_pipeline.py::test_page_miner_extracts_descriptive_rider_heading
+FAILED tests/test_ncuc_pipeline.py::test_page_miner_extracts_descriptive_rider_heading_with_parenthetical
+FAILED tests/test_ncuc_pipeline.py::test_page_miner_extracts_inline_descriptive_heading_from_merged_pdf_text
+FAILED tests/test_ncuc_pipeline.py::test_page_miner_extracts_descriptive_program_heading
+FAILED tests/test_ncuc_pipeline.py::test_importer_reintegrates_ocr_required_documents_via_cpu_ocr
+FAILED tests/test_reprocess_queue.py::test_process_reprocess_queue_bootstraps_missing_tariff_version
+FAILED tests/test_rider_trust.py::TestLoadRiderTrustTable::test_all_rate_class_groups_present
+FAILED tests/test_tariff_engine_live.py::TestRTouLive::test_tou_with_full_period_breakdown
+FAILED tests/test_tariff_engine_live.py::TestRTouLive::test_fixed_charge_is_14_dollars
+FAILED tests/test_tariff_engine_live.py::TestRTouLive::test_all_tou_line_items_have_correct_charge_type
+FAILED tests/test_tariff_engine_live.py::TestRTouLive::test_on_peak_rate_is_highest_tou_rate
+FAILED tests/test_tariff_engine_live.py::TestRToudLive::test_tou_with_period_breakdown
+FAILED tests/test_tariff_engine_live.py::TestSgsToueLive::test_tou_with_full_period_breakdown
+FAILED tests/test_tariff_engine_live.py::TestSgsToueLive::test_sgs_toue_fixed_is_22_dollars
+FAILED tests/test_tariff_engine_live.py::TestSgsLive::test_winter_energy_charge_applied
+FAILED tests/test_tariff_engine_live.py::TestSgsLive::test_no_service_date_uses_all_year_charges_only
+FAILED tests/test_tariff_engine_live.py::TestCrossScheduleSanity::test_all_tou_schedules_return_results
+FAILED tests/test_tariff_engine_live.py::TestCrossScheduleSanity::test_partial_tou_coverage_warns_and_reduces_confidence
+23 failed, 1441 passed, 91 warnings in 574.79s (0:09:34)

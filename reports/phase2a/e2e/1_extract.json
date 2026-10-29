@@ -1,0 +1,12 @@
+{
+  "run_id": 1064,
+  "version_id": 5299,
+  "extractor_status": "parsed",
+  "profile": "progress_residential_flat",
+  "status": "ok",
+  "validation_status": "passed",
+  "run_issues": [],
+  "charges_with_errors": 0,
+  "charges_with_warnings": 0,
+  "output_count": 5
+}

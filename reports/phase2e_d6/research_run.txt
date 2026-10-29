@@ -1,0 +1,323 @@
+additive schema installed
+lineage built
+local resolution complete {'stats': {'candidate_pdfs_unavailable': 0, 'candidate_pdfs_failed_integrity': 0, 'candidate_pages_without_verified_text': 36, 'candidates_partial': 723, 'local_searches_run': 370, 'gaps_not_locally_searchable': 278, 'duplicate_file_candidates_collapsed': 96, 'candidates_full': 84, 'gaps_without_searchable_target': 43, 'candidates_page_suspect': 4, 'candidates_page_redline': 35, 'candidates_identity_struck': 6}, 'archive_state': {'native_page_artifacts': 153911, 'max_page_artifact_id': 362970, 'evidence_sha256': 'd726e928bd3b6b64ec74d45289d3e89e61e4059f844f1211827fefad0be773e4', 'extractor': '1.1.0', 'page_evidence': 'page_redline_evidence@1.1.0', 'document_references': '1.0.0'}, 'pages_indexed': 152168}
+repeat complete
+{
+  "research_database": "C:\\Python\\Duke\\Standalone\\scratch\\d6.db",
+  "timings": {
+    "schema": 0.003063299984205514,
+    "lineage": 2.49827800001367,
+    "resolution": 143.63446440000553,
+    "repeat": 43.28660579997813,
+    "network_plan": 8.107248199987225
+  },
+  "lineage_before_resolution": {
+    "document_relationships": {
+      "active": 3610,
+      "counts": [
+        {
+          "kind": "approved_by",
+          "status": "candidate",
+          "n": 297
+        },
+        {
+          "kind": "clean_counterpart_of",
+          "status": "candidate",
+          "n": 27
+        },
+        {
+          "kind": "references",
+          "status": "candidate",
+          "n": 3286
+        }
+      ]
+    },
+    "versions_with_scanned_pages": 448,
+    "identity_status": {
+      "single": 308,
+      "none": 119,
+      "conflict": 8,
+      "redline_only": 13
+    },
+    "links": {
+      "versions_printing_supersedes": 186,
+      "versions_with_only_other_sheets_supersedes": 115,
+      "links_by_status": {
+        "explicit_unresolved": 141,
+        "verified": 45,
+        "candidate": 5,
+        "conflict": 10
+      },
+      "stale_links_removed": 0
+    },
+    "gaps": {
+      "gaps": 691,
+      "by_type": [
+        {
+          "gap_type": "conflicting_supersession",
+          "evidence_basis": "explicit",
+          "n": 10
+        },
+        {
+          "gap_type": "missing_effective_date_evidence",
+          "evidence_basis": "explicit",
+          "n": 21
+        },
+        {
+          "gap_type": "missing_effective_date_evidence",
+          "evidence_basis": "inferred",
+          "n": 87
+        },
+        {
+          "gap_type": "missing_intermediate_revision",
+          "evidence_basis": "inferred",
+          "n": 121
+        },
+        {
+          "gap_type": "missing_official_clean_tariff",
+          "evidence_basis": "explicit",
+          "n": 65
+        },
+        {
+          "gap_type": "missing_predecessor_revision",
+          "evidence_basis": "explicit",
+          "n": 111
+        },
+        {
+          "gap_type": "missing_regulatory_order",
+          "evidence_basis": "explicit",
+          "n": 26
+        },
+        {
+          "gap_type": "missing_regulatory_order",
+          "evidence_basis": "inferred",
+          "n": 87
+        },
+        {
+          "gap_type": "missing_successor_document",
+          "evidence_basis": "explicit",
+          "n": 3
+        },
+        {
+          "gap_type": "unresolved_version_identity",
+          "evidence_basis": "explicit",
+          "n": 41
+        },
+        {
+          "gap_type": "unresolved_version_identity",
+          "evidence_basis": "inferred",
+          "n": 119
+        }
+      ],
+      "inactive_retained": 0
+    }
+  },
+  "resolution": {
+    "stats": {
+      "candidate_pdfs_unavailable": 0,
+      "candidate_pdfs_failed_integrity": 0,
+      "candidate_pages_without_verified_text": 36,
+      "candidates_partial": 723,
+      "local_searches_run": 370,
+      "gaps_not_locally_searchable": 278,
+      "duplicate_file_candidates_collapsed": 96,
+      "candidates_full": 84,
+      "gaps_without_searchable_target": 43,
+      "candidates_page_suspect": 4,
+      "candidates_page_redline": 35,
+      "candidates_identity_struck": 6
+    },
+    "archive_state": {
+      "native_page_artifacts": 153911,
+      "max_page_artifact_id": 362970,
+      "evidence_sha256": "d726e928bd3b6b64ec74d45289d3e89e61e4059f844f1211827fefad0be773e4",
+      "extractor": "1.1.0",
+      "page_evidence": "page_redline_evidence@1.1.0",
+      "document_references": "1.0.0"
+    },
+    "pages_indexed": 152168
+  },
+  "repeat": {
+    "stats": {
+      "repeated_searches_avoided": 370,
+      "gaps_not_locally_searchable": 278,
+      "gaps_without_searchable_target": 43
+    },
+    "archive_state": {
+      "native_page_artifacts": 153911,
+      "max_page_artifact_id": 362970,
+      "evidence_sha256": "d726e928bd3b6b64ec74d45289d3e89e61e4059f844f1211827fefad0be773e4",
+      "extractor": "1.1.0",
+      "page_evidence": "page_redline_evidence@1.1.0",
+      "document_references": "1.0.0"
+    },
+    "pages_indexed": 152168
+  },
+  "relationships": {
+    "active": 4087,
+    "counts": [
+      {
+        "kind": "approved_by",
+        "status": "candidate",
+        "n": 339
+      },
+      {
+        "kind": "clean_counterpart_of",
+        "status": "candidate",
+        "n": 27
+      },
+      {
+        "kind": "references",
+        "status": "candidate",
+        "n": 3721
+      }
+    ]
+  },
+  "summary": {
+    "gap_status": [
+      {
+        "gap_type": "conflicting_supersession",
+        "status": "open",
+        "n": 10
+      },
+      {
+        "gap_type": "missing_effective_date_evidence",
+        "status": "open",
+        "n": 108
+      },
+      {
+        "gap_type": "missing_intermediate_revision",
+        "status": "candidate_found",
+        "n": 4
+      },
+      {
+        "gap_type": "missing_intermediate_revision",
+        "status": "open",
+        "n": 13
+      },
+      {
+        "gap_type": "missing_intermediate_revision",
+        "status": "searched_not_found",
+        "n": 89
+      },
+      {
+        "gap_type": "missing_intermediate_revision",
+        "status": "verification_required",
+        "n": 14
+      },
+      {
+        "gap_type": "missing_intermediate_revision",
+        "status": "verified",
+        "n": 1
+      },
+      {
+        "gap_type": "missing_official_clean_tariff",
+        "status": "candidate_found",
+        "n": 5
+      },
+      {
+        "gap_type": "missing_official_clean_tariff",
+        "status": "open",
+        "n": 42
+      },
+      {
+        "gap_type": "missing_official_clean_tariff",
+        "status": "searched_not_found",
+        "n": 5
+      },
+      {
+        "gap_type": "missing_official_clean_tariff",
+        "status": "verification_required",
+        "n": 10
+      },
+      {
+        "gap_type": "missing_official_clean_tariff",
+        "status": "verified",
+        "n": 3
+      },
+      {
+        "gap_type": "missing_predecessor_revision",
+        "status": "candidate_found",
+        "n": 38
+      },
+      {
+        "gap_type": "missing_predecessor_revision",
+        "status": "open",
+        "n": 2
+      },
+      {
+        "gap_type": "missing_predecessor_revision",
+        "status": "searched_not_found",
+        "n": 27
+      },
+      {
+        "gap_type": "missing_predecessor_revision",
+        "status": "verification_required",
+        "n": 32
+      },
+      {
+        "gap_type": "missing_predecessor_revision",
+        "status": "verified",
+        "n": 12
+      },
+      {
+        "gap_type": "missing_regulatory_order",
+        "status": "candidate_found",
+        "n": 90
+      },
+      {
+        "gap_type": "missing_regulatory_order",
+        "status": "open",
+        "n": 23
+      },
+      {
+        "gap_type": "missing_successor_document",
+        "status": "candidate_found",
+        "n": 1
+      },
+      {
+        "gap_type": "missing_successor_document",
+        "status": "open",
+        "n": 1
+      },
+      {
+        "gap_type": "missing_successor_document",
+        "status": "verification_required",
+        "n": 1
+      },
+      {
+        "gap_type": "unresolved_version_identity",
+        "status": "open",
+        "n": 160
+      }
+    ],
+    "candidates": {
+      "full": 84,
+      "partial": 729
+    },
+    "gaps_with_candidates": 212,
+    "resolved_gaps": 16
+  },
+  "network_plan": {
+    "planner": "remote_discovery@1.2.0",
+    "gaps_considered": 480,
+    "skipped": {
+      "local_search_not_complete": 321
+    },
+    "targets": 319,
+    "distinct_queries": 241,
+    "by_channel": {
+      "portal_orders": {
+        "planned": 54
+      },
+      "zoom": {
+        "planned": 134
+      },
+      "portal_params": {
+        "planned": 53
+      }
+    }
+  },
+  "canonical_tables_preserved": true,
+  "new_order_evidence": 4316
+}

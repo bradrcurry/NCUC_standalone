@@ -1,0 +1,4245 @@
+{
+  "promotion_log_id": 1,
+  "from_run_id": null,
+  "to_run_id": 1,
+  "deleted": 104,
+  "inserted": 125,
+  "preserved_protected": [],
+  "skipped_candidates_for_protected": [],
+  "applied_overrides": [],
+  "diff": {
+    "target_kind": "tariff_version",
+    "target_id": 6908,
+    "candidate_run_id": 1,
+    "active_run_id": null,
+    "candidate_validation_status": "passed",
+    "version_effective_start": null,
+    "target_effective_date_changes": {
+      "effective_start": [
+        null,
+        "2025-09-01"
+      ]
+    },
+    "summary": {
+      "active_rows": 104,
+      "candidate_rows": 125,
+      "unchanged": 0,
+      "added": 110,
+      "removed": 89,
+      "removed_but_protected": 0,
+      "value_changes": 0,
+      "unit_changes": 0,
+      "effective_date_changes": 12,
+      "rate_class_changes": 15,
+      "applicability_changes": 0,
+      "provenance_differences": 15
+    },
+    "added": [
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Residential Service Schedules - BA-Fuel",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 1
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Residential Service Schedules - BA-EMF",
+        "rate_value": 0.006500000000000001,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 2
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Residential Service Schedules - BA-DSM",
+        "rate_value": 0.0064,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 3
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Residential Service Schedules - BA",
+        "rate_value": 0.0129,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 4
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Residential Service Schedules - JAA",
+        "rate_value": 0.00631,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 6
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Residential Service Schedules - CPRE",
+        "rate_value": 0.00013,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 7
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Residential Service Schedules - CAR",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 8
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Residential Service Schedules - RDM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 9
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Residential Service Schedules - ESM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 10
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Residential Service Schedules - PIM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 11
+      },
+      {
+        "charge_type": "adjustment_total",
+        "charge_label": "Residential Service Schedules Total Rider Adjustments",
+        "rate_value": 0.01685,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 12
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service Schedules - BA-Fuel",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 13
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service Schedules - BA-EMF",
+        "rate_value": 0.0045000000000000005,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 14
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service Schedules - BA-DSM",
+        "rate_value": 0.00042,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 15
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service Schedules - BA-EE",
+        "rate_value": 0.00424,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 16
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service Schedules - BA",
+        "rate_value": 0.00916,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 17
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service Schedules - JAA",
+        "rate_value": 0.00607,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 19
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service Schedules - CPRE",
+        "rate_value": 0.00013,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 20
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service Schedules - ESM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 21
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service Schedules - PIM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 22
+      },
+      {
+        "charge_type": "adjustment_total",
+        "charge_label": "Small General Service Schedules Total Rider Adjustments",
+        "rate_value": 0.012769999999999998,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 23
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service - Constant Load Schedule - BA-Fuel",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 24
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service - Constant Load Schedule - BA-EMF",
+        "rate_value": 0.0045000000000000005,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 25
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service - Constant Load Schedule - BA-DSM",
+        "rate_value": 0.00042,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 26
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service - Constant Load Schedule - BA-EE",
+        "rate_value": 0.00424,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 27
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service - Constant Load Schedule - BA",
+        "rate_value": 0.00916,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 28
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service - Constant Load Schedule - JAA",
+        "rate_value": 0.00607,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 30
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service - Constant Load Schedule - CPRE",
+        "rate_value": 0.00013,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 31
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service - Constant Load Schedule - ESM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 32
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service - Constant Load Schedule - PIM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 33
+      },
+      {
+        "charge_type": "adjustment_total",
+        "charge_label": "Small General Service - Constant Load Schedule Total Rider Adjustments",
+        "rate_value": 0.0128,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 34
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Non-Demand: Medium General Service Schedules - BA-Fuel",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 35
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Non-Demand: Medium General Service Schedules - BA-EMF",
+        "rate_value": 0.005869999999999999,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 36
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Non-Demand: Medium General Service Schedules - BA-DSM",
+        "rate_value": 0.00042,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 37
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Non-Demand: Medium General Service Schedules - BA-EE",
+        "rate_value": 0.00424,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 38
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Non-Demand: Medium General Service Schedules - BA",
+        "rate_value": 0.01053,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 39
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Non-Demand: Medium General Service Schedules - JAA",
+        "rate_value": 0.0046300000000000004,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 41
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Non-Demand: Medium General Service Schedules - CPRE",
+        "rate_value": 0.00010999999999999999,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 42
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Non-Demand: Medium General Service Schedules - ESM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 43
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Non-Demand: Medium General Service Schedules - PIM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 44
+      },
+      {
+        "charge_type": "adjustment_total",
+        "charge_label": "Non-Demand: Medium General Service Schedules Total Rider Adjustments",
+        "rate_value": 0.013819999999999999,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 45
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Demand: Medium General Service Schedules - BA-Fuel",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 46
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Demand: Medium General Service Schedules - BA-EMF",
+        "rate_value": 0.005869999999999999,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 47
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Demand: Medium General Service Schedules - BA-DSM",
+        "rate_value": 0.00042,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 48
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Demand: Medium General Service Schedules - BA-EE",
+        "rate_value": 0.00424,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 49
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Demand: Medium General Service Schedules - BA",
+        "rate_value": 0.01053,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 50
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Demand: Medium General Service Schedules - CPRE",
+        "rate_value": 0.00010999999999999999,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 52
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Demand: Medium General Service Schedules - ESM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 53
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Demand: Medium General Service Schedules - PIM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 54
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Demand: Medium General Service Schedules - JAA",
+        "rate_value": 1.43,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 55
+      },
+      {
+        "charge_type": "adjustment_total",
+        "charge_label": "Demand: Medium General Service Schedules Total Rider Adjustments",
+        "rate_value": 0.00919,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 56
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Seasonal or Intermittent Service Schedule - BA-Fuel",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 58
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Seasonal or Intermittent Service Schedule - BA-EMF",
+        "rate_value": 0.005869999999999999,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 59
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Seasonal or Intermittent Service Schedule - BA-DSM",
+        "rate_value": 0.00042,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 60
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Seasonal or Intermittent Service Schedule - BA-EE",
+        "rate_value": 0.00424,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 61
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Seasonal or Intermittent Service Schedule - BA",
+        "rate_value": 0.01053,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 62
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Seasonal or Intermittent Service Schedule - JAA",
+        "rate_value": 0.015880000000000002,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 64
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Seasonal or Intermittent Service Schedule - CPRE",
+        "rate_value": 0.00010999999999999999,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 65
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Seasonal or Intermittent Service Schedule - ESM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 66
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Seasonal or Intermittent Service Schedule - PIM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 67
+      },
+      {
+        "charge_type": "adjustment_total",
+        "charge_label": "Seasonal or Intermittent Service Schedule Total Rider Adjustments",
+        "rate_value": 0.023479999999999997,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 68
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Large General Service Schedules - BA-Fuel",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 69
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Large General Service Schedules - BA-EMF",
+        "rate_value": 0.00899,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 70
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Large General Service Schedules - BA-DSM",
+        "rate_value": 0.00042,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 71
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Large General Service Schedules - BA-EE",
+        "rate_value": 0.00424,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 72
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Large General Service Schedules - BA",
+        "rate_value": 0.01365,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 73
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Large General Service Schedules - CPRE",
+        "rate_value": 0.00012,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 75
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Large General Service Schedules - ESM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 76
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Large General Service Schedules - PIM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 77
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Large General Service Schedules - JAA",
+        "rate_value": 1.59,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 78
+      },
+      {
+        "charge_type": "adjustment_total",
+        "charge_label": "Large General Service Schedules Total Rider Adjustments",
+        "rate_value": 0.01284,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 79
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Schedule HP & Schedule LGS-RTP - BA-Fuel",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 81
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Schedule HP & Schedule LGS-RTP - BA-EMF",
+        "rate_value": 0.00899,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 82
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Schedule HP & Schedule LGS-RTP - BA-DSM",
+        "rate_value": 0.00042,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 83
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Schedule HP & Schedule LGS-RTP - BA-EE",
+        "rate_value": 0.00424,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 84
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Schedule HP & Schedule LGS-RTP - BA",
+        "rate_value": 0.01365,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 85
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Schedule HP & Schedule LGS-RTP - CPRE",
+        "rate_value": 0.00012,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 87
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Schedule HP & Schedule LGS-RTP - ESM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 88
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Schedule HP & Schedule LGS-RTP - PIM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 89
+      },
+      {
+        "charge_type": "adjustment_total",
+        "charge_label": "Schedule HP & Schedule LGS-RTP Total Rider Adjustments",
+        "rate_value": 0.01284,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 91
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Outdoor Lighting Schedules - BA-Fuel",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 93
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Outdoor Lighting Schedules - BA-EMF",
+        "rate_value": 0.00835,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 94
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Outdoor Lighting Schedules - BA-DSM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 95
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Outdoor Lighting Schedules - BA-EE",
+        "rate_value": 0.00099,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 96
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Outdoor Lighting Schedules - BA",
+        "rate_value": 0.009340000000000001,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 97
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Outdoor Lighting Schedules - JAA",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 99
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Outdoor Lighting Schedules - CPRE",
+        "rate_value": 0.0001,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 100
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Outdoor Lighting Schedules - ESM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 101
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Outdoor Lighting Schedules - PIM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 102
+      },
+      {
+        "charge_type": "adjustment_total",
+        "charge_label": "Outdoor Lighting Schedules Total Rider Adjustments",
+        "rate_value": 0.0014299999999999998,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 103
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Sports Field Lighting Schedule - BA-Fuel",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 104
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Sports Field Lighting Schedule - BA-EMF",
+        "rate_value": 0.00835,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 105
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Sports Field Lighting Schedule - BA-DSM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 106
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Sports Field Lighting Schedule - BA-EE",
+        "rate_value": 0.00099,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 107
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Sports Field Lighting Schedule - BA",
+        "rate_value": 0.009340000000000001,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 108
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Sports Field Lighting Schedule - JAA",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 110
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Sports Field Lighting Schedule - CPRE",
+        "rate_value": 0.0001,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 111
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Sports Field Lighting Schedule - ESM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 112
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Sports Field Lighting Schedule - PIM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 113
+      },
+      {
+        "charge_type": "adjustment_total",
+        "charge_label": "Sports Field Lighting Schedule Total Rider Adjustments",
+        "rate_value": 0.00252,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 114
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Traffic Signal Schedules - BA-Fuel",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 115
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Traffic Signal Schedules - BA-EMF",
+        "rate_value": 0.0045000000000000005,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 116
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Traffic Signal Schedules - BA-DSM",
+        "rate_value": 0.00042,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 117
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Traffic Signal Schedules - BA-EE",
+        "rate_value": 0.00424,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 118
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Traffic Signal Schedules - BA",
+        "rate_value": 0.00916,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 119
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Traffic Signal Schedules - JAA",
+        "rate_value": 0.00333,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 121
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Traffic Signal Schedules - CPRE",
+        "rate_value": 0.00013,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 122
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Traffic Signal Schedules - ESM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 123
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Traffic Signal Schedules - PIM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 124
+      },
+      {
+        "charge_type": "adjustment_total",
+        "charge_label": "Traffic Signal Schedules Total Rider Adjustments",
+        "rate_value": 0.010709999999999999,
+        "rate_unit": "$/kWh",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": null,
+        "extracted_charge_id": 125
+      }
+    ],
+    "removed": [
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Residential Service Schedules - BA-Fuel",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "residential",
+        "tariff_charge_id": 754969,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Residential Service Schedules - BA-EMF",
+        "rate_value": 0.65,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "residential",
+        "tariff_charge_id": 754970,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Residential Service Schedules - BA-DSM",
+        "rate_value": 0.64,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "residential",
+        "tariff_charge_id": 754971,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Residential Service Schedules - BA",
+        "rate_value": 1.29,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "residential",
+        "tariff_charge_id": 754972,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Residential Service Schedules - JAA",
+        "rate_value": 0.631,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "residential",
+        "tariff_charge_id": 754974,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Residential Service Schedules - CPRE",
+        "rate_value": 0.013,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "residential",
+        "tariff_charge_id": 754975,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Residential Service Schedules - CAR",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "residential",
+        "tariff_charge_id": 754976,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Residential Service Schedules - RDM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "residential",
+        "tariff_charge_id": 754977,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Residential Service Schedules - ESM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "residential",
+        "tariff_charge_id": 754978,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Residential Service Schedules - PIM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "residential",
+        "tariff_charge_id": 754979,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service Schedules - BA-Fuel",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_small",
+        "tariff_charge_id": 754980,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service Schedules - BA-EMF",
+        "rate_value": 0.45,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_small",
+        "tariff_charge_id": 754981,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service Schedules - BA-DSM",
+        "rate_value": 0.042,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_small",
+        "tariff_charge_id": 754982,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service Schedules - BA-EE",
+        "rate_value": 0.424,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_small",
+        "tariff_charge_id": 754983,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service Schedules - BA",
+        "rate_value": 0.916,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_small",
+        "tariff_charge_id": 754984,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service Schedules - JAA",
+        "rate_value": 0.607,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_small",
+        "tariff_charge_id": 754986,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service Schedules - CPRE",
+        "rate_value": 0.013,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_small",
+        "tariff_charge_id": 754987,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service Schedules - ESM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_small",
+        "tariff_charge_id": 754988,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service Schedules - PIM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_small",
+        "tariff_charge_id": 754989,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service - Constant Load Schedule - BA-Fuel",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_small",
+        "tariff_charge_id": 754990,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service - Constant Load Schedule - BA-EMF",
+        "rate_value": 0.45,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_small",
+        "tariff_charge_id": 754991,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service - Constant Load Schedule - BA-DSM",
+        "rate_value": 0.042,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_small",
+        "tariff_charge_id": 754992,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service - Constant Load Schedule - BA-EE",
+        "rate_value": 0.424,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_small",
+        "tariff_charge_id": 754993,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service - Constant Load Schedule - BA",
+        "rate_value": 0.916,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_small",
+        "tariff_charge_id": 754994,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service - Constant Load Schedule - JAA",
+        "rate_value": 0.607,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_small",
+        "tariff_charge_id": 754996,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service - Constant Load Schedule - CPRE",
+        "rate_value": 0.013,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_small",
+        "tariff_charge_id": 754997,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service - Constant Load Schedule - ESM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_small",
+        "tariff_charge_id": 754998,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Small General Service - Constant Load Schedule - PIM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_small",
+        "tariff_charge_id": 754999,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Non-Demand: Medium General Service Schedules - BA-Fuel",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_medium",
+        "tariff_charge_id": 755000,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Non-Demand: Medium General Service Schedules - BA-EMF",
+        "rate_value": 0.587,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_medium",
+        "tariff_charge_id": 755001,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Non-Demand: Medium General Service Schedules - BA-DSM",
+        "rate_value": 0.042,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_medium",
+        "tariff_charge_id": 755002,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Non-Demand: Medium General Service Schedules - BA-EE",
+        "rate_value": 0.424,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_medium",
+        "tariff_charge_id": 755003,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Non-Demand: Medium General Service Schedules - BA",
+        "rate_value": 1.053,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_medium",
+        "tariff_charge_id": 755004,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Non-Demand: Medium General Service Schedules - JAA",
+        "rate_value": 0.463,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_medium",
+        "tariff_charge_id": 755006,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Non-Demand: Medium General Service Schedules - CPRE",
+        "rate_value": 0.011,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_medium",
+        "tariff_charge_id": 755007,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Non-Demand: Medium General Service Schedules - ESM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_medium",
+        "tariff_charge_id": 755008,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Non-Demand: Medium General Service Schedules - PIM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_medium",
+        "tariff_charge_id": 755009,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Demand: Medium General Service Schedules - BA-Fuel",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_medium",
+        "tariff_charge_id": 755010,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Demand: Medium General Service Schedules - BA-EMF",
+        "rate_value": 0.587,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_medium",
+        "tariff_charge_id": 755011,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Demand: Medium General Service Schedules - BA-DSM",
+        "rate_value": 0.042,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_medium",
+        "tariff_charge_id": 755012,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Demand: Medium General Service Schedules - BA-EE",
+        "rate_value": 0.424,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_medium",
+        "tariff_charge_id": 755013,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Demand: Medium General Service Schedules - BA",
+        "rate_value": 1.053,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_medium",
+        "tariff_charge_id": 755014,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Demand: Medium General Service Schedules - CPRE",
+        "rate_value": 0.011,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_medium",
+        "tariff_charge_id": 755016,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Demand: Medium General Service Schedules - ESM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_medium",
+        "tariff_charge_id": 755017,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Demand: Medium General Service Schedules - PIM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_medium",
+        "tariff_charge_id": 755018,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Seasonal or Intermittent Service Schedule - BA-Fuel",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "seasonal_intermittent",
+        "tariff_charge_id": 755020,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Seasonal or Intermittent Service Schedule - BA-EMF",
+        "rate_value": 0.587,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "seasonal_intermittent",
+        "tariff_charge_id": 755021,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Seasonal or Intermittent Service Schedule - BA-DSM",
+        "rate_value": 0.042,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "seasonal_intermittent",
+        "tariff_charge_id": 755022,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Seasonal or Intermittent Service Schedule - BA-EE",
+        "rate_value": 0.424,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "seasonal_intermittent",
+        "tariff_charge_id": 755023,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Seasonal or Intermittent Service Schedule - BA",
+        "rate_value": 1.053,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "seasonal_intermittent",
+        "tariff_charge_id": 755024,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Seasonal or Intermittent Service Schedule - JAA",
+        "rate_value": 1.588,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "seasonal_intermittent",
+        "tariff_charge_id": 755026,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Seasonal or Intermittent Service Schedule - CPRE",
+        "rate_value": 0.011,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "seasonal_intermittent",
+        "tariff_charge_id": 755027,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Seasonal or Intermittent Service Schedule - ESM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "seasonal_intermittent",
+        "tariff_charge_id": 755028,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Seasonal or Intermittent Service Schedule - PIM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "seasonal_intermittent",
+        "tariff_charge_id": 755029,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Large General Service Schedules - BA-Fuel",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_large",
+        "tariff_charge_id": 755030,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Large General Service Schedules - BA-EMF",
+        "rate_value": 0.899,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_large",
+        "tariff_charge_id": 755031,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Large General Service Schedules - BA-DSM",
+        "rate_value": 0.042,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_large",
+        "tariff_charge_id": 755032,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Large General Service Schedules - BA-EE",
+        "rate_value": 0.424,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_large",
+        "tariff_charge_id": 755033,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Large General Service Schedules - BA",
+        "rate_value": 1.365,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_large",
+        "tariff_charge_id": 755034,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Large General Service Schedules - CPRE",
+        "rate_value": 0.012,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_large",
+        "tariff_charge_id": 755036,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Large General Service Schedules - ESM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_large",
+        "tariff_charge_id": 755037,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Large General Service Schedules - PIM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "commercial_large",
+        "tariff_charge_id": 755038,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Outdoor Lighting Schedules - BA-Fuel",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "lighting",
+        "tariff_charge_id": 755043,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Outdoor Lighting Schedules - BA-EMF",
+        "rate_value": 0.835,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "lighting",
+        "tariff_charge_id": 755044,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Outdoor Lighting Schedules - BA-DSM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "lighting",
+        "tariff_charge_id": 755045,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Outdoor Lighting Schedules - BA-EE",
+        "rate_value": 0.099,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "lighting",
+        "tariff_charge_id": 755046,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Outdoor Lighting Schedules - BA",
+        "rate_value": 0.934,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "lighting",
+        "tariff_charge_id": 755047,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Outdoor Lighting Schedules - JAA",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "lighting",
+        "tariff_charge_id": 755049,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Outdoor Lighting Schedules - CPRE",
+        "rate_value": 0.01,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "lighting",
+        "tariff_charge_id": 755050,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Outdoor Lighting Schedules - ESM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "lighting",
+        "tariff_charge_id": 755051,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Outdoor Lighting Schedules - PIM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "lighting",
+        "tariff_charge_id": 755052,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Sports Field Lighting Schedule - BA-Fuel",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "lighting_sports_field",
+        "tariff_charge_id": 755053,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Sports Field Lighting Schedule - BA-EMF",
+        "rate_value": 0.835,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "lighting_sports_field",
+        "tariff_charge_id": 755054,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Sports Field Lighting Schedule - BA-DSM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "lighting_sports_field",
+        "tariff_charge_id": 755055,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Sports Field Lighting Schedule - BA-EE",
+        "rate_value": 0.099,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "lighting_sports_field",
+        "tariff_charge_id": 755056,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Sports Field Lighting Schedule - BA",
+        "rate_value": 0.934,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "lighting_sports_field",
+        "tariff_charge_id": 755057,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Sports Field Lighting Schedule - JAA",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "lighting_sports_field",
+        "tariff_charge_id": 755059,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Sports Field Lighting Schedule - CPRE",
+        "rate_value": 0.01,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "lighting_sports_field",
+        "tariff_charge_id": 755060,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Sports Field Lighting Schedule - ESM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "lighting_sports_field",
+        "tariff_charge_id": 755061,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Sports Field Lighting Schedule - PIM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "lighting_sports_field",
+        "tariff_charge_id": 755062,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Traffic Signal Schedules - BA-Fuel",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "traffic_signal",
+        "tariff_charge_id": 755063,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Traffic Signal Schedules - BA-EMF",
+        "rate_value": 0.45,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "traffic_signal",
+        "tariff_charge_id": 755064,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Traffic Signal Schedules - BA-DSM",
+        "rate_value": 0.042,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "traffic_signal",
+        "tariff_charge_id": 755065,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Traffic Signal Schedules - BA-EE",
+        "rate_value": 0.424,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "traffic_signal",
+        "tariff_charge_id": 755066,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Traffic Signal Schedules - BA",
+        "rate_value": 0.916,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "traffic_signal",
+        "tariff_charge_id": 755067,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Traffic Signal Schedules - JAA",
+        "rate_value": 0.333,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "traffic_signal",
+        "tariff_charge_id": 755069,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Traffic Signal Schedules - CPRE",
+        "rate_value": 0.013,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "traffic_signal",
+        "tariff_charge_id": 755070,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Traffic Signal Schedules - ESM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "traffic_signal",
+        "tariff_charge_id": 755071,
+        "protected": false
+      },
+      {
+        "charge_type": "adjustment",
+        "charge_label": "Traffic Signal Schedules - PIM",
+        "rate_value": 0.0,
+        "rate_unit": "$/kW",
+        "tier_min": null,
+        "tier_max": null,
+        "tou_period": null,
+        "season": "all_year",
+        "customer_class": "traffic_signal",
+        "tariff_charge_id": 755072,
+        "protected": false
+      }
+    ],
+    "value_changes": [],
+    "unit_changes": [],
+    "effective_date_changes": [
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Residential Service Schedules - EDIT-4",
+          "rate_value": -0.00249,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "residential",
+          "tariff_charge_id": 754973,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Residential Service Schedules - EDIT-4",
+          "rate_value": -0.00249,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 5
+        },
+        "change": [
+          null,
+          "2023-10-01"
+        ]
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Small General Service Schedules - EDIT-4",
+          "rate_value": -0.0025900000000000003,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "commercial_small",
+          "tariff_charge_id": 754985,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Small General Service Schedules - EDIT-4",
+          "rate_value": -0.0025900000000000003,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 18
+        },
+        "change": [
+          null,
+          "2023-10-01"
+        ]
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Small General Service - Constant Load Schedule - EDIT-4",
+          "rate_value": -0.00256,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "commercial_small",
+          "tariff_charge_id": 754995,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Small General Service - Constant Load Schedule - EDIT-4",
+          "rate_value": -0.00256,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 29
+        },
+        "change": [
+          null,
+          "2023-10-01"
+        ]
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Non-Demand: Medium General Service Schedules - EDIT-4",
+          "rate_value": -0.00145,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "commercial_medium",
+          "tariff_charge_id": 755005,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Non-Demand: Medium General Service Schedules - EDIT-4",
+          "rate_value": -0.00145,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 40
+        },
+        "change": [
+          null,
+          "2023-10-01"
+        ]
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Demand: Medium General Service Schedules - EDIT-4",
+          "rate_value": -0.00145,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "commercial_medium",
+          "tariff_charge_id": 755015,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Demand: Medium General Service Schedules - EDIT-4",
+          "rate_value": -0.00145,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 51
+        },
+        "change": [
+          null,
+          "2023-10-01"
+        ]
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Seasonal or Intermittent Service Schedule - EDIT-4",
+          "rate_value": -0.0030399999999999997,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "seasonal_intermittent",
+          "tariff_charge_id": 755025,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Seasonal or Intermittent Service Schedule - EDIT-4",
+          "rate_value": -0.0030399999999999997,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 63
+        },
+        "change": [
+          null,
+          "2023-10-01"
+        ]
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Large General Service Schedules - EDIT-4",
+          "rate_value": -0.0009299999999999999,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "commercial_large",
+          "tariff_charge_id": 755035,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Large General Service Schedules - EDIT-4",
+          "rate_value": -0.0009299999999999999,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 74
+        },
+        "change": [
+          null,
+          "2023-10-01"
+        ]
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Schedule HP & Schedule LGS-RTP - JAA",
+          "rate_value": 1.59,
+          "rate_unit": "$/kW",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "hourly_pricing_large",
+          "tariff_charge_id": 755041,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Schedule HP & Schedule LGS-RTP - JAA",
+          "rate_value": 1.59,
+          "rate_unit": "$/kW",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 90
+        },
+        "change": [
+          null,
+          "2022-12-01"
+        ]
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Outdoor Lighting Schedules - EDIT-4",
+          "rate_value": -0.00801,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "lighting",
+          "tariff_charge_id": 755048,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Outdoor Lighting Schedules - EDIT-4",
+          "rate_value": -0.00801,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 98
+        },
+        "change": [
+          null,
+          "2023-10-01"
+        ]
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Sports Field Lighting Schedule - EDIT-4",
+          "rate_value": -0.006919999999999999,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "lighting_sports_field",
+          "tariff_charge_id": 755058,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Sports Field Lighting Schedule - EDIT-4",
+          "rate_value": -0.006919999999999999,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 109
+        },
+        "change": [
+          null,
+          "2023-10-01"
+        ]
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Traffic Signal Schedules - EDIT-4",
+          "rate_value": -0.00191,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "traffic_signal",
+          "tariff_charge_id": 755068,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Traffic Signal Schedules - EDIT-4",
+          "rate_value": -0.00191,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 120
+        },
+        "change": [
+          null,
+          "2023-10-01"
+        ]
+      }
+    ],
+    "rate_class_changes": [
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Residential Service Schedules - EDIT-4",
+          "rate_value": -0.00249,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "residential",
+          "tariff_charge_id": 754973,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Residential Service Schedules - EDIT-4",
+          "rate_value": -0.00249,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 5
+        },
+        "change": [
+          "residential",
+          null
+        ]
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Small General Service Schedules - EDIT-4",
+          "rate_value": -0.0025900000000000003,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "commercial_small",
+          "tariff_charge_id": 754985,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Small General Service Schedules - EDIT-4",
+          "rate_value": -0.0025900000000000003,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 18
+        },
+        "change": [
+          "commercial_small",
+          null
+        ]
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Small General Service - Constant Load Schedule - EDIT-4",
+          "rate_value": -0.00256,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "commercial_small",
+          "tariff_charge_id": 754995,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Small General Service - Constant Load Schedule - EDIT-4",
+          "rate_value": -0.00256,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 29
+        },
+        "change": [
+          "commercial_small",
+          null
+        ]
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Non-Demand: Medium General Service Schedules - EDIT-4",
+          "rate_value": -0.00145,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "commercial_medium",
+          "tariff_charge_id": 755005,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Non-Demand: Medium General Service Schedules - EDIT-4",
+          "rate_value": -0.00145,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 40
+        },
+        "change": [
+          "commercial_medium",
+          null
+        ]
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Demand: Medium General Service Schedules - EDIT-4",
+          "rate_value": -0.00145,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "commercial_medium",
+          "tariff_charge_id": 755015,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Demand: Medium General Service Schedules - EDIT-4",
+          "rate_value": -0.00145,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 51
+        },
+        "change": [
+          "commercial_medium",
+          null
+        ]
+      },
+      {
+        "active": {
+          "charge_type": "adjustment_total",
+          "charge_label": "Demand: Medium General Service Schedules Total Rider Adjustments",
+          "rate_value": 1.43,
+          "rate_unit": "$/kW",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "commercial_medium",
+          "tariff_charge_id": 755019,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment_total",
+          "charge_label": "Demand: Medium General Service Schedules Total Rider Adjustments",
+          "rate_value": 1.43,
+          "rate_unit": "$/kW",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 57
+        },
+        "change": [
+          "commercial_medium",
+          null
+        ]
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Seasonal or Intermittent Service Schedule - EDIT-4",
+          "rate_value": -0.0030399999999999997,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "seasonal_intermittent",
+          "tariff_charge_id": 755025,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Seasonal or Intermittent Service Schedule - EDIT-4",
+          "rate_value": -0.0030399999999999997,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 63
+        },
+        "change": [
+          "seasonal_intermittent",
+          null
+        ]
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Large General Service Schedules - EDIT-4",
+          "rate_value": -0.0009299999999999999,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "commercial_large",
+          "tariff_charge_id": 755035,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Large General Service Schedules - EDIT-4",
+          "rate_value": -0.0009299999999999999,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 74
+        },
+        "change": [
+          "commercial_large",
+          null
+        ]
+      },
+      {
+        "active": {
+          "charge_type": "adjustment_total",
+          "charge_label": "Large General Service Schedules Total Rider Adjustments",
+          "rate_value": 1.59,
+          "rate_unit": "$/kW",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "commercial_large",
+          "tariff_charge_id": 755039,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment_total",
+          "charge_label": "Large General Service Schedules Total Rider Adjustments",
+          "rate_value": 1.59,
+          "rate_unit": "$/kW",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 80
+        },
+        "change": [
+          "commercial_large",
+          null
+        ]
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Schedule HP & Schedule LGS-RTP - EDIT-4",
+          "rate_value": -0.0009299999999999999,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "hourly_pricing_large",
+          "tariff_charge_id": 755040,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Schedule HP & Schedule LGS-RTP - EDIT-4",
+          "rate_value": -0.0009299999999999999,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 86
+        },
+        "change": [
+          "hourly_pricing_large",
+          null
+        ]
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Schedule HP & Schedule LGS-RTP - JAA",
+          "rate_value": 1.59,
+          "rate_unit": "$/kW",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "hourly_pricing_large",
+          "tariff_charge_id": 755041,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Schedule HP & Schedule LGS-RTP - JAA",
+          "rate_value": 1.59,
+          "rate_unit": "$/kW",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 90
+        },
+        "change": [
+          "hourly_pricing_large",
+          null
+        ]
+      },
+      {
+        "active": {
+          "charge_type": "adjustment_total",
+          "charge_label": "Schedule HP & Schedule LGS-RTP Total Rider Adjustments",
+          "rate_value": 1.59,
+          "rate_unit": "$/kW",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "hourly_pricing_large",
+          "tariff_charge_id": 755042,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment_total",
+          "charge_label": "Schedule HP & Schedule LGS-RTP Total Rider Adjustments",
+          "rate_value": 1.59,
+          "rate_unit": "$/kW",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 92
+        },
+        "change": [
+          "hourly_pricing_large",
+          null
+        ]
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Outdoor Lighting Schedules - EDIT-4",
+          "rate_value": -0.00801,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "lighting",
+          "tariff_charge_id": 755048,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Outdoor Lighting Schedules - EDIT-4",
+          "rate_value": -0.00801,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 98
+        },
+        "change": [
+          "lighting",
+          null
+        ]
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Sports Field Lighting Schedule - EDIT-4",
+          "rate_value": -0.006919999999999999,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "lighting_sports_field",
+          "tariff_charge_id": 755058,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Sports Field Lighting Schedule - EDIT-4",
+          "rate_value": -0.006919999999999999,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 109
+        },
+        "change": [
+          "lighting_sports_field",
+          null
+        ]
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Traffic Signal Schedules - EDIT-4",
+          "rate_value": -0.00191,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "traffic_signal",
+          "tariff_charge_id": 755068,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Traffic Signal Schedules - EDIT-4",
+          "rate_value": -0.00191,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 120
+        },
+        "change": [
+          "traffic_signal",
+          null
+        ]
+      }
+    ],
+    "applicability_changes": [],
+    "provenance_differences": [
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Residential Service Schedules - EDIT-4",
+          "rate_value": -0.00249,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "residential",
+          "tariff_charge_id": 754973,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Residential Service Schedules - EDIT-4",
+          "rate_value": -0.00249,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 5
+        },
+        "change": {
+          "source_pdf_status": [
+            null,
+            "available"
+          ],
+          "source_pdf_sha256": [
+            null,
+            "30d6a3e56f70401f81cd2563c5f2be32778ae7d6b4fe658154432014006d8426"
+          ],
+          "page_status": [
+            null,
+            "available"
+          ],
+          "page_number": [
+            null,
+            96
+          ],
+          "bbox_status": [
+            null,
+            "available"
+          ],
+          "quote_status": [
+            null,
+            "available"
+          ],
+          "extraction_method": [
+            null,
+            "parser_profile:progress_rider_adjustment_matrix"
+          ],
+          "tracked": [
+            false,
+            true
+          ]
+        }
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Small General Service Schedules - EDIT-4",
+          "rate_value": -0.0025900000000000003,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "commercial_small",
+          "tariff_charge_id": 754985,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Small General Service Schedules - EDIT-4",
+          "rate_value": -0.0025900000000000003,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 18
+        },
+        "change": {
+          "source_pdf_status": [
+            null,
+            "available"
+          ],
+          "source_pdf_sha256": [
+            null,
+            "30d6a3e56f70401f81cd2563c5f2be32778ae7d6b4fe658154432014006d8426"
+          ],
+          "page_status": [
+            null,
+            "available"
+          ],
+          "page_number": [
+            null,
+            96
+          ],
+          "bbox_status": [
+            null,
+            "available"
+          ],
+          "quote_status": [
+            null,
+            "available"
+          ],
+          "extraction_method": [
+            null,
+            "parser_profile:progress_rider_adjustment_matrix"
+          ],
+          "tracked": [
+            false,
+            true
+          ]
+        }
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Small General Service - Constant Load Schedule - EDIT-4",
+          "rate_value": -0.00256,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "commercial_small",
+          "tariff_charge_id": 754995,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Small General Service - Constant Load Schedule - EDIT-4",
+          "rate_value": -0.00256,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 29
+        },
+        "change": {
+          "source_pdf_status": [
+            null,
+            "available"
+          ],
+          "source_pdf_sha256": [
+            null,
+            "30d6a3e56f70401f81cd2563c5f2be32778ae7d6b4fe658154432014006d8426"
+          ],
+          "page_status": [
+            null,
+            "available"
+          ],
+          "page_number": [
+            null,
+            97
+          ],
+          "bbox_status": [
+            null,
+            "available"
+          ],
+          "quote_status": [
+            null,
+            "available"
+          ],
+          "extraction_method": [
+            null,
+            "parser_profile:progress_rider_adjustment_matrix"
+          ],
+          "tracked": [
+            false,
+            true
+          ]
+        }
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Non-Demand: Medium General Service Schedules - EDIT-4",
+          "rate_value": -0.00145,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "commercial_medium",
+          "tariff_charge_id": 755005,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Non-Demand: Medium General Service Schedules - EDIT-4",
+          "rate_value": -0.00145,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 40
+        },
+        "change": {
+          "source_pdf_status": [
+            null,
+            "available"
+          ],
+          "source_pdf_sha256": [
+            null,
+            "30d6a3e56f70401f81cd2563c5f2be32778ae7d6b4fe658154432014006d8426"
+          ],
+          "page_status": [
+            null,
+            "available"
+          ],
+          "page_number": [
+            null,
+            97
+          ],
+          "bbox_status": [
+            null,
+            "available"
+          ],
+          "quote_status": [
+            null,
+            "available"
+          ],
+          "extraction_method": [
+            null,
+            "parser_profile:progress_rider_adjustment_matrix"
+          ],
+          "tracked": [
+            false,
+            true
+          ]
+        }
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Demand: Medium General Service Schedules - EDIT-4",
+          "rate_value": -0.00145,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "commercial_medium",
+          "tariff_charge_id": 755015,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Demand: Medium General Service Schedules - EDIT-4",
+          "rate_value": -0.00145,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 51
+        },
+        "change": {
+          "source_pdf_status": [
+            null,
+            "available"
+          ],
+          "source_pdf_sha256": [
+            null,
+            "30d6a3e56f70401f81cd2563c5f2be32778ae7d6b4fe658154432014006d8426"
+          ],
+          "page_status": [
+            null,
+            "available"
+          ],
+          "page_number": [
+            null,
+            98
+          ],
+          "bbox_status": [
+            null,
+            "available"
+          ],
+          "quote_status": [
+            null,
+            "available"
+          ],
+          "extraction_method": [
+            null,
+            "parser_profile:progress_rider_adjustment_matrix"
+          ],
+          "tracked": [
+            false,
+            true
+          ]
+        }
+      },
+      {
+        "active": {
+          "charge_type": "adjustment_total",
+          "charge_label": "Demand: Medium General Service Schedules Total Rider Adjustments",
+          "rate_value": 1.43,
+          "rate_unit": "$/kW",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "commercial_medium",
+          "tariff_charge_id": 755019,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment_total",
+          "charge_label": "Demand: Medium General Service Schedules Total Rider Adjustments",
+          "rate_value": 1.43,
+          "rate_unit": "$/kW",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 57
+        },
+        "change": {
+          "source_pdf_status": [
+            null,
+            "available"
+          ],
+          "source_pdf_sha256": [
+            null,
+            "30d6a3e56f70401f81cd2563c5f2be32778ae7d6b4fe658154432014006d8426"
+          ],
+          "page_status": [
+            null,
+            "available"
+          ],
+          "page_number": [
+            null,
+            98
+          ],
+          "bbox_status": [
+            null,
+            "available"
+          ],
+          "quote_status": [
+            null,
+            "available"
+          ],
+          "extraction_method": [
+            null,
+            "parser_profile:progress_rider_adjustment_matrix"
+          ],
+          "tracked": [
+            false,
+            true
+          ]
+        }
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Seasonal or Intermittent Service Schedule - EDIT-4",
+          "rate_value": -0.0030399999999999997,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "seasonal_intermittent",
+          "tariff_charge_id": 755025,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Seasonal or Intermittent Service Schedule - EDIT-4",
+          "rate_value": -0.0030399999999999997,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 63
+        },
+        "change": {
+          "source_pdf_status": [
+            null,
+            "available"
+          ],
+          "source_pdf_sha256": [
+            null,
+            "30d6a3e56f70401f81cd2563c5f2be32778ae7d6b4fe658154432014006d8426"
+          ],
+          "page_status": [
+            null,
+            "available"
+          ],
+          "page_number": [
+            null,
+            98
+          ],
+          "bbox_status": [
+            null,
+            "available"
+          ],
+          "quote_status": [
+            null,
+            "available"
+          ],
+          "extraction_method": [
+            null,
+            "parser_profile:progress_rider_adjustment_matrix"
+          ],
+          "tracked": [
+            false,
+            true
+          ]
+        }
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Large General Service Schedules - EDIT-4",
+          "rate_value": -0.0009299999999999999,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "commercial_large",
+          "tariff_charge_id": 755035,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Large General Service Schedules - EDIT-4",
+          "rate_value": -0.0009299999999999999,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 74
+        },
+        "change": {
+          "source_pdf_status": [
+            null,
+            "available"
+          ],
+          "source_pdf_sha256": [
+            null,
+            "30d6a3e56f70401f81cd2563c5f2be32778ae7d6b4fe658154432014006d8426"
+          ],
+          "page_status": [
+            null,
+            "available"
+          ],
+          "page_number": [
+            null,
+            99
+          ],
+          "bbox_status": [
+            null,
+            "available"
+          ],
+          "quote_status": [
+            null,
+            "available"
+          ],
+          "extraction_method": [
+            null,
+            "parser_profile:progress_rider_adjustment_matrix"
+          ],
+          "tracked": [
+            false,
+            true
+          ]
+        }
+      },
+      {
+        "active": {
+          "charge_type": "adjustment_total",
+          "charge_label": "Large General Service Schedules Total Rider Adjustments",
+          "rate_value": 1.59,
+          "rate_unit": "$/kW",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "commercial_large",
+          "tariff_charge_id": 755039,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment_total",
+          "charge_label": "Large General Service Schedules Total Rider Adjustments",
+          "rate_value": 1.59,
+          "rate_unit": "$/kW",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 80
+        },
+        "change": {
+          "source_pdf_status": [
+            null,
+            "available"
+          ],
+          "source_pdf_sha256": [
+            null,
+            "30d6a3e56f70401f81cd2563c5f2be32778ae7d6b4fe658154432014006d8426"
+          ],
+          "page_status": [
+            null,
+            "available"
+          ],
+          "page_number": [
+            null,
+            99
+          ],
+          "bbox_status": [
+            null,
+            "available"
+          ],
+          "quote_status": [
+            null,
+            "available"
+          ],
+          "extraction_method": [
+            null,
+            "parser_profile:progress_rider_adjustment_matrix"
+          ],
+          "tracked": [
+            false,
+            true
+          ]
+        }
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Schedule HP & Schedule LGS-RTP - EDIT-4",
+          "rate_value": -0.0009299999999999999,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "hourly_pricing_large",
+          "tariff_charge_id": 755040,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Schedule HP & Schedule LGS-RTP - EDIT-4",
+          "rate_value": -0.0009299999999999999,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 86
+        },
+        "change": {
+          "source_pdf_status": [
+            null,
+            "available"
+          ],
+          "source_pdf_sha256": [
+            null,
+            "30d6a3e56f70401f81cd2563c5f2be32778ae7d6b4fe658154432014006d8426"
+          ],
+          "page_status": [
+            null,
+            "unavailable"
+          ],
+          "bbox_status": [
+            null,
+            "unavailable"
+          ],
+          "quote_status": [
+            null,
+            "unavailable"
+          ],
+          "extraction_method": [
+            null,
+            "parser_profile:progress_rider_adjustment_matrix"
+          ],
+          "tracked": [
+            false,
+            true
+          ]
+        }
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Schedule HP & Schedule LGS-RTP - JAA",
+          "rate_value": 1.59,
+          "rate_unit": "$/kW",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "hourly_pricing_large",
+          "tariff_charge_id": 755041,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Schedule HP & Schedule LGS-RTP - JAA",
+          "rate_value": 1.59,
+          "rate_unit": "$/kW",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 90
+        },
+        "change": {
+          "source_pdf_status": [
+            null,
+            "available"
+          ],
+          "source_pdf_sha256": [
+            null,
+            "30d6a3e56f70401f81cd2563c5f2be32778ae7d6b4fe658154432014006d8426"
+          ],
+          "page_status": [
+            null,
+            "available"
+          ],
+          "page_number": [
+            null,
+            99
+          ],
+          "bbox_status": [
+            null,
+            "available"
+          ],
+          "quote_status": [
+            null,
+            "available"
+          ],
+          "extraction_method": [
+            null,
+            "parser_profile:progress_rider_adjustment_matrix"
+          ],
+          "tracked": [
+            false,
+            true
+          ]
+        }
+      },
+      {
+        "active": {
+          "charge_type": "adjustment_total",
+          "charge_label": "Schedule HP & Schedule LGS-RTP Total Rider Adjustments",
+          "rate_value": 1.59,
+          "rate_unit": "$/kW",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "hourly_pricing_large",
+          "tariff_charge_id": 755042,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment_total",
+          "charge_label": "Schedule HP & Schedule LGS-RTP Total Rider Adjustments",
+          "rate_value": 1.59,
+          "rate_unit": "$/kW",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 92
+        },
+        "change": {
+          "source_pdf_status": [
+            null,
+            "available"
+          ],
+          "source_pdf_sha256": [
+            null,
+            "30d6a3e56f70401f81cd2563c5f2be32778ae7d6b4fe658154432014006d8426"
+          ],
+          "page_status": [
+            null,
+            "available"
+          ],
+          "page_number": [
+            null,
+            99
+          ],
+          "bbox_status": [
+            null,
+            "available"
+          ],
+          "quote_status": [
+            null,
+            "available"
+          ],
+          "extraction_method": [
+            null,
+            "parser_profile:progress_rider_adjustment_matrix"
+          ],
+          "tracked": [
+            false,
+            true
+          ]
+        }
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Outdoor Lighting Schedules - EDIT-4",
+          "rate_value": -0.00801,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "lighting",
+          "tariff_charge_id": 755048,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Outdoor Lighting Schedules - EDIT-4",
+          "rate_value": -0.00801,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 98
+        },
+        "change": {
+          "source_pdf_status": [
+            null,
+            "available"
+          ],
+          "source_pdf_sha256": [
+            null,
+            "30d6a3e56f70401f81cd2563c5f2be32778ae7d6b4fe658154432014006d8426"
+          ],
+          "page_status": [
+            null,
+            "available"
+          ],
+          "page_number": [
+            null,
+            100
+          ],
+          "bbox_status": [
+            null,
+            "available"
+          ],
+          "quote_status": [
+            null,
+            "available"
+          ],
+          "extraction_method": [
+            null,
+            "parser_profile:progress_rider_adjustment_matrix"
+          ],
+          "tracked": [
+            false,
+            true
+          ]
+        }
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Sports Field Lighting Schedule - EDIT-4",
+          "rate_value": -0.006919999999999999,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "lighting_sports_field",
+          "tariff_charge_id": 755058,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Sports Field Lighting Schedule - EDIT-4",
+          "rate_value": -0.006919999999999999,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 109
+        },
+        "change": {
+          "source_pdf_status": [
+            null,
+            "available"
+          ],
+          "source_pdf_sha256": [
+            null,
+            "30d6a3e56f70401f81cd2563c5f2be32778ae7d6b4fe658154432014006d8426"
+          ],
+          "page_status": [
+            null,
+            "available"
+          ],
+          "page_number": [
+            null,
+            100
+          ],
+          "bbox_status": [
+            null,
+            "available"
+          ],
+          "quote_status": [
+            null,
+            "available"
+          ],
+          "extraction_method": [
+            null,
+            "parser_profile:progress_rider_adjustment_matrix"
+          ],
+          "tracked": [
+            false,
+            true
+          ]
+        }
+      },
+      {
+        "active": {
+          "charge_type": "adjustment",
+          "charge_label": "Traffic Signal Schedules - EDIT-4",
+          "rate_value": -0.00191,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": "traffic_signal",
+          "tariff_charge_id": 755068,
+          "protected": false
+        },
+        "candidate": {
+          "charge_type": "adjustment",
+          "charge_label": "Traffic Signal Schedules - EDIT-4",
+          "rate_value": -0.00191,
+          "rate_unit": "$/kWh",
+          "tier_min": null,
+          "tier_max": null,
+          "tou_period": null,
+          "season": "all_year",
+          "customer_class": null,
+          "extracted_charge_id": 120
+        },
+        "change": {
+          "source_pdf_status": [
+            null,
+            "available"
+          ],
+          "source_pdf_sha256": [
+            null,
+            "30d6a3e56f70401f81cd2563c5f2be32778ae7d6b4fe658154432014006d8426"
+          ],
+          "page_status": [
+            null,
+            "available"
+          ],
+          "page_number": [
+            null,
+            101
+          ],
+          "bbox_status": [
+            null,
+            "available"
+          ],
+          "quote_status": [
+            null,
+            "available"
+          ],
+          "extraction_method": [
+            null,
+            "parser_profile:progress_rider_adjustment_matrix"
+          ],
+          "tracked": [
+            false,
+            true
+          ]
+        }
+      }
+    ]
+  }
+}

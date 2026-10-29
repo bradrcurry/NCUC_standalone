@@ -1,0 +1,100 @@
+[
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "PLANNER_VERSION",
+        "file_path": "src/duke_rates/historical/ncuc/remote_discovery.py",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Variable:src/duke_rates/historical/ncuc/remote_discovery.py:PLANNER_VERSION",
+        "name": "PLANNER_VERSION",
+        "type": "Variable",
+        "filePath": "src/duke_rates/historical/ncuc/remote_discovery.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 0,
+      "risk": "UNKNOWN",
+      "riskSharedAxes": "UNKNOWN",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "riskNote": "No callers resolved. Absence of edges is not evidence the symbol is unused: a caller reaching it through a reference class this index does not record — plain-object property access, a bare-identifier read of a module-scope const — produces no edge to find. Confirm with a text search before treating the change as safe.",
+      "epistemic": "exact",
+      "summary": {
+        "direct": 0,
+        "processes_affected": 0,
+        "modules_affected": 0
+      },
+      "byDepthCounts": {},
+      "affected_processes": [],
+      "affected_modules": [],
+      "byDepth": {}
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "open_snapshot",
+        "file_path": "bench/ncuc_discovery_evidence.py",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target 'open_snapshot' not found",
+      "target": {
+        "name": "open_snapshot"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "table_fingerprints",
+        "file_path": "bench/ncuc_discovery_evidence.py",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target 'table_fingerprints' not found",
+      "target": {
+        "name": "table_fingerprints"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "main",
+        "file_path": "bench/ncuc_discovery_evidence.py",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target 'main' not found",
+      "target": {
+        "name": "main"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  }
+]

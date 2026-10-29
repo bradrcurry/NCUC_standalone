@@ -38,8 +38,9 @@ _GARBAGE_LINE_RE = re.compile(r"^[\s═-╬─-┼▀-▟■-◿¦¬±¶¨\-_=]{
 # Digit↔letter OCR corruption in numeric contexts (dollar/cent amounts, decimals)
 # These only apply when adjacent to digits — avoids corrupting regular words
 _DIGIT_LETTER_FIXES = [
-    # "5" OCR'd as "S" before digits: S123.45 → $123.45, S0.50 → $0.50
-    (re.compile(r"(?<!\w)[5S](?=\d+\.\d{2})"), "$"),
+    # "$" OCR'd as "S" before digits: S123.45 → $123.45, S0.50 → $0.50.
+    # Not the digit 5: native "$55.00" would become "$$5.00".
+    (re.compile(r"(?<!\w)S(?=\d+\.\d{2})"), "$"),
     # "l" (lowercase L) OCR'd as "1" in rate labels: "1arge" → "Large"
     (re.compile(r"\b1(?=arge|ight|ighting)\b", re.I), "l"),
     # "0" OCR'd as "O" in numeric positions: "O.50" → "0.50" (but not "TO" → "T0")
@@ -113,8 +114,10 @@ def normalize_ocr_text(text: str) -> str:
     normalized = re.sub(r"\blO(?=\.\d)", "10", normalized)
     # I → 1 before decimal (I.50 → 1.50)
     normalized = re.sub(r"\bI(?=\.\d)", "1", normalized)
-    # S/5 before digit sequence → $
-    normalized = re.sub(r"\b[5S](?=\d+\.\d+)", "$", normalized)
+    # S before digit sequence → $ (OCR reads "$14.00" as "S14.00").  The digit
+    # 5 is NOT rewritten: this runs on native text too, and "$55.00" /
+    # "515.27" are real values ("$55.00" used to become "$$5.00").
+    normalized = re.sub(r"\bS(?=\d+\.\d+)", "$", normalized)
     # ^, ?, ! after digit and before /kwh → cent sign
     normalized = re.sub(r"(?<=\d)(?:[\^?!]{1,3})(?=\s*(?:per\s+kwh|/kwh|kwh|$))", "¢", normalized, flags=re.I)
     # £ after digit → cent sign

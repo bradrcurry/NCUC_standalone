@@ -1,0 +1,128 @@
+{
+  "target": {
+    "id": "Function:src/duke_rates/document_intelligence/proposed_tariff_promoter.py:apply_promotion",
+    "name": "apply_promotion",
+    "type": "Function",
+    "filePath": "src/duke_rates/document_intelligence/proposed_tariff_promoter.py"
+  },
+  "direction": "upstream",
+  "impactedCount": 1,
+  "risk": "LOW",
+  "riskSharedAxes": "LOW",
+  "riskScale": {
+    "comparableAcrossKinds": true,
+    "unusedAxes": []
+  },
+  "epistemic": "exact",
+  "summary": {
+    "direct": 1,
+    "processes_affected": 1,
+    "modules_affected": 1
+  },
+  "byDepthCounts": {
+    "1": 1
+  },
+  "affected_processes": [
+    {
+      "name": "promote_proposed_tariffs",
+      "type": "Function",
+      "filePath": "src/duke_rates/cli_commands/doc_intel.py",
+      "affected_process_count": 12,
+      "total_hits": 12,
+      "earliest_broken_step": 1
+    }
+  ],
+  "affected_modules": [
+    {
+      "name": "Document_intelligence",
+      "hits": 1,
+      "impact": "direct"
+    }
+  ],
+  "byDepth": {
+    "1": [
+      {
+        "depth": 1,
+        "id": "Function:src/duke_rates/cli_commands/doc_intel.py:promote_proposed_tariffs",
+        "name": "promote_proposed_tariffs",
+        "filePath": "src/duke_rates/cli_commands/doc_intel.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_293_promote_proposed_tar",
+            "label": "Promote_proposed_tariffs → _lookup_source_pdf",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_111_promote_proposed_tar",
+            "label": "Promote_proposed_tariffs → _extract_code_token",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_290_promote_proposed_tar",
+            "label": "Promote_proposed_tariffs → _insert_family",
+            "processType": "intra_community",
+            "step": 1
+          },
+          {
+            "id": "proc_169_promote_proposed_tar",
+            "label": "Promote_proposed_tariffs → Utility_to_company",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_167_promote_proposed_tar",
+            "label": "Promote_proposed_tariffs → _latest_approved_version",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_168_promote_proposed_tar",
+            "label": "Promote_proposed_tariffs → _load_proposed_charges",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_950_promote_proposed_tar",
+            "label": "Promote_proposed_tariffs → _seed_document_types",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_291_promote_proposed_tar",
+            "label": "Promote_proposed_tariffs → _detect_company_for_docket",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_292_promote_proposed_tar",
+            "label": "Promote_proposed_tariffs → _lookup_block_ids",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_858_promote_proposed_tar",
+            "label": "Promote_proposed_tariffs → Configure_logging",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_112_promote_proposed_tar",
+            "label": "Promote_proposed_tariffs → _strip_rider_prefix",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_899_promote_proposed_tar",
+            "label": "Promote_proposed_tariffs → Ensure_directories",
+            "processType": "cross_community",
+            "step": 1
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,45 @@
+........................................................................ [  4%]
+......ss................................................................ [  8%]
+........................................................................ [ 12%]
+.....sssssssssssssssssssssssssssssssss.................................. [ 16%]
+.............................................sssss......ssss............ [ 20%]
+.....ss................................................................. [ 24%]
+........................................................................ [ 28%]
+........................................................................ [ 32%]
+........................................................................ [ 36%]
+........................................................................ [ 40%]
+........................................................................ [ 44%]
+........................................................................ [ 48%]
+................................................................xxxx.... [ 52%]
+........................................................................ [ 56%]
+........................................................................ [ 60%]
+........................................................................ [ 64%]
+........................................................................ [ 68%]
+........................................................................ [ 72%]
+......................................sssssssssssssssssssss............. [ 77%]
+........................................................................ [ 81%]
+........................................................................ [ 85%]
+........................................................................ [ 89%]
+........................................................................ [ 93%]
+......................ssssssssssssssssssssssss.......................... [ 97%]
+................................................                         [100%]
+============================== warnings summary ===============================
+.venv-docling-next\Lib\site-packages\typer\__init__.py:24
+  C:\Python\Duke\Standalone\.venv-docling-next\Lib\site-packages\typer\__init__.py:24: DeprecationWarning: 'click.utils.get_binary_stream' is deprecated and will be removed in Click 9.0.
+    from click.utils import get_binary_stream as get_binary_stream
+
+.venv-docling-next\Lib\site-packages\typer\__init__.py:25
+  C:\Python\Duke\Standalone\.venv-docling-next\Lib\site-packages\typer\__init__.py:25: DeprecationWarning: 'click.utils.get_text_stream' is deprecated and will be removed in Click 9.0.
+    from click.utils import get_text_stream as get_text_stream
+
+tests/test_missing_clean_doc_search.py: 44 warnings
+tests/test_ncuc_portal_harvester.py: 3 warnings
+  C:\Python\Duke\Standalone\src\duke_rates\historical\ncuc\result_harvester.py:69: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    discovered_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+tests/test_missing_clean_doc_search.py: 44 warnings
+  C:\Python\Duke\Standalone\src\duke_rates\historical\ncuc\result_harvester.py:527: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    executed_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1681 passed, 92 skipped, 4 xfailed, 93 warnings in 714.46s (0:11:54)

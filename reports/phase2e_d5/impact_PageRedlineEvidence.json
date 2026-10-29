@@ -1,0 +1,298 @@
+{
+  "target": {
+    "id": "Class:src/duke_rates/parse/redline_detector.py:PageRedlineEvidence",
+    "name": "PageRedlineEvidence",
+    "type": "Class",
+    "filePath": "src/duke_rates/parse/redline_detector.py"
+  },
+  "direction": "upstream",
+  "impactedCount": 29,
+  "risk": "MEDIUM",
+  "riskSharedAxes": "MEDIUM",
+  "riskScale": {
+    "comparableAcrossKinds": true,
+    "unusedAxes": []
+  },
+  "epistemic": "exact",
+  "summary": {
+    "direct": 7,
+    "processes_affected": 0,
+    "modules_affected": 0
+  },
+  "byDepthCounts": {
+    "1": 7,
+    "2": 7,
+    "3": 15
+  },
+  "affected_processes": [],
+  "affected_modules": [],
+  "byDepth": {
+    "1": [
+      {
+        "depth": 1,
+        "id": "File:src/duke_rates/analytics/nc_redline_fingerprint_refresh.py",
+        "name": "nc_redline_fingerprint_refresh.py",
+        "filePath": "src/duke_rates/analytics/nc_redline_fingerprint_refresh.py",
+        "relationType": "IMPORTS",
+        "confidence": 1,
+        "processes": []
+      },
+      {
+        "depth": 1,
+        "id": "File:src/duke_rates/analytics/nc_redline_parse_audit.py",
+        "name": "nc_redline_parse_audit.py",
+        "filePath": "src/duke_rates/analytics/nc_redline_parse_audit.py",
+        "relationType": "IMPORTS",
+        "confidence": 1,
+        "processes": []
+      },
+      {
+        "depth": 1,
+        "id": "File:src/duke_rates/historical/ncuc/document_binding.py",
+        "name": "document_binding.py",
+        "filePath": "src/duke_rates/historical/ncuc/document_binding.py",
+        "relationType": "IMPORTS",
+        "confidence": 1,
+        "processes": []
+      },
+      {
+        "depth": 1,
+        "id": "File:src/duke_rates/historical/ncuc/document_promotion.py",
+        "name": "document_promotion.py",
+        "filePath": "src/duke_rates/historical/ncuc/document_promotion.py",
+        "relationType": "IMPORTS",
+        "confidence": 1,
+        "processes": []
+      },
+      {
+        "depth": 1,
+        "id": "File:src/duke_rates/historical/ncuc/effective_date_reconciliation.py",
+        "name": "effective_date_reconciliation.py",
+        "filePath": "src/duke_rates/historical/ncuc/effective_date_reconciliation.py",
+        "relationType": "IMPORTS",
+        "confidence": 1,
+        "processes": []
+      },
+      {
+        "depth": 1,
+        "id": "File:src/duke_rates/historical/ncuc/ingestion_validation.py",
+        "name": "ingestion_validation.py",
+        "filePath": "src/duke_rates/historical/ncuc/ingestion_validation.py",
+        "relationType": "IMPORTS",
+        "confidence": 1,
+        "processes": []
+      },
+      {
+        "depth": 1,
+        "id": "File:src/duke_rates/historical/ncuc/local_gap_resolution.py",
+        "name": "local_gap_resolution.py",
+        "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+        "relationType": "IMPORTS",
+        "confidence": 1,
+        "processes": []
+      }
+    ],
+    "2": [
+      {
+        "depth": 2,
+        "id": "File:src/duke_rates/cli.py",
+        "name": "cli.py",
+        "filePath": "src/duke_rates/cli.py",
+        "relationType": "IMPORTS",
+        "confidence": 1,
+        "processes": []
+      },
+      {
+        "depth": 2,
+        "id": "File:src/duke_rates/cli_commands/export_audit.py",
+        "name": "export_audit.py",
+        "filePath": "src/duke_rates/cli_commands/export_audit.py",
+        "relationType": "IMPORTS",
+        "confidence": 1,
+        "processes": []
+      },
+      {
+        "depth": 2,
+        "id": "File:src/duke_rates/cli_commands/provenance.py",
+        "name": "provenance.py",
+        "filePath": "src/duke_rates/cli_commands/provenance.py",
+        "relationType": "IMPORTS",
+        "confidence": 1,
+        "processes": []
+      },
+      {
+        "depth": 2,
+        "id": "File:src/duke_rates/db/provenance.py",
+        "name": "provenance.py",
+        "filePath": "src/duke_rates/db/provenance.py",
+        "relationType": "IMPORTS",
+        "confidence": 1,
+        "processes": []
+      },
+      {
+        "depth": 2,
+        "id": "File:src/duke_rates/document_intelligence/llm_charge_promotion.py",
+        "name": "llm_charge_promotion.py",
+        "filePath": "src/duke_rates/document_intelligence/llm_charge_promotion.py",
+        "relationType": "IMPORTS",
+        "confidence": 1,
+        "processes": []
+      },
+      {
+        "depth": 2,
+        "id": "File:src/duke_rates/historical/ncuc/evidence_review.py",
+        "name": "evidence_review.py",
+        "filePath": "src/duke_rates/historical/ncuc/evidence_review.py",
+        "relationType": "IMPORTS",
+        "confidence": 1,
+        "processes": []
+      },
+      {
+        "depth": 2,
+        "id": "File:src/duke_rates/historical/ncuc/remote_discovery.py",
+        "name": "remote_discovery.py",
+        "filePath": "src/duke_rates/historical/ncuc/remote_discovery.py",
+        "relationType": "IMPORTS",
+        "confidence": 1,
+        "processes": []
+      }
+    ],
+    "3": [
+      {
+        "depth": 3,
+        "id": "File:src/duke_rates/__main__.py",
+        "name": "__main__.py",
+        "filePath": "src/duke_rates/__main__.py",
+        "relationType": "IMPORTS",
+        "confidence": 1,
+        "processes": []
+      },
+      {
+        "depth": 3,
+        "id": "File:src/duke_rates/cli_commands/ncuc.py",
+        "name": "ncuc.py",
+        "filePath": "src/duke_rates/cli_commands/ncuc.py",
+        "relationType": "IMPORTS",
+        "confidence": 1,
+        "processes": []
+      },
+      {
+        "depth": 3,
+        "id": "File:src/duke_rates/cli_commands/ocr.py",
+        "name": "ocr.py",
+        "filePath": "src/duke_rates/cli_commands/ocr.py",
+        "relationType": "IMPORTS",
+        "confidence": 1,
+        "processes": []
+      },
+      {
+        "depth": 3,
+        "id": "File:src/duke_rates/cli_commands/parse_refactor.py",
+        "name": "parse_refactor.py",
+        "filePath": "src/duke_rates/cli_commands/parse_refactor.py",
+        "relationType": "IMPORTS",
+        "confidence": 1,
+        "processes": []
+      },
+      {
+        "depth": 3,
+        "id": "File:src/duke_rates/cli_commands/progress.py",
+        "name": "progress.py",
+        "filePath": "src/duke_rates/cli_commands/progress.py",
+        "relationType": "IMPORTS",
+        "confidence": 1,
+        "processes": []
+      },
+      {
+        "depth": 3,
+        "id": "File:src/duke_rates/cli_commands/reprocess.py",
+        "name": "reprocess.py",
+        "filePath": "src/duke_rates/cli_commands/reprocess.py",
+        "relationType": "IMPORTS",
+        "confidence": 1,
+        "processes": []
+      },
+      {
+        "depth": 3,
+        "id": "File:src/duke_rates/cli_commands/search.py",
+        "name": "search.py",
+        "filePath": "src/duke_rates/cli_commands/search.py",
+        "relationType": "IMPORTS",
+        "confidence": 1,
+        "processes": []
+      },
+      {
+        "depth": 3,
+        "id": "File:src/duke_rates/cli_commands/workflow.py",
+        "name": "workflow.py",
+        "filePath": "src/duke_rates/cli_commands/workflow.py",
+        "relationType": "IMPORTS",
+        "confidence": 1,
+        "processes": []
+      },
+      {
+        "depth": 3,
+        "id": "File:src/duke_rates/db/ncuc_loader.py",
+        "name": "ncuc_loader.py",
+        "filePath": "src/duke_rates/db/ncuc_loader.py",
+        "relationType": "IMPORTS",
+        "confidence": 1,
+        "processes": []
+      },
+      {
+        "depth": 3,
+        "id": "File:src/duke_rates/db/rider_summary_provenance.py",
+        "name": "rider_summary_provenance.py",
+        "filePath": "src/duke_rates/db/rider_summary_provenance.py",
+        "relationType": "IMPORTS",
+        "confidence": 1,
+        "processes": []
+      },
+      {
+        "depth": 3,
+        "id": "File:src/duke_rates/document_intelligence/llm_promotion_overnight.py",
+        "name": "llm_promotion_overnight.py",
+        "filePath": "src/duke_rates/document_intelligence/llm_promotion_overnight.py",
+        "relationType": "IMPORTS",
+        "confidence": 1,
+        "processes": []
+      },
+      {
+        "depth": 3,
+        "id": "File:src/duke_rates/historical/ncuc/docket_inventory.py",
+        "name": "docket_inventory.py",
+        "filePath": "src/duke_rates/historical/ncuc/docket_inventory.py",
+        "relationType": "IMPORTS",
+        "confidence": 1,
+        "processes": []
+      },
+      {
+        "depth": 3,
+        "id": "File:src/duke_rates/historical/ncuc/pipeline/bulk_extractor.py",
+        "name": "bulk_extractor.py",
+        "filePath": "src/duke_rates/historical/ncuc/pipeline/bulk_extractor.py",
+        "relationType": "IMPORTS",
+        "confidence": 1,
+        "processes": []
+      },
+      {
+        "depth": 3,
+        "id": "File:src/duke_rates/historical/ncuc/pipeline/candidate_runs.py",
+        "name": "candidate_runs.py",
+        "filePath": "src/duke_rates/historical/ncuc/pipeline/candidate_runs.py",
+        "relationType": "IMPORTS",
+        "confidence": 1,
+        "processes": []
+      },
+      {
+        "depth": 3,
+        "id": "File:src/duke_rates/historical/ncuc/session.py",
+        "name": "session.py",
+        "filePath": "src/duke_rates/historical/ncuc/session.py",
+        "relationType": "IMPORTS",
+        "confidence": 1,
+        "processes": []
+      }
+    ]
+  }
+}

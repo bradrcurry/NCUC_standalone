@@ -1,0 +1,47 @@
+{
+  "detector": "page_redline_evidence@1.1.0",
+  "label_source": "assistant_rendered_page_review",
+  "human_verified": false,
+  "page_count": 29,
+  "rendered_pages_for_detection": 0,
+  "ocr_calls_for_detection": 0,
+  "review_method": "assistant inspection of rendered original pages plus source text; labels frozen before detector changes",
+  "baseline_metrics": {
+    "tp": 11,
+    "fp": 1,
+    "fn": 0,
+    "tn": 17,
+    "abstained": 0,
+    "precision": 0.9166666666666666,
+    "recall_on_assessed_pages": 1.0,
+    "positive_label_coverage": 1.0,
+    "assessment_coverage": 1.0
+  },
+  "metrics": {
+    "tp": 11,
+    "fp": 0,
+    "fn": 0,
+    "tn": 13,
+    "abstained": 5,
+    "precision": 1.0,
+    "recall_on_assessed_pages": 1.0,
+    "positive_label_coverage": 1.0,
+    "assessment_coverage": 0.8275862068965517
+  },
+  "page_attribution_correct": 29,
+  "insufficient_attribution_correct": 29,
+  "elapsed_seconds": [
+    2.1688674000033643,
+    2.0153898999851663,
+    1.9656107999908272,
+    1.900058800005354,
+    1.8401999000052456
+  ],
+  "median_seconds": 1.9656107999908272,
+  "limitations": [
+    "Small curated regression corpus reused during development; not a held-out evaluation.",
+    "Assistant labels require independent human verification.",
+    "No detected edit markup does not establish regulatory approval.",
+    "Image-dominant pages abstain even with an OCR text layer."
+  ]
+}

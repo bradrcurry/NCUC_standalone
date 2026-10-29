@@ -218,3 +218,151 @@ def test_parse_bill_text_handles_year_crossing_subperiods() -> None:
     assert split_items[1].period_start.isoformat() == "2026-01-01"
     assert split_items[1].period_end is not None
     assert split_items[1].period_end.isoformat() == "2026-01-17"
+
+
+# 2026-03-20 R-TOU-CPP bill (pages 1, 3 and 4). The electric section runs off
+# page 3 and resumes under "Billing details - Electric continued" on page 4 with
+# Storm Recovery, Summary of Rider Adjustments and the section total. Before the
+# fix the parser stopped at page 3, so the stored statement omitted $31.99 and
+# had no total.
+TOU_CONTINUED_BILL_TEXT = """Page 1 of 4
+duke-energy.com
+800.452.2777
+9101 8064 6213
+Your Energy Bill
+Service address
+ Bill date
+Account number
+Mar 20, 2026
+29 days
+For service   Feb 17 - Mar 17
+BRAD CURRY
+7701 SUMMERCREST DR
+APEX NC 27539
+Billing summary
+ Previous Amount Due
+$605.70
+      Payment Received Mar 17
+-605.70
+ Current Lighting Charges
+9.41
+ Current Electric Charges
+177.97
+ Taxes
+13.12
+ Total Amount Due Apr 14
+$200.50
+Your usage snapshot
+Page 3 of 4
+Billing details - Lighting
+Billing Period - Feb 17 26 to Mar 17 26
+Fixture Charge
+     SV 95HL UG BP3
+          1.000 @ $8.27000000
+$8.27
+Storm Recovery Charge
+0.77
+Summary of Rider Adjustments
+0.37
+Total Current Charges
+$9.41
+Your current rate is Street Lighting Service - Residential Subdivisions
+(SLR).
+Billing details - Electric
+Billing Period - Feb 17 26 to Mar 17 26
+Meter - 323544050
+Basic Customer Charge
+$14.00
+Critical Peak Energy Charge
+     0.000 kWh @ $0.41002000
+0.00
+On-Peak Energy Charge
+     91.573 kWh @ $0.21952000
+20.10
+Off-Peak Energy Charge
+     650.145 kWh @ $0.11000000
+71.52
+Discount Energy Charge
+     548.865 kWh @ $0.08274000
+45.41
+Clean Energy Rider
+1.81
+Energy Conservation Credit
+-6.86
+Your current rate is Residential Time of Use Critical Pk Pricing (R-
+TOU-CPP).
+For a complete listing of all North Carolina rates and riders, visit
+duke-energy.com/rates
+A rider is a mechanism used to recover costs or credit customers for
+programs, purchases or regional policy initiatives that are outside
+of standard base rates. The Summary of Rider Adjustments line
+item found in the Billing Details includes, but is not limited to:
+fuel- related costs, demand-side management, energy efficiency
+program costs, generation assets, and the competitive procurement
+of renewable energy. For additional detail, please visit duke-
+energy.com/rates to view the Summary of Rider Adjustments tariff
+found within the Index of Rate Schedules tab. Each of the individual
+rider tariffs are located under the Retail Riders heading.
+
+Page 4 of 4
+9101 8064 6213
+Account number
+duke-energy.com
+800.452.2777
+Billing details - Electric continued
+Storm Recovery Charge
+$4.93
+Summary of Rider Adjustments
+27.06
+Total Current Charges
+$177.97
+Billing details - Taxes
+Sales Tax For Utility
+$13.12
+Total Taxes
+$13.12
+"""
+
+
+def test_parse_bill_text_follows_continued_electric_section() -> None:
+    statement = parse_bill_text(TOU_CONTINUED_BILL_TEXT, source_path=Path("2026-03-20.pdf"))
+
+    electric = statement.electric_section
+    assert electric is not None
+    assert electric.rate_code == "R-TOU-CPP"
+    assert electric.total_current_charges == 177.97
+    amounts = {item.label: item.amount for item in electric.line_items}
+    assert amounts["Storm Recovery Charge"] == 4.93
+    assert amounts["Summary of Rider Adjustments"] == 27.06
+    assert amounts["Energy Conservation Credit"] == -6.86
+    assert len(electric.line_items) == 9
+    # Independent checks: the printed lines sum to the printed total, and the
+    # section total equals the front-page "Current Electric Charges".
+    assert round(sum(item.amount for item in electric.line_items), 2) == 177.97
+    assert statement.billing_summary.current_electric_charges == electric.total_current_charges
+
+    # The continuation must not leak into neighbouring sections.
+    assert statement.lighting_section is not None
+    assert statement.lighting_section.total_current_charges == 9.41
+    assert statement.tax_section is not None
+    assert statement.tax_section.total_current_charges == 13.12
+    assert [item.label for item in statement.tax_section.line_items] == ["Sales Tax For Utility"]
+
+
+def test_parse_bill_text_does_not_duplicate_lines_when_continuation_is_contiguous() -> None:
+    # Without the page-break boilerplate between them, the main block would run
+    # into the continuation; each line must still be parsed once.
+    text = TOU_CONTINUED_BILL_TEXT.replace(
+        TOU_CONTINUED_BILL_TEXT[
+            TOU_CONTINUED_BILL_TEXT.index("For a complete listing") : TOU_CONTINUED_BILL_TEXT.index(
+                "Billing details - Electric continued"
+            )
+        ],
+        "",
+    )
+    statement = parse_bill_text(text, source_path=Path("2026-03-20.pdf"))
+
+    electric = statement.electric_section
+    assert electric is not None
+    assert [item.label for item in electric.line_items].count("Storm Recovery Charge") == 1
+    assert electric.total_current_charges == 177.97

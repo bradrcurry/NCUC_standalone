@@ -1,11 +1,14 @@
-"""Tests for the deliberate proposed-to-accepted promotion pipeline."""
+"""Proposal research stays usable; unguarded accepted-lineage writes are refused."""
 
 from __future__ import annotations
 
 import sqlite3
 
+import pytest
+
 from duke_rates.document_intelligence.proposed_tariff_extractor import ensure_schema
 from duke_rates.document_intelligence.proposed_tariff_promoter import (
+    UnsafeProposalPromotionError,
     apply_promotion,
     plan_promotion,
 )
@@ -182,7 +185,7 @@ def test_plan_promotion_drafts_new_family_when_opted_in() -> None:
     assert action.family_to_create.family_type == "rider"
 
 
-def test_apply_promotion_writes_version_and_charges_for_existing_family() -> None:
+def test_apply_promotion_refuses_unguarded_existing_family() -> None:
     conn = _conn()
     _seed_dep_mrop_proposal(conn)
     plan = plan_promotion(
@@ -192,34 +195,15 @@ def test_apply_promotion_writes_version_and_charges_for_existing_family() -> Non
         code_filter="MROP",
     )
 
-    applied = apply_promotion(conn, plan)
-    assert len(applied) == 1
-    action = applied[0]
-    assert action.created_version_id is not None
-    assert len(action.created_charge_ids) == 1
-
-    version = conn.execute(
-        "SELECT family_key, effective_start, docket_number, status, source_type "
-        "FROM tariff_versions WHERE id = ?",
-        (action.created_version_id,),
-    ).fetchone()
-    assert version["family_key"] == "nc-progress-leaf-661"
-    assert version["effective_start"] == "2027-01-01"
-    assert version["docket_number"] == "E-2 Sub 1380"
-    assert version["status"] == "approved"
-    assert version["source_type"] == "promoted_from_proposal"
-
-    charge = conn.execute(
-        "SELECT charge_type, charge_label, rate_value, rate_unit, notes "
-        "FROM tariff_charges WHERE id = ?",
-        (action.created_charge_ids[0],),
-    ).fetchone()
-    assert charge["rate_value"] == 175.0
-    assert charge["rate_unit"] == "$/month"
-    assert "promoted_from_proposed_raw_line" in (charge["notes"] or "")
+    before = list(conn.iterdump())
+    with pytest.raises(UnsafeProposalPromotionError, match="reviewed provenance promote"):
+        apply_promotion(conn, plan)
+    assert list(conn.iterdump()) == before
+    assert plan.actionable[0].created_version_id is None
+    assert plan.actionable[0].charges[0].rate_value == 175.0
 
 
-def test_apply_promotion_creates_new_family_when_planned() -> None:
+def test_apply_promotion_refuses_unguarded_new_family() -> None:
     conn = _conn()
     _seed_dep_pc_new_rider(conn)
     plan = plan_promotion(
@@ -230,21 +214,14 @@ def test_apply_promotion_creates_new_family_when_planned() -> None:
         create_new_families=True,
     )
 
-    apply_promotion(conn, plan)
-
-    family = conn.execute(
-        "SELECT family_type, schedule_code, title, state, company "
-        "FROM tariff_families WHERE family_key = ?",
-        ("nc-progress-leaf-614",),
-    ).fetchone()
-    assert family is not None
-    assert family["family_type"] == "rider"
-    assert family["title"] == "RIDER PC PENSIONS COSTS"
-    assert family["state"] == "NC"
-    assert family["company"] == "progress"
+    before = list(conn.iterdump())
+    with pytest.raises(UnsafeProposalPromotionError):
+        apply_promotion(conn, plan)
+    assert list(conn.iterdump()) == before
+    assert plan.actionable[0].family_to_create.family_key == "nc-progress-leaf-614"
 
 
-def test_plan_promotion_is_idempotent_after_apply() -> None:
+def test_rejected_proposal_remains_available_for_research() -> None:
     conn = _conn()
     _seed_dep_mrop_proposal(conn)
     first = plan_promotion(
@@ -253,7 +230,8 @@ def test_plan_promotion_is_idempotent_after_apply() -> None:
         utility="Duke Energy Progress",
         code_filter="MROP",
     )
-    apply_promotion(conn, first)
+    with pytest.raises(UnsafeProposalPromotionError):
+        apply_promotion(conn, first)
 
     second = plan_promotion(
         conn,
@@ -262,6 +240,5 @@ def test_plan_promotion_is_idempotent_after_apply() -> None:
         code_filter="MROP",
     )
     assert len(second.actions) == 1
-    assert second.actions[0].skip_reason is not None
-    assert "already promoted" in second.actions[0].skip_reason
-    assert second.actionable == []
+    assert second.actionable[0].to_dict() == first.actionable[0].to_dict()
+    assert conn.execute("SELECT COUNT(*) FROM tariff_versions").fetchone()[0] == 0

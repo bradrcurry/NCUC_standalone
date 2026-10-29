@@ -1,0 +1,46 @@
+{
+  "proposal_id": 13,
+  "state": "blocked",
+  "blocking_failures": [
+    "first_page_prints_family_leaf",
+    "single_revision_identity",
+    "printed_revision_is_expected",
+    "single_printed_effective_date"
+  ],
+  "checks": {
+    "file_present": true,
+    "file_matches_stored_hash": true,
+    "pages_in_file": true,
+    "first_page_prints_family_leaf": false,
+    "no_other_leaf_in_run": true,
+    "utility_matches_family": true,
+    "single_revision_identity": false,
+    "pages_not_redline": true,
+    "file_is_the_reviewed_file": true,
+    "printed_revision_is_expected": false,
+    "single_printed_effective_date": false,
+    "page_range_complete": true,
+    "supersession_predecessor_on_file": null,
+    "pages_not_already_bound_to_family": true,
+    "source_provenance_known": true,
+    "binding_mode_allowed": true
+  },
+  "plan": {
+    "mode": "create_version",
+    "target_version_id": null,
+    "revision_value": null,
+    "effective_start": null,
+    "printed_dates": [],
+    "same_revision_versions": [],
+    "same_date_versions": [],
+    "provenance": [
+      {
+        "id": 2197,
+        "docket_number": "E-2",
+        "filing_title": "DEP's  Revised SunSense Program Application and Rider",
+        "filing_date": null,
+        "discovered_url": "https://starw1.ncuc.gov/NCUC/PSC/PSCDocumentDetailsPageNCUC.aspx?DocumentId=f2d058ac-a9bb-46e3-82e9-e2ffe21228f4&Class=Filing"
+      }
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "test_triage_uses_sampled_pages_instead_of_total_page_count",
+        "file_path": "tests/test_d7_segmentation_checkpoint.py",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target 'test_triage_uses_sampled_pages_instead_of_total_page_count' not found",
+      "target": {
+        "name": "test_triage_uses_sampled_pages_instead_of_total_page_count"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  }
+]

@@ -1,0 +1,15 @@
+{
+  "versions_with_charges": 411,
+  "charges": 5082,
+  "status_counts": {
+    "checked": 384,
+    "not_applicable": 27
+  },
+  "failed_check_counts": {
+    "bound_pages_readable": 79,
+    "bound_pages_not_redline": 57,
+    "source_hash_matches": 1,
+    "source_present": 1
+  },
+  "seconds": 78.30748630000744
+}

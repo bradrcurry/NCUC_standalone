@@ -37,6 +37,10 @@ from duke_rates.models.pipeline import PageEvidence
 from duke_rates.models.tariff import TariffFamilyRecord
 
 
+# Phase 2C: these tests assert tariff_charges, so they run with legacy replace.
+pytestmark = pytest.mark.usefixtures("legacy_replace_persistence")
+
+
 # ---------------------------------------------------------------------------
 # Shared helpers
 # ---------------------------------------------------------------------------

@@ -143,6 +143,7 @@ def test_bulk_extractor_record_parse_attempt_persists_document_intelligence(
         signals=None,
         charge_count=1,
         status="ok",
+        text_metrics=None,
         document_intelligence={"fingerprint": {"doc_type": "rider"}},
     )
 

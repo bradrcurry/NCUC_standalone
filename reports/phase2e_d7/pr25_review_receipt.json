@@ -1,0 +1,13 @@
+{
+  "url": "https://github.com/bradrcurry/NCUC_standalone/pull/25",
+  "head": "d317800b76f20ed26c4ffc00253058c7dc1f415f",
+  "files": ["src/duke_rates/document_intelligence/rag_generator.py"],
+  "additions": 18,
+  "deletions": 1,
+  "merge_preview_exit": 0,
+  "compatibility_tests": {"passed": 76, "seconds": 0.61},
+  "historical_pr_author_eval": {"cases": 18, "answered_before": 11, "answered_after": 12, "grounded_rate_before": 1.0, "grounded_rate_after": 0.917, "refusal_rate_before": 1.0, "refusal_rate_after": 1.0},
+  "historical_generation_eval_reproduced_today": false,
+  "decision": "set aside; original PR/commit preserved; underlying metadata already exists and the only new hunk is prompt presentation",
+  "source_files_modified_for_review": false
+}

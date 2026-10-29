@@ -171,14 +171,15 @@ class TariffSpan(BaseModel):
     parent_discovery_id: Optional[int] = None
     start_page: int
     end_page: int
-    
+
     doc_type: str = "unknown"
     confidence: float = 0.0
-    
+
     extracted_leaf_nos: set[str] = Field(default_factory=set)
     extracted_schedule_titles: set[str] = Field(default_factory=set)
     header_footer_snippets: List[str] = Field(default_factory=list)
-    
+
     dates: List[DateCandidate] = Field(default_factory=list)
-    
+
     evidence_score_breakdown: Dict[str, Any] = Field(default_factory=dict)
+    segmentation_evidence: Dict[str, Any] = Field(default_factory=dict)

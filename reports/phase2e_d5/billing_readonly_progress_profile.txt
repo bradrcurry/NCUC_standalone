@@ -1,0 +1,11 @@
+{"event": "bill_start", "bill_id": 12}
+Timeout (0:01:30)!
+Thread 0x0000aca8 (most recent call first):
+  File "C:\Python\Duke\Standalone\src\duke_rates\db\repository.py", line 569 in get_historical_document
+  File "C:\Python\Duke\Standalone\src\duke_rates\historical\tariff_selector.py", line 130 in _load_parse_result
+  File "C:\Python\Duke\Standalone\src\duke_rates\historical\tariff_selector.py", line 163 in _select_riders
+  File "C:\Python\Duke\Standalone\src\duke_rates\historical\tariff_selector.py", line 111 in select_schedule
+  File "C:\Python\Duke\Standalone\src\duke_rates\billing\reconciliation.py", line 60 in reconcile
+  File "C:\python\duke\standalone\scratch\d5_billing_progress_profile.py", line 21 in reconcile
+  File "C:\Python\Duke\Standalone\src\duke_rates\analytics\bill_accuracy.py", line 75 in build_progress_nc_bill_accuracy_report
+  File "C:\python\duke\standalone\scratch\d5_billing_progress_profile.py", line 26 in <module>

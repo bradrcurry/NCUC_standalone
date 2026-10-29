@@ -1,0 +1,5318 @@
+{
+ "summary": {
+  "artifacts_total": 1962,
+  "artifact_verdicts": {
+   "unverifiable:chunk_relative_numbering": 107,
+   "valid:None": 1855
+  },
+  "unsafe_artifacts": 107,
+  "unsafe_pdfs": 107,
+  "bound_documents": 229,
+  "bound_nc_documents": 229,
+  "bound_documents_with_version": 177,
+  "affected_tariff_versions": 180,
+  "span_class": {
+   "not_covered": 183,
+   "wrong_pages": 44,
+   "unbounded": 2
+  },
+  "span_class_with_version": {
+   "not_covered": 134,
+   "wrong_pages": 41,
+   "unbounded": 2
+  },
+  "classification": {
+   "incomplete_structured_coverage": 134,
+   "unsafe_page_mapping": 43,
+   "no_structured_extraction_required": 52
+  },
+  "possible_false_positive_exposures": 43,
+  "missing_structure_exposures": 134,
+  "requires_regeneration_documents": 177,
+  "production_charges_on_exposed_versions": 2031,
+  "legacy_slicer_would_accept": 0,
+  "legacy_slicer_would_accept_with_version": 0,
+  "docling_page_miner_rows_from_unsafe_pdfs": 3787,
+  "confirmed_corrupted_charges": null,
+  "note": "Exposure is potential. Production tariff_charges were not written by the structured path (no extraction_runs schema in this DB); confirmation needs a per-version comparison against the source pages."
+ },
+ "artifacts": [
+  {
+   "artifact_id": 1577,
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1214\\687a5e89-0924-4b54-bd62-264488246e1a.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 57,
+   "stored_pages": [
+    [
+     1,
+     7
+    ]
+   ],
+   "stored_table_count": 0,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1636,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1143\\cc3d5821-7db6-4442-b40e-47b9c271c59f.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 75,
+   "stored_pages": [
+    [
+     1,
+     25
+    ]
+   ],
+   "stored_table_count": 20,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1661,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\1b72e8de-c435-43b7-9b88-dfc4c0a8a97b.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 106,
+   "stored_pages": [
+    [
+     1,
+     6
+    ]
+   ],
+   "stored_table_count": 9,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1668,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1250\\d6fca175-3eed-4754-bef0-b954a6f6a89a.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 78,
+   "stored_pages": [
+    [
+     1,
+     3
+    ]
+   ],
+   "stored_table_count": 2,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1683,
+   "source_pdf": "data\\raw\\historical\\ncuc\\e-2\\e-2-nodate-dep-compliance-tariffs.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 181,
+   "stored_pages": [
+    [
+     1,
+     6
+    ]
+   ],
+   "stored_table_count": 2,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1691,
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1214\\e31d1ef2-78de-4dab-8f84-5b6b6cb94c30.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 146,
+   "stored_pages": [
+    [
+     1,
+     21
+    ]
+   ],
+   "stored_table_count": 0,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1693,
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1243\\4e0c2c78-3f6f-47b5-8ae0-25aed12fe82f.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 147,
+   "stored_pages": [
+    [
+     1,
+     22
+    ]
+   ],
+   "stored_table_count": 9,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1695,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1044\\32e921d3-7055-4672-8ef7-949ed489030a.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 93,
+   "stored_pages": [
+    [
+     1,
+     18
+    ]
+   ],
+   "stored_table_count": 3,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1705,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-7-gap-candidates\\a1c2e778-12b9-457c-898c-40c476e5bd47__E-7 Sub 1146_ 1152 DEC JRRR Revised Tariffs_112519.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 80,
+   "stored_pages": [
+    [
+     1,
+     5
+    ]
+   ],
+   "stored_table_count": 0,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1707,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1023\\02e8dadc-1cc4-4ea0-9a17-e0762c2aa842.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 74,
+   "stored_pages": [
+    [
+     1,
+     24
+    ]
+   ],
+   "stored_table_count": 19,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1710,
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1214\\bd980ae4-9963-4ee3-ae4e-b043653227c8.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 75,
+   "stored_pages": [
+    [
+     1,
+     25
+    ]
+   ],
+   "stored_table_count": 0,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1717,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\downloads\\fcar_discovery\\E-7_Sub_1051_DEC_s_Application_for_Fuel_and_Fuel_Related_Charge_Adjustmen_1c9b369b.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 51,
+   "stored_pages": [
+    [
+     1,
+     1
+    ]
+   ],
+   "stored_table_count": 1,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1736,
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1304\\23414734-53b5-4c50-8a5f-9ef13f6bf47c.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 51,
+   "stored_pages": [
+    [
+     1,
+     1
+    ]
+   ],
+   "stored_table_count": 0,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1751,
+   "source_pdf": "data\\historical\\raw\\nc\\progress\\rider\\joint-agency-adjustment-rider-ncuc-viewfile-aspx-id-04330828-af78-4643-9bde-4d21.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 86,
+   "stored_pages": [
+    [
+     1,
+     11
+    ]
+   ],
+   "stored_table_count": 1,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1791,
+   "source_pdf": "data\\historical\\raw\\nc\\progress\\rider\\street-lighting-service-residential-subdivisions-ncuc-viewfile-aspx-id-f1368a53-.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 129,
+   "stored_pages": [
+    [
+     1,
+     4
+    ]
+   ],
+   "stored_table_count": 4,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1797,
+   "source_pdf": "data\\raw\\historical\\ncuc\\e-2\\e-2-nodate-joint-request-by-dec-llc-and-dep-llc-for-approval-of-tariff-revisions.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 98,
+   "stored_pages": [
+    [
+     1,
+     23
+    ]
+   ],
+   "stored_table_count": 4,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1799,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1145\\a111f643-5e3c-446b-b413-af4833130943.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 414,
+   "stored_pages": [
+    [
+     1,
+     14
+    ]
+   ],
+   "stored_table_count": 18,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1800,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\3f92be50-2f10-4d4c-8952-2bccaa339aba.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 316,
+   "stored_pages": [
+    [
+     1,
+     16
+    ]
+   ],
+   "stored_table_count": 5,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1801,
+   "source_pdf": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-duke-s-rate-schedule-riders-summary-of-rider-adjustments-effective-july-1-2011.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 69,
+   "stored_pages": [
+    [
+     1,
+     19
+    ]
+   ],
+   "stored_table_count": 13,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1802,
+   "source_pdf": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-duke-s-revised-nc-rate-schedule-and-riders.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 68,
+   "stored_pages": [
+    [
+     1,
+     18
+    ]
+   ],
+   "stored_table_count": 11,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1825,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1207\\d8f85cbe-ffbb-4fbe-af70-61d1d1efc2fd.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 78,
+   "stored_pages": [
+    [
+     1,
+     3
+    ]
+   ],
+   "stored_table_count": 1,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1904,
+   "source_pdf": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-duke-s-rate-schedule.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 121,
+   "stored_pages": [
+    [
+     1,
+     21
+    ]
+   ],
+   "stored_table_count": 4,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1906,
+   "source_pdf": "data\\raw\\historical\\ncuc\\e-7\\e-7-nodate-duke-energy-carolinas-llc-s-revisions-to-rate-compliance-filing-of-approved-tar.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 75,
+   "stored_pages": [
+    [
+     1,
+     25
+    ]
+   ],
+   "stored_table_count": 9,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1921,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1176\\b4d1a5ed-82f7-414a-becc-19a12f4f10b5.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 80,
+   "stored_pages": [
+    [
+     1,
+     5
+    ]
+   ],
+   "stored_table_count": 3,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1928,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1253\\f596819a-b1ba-447f-985f-f42f2346139f.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 118,
+   "stored_pages": [
+    [
+     1,
+     6
+    ]
+   ],
+   "stored_table_count": 6,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1931,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1108\\e53d078e-f68a-4028-b6e5-50d99975531b.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 76,
+   "stored_pages": [
+    [
+     1,
+     1
+    ]
+   ],
+   "stored_table_count": 0,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1933,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1300\\28f084a5-d6d8-4419-a7dd-aa6b2c11edbd.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 77,
+   "stored_pages": [
+    [
+     1,
+     2
+    ]
+   ],
+   "stored_table_count": 1,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1934,
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1110\\1088e1cf-360d-4d2d-845d-25082baa9465.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 402,
+   "stored_pages": [
+    [
+     1,
+     2
+    ]
+   ],
+   "stored_table_count": 0,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1935,
+   "source_pdf": "data\\downloads\\ncuc_tariff\\carolinas_rider_sts\\4e0c2c78-3f6f-47b5-8ae0-25aed12fe82f_E-7 Sub 1243 E-2 Sub 1262 DEC DEP Compliance Tariffs 112921.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 147,
+   "stored_pages": [
+    [
+     1,
+     22
+    ]
+   ],
+   "stored_table_count": 9,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1936,
+   "source_pdf": "data\\raw\\historical\\ncuc\\e-2-sub-1294\\e-2-sub-1294-1\\11\\202-dep-s-dsm-ee-revised-compliance-tariffs.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 84,
+   "stored_pages": [
+    [
+     1,
+     9
+    ]
+   ],
+   "stored_table_count": 3,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1937,
+   "source_pdf": "data\\raw\\historical\\ncuc\\e-2\\e-2-nodate-duke-energy-progress-llcs-temporary-rates-tariffs-compliance.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 166,
+   "stored_pages": [
+    [
+     1,
+     16
+    ]
+   ],
+   "stored_table_count": 7,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1940,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1293\\0ed42a3818fcbbdf45cfa697f4aa7b98.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 180,
+   "stored_pages": [
+    [
+     1,
+     5
+    ]
+   ],
+   "stored_table_count": 2,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1941,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1142-compliance\\c4b5a4dd-7637-4b11-b174-0a0f6350813d__DEP Compliance Tariffs E2 Sub 1142.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 130,
+   "stored_pages": [
+    [
+     1,
+     5
+    ]
+   ],
+   "stored_table_count": 0,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1942,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1142-compliance\\21305af8-ba7b-4b79-8334-62db63bab249__E-2 Sub 1142_Corrected Compliance Tariffs_051418.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 71,
+   "stored_pages": [
+    [
+     1,
+     21
+    ]
+   ],
+   "stored_table_count": 17,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1943,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1142-compliance\\b4d1a5ed-82f7-414a-becc-19a12f4f10b5__E-2 Sub 1142 et al_DEP Compliance Tariffs_112918.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 80,
+   "stored_pages": [
+    [
+     1,
+     5
+    ]
+   ],
+   "stored_table_count": 3,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1944,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1142-compliance\\4e25f562-21ae-428f-a134-9f0f98519855__E-2 Subs 1142_ 1153 _ 1206 DEP_s Compliance Tariffs.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 79,
+   "stored_pages": [
+    [
+     1,
+     4
+    ]
+   ],
+   "stored_table_count": 0,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1945,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1142-compliance\\44d04bff-8457-41d7-924b-74a5f84289fb__E-2 Sub 1252 1142 1153 Compliance Tariffs_122320.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 78,
+   "stored_pages": [
+    [
+     1,
+     3
+    ]
+   ],
+   "stored_table_count": 0,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1946,
+   "source_pdf": "data/historical/ncuc/e-2-sub-1219/6e933425-89f2-4849-83c7-5e2a7b85ebdf.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 159,
+   "stored_pages": [
+    [
+     1,
+     9
+    ]
+   ],
+   "stored_table_count": 1,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1947,
+   "source_pdf": "data/historical/ncuc/e-2-sub-1219/784821eb-2349-42a7-9622-e619a5ef4a51.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 159,
+   "stored_pages": [
+    [
+     1,
+     9
+    ]
+   ],
+   "stored_table_count": 1,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1948,
+   "source_pdf": "data/historical/ncuc/e-2-sub-1044/6c047085-1a36-4c0d-b602-df9f553cd50f__E-2 Subs 1023 1044 1069  1071 and 1088 - Compliance Tariffs_112415.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 89,
+   "stored_pages": [
+    [
+     1,
+     14
+    ]
+   ],
+   "stored_table_count": 2,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1949,
+   "source_pdf": "data/historical/ncuc/e-2-sub-1108/e53d078e-f68a-4028-b6e5-50d99975531b.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 76,
+   "stored_pages": [
+    [
+     1,
+     1
+    ]
+   ],
+   "stored_table_count": 0,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1950,
+   "source_pdf": "data/historical/ncuc/e-7-sub-1152/ddb530b1-9dcf-4c08-b480-5684455fe4ea.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 56,
+   "stored_pages": [
+    [
+     1,
+     6
+    ]
+   ],
+   "stored_table_count": 3,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1951,
+   "source_pdf": "data/historical/ncuc/e-7-sub-1058/tax_reform_tariffs_jan2015.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 54,
+   "stored_pages": [
+    [
+     1,
+     4
+    ]
+   ],
+   "stored_table_count": 2,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1952,
+   "source_pdf": "data/historical/ncuc/e-7-sub-1058/filing_letter_july2014.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 86,
+   "stored_pages": [
+    [
+     1,
+     11
+    ]
+   ],
+   "stored_table_count": 6,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1955,
+   "source_pdf": "data\\historical\\raw\\nc\\progress\\rider\\residential-decoupling-mechanism-rider-rdm-ncuc-viewfile-aspx-id-81fe2e7f-a49a-4.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 84,
+   "stored_pages": [
+    [
+     1,
+     9
+    ]
+   ],
+   "stored_table_count": 3,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1957,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1219\\e31d1ef2-78de-4dab-8f84-5b6b6cb94c30.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 146,
+   "stored_pages": [
+    [
+     1,
+     21
+    ]
+   ],
+   "stored_table_count": 0,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1958,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1262\\4e0c2c78-3f6f-47b5-8ae0-25aed12fe82f.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 147,
+   "stored_pages": [
+    [
+     1,
+     22
+    ]
+   ],
+   "stored_table_count": 9,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1959,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-697\\7aefee48-a0e8-4b80-bf20-686f2150ce14.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 53,
+   "stored_pages": [
+    [
+     1,
+     3
+    ]
+   ],
+   "stored_table_count": 1,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1960,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\dcd97697-e6a6-49b3-9f5d-18a4ed66ecb3.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 95,
+   "stored_pages": [
+    [
+     1,
+     20
+    ]
+   ],
+   "stored_table_count": 16,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1961,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1107\\04330828-af78-4643-9bde-4d215d17e5b3.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 86,
+   "stored_pages": [
+    [
+     1,
+     11
+    ]
+   ],
+   "stored_table_count": 1,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1962,
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1306\\1b86f6a8-ce32-41d6-a38f-cf8fbbc80b81.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 53,
+   "stored_pages": [
+    [
+     1,
+     3
+    ]
+   ],
+   "stored_table_count": 1,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1963,
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1146\\c59be01b-89e9-4c21-8ccc-95dc97d2b244.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 140,
+   "stored_pages": [
+    [
+     1,
+     15
+    ]
+   ],
+   "stored_table_count": 17,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1964,
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1305\\49a98fdc-115f-4b59-84ea-d37fd3401fe6.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 564,
+   "stored_pages": [
+    [
+     1,
+     14
+    ]
+   ],
+   "stored_table_count": 8,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1965,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1300\\9737f089-472e-4322-bf9b-5b9e80c7bb5d.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 170,
+   "stored_pages": [
+    [
+     1,
+     20
+    ]
+   ],
+   "stored_table_count": 13,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1966,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1300\\583ec03b-fd34-474e-80f1-3c661a7e14a0.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 180,
+   "stored_pages": [
+    [
+     1,
+     5
+    ]
+   ],
+   "stored_table_count": 0,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1967,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\7f394a37-a20d-4da5-b97d-0035c9d9c0c0.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 352,
+   "stored_pages": [
+    [
+     1,
+     2
+    ]
+   ],
+   "stored_table_count": 3,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1968,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1142\\21305af8-ba7b-4b79-8334-62db63bab249.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 71,
+   "stored_pages": [
+    [
+     1,
+     21
+    ]
+   ],
+   "stored_table_count": 17,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1969,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1023\\04efc351-c973-4618-8f57-a1b7a2c71f33.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 153,
+   "stored_pages": [
+    [
+     1,
+     3
+    ]
+   ],
+   "stored_table_count": 0,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1970,
+   "source_pdf": "data\\raw\\historical\\ncuc\\e-2\\e-2-nodate-dep-temporary-rates-tariff-compliance-filing.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 159,
+   "stored_pages": [
+    [
+     1,
+     9
+    ]
+   ],
+   "stored_table_count": 6,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1971,
+   "source_pdf": "data\\raw\\historical\\ncuc\\e-2\\e-2-nodate-dep-s-joint-agency-asset-rider-application.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 121,
+   "stored_pages": [
+    [
+     1,
+     21
+    ]
+   ],
+   "stored_table_count": 25,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1972,
+   "source_pdf": "data\\raw\\historical\\ncuc\\e-2\\e-2-nodate-duke-energy-progress-annual-joint-agency-asset-rider-cost-recovery-application.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 123,
+   "stored_pages": [
+    [
+     1,
+     23
+    ]
+   ],
+   "stored_table_count": 31,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1973,
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1152\\ddb530b1-9dcf-4c08-b480-5684455fe4ea.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 56,
+   "stored_pages": [
+    [
+     1,
+     6
+    ]
+   ],
+   "stored_table_count": 3,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1974,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-7-sub-1026\\f177191e-658e-42a6-89e7-039b0dd3bd2c.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 75,
+   "stored_pages": [
+    [
+     1,
+     25
+    ]
+   ],
+   "stored_table_count": 9,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1975,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-7-gap-candidates\\2c1b10c4-bd9b-42f7-a075-9ccfe139820e__2020-08-13  Temporary Rates Tariffs Compliance Filing _002_.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 169,
+   "stored_pages": [
+    [
+     1,
+     19
+    ]
+   ],
+   "stored_table_count": 12,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1976,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\downloads\\fcar_discovery\\E-7_Sub_1104_Duke_Energy_Carolinas__LLC_s_Application_for_Fuel_Charge_Adj_2862fd46.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 163,
+   "stored_pages": [
+    [
+     1,
+     13
+    ]
+   ],
+   "stored_table_count": 11,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1977,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\downloads\\fcar_discovery\\E-7_Sub_1129_DEC_s_Annual_Fuel_Adjustment_Rider_Application__Testimony_an_da71d047.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 150,
+   "stored_pages": [
+    [
+     1,
+     25
+    ]
+   ],
+   "stored_table_count": 22,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1978,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\downloads\\fcar_discovery\\E-7_Sub_1072_DEC_S_Application_and_Testimony_of_Kim_H._Smith__Swati_V._Da_de6b22c4.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 167,
+   "stored_pages": [
+    [
+     1,
+     17
+    ]
+   ],
+   "stored_table_count": 4,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1979,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\downloads\\fcar_discovery\\E-7_Sub_1163_DEC_s_Fuel_Charge_Adjustment_Proceeding_b3db2ed8.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 157,
+   "stored_pages": [
+    [
+     1,
+     7
+    ]
+   ],
+   "stored_table_count": 4,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1980,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\downloads\\fcar_discovery\\E-7_Sub_1190_DEC_s_NC_Fuel_Rider-_PUBLIC_8be5e918.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 155,
+   "stored_pages": [
+    [
+     1,
+     5
+    ]
+   ],
+   "stored_table_count": 2,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1981,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\downloads\\fcar_discovery\\E-7_Sub_1033_Duke_s__Public__Application_to_Adjust_the_Fuel_and_Fuel-Rela_af1fdca9.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 174,
+   "stored_pages": [
+    [
+     1,
+     24
+    ]
+   ],
+   "stored_table_count": 17,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1982,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\downloads\\fcar_discovery\\E-7_Sub_1228_R8-55_Relating_to_Fuel_and_Fuel-Related_Charge_Adjustments_f_a8923f35.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 129,
+   "stored_pages": [
+    [
+     1,
+     4
+    ]
+   ],
+   "stored_table_count": 3,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1983,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\downloads\\fcar_discovery\\E-7_Sub_1263_DEC_s_Fuel_Charge_Adjustment_Proceeding-PUBLIC_2d7a5513.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 149,
+   "stored_pages": [
+    [
+     1,
+     24
+    ]
+   ],
+   "stored_table_count": 20,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1984,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\downloads\\fcar_discovery\\E-7_Sub_1250_DEC_s_Fuel_Charge_Adjustment_Proceeding_-_Public_Version_444a44ed.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 135,
+   "stored_pages": [
+    [
+     1,
+     10
+    ]
+   ],
+   "stored_table_count": 7,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1985,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\downloads\\fcar_discovery\\E-7_Sub_1002_Application_of_Duke_Energy_Pursuant_to_G.S._62-133.2__amp__N_ebcd6671.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 189,
+   "stored_pages": [
+    [
+     1,
+     14
+    ]
+   ],
+   "stored_table_count": 9,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1986,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\downloads\\fcar_discovery\\E-7_Sub_982_Duke_s_Application_for_Fuel_Charge_Adjustment_474ded97.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 182,
+   "stored_pages": [
+    [
+     1,
+     7
+    ]
+   ],
+   "stored_table_count": 5,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1987,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\downloads\\dep_pre2014_paginated\\E-2_Sub_929_PEC_s_Revised_Tariff_a8ee491e.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 67,
+   "stored_pages": [
+    [
+     1,
+     17
+    ]
+   ],
+   "stored_table_count": 9,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1988,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\downloads\\dep_pre2014_paginated\\E-2_Sub_929_PEC_s_Rate_Schedules__Riders_and_Other_Revised_Tariffs_059c0320.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 89,
+   "stored_pages": [
+    [
+     1,
+     14
+    ]
+   ],
+   "stored_table_count": 1,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1989,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\downloads\\dep_annual_fuel\\E-2_Sub_949_Revised_Rate_Tariffs_fuel_charge.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 98,
+   "stored_pages": [
+    [
+     1,
+     23
+    ]
+   ],
+   "stored_table_count": 3,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1990,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\downloads\\dep_annual_fuel\\E-2_Sub_976_Revised_Rate_Tariffs_to_Reflect_the_Approved_Fuel_Charge_OC_.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 92,
+   "stored_pages": [
+    [
+     1,
+     17
+    ]
+   ],
+   "stored_table_count": 2,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1991,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\downloads\\dep_annual_fuel\\E-2_Sub_1001_PEC_s_Revised_Rate_Tariffs_to_Reflect_Fuel_Charge__DSM_EE__a.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 93,
+   "stored_pages": [
+    [
+     1,
+     18
+    ]
+   ],
+   "stored_table_count": 2,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1992,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\downloads\\dep_annual_fuel\\E-2_Sub_1018_PEC_s_Revised_Rate_Tariffs_to_Reflect_Fuel_Charges.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 94,
+   "stored_pages": [
+    [
+     1,
+     19
+    ]
+   ],
+   "stored_table_count": 3,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1993,
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1304\\8d93cd19-56d4-4522-a23c-a2ab87a354c7.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 310,
+   "stored_pages": [
+    [
+     1,
+     10
+    ]
+   ],
+   "stored_table_count": 0,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1994,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1206\\be44f740-05ec-4cbe-a878-737dfd6652eb.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 250,
+   "stored_pages": [
+    [
+     1,
+     25
+    ]
+   ],
+   "stored_table_count": 6,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1995,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1206\\ad45b5a9-995b-4fbb-b742-d5b40dcd5a6d.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 218,
+   "stored_pages": [
+    [
+     1,
+     18
+    ]
+   ],
+   "stored_table_count": 21,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1996,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1145\\2e49250d-14aa-4c97-bfac-886851d43cc3.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 86,
+   "stored_pages": [
+    [
+     1,
+     11
+    ]
+   ],
+   "stored_table_count": 11,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 1997,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1354\\752bbc34-999f-401c-bb1a-4a2f60db4a93.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 254,
+   "stored_pages": [
+    [
+     1,
+     4
+    ]
+   ],
+   "stored_table_count": 2,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 2034,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1109\\55ae25fd-10f8-4fe5-b61b-cd4ff727efe8.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 52,
+   "stored_pages": [
+    [
+     1,
+     2
+    ]
+   ],
+   "stored_table_count": 0,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 2054,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1300-sept2023\\1b72e8de-c435-43b7-9b88-dfc4c0a8a97b.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 106,
+   "stored_pages": [
+    [
+     1,
+     6
+    ]
+   ],
+   "stored_table_count": 9,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 2068,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1107\\799dff1e-ce9e-4e73-a287-e53d08bc93e7.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 67,
+   "stored_pages": [
+    [
+     1,
+     17
+    ]
+   ],
+   "stored_table_count": 23,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 2069,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1173\\05ac9b0f-8607-43aa-8f8f-22ccca0bb594.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 89,
+   "stored_pages": [
+    [
+     1,
+     14
+    ]
+   ],
+   "stored_table_count": 6,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 2075,
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1305\\a112fff0-3a33-4cea-9682-b4668ba07bcd.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 194,
+   "stored_pages": [
+    [
+     1,
+     19
+    ]
+   ],
+   "stored_table_count": 0,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 2086,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1146\\cc3d5821-7db6-4442-b40e-47b9c271c59f.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 75,
+   "stored_pages": [
+    [
+     1,
+     1
+    ]
+   ],
+   "stored_table_count": 0,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 2099,
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1305\\a9213b61-776a-48d8-80b2-8aee4e0ce5b3.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 138,
+   "stored_pages": [
+    [
+     1,
+     13
+    ]
+   ],
+   "stored_table_count": 8,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 2110,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\26982660-9ab3-42fc-a68c-a6a63d386c2a.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 98,
+   "stored_pages": [
+    [
+     1,
+     11
+    ]
+   ],
+   "stored_table_count": 5,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 2112,
+   "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\7b9171ff-48d4-46dd-82eb-43bd1ca2cd3d.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 102,
+   "stored_pages": [
+    [
+     1,
+     2
+    ]
+   ],
+   "stored_table_count": 1,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 2114,
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1305\\0db30484-5482-4494-8ded-8071246f5f9d.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 100,
+   "stored_pages": [
+    [
+     1,
+     1
+    ]
+   ],
+   "stored_table_count": 1,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 2115,
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1305\\a5581130-1af2-41bf-9d50-c335a55b8326.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 69,
+   "stored_pages": [
+    [
+     1,
+     19
+    ]
+   ],
+   "stored_table_count": 8,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 2118,
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1305\\a80d8b11-ec8b-4482-acd3-58f211adeb00.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 166,
+   "stored_pages": [
+    [
+     1,
+     4
+    ]
+   ],
+   "stored_table_count": 5,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 2119,
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1305\\4e064ee5-03ab-4583-8069-f582333ba993.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 543,
+   "stored_pages": [
+    [
+     1,
+     6
+    ]
+   ],
+   "stored_table_count": 1,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 2123,
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1304\\db3e3b23-0b28-4427-b909-1dd8df53e60e.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 83,
+   "stored_pages": [
+    [
+     1,
+     8
+    ]
+   ],
+   "stored_table_count": 8,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 2130,
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1276\\03781cdd-3ffe-4a6b-9c37-5bf9da1ad741.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 215,
+   "stored_pages": [
+    [
+     1,
+     3
+    ]
+   ],
+   "stored_table_count": 0,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 2141,
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1276\\fc9bc5af-09e8-49d5-a330-4eda9f737216.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 50,
+   "stored_pages": [
+    [
+     1,
+     1
+    ]
+   ],
+   "stored_table_count": 1,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 2144,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1206\\0b42ec4c-bdae-4222-aa3c-75edc95b7b68.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 453,
+   "stored_pages": [
+    [
+     1,
+     3
+    ]
+   ],
+   "stored_table_count": 10,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 2154,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1206\\bf5a0379-5789-4457-99bc-8e71ac76e96f.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 447,
+   "stored_pages": [
+    [
+     1,
+     10
+    ]
+   ],
+   "stored_table_count": 7,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 2171,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1275\\643579d8-8266-472c-b243-849cc925ee7d.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 169,
+   "stored_pages": [
+    [
+     1,
+     19
+    ]
+   ],
+   "stored_table_count": 3,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 2196,
+   "source_pdf": "data\\historical\\ncuc\\e-7-sub-1300\\25ea8bc3-bfbb-48ca-8bfd-2b47fdbb0674.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 98,
+   "stored_pages": [
+    [
+     1,
+     11
+    ]
+   ],
+   "stored_table_count": 1,
+   "file_hash_matches_disk": true
+  },
+  {
+   "artifact_id": 2199,
+   "source_pdf": "data\\historical\\ncuc\\e-2-sub-1275\\9c355332-9bfe-4790-8175-140f128a27ea.pdf",
+   "status": "success",
+   "verdict": "unverifiable",
+   "reason": "chunk_relative_numbering",
+   "pdf_page_count": 79,
+   "stored_pages": [
+    [
+     1,
+     4
+    ]
+   ],
+   "stored_table_count": 3,
+   "file_hash_matches_disk": true
+  }
+ ],
+ "documents": [
+  {
+   "historical_document_id": 476,
+   "family_key": "nc-carolinas-rider-RSC",
+   "state": "NC",
+   "start_page": 30,
+   "end_page": 57,
+   "version_ids": [
+    5255
+   ],
+   "production_charges": 7,
+   "artifact_id": 1577,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 725,
+   "family_key": "nc-progress-leaf-602",
+   "state": "NC",
+   "start_page": 71,
+   "end_page": 75,
+   "version_ids": [
+    5382
+   ],
+   "production_charges": 8,
+   "artifact_id": 1636,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7683,
+   "family_key": "nc-progress-leaf-500",
+   "state": "NC",
+   "start_page": 1,
+   "end_page": 3,
+   "version_ids": [
+    7256
+   ],
+   "production_charges": 4,
+   "artifact_id": 1636,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7685,
+   "family_key": "nc-progress-leaf-800",
+   "state": "NC",
+   "start_page": 51,
+   "end_page": 52,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1636,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7686,
+   "family_key": "nc-progress-schedule-CSG-44",
+   "state": "NC",
+   "start_page": 45,
+   "end_page": 46,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1636,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7687,
+   "family_key": "nc-progress-schedule-CSE-44",
+   "state": "NC",
+   "start_page": 47,
+   "end_page": 48,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1636,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7688,
+   "family_key": "nc-progress-leaf-574",
+   "state": "NC",
+   "start_page": 49,
+   "end_page": 50,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1636,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 2275,
+   "family_key": "nc-progress-leaf-600",
+   "state": "NC",
+   "start_page": 1,
+   "end_page": 1,
+   "version_ids": [
+    6056
+   ],
+   "production_charges": 136,
+   "artifact_id": 1661,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7256,
+   "family_key": "nc-progress-leaf-528",
+   "state": "NC",
+   "start_page": 2,
+   "end_page": 50,
+   "version_ids": [
+    6824
+   ],
+   "production_charges": 32,
+   "artifact_id": 1661,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7257,
+   "family_key": "nc-progress-leaf-601",
+   "state": "NC",
+   "start_page": 52,
+   "end_page": 52,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1661,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7258,
+   "family_key": "nc-progress-leaf-532",
+   "state": "NC",
+   "start_page": 53,
+   "end_page": 56,
+   "version_ids": [
+    6827
+   ],
+   "production_charges": 1,
+   "artifact_id": 1661,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7259,
+   "family_key": "nc-progress-leaf-535",
+   "state": "NC",
+   "start_page": 57,
+   "end_page": 71,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1661,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7708,
+   "family_key": "nc-progress-leaf-574",
+   "state": "NC",
+   "start_page": 72,
+   "end_page": 106,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1661,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7712,
+   "family_key": "nc-progress-leaf-604",
+   "state": "NC",
+   "start_page": 52,
+   "end_page": 53,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1668,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7713,
+   "family_key": "nc-progress-leaf-602",
+   "state": "NC",
+   "start_page": 74,
+   "end_page": 77,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1668,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7714,
+   "family_key": "nc-progress-leaf-502",
+   "state": "NC",
+   "start_page": 8,
+   "end_page": 9,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1668,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7715,
+   "family_key": "nc-progress-leaf-800",
+   "state": "NC",
+   "start_page": 56,
+   "end_page": 73,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1668,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7716,
+   "family_key": "nc-progress-leaf-601",
+   "state": "NC",
+   "start_page": 13,
+   "end_page": 14,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1668,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7717,
+   "family_key": "nc-progress-leaf-520",
+   "state": "NC",
+   "start_page": 20,
+   "end_page": 22,
+   "version_ids": [
+    7310
+   ],
+   "production_charges": 8,
+   "artifact_id": 1668,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7719,
+   "family_key": "nc-progress-leaf-605",
+   "state": "NC",
+   "start_page": 78,
+   "end_page": 78,
+   "version_ids": [
+    7272
+   ],
+   "production_charges": 5,
+   "artifact_id": 1668,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7722,
+   "family_key": "nc-progress-leaf-605",
+   "state": "NC",
+   "start_page": 134,
+   "end_page": 137,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1683,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7723,
+   "family_key": "nc-progress-leaf-800",
+   "state": "NC",
+   "start_page": 138,
+   "end_page": 141,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1683,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7725,
+   "family_key": "nc-progress-leaf-654",
+   "state": "NC",
+   "start_page": 174,
+   "end_page": 181,
+   "version_ids": [
+    7284
+   ],
+   "production_charges": 1,
+   "artifact_id": 1683,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 2538,
+   "family_key": "nc-carolinas-schedule-LGS",
+   "state": "NC",
+   "start_page": 80,
+   "end_page": 82,
+   "version_ids": [
+    5838
+   ],
+   "production_charges": 11,
+   "artifact_id": 1691,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 2552,
+   "family_key": "nc-carolinas-schedule-OL",
+   "state": "NC",
+   "start_page": 24,
+   "end_page": 28,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1693,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7612,
+   "family_key": "nc-progress-rider-RIDERSCR1",
+   "state": "NC",
+   "start_page": 71,
+   "end_page": 71,
+   "version_ids": [
+    7197
+   ],
+   "production_charges": 0,
+   "artifact_id": 1693,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7724,
+   "family_key": "nc-progress-leaf-602",
+   "state": "NC",
+   "start_page": 143,
+   "end_page": 146,
+   "version_ids": [
+    7269
+   ],
+   "production_charges": 8,
+   "artifact_id": 1693,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7733,
+   "family_key": "nc-progress-leaf-520",
+   "state": "NC",
+   "start_page": 65,
+   "end_page": 70,
+   "version_ids": [
+    7258
+   ],
+   "production_charges": 2,
+   "artifact_id": 1693,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7734,
+   "family_key": "nc-progress-leaf-532",
+   "state": "NC",
+   "start_page": 21,
+   "end_page": 23,
+   "version_ids": [
+    7261
+   ],
+   "production_charges": 2,
+   "artifact_id": 1693,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7740,
+   "family_key": "nc-progress-leaf-535",
+   "state": "NC",
+   "start_page": 50,
+   "end_page": 54,
+   "version_ids": [
+    7262
+   ],
+   "production_charges": 1,
+   "artifact_id": 1693,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7742,
+   "family_key": "nc-progress-leaf-605",
+   "state": "NC",
+   "start_page": 147,
+   "end_page": 147,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1693,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7743,
+   "family_key": "nc-progress-leaf-800",
+   "state": "NC",
+   "start_page": 114,
+   "end_page": 117,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1693,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7746,
+   "family_key": "nc-progress-leaf-500",
+   "state": "NC",
+   "start_page": 135,
+   "end_page": 136,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1693,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7748,
+   "family_key": "nc-progress-leaf-502",
+   "state": "NC",
+   "start_page": 140,
+   "end_page": 142,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1693,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 2588,
+   "family_key": "nc-progress-leaf-521",
+   "state": "NC",
+   "start_page": 12,
+   "end_page": 14,
+   "version_ids": [
+    5888
+   ],
+   "production_charges": 8,
+   "artifact_id": 1695,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 2648,
+   "family_key": "nc-carolinas-schedule-OL",
+   "state": "NC",
+   "start_page": 20,
+   "end_page": 23,
+   "version_ids": [
+    5948
+   ],
+   "production_charges": 77,
+   "artifact_id": 1705,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 2675,
+   "family_key": "nc-progress-leaf-533",
+   "state": "NC",
+   "start_page": 41,
+   "end_page": 44,
+   "version_ids": [
+    5975
+   ],
+   "production_charges": 10,
+   "artifact_id": 1707,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7756,
+   "family_key": "nc-progress-leaf-521",
+   "state": "NC",
+   "start_page": 1,
+   "end_page": 3,
+   "version_ids": [
+    7259
+   ],
+   "production_charges": 0,
+   "artifact_id": 1707,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7758,
+   "family_key": "nc-progress-leaf-800",
+   "state": "NC",
+   "start_page": 45,
+   "end_page": 49,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1707,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7759,
+   "family_key": "nc-progress-leaf-601",
+   "state": "NC",
+   "start_page": 52,
+   "end_page": 53,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1707,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 3118,
+   "family_key": "nc-carolinas-rider-FCAR",
+   "state": "NC",
+   "start_page": 5,
+   "end_page": 5,
+   "version_ids": [
+    6164
+   ],
+   "production_charges": 3,
+   "artifact_id": 1717,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7766,
+   "family_key": "nc-carolinas-rider-FCAR",
+   "state": "NC",
+   "start_page": 1,
+   "end_page": 51,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1736,
+   "span_class": "wrong_pages",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 14,
+   "family_key": "ncuc-dep-602",
+   "state": "NC",
+   "start_page": null,
+   "end_page": null,
+   "version_ids": [
+    4568
+   ],
+   "production_charges": 0,
+   "artifact_id": 1751,
+   "span_class": "unbounded",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 176,
+   "family_key": "nc-progress-leaf-572",
+   "state": "NC",
+   "start_page": 1,
+   "end_page": 129,
+   "version_ids": [
+    5344
+   ],
+   "production_charges": 0,
+   "artifact_id": 1791,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 2045,
+   "family_key": "nc-progress-leaf-610",
+   "state": "NC",
+   "start_page": 29,
+   "end_page": 36,
+   "version_ids": [
+    6607
+   ],
+   "production_charges": 3,
+   "artifact_id": 1797,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 5284,
+   "family_key": "nc-progress-leaf-707",
+   "state": "NC",
+   "start_page": 59,
+   "end_page": 63,
+   "version_ids": [
+    6577
+   ],
+   "production_charges": 0,
+   "artifact_id": 1799,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7395,
+   "family_key": "nc-progress-leaf-601",
+   "state": "NC",
+   "start_page": 392,
+   "end_page": 393,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1799,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 375,
+   "family_key": "nc-progress-leaf-643",
+   "state": "NC",
+   "start_page": 151,
+   "end_page": 152,
+   "version_ids": [
+    5444
+   ],
+   "production_charges": 1,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 376,
+   "family_key": "nc-progress-leaf-644",
+   "state": "NC",
+   "start_page": 153,
+   "end_page": 154,
+   "version_ids": [
+    5445
+   ],
+   "production_charges": 1,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 378,
+   "family_key": "nc-progress-leaf-646",
+   "state": "NC",
+   "start_page": 156,
+   "end_page": 156,
+   "version_ids": [
+    5447
+   ],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 380,
+   "family_key": "nc-progress-leaf-648",
+   "state": "NC",
+   "start_page": 158,
+   "end_page": 158,
+   "version_ids": [
+    5449
+   ],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 381,
+   "family_key": "nc-progress-leaf-649",
+   "state": "NC",
+   "start_page": 159,
+   "end_page": 159,
+   "version_ids": [
+    5450
+   ],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 389,
+   "family_key": "nc-progress-leaf-657",
+   "state": "NC",
+   "start_page": 185,
+   "end_page": 187,
+   "version_ids": [
+    5462
+   ],
+   "production_charges": 1,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 390,
+   "family_key": "nc-progress-leaf-658",
+   "state": "NC",
+   "start_page": 188,
+   "end_page": 190,
+   "version_ids": [
+    5463
+   ],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 391,
+   "family_key": "nc-progress-leaf-659",
+   "state": "NC",
+   "start_page": 191,
+   "end_page": 193,
+   "version_ids": [
+    5464
+   ],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 393,
+   "family_key": "nc-progress-leaf-661",
+   "state": "NC",
+   "start_page": 199,
+   "end_page": 200,
+   "version_ids": [
+    5467
+   ],
+   "production_charges": 3,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 399,
+   "family_key": "nc-progress-leaf-667",
+   "state": "NC",
+   "start_page": 215,
+   "end_page": 218,
+   "version_ids": [
+    5471
+   ],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 425,
+   "family_key": "nc-progress-leaf-720",
+   "state": "NC",
+   "start_page": 271,
+   "end_page": 272,
+   "version_ids": [
+    5513
+   ],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 436,
+   "family_key": "nc-progress-leaf-745",
+   "state": "NC",
+   "start_page": 284,
+   "end_page": 287,
+   "version_ids": [
+    5579
+   ],
+   "production_charges": 6,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 439,
+   "family_key": "nc-progress-leaf-802",
+   "state": "NC",
+   "start_page": 304,
+   "end_page": 313,
+   "version_ids": [
+    5535
+   ],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 440,
+   "family_key": "nc-progress-leaf-803",
+   "state": "NC",
+   "start_page": 314,
+   "end_page": 316,
+   "version_ids": [
+    5536
+   ],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 1859,
+   "family_key": "nc-progress-leaf-607",
+   "state": "NC",
+   "start_page": 139,
+   "end_page": 139,
+   "version_ids": [
+    5723
+   ],
+   "production_charges": 77,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 2450,
+   "family_key": "nc-progress-leaf-712",
+   "state": "NC",
+   "start_page": 253,
+   "end_page": 253,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7252,
+   "family_key": "nc-progress-leaf-528",
+   "state": "NC",
+   "start_page": 3,
+   "end_page": 47,
+   "version_ids": [
+    6823
+   ],
+   "production_charges": 53,
+   "artifact_id": 1800,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7306,
+   "family_key": "nc-progress-leaf-642",
+   "state": "NC",
+   "start_page": 150,
+   "end_page": 150,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7341,
+   "family_key": "nc-progress-leaf-713",
+   "state": "NC",
+   "start_page": 254,
+   "end_page": 255,
+   "version_ids": [
+    6753
+   ],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7577,
+   "family_key": "nc-progress-leaf-608",
+   "state": "NC",
+   "start_page": 140,
+   "end_page": 140,
+   "version_ids": [
+    7190
+   ],
+   "production_charges": 1,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7578,
+   "family_key": "nc-progress-leaf-609",
+   "state": "NC",
+   "start_page": 141,
+   "end_page": 141,
+   "version_ids": [
+    7192
+   ],
+   "production_charges": 1,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7579,
+   "family_key": "nc-progress-leaf-610",
+   "state": "NC",
+   "start_page": 142,
+   "end_page": 142,
+   "version_ids": [
+    7193
+   ],
+   "production_charges": 1,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7678,
+   "family_key": "nc-progress-leaf-704",
+   "state": "NC",
+   "start_page": 239,
+   "end_page": 240,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7774,
+   "family_key": "nc-progress-leaf-741",
+   "state": "NC",
+   "start_page": 275,
+   "end_page": 275,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7775,
+   "family_key": "nc-progress-leaf-602",
+   "state": "NC",
+   "start_page": 259,
+   "end_page": 261,
+   "version_ids": [
+    7270
+   ],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7776,
+   "family_key": "nc-progress-leaf-532",
+   "state": "NC",
+   "start_page": 50,
+   "end_page": 53,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7777,
+   "family_key": "nc-progress-leaf-535",
+   "state": "NC",
+   "start_page": 54,
+   "end_page": 68,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7778,
+   "family_key": "nc-progress-leaf-574",
+   "state": "NC",
+   "start_page": 69,
+   "end_page": 96,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7779,
+   "family_key": "nc-progress-leaf-600",
+   "state": "NC",
+   "start_page": 126,
+   "end_page": 134,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7780,
+   "family_key": "nc-progress-leaf-604",
+   "state": "NC",
+   "start_page": 136,
+   "end_page": 136,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7781,
+   "family_key": "nc-progress-leaf-605",
+   "state": "NC",
+   "start_page": 137,
+   "end_page": 138,
+   "version_ids": [
+    7274
+   ],
+   "production_charges": 5,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7782,
+   "family_key": "nc-progress-leaf-611",
+   "state": "NC",
+   "start_page": 143,
+   "end_page": 143,
+   "version_ids": [
+    7277
+   ],
+   "production_charges": 4,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7783,
+   "family_key": "nc-progress-leaf-640",
+   "state": "NC",
+   "start_page": 145,
+   "end_page": 146,
+   "version_ids": [
+    7282
+   ],
+   "production_charges": 1,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7784,
+   "family_key": "nc-progress-leaf-641",
+   "state": "NC",
+   "start_page": 147,
+   "end_page": 149,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7785,
+   "family_key": "nc-progress-leaf-653",
+   "state": "NC",
+   "start_page": 170,
+   "end_page": 172,
+   "version_ids": [
+    7283
+   ],
+   "production_charges": 5,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7786,
+   "family_key": "nc-progress-leaf-654",
+   "state": "NC",
+   "start_page": 173,
+   "end_page": 176,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7787,
+   "family_key": "nc-progress-leaf-800",
+   "state": "NC",
+   "start_page": 288,
+   "end_page": 298,
+   "version_ids": [
+    7308
+   ],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7788,
+   "family_key": "nc-progress-leaf-660",
+   "state": "NC",
+   "start_page": 194,
+   "end_page": 198,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7789,
+   "family_key": "nc-progress-leaf-662",
+   "state": "NC",
+   "start_page": 201,
+   "end_page": 202,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7790,
+   "family_key": "nc-progress-leaf-663",
+   "state": "NC",
+   "start_page": 203,
+   "end_page": 206,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7791,
+   "family_key": "nc-progress-leaf-664",
+   "state": "NC",
+   "start_page": 207,
+   "end_page": 208,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7792,
+   "family_key": "nc-progress-leaf-665",
+   "state": "NC",
+   "start_page": 209,
+   "end_page": 212,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7793,
+   "family_key": "nc-progress-leaf-670",
+   "state": "NC",
+   "start_page": 226,
+   "end_page": 228,
+   "version_ids": [
+    7288
+   ],
+   "production_charges": 7,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7794,
+   "family_key": "nc-progress-leaf-669",
+   "state": "NC",
+   "start_page": 222,
+   "end_page": 225,
+   "version_ids": [
+    7286
+   ],
+   "production_charges": 2,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7795,
+   "family_key": "nc-progress-leaf-700",
+   "state": "NC",
+   "start_page": 229,
+   "end_page": 231,
+   "version_ids": [
+    7290
+   ],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7796,
+   "family_key": "nc-progress-leaf-702",
+   "state": "NC",
+   "start_page": 235,
+   "end_page": 236,
+   "version_ids": [
+    7292
+   ],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7797,
+   "family_key": "nc-progress-leaf-703",
+   "state": "NC",
+   "start_page": 237,
+   "end_page": 238,
+   "version_ids": [
+    7293
+   ],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7798,
+   "family_key": "nc-progress-leaf-705",
+   "state": "NC",
+   "start_page": 241,
+   "end_page": 241,
+   "version_ids": [
+    7295
+   ],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7799,
+   "family_key": "nc-progress-leaf-706",
+   "state": "NC",
+   "start_page": 242,
+   "end_page": 245,
+   "version_ids": [
+    7296
+   ],
+   "production_charges": 4,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7800,
+   "family_key": "nc-progress-leaf-707",
+   "state": "NC",
+   "start_page": 246,
+   "end_page": 246,
+   "version_ids": [
+    7297
+   ],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7801,
+   "family_key": "nc-progress-leaf-708",
+   "state": "NC",
+   "start_page": 247,
+   "end_page": 249,
+   "version_ids": [
+    7298
+   ],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7802,
+   "family_key": "nc-progress-leaf-709",
+   "state": "NC",
+   "start_page": 250,
+   "end_page": 250,
+   "version_ids": [
+    7299
+   ],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7803,
+   "family_key": "nc-progress-leaf-710",
+   "state": "NC",
+   "start_page": 251,
+   "end_page": 251,
+   "version_ids": [
+    7300
+   ],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7804,
+   "family_key": "nc-progress-leaf-711",
+   "state": "NC",
+   "start_page": 252,
+   "end_page": 252,
+   "version_ids": [
+    7301
+   ],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7805,
+   "family_key": "nc-progress-leaf-714",
+   "state": "NC",
+   "start_page": 256,
+   "end_page": 258,
+   "version_ids": [
+    7302
+   ],
+   "production_charges": 3,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7806,
+   "family_key": "nc-progress-leaf-716",
+   "state": "NC",
+   "start_page": 262,
+   "end_page": 263,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7807,
+   "family_key": "nc-progress-leaf-718",
+   "state": "NC",
+   "start_page": 268,
+   "end_page": 268,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7808,
+   "family_key": "nc-progress-leaf-719",
+   "state": "NC",
+   "start_page": 269,
+   "end_page": 270,
+   "version_ids": [
+    7304
+   ],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7809,
+   "family_key": "nc-progress-leaf-740",
+   "state": "NC",
+   "start_page": 273,
+   "end_page": 274,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7810,
+   "family_key": "nc-progress-leaf-742",
+   "state": "NC",
+   "start_page": 276,
+   "end_page": 276,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7811,
+   "family_key": "nc-progress-leaf-743",
+   "state": "NC",
+   "start_page": 277,
+   "end_page": 277,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7812,
+   "family_key": "nc-progress-leaf-744",
+   "state": "NC",
+   "start_page": 278,
+   "end_page": 283,
+   "version_ids": [
+    7306
+   ],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7813,
+   "family_key": "nc-progress-leaf-801",
+   "state": "NC",
+   "start_page": 299,
+   "end_page": 303,
+   "version_ids": [
+    7309
+   ],
+   "production_charges": 0,
+   "artifact_id": 1800,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 298,
+   "family_key": "nc-progress-leaf-590",
+   "state": "NC",
+   "start_page": 60,
+   "end_page": 62,
+   "version_ids": [
+    5352
+   ],
+   "production_charges": 37,
+   "artifact_id": 1801,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 2096,
+   "family_key": "nc-carolinas-schedule-OL",
+   "state": "NC",
+   "start_page": 25,
+   "end_page": 27,
+   "version_ids": [
+    4394
+   ],
+   "production_charges": 32,
+   "artifact_id": 1802,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 353,
+   "family_key": "nc-progress-leaf-571",
+   "state": "NC",
+   "start_page": 5,
+   "end_page": 78,
+   "version_ids": [
+    5339
+   ],
+   "production_charges": 20,
+   "artifact_id": 1825,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 464,
+   "family_key": "nc-carolinas-rider-EC",
+   "state": "NC",
+   "start_page": 88,
+   "end_page": 88,
+   "version_ids": [
+    5227
+   ],
+   "production_charges": 5,
+   "artifact_id": 1904,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 2053,
+   "family_key": "nc-progress-leaf-520",
+   "state": "NC",
+   "start_page": 15,
+   "end_page": 17,
+   "version_ids": [
+    7257
+   ],
+   "production_charges": 2,
+   "artifact_id": 1904,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 456,
+   "family_key": "nc-carolinas-schedule-NL",
+   "state": "NC",
+   "start_page": 33,
+   "end_page": 33,
+   "version_ids": [
+    5270
+   ],
+   "production_charges": 0,
+   "artifact_id": 1906,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 536,
+   "family_key": "nc-carolinas-rider-SUMMARY",
+   "state": "NC",
+   "start_page": 8,
+   "end_page": 12,
+   "version_ids": [
+    5260
+   ],
+   "production_charges": 141,
+   "artifact_id": 1906,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7161,
+   "family_key": "nc-carolinas-schedule-ES",
+   "state": "NC",
+   "start_page": 16,
+   "end_page": 17,
+   "version_ids": [
+    6623
+   ],
+   "production_charges": 5,
+   "artifact_id": 1906,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7162,
+   "family_key": "nc-carolinas-schedule-FL",
+   "state": "NC",
+   "start_page": 18,
+   "end_page": 19,
+   "version_ids": [
+    6624
+   ],
+   "production_charges": 15,
+   "artifact_id": 1906,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7163,
+   "family_key": "nc-carolinas-schedule-GL",
+   "state": "NC",
+   "start_page": 20,
+   "end_page": 21,
+   "version_ids": [
+    6625
+   ],
+   "production_charges": 18,
+   "artifact_id": 1906,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7164,
+   "family_key": "nc-carolinas-schedule-PG",
+   "state": "NC",
+   "start_page": 49,
+   "end_page": 51,
+   "version_ids": [
+    6634
+   ],
+   "production_charges": 3,
+   "artifact_id": 1906,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7165,
+   "family_key": "nc-carolinas-schedule-I",
+   "state": "NC",
+   "start_page": 26,
+   "end_page": 28,
+   "version_ids": [
+    6626
+   ],
+   "production_charges": 8,
+   "artifact_id": 1906,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7166,
+   "family_key": "nc-carolinas-schedule-LGS",
+   "state": "NC",
+   "start_page": 31,
+   "end_page": 31,
+   "version_ids": [
+    6627
+   ],
+   "production_charges": 0,
+   "artifact_id": 1906,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7167,
+   "family_key": "nc-carolinas-schedule-NL",
+   "state": "NC",
+   "start_page": 32,
+   "end_page": 33,
+   "version_ids": [
+    6628
+   ],
+   "production_charges": 0,
+   "artifact_id": 1906,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7168,
+   "family_key": "nc-carolinas-schedule-OL",
+   "state": "NC",
+   "start_page": 34,
+   "end_page": 36,
+   "version_ids": [
+    6629
+   ],
+   "production_charges": 38,
+   "artifact_id": 1906,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7169,
+   "family_key": "nc-carolinas-schedule-OPT-E",
+   "state": "NC",
+   "start_page": 37,
+   "end_page": 39,
+   "version_ids": [
+    6630
+   ],
+   "production_charges": 4,
+   "artifact_id": 1906,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7171,
+   "family_key": "nc-carolinas-schedule-OPT-G",
+   "state": "NC",
+   "start_page": 40,
+   "end_page": 42,
+   "version_ids": [
+    6631
+   ],
+   "production_charges": 6,
+   "artifact_id": 1906,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7172,
+   "family_key": "nc-carolinas-schedule-OPT-H",
+   "state": "NC",
+   "start_page": 43,
+   "end_page": 45,
+   "version_ids": [
+    6632
+   ],
+   "production_charges": 3,
+   "artifact_id": 1906,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7173,
+   "family_key": "nc-carolinas-schedule-OPT-I",
+   "state": "NC",
+   "start_page": 46,
+   "end_page": 48,
+   "version_ids": [
+    6633
+   ],
+   "production_charges": 3,
+   "artifact_id": 1906,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7174,
+   "family_key": "nc-carolinas-schedule-PL",
+   "state": "NC",
+   "start_page": 53,
+   "end_page": 55,
+   "version_ids": [
+    6635
+   ],
+   "production_charges": 29,
+   "artifact_id": 1906,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7175,
+   "family_key": "nc-carolinas-schedule-RE",
+   "state": "NC",
+   "start_page": 56,
+   "end_page": 57,
+   "version_ids": [
+    6636
+   ],
+   "production_charges": 2,
+   "artifact_id": 1906,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7176,
+   "family_key": "nc-carolinas-schedule-RS",
+   "state": "NC",
+   "start_page": 60,
+   "end_page": 61,
+   "version_ids": [
+    6637
+   ],
+   "production_charges": 2,
+   "artifact_id": 1906,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7177,
+   "family_key": "nc-carolinas-schedule-RT",
+   "state": "NC",
+   "start_page": 64,
+   "end_page": 65,
+   "version_ids": [
+    6638
+   ],
+   "production_charges": 3,
+   "artifact_id": 1906,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7178,
+   "family_key": "nc-carolinas-schedule-S",
+   "state": "NC",
+   "start_page": 66,
+   "end_page": 66,
+   "version_ids": [
+    6639
+   ],
+   "production_charges": 1,
+   "artifact_id": 1906,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7179,
+   "family_key": "nc-carolinas-schedule-SGS",
+   "state": "NC",
+   "start_page": 67,
+   "end_page": 69,
+   "version_ids": [
+    6640
+   ],
+   "production_charges": 10,
+   "artifact_id": 1906,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7180,
+   "family_key": "nc-carolinas-schedule-TS",
+   "state": "NC",
+   "start_page": 73,
+   "end_page": 73,
+   "version_ids": [
+    6641
+   ],
+   "production_charges": 3,
+   "artifact_id": 1906,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7182,
+   "family_key": "nc-carolinas-schedule-WC",
+   "state": "NC",
+   "start_page": 74,
+   "end_page": 75,
+   "version_ids": [
+    6642
+   ],
+   "production_charges": 2,
+   "artifact_id": 1906,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 495,
+   "family_key": "nc-progress-leaf-800",
+   "state": "NC",
+   "start_page": 1,
+   "end_page": 80,
+   "version_ids": [
+    6141
+   ],
+   "production_charges": 0,
+   "artifact_id": 1921,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 818,
+   "family_key": "nc-progress-leaf-602",
+   "state": "NC",
+   "start_page": 1,
+   "end_page": 118,
+   "version_ids": [
+    5389
+   ],
+   "production_charges": 8,
+   "artifact_id": 1928,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7365,
+   "family_key": "nc-progress-leaf-602",
+   "state": "NC",
+   "start_page": 27,
+   "end_page": 41,
+   "version_ids": [
+    7175
+   ],
+   "production_charges": 0,
+   "artifact_id": 1928,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 982,
+   "family_key": "nc-progress-leaf-654",
+   "state": "NC",
+   "start_page": 1,
+   "end_page": 3,
+   "version_ids": [
+    5457
+   ],
+   "production_charges": 5,
+   "artifact_id": 1933,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 1120,
+   "family_key": "nc-progress-leaf-800",
+   "state": "NC",
+   "start_page": 22,
+   "end_page": 402,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1934,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 1151,
+   "family_key": "nc-carolinas-schedule-OL",
+   "state": "NC",
+   "start_page": 24,
+   "end_page": 59,
+   "version_ids": [
+    4622
+   ],
+   "production_charges": 157,
+   "artifact_id": 1935,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 2457,
+   "family_key": "nc-progress-leaf-532",
+   "state": "NC",
+   "start_page": 118,
+   "end_page": 121,
+   "version_ids": [
+    6614
+   ],
+   "production_charges": 5,
+   "artifact_id": 1937,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 2639,
+   "family_key": "nc-progress-leaf-574",
+   "state": "NC",
+   "start_page": 48,
+   "end_page": 49,
+   "version_ids": [
+    5939
+   ],
+   "production_charges": 24,
+   "artifact_id": 1940,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 1739,
+   "family_key": "nc-progress-leaf-574",
+   "state": "NC",
+   "start_page": 49,
+   "end_page": 52,
+   "version_ids": [
+    5596
+   ],
+   "production_charges": 24,
+   "artifact_id": 1941,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 1751,
+   "family_key": "nc-progress-leaf-574",
+   "state": "NC",
+   "start_page": 50,
+   "end_page": 53,
+   "version_ids": [
+    5608
+   ],
+   "production_charges": 24,
+   "artifact_id": 1942,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 1763,
+   "family_key": "nc-progress-leaf-574",
+   "state": "NC",
+   "start_page": 51,
+   "end_page": 54,
+   "version_ids": [
+    5620
+   ],
+   "production_charges": 24,
+   "artifact_id": 1943,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 1775,
+   "family_key": "nc-progress-leaf-574",
+   "state": "NC",
+   "start_page": 52,
+   "end_page": 55,
+   "version_ids": [
+    5632
+   ],
+   "production_charges": 24,
+   "artifact_id": 1944,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 1789,
+   "family_key": "nc-progress-leaf-571",
+   "state": "NC",
+   "start_page": 61,
+   "end_page": 78,
+   "version_ids": [
+    5646
+   ],
+   "production_charges": 33,
+   "artifact_id": 1945,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 1790,
+   "family_key": "nc-progress-leaf-503",
+   "state": "NC",
+   "start_page": 78,
+   "end_page": 80,
+   "version_ids": [
+    5314
+   ],
+   "production_charges": 5,
+   "artifact_id": 1946,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 1791,
+   "family_key": "nc-progress-leaf-503",
+   "state": "NC",
+   "start_page": 78,
+   "end_page": 80,
+   "version_ids": [
+    5647
+   ],
+   "production_charges": 5,
+   "artifact_id": 1947,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 1797,
+   "family_key": "nc-progress-leaf-530",
+   "state": "NC",
+   "start_page": 20,
+   "end_page": 32,
+   "version_ids": [
+    5659
+   ],
+   "production_charges": 30,
+   "artifact_id": 1948,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 1809,
+   "family_key": "nc-progress-leaf-530",
+   "state": "NC",
+   "start_page": 19,
+   "end_page": 31,
+   "version_ids": [
+    5671
+   ],
+   "production_charges": 30,
+   "artifact_id": 1949,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 2525,
+   "family_key": "nc-carolinas-schedule-OL",
+   "state": "NC",
+   "start_page": 23,
+   "end_page": 26,
+   "version_ids": [
+    5825
+   ],
+   "production_charges": 77,
+   "artifact_id": 1950,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 1823,
+   "family_key": "nc-carolinas-schedule-RS",
+   "state": "NC",
+   "start_page": 3,
+   "end_page": 4,
+   "version_ids": [
+    5688
+   ],
+   "production_charges": 2,
+   "artifact_id": 1951,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 1824,
+   "family_key": "nc-carolinas-schedule-SGS",
+   "state": "NC",
+   "start_page": 17,
+   "end_page": 19,
+   "version_ids": [
+    5689
+   ],
+   "production_charges": 11,
+   "artifact_id": 1951,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 1825,
+   "family_key": "nc-carolinas-schedule-LGS",
+   "state": "NC",
+   "start_page": 22,
+   "end_page": 24,
+   "version_ids": [
+    5690
+   ],
+   "production_charges": 11,
+   "artifact_id": 1951,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 1826,
+   "family_key": "nc-carolinas-schedule-ES",
+   "state": "NC",
+   "start_page": 7,
+   "end_page": 8,
+   "version_ids": [
+    5691
+   ],
+   "production_charges": 3,
+   "artifact_id": 1951,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 1827,
+   "family_key": "nc-carolinas-schedule-I",
+   "state": "NC",
+   "start_page": 41,
+   "end_page": 43,
+   "version_ids": [
+    5692
+   ],
+   "production_charges": 10,
+   "artifact_id": 1951,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 1828,
+   "family_key": "nc-carolinas-schedule-PG",
+   "state": "NC",
+   "start_page": 51,
+   "end_page": 53,
+   "version_ids": [
+    5693
+   ],
+   "production_charges": 3,
+   "artifact_id": 1951,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 1829,
+   "family_key": "nc-carolinas-schedule-TS",
+   "state": "NC",
+   "start_page": 40,
+   "end_page": 40,
+   "version_ids": [
+    5694
+   ],
+   "production_charges": 3,
+   "artifact_id": 1951,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 1837,
+   "family_key": "nc-carolinas-schedule-ES",
+   "state": "NC",
+   "start_page": 4,
+   "end_page": 5,
+   "version_ids": [
+    5702
+   ],
+   "production_charges": 3,
+   "artifact_id": 1952,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 1838,
+   "family_key": "nc-carolinas-schedule-I",
+   "state": "NC",
+   "start_page": 14,
+   "end_page": 16,
+   "version_ids": [
+    5703
+   ],
+   "production_charges": 10,
+   "artifact_id": 1952,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 1839,
+   "family_key": "nc-carolinas-schedule-LGS",
+   "state": "NC",
+   "start_page": 17,
+   "end_page": 19,
+   "version_ids": [
+    5704
+   ],
+   "production_charges": 11,
+   "artifact_id": 1952,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 1840,
+   "family_key": "nc-carolinas-schedule-PG",
+   "state": "NC",
+   "start_page": 37,
+   "end_page": 40,
+   "version_ids": [
+    5705
+   ],
+   "production_charges": 3,
+   "artifact_id": 1952,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 1841,
+   "family_key": "nc-carolinas-schedule-RS",
+   "state": "NC",
+   "start_page": 48,
+   "end_page": 49,
+   "version_ids": [
+    5706
+   ],
+   "production_charges": 2,
+   "artifact_id": 1952,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 1842,
+   "family_key": "nc-carolinas-schedule-SGS",
+   "state": "NC",
+   "start_page": 54,
+   "end_page": 56,
+   "version_ids": [
+    5707
+   ],
+   "production_charges": 11,
+   "artifact_id": 1952,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 1843,
+   "family_key": "nc-carolinas-schedule-TS",
+   "state": "NC",
+   "start_page": 60,
+   "end_page": 60,
+   "version_ids": [
+    5708
+   ],
+   "production_charges": 3,
+   "artifact_id": 1952,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 1847,
+   "family_key": "nc-progress-leaf-608",
+   "state": "NC",
+   "start_page": null,
+   "end_page": null,
+   "version_ids": [
+    6070
+   ],
+   "production_charges": 0,
+   "artifact_id": 1955,
+   "span_class": "unbounded",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 345,
+   "family_key": "nc-progress-leaf-528",
+   "state": "NC",
+   "start_page": 2,
+   "end_page": 46,
+   "version_ids": [
+    5329
+   ],
+   "production_charges": 53,
+   "artifact_id": 1960,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 347,
+   "family_key": "nc-progress-leaf-532",
+   "state": "NC",
+   "start_page": 49,
+   "end_page": 52,
+   "version_ids": [
+    5331
+   ],
+   "production_charges": 3,
+   "artifact_id": 1960,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 350,
+   "family_key": "nc-progress-leaf-535",
+   "state": "NC",
+   "start_page": 53,
+   "end_page": 67,
+   "version_ids": [
+    5334
+   ],
+   "production_charges": 11,
+   "artifact_id": 1960,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 356,
+   "family_key": "nc-progress-leaf-574",
+   "state": "NC",
+   "start_page": 68,
+   "end_page": 95,
+   "version_ids": [
+    5349
+   ],
+   "production_charges": 24,
+   "artifact_id": 1960,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7264,
+   "family_key": "nc-progress-leaf-601",
+   "state": "NC",
+   "start_page": 48,
+   "end_page": 48,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1960,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7484,
+   "family_key": "nc-carolinas-schedule-IT",
+   "state": "NC",
+   "start_page": 13,
+   "end_page": 55,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1964,
+   "span_class": "wrong_pages",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7485,
+   "family_key": "nc-carolinas-rider-EE",
+   "state": "NC",
+   "start_page": 56,
+   "end_page": 68,
+   "version_ids": [
+    6959
+   ],
+   "production_charges": 1,
+   "artifact_id": 1964,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 3687,
+   "family_key": "nc-progress-leaf-602",
+   "state": "NC",
+   "start_page": 154,
+   "end_page": 154,
+   "version_ids": [
+    6428
+   ],
+   "production_charges": 8,
+   "artifact_id": 1967,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 2473,
+   "family_key": "nc-progress-leaf-613",
+   "state": "NC",
+   "start_page": 89,
+   "end_page": 93,
+   "version_ids": [
+    6079
+   ],
+   "production_charges": 2,
+   "artifact_id": 1970,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 2512,
+   "family_key": "nc-progress-leaf-602",
+   "state": "NC",
+   "start_page": 72,
+   "end_page": 72,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1971,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 2513,
+   "family_key": "nc-progress-leaf-602",
+   "state": "NC",
+   "start_page": 122,
+   "end_page": 123,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1972,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 2672,
+   "family_key": "nc-carolinas-schedule-OL",
+   "state": "NC",
+   "start_page": 66,
+   "end_page": 69,
+   "version_ids": [
+    5972
+   ],
+   "production_charges": 74,
+   "artifact_id": 1975,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 3115,
+   "family_key": "nc-carolinas-rider-FCAR",
+   "state": "NC",
+   "start_page": 4,
+   "end_page": 4,
+   "version_ids": [
+    6161
+   ],
+   "production_charges": 3,
+   "artifact_id": 1976,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 3116,
+   "family_key": "nc-carolinas-rider-FCAR",
+   "state": "NC",
+   "start_page": 3,
+   "end_page": 4,
+   "version_ids": [
+    6162
+   ],
+   "production_charges": 3,
+   "artifact_id": 1977,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 3117,
+   "family_key": "nc-carolinas-rider-FCAR",
+   "state": "NC",
+   "start_page": 4,
+   "end_page": 4,
+   "version_ids": [
+    6163
+   ],
+   "production_charges": 3,
+   "artifact_id": 1978,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 3119,
+   "family_key": "nc-carolinas-rider-FCAR",
+   "state": "NC",
+   "start_page": 3,
+   "end_page": 4,
+   "version_ids": [
+    6165
+   ],
+   "production_charges": 3,
+   "artifact_id": 1979,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 3120,
+   "family_key": "nc-carolinas-rider-FCAR",
+   "state": "NC",
+   "start_page": 4,
+   "end_page": 4,
+   "version_ids": [
+    6166
+   ],
+   "production_charges": 3,
+   "artifact_id": 1980,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 3121,
+   "family_key": "nc-carolinas-rider-FCAR",
+   "state": "NC",
+   "start_page": 4,
+   "end_page": 4,
+   "version_ids": [
+    6167
+   ],
+   "production_charges": 3,
+   "artifact_id": 1981,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 3122,
+   "family_key": "nc-carolinas-rider-FCAR",
+   "state": "NC",
+   "start_page": 5,
+   "end_page": 5,
+   "version_ids": [
+    6168
+   ],
+   "production_charges": 3,
+   "artifact_id": 1982,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 3123,
+   "family_key": "nc-carolinas-rider-FCAR",
+   "state": "NC",
+   "start_page": 5,
+   "end_page": 5,
+   "version_ids": [
+    6169
+   ],
+   "production_charges": 3,
+   "artifact_id": 1983,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 3124,
+   "family_key": "nc-carolinas-rider-FCAR",
+   "state": "NC",
+   "start_page": 5,
+   "end_page": 5,
+   "version_ids": [
+    6170
+   ],
+   "production_charges": 3,
+   "artifact_id": 1984,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 3125,
+   "family_key": "nc-carolinas-rider-FCAR",
+   "state": "NC",
+   "start_page": 4,
+   "end_page": 4,
+   "version_ids": [
+    6171
+   ],
+   "production_charges": 3,
+   "artifact_id": 1985,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 3126,
+   "family_key": "nc-carolinas-rider-FCAR",
+   "state": "NC",
+   "start_page": 4,
+   "end_page": 4,
+   "version_ids": [
+    6172
+   ],
+   "production_charges": 3,
+   "artifact_id": 1986,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 3127,
+   "family_key": "nc-progress-leaf-501",
+   "state": "NC",
+   "start_page": 5,
+   "end_page": 7,
+   "version_ids": [
+    6175
+   ],
+   "production_charges": 6,
+   "artifact_id": 1987,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 3128,
+   "family_key": "nc-progress-leaf-501",
+   "state": "NC",
+   "start_page": 4,
+   "end_page": 6,
+   "version_ids": [
+    6176
+   ],
+   "production_charges": 6,
+   "artifact_id": 1988,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 3132,
+   "family_key": "nc-progress-leaf-501",
+   "state": "NC",
+   "start_page": 8,
+   "end_page": 10,
+   "version_ids": [
+    6181
+   ],
+   "production_charges": 6,
+   "artifact_id": 1989,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 3134,
+   "family_key": "nc-progress-leaf-501",
+   "state": "NC",
+   "start_page": 4,
+   "end_page": 6,
+   "version_ids": [
+    6182
+   ],
+   "production_charges": 6,
+   "artifact_id": 1990,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 3136,
+   "family_key": "nc-progress-leaf-501",
+   "state": "NC",
+   "start_page": 4,
+   "end_page": 6,
+   "version_ids": [
+    6183
+   ],
+   "production_charges": 6,
+   "artifact_id": 1991,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 3138,
+   "family_key": "nc-progress-leaf-501",
+   "state": "NC",
+   "start_page": 4,
+   "end_page": 6,
+   "version_ids": [
+    6184
+   ],
+   "production_charges": 6,
+   "artifact_id": 1992,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7480,
+   "family_key": "nc-carolinas-schedule-PPBE",
+   "state": "NC",
+   "start_page": 1,
+   "end_page": 170,
+   "version_ids": [
+    6913
+   ],
+   "production_charges": 0,
+   "artifact_id": 1993,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7139,
+   "family_key": "nc-progress-leaf-707",
+   "state": "NC",
+   "start_page": 68,
+   "end_page": 68,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 1994,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7136,
+   "family_key": "nc-progress-leaf-707",
+   "state": "NC",
+   "start_page": 44,
+   "end_page": 47,
+   "version_ids": [
+    6775
+   ],
+   "production_charges": 0,
+   "artifact_id": 1995,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 5294,
+   "family_key": "nc-progress-leaf-602",
+   "state": "NC",
+   "start_page": 68,
+   "end_page": 71,
+   "version_ids": [
+    7179
+   ],
+   "production_charges": 0,
+   "artifact_id": 1997,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7234,
+   "family_key": "nc-progress-leaf-533",
+   "state": "NC",
+   "start_page": 1,
+   "end_page": 42,
+   "version_ids": [
+    6743
+   ],
+   "production_charges": 42,
+   "artifact_id": 1997,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7247,
+   "family_key": "nc-progress-leaf-602",
+   "state": "NC",
+   "start_page": 248,
+   "end_page": 254,
+   "version_ids": [
+    6814
+   ],
+   "production_charges": 8,
+   "artifact_id": 1997,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7311,
+   "family_key": "nc-progress-leaf-603",
+   "state": "NC",
+   "start_page": 1,
+   "end_page": 52,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 2034,
+   "span_class": "wrong_pages",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7378,
+   "family_key": "nc-progress-leaf-501",
+   "state": "NC",
+   "start_page": 59,
+   "end_page": 67,
+   "version_ids": [
+    6803
+   ],
+   "production_charges": 0,
+   "artifact_id": 2068,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 5459,
+   "family_key": "nc-progress-leaf-501",
+   "state": "NC",
+   "start_page": 1,
+   "end_page": 89,
+   "version_ids": [
+    6646
+   ],
+   "production_charges": 18,
+   "artifact_id": 2069,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7476,
+   "family_key": "nc-carolinas-rider-IS",
+   "state": "NC",
+   "start_page": 109,
+   "end_page": 194,
+   "version_ids": [
+    6895
+   ],
+   "production_charges": 0,
+   "artifact_id": 2075,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 3140,
+   "family_key": "nc-progress-leaf-501",
+   "state": "NC",
+   "start_page": 4,
+   "end_page": 6,
+   "version_ids": [
+    6186
+   ],
+   "production_charges": 6,
+   "artifact_id": 2086,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7250,
+   "family_key": "nc-progress-leaf-601",
+   "state": "NC",
+   "start_page": 51,
+   "end_page": 51,
+   "version_ids": [
+    7168
+   ],
+   "production_charges": 0,
+   "artifact_id": 2110,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7253,
+   "family_key": "nc-progress-leaf-532",
+   "state": "NC",
+   "start_page": 52,
+   "end_page": 55,
+   "version_ids": [
+    6826
+   ],
+   "production_charges": 2,
+   "artifact_id": 2110,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7254,
+   "family_key": "nc-progress-leaf-535",
+   "state": "NC",
+   "start_page": 56,
+   "end_page": 70,
+   "version_ids": [
+    6831
+   ],
+   "production_charges": 17,
+   "artifact_id": 2110,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7255,
+   "family_key": "nc-progress-leaf-574",
+   "state": "NC",
+   "start_page": 71,
+   "end_page": 98,
+   "version_ids": [
+    6744
+   ],
+   "production_charges": 5,
+   "artifact_id": 2110,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7265,
+   "family_key": "nc-progress-leaf-600",
+   "state": "NC",
+   "start_page": 1,
+   "end_page": 1,
+   "version_ids": [
+    6908
+   ],
+   "production_charges": 104,
+   "artifact_id": 2112,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7266,
+   "family_key": "nc-progress-leaf-528",
+   "state": "NC",
+   "start_page": 2,
+   "end_page": 47,
+   "version_ids": [
+    6825
+   ],
+   "production_charges": 53,
+   "artifact_id": 2112,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7267,
+   "family_key": "nc-progress-leaf-601",
+   "state": "NC",
+   "start_page": 102,
+   "end_page": 102,
+   "version_ids": [
+    7171
+   ],
+   "production_charges": 0,
+   "artifact_id": 2112,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7268,
+   "family_key": "nc-progress-leaf-532",
+   "state": "NC",
+   "start_page": 50,
+   "end_page": 53,
+   "version_ids": [
+    6828
+   ],
+   "production_charges": 4,
+   "artifact_id": 2112,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7269,
+   "family_key": "nc-progress-leaf-533",
+   "state": "NC",
+   "start_page": 54,
+   "end_page": 58,
+   "version_ids": [
+    6830
+   ],
+   "production_charges": 9,
+   "artifact_id": 2112,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7270,
+   "family_key": "nc-progress-leaf-535",
+   "state": "NC",
+   "start_page": 59,
+   "end_page": 68,
+   "version_ids": [],
+   "production_charges": 0,
+   "artifact_id": 2112,
+   "span_class": "not_covered",
+   "classification": "no_structured_extraction_required",
+   "requires_regeneration": false,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7595,
+   "family_key": "nc-progress-leaf-532",
+   "state": "NC",
+   "start_page": 11,
+   "end_page": 18,
+   "version_ids": [
+    7198,
+    7208
+   ],
+   "production_charges": 8,
+   "artifact_id": 2196,
+   "span_class": "wrong_pages",
+   "classification": "unsafe_page_mapping",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7596,
+   "family_key": "nc-progress-leaf-533",
+   "state": "NC",
+   "start_page": 19,
+   "end_page": 28,
+   "version_ids": [
+    7199,
+    7207
+   ],
+   "production_charges": 18,
+   "artifact_id": 2196,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7597,
+   "family_key": "nc-progress-leaf-536",
+   "state": "NC",
+   "start_page": 29,
+   "end_page": 36,
+   "version_ids": [
+    7200,
+    7206
+   ],
+   "production_charges": 12,
+   "artifact_id": 2196,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7599,
+   "family_key": "nc-progress-leaf-800",
+   "state": "NC",
+   "start_page": 59,
+   "end_page": 98,
+   "version_ids": [
+    7196
+   ],
+   "production_charges": 0,
+   "artifact_id": 2196,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 5365,
+   "family_key": "nc-progress-leaf-602",
+   "state": "NC",
+   "start_page": 75,
+   "end_page": 78,
+   "version_ids": [
+    6649
+   ],
+   "production_charges": 8,
+   "artifact_id": 2199,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7614,
+   "family_key": "nc-progress-leaf-605",
+   "state": "NC",
+   "start_page": 79,
+   "end_page": 79,
+   "version_ids": [
+    7189
+   ],
+   "production_charges": 5,
+   "artifact_id": 2199,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7615,
+   "family_key": "nc-progress-leaf-800",
+   "state": "NC",
+   "start_page": 46,
+   "end_page": 49,
+   "version_ids": [
+    7195
+   ],
+   "production_charges": 0,
+   "artifact_id": 2199,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7619,
+   "family_key": "nc-progress-leaf-500",
+   "state": "NC",
+   "start_page": 67,
+   "end_page": 68,
+   "version_ids": [
+    7164
+   ],
+   "production_charges": 4,
+   "artifact_id": 2199,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  },
+  {
+   "historical_document_id": 7621,
+   "family_key": "nc-progress-leaf-502",
+   "state": "NC",
+   "start_page": 72,
+   "end_page": 74,
+   "version_ids": [
+    7166
+   ],
+   "production_charges": 7,
+   "artifact_id": 2199,
+   "span_class": "not_covered",
+   "classification": "incomplete_structured_coverage",
+   "requires_regeneration": true,
+   "legacy_slicer_would_accept": false
+  }
+ ]
+}

@@ -58,6 +58,11 @@ def save_page_artifacts(
                 "footer_candidates": page.footer_candidates,
                 "has_effective_date_phrase": page.has_effective_date_phrase,
                 "has_docket_phrase": page.has_docket_phrase,
+                "has_redline_markers": page.has_redline_markers,
+                "redline_marker_count": page.redline_marker_count,
+                "has_dual_rate_pair": page.has_dual_rate_pair,
+                "has_toc_page": page.has_toc_page,
+                "page_metadata_version": "page_metadata@1.1.0",
                 "extracted_leaf_nos": page.extracted_leaf_nos,
                 "extracted_schedule_codes": page.extracted_schedule_codes,
                 **(metadata or {}),
@@ -106,6 +111,22 @@ def load_page_artifacts(
     pages: list[PageEvidence] = []
     for row in rows:
         metadata = json.loads(row["metadata_json"] or "{}")
+        from duke_rates.historical.ncuc.pipeline.page_miner import _extract_page_features_from_text
+
+        recovered = None
+        flags = (
+            "has_redline_markers",
+            "redline_marker_count",
+            "has_dual_rate_pair",
+            "has_toc_page",
+        )
+        if any(key not in metadata for key in flags):
+            recovered = _extract_page_features_from_text(
+                row["text_content"] or "", row["page_number"]
+            )
+        restored = {
+            key: metadata[key] if key in metadata else getattr(recovered, key) for key in flags
+        }
         pages.append(
             PageEvidence(
                 page_number=row["page_number"],
@@ -124,6 +145,7 @@ def load_page_artifacts(
                 has_docket_phrase=bool(metadata.get("has_docket_phrase")),
                 extracted_leaf_nos=list(metadata.get("extracted_leaf_nos") or []),
                 extracted_schedule_codes=list(metadata.get("extracted_schedule_codes") or []),
+                **restored,
             )
         )
     return pages
@@ -164,7 +186,7 @@ def save_span_artifacts(
             header_footer_snippets=list(span.header_footer_snippets),
             dates=list(span.dates),
             evidence_score_breakdown=dict(span.evidence_score_breakdown),
-            metadata=metadata or {},
+            metadata={**(metadata or {}), "segmentation_evidence": span.segmentation_evidence},
         )
         conn.execute(
             """
@@ -210,7 +232,7 @@ def load_span_artifacts(
         """
         SELECT start_page, end_page, doc_type, confidence, extracted_leaf_nos_json,
                extracted_schedule_titles_json, header_footer_snippets_json, dates_json,
-               evidence_score_breakdown_json
+               evidence_score_breakdown_json, metadata_json
         FROM ncuc_span_artifacts
         WHERE source_pdf = ? AND file_hash IS ? AND artifact_version = ?
         ORDER BY span_index
@@ -226,13 +248,20 @@ def load_span_artifacts(
                 doc_type=row["doc_type"],
                 confidence=float(row["confidence"] or 0.0),
                 extracted_leaf_nos=set(json.loads(row["extracted_leaf_nos_json"] or "[]")),
-                extracted_schedule_titles=set(json.loads(row["extracted_schedule_titles_json"] or "[]")),
+                extracted_schedule_titles=set(
+                    json.loads(row["extracted_schedule_titles_json"] or "[]")
+                ),
                 header_footer_snippets=list(json.loads(row["header_footer_snippets_json"] or "[]")),
                 dates=[
                     DateCandidate.model_validate(item)
                     for item in json.loads(row["dates_json"] or "[]")
                 ],
-                evidence_score_breakdown=dict(json.loads(row["evidence_score_breakdown_json"] or "{}")),
+                evidence_score_breakdown=dict(
+                    json.loads(row["evidence_score_breakdown_json"] or "{}")
+                ),
+                segmentation_evidence=json.loads(row["metadata_json"] or "{}").get(
+                    "segmentation_evidence", {}
+                ),
             )
         )
     return spans
@@ -333,6 +362,31 @@ def save_docling_artifact(
         ),
     )
     return int(cur.lastrowid)
+
+
+#: ``degraded_modes`` entries (written by ``convert_pdf_safe``) that mean the
+#: conversion lost content -- OCR and/or table structure were switched off for
+#: some pages.  ``chunked`` and ``cpu_fallback`` keep full model quality.
+DOCLING_QUALITY_LOSS_MODES = frozenset({"page_degraded"})
+
+
+def docling_artifact_is_degraded(metadata: dict | str | None) -> bool:
+    """True when a Docling artifact's metadata says content was lost.
+
+    Accepts the ``metadata_json`` column (str) or an already-decoded dict.
+    Unknown or missing metadata counts as not degraded, matching legacy rows.
+    """
+    if isinstance(metadata, str):
+        try:
+            metadata = json.loads(metadata)
+        except ValueError:
+            return False
+    if not isinstance(metadata, dict):
+        return False
+    modes = metadata.get("degraded_modes") or metadata.get("_degraded_modes") or []
+    if any(mode in DOCLING_QUALITY_LOSS_MODES for mode in modes):
+        return True
+    return bool(metadata.get("skipped_pages") or metadata.get("_skipped_pages"))
 
 
 def load_docling_artifact(

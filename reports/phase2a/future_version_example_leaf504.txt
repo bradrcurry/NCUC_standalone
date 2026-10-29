@@ -1,0 +1,9 @@
+# leaf-504 R-TOU-EV, 1000 kWh (300 on / 700 off), service 2025-11-01, production-content scratch DB
+--- before (25def84)
+effective_start= 2026-01-01 total= 13985.84 coverage= n/a
+  warning: Demand quantity missing for rider Curtailable Demand Credit on nc-progress-leaf-655.
+  warning: Demand quantity missing for rider Premium Demand Charge - Level 2 on nc-progress-leaf-655.
+  warning: Rider charges not yet parsed for: nc-progress-leaf-611, nc-progress-leaf-641, nc-progress-leaf-644, nc-progress-leaf-645, nc-progress-leaf-646, nc-progress-leaf
+--- after (phase 2A)
+effective_start= None total= 0.0 coverage= incomplete
+  warning: Incomplete coverage: no version of nc-progress-leaf-504 was in effect on 2025-11-01; the earliest version on file is effective 2026-01-01. Not priced.

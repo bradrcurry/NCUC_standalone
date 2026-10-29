@@ -1,0 +1,21 @@
+{
+  "rebound": [
+    96,
+    101
+  ],
+  "charges_kept": 104,
+  "charges_deleted": 0,
+  "next": "provenance extract-candidate on the new pages, compare, then provenance promote",
+  "snapshot_before": {
+    "historical_documents": 1,
+    "tariff_versions": 1,
+    "tariff_charges": 104,
+    "document_assertions": 0
+  },
+  "snapshot_after": {
+    "historical_documents": 1,
+    "tariff_versions": 1,
+    "tariff_charges": 104,
+    "document_assertions": 0
+  }
+}

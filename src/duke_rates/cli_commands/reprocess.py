@@ -12,6 +12,8 @@ from pathlib import Path
 
 import typer
 
+from duke_rates.cli_commands.extraction_options import announce_persistence, legacy_replace_option
+
 from duke_rates.db.artifact_cache import load_page_artifacts, save_page_artifacts, save_span_artifacts
 from duke_rates.db.repository import Repository
 from duke_rates.db.sqlite import connect as connect_sqlite
@@ -193,6 +195,7 @@ def _refresh_historical_artifacts_for_reprocess(
 def _process_single_reprocess_queue_item(
     database_path: str | Path,
     force_clear: bool = False,
+    legacy_replace: bool = False,
 ) -> dict[str, int | bool]:
     from duke_rates.cli import _ensure_historical_tariff_version
     from duke_rates.db.reprocess import (
@@ -269,8 +272,12 @@ def _process_single_reprocess_queue_item(
         version_bootstrapped = True
 
     try:
-        process_result = extractor.process_document(doc, force_clear=force_clear)
-        _, family_key, inserted = process_result[:3]
+        # Phase 2C: a candidate run; tariff_charges changes only with legacy_replace.
+        outcome = extractor.process_document_result(
+            doc, force_clear=force_clear, legacy_replace=legacy_replace,
+            created_by="reprocess:process-queue-nc",
+        )
+        family_key, inserted = outcome.family_key, outcome.inserted
         conn = connect(db_path)
         try:
             latest_run = latest_processing_run_for_document(
@@ -284,6 +291,10 @@ def _process_single_reprocess_queue_item(
                 latest_run_id=latest_run["id"] if latest_run else None,
                 metadata={
                     "charges_inserted": inserted,
+                    "charges_extracted": outcome.extracted,
+                    "candidate_run_id": outcome.run_id,
+                    "persistence": outcome.persistence,
+                    "needs_review": outcome.needs_review,
                     "family_key": family_key,
                     **artifact_refresh,
                     "version_bootstrapped": version_bootstrapped,
@@ -807,14 +818,16 @@ def process_reprocess_queue_nc(
         False,
         "--enforce-cleanup",
         help=(
-            "Delete stale tariff_charges for the version even when this reprocess "
-            "extracts 0 charges. Use after tightening routing/guard logic so "
-            "now-refused old extractions get cleared instead of surviving silently."
+            "With --legacy-replace: also promote empty extractions, clearing stale "
+            "tariff_charges for the version. Without it an empty candidate run is "
+            "stored for review and nothing is deleted."
         ),
     ),
+    legacy_replace: bool = legacy_replace_option(),
 ) -> None:
-    """Process pending historical reparse queue items."""
+    """Process pending historical reparse queue items into candidate runs (Phase 2C)."""
     settings, _ = _bootstrap()
+    legacy_replace = announce_persistence(legacy_replace)
     if not isinstance(workers, int):
         workers = 1
     if until_empty:
@@ -825,7 +838,7 @@ def process_reprocess_queue_nc(
     if workers == 1:
         while processed < limit:
             result = _process_single_reprocess_queue_item(
-                settings.database_path, force_clear=enforce_cleanup
+                settings.database_path, force_clear=enforce_cleanup, legacy_replace=legacy_replace
             )
             if not result["processed"]:
                 break
@@ -845,6 +858,7 @@ def process_reprocess_queue_nc(
                         _process_single_reprocess_queue_item,
                         settings.database_path,
                         force_clear=enforce_cleanup,
+                        legacy_replace=legacy_replace,
                     )
                 )
                 submitted += 1
@@ -864,6 +878,7 @@ def process_reprocess_queue_nc(
                                 _process_single_reprocess_queue_item,
                                 settings.database_path,
                                 force_clear=enforce_cleanup,
+                                legacy_replace=legacy_replace,
                             )
                         )
                         submitted += 1

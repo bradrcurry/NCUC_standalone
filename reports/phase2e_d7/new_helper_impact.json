@@ -1,0 +1,59 @@
+[
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "_own_sheet_lines",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target '_own_sheet_lines' not found",
+      "target": {
+        "name": "_own_sheet_lines"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "_page_kind",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target '_page_kind' not found",
+      "target": {
+        "name": "_page_kind"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "_is_table_continuation",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target '_is_table_continuation' not found",
+      "target": {
+        "name": "_is_table_continuation"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  }
+]

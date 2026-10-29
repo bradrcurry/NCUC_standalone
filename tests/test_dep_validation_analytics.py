@@ -5,7 +5,11 @@ from pathlib import Path
 from duke_rates.analytics.dep_validation import load_dep_res_validation_report
 
 
-DB_PATH = Path("data/db/duke_rates.db")
+from conftest import LIVE_DB_PATH, requires_live_db  # noqa: E402
+
+# Live-data tests read a frozen snapshot (DUKE_RATES_TEST_LIVE_DB), never production.
+DB_PATH = LIVE_DB_PATH
+pytestmark = requires_live_db
 
 
 def test_dep_validation_report_identifies_expected_clean_rider_gaps() -> None:

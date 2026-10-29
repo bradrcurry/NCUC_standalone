@@ -1,0 +1,220 @@
+{
+ "6908": {
+  "historical_document_id": 7265,
+  "version_id": 6908,
+  "run_id": 1,
+  "run_status": "ok",
+  "validation_status": "passed",
+  "span": [
+   96,
+   101
+  ],
+  "charge_count": 125,
+  "charges_by_page": {
+   "100": 22,
+   "101": 11,
+   "96": 23,
+   "97": 22,
+   "98": 23,
+   "99": 15,
+   "None": 9
+  },
+  "charges_without_page": 9,
+  "evidence_outside_span": [],
+  "families": {
+   "nc-progress-leaf-600": 125
+  },
+  "units": {
+   "$/kWh": 119,
+   "$/kW": 6
+  },
+  "per_kw_rows_needing_review": [
+   "Large General Service Schedules - JAA",
+   "Schedule HP & Schedule LGS-RTP - JAA"
+  ],
+  "duplicate_natural_keys": [],
+  "total_reconciliation": {
+   "classes_checked": 14,
+   "reconciled": 14,
+   "failures": []
+  },
+  "rows_printed_struck_through": []
+ },
+ "6056": {
+  "historical_document_id": 2275,
+  "version_id": 6056,
+  "run_id": 2,
+  "run_status": "ok",
+  "validation_status": "failed",
+  "span": [
+   100,
+   105
+  ],
+  "charge_count": 136,
+  "charges_by_page": {
+   "100": 23,
+   "101": 22,
+   "102": 24,
+   "103": 16,
+   "104": 22,
+   "105": 11,
+   "None": 18
+  },
+  "charges_without_page": 18,
+  "evidence_outside_span": [],
+  "families": {
+   "nc-progress-leaf-600": 136
+  },
+  "units": {
+   "$/kWh": 130,
+   "$/kW": 6
+  },
+  "per_kw_rows_needing_review": [
+   "Large General Service Schedules - JAA",
+   "Schedule HP & Schedule LGS-RTP - JAA"
+  ],
+  "duplicate_natural_keys": [],
+  "total_reconciliation": {
+   "classes_checked": 14,
+   "reconciled": 3,
+   "failures": [
+    {
+     "class": "Demand: Medium General Service Schedules",
+     "unit": "$/kWh",
+     "sum_components": 0.0091,
+     "printed_total": 0.9,
+     "diff": -0.8909
+    },
+    {
+     "class": "Large General Service Schedules",
+     "unit": "$/kWh",
+     "sum_components": 0.01275,
+     "printed_total": 84.75,
+     "diff": -84.73725
+    },
+    {
+     "class": "Non-Demand: Medium General Service Schedules",
+     "unit": "$/kWh",
+     "sum_components": 0.01373,
+     "printed_total": 3823.73,
+     "diff": -3823.71627
+    },
+    {
+     "class": "Outdoor Lighting Schedules",
+     "unit": "$/kWh",
+     "sum_components": 0.00134,
+     "printed_total": 43.34,
+     "diff": -43.33866
+    },
+    {
+     "class": "Residential Service Schedules",
+     "unit": "$/kWh",
+     "sum_components": 0.01676,
+     "printed_total": 6856.76,
+     "diff": -6856.74324
+    },
+    {
+     "class": "Schedule HP & Schedule LGS-RTP",
+     "unit": "$/kWh",
+     "sum_components": 0.01275,
+     "printed_total": 84.75,
+     "diff": -84.73725
+    },
+    {
+     "class": "Seasonal or Intermittent Service Schedule",
+     "unit": "$/kWh",
+     "sum_components": 0.02339,
+     "printed_total": 3483.39,
+     "diff": -3483.36661
+    },
+    {
+     "class": "Small General Service",
+     "unit": "$/kWh",
+     "sum_components": 0.01271,
+     "printed_total": 2802.71,
+     "diff": -2802.69729
+    },
+    {
+     "class": "Small General Service Schedules",
+     "unit": "$/kWh",
+     "sum_components": 0.01268,
+     "printed_total": 2772.68,
+     "diff": -2772.66732
+    },
+    {
+     "class": "Sports Field Lighting Schedule",
+     "unit": "$/kWh",
+     "sum_components": 0.00243,
+     "printed_total": 52.43,
+     "diff": -52.42757
+    },
+    {
+     "class": "Traffic Signal Schedules",
+     "unit": "$/kWh",
+     "sum_components": 0.01062,
+     "printed_total": 71.62,
+     "diff": -71.60938
+    }
+   ]
+  },
+  "rows_printed_struck_through": [
+   {
+    "label": "Residential Service Schedules - RAL-2",
+    "value": -8.999999999999999e-05,
+    "page": 100
+   },
+   {
+    "label": "Small General Service Schedules - RAL-2",
+    "value": -8.999999999999999e-05,
+    "page": 100
+   },
+   {
+    "label": "Small General Service - Constant Load Schedule - RAL-2",
+    "value": -8.999999999999999e-05,
+    "page": 101
+   },
+   {
+    "label": "Non-Demand: Medium General Service Schedules - RAL-2",
+    "value": -8.999999999999999e-05,
+    "page": 101
+   },
+   {
+    "label": "Demand: Medium General Service Schedules - RAL-2",
+    "value": -8.999999999999999e-05,
+    "page": 102
+   },
+   {
+    "label": "Seasonal or Intermittent Service Schedule - RAL-2",
+    "value": -8.999999999999999e-05,
+    "page": 102
+   },
+   {
+    "label": "Large General Service Schedules - RAL-2",
+    "value": -8.999999999999999e-05,
+    "page": 103
+   },
+   {
+    "label": "Schedule HP & Schedule LGS-RTP - RAL-2",
+    "value": -8.999999999999999e-05,
+    "page": null
+   },
+   {
+    "label": "Outdoor Lighting Schedules - RAL-2",
+    "value": -8.999999999999999e-05,
+    "page": 104
+   },
+   {
+    "label": "Sports Field Lighting Schedule - RAL-2",
+    "value": -8.999999999999999e-05,
+    "page": 104
+   },
+   {
+    "label": "Traffic Signal Schedules - RAL-2",
+    "value": -8.999999999999999e-05,
+    "page": 105
+   }
+  ]
+ },
+ "legacy_tariff_charges_after_rebind": {},
+ "active_results": []
+}

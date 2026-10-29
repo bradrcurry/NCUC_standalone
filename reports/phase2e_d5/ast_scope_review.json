@@ -1,0 +1,346 @@
+{
+  "staged_file_count": 106,
+  "existing_top_level_symbols_changed": [
+    {
+      "file": "bench/billing_check.py",
+      "symbol": "main"
+    },
+    {
+      "file": "src/duke_rates/cli_commands/doc_intel.py",
+      "symbol": "promote_proposed_tariffs"
+    },
+    {
+      "file": "src/duke_rates/document_intelligence/llm_charge_promotion.py",
+      "symbol": "promote_llm_charge_proposals"
+    },
+    {
+      "file": "src/duke_rates/document_intelligence/proposed_tariff_promoter.py",
+      "symbol": "apply_promotion"
+    },
+    {
+      "file": "src/duke_rates/historical/metadata.py",
+      "symbol": "_first_unique_match"
+    },
+    {
+      "file": "src/duke_rates/historical/ncuc/evidence_review.py",
+      "symbol": "_items_from_source_audit"
+    },
+    {
+      "file": "src/duke_rates/historical/ncuc/ingestion_validation.py",
+      "symbol": "_version_checks"
+    },
+    {
+      "file": "src/duke_rates/historical/ncuc/ingestion_validation.py",
+      "symbol": "_page_checks"
+    },
+    {
+      "file": "src/duke_rates/parse/redline_detector.py",
+      "symbol": "evaluate_redline_page"
+    },
+    {
+      "file": "src/duke_rates/parse/redline_detector.py",
+      "symbol": "PageRedlineEvidence"
+    },
+    {
+      "file": "src/duke_rates/parse/redline_detector.py",
+      "symbol": "summarize_page_evidence"
+    },
+    {
+      "file": "tests/test_llm_charge_promotion.py",
+      "symbol": "test_promote_llm_charge_proposals_dry_run_and_execute"
+    },
+    {
+      "file": "tests/test_llm_promotion_overnight.py",
+      "symbol": "_init_db"
+    },
+    {
+      "file": "tests/test_llm_promotion_overnight.py",
+      "symbol": "_insert_validated_row"
+    }
+  ],
+  "new_top_level_symbols": [
+    {
+      "file": "bench/redline_exposure.py",
+      "symbol": "run"
+    },
+    {
+      "file": "bench/redline_exposure.py",
+      "symbol": "main"
+    },
+    {
+      "file": "bench/redline_native.py",
+      "symbol": "_score"
+    },
+    {
+      "file": "bench/redline_native.py",
+      "symbol": "run"
+    },
+    {
+      "file": "bench/redline_native.py",
+      "symbol": "main"
+    },
+    {
+      "file": "src/duke_rates/document_intelligence/proposed_tariff_promoter.py",
+      "symbol": "UnsafeProposalPromotionError"
+    },
+    {
+      "file": "src/duke_rates/historical/ncuc/ingestion_validation.py",
+      "symbol": "version_source_integrity"
+    },
+    {
+      "file": "src/duke_rates/parse/redline_detector.py",
+      "symbol": "_observe"
+    },
+    {
+      "file": "src/duke_rates/parse/redline_detector.py",
+      "symbol": "_native_bars"
+    },
+    {
+      "file": "src/duke_rates/parse/redline_detector.py",
+      "symbol": "_numeric_regions"
+    },
+    {
+      "file": "tests/fixtures/d5_redline/make_fixtures.py",
+      "symbol": "main"
+    },
+    {
+      "file": "tests/test_d5_archived_redline.py",
+      "symbol": "test_original_archived_page_classification"
+    },
+    {
+      "file": "tests/test_d5_metadata_first_match.py",
+      "symbol": "test_metadata_does_not_scan_unneeded_large_whitespace_tail"
+    },
+    {
+      "file": "tests/test_d5_metadata_first_match.py",
+      "symbol": "test_first_value_matches_previous_unique_collection"
+    },
+    {
+      "file": "tests/test_d5_native_redline.py",
+      "symbol": "test_unrelated_logo_cannot_corroborate_heading_insertion"
+    },
+    {
+      "file": "tests/test_d5_native_redline.py",
+      "symbol": "test_label_strike_does_not_claim_deletion_of_nearby_rate"
+    },
+    {
+      "file": "tests/test_d5_native_redline.py",
+      "symbol": "_page"
+    },
+    {
+      "file": "tests/test_d5_native_redline.py",
+      "symbol": "test_annotations_without_deletion_are_ambiguous"
+    },
+    {
+      "file": "tests/test_d5_native_redline.py",
+      "symbol": "test_multiline_strike_annotation_preserves_individual_quads"
+    },
+    {
+      "file": "tests/test_d5_native_redline.py",
+      "symbol": "test_classification_is_machine_evidence_and_page_scoped"
+    },
+    {
+      "file": "tests/test_d5_native_redline.py",
+      "symbol": "test_image_page_with_searchable_overlay_is_insufficient"
+    },
+    {
+      "file": "tests/test_d5_native_redline.py",
+      "symbol": "test_blue_email_underline_is_ambiguous_not_tariff_insertion"
+    },
+    {
+      "file": "tests/test_d5_native_redline.py",
+      "symbol": "test_synthetic_colored_heading_is_not_sufficient_for_rate_insertion"
+    },
+    {
+      "file": "tests/test_d5_native_redline.py",
+      "symbol": "test_black_decoration_is_not_material_redline"
+    },
+    {
+      "file": "tests/test_d5_native_redline.py",
+      "symbol": "test_duplicate_strike_evidence_does_not_inflate_coverage"
+    },
+    {
+      "file": "tests/test_d5_native_redline.py",
+      "symbol": "test_black_vector_strike_on_rate_preserves_exact_geometry"
+    },
+    {
+      "file": "tests/test_d5_promotion_safety.py",
+      "symbol": "test_llm_valid_readable_source_preserves_promotion_audit"
+    },
+    {
+      "file": "tests/test_d5_promotion_safety.py",
+      "symbol": "_llm_db"
+    },
+    {
+      "file": "tests/test_d5_promotion_safety.py",
+      "symbol": "test_retired_proposal_confirmation_refuses_before_settings_or_database"
+    },
+    {
+      "file": "tests/test_d5_promotion_safety.py",
+      "symbol": "test_image_source_needs_explicit_reviewed_override"
+    },
+    {
+      "file": "tests/test_d5_promotion_safety.py",
+      "symbol": "test_llm_unattended_write_refuses_incomplete_or_unsafe_source"
+    },
+    {
+      "file": "tests/test_d5_readonly_audit.py",
+      "symbol": "test_shared_audit_wrapper_preserves_database_bytes"
+    },
+    {
+      "file": "tests/test_d5_readonly_audit.py",
+      "symbol": "test_missing_audit_database_is_not_created"
+    },
+    {
+      "file": "tests/test_d5_review_evidence.py",
+      "symbol": "test_queue_keeps_actual_sha_separate_from_archive_identifier"
+    },
+    {
+      "file": "tests/test_proposed_tariff_promoter.py",
+      "symbol": "test_rejected_proposal_remains_available_for_research"
+    },
+    {
+      "file": "tests/test_proposed_tariff_promoter.py",
+      "symbol": "test_apply_promotion_refuses_unguarded_new_family"
+    },
+    {
+      "file": "tests/test_proposed_tariff_promoter.py",
+      "symbol": "test_apply_promotion_refuses_unguarded_existing_family"
+    }
+  ],
+  "removed_or_gitnexus_renamed_symbols": [
+    {
+      "file": "src/duke_rates/document_intelligence/proposed_tariff_promoter.py",
+      "symbol": "_insert_version"
+    },
+    {
+      "file": "src/duke_rates/document_intelligence/proposed_tariff_promoter.py",
+      "symbol": "_insert_family"
+    },
+    {
+      "file": "src/duke_rates/document_intelligence/proposed_tariff_promoter.py",
+      "symbol": "_insert_charge"
+    },
+    {
+      "file": "tests/test_proposed_tariff_promoter.py",
+      "symbol": "test_plan_promotion_is_idempotent_after_apply"
+    },
+    {
+      "file": "tests/test_proposed_tariff_promoter.py",
+      "symbol": "test_apply_promotion_writes_version_and_charges_for_existing_family"
+    },
+    {
+      "file": "tests/test_proposed_tariff_promoter.py",
+      "symbol": "test_apply_promotion_creates_new_family_when_planned"
+    }
+  ],
+  "staged_paths": [
+    "bench/README.md",
+    "bench/billing_check.py",
+    "bench/redline_exposure.py",
+    "bench/redline_native.py",
+    "docs/cli_command_reference.md",
+    "docs/design/2026-10-29_phase2e_d5_plan.md",
+    "docs/plans/ncuc_document_intelligence_roadmap.md",
+    "docs/reports/2026-10-29_phase2e_d5_redline_historical_integrity.md",
+    "reports/phase2e_d5/ast_scope_review.json",
+    "reports/phase2e_d5/baseline_exposure.json.gz",
+    "reports/phase2e_d5/baseline_source_coverage.json",
+    "reports/phase2e_d5/billing_baseline_metadata_patch.json",
+    "reports/phase2e_d5/billing_comparison.json",
+    "reports/phase2e_d5/billing_default_connections_after_stopped.txt",
+    "reports/phase2e_d5/billing_default_connections_before_stopped.txt",
+    "reports/phase2e_d5/billing_first_match_single_bill_profile.txt",
+    "reports/phase2e_d5/billing_harness_safety_probe.json",
+    "reports/phase2e_d5/billing_readonly_after.json",
+    "reports/phase2e_d5/billing_readonly_before.json",
+    "reports/phase2e_d5/billing_readonly_progress_profile.txt",
+    "reports/phase2e_d5/billing_readonly_single_bill_profile.txt",
+    "reports/phase2e_d5/billing_unoptimized_after_stopped.txt",
+    "reports/phase2e_d5/billing_unoptimized_before_stopped.txt",
+    "reports/phase2e_d5/change_review/clean_candidate399_p7.png",
+    "reports/phase2e_d5/change_review/contact_00.jpg",
+    "reports/phase2e_d5/change_review/contact_06.jpg",
+    "reports/phase2e_d5/change_review/contact_12.jpg",
+    "reports/phase2e_d5/fixture_native_integrity.json",
+    "reports/phase2e_d5/fixture_native_integrity_summary.txt",
+    "reports/phase2e_d5/formatting_semantics_check.txt",
+    "reports/phase2e_d5/full_tests_final.txt",
+    "reports/phase2e_d5/full_tests_with_metadata_fix.txt",
+    "reports/phase2e_d5/gitnexus_detect_final.json",
+    "reports/phase2e_d5/gitnexus_final_with_metadata_analyze.txt",
+    "reports/phase2e_d5/impact_PageRedlineEvidence.json",
+    "reports/phase2e_d5/impact__page_checks.json",
+    "reports/phase2e_d5/impact__version_checks.json",
+    "reports/phase2e_d5/impact_billing_benchmark_main.json",
+    "reports/phase2e_d5/impact_metadata_first_match.json",
+    "reports/phase2e_d5/impact_page_evaluation.json",
+    "reports/phase2e_d5/impact_proposed_apply.json",
+    "reports/phase2e_d5/impact_queue_source_items.json",
+    "reports/phase2e_d5/impact_summarize_page_evidence.json",
+    "reports/phase2e_d5/impact_version_integrity_final.json",
+    "reports/phase2e_d5/metadata_first_match_tests.txt",
+    "reports/phase2e_d5/native_benchmark_final.json",
+    "reports/phase2e_d5/native_benchmark_final_summary.txt",
+    "reports/phase2e_d5/production_hash.json",
+    "reports/phase2e_d5/production_hash_final.json",
+    "reports/phase2e_d5/production_scratch_authoritative_comparison.json",
+    "reports/phase2e_d5/proposal_planning_cli_probe.json",
+    "reports/phase2e_d5/remediation_preparation.json.gz",
+    "reports/phase2e_d5/review_queue.json.gz",
+    "reports/phase2e_d5/review_queue_build_summary.txt",
+    "reports/phase2e_d5/ruff_new_final.txt",
+    "reports/phase2e_d5/shared_source_audit.json.gz",
+    "reports/phase2e_d5/shared_source_audit_summary.txt",
+    "reports/phase2e_d5/staged_diff_check_final.txt",
+    "reports/phase2e_d5/strong_source_charge_review.json.gz",
+    "reports/phase2e_d5/strong_source_charge_review_summary.txt",
+    "reports/phase2e_d5/targeted_final.txt",
+    "reports/phase2e_d5/targeted_with_metadata_fix.txt",
+    "src/duke_rates/cli_commands/doc_intel.py",
+    "src/duke_rates/document_intelligence/llm_charge_promotion.py",
+    "src/duke_rates/document_intelligence/proposed_tariff_promoter.py",
+    "src/duke_rates/historical/metadata.py",
+    "src/duke_rates/historical/ncuc/evidence_review.py",
+    "src/duke_rates/historical/ncuc/ingestion_validation.py",
+    "src/duke_rates/parse/redline_detector.py",
+    "tests/fixtures/d5_redline/00.pdf",
+    "tests/fixtures/d5_redline/01.pdf",
+    "tests/fixtures/d5_redline/02.pdf",
+    "tests/fixtures/d5_redline/03.pdf",
+    "tests/fixtures/d5_redline/04.pdf",
+    "tests/fixtures/d5_redline/05.pdf",
+    "tests/fixtures/d5_redline/06.pdf",
+    "tests/fixtures/d5_redline/07.pdf",
+    "tests/fixtures/d5_redline/08.pdf",
+    "tests/fixtures/d5_redline/09.pdf",
+    "tests/fixtures/d5_redline/10.pdf",
+    "tests/fixtures/d5_redline/11.pdf",
+    "tests/fixtures/d5_redline/12.pdf",
+    "tests/fixtures/d5_redline/13.pdf",
+    "tests/fixtures/d5_redline/14.pdf",
+    "tests/fixtures/d5_redline/15.pdf",
+    "tests/fixtures/d5_redline/16.pdf",
+    "tests/fixtures/d5_redline/17.pdf",
+    "tests/fixtures/d5_redline/18.pdf",
+    "tests/fixtures/d5_redline/19.pdf",
+    "tests/fixtures/d5_redline/20.pdf",
+    "tests/fixtures/d5_redline/21.pdf",
+    "tests/fixtures/d5_redline/26.pdf",
+    "tests/fixtures/d5_redline/27.pdf",
+    "tests/fixtures/d5_redline/28.pdf",
+    "tests/fixtures/d5_redline/README.md",
+    "tests/fixtures/d5_redline/make_fixtures.py",
+    "tests/fixtures/d5_redline/manifest.json",
+    "tests/test_d5_archived_redline.py",
+    "tests/test_d5_metadata_first_match.py",
+    "tests/test_d5_native_redline.py",
+    "tests/test_d5_promotion_safety.py",
+    "tests/test_d5_readonly_audit.py",
+    "tests/test_d5_review_evidence.py",
+    "tests/test_llm_charge_promotion.py",
+    "tests/test_llm_promotion_overnight.py",
+    "tests/test_proposed_tariff_promoter.py"
+  ],
+  "no_database_archive_model_or_scratch_files_staged": true
+}

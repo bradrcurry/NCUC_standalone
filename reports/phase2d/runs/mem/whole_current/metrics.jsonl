@@ -1,0 +1,1 @@
+{"doc_id": "hd5324_jaa", "seconds": 501.9, "status": "ok", "error": null, "peak_rss_mb": 3608, "min_avail_gb": 5.55, "cpu_mean_pct": 94.9, "torch_peak_alloc_mb": 1428, "torch_peak_reserved_mb": 1802, "gpu_mem_used_peak_mib": 1931.0, "gpu_util_mean": 26.5, "gpu_util_max": 100.0, "pages": 110, "tables": 86, "texts": 4062, "conversion_status": "ConversionStatus.PARTIAL_SUCCESS"}

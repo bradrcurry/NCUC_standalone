@@ -247,6 +247,46 @@ progress show-regulator-gaps
 progress show-search-pack
 promote-llm-charge-proposals-nc
 propose-llm-charge-promotions-nc
+provenance apply-proposal
+provenance approve-proposal
+provenance audit-docling-coverage
+provenance audit-version-sources
+provenance backfill
+provenance binding-check
+provenance build-clue-ledger
+provenance build-review-queue
+provenance candidates
+provenance classify-date-conflicts
+provenance compare
+provenance completeness
+provenance drop-schema
+provenance evidence
+provenance extract-candidate
+provenance extract-candidates
+provenance history
+provenance issues
+provenance migrate
+provenance plan-network-searches
+provenance promote
+provenance proposals
+provenance propose-binding
+provenance propose-rebind
+provenance propose-redline-duplicate
+provenance reconcile-effective-dates
+provenance reject
+provenance reject-proposal
+provenance resolve-gaps-local
+provenance retrieve-remote-candidates
+provenance review-item
+provenance review-queue
+provenance review-remote-candidate
+provenance rollback
+provenance rollback-proposal
+provenance run-network-searches
+provenance search-ledger
+provenance typed-gaps
+provenance unsupported-charges
+provenance verify
 reclassify-llm-row-conflicts-nc
 recommend-missing-dockets-nc
 recommend-overnight-lane-nc

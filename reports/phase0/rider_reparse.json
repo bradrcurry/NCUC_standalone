@@ -1,0 +1,2573 @@
+{
+ "summary": {
+  "baseline_ref": "8c092b5",
+  "documents": 37,
+  "missing": 0,
+  "totals": {
+   "baseline": {
+    "pdfplumber": {
+     "blocks": 320,
+     "rows": 3742,
+     "checksums": 393,
+     "checksums_ok": 176,
+     "jaa_cents_gt_1": 96,
+     "merged_blocks": 8,
+     "implausible_cents_rows": 412,
+     "footer_rows": 141
+    },
+    "pymupdf": {
+     "blocks": 248,
+     "rows": 4543,
+     "checksums": 293,
+     "checksums_ok": 95,
+     "merged_blocks": 82,
+     "jaa_cents_gt_1": 96,
+     "implausible_cents_rows": 803,
+     "footer_rows": 180
+    }
+   },
+   "repaired": {
+    "pdfplumber": {
+     "blocks": 348,
+     "rows": 3446,
+     "checksums": 423,
+     "checksums_ok": 386,
+     "jaa_cents_gt_1": 32,
+     "ambiguous_blocks": 8,
+     "implausible_cents_rows": 11
+    },
+    "pymupdf": {
+     "blocks": 348,
+     "rows": 3469,
+     "checksums": 409,
+     "checksums_ok": 391,
+     "jaa_cents_gt_1": 31,
+     "implausible_cents_rows": 11,
+     "unit_ambiguous_rows": 18
+    }
+   }
+  },
+  "parse_seconds": {
+   "baseline": 3.5418307000072673,
+   "repaired": 1.1003996996441856
+  }
+ },
+ "documents": [
+  {
+   "pdf": "C:\\Python\\Duke\\Standalone\\data\\raw\\nc\\progress\\rider\\leaf-no-600-summary-of-riders-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no-.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 8,
+     "jaa_cents_gt_1": 5
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.108,
+      "rows": 8
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 7,
+     "rows": 109,
+     "checksums": 10,
+     "checksums_ok": 3,
+     "merged_blocks": 4,
+     "jaa_cents_gt_1": 5
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.108,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 14,
+     "jaa_cents_gt_1": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.108,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 14,
+     "jaa_cents_gt_1": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.108,
+      "rows": 8
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\historical\\ncuc\\e-2-sub-1300-sept2023\\1b72e8de-c435-43b7-9b88-dfc4c0a8a97b.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 8,
+     "rows": 122,
+     "checksums": 11,
+     "merged_blocks": 3,
+     "jaa_cents_gt_1": 4
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.685676,
+      "rows": 9
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 11,
+     "rows": 122,
+     "checksums": 14,
+     "jaa_cents_gt_1": 4
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.685676,
+      "rows": 9
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 122,
+     "checksums": 14,
+     "ambiguous_blocks": 3,
+     "checksums_ok": 3,
+     "jaa_cents_gt_1": 1
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.685676,
+      "rows": 9
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 11,
+     "rows": 122,
+     "checksums": 14,
+     "checksums_ok": 3,
+     "jaa_cents_gt_1": 1
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.685676,
+      "rows": 9
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\historical\\ncuc\\e-2-sub-1300-sept2023\\3f92be50-2f10-4d4c-8952-2bccaa339aba.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 229,
+     "checksums": 14,
+     "checksums_ok": 7,
+     "jaa_cents_gt_1": 4,
+     "implausible_cents_rows": 73
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.676,
+      "rows": 9
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 7,
+     "rows": 358,
+     "checksums": 10,
+     "checksums_ok": 3,
+     "merged_blocks": 4,
+     "jaa_cents_gt_1": 4,
+     "implausible_cents_rows": 181,
+     "footer_rows": 1
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.676,
+      "rows": 9
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 122,
+     "checksums": 14,
+     "checksums_ok": 14,
+     "jaa_cents_gt_1": 1
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.676,
+      "rows": 9
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 11,
+     "rows": 122,
+     "checksums": 14,
+     "checksums_ok": 14,
+     "jaa_cents_gt_1": 1
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.676,
+      "rows": 9
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\historical\\ncuc\\e-2-sub-1300-sept2023\\7b9171ff-48d4-46dd-82eb-43bd1ca2cd3d.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 8,
+     "rows": 111,
+     "checksums": 11,
+     "checksums_ok": 3,
+     "merged_blocks": 3,
+     "jaa_cents_gt_1": 4
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.685,
+      "rows": 8
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 8,
+     "jaa_cents_gt_1": 4
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.685,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 11,
+     "ambiguous_blocks": 3,
+     "jaa_cents_gt_1": 1
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.685,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 14,
+     "jaa_cents_gt_1": 1
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.685,
+      "rows": 8
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\historical\\ncuc\\e-2-sub-1300-sept2023\\7f394a37-a20d-4da5-b97d-0035c9d9c0c0.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 379,
+     "checksums": 14,
+     "checksums_ok": 7,
+     "jaa_cents_gt_1": 4,
+     "implausible_cents_rows": 145,
+     "footer_rows": 16
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.676,
+      "rows": 9
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 7,
+     "rows": 597,
+     "checksums": 10,
+     "checksums_ok": 3,
+     "merged_blocks": 4,
+     "jaa_cents_gt_1": 4,
+     "footer_rows": 20,
+     "implausible_cents_rows": 266
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.676,
+      "rows": 9
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 122,
+     "checksums": 14,
+     "checksums_ok": 14,
+     "jaa_cents_gt_1": 1
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.676,
+      "rows": 9
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 11,
+     "rows": 122,
+     "checksums": 14,
+     "checksums_ok": 14,
+     "jaa_cents_gt_1": 1
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.676,
+      "rows": 9
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\historical\\ncuc\\e-2-sub-1300\\0c5713b0-ba53-4fbe-b31d-a4cb300965b5.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 8,
+     "jaa_cents_gt_1": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.95,
+      "rows": 8
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 7,
+     "rows": 110,
+     "checksums": 10,
+     "checksums_ok": 3,
+     "merged_blocks": 4,
+     "jaa_cents_gt_1": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.95,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 14
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.95,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 14
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.95,
+      "rows": 8
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\historical\\ncuc\\e-2-sub-1300\\176ad684-f629-4f33-b3d5-73873269be8e.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 88,
+     "checksums": 14,
+     "checksums_ok": 8,
+     "jaa_cents_gt_1": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.71695,
+      "rows": 5
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 7,
+     "rows": 110,
+     "checksums": 10,
+     "checksums_ok": 3,
+     "merged_blocks": 4,
+     "jaa_cents_gt_1": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.71695,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 88,
+     "checksums": 14,
+     "checksums_ok": 13
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.71695,
+      "rows": 5
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 13
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.71695,
+      "rows": 8
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\historical\\ncuc\\e-2-sub-1300\\28f084a5-d6d8-4419-a7dd-aa6b2c11edbd.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 129,
+     "checksums": 14,
+     "checksums_ok": 7,
+     "jaa_cents_gt_1": 3,
+     "implausible_cents_rows": 8,
+     "footer_rows": 5
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.465,
+      "rows": 8
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 7,
+     "rows": 142,
+     "checksums": 10,
+     "checksums_ok": 3,
+     "merged_blocks": 4,
+     "jaa_cents_gt_1": 3,
+     "footer_rows": 19,
+     "implausible_cents_rows": 22
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.465,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 14
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.465,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 14
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.465,
+      "rows": 8
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\historical\\ncuc\\e-2-sub-1300\\3bc492a8-75e2-445c-a265-fb054a652e33.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 8,
+     "jaa_cents_gt_1": 5
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.097,
+      "rows": 8
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 11,
+     "rows": 125,
+     "checksums": 13,
+     "checksums_ok": 6,
+     "jaa_cents_gt_1": 5,
+     "merged_blocks": 1,
+     "implausible_cents_rows": 5
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.097,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 14,
+     "jaa_cents_gt_1": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.097,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 14,
+     "jaa_cents_gt_1": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.097,
+      "rows": 8
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\historical\\ncuc\\e-2-sub-1300\\f5761884-4b3d-4d40-adfe-1a5452ad1f2c.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 8,
+     "jaa_cents_gt_1": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.70116,
+      "rows": 8
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 7,
+     "rows": 110,
+     "checksums": 10,
+     "checksums_ok": 3,
+     "merged_blocks": 4,
+     "jaa_cents_gt_1": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.70116,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 13
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.716,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 13
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.716,
+      "rows": 8
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\historical\\ncuc\\e-2-sub-1300\\f76e6a9b-98de-4704-b456-8c20214bd981.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 88,
+     "checksums": 14,
+     "checksums_ok": 8,
+     "jaa_cents_gt_1": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.71695,
+      "rows": 5
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 9,
+     "rows": 121,
+     "checksums": 13,
+     "checksums_ok": 4,
+     "jaa_cents_gt_1": 4,
+     "merged_blocks": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.71695,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 13
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.95,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 13
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.95,
+      "rows": 8
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\historical\\ncuc\\e-2-sub-1322\\4371fa8b-6993-4f22-bf06-aaaac560cff4.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 127,
+     "checksums": 14,
+     "checksums_ok": 5,
+     "implausible_cents_rows": 5,
+     "jaa_cents_gt_1": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.310456,
+      "rows": 9
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 7,
+     "rows": 126,
+     "checksums": 8,
+     "checksums_ok": 1,
+     "implausible_cents_rows": 4,
+     "merged_blocks": 4,
+     "jaa_cents_gt_1": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.310456,
+      "rows": 9
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 122,
+     "checksums": 14,
+     "checksums_ok": 14
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.456,
+      "rows": 9
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 11,
+     "rows": 122,
+     "checksums": 14,
+     "checksums_ok": 14
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.456,
+      "rows": 9
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\historical\\ncuc\\e-2-sub-1341\\211c874c-48ab-4576-bf20-aa71de632d3f.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 92,
+     "checksums": 14,
+     "checksums_ok": 1,
+     "jaa_cents_gt_1": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.4651,
+      "rows": 8
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 7,
+     "rows": 92,
+     "jaa_cents_gt_1": 3,
+     "checksums": 5,
+     "merged_blocks": 1
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": null,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 14
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.701,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 14
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.701,
+      "rows": 8
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\historical\\ncuc\\e-2-sub-1344\\f04e9e33-8b7c-49e4-ba7f-1120dc87c53f.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 92,
+     "checksums": 14,
+     "checksums_ok": 1,
+     "jaa_cents_gt_1": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.4651,
+      "rows": 8
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 7,
+     "rows": 92,
+     "jaa_cents_gt_1": 3,
+     "checksums": 5,
+     "merged_blocks": 1
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": null,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 14
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.701,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 14
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.701,
+      "rows": 8
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\historical\\ncuc\\e-2-sub-1345\\0bfd8fc6-0edc-4b81-a331-e48176c521f7.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 92,
+     "checksums": 14,
+     "checksums_ok": 1,
+     "jaa_cents_gt_1": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.4651,
+      "rows": 8
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 7,
+     "rows": 92,
+     "jaa_cents_gt_1": 3,
+     "checksums": 5,
+     "merged_blocks": 1
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": null,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 14
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.701,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 14
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.701,
+      "rows": 8
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\historical\\ncuc\\e-2-sub-1354\\18bf9150-23ad-4853-9ad9-bf737f2b234e.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 70,
+     "checksums": 14,
+     "implausible_cents_rows": 12,
+     "jaa_cents_gt_1": 2
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.9502,
+      "rows": 0
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 7,
+     "rows": 74,
+     "implausible_cents_rows": 13
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": null,
+      "rows": 0
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 69,
+     "checksums": 14,
+     "implausible_cents_rows": 10,
+     "jaa_cents_gt_1": 1
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.9502,
+      "rows": 0
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 11,
+     "rows": 69,
+     "implausible_cents_rows": 10
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": null,
+      "rows": 0
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\historical\\ncuc\\e-2-sub-1354\\30122e13-7ff7-4d28-922a-536b03a34a99.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 115,
+     "checksums": 14,
+     "checksums_ok": 6,
+     "implausible_cents_rows": 4,
+     "jaa_cents_gt_1": 5
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.031,
+      "rows": 8
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 11,
+     "rows": 116,
+     "checksums": 14,
+     "checksums_ok": 5,
+     "implausible_cents_rows": 5,
+     "jaa_cents_gt_1": 5
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.031,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 112,
+     "checksums": 14,
+     "checksums_ok": 14,
+     "implausible_cents_rows": 1,
+     "jaa_cents_gt_1": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.031,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 11,
+     "rows": 112,
+     "checksums": 14,
+     "checksums_ok": 14,
+     "implausible_cents_rows": 1,
+     "jaa_cents_gt_1": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.031,
+      "rows": 8
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\historical\\ncuc\\e-2-sub-1361\\f76e6a9b-98de-4704-b456-8c20214bd981.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 88,
+     "checksums": 14,
+     "checksums_ok": 8,
+     "jaa_cents_gt_1": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.71695,
+      "rows": 5
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 9,
+     "rows": 121,
+     "checksums": 13,
+     "checksums_ok": 4,
+     "jaa_cents_gt_1": 4,
+     "merged_blocks": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.71695,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 13
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.95,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 13
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.95,
+      "rows": 8
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\historical\\ncuc\\e-7-sub-1146\\2b313fc1-fca0-4b0e-8968-62d470550b16.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 6,
+     "rows": 62,
+     "checksums": 6,
+     "checksums_ok": 2,
+     "footer_rows": 4,
+     "implausible_cents_rows": 4
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": -0.3923,
+      "rows": 10
+     },
+     {
+      "rate_class": "Residential Schedules",
+      "total": -0.3923,
+      "rows": 8
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 6,
+     "rows": 84,
+     "checksums": 6,
+     "checksums_ok": 4,
+     "footer_rows": 4,
+     "implausible_cents_rows": 4,
+     "merged_blocks": 1
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": -0.3923,
+      "rows": 10
+     },
+     {
+      "rate_class": "Residential Schedules",
+      "total": -0.3923,
+      "rows": 10
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 6,
+     "rows": 60,
+     "checksums": 6,
+     "checksums_ok": 6
+    },
+    "residential": []
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 6,
+     "rows": 60,
+     "checksums": 6,
+     "checksums_ok": 6
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": -0.3923,
+      "rows": 10
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\historical\\ncuc\\e-7-sub-1146\\6a63efaf-e2da-47ef-8e8a-438d286740e2.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 6,
+     "rows": 62,
+     "checksums": 6,
+     "checksums_ok": 2,
+     "footer_rows": 4,
+     "implausible_cents_rows": 4
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": -0.3923,
+      "rows": 10
+     },
+     {
+      "rate_class": "Residential Schedules",
+      "total": -0.3923,
+      "rows": 8
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 6,
+     "rows": 84,
+     "checksums": 6,
+     "checksums_ok": 4,
+     "footer_rows": 4,
+     "implausible_cents_rows": 4,
+     "merged_blocks": 1
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": -0.3923,
+      "rows": 10
+     },
+     {
+      "rate_class": "Residential Schedules",
+      "total": -0.3923,
+      "rows": 10
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 6,
+     "rows": 60,
+     "checksums": 6,
+     "checksums_ok": 6
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": -0.3923,
+      "rows": 10
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 6,
+     "rows": 60,
+     "checksums": 6,
+     "checksums_ok": 6
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": -0.3923,
+      "rows": 10
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\historical\\ncuc\\e-7-sub-1146\\862c65b6-137d-4008-a941-b29c2c1fdf53.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 4,
+     "rows": 46,
+     "checksums": 4,
+     "checksums_ok": 2,
+     "footer_rows": 2,
+     "implausible_cents_rows": 2
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 1.2562,
+      "rows": 12
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 4,
+     "rows": 67,
+     "checksums": 4,
+     "checksums_ok": 2,
+     "footer_rows": 5,
+     "implausible_cents_rows": 5,
+     "merged_blocks": 1
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 1.2562,
+      "rows": 12
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 6,
+     "rows": 62,
+     "checksums": 6,
+     "checksums_ok": 6
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 1.2562,
+      "rows": 12
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 6,
+     "rows": 62,
+     "checksums": 6,
+     "checksums_ok": 6
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 1.2562,
+      "rows": 12
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\historical\\ncuc\\e-7-sub-1146\\c59be01b-89e9-4c21-8ccc-95dc97d2b244.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 5,
+     "rows": 157,
+     "checksums": 5,
+     "checksums_ok": 3,
+     "footer_rows": 87,
+     "implausible_cents_rows": 105
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": -0.2912,
+      "rows": 9
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 4,
+     "rows": 285,
+     "checksums": 4,
+     "checksums_ok": 2,
+     "footer_rows": 94,
+     "implausible_cents_rows": 215,
+     "merged_blocks": 1
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": -0.2912,
+      "rows": 9
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 6,
+     "rows": 54,
+     "checksums": 6,
+     "checksums_ok": 6
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": -0.2912,
+      "rows": 9
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 6,
+     "rows": 54,
+     "checksums": 6,
+     "checksums_ok": 6
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": -0.2912,
+      "rows": 9
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\historical\\ncuc\\e-7-sub-1146\\e68d871e-8460-453b-ac2a-cb20d9c18d2d.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 4,
+     "rows": 42,
+     "checksums": 4,
+     "checksums_ok": 2,
+     "footer_rows": 4,
+     "implausible_cents_rows": 4
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 0.57027596,
+      "rows": 9
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 4,
+     "rows": 59,
+     "checksums": 2,
+     "checksums_ok": 1,
+     "footer_rows": 4,
+     "implausible_cents_rows": 4,
+     "merged_blocks": 1
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 0.57027596,
+      "rows": 9
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 6,
+     "rows": 48,
+     "checksums": 6,
+     "checksums_ok": 6
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 0.7596,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 6,
+     "rows": 48,
+     "checksums": 6,
+     "checksums_ok": 6
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 0.7596,
+      "rows": 8
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\historical\\ncuc\\e-7-sub-1214\\862c65b6-137d-4008-a941-b29c2c1fdf53.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 4,
+     "rows": 46,
+     "checksums": 4,
+     "checksums_ok": 2,
+     "footer_rows": 2,
+     "implausible_cents_rows": 2
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 1.2562,
+      "rows": 12
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 4,
+     "rows": 67,
+     "checksums": 4,
+     "checksums_ok": 2,
+     "footer_rows": 5,
+     "implausible_cents_rows": 5,
+     "merged_blocks": 1
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 1.2562,
+      "rows": 12
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 6,
+     "rows": 62,
+     "checksums": 6,
+     "checksums_ok": 6
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 1.2562,
+      "rows": 12
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 6,
+     "rows": 62,
+     "checksums": 6,
+     "checksums_ok": 6
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 1.2562,
+      "rows": 12
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\historical\\raw\\nc\\progress\\rider\\summary-of-rider-adjustments-leaf-no-600-eff-2024-04-01-data-historical-manual-l.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 8,
+     "jaa_cents_gt_1": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.95,
+      "rows": 8
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 7,
+     "rows": 110,
+     "checksums": 10,
+     "checksums_ok": 3,
+     "merged_blocks": 4,
+     "jaa_cents_gt_1": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.95,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 14
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.95,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 14
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 1.95,
+      "rows": 8
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\historical\\raw\\nc\\progress\\rider\\summary-of-rider-adjustments-leaf-no-600-eff-2025-12-01-data-historical-manual-l.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 8,
+     "jaa_cents_gt_1": 5
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.031,
+      "rows": 8
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 7,
+     "rows": 109,
+     "checksums": 10,
+     "checksums_ok": 3,
+     "merged_blocks": 4,
+     "jaa_cents_gt_1": 5
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.031,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 14,
+     "jaa_cents_gt_1": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.031,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 14,
+     "jaa_cents_gt_1": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.031,
+      "rows": 8
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\historical\\raw\\nc\\progress\\rider\\summary-of-rider-adjustments-leaf-no-600-eff-2026-01-01-data-historical-manual-l.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 8,
+     "jaa_cents_gt_1": 5
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.097,
+      "rows": 8
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 7,
+     "rows": 109,
+     "checksums": 10,
+     "checksums_ok": 3,
+     "merged_blocks": 4,
+     "jaa_cents_gt_1": 5
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.097,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 14,
+     "jaa_cents_gt_1": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.097,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 14,
+     "jaa_cents_gt_1": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.097,
+      "rows": 8
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\processed\\search_leads\\downloads\\dec_2018_leaf99_target\\3c16193b-55fd-4d9c-8ea1-c97fd1661a42__E-7 Sub 1146 DEC_s Revised Fuel Cost Adjustment Rider.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 4,
+     "rows": 62,
+     "checksums": 4,
+     "checksums_ok": 3,
+     "footer_rows": 3,
+     "implausible_cents_rows": 32
+    },
+    "residential": []
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 5,
+     "rows": 87,
+     "checksums": 5,
+     "merged_blocks": 1,
+     "footer_rows": 2,
+     "implausible_cents_rows": 48
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 0.3335,
+      "rows": 5
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 7,
+     "rows": 49,
+     "checksums": 7,
+     "checksums_ok": 7
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 0.3335,
+      "rows": 7
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 7,
+     "rows": 49,
+     "checksums": 7,
+     "checksums_ok": 7
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 0.3335,
+      "rows": 7
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\processed\\search_leads\\downloads\\dec_rider_summary_targets\\33bac29c-2fa3-4ad1-8e97-c23b76191960__E-7 Sub 1285 DEC Rider Summary Compliance Tariffs.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 4,
+     "rows": 38,
+     "checksums": 4,
+     "checksums_ok": 2,
+     "footer_rows": 4,
+     "implausible_cents_rows": 4
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 2.1812,
+      "rows": 8
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 4,
+     "rows": 52,
+     "checksums": 4,
+     "checksums_ok": 2,
+     "footer_rows": 4,
+     "implausible_cents_rows": 4,
+     "merged_blocks": 1
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 2.1812,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 6,
+     "rows": 48,
+     "checksums": 6,
+     "checksums_ok": 6
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 2.1812,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 6,
+     "rows": 48,
+     "checksums": 6,
+     "checksums_ok": 6
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 2.1812,
+      "rows": 8
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\processed\\search_leads\\downloads\\dec_rider_summary_targets\\34b967fb-527c-44aa-bc5a-78d01d74f758__DEC-NC Rider Summary - Rev. _ 63 _Eff. 01.01.2025 - Current_.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 4,
+     "rows": 46,
+     "checksums": 4,
+     "checksums_ok": 2,
+     "footer_rows": 2,
+     "implausible_cents_rows": 2
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 0.1125,
+      "rows": 12
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 4,
+     "rows": 65,
+     "checksums": 4,
+     "checksums_ok": 2,
+     "footer_rows": 3,
+     "implausible_cents_rows": 3,
+     "merged_blocks": 1
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 0.1125,
+      "rows": 12
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 6,
+     "rows": 62,
+     "checksums": 6,
+     "checksums_ok": 5
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 0.1125,
+      "rows": 12
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 6,
+     "rows": 62,
+     "checksums": 6,
+     "checksums_ok": 5
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 0.1125,
+      "rows": 12
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\raw\\nc\\carolinas\\rider\\ncridersummary-pdf-media-pdfs-for-your-home-rates-electric-nc-ncridersummary-pdf.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 4,
+     "rows": 46,
+     "checksums": 4,
+     "checksums_ok": 2,
+     "footer_rows": 2,
+     "implausible_cents_rows": 2
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 0.4951,
+      "rows": 12
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 4,
+     "rows": 65,
+     "checksums": 4,
+     "checksums_ok": 2,
+     "footer_rows": 3,
+     "implausible_cents_rows": 3,
+     "merged_blocks": 1
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 0.4951,
+      "rows": 12
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 6,
+     "rows": 62,
+     "checksums": 6,
+     "checksums_ok": 6
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 0.4951,
+      "rows": 12
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 6,
+     "rows": 62,
+     "checksums": 6,
+     "checksums_ok": 6
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 0.4951,
+      "rows": 12
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\raw\\nc\\carolinas\\rider\\summary-of-rider-adjustments-media-pdfs-for-your-home-rates-electric-nc-ncriders.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 4,
+     "rows": 46,
+     "checksums": 4,
+     "checksums_ok": 2,
+     "footer_rows": 3,
+     "implausible_cents_rows": 2
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 1.6937,
+      "rows": 12
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 4,
+     "rows": 68,
+     "checksums": 4,
+     "checksums_ok": 2,
+     "footer_rows": 6,
+     "implausible_cents_rows": 6,
+     "merged_blocks": 1
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 1.6937,
+      "rows": 12
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 6,
+     "rows": 62,
+     "checksums": 6,
+     "checksums_ok": 6
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 1.6937,
+      "rows": 12
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 6,
+     "rows": 62,
+     "checksums": 6,
+     "checksums_ok": 6
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 1.6937,
+      "rows": 12
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\raw\\nc\\progress\\rider\\leaf-no-600-summary-of-riders-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no-.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 8,
+     "jaa_cents_gt_1": 5
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.108,
+      "rows": 8
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 7,
+     "rows": 109,
+     "checksums": 10,
+     "checksums_ok": 3,
+     "merged_blocks": 4,
+     "jaa_cents_gt_1": 5
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.108,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 14,
+     "jaa_cents_gt_1": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.108,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 14,
+     "jaa_cents_gt_1": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.108,
+      "rows": 8
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data\\raw\\nc\\progress\\rider\\summary-of-rider-adjustments-media-pdfs-for-your-home-rates-dep-nc-leaf-no-600-s.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 10,
+     "rows": 111,
+     "checksums": 12,
+     "checksums_ok": 8,
+     "jaa_cents_gt_1": 5,
+     "merged_blocks": 1
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 3.144,
+      "rows": 8
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 7,
+     "rows": 109,
+     "checksums": 9,
+     "checksums_ok": 3,
+     "merged_blocks": 4,
+     "jaa_cents_gt_1": 5
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 3.144,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 12,
+     "jaa_cents_gt_1": 3,
+     "ambiguous_blocks": 1
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 3.144,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 13,
+     "jaa_cents_gt_1": 3,
+     "unit_ambiguous_rows": 9
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 3.144,
+      "rows": 8
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data/raw/nc/progress/rider/leaf-600-eff-2026-06-01.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 10,
+     "rows": 111,
+     "checksums": 12,
+     "checksums_ok": 8,
+     "jaa_cents_gt_1": 5,
+     "merged_blocks": 1
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 3.144,
+      "rows": 8
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 7,
+     "rows": 109,
+     "checksums": 9,
+     "checksums_ok": 3,
+     "merged_blocks": 4,
+     "jaa_cents_gt_1": 5
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 3.144,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 12,
+     "jaa_cents_gt_1": 3,
+     "ambiguous_blocks": 1
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 3.144,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 13,
+     "jaa_cents_gt_1": 3,
+     "unit_ambiguous_rows": 9
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 3.144,
+      "rows": 8
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "data/raw/nc/carolinas/rider/leaf-99-eff-2026-06-01.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 4,
+     "rows": 46,
+     "checksums": 4,
+     "checksums_ok": 2,
+     "footer_rows": 3,
+     "implausible_cents_rows": 2
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 1.6937,
+      "rows": 12
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 4,
+     "rows": 68,
+     "checksums": 4,
+     "checksums_ok": 2,
+     "footer_rows": 6,
+     "implausible_cents_rows": 6,
+     "merged_blocks": 1
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 1.6937,
+      "rows": 12
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 6,
+     "rows": 62,
+     "checksums": 6,
+     "checksums_ok": 6
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 1.6937,
+      "rows": 12
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 6,
+     "rows": 62,
+     "checksums": 6,
+     "checksums_ok": 6
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Schedules",
+      "total": 1.6937,
+      "rows": 12
+     }
+    ]
+   }
+  },
+  {
+   "pdf": "tests/fixtures/docling/dep_leaf600_2026-04-01.pdf",
+   "baseline.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 8,
+     "jaa_cents_gt_1": 5
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.108,
+      "rows": 8
+     }
+    ]
+   },
+   "baseline.pymupdf": {
+    "stats": {
+     "blocks": 7,
+     "rows": 109,
+     "checksums": 10,
+     "checksums_ok": 3,
+     "merged_blocks": 4,
+     "jaa_cents_gt_1": 5
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.108,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pdfplumber": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 14,
+     "jaa_cents_gt_1": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.108,
+      "rows": 8
+     }
+    ]
+   },
+   "repaired.pymupdf": {
+    "stats": {
+     "blocks": 11,
+     "rows": 111,
+     "checksums": 14,
+     "checksums_ok": 14,
+     "jaa_cents_gt_1": 3
+    },
+    "residential": [
+     {
+      "rate_class": "Residential Service Schedules",
+      "total": 2.108,
+      "rows": 8
+     }
+    ]
+   }
+  }
+ ]
+}

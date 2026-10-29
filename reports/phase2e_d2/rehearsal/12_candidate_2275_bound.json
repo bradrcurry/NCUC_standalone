@@ -1,0 +1,26 @@
+{
+  "run_id": 2,
+  "version_id": 6056,
+  "extractor_status": "empty",
+  "profile": "progress_rider_adjustment_matrix",
+  "structured_mode": "hybrid",
+  "needs_review": false,
+  "status": "empty",
+  "validation_status": "warnings",
+  "run_issues": [
+    {
+      "level": "info",
+      "code": "docling_artifact_unusable",
+      "detail": "docling artifact 1661 not used: chunk_relative_numbering (structure from native_pdf)",
+      "needs_review": false
+    },
+    {
+      "level": "warning",
+      "code": "empty_run",
+      "detail": "run produced no output"
+    }
+  ],
+  "charges_with_errors": 0,
+  "charges_with_warnings": 0,
+  "output_count": 0
+}

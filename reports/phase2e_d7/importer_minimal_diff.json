@@ -1,0 +1,5 @@
+{
+  "base": "2555e98",
+  "behavior_preserved_against_formatted_tested_source": true,
+  "change": "only non-tariff binding guard; unrelated class formatting restored"
+}

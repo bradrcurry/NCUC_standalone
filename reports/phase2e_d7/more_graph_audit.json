@@ -1,0 +1,1011 @@
+[
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "triage_pdf",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Function:src/duke_rates/historical/ncuc/pipeline/triage.py:triage_pdf",
+        "name": "triage_pdf",
+        "type": "Function",
+        "filePath": "src/duke_rates/historical/ncuc/pipeline/triage.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 17,
+      "risk": "CRITICAL",
+      "riskSharedAxes": "MEDIUM",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "epistemic": "exact",
+      "summary": {
+        "direct": 6,
+        "processes_affected": 4,
+        "modules_affected": 5
+      },
+      "byDepthCounts": {
+        "1": 6,
+        "2": 8,
+        "3": 3
+      },
+      "affected_processes": [
+        {
+          "name": "mine_ncuc_pipeline",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli.py",
+          "affected_process_count": 7,
+          "total_hits": 20,
+          "earliest_broken_step": 1
+        },
+        {
+          "name": "execute_workflow_next_action_nc",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli.py",
+          "affected_process_count": 10,
+          "total_hits": 10,
+          "earliest_broken_step": 1
+        },
+        {
+          "name": "benchmark_docling",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/doc_intel.py",
+          "affected_process_count": 5,
+          "total_hits": 10,
+          "earliest_broken_step": 1
+        },
+        {
+          "name": "ncuc_import_pipeline",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/ncuc.py",
+          "affected_process_count": 8,
+          "total_hits": 8,
+          "earliest_broken_step": 1
+        }
+      ],
+      "affected_modules": [
+        {
+          "name": "Cli_commands",
+          "hits": 6,
+          "impact": "direct"
+        },
+        {
+          "name": "Ncuc",
+          "hits": 4,
+          "impact": "direct"
+        },
+        {
+          "name": "Pipeline",
+          "hits": 3,
+          "impact": "direct"
+        },
+        {
+          "name": "Tests",
+          "hits": 2,
+          "impact": "direct"
+        },
+        {
+          "name": "Hardware",
+          "hits": 1,
+          "impact": "direct"
+        }
+      ],
+      "byDepth": {
+        "1": [
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/benchmark/pipeline_bench.py:run_single",
+            "name": "run_single",
+            "filePath": "src/duke_rates/benchmark/pipeline_bench.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_161_benchmark_docling",
+                "label": "Benchmark_docling → _compute_hash",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_279_benchmark_docling",
+                "label": "Benchmark_docling → Get_gpu_manager",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_107_benchmark_docling",
+                "label": "Benchmark_docling → _clamp_score",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_464_benchmark_docling",
+                "label": "Benchmark_docling → Is_cuda_available",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_162_benchmark_docling",
+                "label": "Benchmark_docling → _estimate_table_like_density",
+                "processType": "cross_community",
+                "step": 2
+              }
+            ]
+          },
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/cli_commands/ocr.py:enqueue_ocr_remediation_nc",
+            "name": "enqueue_ocr_remediation_nc",
+            "filePath": "src/duke_rates/cli_commands/ocr.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": []
+          },
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/cli_commands/reprocess.py:_refresh_historical_artifacts_for_reprocess",
+            "name": "_refresh_historical_artifacts_for_reprocess",
+            "filePath": "src/duke_rates/cli_commands/reprocess.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": []
+          },
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/db/ocr_queue.py:enqueue_ocr_candidates",
+            "name": "enqueue_ocr_candidates",
+            "filePath": "src/duke_rates/db/ocr_queue.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": []
+          },
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/historical/ncuc/importer.py:NcucPipelineImporter.import_all_pending_downloads._process_record@363:8#1",
+            "name": "_process_record",
+            "filePath": "src/duke_rates/historical/ncuc/importer.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_4_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _row_to_historical_document",
+                "processType": "cross_community",
+                "step": 3
+              },
+              {
+                "id": "proc_363_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → Migrate",
+                "processType": "cross_community",
+                "step": 3
+              },
+              {
+                "id": "proc_727_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _seed_document_types",
+                "processType": "cross_community",
+                "step": 3
+              },
+              {
+                "id": "proc_30_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _row_to_document",
+                "processType": "cross_community",
+                "step": 3
+              },
+              {
+                "id": "proc_17_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _normalize_historical_leaf",
+                "processType": "cross_community",
+                "step": 3
+              },
+              {
+                "id": "proc_3_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _connect",
+                "processType": "cross_community",
+                "step": 3
+              }
+            ]
+          },
+          {
+            "depth": 1,
+            "id": "Method:src/duke_rates/historical/ncuc/importer.py:NcucPipelineImporter.mine_discovery_record_spans#1",
+            "name": "mine_discovery_record_spans",
+            "filePath": "src/duke_rates/historical/ncuc/importer.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": []
+          }
+        ],
+        "2": [
+          {
+            "depth": 2,
+            "id": "Function:scripts/maintenance/repair_ncuc_company_mismatches.py:main",
+            "name": "main",
+            "filePath": "scripts/maintenance/repair_ncuc_company_mismatches.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": []
+          },
+          {
+            "depth": 2,
+            "id": "Function:src/duke_rates/cli.py:execute_workflow_next_action_nc",
+            "name": "execute_workflow_next_action_nc",
+            "filePath": "src/duke_rates/cli.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_865_execute_workflow_nex",
+                "label": "Execute_workflow_next_action_nc → _seed_document_types",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_256_execute_workflow_nex",
+                "label": "Execute_workflow_next_action_nc → _build_fast_reprocess_priority_summary_nc",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_621_execute_workflow_nex",
+                "label": "Execute_workflow_next_action_nc → Configure_logging",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_150_execute_workflow_nex",
+                "label": "Execute_workflow_next_action_nc → _count_rows",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_95_execute_workflow_nex",
+                "label": "Execute_workflow_next_action_nc → _classify_ocr_route",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_151_execute_workflow_nex",
+                "label": "Execute_workflow_next_action_nc → _build_operational_parse_review_status",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_782_execute_workflow_nex",
+                "label": "Execute_workflow_next_action_nc → Ensure_directories",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_96_execute_workflow_nex",
+                "label": "Execute_workflow_next_action_nc → _safe_text_file_length",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_69_execute_workflow_nex",
+                "label": "Execute_workflow_next_action_nc → Current_stage_versions",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_68_execute_workflow_nex",
+                "label": "Execute_workflow_next_action_nc → Latest_processing_run_for_document",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          },
+          {
+            "depth": 2,
+            "id": "Function:src/duke_rates/cli.py:mine_ncuc_pipeline",
+            "name": "mine_ncuc_pipeline",
+            "filePath": "src/duke_rates/cli.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_3_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _connect",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_17_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _normalize_historical_leaf",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_98_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _decode_provenance_notes",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_30_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _row_to_document",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_727_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _seed_document_types",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_363_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → Migrate",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_4_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _row_to_historical_document",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          },
+          {
+            "depth": 2,
+            "id": "Function:src/duke_rates/cli_commands/doc_intel.py:benchmark_docling",
+            "name": "benchmark_docling",
+            "filePath": "src/duke_rates/cli_commands/doc_intel.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_161_benchmark_docling",
+                "label": "Benchmark_docling → _compute_hash",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_279_benchmark_docling",
+                "label": "Benchmark_docling → Get_gpu_manager",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_162_benchmark_docling",
+                "label": "Benchmark_docling → _estimate_table_like_density",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_107_benchmark_docling",
+                "label": "Benchmark_docling → _clamp_score",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_464_benchmark_docling",
+                "label": "Benchmark_docling → Is_cuda_available",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          },
+          {
+            "depth": 2,
+            "id": "Function:src/duke_rates/cli_commands/ocr.py:enqueue_ocr_nc",
+            "name": "enqueue_ocr_nc",
+            "filePath": "src/duke_rates/cli_commands/ocr.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": []
+          },
+          {
+            "depth": 2,
+            "id": "Function:src/duke_rates/cli_commands/ocr.py:process_ocr_backlog_nc",
+            "name": "process_ocr_backlog_nc",
+            "filePath": "src/duke_rates/cli_commands/ocr.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": []
+          },
+          {
+            "depth": 2,
+            "id": "Function:src/duke_rates/cli_commands/reprocess.py:_process_single_reprocess_queue_item",
+            "name": "_process_single_reprocess_queue_item",
+            "filePath": "src/duke_rates/cli_commands/reprocess.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": []
+          },
+          {
+            "depth": 2,
+            "id": "Method:src/duke_rates/historical/ncuc/importer.py:NcucPipelineImporter.import_all_pending_downloads#3",
+            "name": "import_all_pending_downloads",
+            "filePath": "src/duke_rates/historical/ncuc/importer.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_363_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → Migrate",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_4_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _row_to_historical_document",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_30_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _row_to_document",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_727_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _seed_document_types",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_98_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _decode_provenance_notes",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_3_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _connect",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_17_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _normalize_historical_leaf",
+                "processType": "cross_community",
+                "step": 2
+              }
+            ]
+          }
+        ],
+        "3": [
+          {
+            "depth": 3,
+            "id": "File:scripts/maintenance/repair_ncuc_company_mismatches.py",
+            "name": "repair_ncuc_company_mismatches.py",
+            "filePath": "scripts/maintenance/repair_ncuc_company_mismatches.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": []
+          },
+          {
+            "depth": 3,
+            "id": "Function:src/duke_rates/cli_commands/ncuc.py:ncuc_import_pipeline",
+            "name": "ncuc_import_pipeline",
+            "filePath": "src/duke_rates/cli_commands/ncuc.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_397_ncuc_import_pipeline",
+                "label": "Ncuc_import_pipeline → _leaf_from_family_key",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_520_ncuc_import_pipeline",
+                "label": "Ncuc_import_pipeline → _normalize_historical_leaf",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_592_ncuc_import_pipeline",
+                "label": "Ncuc_import_pipeline → _row_to_document",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_362_ncuc_import_pipeline",
+                "label": "Ncuc_import_pipeline → _seed_document_types",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_513_ncuc_import_pipeline",
+                "label": "Ncuc_import_pipeline → Migrate",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_396_ncuc_import_pipeline",
+                "label": "Ncuc_import_pipeline → _historical_primary_code",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_57_ncuc_import_pipeline",
+                "label": "Ncuc_import_pipeline → _row_to_bill_component_observation",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_518_ncuc_import_pipeline",
+                "label": "Ncuc_import_pipeline → _coerce_optional_int",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          },
+          {
+            "depth": 3,
+            "id": "Function:src/duke_rates/cli_commands/reprocess.py:process_reprocess_queue_nc",
+            "name": "process_reprocess_queue_nc",
+            "filePath": "src/duke_rates/cli_commands/reprocess.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": []
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operation": {
+      "tool": "context",
+      "params": {
+        "name": "triage_pdf",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "status": "found",
+      "symbol": {
+        "uid": "Function:src/duke_rates/historical/ncuc/pipeline/triage.py:triage_pdf",
+        "name": "triage_pdf",
+        "kind": "Function",
+        "filePath": "src/duke_rates/historical/ncuc/pipeline/triage.py",
+        "startLine": 98,
+        "endLine": 285
+      },
+      "epistemic": "exact",
+      "incoming": {
+        "calls": [
+          {
+            "uid": "Function:src/duke_rates/benchmark/pipeline_bench.py:run_single",
+            "name": "run_single",
+            "filePath": "src/duke_rates/benchmark/pipeline_bench.py"
+          },
+          {
+            "uid": "Function:src/duke_rates/cli_commands/ocr.py:enqueue_ocr_remediation_nc",
+            "name": "enqueue_ocr_remediation_nc",
+            "filePath": "src/duke_rates/cli_commands/ocr.py"
+          },
+          {
+            "uid": "Function:src/duke_rates/cli_commands/reprocess.py:_refresh_historical_artifacts_for_reprocess",
+            "name": "_refresh_historical_artifacts_for_reprocess",
+            "filePath": "src/duke_rates/cli_commands/reprocess.py"
+          },
+          {
+            "uid": "Function:src/duke_rates/db/ocr_queue.py:enqueue_ocr_candidates",
+            "name": "enqueue_ocr_candidates",
+            "filePath": "src/duke_rates/db/ocr_queue.py"
+          },
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/importer.py:NcucPipelineImporter.import_all_pending_downloads._process_record@363:8#1",
+            "name": "_process_record",
+            "filePath": "src/duke_rates/historical/ncuc/importer.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/historical/ncuc/importer.py:NcucPipelineImporter.mine_discovery_record_spans#1",
+            "name": "mine_discovery_record_spans",
+            "filePath": "src/duke_rates/historical/ncuc/importer.py"
+          }
+        ]
+      },
+      "outgoing": {
+        "calls": [
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/pipeline/triage.py:_clamp_score",
+            "name": "_clamp_score",
+            "filePath": "src/duke_rates/historical/ncuc/pipeline/triage.py"
+          },
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/pipeline/triage.py:_compute_hash",
+            "name": "_compute_hash",
+            "filePath": "src/duke_rates/historical/ncuc/pipeline/triage.py"
+          },
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/pipeline/triage.py:_estimate_reading_order_risk",
+            "name": "_estimate_reading_order_risk",
+            "filePath": "src/duke_rates/historical/ncuc/pipeline/triage.py"
+          },
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/pipeline/triage.py:_estimate_table_like_density",
+            "name": "_estimate_table_like_density",
+            "filePath": "src/duke_rates/historical/ncuc/pipeline/triage.py"
+          },
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/pipeline/triage.py:_infer_document_archetype",
+            "name": "_infer_document_archetype",
+            "filePath": "src/duke_rates/historical/ncuc/pipeline/triage.py"
+          },
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/pipeline/triage.py:_infer_table_mode",
+            "name": "_infer_table_mode",
+            "filePath": "src/duke_rates/historical/ncuc/pipeline/triage.py"
+          }
+        ],
+        "accesses": [
+          {
+            "uid": "Property:src/duke_rates/models/pipeline.py:DocumentTriage.confidence_score",
+            "name": "confidence_score",
+            "filePath": "src/duke_rates/models/pipeline.py"
+          },
+          {
+            "uid": "Property:src/duke_rates/models/pipeline.py:DocumentTriage.confidence_score",
+            "name": "confidence_score",
+            "filePath": "src/duke_rates/models/pipeline.py"
+          },
+          {
+            "uid": "Property:src/duke_rates/models/pipeline.py:DocumentTriage.document_archetype_candidate",
+            "name": "document_archetype_candidate",
+            "filePath": "src/duke_rates/models/pipeline.py"
+          },
+          {
+            "uid": "Property:src/duke_rates/models/pipeline.py:DocumentTriage.document_archetype_candidate",
+            "name": "document_archetype_candidate",
+            "filePath": "src/duke_rates/models/pipeline.py"
+          },
+          {
+            "uid": "Property:src/duke_rates/models/pipeline.py:DocumentTriage.gpu_ocr_candidate",
+            "name": "gpu_ocr_candidate",
+            "filePath": "src/duke_rates/models/pipeline.py"
+          },
+          {
+            "uid": "Property:src/duke_rates/models/pipeline.py:DocumentTriage.gpu_ocr_candidate",
+            "name": "gpu_ocr_candidate",
+            "filePath": "src/duke_rates/models/pipeline.py"
+          },
+          {
+            "uid": "Property:src/duke_rates/models/pipeline.py:DocumentTriage.has_leaf_phrases",
+            "name": "has_leaf_phrases",
+            "filePath": "src/duke_rates/models/pipeline.py"
+          },
+          {
+            "uid": "Property:src/duke_rates/models/pipeline.py:DocumentTriage.is_likely_scanned",
+            "name": "is_likely_scanned",
+            "filePath": "src/duke_rates/models/pipeline.py"
+          },
+          {
+            "uid": "Property:src/duke_rates/models/pipeline.py:DocumentTriage.is_likely_tariff_related",
+            "name": "is_likely_tariff_related",
+            "filePath": "src/duke_rates/models/pipeline.py"
+          },
+          {
+            "uid": "Property:src/duke_rates/models/pipeline.py:DocumentTriage.likely_document_class",
+            "name": "likely_document_class",
+            "filePath": "src/duke_rates/models/pipeline.py"
+          },
+          {
+            "uid": "Property:src/duke_rates/models/pipeline.py:DocumentTriage.likely_document_class",
+            "name": "likely_document_class",
+            "filePath": "src/duke_rates/models/pipeline.py"
+          },
+          {
+            "uid": "Property:src/duke_rates/models/pipeline.py:DocumentTriage.likely_document_class",
+            "name": "likely_document_class",
+            "filePath": "src/duke_rates/models/pipeline.py"
+          },
+          {
+            "uid": "Property:src/duke_rates/models/pipeline.py:DocumentTriage.native_text_backend",
+            "name": "native_text_backend",
+            "filePath": "src/duke_rates/models/pipeline.py"
+          },
+          {
+            "uid": "Property:src/duke_rates/models/pipeline.py:DocumentTriage.native_text_backend",
+            "name": "native_text_backend",
+            "filePath": "src/duke_rates/models/pipeline.py"
+          },
+          {
+            "uid": "Property:src/duke_rates/models/pipeline.py:DocumentTriage.native_text_quality_score",
+            "name": "native_text_quality_score",
+            "filePath": "src/duke_rates/models/pipeline.py"
+          },
+          {
+            "uid": "Property:src/duke_rates/models/pipeline.py:DocumentTriage.ocr_confidence_score",
+            "name": "ocr_confidence_score",
+            "filePath": "src/duke_rates/models/pipeline.py"
+          },
+          {
+            "uid": "Property:src/duke_rates/models/pipeline.py:DocumentTriage.ocr_confidence_score",
+            "name": "ocr_confidence_score",
+            "filePath": "src/duke_rates/models/pipeline.py"
+          },
+          {
+            "uid": "Property:src/duke_rates/models/pipeline.py:DocumentTriage.page_count",
+            "name": "page_count",
+            "filePath": "src/duke_rates/models/pipeline.py"
+          },
+          {
+            "uid": "Property:src/duke_rates/models/pipeline.py:DocumentTriage.page_count",
+            "name": "page_count",
+            "filePath": "src/duke_rates/models/pipeline.py"
+          },
+          {
+            "uid": "Property:src/duke_rates/models/pipeline.py:DocumentTriage.reading_order_risk_score",
+            "name": "reading_order_risk_score",
+            "filePath": "src/duke_rates/models/pipeline.py"
+          },
+          {
+            "uid": "Property:src/duke_rates/models/pipeline.py:DocumentTriage.route_recommendation",
+            "name": "route_recommendation",
+            "filePath": "src/duke_rates/models/pipeline.py"
+          },
+          {
+            "uid": "Property:src/duke_rates/models/pipeline.py:DocumentTriage.route_recommendation",
+            "name": "route_recommendation",
+            "filePath": "src/duke_rates/models/pipeline.py"
+          },
+          {
+            "uid": "Property:src/duke_rates/models/pipeline.py:DocumentTriage.route_recommendation",
+            "name": "route_recommendation",
+            "filePath": "src/duke_rates/models/pipeline.py"
+          },
+          {
+            "uid": "Property:src/duke_rates/models/pipeline.py:DocumentTriage.route_recommendation",
+            "name": "route_recommendation",
+            "filePath": "src/duke_rates/models/pipeline.py"
+          }
+        ]
+      },
+      "processes": [
+        {
+          "id": "proc_107_benchmark_docling",
+          "name": "Benchmark_docling → _clamp_score",
+          "step_index": 3,
+          "step_count": 5
+        },
+        {
+          "id": "proc_161_benchmark_docling",
+          "name": "Benchmark_docling → _compute_hash",
+          "step_index": 3,
+          "step_count": 4
+        },
+        {
+          "id": "proc_162_benchmark_docling",
+          "name": "Benchmark_docling → _estimate_table_like_density",
+          "step_index": 3,
+          "step_count": 4
+        }
+      ]
+    }
+  },
+  {
+    "operation": {
+      "tool": "context",
+      "params": {
+        "name": "mine_discovery_record_spans",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "status": "ambiguous",
+      "message": "Found 2 symbols matching 'mine_discovery_record_spans'. Use uid, file_path, or kind to disambiguate.",
+      "totalCandidates": 2,
+      "candidates": [
+        {
+          "uid": "Method:tests/test_missing_doc_workflow.py:FakeImporter.mine_discovery_record_spans#1",
+          "name": "mine_discovery_record_spans",
+          "kind": "Method",
+          "filePath": "tests/test_missing_doc_workflow.py",
+          "line": 247,
+          "score": 0.54
+        },
+        {
+          "uid": "Method:src/duke_rates/historical/ncuc/importer.py:NcucPipelineImporter.mine_discovery_record_spans#1",
+          "name": "mine_discovery_record_spans",
+          "kind": "Method",
+          "filePath": "src/duke_rates/historical/ncuc/importer.py",
+          "line": 421,
+          "score": 0.54
+        }
+      ]
+    }
+  },
+  {
+    "operation": {
+      "tool": "context",
+      "params": {
+        "name": "DocumentSectionAggregator",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "status": "found",
+      "symbol": {
+        "uid": "Class:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator",
+        "name": "DocumentSectionAggregator",
+        "kind": "Class",
+        "filePath": "src/duke_rates/document_intelligence/section_aggregator.py",
+        "startLine": 112,
+        "endLine": 1651
+      },
+      "epistemic": "exact",
+      "incoming": {
+        "imports": [
+          {
+            "uid": "File:src/duke_rates/cli_commands/parse_refactor.py",
+            "name": "parse_refactor.py",
+            "filePath": "src/duke_rates/cli_commands/parse_refactor.py"
+          },
+          {
+            "uid": "File:src/duke_rates/document_intelligence/parse_improvement_loop.py",
+            "name": "parse_improvement_loop.py",
+            "filePath": "src/duke_rates/document_intelligence/parse_improvement_loop.py"
+          }
+        ]
+      },
+      "outgoing": {
+        "has_method": [
+          {
+            "uid": "Function:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator._merge_adjacent_similar._parent_span_index@1136:8#1",
+            "name": "_parent_span_index",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator.__init__#1",
+            "name": "__init__",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator._build_known_codes#0",
+            "name": "_build_known_codes",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator._build_signal_evidence#1",
+            "name": "_build_signal_evidence",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator._classify_and_score#3",
+            "name": "_classify_and_score",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator._classify_section_type#2",
+            "name": "_classify_section_type",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator._collect_text_boundaries#2",
+            "name": "_collect_text_boundaries",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator._derive_document_type#3",
+            "name": "_derive_document_type",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator._detect_hearing_signals#1",
+            "name": "_detect_hearing_signals",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator._detect_text_boundary_signals#1",
+            "name": "_detect_text_boundary_signals",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator._get_known_codes#0",
+            "name": "_get_known_codes",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator._is_code_like#1",
+            "name": "_is_code_like",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator._is_known_or_code_like#1",
+            "name": "_is_known_or_code_like",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator._load_pages#1",
+            "name": "_load_pages",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator._load_spans#1",
+            "name": "_load_spans",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator._make_sub_section#2",
+            "name": "_make_sub_section",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator._merge_adjacent_similar#1",
+            "name": "_merge_adjacent_similar",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator._refine_boundaries#2",
+            "name": "_refine_boundaries",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator._score_hearing_likelihood#1",
+            "name": "_score_hearing_likelihood",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator._score_section#3",
+            "name": "_score_section",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator._seed_from_spans#3",
+            "name": "_seed_from_spans",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator._upsert_document_classification#4",
+            "name": "_upsert_document_classification",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator.build_sections#1",
+            "name": "build_sections",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator.populate_all#1",
+            "name": "populate_all",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator.populate_one#1",
+            "name": "populate_one",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator.select_candidates#1",
+            "name": "select_candidates",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          }
+        ],
+        "has_property": [
+          {
+            "uid": "Property:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator._MIN_QA_HITS",
+            "name": "_MIN_QA_HITS",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          },
+          {
+            "uid": "Property:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator._NON_CODE_WORDS",
+            "name": "_NON_CODE_WORDS",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          },
+          {
+            "uid": "Property:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator._RE_COMPANY_HEADER",
+            "name": "_RE_COMPANY_HEADER",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          },
+          {
+            "uid": "Property:src/duke_rates/document_intelligence/section_aggregator.py:DocumentSectionAggregator._RE_ELECTRICITY_NO",
+            "name": "_RE_ELECTRICITY_NO",
+            "filePath": "src/duke_rates/document_intelligence/section_aggregator.py"
+          }
+        ]
+      },
+      "processes": []
+    }
+  }
+]

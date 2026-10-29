@@ -1,0 +1,124 @@
+{
+  "manifest_id": "2026-10-27_phase1c_proposed",
+  "status": "PROPOSAL - not applied anywhere, not executable as-is",
+  "description": "Correction plan for the issues left open by the 2026-10-27 billing integrity manifest (F1-F5) plus defects found during Phase 1C. Each item states its evidence and whether the corrected value is independently verifiable from a held source document. Items marked needs_source must not be applied until that document is obtained. Kinds marked new_apply_kind need support added to apply_corrections.py (with precondition + receipt + revert) before they can run. See docs/reports/2026-10-27_phase1c_closeout.md section 4.",
+  "items": [
+    {
+      "id": "P1-dec-ol-metal-halide-area-new-pole-ocr5",
+      "origin": "F1",
+      "verifiability": "value_verified; effective_date_unverified",
+      "kind": "update_charges",
+      "updates": [{"id": 752064, "column": "rate_value", "before": 6.05, "after": 56.05}],
+      "evidence": "data/raw/historical/ncuc/e-7/e-7-nodate-duke-power-s-rate-schedule-riders.pdf p22, rendered at 110 dpi: Schedule OL (NC) Sixteenth Leaf No. 32, row METAL HALIDE / 110,000 lm / 395 kWh / Area: Existing 48.55, New Pole 56.05, New Pole Served Underground 60.10. OCR text holds '56.05' with no standalone '6.05'.",
+      "open_question": "The version's effective_start (2001-07-01) comes from an undated filing; the value fix does not depend on it, but the date is not verified.",
+      "consumers": "TariffBillingEngine (DEC OL), URDB export, completeness audits. Not on the DEP bill path."
+    },
+    {
+      "id": "P2-leaf608-rdm-2025-04-01",
+      "origin": "F3",
+      "verifiability": "verified",
+      "steps": [
+        {"kind": "update_charges", "updates": [{"id": 755415, "column": "rate_value", "before": 0.00252, "after": 0.00232}]},
+        {"kind": "update_version", "new_apply_kind": true, "version_id": 5414, "column": "historical_document_id", "before": 368, "after": 48},
+        {"kind": "update_historical_document", "new_apply_kind": true, "row_id": 368, "column": "effective_start", "before": "2025-04-01", "after": "2026-04-01"}
+      ],
+      "evidence": "hd 48 (renewable-demand-management-rider-leaf-no-608-eff-2025-04-01...pdf) p1: 'Effective for service rendered on and after April 1, 2025' ... 'is 0.232c per kilowatt-hour'. hd 1846 (E-2 Sub 1300 bundle p13): same date, residential 0.232. Leaf-600 summaries hd 40 and hd 41 both print 'RDM 0.232 4/1/25'. hd 368 (ry1 current-site PDF) prints 'April 1, 2026' and 0.252, duplicating vid 5893 (hd 2593, 2026-04-01, 0.00252).",
+      "consumers": "TariffBillingEngine rider linking (include_riders=True), rider history views. The 12-bill reconciliation prices riders from the leaf-600 summary and is unaffected."
+    },
+    {
+      "id": "P3-leaf610-pim-2025-04-01",
+      "origin": "F4",
+      "verifiability": "verified_from_summary_only",
+      "steps": [
+        {"kind": "update_charges", "updates": [{"id": 755422, "column": "rate_value", "before": 5e-05, "after": 2e-05}]},
+        {"kind": "update_historical_document", "new_apply_kind": true, "row_id": 370, "column": "effective_start", "before": "2025-04-01", "after": "2026-04-01"},
+        {"kind": "update_version", "new_apply_kind": true, "version_id": 5424, "column": "historical_document_id", "before": 370, "after": null, "note": "no held leaf-610 sheet for 2025-04-01; reviewer decides whether to bind to the leaf-600 summary (hd 40) as evidence or leave unbound"}
+      ],
+      "evidence": "hd 370 prints 'on and after April 1, 2026' and 0.005c (so vid 5424's 2025-04-01 date and value are the 2026 sheet's). Leaf-600 hd 40 and hd 41 both print 'PIM 0.002 4/1/25'. hd 1850 (2026 redline) shows struck '0.002' and 'April 1, 2025'. No clean 2025 leaf-610 sheet is held.",
+      "recommendation": "Acquire the 2025-04-01 leaf-610 sheet (E-2 Sub 1300 compliance) before applying, or accept the two leaf-600 summaries as the source.",
+      "consumers": "Same as P2."
+    },
+    {
+      "id": "P4-leaf602-jaa-2024-12-01",
+      "origin": "F5",
+      "verifiability": "needs_source",
+      "proposed_action": "Do not insert values. Mark vid 6649 for review: its eight charges are the June-2021 sheet's (hd 5365 prints 'on and after December 1, 2021'), so they are wrong for 2024-12-01 in every class.",
+      "evidence": "Leaf-600 hd 40 prints 'JAA 0.538 12/1/24' (residential only). No held document prints the 2024-12-01 leaf-602 class table: the 174-page E-2 Sub 1354 bundle (hd 7492) has no '0.538'. hd 880 shows a 'current' residential of 0.00518 in the 2025 order, which does not match 0.538 either (likely excludes regulatory fee); not used.",
+      "consumers": "TariffBillingEngine rider linking for Dec 2024 - Nov 2025 service."
+    },
+    {
+      "id": "P5-leaf602-jaa-vid5391-misdated-signflip",
+      "origin": "new (Phase 1C)",
+      "verifiability": "verified",
+      "proposed_action": "Retire vid 5391 (status -> 'superseded', charges kept for audit) rather than delete.",
+      "steps": [{"kind": "update_version", "new_apply_kind": true, "version_id": 5391, "column": "status", "before": "approved", "after": "superseded"}],
+      "evidence": "vid 5391 is dated 2024-07-01 but bound to hd 880, an order directing rates 'effective for service rendered on and after December 1, 2025'. Its table prints residential 0.00518 / (0.00054) / 0.00464 (current / change / new); the stored rows carry -0.00464, -0.00223, -0.93 (parenthesised change column misread as sign) and six 'demand' rows duplicating the $/kWh values in $/kW. vid 5747 (2025-12-01, hd 1882 clean Rev. 3 sheet) already holds the correct 2025-12-01 values.",
+      "consumers": "TariffBillingEngine rider linking for Jul - Nov 2024 service would apply a JAA credit instead of a charge."
+    },
+    {
+      "id": "P6-leaf504-r-tou-ev-duplicates-and-bcc",
+      "origin": "new (Phase 1C, live-test triage)",
+      "verifiability": "verified",
+      "steps": [
+        {"kind": "delete_charges", "new_apply_kind": true, "ids": [753125, 753126], "note": "exact duplicates of 753123 / 753124"},
+        {"kind": "insert_charges", "version_id": 5317, "precondition_count": 5, "rows": [
+          {"charge_type": "fixed", "charge_label": "Basic Customer Charge", "rate_value": 14.0, "rate_unit": "$/month", "tou_period": null, "season": "all_year", "customer_class": "residential", "source_snippet": "A. Basic Customer Charge: $14.00"}
+        ]}
+      ],
+      "evidence": "hd 336 (E-2 Sub 1334 bundle, pages 7-12 = DEP NC First Revised Leaf No. 504, eff January 1, 2026) p8: 'A. Basic Customer Charge: $14.00 B. kWh Energy Charge: 1. 13.096c per Standard kWh ... 6.548c per Discount kWh'.",
+      "consumers": "TariffBillingEngine (R-TOU-EV). Note: rows are charge_type 'energy' with tou_period 'standard'/'discount', a period the engine's TOU path does not know; see closeout section 5."
+    },
+    {
+      "id": "P7-leaf520-sgs-2025-10-01-missing-bcc",
+      "origin": "new (Phase 1C, live-test triage)",
+      "verifiability": "verified",
+      "kind": "insert_charges",
+      "version_id": 5318,
+      "precondition_count": 4,
+      "rows": [
+        {"charge_type": "fixed", "charge_label": "Basic Customer Charge", "rate_value": 22.0, "rate_unit": "$/month", "tou_period": null, "season": "all_year", "customer_class": "commercial_small", "source_snippet": "A. $22.00 Basic Customer Charge"}
+      ],
+      "evidence": "hd 337 (leaf-no-520-schedule-sgs.pdf, NC Second Revised Leaf No. 520, eff October 1, 2025) p1: 'I. For Single-Phase Service: A. $22.00 Basic Customer Charge B. Kilowatt-Hour Energy Charge: 13.188c ... first 750 kWh 11.166c ... next 1,250 kWh 10.616c ... all additional kWh'. The stored block rates are correct and non-seasonal.",
+      "consumers": "TariffBillingEngine (SGS)."
+    },
+    {
+      "id": "P8-leaf656-label-follow-up-to-C8",
+      "origin": "C8 note",
+      "verifiability": "verified",
+      "kind": "update_charges",
+      "updates": [{"id": 755536, "column": "charge_label", "before": "Basic Customer Charge", "after": "Customer Charge (in addition to Basic Customer Charge)"}],
+      "evidence": "Rider 68 (leaf-656) p1: 'A. Customer Charge in addition to the Basic Customer Charge in the rate schedule: $55.00.'",
+      "consumers": "TariffBillingEngine picks the first non-three-phase fixed row as the primary BCC; mislabelled rider rows are a double-count risk."
+    },
+    {
+      "id": "P9-hd40-title-date",
+      "origin": "F2",
+      "verifiability": "verified",
+      "kind": "update_historical_document",
+      "new_apply_kind": true,
+      "row_id": 40,
+      "column": "title",
+      "note": "cosmetic: title/filename say eff. 2024-04-01; PDF says on and after April 1, 2025. effective_start is already 2025-04-01. Low priority."
+    },
+    {
+      "id": "P10-unverified-effective-date-moves",
+      "origin": "Phase 1B section 5",
+      "verifiability": "needs_review",
+      "findings": [
+        {"hd": 2519, "family": "nc-progress-leaf-640", "may11": "2019-01-01", "current": "2018-03-16", "printed": "March 16, 2018", "verdict": "current correct"},
+        {"hd": 2520, "family": "nc-progress-leaf-574", "may11": "2016-12-01", "current": "2021-01-01", "printed": "January 1, 2021", "verdict": "current correct"},
+        {"hd": 532, "family": "nc-progress-leaf-601", "may11": "2024-01-21", "current": "2024-01-27", "printed": "January 1, 2024 / January 1, 2025 (redline)", "verdict": "both wrong; looks like a filing date"},
+        {"hd": 2498, "family": "nc-progress-leaf-600", "may11": "2025-01-21", "current": "2025-01-27", "printed": "April 1, 2025 (redline January -> April)", "verdict": "both wrong; looks like a filing date"},
+        {"hd": 5313, "family": "nc-progress-leaf-600", "may11": "2024-01-24", "current": "2024-01-23", "printed": "January 1, 2024", "verdict": "both wrong; looks like a filing date"},
+        {"hd": 2503, "family": "nc-progress-leaf-704", "may11": "2019-02-27", "current": "2023-11-20", "printed": "none found in first 6 pages", "verdict": "unresolved"}
+      ],
+      "note": "None of these documents is on the 12-bill path (which uses hd 29, 40, 41, 42 and current docs 343/346). Redline bundles should not carry a rate effective date at all; see the provenance plan."
+    },
+    {
+      "id": "P11-deleted-2025-01-01-versions",
+      "origin": "Phase 1B section 5",
+      "verifiability": "needs_source",
+      "note": "leaf-611 (CAR, published 0.034c eff 1/1/25) and leaf-605 (CPRE) 2025-01-01 versions were deleted by the late-May dedup. They exist in data/db/duke_rates_eval_20260511_162535.db; restore only after re-verifying each value against its source PDF."
+    }
+  ]
+}

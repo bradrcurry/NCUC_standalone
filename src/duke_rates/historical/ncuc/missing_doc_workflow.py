@@ -553,7 +553,9 @@ def _process_reprocess_stage(
             version_bootstrapped = True
 
         try:
-            _, family_key, inserted = extractor.process_document(doc)
+            # Phase 2C: candidate run (DUKE_RATES_LEGACY_REPLACE=1 promotes it).
+            outcome = extractor.process_document_result(doc, created_by="workflow:run-nc-missing-doc")
+            family_key, inserted = outcome.family_key, outcome.inserted
             with repository._connect() as conn:
                 latest_run = latest_processing_run_for_document(
                     conn,
@@ -566,6 +568,9 @@ def _process_reprocess_stage(
                     latest_run_id=latest_run["id"] if latest_run else None,
                     metadata={
                         "charges_inserted": inserted,
+                        "charges_extracted": outcome.extracted,
+                        "candidate_run_id": outcome.run_id,
+                        "needs_review": outcome.needs_review,
                         "family_key": family_key,
                         "version_bootstrapped": version_bootstrapped,
                         "version_id": doc.get("version_id") or version_id,

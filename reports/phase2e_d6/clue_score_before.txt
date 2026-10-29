@@ -1,0 +1,79 @@
+{
+ "documents": 50,
+ "evidence_failures": [],
+ "per_kind": {
+  "revision": {
+   "tp": 59,
+   "fp": 0,
+   "fn": 2,
+   "precision": 1.0,
+   "recall": 0.9672
+  },
+  "supersedes": {
+   "tp": 27,
+   "fp": 0,
+   "fn": 1,
+   "precision": 1.0,
+   "recall": 0.9643
+  },
+  "effective_date": {
+   "tp": 35,
+   "fp": 1,
+   "fn": 2,
+   "precision": 0.9722,
+   "recall": 0.9459
+  },
+  "docket": {
+   "tp": 45,
+   "fp": 0,
+   "fn": 0,
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  "order_date": {
+   "tp": 33,
+   "fp": 0,
+   "fn": 1,
+   "precision": 1.0,
+   "recall": 0.9706
+  }
+ },
+ "page_attribution": {
+  "attributed": 199
+ },
+ "normalization_accuracy": {
+  "revision": {
+   "right": 59
+  },
+  "supersedes": {
+   "right": 27
+  },
+  "effective_date": {
+   "right": 35
+  },
+  "docket": {
+   "right": 45
+  },
+  "order_date": {
+   "right": 33
+  }
+ },
+ "by_text_layer": {
+  "native_text": {
+   "tp": 193,
+   "fn": 6,
+   "fp": 1
+  },
+  "ocr": {
+   "tp": 6
+  }
+ },
+ "family_identity": {
+  "correct": 48,
+  "withheld_redline": 1
+ },
+ "links": {
+  "verified:confirmed": 10
+ },
+ "discrepancy_count": 7
+}

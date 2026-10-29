@@ -92,10 +92,16 @@ class TableCell(BaseModel):
     confidence: float = 0.0
     bbox: BoundingBox | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
+    # Phase 2B structure (defaults keep older serialized representations valid).
+    row_span: int = 1
+    col_span: int = 1
+    is_column_header: bool = False
 
 
 class ExtractedTable(BaseModel):
     page_number: int
+    # Stable within one representation, e.g. "docling:#/tables/3" or "native:p2-t1".
+    table_id: str | None = None
     row_count: int = 0
     column_count: int = 0
     headers: list[str] = Field(default_factory=list)
@@ -140,6 +146,10 @@ class DocumentRepresentation(BaseModel):
     warnings: list[NormalizationWarning] = Field(default_factory=list)
     normalization_metrics: NormalizationMetrics = Field(default_factory=NormalizationMetrics)
     document_metadata: dict[str, Any] = Field(default_factory=dict)
+    # Phase 2B: producer identity and whether bboxes are real coordinates.
+    backend_version: str | None = None
+    representation_version: str | None = None
+    coordinates_available: bool | None = None
 
 
 class DocumentFingerprintResult(BaseModel):

@@ -1,0 +1,111 @@
+{
+  "base_commit": "2555e98",
+  "python_scope": [
+    {
+      "file": "bench/score_segmentation.py",
+      "existing_functions_or_methods_changed": [],
+      "new_functions_or_methods": [
+        "ratio",
+        "boundary_score",
+        "score_components",
+        "cached_pages",
+        "main"
+      ],
+      "removed": [],
+      "sha256": "cdbd4c6bde23660f7bee424bb0792f0b179b0f7f0b6292b9e5f5baa8e67e490d"
+    },
+    {
+      "file": "src/duke_rates/db/artifact_cache.py",
+      "existing_functions_or_methods_changed": [
+        "save_page_artifacts",
+        "load_page_artifacts",
+        "save_span_artifacts",
+        "load_span_artifacts"
+      ],
+      "new_functions_or_methods": [],
+      "removed": [],
+      "sha256": "a0cffd5f6af43b933f8002c7940321e938656e3aa5ff104f11ff550781fbb33a"
+    },
+    {
+      "file": "src/duke_rates/historical/ncuc/importer.py",
+      "existing_functions_or_methods_changed": [
+        "NcucPipelineImporter.mine_discovery_record_spans",
+        "NcucPipelineImporter.mine_discovery_record_spans_with_pages"
+      ],
+      "new_functions_or_methods": [],
+      "removed": [],
+      "sha256": "2e40a167332f4aee12411417d250717fa0156f5428e5ea14392ff94e82d3dff0"
+    },
+    {
+      "file": "src/duke_rates/historical/ncuc/pipeline/segmentation.py",
+      "existing_functions_or_methods_changed": [
+        "_classify_page_doc_type",
+        "segment_document"
+      ],
+      "new_functions_or_methods": [
+        "_own_sheet_lines",
+        "_page_kind",
+        "_is_table_continuation",
+        "_page_observation",
+        "_merge_boundary_evidence",
+        "_own_leaf_numbers"
+      ],
+      "removed": [],
+      "sha256": "925da87e58452df05a5c261fd9c596785cd6a7c1827c0e6f47894305de5cf4c1"
+    },
+    {
+      "file": "src/duke_rates/historical/ncuc/pipeline/stage_versions.py",
+      "existing_functions_or_methods_changed": [],
+      "new_functions_or_methods": [],
+      "removed": [],
+      "sha256": "2994822c950c2992f60d75c124afdd320081fb17aeaddb8661ccf9aa1dc3f966"
+    },
+    {
+      "file": "src/duke_rates/historical/ncuc/pipeline/triage.py",
+      "existing_functions_or_methods_changed": [
+        "triage_pdf"
+      ],
+      "new_functions_or_methods": [],
+      "removed": [],
+      "sha256": "157c1bbc72e5383cb0936b0a0a7ead44925fff51c5953c4a2a4c0792253bf4f8"
+    },
+    {
+      "file": "src/duke_rates/models/pipeline.py",
+      "existing_functions_or_methods_changed": [],
+      "new_functions_or_methods": [],
+      "removed": [],
+      "sha256": "50a3f3bdfe60d22e4254f09983ac654026f2b5e7c6e09813c11b12b80f5e4ca7"
+    },
+    {
+      "file": "tests/test_d7_segmentation_checkpoint.py",
+      "existing_functions_or_methods_changed": [],
+      "new_functions_or_methods": [
+        "page",
+        "test_body_leaf_reference_cannot_merge_two_distinct_own_leaves",
+        "test_rate_vocabulary_in_legal_or_calculation_pages_is_not_a_tariff",
+        "test_formal_sheet_ends_before_a_following_order",
+        "test_headerless_credit_table_keeps_single_leaf_ownership_with_nbsp",
+        "test_ambiguous_original_page_ownership_is_rejected",
+        "test_missing_page_gap_is_not_bridged_even_when_the_leaf_matches",
+        "test_cache_roundtrip_preserves_flags_and_separate_segmentation_evidence",
+        "test_triage_uses_sampled_pages_instead_of_total_page_count",
+        "test_importer_never_binds_non_tariff_span_even_with_a_strong_family_match"
+      ],
+      "removed": [],
+      "sha256": "5d31959129922c43b3d1bb125e84140026705fb8c9152f9490bf459ce40536ea"
+    },
+    {
+      "file": "tests/test_ocr_benchmark_report.py",
+      "existing_functions_or_methods_changed": [
+        "test_build_ocr_benchmark_nc_report_groups_backend_and_outcomes"
+      ],
+      "new_functions_or_methods": [],
+      "removed": [],
+      "sha256": "0cd2573253ddb8d761621a7539dbc50e1ad9b0e6e4caff4744e252a71d2453cb"
+    }
+  ],
+  "existing_functions_or_methods_changed": 10,
+  "data_model_change": "TariffSpan.segmentation_evidence, default empty dictionary",
+  "numeric_or_billing_files_changed": false,
+  "db_archive_env_or_dependency_files_staged": []
+}

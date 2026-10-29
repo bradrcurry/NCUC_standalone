@@ -145,11 +145,19 @@ def _populate_billing_summary(text: str, bill: BillStatementData) -> None:
 
 def _parse_bill_section(text: str, section_name: str, bill_date: date | None) -> BillSection | None:
     headers = ["Lighting", "Electric", "Taxes"]
+    continued_header = f"Billing details - {section_name} continued"
     next_headers = [f"Billing details - {name}" for name in headers if name != section_name]
     next_headers.extend(["For a complete listing", "A rider is a mechanism used"])
-    block = _extract_block(text, f"Billing details - {section_name}", next_headers)
+    block = _extract_block(text, f"Billing details - {section_name}", [*next_headers, continued_header])
     if not block:
         return None
+    # A section that overflows its page resumes under "... continued" on the next
+    # page with its trailing riders and the section total (2026-03-20 bill, page 4).
+    search_from = 0
+    while (start := text.find(continued_header, search_from)) != -1:
+        continued = _extract_block(text[start:], continued_header, next_headers)
+        block = f"{block}\n{continued}"
+        search_from = start + len(continued_header)
 
     lines = [line.strip() for line in block.splitlines() if line.strip()]
     section = BillSection(name=section_name)

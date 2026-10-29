@@ -164,6 +164,141 @@ class DocParamSearchResult:
 
 
 # ---------------------------------------------------------------------------
+# Search outcome (Phase 2E D2)
+# ---------------------------------------------------------------------------
+
+#: The search walked every result page the portal offered, or the portal said 0 items.
+COMPLETE_STOP_REASONS = ("last_page", "single_page", "empty_result", "inventory_complete")
+#: Results were returned but more may exist. Never negative evidence.
+INCOMPLETE_STOP_REASONS = (
+    "max_results_cap", "page_cap", "pagination_error", "stale_grid", "item_count_mismatch",
+    # D3 live pilot: "NO RESULTS FOUND" for a docket-filtered query is not evidence the docket
+    # has no such filing: 9/9 docket-scoped ORDER queries came back empty, including the E-7 Sub 1026
+    # rate case (docs/NCUC_PORTAL_WORKING_METHOD.md records the same for TARIFF queries).
+    "docket_scoped_empty",
+    "inventory_first_page_only",
+)
+BLOCKED_STOP_REASONS = ("blocked_initial", "blocked_pagination")
+#: The query did not run as requested (or its result page was not recognised).
+ERROR_STOP_REASONS = ("form_unavailable", "filter_not_applied", "submit_error", "unrecognized_page",
+                      "docket_not_resolved", "docket_ambiguous")
+
+
+class PortalSearchError(RuntimeError):
+    """A search that could not run as requested (blocked, unfiltered, unrecognised page)."""
+
+    def __init__(self, message: str, outcome: "DocParamSearchOutcome"):
+        super().__init__(message)
+        self.outcome = outcome
+
+
+@dataclass
+class DocParamSearchOutcome:
+    """What a DocumentsParameterSearch query returned and why it stopped."""
+
+    results: list[DocParamSearchResult]
+    stop_reason: str
+    pages_reached: int = 0
+    pages_total: int | None = None
+    items_reported: int | None = None        # the portal's own "Items Count: N"
+    filter_requested: list[str] = field(default_factory=list)
+    filter_verified: bool | None = None       # None: no filter requested
+    grid_signatures: list[str] = field(default_factory=list)
+    error: str | None = None
+
+    @property
+    def complete(self) -> bool:
+        return self.stop_reason in COMPLETE_STOP_REASONS
+
+    @property
+    def ledger_outcome(self) -> str:
+        """``search_attempts.outcome`` for this search."""
+        if self.stop_reason in BLOCKED_STOP_REASONS:
+            return "blocked"
+        if self.stop_reason in ERROR_STOP_REASONS:
+            return "error"
+        if self.stop_reason in INCOMPLETE_STOP_REASONS:
+            return "incomplete"
+        return "hits" if self.results else "no_results"
+
+    def summary(self) -> dict:
+        return {
+            "stop_reason": self.stop_reason, "pages_reached": self.pages_reached,
+            "pages_total": self.pages_total, "items_reported": self.items_reported,
+            "result_count": len(self.results), "filter_requested": self.filter_requested,
+            "filter_verified": self.filter_verified, "error": self.error,
+        }
+
+
+# ---------------------------------------------------------------------------
+# Page state (pure functions over captured HTML)
+# ---------------------------------------------------------------------------
+
+_ITEMS_COUNT_RE = re.compile(r"Items\s+Count:\s*([\d,]+)", re.I)
+_NO_RECORDS_RE = re.compile(r"No\s+(?:records|documents|items|results)\s+(?:were\s+)?found", re.I)
+_RESULTS_PAGE_SIZE = 10  # rows per grid page on the captured results page
+
+
+def is_blocked_page(title: str, html: str) -> bool:
+    """Cloudflare challenge or access-denied page instead of the portal."""
+    low = (html or "").lower()
+    return (
+        "just a moment" in (title or "").lower()
+        or "checking your browser" in low
+        or "cf-challenge" in low
+        or "attention required! | cloudflare" in low
+        or ("403 forbidden" in low and "pscdocumentsearchcontrol1" not in low)
+    )
+
+
+def items_reported(html: str) -> int | None:
+    """The portal's own total ("Items Count: 211"), when printed."""
+    m = _ITEMS_COUNT_RE.search(html or "")
+    return int(m.group(1).replace(",", "")) if m else None
+
+
+def results_grid_present(html: str) -> bool:
+    return "PSCDocumentSearchControl1_resultsGrid" in (html or "")
+
+
+def explicit_empty_result(html: str) -> bool:
+    """The portal says the query matched nothing (not merely: no rows parsed)."""
+    count = items_reported(html)
+    return count == 0 or (count is None and bool(_NO_RECORDS_RE.search(html or "")))
+
+
+def pager_current_page(html: str) -> int | None:
+    """Current page number: the pager row's un-linked number (``<span>1</span>``)."""
+    soup = BeautifulSoup(html or "", "lxml")
+    link = next((a for a in soup.find_all("a") if "resultsGrid" in a.get("href", "")
+                 and "__doPostBack" in a.get("href", "")), None)
+    if link is None:
+        return None
+    cell = link.find_parent("td")
+    for span in cell.find_all("span") if cell else []:
+        text = span.get_text(strip=True)
+        if text.isdigit():
+            return int(text)
+    return None
+
+
+def grid_signature(html: str) -> str:
+    """Identity of the rows on a result page: ordered document ids (or descriptions)."""
+    import hashlib
+
+    rows = _parse_results_page(html or "", "")
+    keys = [r.document_id or r.description[:60] for r in rows]
+    return hashlib.sha256("|".join(keys).encode("utf-8")).hexdigest()[:16] if keys else ""
+
+
+def filing_type_list_disabled(html: str) -> bool | None:
+    """True while the filing-type list waits for the checkbox auto-postback."""
+    soup = BeautifulSoup(html or "", "lxml")
+    sel = soup.find("select", attrs={"name": re.compile(r"filingTypesList$")})
+    return None if sel is None else sel.has_attr("disabled")
+
+
+# ---------------------------------------------------------------------------
 # Main searcher class
 # ---------------------------------------------------------------------------
 
@@ -202,10 +337,68 @@ class DocumentParamSearcher:
             max_results: Maximum number of result rows to collect
 
         Returns:
-            List of DocParamSearchResult objects
+            List of DocParamSearchResult objects. How the search stopped is
+            kept on ``self.last_outcome`` (see :meth:`search_with_outcome`).
+
+        Raises:
+            RuntimeError (:class:`PortalSearchError`) when the portal is blocked
+            on load, or the query could not run as requested (filing-type filter
+            not applied, form missing, unrecognised result page). Results already
+            collected when pagination fails are returned, as before.
+        """
+        outcome = self.search_with_outcome(
+            page,
+            company_name=company_name,
+            docket_number=docket_number,
+            filing_types=filing_types,
+            date_after=date_after,
+            date_before=date_before,
+            max_results=max_results,
+        )
+        if outcome.stop_reason == "blocked_initial":
+            raise PortalSearchError(
+                f"Cloudflare blocked DocumentsParameterSearch ({outcome.error}). "
+                "Ensure authenticated context is active.",
+                outcome,
+            )
+        if outcome.stop_reason in ERROR_STOP_REASONS:
+            raise PortalSearchError(
+                f"DocumentsParameterSearch did not run as requested: {outcome.stop_reason} ({outcome.error})",
+                outcome,
+            )
+        return outcome.results
+
+    def search_with_outcome(
+        self,
+        page: "Page",
+        *,
+        company_name: str = "Duke Energy Progress",
+        docket_number: str = "",
+        filing_types: list[str] | None = None,
+        date_after: str = "",
+        date_before: str = "",
+        max_results: int = 2000,
+        max_pages: int = 100,
+        grid_wait_seconds: float = 20.0,
+    ) -> DocParamSearchOutcome:
+        """Run one query and report how it ended; never raises for portal states.
+
+        Differences from the pre-D2 loop, each recorded on the outcome:
+
+        * The filing-type list is selected only after the checkbox auto-postback
+          has enabled it, and the selection is read back. If it cannot be
+          verified the query is **not** submitted (``filter_not_applied``):
+          the old code silently ran it unfiltered.
+        * Text fields are filled after that postback and read back.
+        * After each pagination postback the grid must show a new page number
+          and new rows (``stale_grid`` otherwise) instead of a fixed sleep.
+        * Rows already collected are not added twice, and the portal's
+          "Items Count" is compared with the rows collected.
         """
         if filing_types is None:
             filing_types = ["TARIFF", "RATESCED"]
+        self.last_outcome = outcome = DocParamSearchOutcome(results=[], stop_reason="submit_error",
+                                                            filter_requested=list(filing_types))
 
         logger.info(
             "DocumentParamSearch: company=%r types=%s docket=%r after=%r",
@@ -213,68 +406,69 @@ class DocumentParamSearcher:
         )
 
         page.goto(DOCUMENT_SEARCH_URL, wait_until="domcontentloaded", timeout=60000)
-        time.sleep(2)
+        self._sleep(2)
 
         title = page.title()
-        if "Just a moment" in title or "checking your browser" in page.content().lower():
-            raise RuntimeError(
-                f"Cloudflare blocked DocumentsParameterSearch (title={title!r}). "
-                "Ensure authenticated context is active."
-            )
+        html = page.content()
+        if is_blocked_page(title, html):
+            outcome.stop_reason, outcome.error = "blocked_initial", f"title={title!r}"
+            return outcome
 
         logger.info("DocumentsParameterSearch loaded: %r", title)
 
         # Discover the full ASP.NET naming-container prefix at runtime
         # (the ctl## portion can vary; the suffix _FIELD_* constants are fixed)
-        html = page.content()
+        if "PSCDocumentSearchControl1" not in html:
+            outcome.stop_reason, outcome.error = "form_unavailable", f"no search form (title={title!r})"
+            return outcome
         prefix = _discover_prefix(html)
         logger.debug("ASP.NET naming prefix: %r", prefix)
 
         def sel(suffix: str) -> str:
             return f'[name="{prefix}{suffix}"]'
 
-        # --- Fill form ---
-        if company_name:
-            try:
-                page.fill(sel(_FIELD_COMPANY), company_name)
-            except Exception as e:
-                logger.warning("Could not fill companyName: %s", e)
-
-        if docket_number:
-            try:
-                page.fill(sel(_FIELD_DOCKET), docket_number)
-            except Exception as e:
-                logger.warning("Could not fill docketNumber: %s", e)
-
-        if date_after:
-            try:
-                page.fill(sel(_FIELD_DATE_AFTER), date_after)
-            except Exception as e:
-                logger.warning("Could not fill filedOnOrAfterTextBox: %s", e)
-
-        if date_before:
-            try:
-                page.fill(sel(_FIELD_DATE_BEFORE), date_before)
-            except Exception as e:
-                logger.warning("Could not fill filedOnOrBeforeTextBox: %s", e)
-
-        # Check the filing types filter checkbox, then select GUIDs
+        # --- Filing-type filter first: the checkbox auto-posts back and re-renders the form ---
         if filing_types:
+            guids = [FILING_TYPE_GUIDS[ft] for ft in filing_types if ft in FILING_TYPE_GUIDS]
+            unknown = [ft for ft in filing_types if ft not in FILING_TYPE_GUIDS]
+            if unknown or not guids:
+                outcome.stop_reason, outcome.error = "filter_not_applied", f"unknown filing types {unknown}"
+                outcome.filter_verified = False
+                return outcome
             try:
                 cb_sel = sel(_FIELD_FT_CHECKBOX)
                 if not page.is_checked(cb_sel):
                     page.check(cb_sel)
-                    time.sleep(0.5)
+                # The list stays disabled until the postback completes.
+                page.wait_for_selector(f"{sel(_FIELD_FT_LIST)}:not([disabled])", timeout=15000)
+                page.select_option(sel(_FIELD_FT_LIST), value=guids)
+                chosen = page.eval_on_selector(
+                    sel(_FIELD_FT_LIST), "el => Array.from(el.selectedOptions).map(o => o.value)"
+                )
+                outcome.filter_verified = sorted(chosen or []) == sorted(guids)
+                logger.debug("Selected filing type GUIDs: %s (read back %s)", guids, chosen)
             except Exception as e:
-                logger.warning("Could not check filterByFilingTypesCheckBox: %s", e)
+                outcome.filter_verified = False
+                outcome.error = f"{type(e).__name__}: {e}"
+            if not outcome.filter_verified:
+                outcome.stop_reason = "filter_not_applied"
+                outcome.error = outcome.error or "filing-type selection did not read back"
+                logger.warning("DocumentParamSearch: filter not applied, query not submitted (%s)", outcome.error)
+                return outcome
 
-            guids = [FILING_TYPE_GUIDS[ft] for ft in filing_types if ft in FILING_TYPE_GUIDS]
-            if guids:
-                try:
-                    page.select_option(sel(_FIELD_FT_LIST), value=guids)
-                    logger.debug("Selected filing type GUIDs: %s", guids)
-                except Exception as e:
-                    logger.warning("Could not select filingTypesList: %s", e)
+        # --- Fill text fields (after the postback, so they are not reset) ---
+        for value, suffix in ((company_name, _FIELD_COMPANY), (docket_number, _FIELD_DOCKET),
+                              (date_after, _FIELD_DATE_AFTER), (date_before, _FIELD_DATE_BEFORE)):
+            if not value:
+                continue
+            try:
+                page.fill(sel(suffix), value)
+                echoed = page.input_value(sel(suffix))
+                if echoed != value:
+                    raise ValueError(f"read back {echoed!r}")
+            except Exception as e:
+                outcome.stop_reason, outcome.error = "form_unavailable", f"{suffix}: {e}"
+                return outcome
 
         # --- Submit ---
         try:
@@ -282,46 +476,99 @@ class DocumentParamSearcher:
             page.wait_for_load_state("domcontentloaded", timeout=30000)
         except Exception as e:
             logger.warning("Search button click issue: %s", e)
-        time.sleep(3)
+        self._sleep(3)
 
-        # --- Parse results (all on one page — no pagination observed) ---
+        html = page.content()
+        if is_blocked_page(page.title(), html):
+            outcome.stop_reason, outcome.error = "blocked_initial", "challenge after submit"
+            return outcome
+        outcome.items_reported = items_reported(html)
+        if explicit_empty_result(html):
+            outcome.stop_reason = "docket_scoped_empty" if docket_number.strip() else "empty_result"
+            outcome.pages_reached = 1
+            return outcome
+        if not results_grid_present(html):
+            outcome.stop_reason = "unrecognized_page"
+            outcome.error = "no result grid and no empty-result statement after submit"
+            return outcome
+        if outcome.items_reported is not None:
+            outcome.pages_total = -(-outcome.items_reported // _RESULTS_PAGE_SIZE)
+
         all_results: list[DocParamSearchResult] = []
+        seen: set[str] = set()
         page_num = 1
 
         while True:
-            html = page.content()
             page_results = _parse_results_page(html, company_name)
+            outcome.grid_signatures.append(grid_signature(html))
+            outcome.pages_reached = page_num
+            new = [r for r in page_results if (r.document_id or r.description[:60]) not in seen]
+            seen.update(r.document_id or r.description[:60] for r in new)
             logger.info(
                 "Page %d: %d results (total so far: %d)",
-                page_num, len(page_results),
-                len(all_results) + len(page_results),
+                page_num, len(page_results), len(all_results) + len(new),
             )
-            all_results.extend(page_results)
+            all_results.extend(new)
 
             if len(all_results) >= max_results:
                 all_results = all_results[:max_results]
+                outcome.stop_reason = "max_results_cap"
                 break
 
             next_target = _find_next_page_target(html, current_page=page_num)
             if not next_target:
+                outcome.stop_reason = "last_page" if page_num > 1 or pager_current_page(html) else "single_page"
+                break
+            if page_num >= max_pages:
+                logger.warning("DocumentParamSearch: hit %d-page safety cap", max_pages)
+                outcome.stop_reason = "page_cap"
                 break
 
+            previous = outcome.grid_signatures[-1]
             try:
                 page.evaluate(f"__doPostBack('{next_target}', '')")
                 page.wait_for_load_state("domcontentloaded", timeout=20000)
-                time.sleep(2)
             except Exception as e:
-                logger.debug("Pagination postback failed: %s", e)
+                logger.warning("Pagination postback failed on page %d: %s", page_num + 1, e)
+                outcome.stop_reason, outcome.error = "pagination_error", f"{type(e).__name__}: {e}"
                 break
-
+            html, state = self._await_grid_page(page, page_num + 1, previous, grid_wait_seconds)
+            if state != "ok":
+                outcome.stop_reason = state
+                outcome.error = f"page {page_num + 1}: {state}"
+                break
             page_num += 1
-            if page_num > 100:
-                logger.warning("DocumentParamSearch: hit 100-page safety cap")
-                break
+
+        if outcome.stop_reason in COMPLETE_STOP_REASONS and outcome.items_reported is not None \
+                and len(all_results) < min(outcome.items_reported, max_results):
+            outcome.stop_reason = "item_count_mismatch"
+            outcome.error = f"portal reports {outcome.items_reported} items, {len(all_results)} collected"
 
         _enrich_results(all_results)
-        logger.info("DocumentParamSearch: %d total results", len(all_results))
-        return all_results
+        outcome.results = all_results
+        logger.info("DocumentParamSearch: %d total results (%s)", len(all_results), outcome.stop_reason)
+        return outcome
+
+    def _await_grid_page(self, page: "Page", expected_page: int, previous_signature: str,
+                         timeout: float) -> tuple[str, str]:
+        """Wait until the grid shows ``expected_page`` with rows different from the last page."""
+        waited, html = 0.0, ""
+        while True:
+            html = page.content()
+            if is_blocked_page(page.title(), html):
+                return html, "blocked_pagination"
+            signature = grid_signature(html)
+            current = pager_current_page(html)
+            if signature and signature != previous_signature and current in (expected_page, None):
+                return html, "ok"
+            if waited >= timeout:
+                return html, "stale_grid"
+            self._sleep(0.5)
+            waited += 0.5
+
+    def _sleep(self, seconds: float) -> None:
+        time.sleep(seconds)
+
 
     def search_tariff_schedules(
         self,
@@ -535,6 +782,10 @@ def _find_next_page_target(html: str, *, current_page: int) -> str | None:
     explicit ``Next`` link.  The current page number is omitted from the pager,
     so we look for the next numeric page first and fall back to the ellipsis
     control when advancing past the visible page window.
+
+    Past the first window the pager also has a *leading* ellipsis that goes
+    back ("... 21 22"). Only an ellipsis after the last numbered entry
+    advances; on the last page there is none, so the walk ends.
     """
     soup = BeautifulSoup(html, "lxml")
     numeric_targets: dict[int, str] = {}
@@ -551,6 +802,7 @@ def _find_next_page_target(html: str, *, current_page: int) -> str | None:
         target = m.group(1)
         if text.isdigit():
             numeric_targets[int(text)] = target
+            ellipsis_target = None  # an ellipsis before a number is the leading (backward) one
         elif text == "...":
             ellipsis_target = target
 

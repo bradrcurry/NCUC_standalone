@@ -119,7 +119,10 @@ def _load_cached_docling_artifact(
     # --- DB-first lookup ---
     if conn is not None:
         try:
-            from duke_rates.db.artifact_cache import load_docling_artifact
+            from duke_rates.db.artifact_cache import (
+                docling_artifact_is_degraded,
+                load_docling_artifact,
+            )
             db_hash = expected_hash  # may be None
             row = load_docling_artifact(
                 conn,
@@ -128,6 +131,11 @@ def _load_cached_docling_artifact(
                 backend_version=DOCLING_BACKEND_VERSION,
                 accelerator=accelerator,
             )
+            # A degraded conversion (OCR/tables switched off) must not satisfy
+            # a request for a full-quality conversion.
+            if row and docling_artifact_is_degraded(row.get("metadata_json")):
+                logger.debug("Docling cache miss: cached artifact is degraded for %s", file_path)
+                row = None
             if row and row.get("status") == "success":
                 row_pipeline = row.get("pipeline") or PIPELINE_STANDARD
                 if row_pipeline == pipeline:
@@ -168,6 +176,10 @@ def _load_cached_docling_artifact(
     if payload.get("accelerator") not in {None, accelerator}:
         return None
     if payload.get("pipeline") not in {None, pipeline}:
+        return None
+    from duke_rates.db.artifact_cache import docling_artifact_is_degraded
+    if docling_artifact_is_degraded(payload):
+        logger.debug("Docling cache miss: sidecar artifact is degraded for %s", file_path)
         return None
     payload["_source"] = "sidecar"
     return payload

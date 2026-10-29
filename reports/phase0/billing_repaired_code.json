@@ -1,0 +1,150 @@
+{
+ "label": "repaired_code",
+ "summary": {
+  "bill_count": 12,
+  "usage_xml_path": "C:\\Python\\Duke\\Standalone\\data\\usage\\Energy Usage.xml",
+  "status_counts": {
+   "close_match": 1,
+   "good_match": 5,
+   "poor_match": 6
+  },
+  "good_match_count": 5,
+  "close_match_count": 1,
+  "tou_needs_work_count": 0,
+  "max_abs_total_delta": 7.26
+ },
+ "bills": [
+  {
+   "bill_date": "2025-04-21",
+   "rate_code": "RES",
+   "bill_kwh": 821.0,
+   "actual_electric_total_fallback": 121.15,
+   "estimated_electric_total": 125.07,
+   "total_delta": -3.92,
+   "summary_rider_estimated": 16.01,
+   "summary_rider_delta": 0.01,
+   "status": null
+  },
+  {
+   "bill_date": "2025-05-20",
+   "rate_code": "RES",
+   "bill_kwh": 1460.0,
+   "actual_electric_total_fallback": 215.67,
+   "estimated_electric_total": 222.66,
+   "total_delta": -6.99,
+   "summary_rider_estimated": 28.47,
+   "summary_rider_delta": 0.0,
+   "status": null
+  },
+  {
+   "bill_date": "2025-06-19",
+   "rate_code": "RES",
+   "bill_kwh": 1316.0,
+   "actual_electric_total_fallback": 195.94,
+   "estimated_electric_total": 202.23,
+   "total_delta": -6.29,
+   "summary_rider_estimated": 25.66,
+   "summary_rider_delta": 0.0,
+   "status": null
+  },
+  {
+   "bill_date": "2025-07-21",
+   "rate_code": "RES",
+   "bill_kwh": 1520.0,
+   "actual_electric_total_fallback": 223.61,
+   "estimated_electric_total": 230.87,
+   "total_delta": -7.26,
+   "summary_rider_estimated": 29.64,
+   "summary_rider_delta": 0.02,
+   "status": null
+  },
+  {
+   "bill_date": "2025-08-20",
+   "rate_code": "RES",
+   "bill_kwh": 1379.0,
+   "actual_electric_total_fallback": 204.08,
+   "estimated_electric_total": 210.68,
+   "total_delta": -6.6,
+   "summary_rider_estimated": 26.89,
+   "summary_rider_delta": 0.01,
+   "status": null
+  },
+  {
+   "bill_date": "2025-09-19",
+   "rate_code": "RES",
+   "bill_kwh": 1130.0,
+   "actual_electric_total_fallback": 170.01,
+   "estimated_electric_total": 175.44,
+   "total_delta": -5.43,
+   "summary_rider_estimated": 22.04,
+   "summary_rider_delta": -0.01,
+   "status": null
+  },
+  {
+   "bill_date": "2025-10-21",
+   "rate_code": "RES",
+   "bill_kwh": 876.0,
+   "actual_electric_total_fallback": 136.94,
+   "estimated_electric_total": 138.76,
+   "total_delta": -1.82,
+   "summary_rider_estimated": 17.08,
+   "summary_rider_delta": 0.0,
+   "status": null
+  },
+  {
+   "bill_date": "2025-11-19",
+   "rate_code": "RES",
+   "bill_kwh": 813.0,
+   "actual_electric_total_fallback": 131.22,
+   "estimated_electric_total": 131.19,
+   "total_delta": 0.03,
+   "summary_rider_estimated": 15.85,
+   "summary_rider_delta": 0.03,
+   "status": null
+  },
+  {
+   "bill_date": "2025-12-18",
+   "rate_code": "RES",
+   "bill_kwh": 1234.0,
+   "actual_electric_total_fallback": 188.78,
+   "estimated_electric_total": 189.23,
+   "total_delta": -0.45,
+   "summary_rider_estimated": 25.06,
+   "summary_rider_delta": -0.45,
+   "status": null
+  },
+  {
+   "bill_date": "2026-01-21",
+   "rate_code": "RES",
+   "bill_kwh": 1300.0,
+   "actual_electric_total_fallback": 198.74,
+   "estimated_electric_total": 199.14,
+   "total_delta": -0.4,
+   "summary_rider_estimated": 27.26,
+   "summary_rider_delta": -0.4,
+   "status": null
+  },
+  {
+   "bill_date": "2026-02-18",
+   "rate_code": "RES",
+   "bill_kwh": 2405.0,
+   "actual_electric_total_fallback": 348.57,
+   "estimated_electric_total": 348.57,
+   "total_delta": 0.0,
+   "summary_rider_estimated": 50.43,
+   "summary_rider_delta": 0.0,
+   "status": null
+  },
+  {
+   "bill_date": "2026-03-20",
+   "rate_code": "R-TOU-CPP",
+   "bill_kwh": 1290.583,
+   "actual_electric_total_fallback": 145.98,
+   "estimated_electric_total": 145.99,
+   "total_delta": -0.01,
+   "summary_rider_estimated": null,
+   "summary_rider_delta": null,
+   "status": null
+  }
+ ]
+}

@@ -1,0 +1,398 @@
+# Tariff-extraction benchmark corpus v0 (ground truth in bench/expected/<doc_id>.json).
+# Ground truth transcribed from source PDFs only (text layer + rendered page images); never from DB charge tables or repo parsers.
+# pages = 1-based [first,last] PDF pages transcribed. bench_pdf is null when the source PDF is >= 3 MB (use source_path).
+docs:
+  - doc_id: dep_leaf600_2026-06-01
+    category: "A"
+    title: "DEP NC Tenth Revised Leaf No. 600 Summary of Rider Adjustments (eff 2026-06-01)"
+    source_path: "data/raw/nc/progress/rider/leaf-600-eff-2026-06-01.pdf"
+    bench_pdf: "bench/pdfs/dep_leaf600_2026-06-01.pdf"
+    sha256: 84c7962c2fa262e7d5f64d408fdef3deacd080a22ee445eb9ecbd0c7a9f0d474
+    size_bytes: 302408
+    pdf_page_count: 5
+    pages: [1, 5]
+    hd_id: null
+    hd_bounds: null
+    family_key: "nc-progress-leaf-600"
+    why_selected: "A: checksum-bearing current rider summary; June 2026 layout that broke the coordinate parser"
+    expected_zero: false
+    expected_charges: 135
+  - doc_id: dep_leaf600_2026-04-01
+    category: "A"
+    title: "DEP NC Ninth Revised Leaf No. 600 Summary of Rider Adjustments (eff 2026-04-01)"
+    source_path: "tests/fixtures/docling/dep_leaf600_2026-04-01.pdf"
+    bench_pdf: "bench/pdfs/dep_leaf600_2026-04-01.pdf"
+    sha256: 1081b1797915e179ae80478e8376de6896e2649a7d64f81259362e81eb609caa
+    size_bytes: 274828
+    pdf_page_count: 5
+    pages: [1, 5]
+    hd_id: null
+    hd_bounds: null
+    family_key: "nc-progress-leaf-600"
+    why_selected: "A: previous revision for version-continuity checks; existing Docling test fixture"
+    expected_zero: false
+    expected_charges: 135
+  - doc_id: dec_leaf99_2026-06-01
+    category: "A"
+    title: "DEC NC Sixty-Seventh Revised Leaf No. 99 Summary of Rider Adjustments (eff 2026-06-01)"
+    source_path: "data/raw/nc/carolinas/rider/leaf-99-eff-2026-06-01.pdf"
+    bench_pdf: "bench/pdfs/dec_leaf99_2026-06-01.pdf"
+    sha256: 7cec508961340839ceb2dba57fd916175ced3e4bf93a40f875e2246c9b71fee5
+    size_bytes: 172431
+    pdf_page_count: 3
+    pages: [1, 3]
+    hd_id: null
+    hd_bounds: null
+    family_key: "nc-carolinas-rider-SUMMARY"
+    why_selected: "A: current DEC summary; Baseline/Incremental columns"
+    expected_zero: false
+    expected_charges: 90
+  - doc_id: dec_blk307_rev63
+    category: "B"
+    title: "DEC NC Sixty-Third Revised Leaf No. 99 Summary of Rider Adjustments (eff 2025-01-01) [blk307]"
+    source_path: "data/processed/search_leads/downloads/dec_rider_summary_targets/34b967fb-527c-44aa-bc5a-78d01d74f758__DEC-NC Rider Summary - Rev. _ 63 _Eff. 01.01.2025 - Current_.pdf"
+    bench_pdf: "bench/pdfs/dec_blk307_rev63.pdf"
+    sha256: e9f06237dfc5891beee8e6a62837f5cb8ddda4116b10e22f997f553073edc10d
+    size_bytes: 238358
+    pdf_page_count: 2
+    pages: [1, 2]
+    hd_id: null
+    hd_bounds: null
+    family_key: "nc-carolinas-rider-SUMMARY"
+    why_selected: "B: blk 307 merged-section failure (Residential vs General Service leakage); contains a printed total that does not add up"
+    expected_zero: false
+    expected_charges: 90
+  - doc_id: dec_blk304_sub1285
+    category: "B"
+    title: "E-7 Sub 1285 DEC Rider Summary Compliance Tariffs (Leaf 99 Fifty-Ninth Rev, eff 2024-01-01) [blk304]"
+    source_path: "data/processed/search_leads/downloads/dec_rider_summary_targets/33bac29c-2fa3-4ad1-8e97-c23b76191960__E-7 Sub 1285 DEC Rider Summary Compliance Tariffs.pdf"
+    bench_pdf: "bench/pdfs/dec_blk304_sub1285.pdf"
+    sha256: 6456c0b061f558656bb72116de9cc160d4c83c83e460c3f2e345485740f98f3f
+    size_bytes: 447705
+    pdf_page_count: 6
+    pages: [3, 4]
+    hd_id: null
+    hd_bounds: null
+    family_key: "nc-carolinas-rider-SUMMARY"
+    why_selected: "B: blk 304; cover letter + clean + redline copies in one PDF (document bounding)"
+    expected_zero: false
+    expected_charges: 72
+  - doc_id: dep_blk13_sub1300
+    category: "B"
+    title: "E-2 Sub 1300 redline of DEP Leaf 600 Sixth Revised (eff 2025-04-01) [blk13]"
+    source_path: "data/historical/ncuc/e-2-sub-1300/176ad684-f629-4f33-b3d5-73873269be8e.pdf"
+    bench_pdf: "bench/pdfs/dep_blk13_sub1300.pdf"
+    sha256: 2746270ff4e1987ef6bb70b08fe2c9a75df72d93c3c68cb420a4e1885cb81375
+    size_bytes: 377050
+    pdf_page_count: 5
+    pages: [1, 5]
+    hd_id: null
+    hd_bounds: null
+    family_key: "nc-progress-leaf-600"
+    why_selected: "B: blk 13; HP/LGS-RTP $/kW JAA columns; redline with struck+inserted digits concatenated in text layer"
+    expected_zero: false
+    expected_charges: 135
+  - doc_id: dec_blk361_sub1146_fca
+    category: "B"
+    title: "E-7 Sub 1146 DEC Revised Fuel Cost Adjustment Rider filing (Leaf 99 Thirty-Third Rev, eff 2018-08-01) [blk361]"
+    source_path: "data/processed/search_leads/downloads/dec_2018_leaf99_target/3c16193b-55fd-4d9c-8ea1-c97fd1661a42__E-7 Sub 1146 DEC_s Revised Fuel Cost Adjustment Rider.pdf"
+    bench_pdf: "bench/pdfs/dec_blk361_sub1146_fca.pdf"
+    sha256: 7346216ba4f8e8170ce1bdaf2f2203edde1c39bbf9d2115d321e7c3fb1761350
+    size_bytes: 640668
+    pdf_page_count: 9
+    pages: [4, 5]
+    hd_id: null
+    hd_bounds: null
+    family_key: "nc-carolinas-rider-SUMMARY"
+    why_selected: "B: blk 361; summary embedded in a filing with cover letter, FCA rider redline/clean and a 4-page service list"
+    expected_zero: false
+    expected_charges: 72
+  - doc_id: hd0029_dep_res
+    category: "C"
+    title: "Residential Service (Leaf No. 500, eff. 2024-10-01)"
+    source_path: "data/historical/raw/nc/progress/rate/residential-service-leaf-no-500-eff-2024-10-01-data-historical-manual-leaf-no-50.pdf"
+    bench_pdf: "bench/pdfs/hd0029_dep_res.pdf"
+    sha256: 074fa60b12335960627025743859ce31cec59c28d52c4a4d4cb96d8efd21d373
+    size_bytes: 144399
+    pdf_page_count: 3
+    pages: [1, 3]
+    hd_id: 29
+    hd_bounds: [1, 3]
+    family_key: "nc-progress-leaf-500"
+    why_selected: "C: DEP Schedule RES base rates, seasonal + tiered (Docling body.children orphan case)"
+    expected_zero: false
+    expected_charges: 7
+  - doc_id: hd7378_dep_rtoud_2014
+    category: "C"
+    title: "Residential Service Time-of-Use Schedule R-TOUD (Smart Usage Select Option) (Span 59-67)"
+    source_path: "data/historical/ncuc/e-2-sub-1107/799dff1e-ce9e-4e73-a287-e53d08bc93e7.pdf"
+    bench_pdf: null
+    sha256: a4850072237e9db7195917622402699ef03e72c4f0220597ff7c2dc2c7c98dde
+    size_bytes: 3591820
+    pdf_page_count: 67
+    pages: [59, 67]
+    hd_id: 7378
+    hd_bounds: [59, 67]
+    family_key: "nc-progress-leaf-501"
+    why_selected: "C: R-TOUD hd known empty; turns out the span holds workpapers/testimony, no tariff (mis-bounded span)"
+    expected_zero: true
+    expected_charges: 0
+  - doc_id: hd3140_dep_rtoud44
+    category: "C"
+    title: "DEP Compliance Tariffs E-2 Sub 1143/1144/1146 - Schedule R-TOUD-44"
+    source_path: "data/historical/ncuc/e-2-sub-1146/cc3d5821-7db6-4442-b40e-47b9c271c59f.pdf"
+    bench_pdf: "bench/pdfs/hd3140_dep_rtoud44.pdf"
+    sha256: cd8ac04a830ded1c2029f1fac05e652c1bbb2a40dd662a20793fa19c1b3ffdac
+    size_bytes: 942208
+    pdf_page_count: 75
+    pages: [4, 6]
+    hd_id: 3140
+    hd_bounds: [4, 6]
+    family_key: "nc-progress-leaf-501"
+    why_selected: "C: SUBSTITUTE for hd 3199 (absent from snapshot): DEP R-TOUD-44 TOU demand + energy, seasonal"
+    expected_zero: false
+    expected_charges: 11
+  - doc_id: hd7380_dec_rs_scan
+    category: "C,G"
+    title: "RS (Span 4-5)"
+    source_path: "data/raw/historical/ncuc/e-7/e-7-nodate-duke-power-s-rate-schedule-riders.pdf"
+    bench_pdf: "bench/pdfs/hd7380_dec_rs_scan.pdf"
+    sha256: 91560cdc89b92f5c19dabb27dcf2d33100e69923bbbc488b4131309b75acc3b4
+    size_bytes: 2222040
+    pdf_page_count: 49
+    pages: [4, 5]
+    hd_id: 7380
+    hd_bounds: [4, 5]
+    family_key: "nc-carolinas-schedule-RS"
+    why_selected: "C+G: 2001 Duke Power Schedule RS scan; 4 categories x 2 seasons x 3 blocks; OCR turns cent sign into trailing 0"
+    expected_zero: false
+    expected_charges: 31
+  - doc_id: hd1875_dec_rs
+    category: "C"
+    title: "RS (Span 1-2)"
+    source_path: "data/historical/ncuc/e-7-sub-1276/a471be0b-5539-4696-999a-d250438b3589.pdf"
+    bench_pdf: "bench/pdfs/hd1875_dec_rs.pdf"
+    sha256: 85640f78da6e0cf9205741e877ed990a638982d2e5121e767a5641f7d6963bf1
+    size_bytes: 95985
+    pdf_page_count: 2
+    pages: [1, 2]
+    hd_id: 1875
+    hd_bounds: [1, 2]
+    family_key: "nc-carolinas-schedule-RS"
+    why_selected: "C: DEC Schedule RS by title (E-7 Sub 1276, eff 2025-01-01); flat energy charge + SSI rate"
+    expected_zero: false
+    expected_charges: 5
+  - doc_id: hd0179_jaa
+    category: "D"
+    title: "Joint Agency Asset Rider JAA"
+    source_path: "data/historical/raw/nc/progress/other/joint-agency-asset-rider-jaa-ncuc-viewfile-aspx-id-f9913a14-bbd0-4b63-a2ca-ef142.pdf"
+    bench_pdf: "bench/pdfs/hd0179_jaa.pdf"
+    sha256: 8b0b4361181964cdd36111a0d2b921ed43da1fdc43fcea7c9d765387bf4eba5d
+    size_bytes: 2320299
+    pdf_page_count: 19
+    pages: [1, 19]
+    hd_id: 179
+    hd_bounds: [1, 19]
+    family_key: "nc-progress-leaf-602"
+    why_selected: "D: JAA leaf-602 hd with empty profile; is a proof of publication (scanned) with PROPOSED rates in a notice"
+    expected_zero: true
+    expected_charges: 0
+  - doc_id: hd7365_jaa
+    category: "D"
+    title: "Joint Agency Asset Rider JAA (Span 27-41)"
+    source_path: "data/historical/ncuc/e-2-sub-1253/f596819a-b1ba-447f-985f-f42f2346139f.pdf"
+    bench_pdf: null
+    sha256: c48c62851e56ff653ba2dabe7d54cf2803aed3218a4465a5968e28b93b7018ac
+    size_bytes: 10018625
+    pdf_page_count: 118
+    pages: [27, 41]
+    hd_id: 7365
+    hd_bounds: [27, 41]
+    family_key: "nc-progress-leaf-602"
+    why_selected: "D: JAA hd with empty profile; rider calculation exhibits, not a tariff"
+    expected_zero: true
+    expected_charges: 0
+  - doc_id: hd5324_jaa
+    category: "D"
+    title: "Joint Agency Asset Rider JAA (Span 17-31)"
+    source_path: "data/historical/ncuc/e-2-sub-1207/32b7c724-edef-4a3a-bb45-85058c2ec503.pdf"
+    bench_pdf: null
+    sha256: 3e8067d223d94eabe1a7f34fb02a47156775ac4403f7cf06e85e6892bd430b05
+    size_bytes: 3480525
+    pdf_page_count: 110
+    pages: [17, 31]
+    hd_id: 5324
+    hd_bounds: [17, 31]
+    family_key: "nc-progress-leaf-602"
+    why_selected: "D: JAA hd with empty profile; scanned calculation exhibits, not a tariff"
+    expected_zero: true
+    expected_charges: 0
+  - doc_id: hd1882_jaa_rev3
+    category: "D"
+    title: "DEP NC Rider JAA Rev. 3 Eff. 12.01.2025 (Current)"
+    source_path: "data/downloads/ncuc_tariff/authenticated_portal/dep/E-2_Sub_1354/11-24-2025_60a79c31_E-2_Sub_1354_DEP_NC_Rider_JAA_-_Rev._3_Eff._12.01.2025_-_Current_clean.pdf"
+    bench_pdf: "bench/pdfs/hd1882_jaa_rev3.pdf"
+    sha256: c36cef61e6bc9bbb130c216ffe3de4f6afac25afa7ccfc8bc24fd2a7f74621b2
+    size_bytes: 794663
+    pdf_page_count: 1
+    pages: [1, 1]
+    hd_id: 1882
+    hd_bounds: [1, 1]
+    family_key: "nc-progress-leaf-602"
+    why_selected: "D: passing JAA leaf-602 tariff (Third Revised eff 2025-12-01); cross-checks Leaf 600 JAA rows"
+    expected_zero: false
+    expected_charges: 8
+  - doc_id: hd0378_cm
+    category: "E"
+    title: "Campground and Marina Rider CM (Span 156-156)"
+    source_path: "data/historical/ncuc/e-2-sub-1300-sept2023/3f92be50-2f10-4d4c-8952-2bccaa339aba.pdf"
+    bench_pdf: null
+    sha256: 7a5cbdce496e1dbafd60af074cc80a786dd9087fcd121c65d7e13981bf3c41a0
+    size_bytes: 15732561
+    pdf_page_count: 316
+    pages: [156, 156]
+    hd_id: 378
+    hd_bounds: [156, 156]
+    family_key: "nc-progress-leaf-646"
+    why_selected: "E: single-page rider inside 316-page 2015/2023 compliance bundle (Span 156)"
+    expected_zero: true
+    expected_charges: 0
+  - doc_id: hd0379_r28
+    category: "E"
+    title: "leaf-no-647-rider-28-ry1.pdf"
+    source_path: "data/raw/nc/progress/rider/leaf-no-647-rider-28-ry1-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no-647-r.pdf"
+    bench_pdf: "bench/pdfs/hd0379_r28.pdf"
+    sha256: d3081fca19d504412699090b1e10e074d3bab85e38530dcfef425b442cda38db
+    size_bytes: 101846
+    pdf_page_count: 1
+    pages: [1, 1]
+    hd_id: 379
+    hd_bounds: [1, 1]
+    family_key: "nc-progress-leaf-647"
+    why_selected: "E: single-page Rider 28 standalone PDF"
+    expected_zero: true
+    expected_charges: 0
+  - doc_id: hd7770_dec_riderlc
+    category: "G"
+    title: "RIDER LC (Span 16-24)"
+    source_path: "data/historical/ncuc/e-7-sub-1032/03f98414-1907-449a-be37-b4940c251112.pdf"
+    bench_pdf: "bench/pdfs/hd7770_dec_riderlc.pdf"
+    sha256: c1919843e386d8cfe3a13e7da153fdb162d1e175c3e5526bb9fa8b61cb59bf8b
+    size_bytes: 1433336
+    pdf_page_count: 24
+    pages: [16, 19]
+    hd_id: 7770
+    hd_bounds: [16, 24]
+    family_key: "nc-carolinas-rider-RIDERLC"
+    why_selected: "G: Carolinas RIDER LC incentive table (ncriderlc-pdf.pdf itself not in repo; this E-7 Sub 1032 copy has a clean text layer)"
+    expected_zero: false
+    expected_charges: 12
+  - doc_id: hd0396_ssr
+    category: "H"
+    title: "leaf-no-664-rider-ssr-ry1.pdf"
+    source_path: "data/raw/nc/progress/rider/leaf-no-664-rider-ssr-ry1-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no-664-.pdf"
+    bench_pdf: "bench/pdfs/hd0396_ssr.pdf"
+    sha256: f6f6f042bd1a741823197882a5f71ade69f0dc6ed68761bafd0d517e8c01a8a0
+    size_bytes: 68897
+    pdf_page_count: 2
+    pages: [1, 2]
+    hd_id: 396
+    hd_bounds: [1, 2]
+    family_key: "nc-progress-leaf-664"
+    why_selected: "H: no-profile family DEP 664 SSR"
+    expected_zero: true
+    expected_charges: 0
+  - doc_id: hd7295_car
+    category: "I"
+    title: "CAR (Span 1-6)"
+    source_path: "data/historical/ncuc/e-7-sub-1276/45916732-267e-40de-aebc-84690b9069d8.pdf"
+    bench_pdf: "bench/pdfs/hd7295_car.pdf"
+    sha256: 41890987738e72340a6e8d084fc7a5d3be42639fae80d229146c27fa2a9ea9ac
+    size_bytes: 1147052
+    pdf_page_count: 6
+    pages: [1, 6]
+    hd_id: 7295
+    hd_bounds: [1, 6]
+    family_key: "nc-carolinas-rider-CAR"
+    why_selected: "I: CAR classified as an order; actually a letter + rate-calculation attachment"
+    expected_zero: true
+    expected_charges: 0
+  - doc_id: hd0392_pps
+    category: "J"
+    title: "leaf-no-660-rider-pps-ry1.pdf"
+    source_path: "data/raw/nc/progress/rider/leaf-no-660-rider-pps-ry1-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no-660-.pdf"
+    bench_pdf: "bench/pdfs/hd0392_pps.pdf"
+    sha256: f8eee690b26bb4c99415d6a2ec33ff17b5b177f6be8915f85c9694d8a9b0b8a6
+    size_bytes: 122453
+    pdf_page_count: 5
+    pages: [1, 5]
+    hd_id: 392
+    hd_bounds: [1, 5]
+    family_key: "nc-progress-leaf-660"
+    why_selected: "J: negative control leaf-660 PPS - contains one $50 fee, so NOT fully zero"
+    expected_zero: false
+    expected_charges: 1
+  - doc_id: hd0403_cei
+    category: "J"
+    title: "leaf-no-672-rider-cei.pdf"
+    source_path: "data/raw/nc/progress/rider/leaf-no-672-rider-cei-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no-672-ride.pdf"
+    bench_pdf: "bench/pdfs/hd0403_cei.pdf"
+    sha256: d6ec750af522ebbaf4c52848f8778d0aafa0c93b10c50dd247b125bee7a4d892
+    size_bytes: 86443
+    pdf_page_count: 3
+    pages: [1, 3]
+    hd_id: 403
+    hd_bounds: [1, 3]
+    family_key: "nc-progress-leaf-672"
+    why_selected: "J: negative control leaf-672 CEI (price posted on website)"
+    expected_zero: true
+    expected_charges: 0
+  - doc_id: hd0408_rsnes
+    category: "J"
+    title: "leaf-no-703-program-rsnes.pdf"
+    source_path: "data/raw/nc/progress/rate/leaf-no-703-program-rsnes-pdf-media-pdfs-for-your-home-rates-dep-nc-leaf-no-703-.pdf"
+    bench_pdf: "bench/pdfs/hd0408_rsnes.pdf"
+    sha256: fe32a4705a14397f3158a25174a81d1906ccf1a668bd7b18ae6c4a29d78821f0
+    size_bytes: 105062
+    pdf_page_count: 2
+    pages: [1, 2]
+    hd_id: 408
+    hd_bounds: [1, 2]
+    family_key: "nc-progress-leaf-703"
+    why_selected: "J: negative control leaf-703 program description"
+    expected_zero: true
+    expected_charges: 0
+  - doc_id: hd0182_jaa_order
+    category: "J"
+    title: "Rule R8-70 for Approval of a Joint Agency Asset ) OF TIME Rider for Recovery of Joint Agency Asset Costs )"
+    source_path: "data/historical/raw/nc/progress/rider/rule-r8-70-for-approval-of-a-joint-agency-asset-of-time-rider-for-recovery-of-jo.pdf"
+    bench_pdf: "bench/pdfs/hd0182_jaa_order.pdf"
+    sha256: 3d7f2d5a0cfa3e11b3f5e33d77ab4150ea5d389be9d223211220a7da94b80c81
+    size_bytes: 125761
+    pdf_page_count: 3
+    pages: [1, 3]
+    hd_id: 182
+    hd_bounds: [1, 3]
+    family_key: "nc-progress-leaf-602"
+    why_selected: "J: negative control JAA docket procedural motion"
+    expected_zero: true
+    expected_charges: 0
+  - doc_id: hd7819_edit4_term
+    category: "J"
+    title: "Excess Deferred Income Tax Rider EDIT-4 (Terminated)"
+    source_path: "data/raw/nc/progress/rider/leaf-604-eff-2026-06-01.pdf"
+    bench_pdf: "bench/pdfs/hd7819_edit4_term.pdf"
+    sha256: 1e663d08a8c84ca17edd4da95e92e596bcb5df9cdf1b3bb1492fec6a0ff3804b
+    size_bytes: 78204
+    pdf_page_count: 1
+    pages: [1, 1]
+    hd_id: 7819
+    hd_bounds: [1, 1]
+    family_key: "nc-progress-leaf-604"
+    why_selected: "J: negative control EDIT-4 terminated 2026-06-01"
+    expected_zero: true
+    expected_charges: 0
+skipped:
+  - {requested: "hd 3199", reason: "not present in test snapshot (historical_documents has 682 rows, max id 7820); replaced by hd 3140"}
+  - {requested: "Carolinas RIDER LC ncriderlc-pdf.pdf", reason: "file not in repo; hd 7770 (E-7 Sub 1032 RIDER LC span) used instead"}
+  - {requested: "pre-2000 Carolinas scan", reason: "none found in snapshot; oldest Carolinas scan used is hd 7380 (eff 2001-07-01)"}

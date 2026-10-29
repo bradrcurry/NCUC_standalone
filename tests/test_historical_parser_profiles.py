@@ -8,6 +8,7 @@ from duke_rates.db.sqlite import connect
 from duke_rates.historical.ncuc.pipeline.bulk_extractor import BulkExtractor
 from duke_rates.historical.ncuc.pipeline.rate_extractor import ExtractedCharge
 from duke_rates.historical.ncuc.pipeline.parser_profiles import (
+    ProgressJaaRiderProfile,
     CarolinasCustomerAssistanceRecoveryProfile,
     CarolinasCurrentLeafBridgeProfile,
     CarolinasEnergyEfficiencyRiderProfile,
@@ -47,6 +48,10 @@ from duke_rates.historical.ncuc.pipeline.parser_profiles import (
     ProgressResidentialTouProfile,
     ProgressSunSenseSolarRebateProfile,
 )
+
+
+# Phase 2C: these tests assert tariff_charges, so they run with legacy replace.
+pytestmark = pytest.mark.usefixtures("legacy_replace_persistence")
 
 
 TOU_SEASONAL_TEXT = """\
@@ -1434,14 +1439,15 @@ def test_registry_selects_progress_single_value_rider_for_leaf_602_with_relaxed_
     Leaf No. 602
     """
 
+    # d5e6428 gave leaf-602 (JAA) a dedicated profile; the relaxed
+    # single-value routing this test was written for no longer applies.
     profile = registry.select(doc, text)
-    assert isinstance(profile, ProgressSingleValueRiderProfile)
-    assert profile.name == "progress_single_value_rider"
+    assert isinstance(profile, ProgressJaaRiderProfile)
+    assert profile.name == "progress_jaa_rider"
 
     ranked = registry.rank_candidates(doc, text)
-    assert ranked[0].name == "progress_single_value_rider"
-    assert "single_value_rider_family" in ranked[0].reasons
-    assert "relaxed_family_selection" in ranked[0].reasons
+    assert ranked[0].name == "progress_jaa_rider"
+    assert "jaa_family" in ranked[0].reasons
 
 
 def test_registry_selects_progress_single_value_rider_for_agency_asset_rider_variant() -> None:
@@ -3714,7 +3720,7 @@ Effective for bills rendered on and after December 1, 2025
         """
     ).fetchone()
     assert row is not None
-    assert row["parser_profile"] == "progress_single_value_rider"
+    assert row["parser_profile"] == "progress_jaa_rider"  # d5e6428: leaf-602 -> JAA profile
     assert row["status"] == "parsed"
     assert row["charge_count"] >= 4
     check.close()
@@ -4153,7 +4159,13 @@ def test_bulk_extractor_skips_reference_only_program_families_as_accepted(
         ),
         "test",
     )
-    monkeypatch.setattr(extractor, "classify_document", lambda title, text_sample: "tariff")
+    # process_document classifies through self.classifier.classify_with_result.
+    real_classify = extractor.classifier.classify_with_result
+    monkeypatch.setattr(
+        extractor.classifier,
+        "classify_with_result",
+        lambda title, text_sample: ("tariff", real_classify(title, text_sample)[1]),
+    )
 
     doc = extractor.get_document_for_extraction(historical_id)
     assert doc is not None
@@ -4565,12 +4577,20 @@ def test_bulk_extractor_run_extraction_respects_limit(tmp_path) -> None:
 
     extractor.get_documents_needing_extraction = lambda: list(docs)
     extractor.count_documents_missing_versions = lambda: 0
-    extractor.process_document = lambda doc: (doc["id"], doc["family_key"], 1, "ok", "test_profile")
+    # Phase 2C: run_extraction drives process_document_result.
+    from duke_rates.historical.ncuc.pipeline.bulk_extractor import ProcessResult
+
+    extractor.require_provenance_schema = lambda: None  # no database behind this test
+    extractor.process_document_result = lambda doc, **kw: ProcessResult(
+        doc["id"], doc["family_key"], "ok", "test_profile", extracted=1, inserted=1, run_id=7
+    )
 
     results = extractor.run_extraction(max_workers=1, limit=1)
 
     assert results["total_documents"] == 1
     assert results["documents_processed"] == 1
     assert results["total_charges_inserted"] == 1
+    assert results["total_charges_extracted"] == 1
+    assert results["candidate_runs"][0]["run_id"] == 7
     assert results["by_family"] == {"family-a": 1}
     assert results["status_counts"] == {"ok": 1}

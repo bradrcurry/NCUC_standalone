@@ -1,0 +1,8 @@
+{
+  "baseline_commit": "90be8be",
+  "baseline_exception": "identical first-match metadata optimization applied to both trees; same first normalized match, no clipping or regex change",
+  "modified_baseline_file": "scratch/d5_baseline_tree/src/duke_rates/historical/metadata.py",
+  "sha256_before": "64d8c595a51a7d24e88e7ed0e76bd979bcaeec7c174c2bbbee6179041b73e2a3",
+  "sha256_after": "6a1e31c297ba1421a2e2d7e6d6c2b45bf3c977294b25b2eb480af6875e447fc4",
+  "matches_current_metadata_module": true
+}

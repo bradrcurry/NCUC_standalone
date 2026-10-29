@@ -1,0 +1,315 @@
+{
+ "before": {
+  "tariff_versions": {
+   "rows": 988,
+   "sha256": "9bf86b9b6f0e4527ddf58e0247f4da8716b64f25468cbcefd54cd1b7388d19f3"
+  },
+  "historical_documents": {
+   "rows": 682,
+   "sha256": "60517538be2936195f7f2b09d8bbd4742dde607ef3ddd7c53c23a097150c386f"
+  },
+  "tariff_charges": {
+   "rows": 5198,
+   "sha256": "a37f23f99f8ffffb5a2b8bdbef2d11b54418eaf0193219edf5823d8e3b6c2555"
+  },
+  "lineage_links": {
+   "rows": 201,
+   "sha256": "2d616409b4c2c06543465c61b8a5e2baef926ac6ee6c3be0eecba114daddd8bc"
+  },
+  "lineage_gaps_typed": {
+   "rows": 691,
+   "sha256": "27e13e2b792744dc382944350dc0c7aa6177f2debb52ccd9bbb870e19f4bea19"
+  },
+  "document_assertions": {
+   "rows": 0,
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "effective_date_assessments": {
+   "rows": 578,
+   "sha256": "92d33571a2d980a09f2ae92e9b48a26bfcabeba471f8091475d752fba63ee6e5"
+  },
+  "gap_status": {
+   "candidate_found": 131,
+   "open": 321,
+   "searched_not_found": 165,
+   "verification_required": 58,
+   "verified": 16
+  }
+ },
+ "applied": [
+  {
+   "candidate": 461,
+   "proposal_id": 21,
+   "mode": "create_version",
+   "tariff_version_id": 7317,
+   "historical_document_id": 7825,
+   "created_version": true,
+   "previous_historical_document_id": null,
+   "charges_created": 0,
+   "charges_deleted": 0,
+   "post_apply_validation": {
+    "ok": true,
+    "pages_read": 5,
+    "printed_revisions": [
+     "NC:leaf-600:rev-4"
+    ]
+   },
+   "gap_before": {
+    "id": 1634,
+    "status": "verified",
+    "status_reason": "candidate identity verified against the page image (not bound; not resolved)",
+    "updated_at": "2026-10-29T01:26:25.150489Z"
+   }
+  },
+  {
+   "candidate": 399,
+   "proposal_id": 22,
+   "mode": "replace_redline_source",
+   "tariff_version_id": 6737,
+   "historical_document_id": 7826,
+   "created_version": false,
+   "previous_historical_document_id": 7212,
+   "charges_created": 0,
+   "charges_deleted": 0,
+   "post_apply_validation": {
+    "ok": true,
+    "pages_read": 2,
+    "printed_revisions": [
+     "NC:leaf-99:rev-62"
+    ]
+   },
+   "gap_before": {
+    "id": 1455,
+    "status": "verified",
+    "status_reason": "candidate identity verified against the page image (not bound; not resolved)",
+    "updated_at": "2026-10-29T01:26:23.486924Z"
+   }
+  },
+  {
+   "candidate": 417,
+   "proposal_id": 23,
+   "mode": "create_version",
+   "tariff_version_id": 7318,
+   "historical_document_id": 7827,
+   "created_version": true,
+   "previous_historical_document_id": null,
+   "charges_created": 0,
+   "charges_deleted": 0,
+   "post_apply_validation": {
+    "ok": true,
+    "pages_read": 4,
+    "printed_revisions": [
+     "NC:leaf-503:rev-1"
+    ]
+   },
+   "gap_before": {
+    "id": 1550,
+    "status": "verified",
+    "status_reason": "candidate identity verified against the page image (not bound; not resolved)",
+    "updated_at": "2026-10-29T01:26:21.772681Z"
+   }
+  },
+  {
+   "candidate": 569,
+   "proposal_id": 24,
+   "mode": "create_version",
+   "tariff_version_id": 7319,
+   "historical_document_id": 7828,
+   "created_version": true,
+   "previous_historical_document_id": null,
+   "charges_created": 0,
+   "charges_deleted": 0,
+   "post_apply_validation": {
+    "ok": true,
+    "pages_read": 3,
+    "printed_revisions": [
+     "NC:leaf-55:rev-57"
+    ]
+   },
+   "gap_before": {
+    "id": 1945,
+    "status": "verified",
+    "status_reason": "candidate identity verified against the page image (not bound; not resolved)",
+    "updated_at": "2026-10-29T01:26:20.040534Z"
+   }
+  }
+ ],
+ "blocked": [
+  {
+   "candidate": 459,
+   "state": "blocked",
+   "blocking_failures": [
+    "binding_mode_allowed"
+   ],
+   "mode": null,
+   "existing": [
+    7317
+   ]
+  },
+  {
+   "candidate": 570,
+   "state": "blocked",
+   "blocking_failures": [
+    "binding_mode_allowed"
+   ],
+   "mode": null,
+   "existing": [
+    7319
+   ]
+  },
+  {
+   "candidate": 483,
+   "state": "blocked",
+   "blocking_failures": [
+    "binding_mode_allowed"
+   ],
+   "mode": null,
+   "existing": []
+  },
+  {
+   "candidate": 576,
+   "state": "blocked",
+   "blocking_failures": [
+    "binding_mode_allowed"
+   ],
+   "mode": null,
+   "existing": []
+  },
+  {
+   "candidate": 540,
+   "state": "blocked",
+   "blocking_failures": [
+    "binding_mode_allowed"
+   ],
+   "mode": null,
+   "existing": [
+    6110,
+    6156
+   ]
+  },
+  {
+   "candidate": 554,
+   "state": "blocked",
+   "blocking_failures": [
+    "pages_not_redline"
+   ],
+   "mode": "create_version",
+   "existing": []
+  }
+ ],
+ "after_apply": {
+  "tariff_versions": {
+   "rows": 991,
+   "sha256": "8775cc138481dda2a9c5ee075a5c54eead4f37cf4bef0f17a25b626daeb4cf8d"
+  },
+  "historical_documents": {
+   "rows": 686,
+   "sha256": "663d972a7fb3e5e9ed79d1c27a3787697a61e416f531b3d17d334a25da4c8719"
+  },
+  "tariff_charges": {
+   "rows": 5198,
+   "sha256": "a37f23f99f8ffffb5a2b8bdbef2d11b54418eaf0193219edf5823d8e3b6c2555"
+  },
+  "lineage_links": {
+   "rows": 201,
+   "sha256": "2d616409b4c2c06543465c61b8a5e2baef926ac6ee6c3be0eecba114daddd8bc"
+  },
+  "lineage_gaps_typed": {
+   "rows": 691,
+   "sha256": "f49d0c23980ab17db33f8330c0317e84b143c699fe38ba19c2782eb79d1c538e"
+  },
+  "document_assertions": {
+   "rows": 0,
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "effective_date_assessments": {
+   "rows": 578,
+   "sha256": "92d33571a2d980a09f2ae92e9b48a26bfcabeba471f8091475d752fba63ee6e5"
+  },
+  "gap_status": {
+   "candidate_found": 131,
+   "open": 321,
+   "resolved": 4,
+   "searched_not_found": 165,
+   "verification_required": 58,
+   "verified": 12
+  }
+ },
+ "promotion": {
+  "run_id": 2,
+  "validation": {
+   "validation_id": 1,
+   "verdict": "pass",
+   "failed": [],
+   "overrides": []
+  },
+  "inserted": 125,
+  "total_rows": 14,
+  "version_status": "bound_pending_charges"
+ },
+ "early_rollback": "refused: tariff_charges changed after this proposal was applied (a charge promotion?); undo that first with `provenance rollback`, then roll back this proposal",
+ "unwind": [
+  {
+   "restored": true,
+   "charges_unchanged": true
+  },
+  {
+   "restored": true,
+   "charges_unchanged": true
+  },
+  {
+   "restored": true,
+   "charges_unchanged": true
+  },
+  {
+   "restored": true,
+   "charges_unchanged": true
+  }
+ ],
+ "after_unwind": {
+  "tariff_versions": {
+   "rows": 988,
+   "sha256": "9bf86b9b6f0e4527ddf58e0247f4da8716b64f25468cbcefd54cd1b7388d19f3"
+  },
+  "historical_documents": {
+   "rows": 682,
+   "sha256": "60517538be2936195f7f2b09d8bbd4742dde607ef3ddd7c53c23a097150c386f"
+  },
+  "tariff_charges": {
+   "rows": 5198,
+   "sha256": "a37f23f99f8ffffb5a2b8bdbef2d11b54418eaf0193219edf5823d8e3b6c2555"
+  },
+  "lineage_links": {
+   "rows": 201,
+   "sha256": "2d616409b4c2c06543465c61b8a5e2baef926ac6ee6c3be0eecba114daddd8bc"
+  },
+  "lineage_gaps_typed": {
+   "rows": 691,
+   "sha256": "27e13e2b792744dc382944350dc0c7aa6177f2debb52ccd9bbb870e19f4bea19"
+  },
+  "document_assertions": {
+   "rows": 0,
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "effective_date_assessments": {
+   "rows": 578,
+   "sha256": "92d33571a2d980a09f2ae92e9b48a26bfcabeba471f8091475d752fba63ee6e5"
+  },
+  "gap_status": {
+   "candidate_found": 131,
+   "open": 321,
+   "searched_not_found": 165,
+   "verification_required": 58,
+   "verified": 16
+  }
+ },
+ "identical_after_unwind": {
+  "tariff_versions": true,
+  "historical_documents": true,
+  "tariff_charges": true,
+  "lineage_links": true,
+  "lineage_gaps_typed": true,
+  "document_assertions": true,
+  "effective_date_assessments": true
+ }
+}

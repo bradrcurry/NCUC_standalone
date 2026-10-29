@@ -183,6 +183,30 @@ def test_promote_llm_charge_proposals_dry_run_and_execute(tmp_path):
     db_path = tmp_path / "test.sqlite"
     conn = _init_db(db_path)
     _insert_validated_row(conn)
+    # A validated model row needs a currently readable, bound source as well.
+    import hashlib
+    import fitz
+
+    pdf_path = tmp_path / "source.pdf"
+    with fitz.open() as doc:
+        page = doc.new_page()
+        page.insert_text((72, 100), "Energy Charge 6.0370 per on-peak kWh")
+        doc.save(pdf_path)
+    conn.execute("ALTER TABLE tariff_versions ADD COLUMN document_id INTEGER")
+    conn.execute(
+        "CREATE TABLE historical_documents (id INTEGER PRIMARY KEY, local_path TEXT, "
+        "content_hash TEXT, start_page INTEGER, end_page INTEGER)"
+    )
+    conn.execute(
+        "CREATE TABLE document_fingerprints (source_pdf TEXT, redline_confidence REAL, "
+        "redline_detector_version TEXT, is_redline_candidate INTEGER, red_is_index_only INTEGER, "
+        "page_start INTEGER, page_end INTEGER)"
+    )
+    conn.execute(
+        "INSERT INTO historical_documents VALUES (100, ?, ?, 1, 1)",
+        (str(pdf_path), hashlib.sha256(pdf_path.read_bytes()).hexdigest()),
+    )
+    conn.execute("UPDATE llm_candidate_rate_extractions SET source_pdf = ?", (str(pdf_path),))
     conn.commit()
     conn.close()
     propose_llm_charge_promotions(db_path, limit=10, execute=True)

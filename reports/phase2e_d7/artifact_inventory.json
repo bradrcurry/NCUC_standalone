@@ -1,0 +1,110 @@
+[
+  {
+    "label": "jaa",
+    "artifacts": [
+      {
+        "source_pdf": "data\\historical\\ncuc\\e-2-sub-1207\\32b7c724-edef-4a3a-bb45-85058c2ec503.pdf",
+        "file_hash": "3e8067d223d94eabe1a7f34fb02a47156775ac4403f7cf06e85e6892bd430b05",
+        "artifact_version": "page_miner_v6",
+        "n": 110,
+        "first": 1,
+        "last": 110
+      },
+      {
+        "source_pdf": "data\\historical\\ncuc\\e-2-sub-1207\\32b7c724-edef-4a3a-bb45-85058c2ec503.pdf",
+        "file_hash": "b97bdc765171f37453f19f6d07b1eb25",
+        "artifact_version": "docling_page_miner_v1",
+        "n": 110,
+        "first": 1,
+        "last": 110
+      },
+      {
+        "source_pdf": "data\\historical\\ncuc\\e-2-sub-1207\\32b7c724-edef-4a3a-bb45-85058c2ec503.pdf",
+        "file_hash": "b97bdc765171f37453f19f6d07b1eb25",
+        "artifact_version": "page_miner_v6",
+        "n": 110,
+        "first": 1,
+        "last": 110
+      }
+    ]
+  },
+  {
+    "label": "tariff_book",
+    "artifacts": [
+      {
+        "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\3f92be50-2f10-4d4c-8952-2bccaa339aba.pdf",
+        "file_hash": "31a080ac1bfc223611fdaaba6a1db3e1",
+        "artifact_version": "page_miner_v6",
+        "n": 316,
+        "first": 1,
+        "last": 316
+      },
+      {
+        "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\3f92be50-2f10-4d4c-8952-2bccaa339aba.pdf",
+        "file_hash": "7a5cbdce496e1dbafd60af074cc80a786dd9087fcd121c65d7e13981bf3c41a0",
+        "artifact_version": "docling_page_miner_v1",
+        "n": 316,
+        "first": 1,
+        "last": 316
+      },
+      {
+        "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\3f92be50-2f10-4d4c-8952-2bccaa339aba.pdf",
+        "file_hash": "7a5cbdce496e1dbafd60af074cc80a786dd9087fcd121c65d7e13981bf3c41a0",
+        "artifact_version": "page_miner_v6",
+        "n": 316,
+        "first": 1,
+        "last": 316
+      },
+      {
+        "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\3f92be50-2f10-4d4c-8952-2bccaa339aba.pdf",
+        "file_hash": "None",
+        "artifact_version": "page_miner_v6",
+        "n": 316,
+        "first": 1,
+        "last": 316
+      },
+      {
+        "source_pdf": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\3f92be50-2f10-4d4c-8952-2bccaa339aba.pdf",
+        "file_hash": "imported",
+        "artifact_version": "page_miner_v6",
+        "n": 316,
+        "first": 1,
+        "last": 316
+      }
+    ]
+  },
+  {
+    "label": "appeal",
+    "artifacts": [
+      {
+        "source_pdf": "data\\historical\\ncuc\\e-2-sub-1300\\32d25655-7a4c-4141-acc0-d675a507e369.pdf",
+        "file_hash": "aea8a3a87f0cc374204f18db39348da8",
+        "artifact_version": "page_miner_v6",
+        "n": 598,
+        "first": 1,
+        "last": 598
+      },
+      {
+        "source_pdf": "data\\historical\\ncuc\\e-7-sub-1276\\32d25655-7a4c-4141-acc0-d675a507e369.pdf",
+        "file_hash": "60276868e964b0e3b5e6270760cddb8895b22dc7fd19863262c73522e718ecbf",
+        "artifact_version": "page_miner_v6",
+        "n": 598,
+        "first": 1,
+        "last": 598
+      }
+    ]
+  },
+  {
+    "label": "dsm_ee",
+    "artifacts": [
+      {
+        "source_pdf": "data\\historical\\ncuc\\e-7-sub-1285\\543b80be-7672-4b7c-9897-da915455f6da.pdf",
+        "file_hash": "77a0da9636cd9f283d87b0e8102be79ab221427054a8f8d7452cf9318b43ee28",
+        "artifact_version": "page_miner_v6",
+        "n": 1097,
+        "first": 1,
+        "last": 1097
+      }
+    ]
+  }
+]

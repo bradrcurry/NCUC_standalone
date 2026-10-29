@@ -1,0 +1,6 @@
+src/duke_rates/db/provenance_schema.py ['ensure_provenance_schema', 'provenance_usage']
+src/duke_rates/download/storage.py ['verified_pdf_sha256', 'preserve_pdf_blob']
+src/duke_rates/historical/ncuc/clue_ledger.py ['clue_uid', 'write_page_clues']
+src/duke_rates/historical/ncuc/clue_lineage.py ['_evaluate_target', '_local_order_exists', 'rebuild_lineage']
+src/duke_rates/historical/ncuc/local_gap_resolution.py ['archive_state', 'build_archive_index', 'resolve_gaps_locally', '_search_pages', '_resolve_order_gap', '_update_status', '_prior_local_attempt']
+src/duke_rates/historical/ncuc/remote_discovery.py ['local_search_complete', 'plan_network_searches', 'check_identity', 'retrieve_and_check', 'review_candidate']

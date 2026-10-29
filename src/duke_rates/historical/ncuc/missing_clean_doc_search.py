@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+from contextlib import nullcontext
 from dataclasses import asdict
 from pathlib import Path
 from typing import Any
@@ -16,6 +17,7 @@ from duke_rates.historical.ncuc.document_param_search import DocParamSearchResul
 from duke_rates.historical.ncuc.query_builder import QuerySpec
 from duke_rates.historical.ncuc.result_harvester import HarvestSession, SearchResult
 from duke_rates.historical.ncuc.result_scorer import ResultScorer
+from duke_rates.historical.ncuc.search_ledger import SearchLedger
 from duke_rates.historical.ncuc.session import close_authenticated_context, create_authenticated_context
 from duke_rates.models.docket_lead import RegulatoryDocketLeadRecord
 from duke_rates.models.historical_lead import HistoricalLeadRecord
@@ -46,7 +48,9 @@ def search_nc_missing_clean_documents(
     enrich_portal_details: bool = True,
     persist: bool = True,
     save_manifest: bool = True,
+    search_ledger: SearchLedger | None = None,
 ) -> dict[str, Any]:
+    """Search for missing clean documents; ``search_ledger`` (optional) records each query."""
     report = build_nc_missing_clean_doc_audit(database_path)
     selected_rows = _select_audit_rows(
         report.get("rows", []),
@@ -86,6 +90,7 @@ def search_nc_missing_clean_documents(
                 lead_row=lead_row,
                 max_results=structured_max_results,
                 enrich_portal_details=enrich_portal_details,
+                search_ledger=search_ledger,
             )
             keyword_candidates = _run_keyword_searches(
                 settings,
@@ -93,6 +98,7 @@ def search_nc_missing_clean_documents(
                 harvest_session=harvest_session,
                 lead_row=lead_row,
                 max_results=keyword_max_results,
+                search_ledger=search_ledger,
             )
 
             merged = _merge_candidate_rows(structured_candidates + keyword_candidates)
@@ -212,6 +218,7 @@ def _run_structured_searches(
     lead_row: dict[str, Any],
     max_results: int,
     enrich_portal_details: bool,
+    search_ledger: SearchLedger | None = None,
 ) -> list[dict[str, Any]]:
     if portal_context is None:
         return []
@@ -220,15 +227,24 @@ def _run_structured_searches(
     searcher = DocumentParamSearcher(settings)
     results: list[dict[str, Any]] = []
     for spec in _build_structured_query_specs(lead_row):
-        raw_rows = searcher.search(
-            page,
-            company_name=_company_name_for_row(lead_row),
-            docket_number=_query_note_value(spec.notes, "docket") or "",
-            filing_types=_note_csv_list(spec.notes, "filing_types") or _loads_json_list(lead_row.get("suggested_portal_filing_types")),
-            date_after=_query_note_value(spec.notes, "date_after") or "",
-            date_before=_query_note_value(spec.notes, "date_before") or "",
-            max_results=max_results,
-        )
+        query = {
+            "company_name": _company_name_for_row(lead_row),
+            "docket_number": _query_note_value(spec.notes, "docket") or "",
+            "filing_types": _note_csv_list(spec.notes, "filing_types") or _loads_json_list(lead_row.get("suggested_portal_filing_types")),
+            "date_after": _query_note_value(spec.notes, "date_after") or "",
+            "date_before": _query_note_value(spec.notes, "date_before") or "",
+            "max_results": max_results,
+        }
+        with _ledger_attempt(search_ledger, "portal_params", query, lead_row) as attempt:
+            raw_rows = searcher.search(page, **query)
+            if attempt is not None:
+                refs = [row.document_id or row.document_detail_url for row in raw_rows]
+                outcome = getattr(searcher, "last_outcome", None)
+                if outcome is not None:
+                    # The searcher's own stop reason (last page, stale grid, ...) decides the outcome.
+                    attempt.finish_outcome(outcome, refs=refs)
+                else:
+                    attempt.finish(raw_rows, refs=refs, cap=max_results)
         if enrich_portal_details and raw_rows:
             raw_rows = searcher.enrich_with_document_details(page, raw_rows, delay_seconds=0.2)
         converted = [_doc_param_candidate(lead_row, spec, row) for row in raw_rows]
@@ -244,6 +260,7 @@ def _run_keyword_searches(
     harvest_session: HarvestSession,
     lead_row: dict[str, Any],
     max_results: int,
+    search_ledger: SearchLedger | None = None,
 ) -> list[dict[str, Any]]:
     from duke_rates.models.ncuc import NcucSearchQuery
 
@@ -263,13 +280,26 @@ def _run_keyword_searches(
                 *( [f"docket={query.docket_hint}"] if query.docket_hint else [] ),
             ],
         )
-        discovered = [
-            _discovery_candidate(lead_row, spec, row.record, row.relevance_score, row.notes)
-            for row in discovery_service.search_public_site(query, max_results=max_results)
-        ]
+        params = {"query_text": query.query_text, "docket_hint": query.docket_hint, "max_results": max_results}
+        with _ledger_attempt(search_ledger, "zoom", params, lead_row) as attempt:
+            discovered = [
+                _discovery_candidate(lead_row, spec, row.record, row.relevance_score, row.notes)
+                for row in discovery_service.search_public_site(query, max_results=max_results)
+            ]
+            if attempt is not None:
+                attempt.finish(discovered, refs=[item["search_result"].url for item in discovered],
+                               cap=max_results)
         harvest_session.record_query(spec, [item["search_result"] for item in discovered], False, "")
         results.extend(discovered)
     return results
+
+
+def _ledger_attempt(search_ledger: SearchLedger | None, channel: str, params: dict[str, Any],
+                   lead_row: dict[str, Any]):
+    """Record one query in the search ledger, or do nothing when no ledger is given."""
+    if search_ledger is None:
+        return nullcontext(None)
+    return search_ledger.attempt(channel, params, caller=f"missing_clean_doc_search:{lead_row['family_key']}")
 
 
 def _build_structured_query_specs(lead_row: dict[str, Any]) -> list[QuerySpec]:

@@ -1,0 +1,413 @@
+{
+  "summary": {
+    "changed_count": 47,
+    "affected_count": 6,
+    "changed_files": 64,
+    "risk_level": "high"
+  },
+  "changed_symbols": [
+    {
+      "id": "Function:bench/score_segmentation.py:ratio",
+      "name": "ratio",
+      "type": "Function",
+      "filePath": "bench/score_segmentation.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:bench/score_segmentation.py:boundary_score",
+      "name": "boundary_score",
+      "type": "Function",
+      "filePath": "bench/score_segmentation.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:bench/score_segmentation.py:score_components",
+      "name": "score_components",
+      "type": "Function",
+      "filePath": "bench/score_segmentation.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:bench/score_segmentation.py:cached_pages",
+      "name": "cached_pages",
+      "type": "Function",
+      "filePath": "bench/score_segmentation.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:bench/score_segmentation.py:main",
+      "name": "main",
+      "type": "Function",
+      "filePath": "bench/score_segmentation.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/design/2026-10-29_phase2e_d7_plan.md:L1:D7 — Large-document intelligence",
+      "name": "D7 — Large-document intelligence",
+      "type": "Section",
+      "filePath": "docs/design/2026-10-29_phase2e_d7_plan.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/design/2026-10-29_phase2e_d7_plan.md:L7:Source-led evaluation",
+      "name": "Source-led evaluation",
+      "type": "Section",
+      "filePath": "docs/design/2026-10-29_phase2e_d7_plan.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/design/2026-10-29_phase2e_d7_plan.md:L23:Extend existing components",
+      "name": "Extend existing components",
+      "type": "Section",
+      "filePath": "docs/design/2026-10-29_phase2e_d7_plan.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/design/2026-10-29_phase2e_d7_plan.md:L46:Validation and delivery",
+      "name": "Validation and delivery",
+      "type": "Section",
+      "filePath": "docs/design/2026-10-29_phase2e_d7_plan.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/plans/ncuc_document_intelligence_roadmap.md:L1:NCUC document intelligence roadmap",
+      "name": "NCUC document intelligence roadmap",
+      "type": "Section",
+      "filePath": "docs/plans/ncuc_document_intelligence_roadmap.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/plans/ncuc_document_intelligence_roadmap.md:L28:Milestones and acceptance gates",
+      "name": "Milestones and acceptance gates",
+      "type": "Section",
+      "filePath": "docs/plans/ncuc_document_intelligence_roadmap.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/plans/ncuc_document_intelligence_roadmap.md:L133:Next action",
+      "name": "Next action",
+      "type": "Section",
+      "filePath": "docs/plans/ncuc_document_intelligence_roadmap.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/db/artifact_cache.py:save_page_artifacts",
+      "name": "save_page_artifacts",
+      "type": "Function",
+      "filePath": "src/duke_rates/db/artifact_cache.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/db/artifact_cache.py:load_page_artifacts",
+      "name": "load_page_artifacts",
+      "type": "Function",
+      "filePath": "src/duke_rates/db/artifact_cache.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/db/artifact_cache.py:save_span_artifacts",
+      "name": "save_span_artifacts",
+      "type": "Function",
+      "filePath": "src/duke_rates/db/artifact_cache.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/db/artifact_cache.py:load_span_artifacts",
+      "name": "load_span_artifacts",
+      "type": "Function",
+      "filePath": "src/duke_rates/db/artifact_cache.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Class:src/duke_rates/historical/ncuc/importer.py:NcucPipelineImporter",
+      "name": "NcucPipelineImporter",
+      "type": "Class",
+      "filePath": "src/duke_rates/historical/ncuc/importer.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Method:src/duke_rates/historical/ncuc/importer.py:NcucPipelineImporter.mine_discovery_record_spans#1",
+      "name": "mine_discovery_record_spans",
+      "type": "Method",
+      "filePath": "src/duke_rates/historical/ncuc/importer.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Method:src/duke_rates/historical/ncuc/importer.py:NcucPipelineImporter.mine_discovery_record_spans_with_pages#4",
+      "name": "mine_discovery_record_spans_with_pages",
+      "type": "Method",
+      "filePath": "src/duke_rates/historical/ncuc/importer.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/pipeline/segmentation.py:_classify_page_doc_type",
+      "name": "_classify_page_doc_type",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/pipeline/segmentation.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/pipeline/segmentation.py:segment_document",
+      "name": "segment_document",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/pipeline/segmentation.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Variable:src/duke_rates/historical/ncuc/pipeline/segmentation.py:_LEAF_LINE",
+      "name": "_LEAF_LINE",
+      "type": "Variable",
+      "filePath": "src/duke_rates/historical/ncuc/pipeline/segmentation.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Variable:src/duke_rates/historical/ncuc/pipeline/segmentation.py:_EXPLICIT_CODE",
+      "name": "_EXPLICIT_CODE",
+      "type": "Variable",
+      "filePath": "src/duke_rates/historical/ncuc/pipeline/segmentation.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/pipeline/segmentation.py:_own_sheet_lines",
+      "name": "_own_sheet_lines",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/pipeline/segmentation.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/pipeline/segmentation.py:_page_kind",
+      "name": "_page_kind",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/pipeline/segmentation.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/pipeline/segmentation.py:_is_table_continuation",
+      "name": "_is_table_continuation",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/pipeline/segmentation.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/pipeline/segmentation.py:_page_observation",
+      "name": "_page_observation",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/pipeline/segmentation.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/pipeline/segmentation.py:_merge_boundary_evidence",
+      "name": "_merge_boundary_evidence",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/pipeline/segmentation.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/pipeline/segmentation.py:_own_leaf_numbers",
+      "name": "_own_leaf_numbers",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/pipeline/segmentation.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Variable:src/duke_rates/historical/ncuc/pipeline/stage_versions.py:SPAN_ARTIFACT_VERSION",
+      "name": "SPAN_ARTIFACT_VERSION",
+      "type": "Variable",
+      "filePath": "src/duke_rates/historical/ncuc/pipeline/stage_versions.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/pipeline/triage.py:triage_pdf",
+      "name": "triage_pdf",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/pipeline/triage.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Class:src/duke_rates/models/pipeline.py:TariffSpan",
+      "name": "TariffSpan",
+      "type": "Class",
+      "filePath": "src/duke_rates/models/pipeline.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Property:src/duke_rates/models/pipeline.py:TariffSpan.segmentation_evidence",
+      "name": "segmentation_evidence",
+      "type": "Property",
+      "filePath": "src/duke_rates/models/pipeline.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d7_segmentation_checkpoint.py:page",
+      "name": "page",
+      "type": "Function",
+      "filePath": "tests/test_d7_segmentation_checkpoint.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d7_segmentation_checkpoint.py:test_body_leaf_reference_cannot_merge_two_distinct_own_leaves",
+      "name": "test_body_leaf_reference_cannot_merge_two_distinct_own_leaves",
+      "type": "Function",
+      "filePath": "tests/test_d7_segmentation_checkpoint.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d7_segmentation_checkpoint.py:test_rate_vocabulary_in_legal_or_calculation_pages_is_not_a_tariff",
+      "name": "test_rate_vocabulary_in_legal_or_calculation_pages_is_not_a_tariff",
+      "type": "Function",
+      "filePath": "tests/test_d7_segmentation_checkpoint.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d7_segmentation_checkpoint.py:test_formal_sheet_ends_before_a_following_order",
+      "name": "test_formal_sheet_ends_before_a_following_order",
+      "type": "Function",
+      "filePath": "tests/test_d7_segmentation_checkpoint.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d7_segmentation_checkpoint.py:test_headerless_credit_table_keeps_single_leaf_ownership_with_nbsp",
+      "name": "test_headerless_credit_table_keeps_single_leaf_ownership_with_nbsp",
+      "type": "Function",
+      "filePath": "tests/test_d7_segmentation_checkpoint.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d7_segmentation_checkpoint.py:test_ambiguous_original_page_ownership_is_rejected",
+      "name": "test_ambiguous_original_page_ownership_is_rejected",
+      "type": "Function",
+      "filePath": "tests/test_d7_segmentation_checkpoint.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d7_segmentation_checkpoint.py:test_missing_page_gap_is_not_bridged_even_when_the_leaf_matches",
+      "name": "test_missing_page_gap_is_not_bridged_even_when_the_leaf_matches",
+      "type": "Function",
+      "filePath": "tests/test_d7_segmentation_checkpoint.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d7_segmentation_checkpoint.py:test_cache_roundtrip_preserves_flags_and_separate_segmentation_evidence",
+      "name": "test_cache_roundtrip_preserves_flags_and_separate_segmentation_evidence",
+      "type": "Function",
+      "filePath": "tests/test_d7_segmentation_checkpoint.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d7_segmentation_checkpoint.py:test_triage_uses_sampled_pages_instead_of_total_page_count",
+      "name": "test_triage_uses_sampled_pages_instead_of_total_page_count",
+      "type": "Function",
+      "filePath": "tests/test_d7_segmentation_checkpoint.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Class:tests/test_d7_segmentation_checkpoint.py:FakeDocument",
+      "name": "FakeDocument",
+      "type": "Class",
+      "filePath": "tests/test_d7_segmentation_checkpoint.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Method:tests/test_d7_segmentation_checkpoint.py:FakeDocument.__getitem__#1",
+      "name": "__getitem__",
+      "type": "Method",
+      "filePath": "tests/test_d7_segmentation_checkpoint.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Method:tests/test_d7_segmentation_checkpoint.py:FakeDocument.close#0",
+      "name": "close",
+      "type": "Method",
+      "filePath": "tests/test_d7_segmentation_checkpoint.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d7_segmentation_checkpoint.py:test_importer_never_binds_non_tariff_span_even_with_a_strong_family_match",
+      "name": "test_importer_never_binds_non_tariff_span_even_with_a_strong_family_match",
+      "type": "Function",
+      "filePath": "tests/test_d7_segmentation_checkpoint.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_ocr_benchmark_report.py:test_build_ocr_benchmark_nc_report_groups_backend_and_outcomes",
+      "name": "test_build_ocr_benchmark_nc_report_groups_backend_and_outcomes",
+      "type": "Function",
+      "filePath": "tests/test_ocr_benchmark_report.py",
+      "change_type": "touched"
+    }
+  ],
+  "affected_processes": [
+    {
+      "id": "proc_107_benchmark_docling",
+      "name": "Benchmark_docling → _clamp_score",
+      "process_type": "cross_community",
+      "step_count": 5,
+      "changed_steps": [
+        {
+          "symbol": "triage_pdf",
+          "step": 3
+        }
+      ]
+    },
+    {
+      "id": "proc_161_benchmark_docling",
+      "name": "Benchmark_docling → _compute_hash",
+      "process_type": "cross_community",
+      "step_count": 4,
+      "changed_steps": [
+        {
+          "symbol": "triage_pdf",
+          "step": 3
+        }
+      ]
+    },
+    {
+      "id": "proc_162_benchmark_docling",
+      "name": "Benchmark_docling → _estimate_table_like_density",
+      "process_type": "cross_community",
+      "step_count": 4,
+      "changed_steps": [
+        {
+          "symbol": "triage_pdf",
+          "step": 3
+        }
+      ]
+    },
+    {
+      "id": "proc_404_mine_docling_nc",
+      "name": "Mine_docling_nc → Infer_duke_company_from_context",
+      "process_type": "cross_community",
+      "step_count": 5,
+      "changed_steps": [
+        {
+          "symbol": "mine_discovery_record_spans_with_pages",
+          "step": 2
+        }
+      ]
+    },
+    {
+      "id": "proc_540_mine_docling_nc",
+      "name": "Mine_docling_nc → Detect_duke_company",
+      "process_type": "cross_community",
+      "step_count": 5,
+      "changed_steps": [
+        {
+          "symbol": "mine_discovery_record_spans_with_pages",
+          "step": 2
+        }
+      ]
+    },
+    {
+      "id": "proc_799_mine_docling_nc",
+      "name": "Mine_docling_nc → _seed_document_types",
+      "process_type": "cross_community",
+      "step_count": 6,
+      "changed_steps": [
+        {
+          "symbol": "mine_discovery_record_spans_with_pages",
+          "step": 2
+        }
+      ]
+    }
+  ]
+}
