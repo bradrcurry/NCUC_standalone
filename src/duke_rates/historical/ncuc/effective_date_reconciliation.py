@@ -138,3 +138,134 @@ def assessment_summary(conn: sqlite3.Connection) -> dict:
                        "effective_date_assessments WHERE status = 'conflict' ORDER BY family_key, tariff_version_id")
         ],
     }
+
+
+# ---------------------------------------------------------------------------
+# Conflict classification (Phase 2E D3)
+# ---------------------------------------------------------------------------
+
+CLASSIFIER_VERSION = "effective_date_conflict_classifier@1.0.0"
+#: A stored date this close before the printed one, on a version whose document carries the same stored
+#: date, is the filing / letter date of the compliance filing (D1: 6548 stores 2024-01-24, prints 2025-01-01).
+_FILING_LAG_DAYS = 400
+
+
+def _days(a: str, b: str) -> int:
+    return (datetime.fromisoformat(b) - datetime.fromisoformat(a)).days
+
+
+def classify_conflicts(conn: sqlite3.Connection, *, read_pages: bool = True) -> list[dict]:
+    """Classify every ``conflict`` assessment by cause, from stored metadata and the sheet's own pages.
+
+    Read-only. Causes, in precedence order (the first that holds is the cause; every test is reported):
+
+    * ``redline_contamination``: the observed pages carry redline markup, so the printed date is unreliable.
+    * ``proposed_or_unapproved_sheet``: the observed pages print a "(Proposed)" revision or a blank
+      "Order dated ____": the printed date is a requested date, not an approved one (D3 spot check:
+      version 5231's page is "Sixth (Proposed) Revised Leaf No. 64").
+    * ``stored_year_digit_error``: same distinctive month and day (not the 1st, which most tariff dates
+      share), another year (``2026-10-13`` vs ``2009-10-13``).
+    * ``observed_period_held_by_sibling``: another version of the family already starts on the printed
+      date. Changing this one's date would create two versions for one period: a duplicate registration
+      or a wrong binding, never a date correction.
+    * ``version_date_disagrees_with_its_document``: the bound document's own ``effective_start`` is the
+      printed date; only the version row differs.
+    * ``stored_filing_or_order_date``: the stored date is not the 1st of a month, is (within a week) the
+      document's own date, and falls within ``_FILING_LAG_DAYS`` before the printed effective date: a
+      filing, letter or order date stored as the effective date.
+    * ``adjacent_rate_year``: both dates are the 1st of a month, about a year apart (multi-year rate plan
+      bundles hold each rate year's sheet): the bound pages may be the other rate year's sheet.
+    * ``bound_document_from_other_period``: the printed date is more than a year from the stored one:
+      the bound pages are another revision's sheet, or the stored period is wrong.
+    * ``unexplained``.
+
+    ``proposed_correction`` is offered only for the year-digit, document-agrees and filing-date causes,
+    with one observed date, no sibling holding it and clean pages; it is a proposal for
+    ``provenance revise-metadata``, never applied here.
+    """
+    from duke_rates.parse.redline_detector import PageRedlineReader, summarize_page_evidence
+
+    reader = PageRedlineReader() if read_pages else None
+    out = []
+    try:
+        for a in conn.execute("SELECT * FROM effective_date_assessments WHERE status = 'conflict' ORDER BY id"
+                              ).fetchall():
+            obs = json.loads(a["observed_json"] or "[]")
+            printed = sorted({o["date"] for o in obs})
+            pages = sorted({o["page"] for o in obs})
+            v = conn.execute(
+                "SELECT tv.id, tv.effective_start, tv.status, tv.historical_document_id, hd.local_path, "
+                "hd.start_page, hd.end_page, hd.effective_start AS hd_effective, "
+                "(SELECT COUNT(*) FROM tariff_charges WHERE version_id = tv.id) AS charges "
+                "FROM tariff_versions tv LEFT JOIN historical_documents hd ON hd.id = tv.historical_document_id "
+                "WHERE tv.id = ?", (a["tariff_version_id"],)).fetchone()
+            stored, obs_date = a["stored_value"], printed[0] if len(printed) == 1 else None
+            siblings = [dict(r) for r in conn.execute(
+                "SELECT tv.id, tv.effective_start, tv.status, tv.historical_document_id, hd.local_path, "
+                "hd.start_page, hd.end_page FROM tariff_versions tv LEFT JOIN historical_documents hd "
+                "ON hd.id = tv.historical_document_id WHERE tv.family_key = ? AND tv.id <> ? "
+                "AND substr(tv.effective_start, 1, 10) = ?", (a["family_key"], a["tariff_version_id"], obs_date))]
+            for s in siblings:
+                s["same_file"] = bool(v["local_path"]) and s["local_path"] == v["local_path"]
+            evidence = None
+            if reader is not None and v["local_path"] and pages:
+                evidence = summarize_page_evidence([e for p in pages for e in reader.pages(v["local_path"], p, p)])
+            hd_eff = (v["hd_effective"] or "")[:10] or None
+            marks = obs and conn.execute(
+                f"SELECT COUNT(*) FROM regulatory_clues WHERE file_sha256 = ? AND page IN ({','.join('?' * len(pages))}) "
+                "AND ((clue_kind = 'revision' AND json_extract(normalized_json, '$.proposed_marker') = 1) "
+                "OR (clue_kind = 'order_date' AND normalization = 'blank'))", (obs[0]["file_sha256"], *pages)
+            ).fetchone()[0]
+            tests = {
+                "redline_pages": bool(evidence and evidence["verdict"] == "redline"),
+                "proposal_markers_on_pages": int(marks or 0),
+                "year_digit": bool(obs_date and stored and obs_date[4:] == stored[4:] and obs_date[:4] != stored[:4]
+                                   and stored[8:10] != "01"),
+                "sibling_holds_printed_date": bool(siblings),
+                "document_agrees_with_print": bool(obs_date and hd_eff == obs_date and stored != obs_date),
+                "stored_is_document_date": bool(hd_eff and stored and abs(_days(hd_eff, stored)) <= 7),
+                "days_stored_to_printed": _days(stored, obs_date) if (stored and obs_date) else None,
+                "span_pages": (v["end_page"] or 0) - (v["start_page"] or 0) + 1 if v["start_page"] else None,
+            }
+            lag = tests["days_stored_to_printed"]
+            if tests["redline_pages"]:
+                cause = "redline_contamination"
+            elif tests["proposal_markers_on_pages"]:
+                cause = "proposed_or_unapproved_sheet"
+            elif tests["year_digit"]:
+                cause = "stored_year_digit_error"
+            elif tests["sibling_holds_printed_date"]:
+                cause = "observed_period_held_by_sibling"
+            elif tests["document_agrees_with_print"]:
+                cause = "version_date_disagrees_with_its_document"
+            elif lag is not None and 0 < lag <= _FILING_LAG_DAYS and stored[8:10] != "01" and (
+                    tests["stored_is_document_date"] or not hd_eff):
+                cause = "stored_filing_or_order_date"
+            elif lag is not None and 300 <= abs(lag) <= 400 and stored[8:10] == "01" and obs_date[8:10] == "01":
+                cause = "adjacent_rate_year"
+            elif lag is not None and abs(lag) > 366:
+                cause = "bound_document_from_other_period"
+            else:
+                cause = "unexplained"
+            correctable = cause in ("stored_year_digit_error", "version_date_disagrees_with_its_document",
+                                    "stored_filing_or_order_date") and obs_date and not siblings \
+                and not (evidence and evidence["verdict"] in ("redline", "suspect"))
+            out.append({
+                "tariff_version_id": a["tariff_version_id"], "family_key": a["family_key"], "stored": stored,
+                "printed": printed, "pages": pages, "file_sha256": obs[0]["file_sha256"] if obs else None,
+                "source_pdf": v["local_path"], "bound_pages": [v["start_page"], v["end_page"]],
+                "document_effective_start": hd_eff, "version_status": v["status"], "charges": v["charges"],
+                "page_evidence": {k: evidence.get(k) for k in ("verdict", "redline_pages", "suspect_pages")}
+                if evidence else None,
+                "siblings_at_printed_date": siblings, "tests": tests, "cause": cause,
+                "confidence": "high" if correctable and cause != "stored_filing_or_order_date" else
+                ("medium" if correctable else "needs_review"),
+                "proposed_correction": {"table": "tariff_versions", "row_id": a["tariff_version_id"],
+                                        "column": "effective_start", "from": stored, "to": obs_date,
+                                        "via": "provenance revise-metadata (after review)"} if correctable else None,
+                "classifier": CLASSIFIER_VERSION,
+            })
+    finally:
+        if reader is not None:
+            reader.close()
+    return out

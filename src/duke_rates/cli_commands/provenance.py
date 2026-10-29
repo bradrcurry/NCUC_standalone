@@ -859,6 +859,87 @@ def propose_binding_cmd(
                      evidence={"gap_candidate_id": gap_candidate_id, "gap_id": params["gap_id"]}))
 
 
+@provenance_app.command("build-review-queue")
+def build_review_queue_cmd(
+    db: Path = _DB_OPTION,
+    allow_production: bool = _ALLOW_PROD,
+    source_audit: Path | None = typer.Option(
+        None, "--source-audit", help="Reuse a source-audit JSON ({'versions': [...]}) instead of re-reading every span."),
+    redline_grades: Path | None = typer.Option(None, "--redline-grades", help="Signal grades per version (JSON list)."),
+    manual: Path | None = typer.Option(None, "--manual", help="Page-reviewed findings to add (JSON list)."),
+    json_out: Path | None = typer.Option(None, "--json", help="Also write every item here."),
+) -> None:
+    """Build or refresh the prioritized evidence review queue (keeps every review decision)."""
+    from duke_rates.historical.ncuc import evidence_review as er
+
+    conn = _promotion_conn(db, allow_production)
+    audit = json.loads(source_audit.read_text(encoding="utf-8"))["versions"] if source_audit else None
+    grades = {g["tariff_version_id"]: g["grade"] for g in json.loads(redline_grades.read_text(encoding="utf-8"))} \
+        if redline_grades else None
+    summary = er.build_review_queue(conn, source_audit=audit, redline_grades=grades,
+                                    manual=json.loads(manual.read_text(encoding="utf-8")) if manual else None)
+    _write_json(json_out, {"summary": summary, "items": er.list_items(conn)})
+    _echo(summary)
+
+
+@provenance_app.command("review-queue")
+def review_queue_cmd(
+    db: Path = _DB_OPTION,
+    problem_type: str | None = typer.Option(None, "--problem-type"),
+    priority: int | None = typer.Option(None, "--priority"),
+    status: str | None = typer.Option("open", "--status", help="open | accepted | rejected | deferred"),
+    json_out: Path | None = typer.Option(None, "--json"),
+) -> None:
+    """List review items, highest priority first (read-only)."""
+    from duke_rates.historical.ncuc import evidence_review as er
+
+    items = er.list_items(_open(db, write=False), problem_type=problem_type, priority=priority, status=status)
+    _write_json(json_out, items)
+    _echo([{k: i[k] for k in ("id", "priority", "problem_type", "family_key", "tariff_version_id", "cause",
+                              "evidence_level", "review_status")} | {"explanation": i["explanation"][:120]}
+           for i in items])
+
+
+@provenance_app.command("review-item")
+def review_item_cmd(
+    db: Path = _DB_OPTION,
+    allow_production: bool = _ALLOW_PROD,
+    item_id: int = typer.Option(..., "--id"),
+    decision: str = typer.Option(..., "--decision", help="accepted | rejected | deferred"),
+    by: str = typer.Option(..., "--by", help="Reviewer name."),
+    note: str = typer.Option(..., "--note", help="What was read and decided."),
+) -> None:
+    """Record a reviewer's decision on one item (corrections still go through their own workflows)."""
+    from duke_rates.historical.ncuc import evidence_review as er
+
+    conn = _promotion_conn(db, allow_production)
+    try:
+        er.review_item(conn, item_id, decision=decision, reviewer=by, note=note)
+    except ValueError as exc:
+        raise typer.BadParameter(str(exc)) from exc
+    _echo(dict(conn.execute("SELECT id, problem_type, review_status, reviewed_by, evidence_level FROM "
+                            "evidence_review_items WHERE id = ?", (item_id,)).fetchone()))
+
+
+@provenance_app.command("classify-date-conflicts")
+def classify_date_conflicts_cmd(
+    db: Path = _DB_OPTION,
+    json_out: Path | None = typer.Option(None, "--json"),
+) -> None:
+    """Classify every effective-date conflict by cause from the sheet's own pages (read-only)."""
+    from collections import Counter as _Counter
+
+    from duke_rates.historical.ncuc.effective_date_reconciliation import classify_conflicts
+
+    conn = _open(db, write=False)
+    conn.row_factory = sqlite3.Row
+    result = classify_conflicts(conn)
+    _write_json(json_out, result)
+    _echo({"conflicts": len(result), "by_cause": dict(_Counter(r["cause"] for r in result)),
+           "by_confidence": dict(_Counter(r["confidence"] for r in result)),
+           "proposed_corrections": sum(1 for r in result if r["proposed_correction"])})
+
+
 @provenance_app.command("audit-version-sources")
 def audit_version_sources_cmd(
     db: Path = _DB_OPTION,

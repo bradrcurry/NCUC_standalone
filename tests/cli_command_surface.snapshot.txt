@@ -254,7 +254,9 @@ provenance audit-version-sources
 provenance backfill
 provenance binding-check
 provenance build-clue-ledger
+provenance build-review-queue
 provenance candidates
+provenance classify-date-conflicts
 provenance compare
 provenance completeness
 provenance drop-schema
@@ -275,6 +277,8 @@ provenance reject
 provenance reject-proposal
 provenance resolve-gaps-local
 provenance retrieve-remote-candidates
+provenance review-item
+provenance review-queue
 provenance review-remote-candidate
 provenance rollback
 provenance rollback-proposal
