@@ -3,7 +3,7 @@
 Turns a verified document finding into a corrected document relationship,
 under explicit approval, with a snapshot and a way back.
 
-Two proposal kinds:
+Three proposal kinds:
 
 * ``rebind_page_range``: bind a historical document to the page run that
   actually holds its sheet (D1: hd 7265 is bound to the bundle's index page;
@@ -11,6 +11,9 @@ Two proposal kinds:
 * ``mark_redline_duplicate``: record that a span is the redline of a sheet
   already held clean elsewhere (D1: hd 2275 pp.100-105 is the redline of
   hd 7265's sheet). This writes only ``document_assertions``.
+* ``bind_unbound_document`` (D3): bind an archived sheet that no version uses
+  (see :mod:`document_binding`): attach it to a source-less version, replace a
+  redline source with the clean sheet, or create a not-yet-billable version.
 
 Checks run when proposing and again when applying (the data may have changed
 in between). Each check is stored as pass/fail with its detail:
@@ -242,11 +245,21 @@ def _blocking_failures(checks: dict) -> list[str]:
 # ---------------------------------------------------------------------------
 
 
-def propose(conn: sqlite3.Connection, kind: str, historical_document_id: int, *, params: dict,
+def _evaluate_binding(conn: sqlite3.Connection, params: dict) -> tuple[dict, dict]:
+    from duke_rates.historical.ncuc import document_binding
+
+    return document_binding.evaluate(conn, params)
+
+
+def propose(conn: sqlite3.Connection, kind: str, historical_document_id: int | None, *, params: dict,
             proposed_by: str, evidence: dict | None = None) -> dict:
     if not proposed_by.strip():
         raise PromotionError("a proposer name is required")
-    if kind == "rebind_page_range":
+    plan = None
+    if kind == "bind_unbound_document":
+        checks, plan = _evaluate_binding(conn, params)
+        params = params | {"plan": plan}
+    elif kind == "rebind_page_range":
         checks = _evaluate_rebind(conn, historical_document_id, params["start_page"], params["end_page"])
     elif kind == "mark_redline_duplicate":
         checks = _evaluate_duplicate(conn, historical_document_id, params["start_page"], params["end_page"],
@@ -255,7 +268,9 @@ def propose(conn: sqlite3.Connection, kind: str, historical_document_id: int, *,
         raise PromotionError(f"unknown proposal kind {kind!r}")
     failures = _blocking_failures(checks)
     state = "blocked" if failures else "proposed"
-    versions = _versions(conn, historical_document_id)
+    versions = _versions(conn, historical_document_id) if historical_document_id else []
+    if plan is not None:
+        versions = [{"id": plan["target_version_id"]}] if plan.get("target_version_id") else []
     cur = conn.execute(
         """
         INSERT INTO promotion_proposals (kind, historical_document_id, tariff_version_id, params_json, evidence_json,
@@ -269,7 +284,7 @@ def propose(conn: sqlite3.Connection, kind: str, historical_document_id: int, *,
     )
     conn.commit()
     return {"proposal_id": cur.lastrowid, "state": state, "blocking_failures": failures,
-            "checks": {k: v["ok"] for k, v in checks.items()}}
+            "checks": {k: v["ok"] for k, v in checks.items()}} | ({"plan": plan} if plan is not None else {})
 
 
 def _proposal(conn: sqlite3.Connection, proposal_id: int) -> sqlite3.Row:
@@ -334,6 +349,8 @@ def apply(conn: sqlite3.Connection, proposal_id: int, *, applied_by: str) -> dic
         raise PromotionError(f"proposal {proposal_id} is {p['state']}; it must be approved by a named reviewer first")
     params = json.loads(p["params_json"])
     hd_id = p["historical_document_id"]
+    if p["kind"] == "bind_unbound_document":
+        return _apply_binding(conn, p, params, applied_by)
     checks = (_evaluate_rebind(conn, hd_id, params["start_page"], params["end_page"])
               if p["kind"] == "rebind_page_range" else
               _evaluate_duplicate(conn, hd_id, params["start_page"], params["end_page"],
@@ -373,6 +390,84 @@ def apply(conn: sqlite3.Connection, proposal_id: int, *, applied_by: str) -> dic
     return result
 
 
+def _gap_row(conn: sqlite3.Connection, gap_id: int | None) -> dict | None:
+    if not gap_id or not conn.execute("SELECT 1 FROM sqlite_master WHERE name = 'lineage_gaps_typed'").fetchone():
+        return None
+    row = conn.execute("SELECT id, status, status_reason, updated_at FROM lineage_gaps_typed WHERE id = ?",
+                       (gap_id,)).fetchone()
+    return dict(row) if row else None
+
+
+def _apply_binding(conn: sqlite3.Connection, p: sqlite3.Row, params: dict, applied_by: str) -> dict:
+    from duke_rates.historical.ncuc import document_binding
+
+    proposal_id = p["id"]
+    checks, plan = _evaluate_binding(conn, {k: v for k, v in params.items() if k != "plan"})
+    failures = _blocking_failures(checks)
+    approved_plan = params["plan"]
+    if not failures and (plan["mode"], plan.get("target_version_id")) != (
+            approved_plan["mode"], approved_plan.get("target_version_id")):
+        failures = ["binding_plan_changed_since_approval"]
+    if failures:
+        conn.execute("UPDATE promotion_proposals SET state = 'blocked', state_reason = ?, checks_json = ? WHERE id = ?",
+                     ("re-check at apply failed: " + ", ".join(failures), json.dumps(checks, default=str), proposal_id))
+        conn.commit()
+        raise PromotionError(f"proposal {proposal_id}: blocking checks failed at apply time: {failures}")
+    reason = f"promotion proposal {proposal_id} ({p['kind']}) approved by {p['approved_by']}: {p['approval_note']}"
+    gap_before = _gap_row(conn, params.get("gap_id"))
+    target = plan.get("target_version_id")
+    old_hd = conn.execute("SELECT historical_document_id FROM tariff_versions WHERE id = ?",
+                          (target,)).fetchone()[0] if target else None
+    with atomic(conn), write_context(conn, f"{WORKFLOW_VERSION}:{applied_by}", evidence=reason):
+        before = _snapshot(conn, proposal_id, "before", old_hd) if old_hd else {}
+        result = document_binding.apply_binding(conn, proposal_id, params, plan, applied_by)
+        conn.execute("UPDATE promotion_proposals SET historical_document_id = ?, tariff_version_id = ? WHERE id = ?",
+                     (result["historical_document_id"], result["tariff_version_id"], proposal_id))
+        after = _snapshot(conn, proposal_id, "after", result["historical_document_id"])
+        validation = document_binding.post_apply_validation(conn, result, params)
+        if not validation["ok"]:
+            raise PromotionError(f"proposal {proposal_id}: the bound row did not validate after apply: {validation}")
+        if gap_before is not None:
+            conn.execute("UPDATE lineage_gaps_typed SET status = 'resolved', status_reason = ?, updated_at = ? "
+                         "WHERE id = ?",
+                         (f"bound by promotion proposal {proposal_id} ({result['mode']}); version "
+                          f"{result['tariff_version_id']}, hd {result['historical_document_id']}", _now(),
+                          gap_before["id"]))
+        result |= {"post_apply_validation": validation, "gap_before": gap_before,
+                   "snapshot_before": before, "snapshot_after": after,
+                   "next": "provenance extract-candidate on the bound pages, review, then provenance promote"}
+        conn.execute("UPDATE promotion_proposals SET state = 'applied', applied_by = ?, applied_at = ?, "
+                     "apply_result_json = ?, checks_json = ? WHERE id = ?",
+                     (applied_by, _now(), json.dumps(result, default=str), json.dumps(checks, default=str),
+                      proposal_id))
+    return result
+
+
+def _rollback_binding(conn: sqlite3.Connection, p: sqlite3.Row, by: str) -> dict:
+    from duke_rates.historical.ncuc import document_binding
+
+    result = json.loads(p["apply_result_json"])
+    with atomic(conn), write_context(conn, f"{WORKFLOW_VERSION}:{by}",
+                                     evidence=f"rollback of promotion proposal {p['id']}"):
+        try:
+            document_binding.rollback_binding(conn, result)
+        except RuntimeError as exc:
+            raise PromotionError(str(exc)) from exc
+        gap = result.get("gap_before")
+        if gap:
+            conn.execute("UPDATE lineage_gaps_typed SET status = ?, status_reason = ?, updated_at = ? WHERE id = ?",
+                         (gap["status"], gap["status_reason"], gap.get("updated_at") or _now(), gap["id"]))
+        conn.execute("UPDATE promotion_proposals SET state = 'rolled_back', rolled_back_by = ?, rolled_back_at = ? "
+                     "WHERE id = ?", (by, _now(), p["id"]))
+    gone = conn.execute("SELECT COUNT(*) FROM historical_documents WHERE id = ?",
+                        (result["historical_document_id"],)).fetchone()[0] == 0
+    version = conn.execute("SELECT historical_document_id FROM tariff_versions WHERE id = ?",
+                           (result["tariff_version_id"],)).fetchone()
+    restored = (version is None) if result.get("created_version") else (
+        version is not None and version[0] == result.get("previous_historical_document_id"))
+    return {"restored": gone and restored, "charges_unchanged": True}
+
+
 def rollback(conn: sqlite3.Connection, proposal_id: int, *, by: str) -> dict:
     """Restore the rows an applied proposal changed, exactly as snapshotted."""
     p = _proposal(conn, proposal_id)
@@ -387,6 +482,8 @@ def rollback(conn: sqlite3.Connection, proposal_id: int, *, by: str) -> dict:
         raise PromotionError(
             "tariff_charges changed after this proposal was applied (a charge promotion?); "
             "undo that first with `provenance rollback`, then roll back this proposal")
+    if p["kind"] == "bind_unbound_document":
+        return _rollback_binding(conn, p, by)
     with atomic(conn), write_context(conn, f"{WORKFLOW_VERSION}:{by}",
                                      evidence=f"rollback of promotion proposal {proposal_id}"):
         if p["kind"] == "rebind_page_range":

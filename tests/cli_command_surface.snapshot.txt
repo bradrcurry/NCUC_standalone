@@ -267,6 +267,7 @@ provenance migrate
 provenance plan-network-searches
 provenance promote
 provenance proposals
+provenance propose-binding
 provenance propose-rebind
 provenance propose-redline-duplicate
 provenance reconcile-effective-dates

@@ -836,6 +836,29 @@ def propose_rebind_cmd(
                      params={"start_page": start_page, "end_page": end_page}, evidence=json.loads(evidence)))
 
 
+@provenance_app.command("propose-binding")
+def propose_binding_cmd(
+    db: Path = _DB_OPTION,
+    allow_production: bool = _ALLOW_PROD,
+    gap_candidate_id: int = typer.Option(..., "--gap-candidate-id",
+                                         help="The gap_candidates row (file, pages, family, expected revision)."),
+    target_version_id: int | None = typer.Option(None, "--target-version-id",
+                                                 help="Bind to this existing version (checked, not trusted)."),
+    by: str = typer.Option(..., "--by", help="Proposer."),
+) -> None:
+    """Propose binding an archived, unbound sheet to a tariff version (checks run; nothing changes).
+
+    The mode (attach / replace_redline_source / create_version) comes from the checks.
+    """
+    from duke_rates.historical.ncuc import document_binding
+    from duke_rates.historical.ncuc import document_promotion as dp
+
+    conn = _promotion_conn(db, allow_production)
+    params = document_binding.params_from_gap_candidate(conn, gap_candidate_id, target_version_id=target_version_id)
+    _echo(dp.propose(conn, "bind_unbound_document", None, proposed_by=by, params=params,
+                     evidence={"gap_candidate_id": gap_candidate_id, "gap_id": params["gap_id"]}))
+
+
 @provenance_app.command("audit-version-sources")
 def audit_version_sources_cmd(
     db: Path = _DB_OPTION,
