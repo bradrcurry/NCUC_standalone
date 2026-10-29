@@ -1,0 +1,234 @@
+{
+ "versions_assessed": 578,
+ "by_status": {
+  "agree": 269,
+  "ambiguous": 7,
+  "conflict": 35,
+  "none": 49,
+  "observed_only": 12,
+  "stored_only": 206
+ },
+ "bound_violations": 2,
+ "summary": {
+  "by_status": {
+   "agree": 269,
+   "ambiguous": 7,
+   "conflict": 35,
+   "none": 49,
+   "observed_only": 12,
+   "stored_only": 206
+  },
+  "conflicts": [
+   {
+    "version_id": 5225,
+    "family_key": "nc-carolinas-rider-CEI",
+    "stored": "2025-01-23",
+    "observed": "[{\"date\": \"2025-01-15\", \"clue_id\": 31424, \"file_sha256\": \"6928831501fdd4b2e07fa8061a41f0dcbabfd30f8f69f376b3fde2d0e63be062\", \"page\": 10, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2025-01-15\", \"clue_id\": 31434, \"file_sha256\": \"6928831501fdd4b2e07fa8061a41f0dcbabfd30f8f69f376b3fde2d0e63be062\", \"page\": 11, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 5231,
+    "family_key": "nc-carolinas-rider-EDPR",
+    "stored": "2012-02-01",
+    "observed": "[{\"date\": \"2012-07-01\", \"clue_id\": 38992, \"file_sha256\": \"05b54dd770bd3fe162e62abfcc40bf421b737009fa18e319b40f2d53f9d63f14\", \"page\": 5, \"role\": \"body\", \"normalization\": \"ocr_repaired\"}, {\"date\": \"2012-07-01\", \"clue_id\": 38993, \"file_sha256\": \"05b54dd770bd3fe162e62abfcc40bf421b737009fa18e319b40f2d53f9d63f14\", \"page\": 5, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 5234,
+    "family_key": "nc-carolinas-rider-EDPR",
+    "stored": "2021-06-01",
+    "observed": "[{\"date\": \"2023-07-01\", \"clue_id\": 39013, \"file_sha256\": \"2f87c23a7d62687661984b58b3a05275daffa7a00602c3a2bda6595d759fc144\", \"page\": 2, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2023-07-01\", \"clue_id\": 39016, \"file_sha256\": \"2f87c23a7d62687661984b58b3a05275daffa7a00602c3a2bda6595d759fc144\", \"page\": 2, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2023-07-01\", \"clue_id\": 39030, \"file_sha256\": \"2f87c23a7d62687661984b58b3a05275daffa7a00602c3a2bda6595d759fc144\", \"page\": 3, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 5240,
+    "family_key": "nc-carolinas-rider-EE",
+    "stored": "2016-10-05",
+    "observed": "[{\"date\": \"2017-01-01\", \"clue_id\": 38441, \"file_sha256\": \"5332281e600cd8c8f112f0f0406a7dea833a08f4f53d16719cfa8bb7d7ba6af7\", \"page\": 2, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2017-01-01\", \"clue_id\": 38453, \"file_sha256\": \"5332281e600cd8c8f112f0f0406a7dea833a08f4f53d16719cfa8bb7d7ba6af7\", \"page\": 3, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2017-01-01\", \"clue_id\": 38464, \"file_sha256\": \"5332281e600cd8c8f112f0f0406a7dea833a08f4f53d16719cfa8bb7d7ba6af7\", \"page\": 4, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2017-01-01\", \"clue_id\": 38475, \"file_sha256\": \"5332281e600cd8c8f112f0f0406a7dea833a08f4f53d16719cfa8bb7d7ba6af7\", \"page\": 5, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 5984,
+    "family_key": "nc-carolinas-rider-EE",
+    "stored": "2010-01-01",
+    "observed": "[{\"date\": \"2010-09-01\", \"clue_id\": 42484, \"file_sha256\": \"e9b6809a0bb284c4849b066cfc2c806221957ed68e086c23efd004324418d12a\", \"page\": 3, \"role\": \"footer\", \"normalization\": \"ocr_repaired\"}, {\"date\": \"2010-09-01\", \"clue_id\": 42495, \"file_sha256\": \"e9b6809a0bb284c4849b066cfc2c806221957ed68e086c23efd004324418d12a\", \"page\": 4, \"role\": \"footer\", \"normalization\": \"ocr_repaired\"}]"
+   },
+   {
+    "version_id": 5990,
+    "family_key": "nc-carolinas-rider-PS",
+    "stored": "2026-10-13",
+    "observed": "[{\"date\": \"2009-10-13\", \"clue_id\": 41803, \"file_sha256\": \"6f1dc53909c5598f01ec95b6d6f67667ad4f0f97bae8ceecb56754dfdb984d6c\", \"page\": 10, \"role\": \"footer\", \"normalization\": \"ocr_repaired\"}]"
+   },
+   {
+    "version_id": 5256,
+    "family_key": "nc-carolinas-rider-SCG",
+    "stored": "2007-12-21",
+    "observed": "[{\"date\": \"2008-01-01\", \"clue_id\": 38538, \"file_sha256\": \"7d1d4f9c74ea7dfba43e819b93d7624f69b0cf5ce9049232f852226b50bf1e79\", \"page\": 3, \"role\": \"footer\", \"normalization\": \"ocr_repaired\"}]"
+   },
+   {
+    "version_id": 5270,
+    "family_key": "nc-carolinas-schedule-NL",
+    "stored": "2013-10-23",
+    "observed": "[{\"date\": \"2013-11-01\", \"clue_id\": 37992, \"file_sha256\": \"804562fb6d04d7070851f32a24cd4cd6475134b370fb6c8d958f76f18b93fafe\", \"page\": 33, \"role\": \"footer\", \"normalization\": \"ocr_repaired\"}]"
+   },
+   {
+    "version_id": 4639,
+    "family_key": "nc-carolinas-schedule-SGS",
+    "stored": "1993-11-01",
+    "observed": "[{\"date\": \"2007-09-02\", \"clue_id\": 39687, \"file_sha256\": \"f5ce2e35c7cfa39577dfb2f4e320a06f85fe5822367326e16a939d056019487c\", \"page\": 8, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 5647,
+    "family_key": "nc-progress-leaf-503",
+    "stored": "2022-05-18",
+    "observed": "[{\"date\": \"2022-06-01\", \"clue_id\": 40530, \"file_sha256\": \"01506f59267ef4b68c8f0dc1ec19390f20c4d24d9058976386966c4fe6428a79\", \"page\": 80, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 7208,
+    "family_key": "nc-progress-leaf-532",
+    "stored": "2024-01-01",
+    "observed": "[{\"date\": \"2023-10-01\", \"clue_id\": 50051, \"file_sha256\": \"32722e717cdac1008d82057c6db4895b6532b34446490908176635f325cd6639\", \"page\": 11, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2023-10-01\", \"clue_id\": 50063, \"file_sha256\": \"32722e717cdac1008d82057c6db4895b6532b34446490908176635f325cd6639\", \"page\": 12, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2023-10-01\", \"clue_id\": 50073, \"file_sha256\": \"32722e717cdac1008d82057c6db4895b6532b34446490908176635f325cd6639\", \"page\": 13, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2023-10-01\", \"clue_id\": 50083, \"file_sha256\": \"32722e717cdac1008d82057c6db4895b6532b34446490908176635f325cd6639\", \"page\": 14, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2023-10-01\", \"clue_id\": 50094, \"file_sha256\": \"32722e717cdac1008d82057c6db4895b6532b34446490908176635f325cd6639\", \"page\": 15, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2023-10-01\", \"clue_id\": 50107, \"file_sha256\": \"32722e717cdac1008d82057c6db4895b6532b34446490908176635f325cd6639\", \"page\": 16, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2023-10-01\", \"clue_id\": 50117, \"file_sha256\": \"32722e717cdac1008d82057c6db4895b6532b34446490908176635f325cd6639\", \"page\": 17, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2023-10-01\", \"clue_id\": 50127, \"file_sha256\": \"32722e717cdac1008d82057c6db4895b6532b34446490908176635f325cd6639\", \"page\": 18, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 7207,
+    "family_key": "nc-progress-leaf-533",
+    "stored": "2024-01-01",
+    "observed": "[{\"date\": \"2023-10-01\", \"clue_id\": 50138, \"file_sha256\": \"32722e717cdac1008d82057c6db4895b6532b34446490908176635f325cd6639\", \"page\": 19, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2023-10-01\", \"clue_id\": 50148, \"file_sha256\": \"32722e717cdac1008d82057c6db4895b6532b34446490908176635f325cd6639\", \"page\": 20, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2023-10-01\", \"clue_id\": 50158, \"file_sha256\": \"32722e717cdac1008d82057c6db4895b6532b34446490908176635f325cd6639\", \"page\": 21, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2023-10-01\", \"clue_id\": 50168, \"file_sha256\": \"32722e717cdac1008d82057c6db4895b6532b34446490908176635f325cd6639\", \"page\": 22, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2023-10-01\", \"clue_id\": 50178, \"file_sha256\": \"32722e717cdac1008d82057c6db4895b6532b34446490908176635f325cd6639\", \"page\": 23, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2023-10-01\", \"clue_id\": 50189, \"file_sha256\": \"32722e717cdac1008d82057c6db4895b6532b34446490908176635f325cd6639\", \"page\": 24, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2023-10-01\", \"clue_id\": 50199, \"file_sha256\": \"32722e717cdac1008d82057c6db4895b6532b34446490908176635f325cd6639\", \"page\": 25, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2023-10-01\", \"clue_id\": 50209, \"file_sha256\": \"32722e717cdac1008d82057c6db4895b6532b34446490908176635f325cd6639\", \"page\": 26, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2023-10-01\", \"clue_id\": 50219, \"file_sha256\": \"32722e717cdac1008d82057c6db4895b6532b34446490908176635f325cd6639\", \"page\": 27, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2023-10-01\", \"clue_id\": 50229, \"file_sha256\": \"32722e717cdac1008d82057c6db4895b6532b34446490908176635f325cd6639\", \"page\": 28, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 5339,
+    "family_key": "nc-progress-leaf-571",
+    "stored": "2019-11-27",
+    "observed": "[{\"date\": \"2019-12-01\", \"clue_id\": 33436, \"file_sha256\": \"43d61089faf3704e5d1fdac85f47390d6696cb7f48305fcbea5b2b1dfc8ce89f\", \"page\": 6, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2019-12-01\", \"clue_id\": 33444, \"file_sha256\": \"43d61089faf3704e5d1fdac85f47390d6696cb7f48305fcbea5b2b1dfc8ce89f\", \"page\": 9, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2019-12-01\", \"clue_id\": 33452, \"file_sha256\": \"43d61089faf3704e5d1fdac85f47390d6696cb7f48305fcbea5b2b1dfc8ce89f\", \"page\": 11, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2019-12-01\", \"clue_id\": 33460, \"file_sha256\": \"43d61089faf3704e5d1fdac85f47390d6696cb7f48305fcbea5b2b1dfc8ce89f\", \"page\": 14, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2019-12-01\", \"clue_id\": 33468, \"file_sha256\": \"43d61089faf3704e5d1fdac85f47390d6696cb7f48305fcbea5b2b1dfc8ce89f\", \"page\": 16, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2019-12-01\", \"clue_id\": 33476, \"file_sha256\": \"43d61089faf3704e5d1fdac85f47390d6696cb7f48305fcbea5b2b1dfc8ce89f\", \"page\": 18, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2019-12-01\", \"clue_id\": 33487, \"file_sha256\": \"43d61089faf3704e5d1fdac85f47390d6696cb7f48305fcbea5b2b1dfc8ce89f\", \"page\": 22, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2019-12-01\", \"clue_id\": 33495, \"file_sha256\": \"43d61089faf3704e5d1fdac85f47390d6696cb7f48305fcbea5b2b1dfc8ce89f\", \"page\": 25, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2019-12-01\", \"clue_id\": 33503, \"file_sha256\": \"43d61089faf3704e5d1fdac85f47390d6696cb7f48305fcbea5b2b1dfc8ce89f\", \"page\": 28, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2019-12-01\", \"clue_id\": 33511, \"file_sha256\": \"43d61089faf3704e5d1fdac85f47390d6696cb7f48305fcbea5b2b1dfc8ce89f\", \"page\": 31, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2019-12-01\", \"clue_id\": 33522, \"file_sha256\": \"43d61089faf3704e5d1fdac85f47390d6696cb7f48305fcbea5b2b1dfc8ce89f\", \"page\": 35, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2019-12-01\", \"clue_id\": 33530, \"file_sha256\": \"43d61089faf3704e5d1fdac85f47390d6696cb7f48305fcbea5b2b1dfc8ce89f\", \"page\": 39, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2019-12-01\", \"clue_id\": 33539, \"file_sha256\": \"43d61089faf3704e5d1fdac85f47390d6696cb7f48305fcbea5b2b1dfc8ce89f\", \"page\": 44, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2019-12-01\", \"clue_id\": 33547, \"file_sha256\": \"43d61089faf3704e5d1fdac85f47390d6696cb7f48305fcbea5b2b1dfc8ce89f\", \"page\": 46, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2019-12-01\", \"clue_id\": 33555, \"file_sha256\": \"43d61089faf3704e5d1fdac85f47390d6696cb7f48305fcbea5b2b1dfc8ce89f\", \"page\": 48, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2019-12-01\", \"clue_id\": 33563, \"file_sha256\": \"43d61089faf3704e5d1fdac85f47390d6696cb7f48305fcbea5b2b1dfc8ce89f\", \"page\": 50, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2019-12-01\", \"clue_id\": 33572, \"file_sha256\": \"43d61089faf3704e5d1fdac85f47390d6696cb7f48305fcbea5b2b1dfc8ce89f\", \"page\": 52, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2019-12-01\", \"clue_id\": 33580, \"file_sha256\": \"43d61089faf3704e5d1fdac85f47390d6696cb7f48305fcbea5b2b1dfc8ce89f\", \"page\": 54, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2019-12-01\", \"clue_id\": 33591, \"file_sha256\": \"43d61089faf3704e5d1fdac85f47390d6696cb7f48305fcbea5b2b1dfc8ce89f\", \"page\": 60, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2019-12-01\", \"clue_id\": 33599, \"file_sha256\": \"43d61089faf3704e5d1fdac85f47390d6696cb7f48305fcbea5b2b1dfc8ce89f\", \"page\": 65, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2019-12-01\", \"clue_id\": 33609, \"file_sha256\": \"43d61089faf3704e5d1fdac85f47390d6696cb7f48305fcbea5b2b1dfc8ce89f\", \"page\": 70, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2019-12-01\", \"clue_id\": 33617, \"file_sha256\": \"43d61089faf3704e5d1fdac85f47390d6696cb7f48305fcbea5b2b1dfc8ce89f\", \"page\": 72, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2019-12-01\", \"clue_id\": 33625, \"file_sha256\": \"43d61089faf3704e5d1fdac85f47390d6696cb7f48305fcbea5b2b1dfc8ce89f\", \"page\": 75, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2019-12-01\", \"clue_id\": 33631, \"file_sha256\": \"43d61089faf3704e5d1fdac85f47390d6696cb7f48305fcbea5b2b1dfc8ce89f\", \"page\": 76, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 6052,
+    "family_key": "nc-progress-leaf-574",
+    "stored": "2016-12-01",
+    "observed": "[{\"date\": \"2021-01-01\", \"clue_id\": 44318, \"file_sha256\": \"cd3f20b303535802eaee6078a380c71d1d95f9dcb7fce51f3e5c476233607bce\", \"page\": 52, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 6057,
+    "family_key": "nc-progress-leaf-600",
+    "stored": "2025-01-16",
+    "observed": "[{\"date\": \"2025-04-01\", \"clue_id\": 44189, \"file_sha256\": \"3776a33f3a5e9b1a89604075f427e5bf49adeb0d49a1a29594e2db25b9025759\", \"page\": 8, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2025-04-01\", \"clue_id\": 44200, \"file_sha256\": \"3776a33f3a5e9b1a89604075f427e5bf49adeb0d49a1a29594e2db25b9025759\", \"page\": 9, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2025-04-01\", \"clue_id\": 44213, \"file_sha256\": \"3776a33f3a5e9b1a89604075f427e5bf49adeb0d49a1a29594e2db25b9025759\", \"page\": 10, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2025-04-01\", \"clue_id\": 44226, \"file_sha256\": \"3776a33f3a5e9b1a89604075f427e5bf49adeb0d49a1a29594e2db25b9025759\", \"page\": 11, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2025-04-01\", \"clue_id\": 44241, \"file_sha256\": \"3776a33f3a5e9b1a89604075f427e5bf49adeb0d49a1a29594e2db25b9025759\", \"page\": 12, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 6548,
+    "family_key": "nc-progress-leaf-600",
+    "stored": "2024-01-24",
+    "observed": "[{\"date\": \"2025-01-01\", \"clue_id\": 45580, \"file_sha256\": \"9e160dab2ca17da0d621d5e43e67ff0091ada765682e530db190d9ed4a5c36da\", \"page\": 9, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2025-01-01\", \"clue_id\": 45593, \"file_sha256\": \"9e160dab2ca17da0d621d5e43e67ff0091ada765682e530db190d9ed4a5c36da\", \"page\": 10, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2025-01-01\", \"clue_id\": 45608, \"file_sha256\": \"9e160dab2ca17da0d621d5e43e67ff0091ada765682e530db190d9ed4a5c36da\", \"page\": 11, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2025-01-01\", \"clue_id\": 45623, \"file_sha256\": \"9e160dab2ca17da0d621d5e43e67ff0091ada765682e530db190d9ed4a5c36da\", \"page\": 12, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2025-01-01\", \"clue_id\": 45640, \"file_sha256\": \"9e160dab2ca17da0d621d5e43e67ff0091ada765682e530db190d9ed4a5c36da\", \"page\": 13, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 5363,
+    "family_key": "nc-progress-leaf-601",
+    "stored": "2018-03-16",
+    "observed": "[{\"date\": \"2020-01-01\", \"clue_id\": 39180, \"file_sha256\": \"c0891fb49a910802a37cc2c622fd225f6af3782334135b640605846ecc8b0e34\", \"page\": 4, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 6059,
+    "family_key": "nc-progress-leaf-601",
+    "stored": "2024-01-16",
+    "observed": "[{\"date\": \"2025-01-01\", \"clue_id\": 31507, \"file_sha256\": \"bf3ff80e0ddfc864fcec66e070c29eda25cf542e3aeb9fd0abeff1d4148b9c6a\", \"page\": 5, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2025-01-01\", \"clue_id\": 31513, \"file_sha256\": \"bf3ff80e0ddfc864fcec66e070c29eda25cf542e3aeb9fd0abeff1d4148b9c6a\", \"page\": 6, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2025-01-01\", \"clue_id\": 31519, \"file_sha256\": \"bf3ff80e0ddfc864fcec66e070c29eda25cf542e3aeb9fd0abeff1d4148b9c6a\", \"page\": 7, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 7229,
+    "family_key": "nc-progress-leaf-601",
+    "stored": "2014-12-01",
+    "observed": "[{\"date\": \"2017-02-01\", \"clue_id\": 50939, \"file_sha256\": \"5a3d7c7c988cf274d6bc74f4e9ec8da3d7eef642644451c9988ce40761a4c911\", \"page\": 74, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 7267,
+    "family_key": "nc-progress-leaf-601",
+    "stored": "2024-01-27",
+    "observed": "[{\"date\": \"2024-12-01\", \"clue_id\": 51909, \"file_sha256\": \"9647b1cfa060341a9b7617fb53c1803ca3b3c319b7ff4c6da054c466203474d7\", \"page\": 5, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2024-12-01\", \"clue_id\": 51916, \"file_sha256\": \"9647b1cfa060341a9b7617fb53c1803ca3b3c319b7ff4c6da054c466203474d7\", \"page\": 6, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2024-12-01\", \"clue_id\": 51923, \"file_sha256\": \"9647b1cfa060341a9b7617fb53c1803ca3b3c319b7ff4c6da054c466203474d7\", \"page\": 7, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 6649,
+    "family_key": "nc-progress-leaf-602",
+    "stored": "2024-12-01",
+    "observed": "[{\"date\": \"2021-12-01\", \"clue_id\": 45813, \"file_sha256\": \"6ae188ba10684c545c551a958a3f250cd462e895b50d259f5ba83d94caf90bf1\", \"page\": 77, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2021-12-01\", \"clue_id\": 45819, \"file_sha256\": \"6ae188ba10684c545c551a958a3f250cd462e895b50d259f5ba83d94caf90bf1\", \"page\": 78, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 7269,
+    "family_key": "nc-progress-leaf-602",
+    "stored": "2021-06-01",
+    "observed": "[{\"date\": \"2021-12-01\", \"clue_id\": 44502, \"file_sha256\": \"d42c8e6a3500f4119a1cedd6bc06c6e07bce3b470ddd7aa5c06732026ea5e192\", \"page\": 145, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2021-12-01\", \"clue_id\": 44508, \"file_sha256\": \"d42c8e6a3500f4119a1cedd6bc06c6e07bce3b470ddd7aa5c06732026ea5e192\", \"page\": 146, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 7275,
+    "family_key": "nc-progress-leaf-605",
+    "stored": "2024-01-01",
+    "observed": "[{\"date\": \"2025-01-01\", \"clue_id\": 51733, \"file_sha256\": \"f8c0037b7af22da01e5911944f59c76e25ca4ebf245197201428f3d0541665d9\", \"page\": 31, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2025-01-01\", \"clue_id\": 51739, \"file_sha256\": \"f8c0037b7af22da01e5911944f59c76e25ca4ebf245197201428f3d0541665d9\", \"page\": 32, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2025-01-01\", \"clue_id\": 51745, \"file_sha256\": \"f8c0037b7af22da01e5911944f59c76e25ca4ebf245197201428f3d0541665d9\", \"page\": 33, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2025-01-01\", \"clue_id\": 51751, \"file_sha256\": \"f8c0037b7af22da01e5911944f59c76e25ca4ebf245197201428f3d0541665d9\", \"page\": 34, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 7277,
+    "family_key": "nc-progress-leaf-611",
+    "stored": "2023-10-01",
+    "observed": "[{\"date\": \"2024-01-01\", \"clue_id\": 35351, \"file_sha256\": \"7a5cbdce496e1dbafd60af074cc80a786dd9087fcd121c65d7e13981bf3c41a0\", \"page\": 143, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 5442,
+    "family_key": "nc-progress-leaf-642",
+    "stored": "2015-04-01",
+    "observed": "[{\"date\": \"2013-06-01\", \"clue_id\": 38964, \"file_sha256\": \"4533ad09629ce92fca97df46eedddbf90e71929341cb77d09440b0f131cd40a9\", \"page\": 5, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 5466,
+    "family_key": "nc-progress-leaf-661",
+    "stored": "2019-02-01",
+    "observed": "[{\"date\": \"2019-01-23\", \"clue_id\": 38949, \"file_sha256\": \"82a5443f43011bbe45db3f77554f50158eb1123593bf31bd77de7e1acb92dbeb\", \"page\": 5, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 5565,
+    "family_key": "nc-progress-leaf-663",
+    "stored": "2023-10-01",
+    "observed": "[{\"date\": \"2021-07-08\", \"clue_id\": 40379, \"file_sha256\": \"84be00ebedddafaeaca6a35923a715c603a83bd0984be5fe8d26902a0269d34d\", \"page\": 1, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2021-07-08\", \"clue_id\": 40388, \"file_sha256\": \"84be00ebedddafaeaca6a35923a715c603a83bd0984be5fe8d26902a0269d34d\", \"page\": 2, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2021-07-08\", \"clue_id\": 40397, \"file_sha256\": \"84be00ebedddafaeaca6a35923a715c603a83bd0984be5fe8d26902a0269d34d\", \"page\": 3, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 7285,
+    "family_key": "nc-progress-leaf-668",
+    "stored": "2023-10-01",
+    "observed": "[{\"date\": \"2025-01-01\", \"clue_id\": 51673, \"file_sha256\": \"f8c0037b7af22da01e5911944f59c76e25ca4ebf245197201428f3d0541665d9\", \"page\": 24, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2025-01-01\", \"clue_id\": 51683, \"file_sha256\": \"f8c0037b7af22da01e5911944f59c76e25ca4ebf245197201428f3d0541665d9\", \"page\": 25, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2025-01-01\", \"clue_id\": 51693, \"file_sha256\": \"f8c0037b7af22da01e5911944f59c76e25ca4ebf245197201428f3d0541665d9\", \"page\": 26, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 7289,
+    "family_key": "nc-progress-leaf-670",
+    "stored": "2024-01-01",
+    "observed": "[{\"date\": \"2025-01-01\", \"clue_id\": 51785, \"file_sha256\": \"f8c0037b7af22da01e5911944f59c76e25ca4ebf245197201428f3d0541665d9\", \"page\": 38, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2025-01-01\", \"clue_id\": 51791, \"file_sha256\": \"f8c0037b7af22da01e5911944f59c76e25ca4ebf245197201428f3d0541665d9\", \"page\": 39, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2025-01-01\", \"clue_id\": 51797, \"file_sha256\": \"f8c0037b7af22da01e5911944f59c76e25ca4ebf245197201428f3d0541665d9\", \"page\": 40, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 6751,
+    "family_key": "nc-progress-leaf-674",
+    "stored": "2025-01-01",
+    "observed": "[{\"date\": \"2026-01-01\", \"clue_id\": 48466, \"file_sha256\": \"792200b3155eaa3c586acea38a821628759926c6aa0be62849d8cc41037c223f\", \"page\": 18, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2026-01-01\", \"clue_id\": 48477, \"file_sha256\": \"792200b3155eaa3c586acea38a821628759926c6aa0be62849d8cc41037c223f\", \"page\": 19, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2026-01-01\", \"clue_id\": 48488, \"file_sha256\": \"792200b3155eaa3c586acea38a821628759926c6aa0be62849d8cc41037c223f\", \"page\": 20, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2026-01-01\", \"clue_id\": 48499, \"file_sha256\": \"792200b3155eaa3c586acea38a821628759926c6aa0be62849d8cc41037c223f\", \"page\": 21, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2026-01-01\", \"clue_id\": 48510, \"file_sha256\": \"792200b3155eaa3c586acea38a821628759926c6aa0be62849d8cc41037c223f\", \"page\": 22, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2026-01-01\", \"clue_id\": 48521, \"file_sha256\": \"792200b3155eaa3c586acea38a821628759926c6aa0be62849d8cc41037c223f\", \"page\": 23, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2026-01-01\", \"clue_id\": 48532, \"file_sha256\": \"792200b3155eaa3c586acea38a821628759926c6aa0be62849d8cc41037c223f\", \"page\": 24, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2026-01-01\", \"clue_id\": 48543, \"file_sha256\": \"792200b3155eaa3c586acea38a821628759926c6aa0be62849d8cc41037c223f\", \"page\": 25, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2026-01-01\", \"clue_id\": 48554, \"file_sha256\": \"792200b3155eaa3c586acea38a821628759926c6aa0be62849d8cc41037c223f\", \"page\": 26, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2026-01-01\", \"clue_id\": 48565, \"file_sha256\": \"792200b3155eaa3c586acea38a821628759926c6aa0be62849d8cc41037c223f\", \"page\": 27, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2026-01-01\", \"clue_id\": 48576, \"file_sha256\": \"792200b3155eaa3c586acea38a821628759926c6aa0be62849d8cc41037c223f\", \"page\": 28, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2026-01-01\", \"clue_id\": 48587, \"file_sha256\": \"792200b3155eaa3c586acea38a821628759926c6aa0be62849d8cc41037c223f\", \"page\": 29, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2026-01-01\", \"clue_id\": 48598, \"file_sha256\": \"792200b3155eaa3c586acea38a821628759926c6aa0be62849d8cc41037c223f\", \"page\": 30, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2026-01-01\", \"clue_id\": 48609, \"file_sha256\": \"792200b3155eaa3c586acea38a821628759926c6aa0be62849d8cc41037c223f\", \"page\": 31, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2026-01-01\", \"clue_id\": 48620, \"file_sha256\": \"792200b3155eaa3c586acea38a821628759926c6aa0be62849d8cc41037c223f\", \"page\": 32, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2026-01-01\", \"clue_id\": 48631, \"file_sha256\": \"792200b3155eaa3c586acea38a821628759926c6aa0be62849d8cc41037c223f\", \"page\": 33, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2026-01-01\", \"clue_id\": 48642, \"file_sha256\": \"792200b3155eaa3c586acea38a821628759926c6aa0be62849d8cc41037c223f\", \"page\": 34, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2026-01-01\", \"clue_id\": 48653, \"file_sha256\": \"792200b3155eaa3c586acea38a821628759926c6aa0be62849d8cc41037c223f\", \"page\": 35, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2026-01-01\", \"clue_id\": 48664, \"file_sha256\": \"792200b3155eaa3c586acea38a821628759926c6aa0be62849d8cc41037c223f\", \"page\": 36, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2026-01-01\", \"clue_id\": 48675, \"file_sha256\": \"792200b3155eaa3c586acea38a821628759926c6aa0be62849d8cc41037c223f\", \"page\": 37, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 7291,
+    "family_key": "nc-progress-leaf-701",
+    "stored": "2020-10-13",
+    "observed": "[{\"date\": \"2025-01-01\", \"clue_id\": 51449, \"file_sha256\": \"127e5029fae6e27f24e673a1a6a2daed22707674cd734c1154dabdc44cef0058\", \"page\": 5, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2025-01-01\", \"clue_id\": 51460, \"file_sha256\": \"127e5029fae6e27f24e673a1a6a2daed22707674cd734c1154dabdc44cef0058\", \"page\": 6, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2025-01-01\", \"clue_id\": 51471, \"file_sha256\": \"127e5029fae6e27f24e673a1a6a2daed22707674cd734c1154dabdc44cef0058\", \"page\": 7, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 6110,
+    "family_key": "nc-progress-leaf-704",
+    "stored": "2019-02-27",
+    "observed": "[{\"date\": \"2023-01-01\", \"clue_id\": 40355, \"file_sha256\": \"1c0903205bd36f78d1e0d3cba1cb1ca9837df12de4dc6ad7e996ff1488049d44\", \"page\": 5, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2023-01-01\", \"clue_id\": 40366, \"file_sha256\": \"1c0903205bd36f78d1e0d3cba1cb1ca9837df12de4dc6ad7e996ff1488049d44\", \"page\": 6, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 5506,
+    "family_key": "nc-progress-leaf-717",
+    "stored": "2014-01-01",
+    "observed": "[{\"date\": \"2016-01-01\", \"clue_id\": 38637, \"file_sha256\": \"7a42aa42bbe2cea68819e54a4a36fe714bc2cabc60dc7cd46f37aaa0f742aa5f\", \"page\": 10, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 6141,
+    "family_key": "nc-progress-leaf-800",
+    "stored": "2014-09-15",
+    "observed": "[{\"date\": \"2018-12-01\", \"clue_id\": 38683, \"file_sha256\": \"208eedc416efbcb7e5309ab5e18f56e58049060974b00b315fc8dd92a8f8a944\", \"page\": 3, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2018-12-01\", \"clue_id\": 38693, \"file_sha256\": \"208eedc416efbcb7e5309ab5e18f56e58049060974b00b315fc8dd92a8f8a944\", \"page\": 6, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2018-12-01\", \"clue_id\": 38703, \"file_sha256\": \"208eedc416efbcb7e5309ab5e18f56e58049060974b00b315fc8dd92a8f8a944\", \"page\": 9, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2018-12-01\", \"clue_id\": 38713, \"file_sha256\": \"208eedc416efbcb7e5309ab5e18f56e58049060974b00b315fc8dd92a8f8a944\", \"page\": 11, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2018-12-01\", \"clue_id\": 38723, \"file_sha256\": \"208eedc416efbcb7e5309ab5e18f56e58049060974b00b315fc8dd92a8f8a944\", \"page\": 14, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2018-12-01\", \"clue_id\": 38733, \"file_sha256\": \"208eedc416efbcb7e5309ab5e18f56e58049060974b00b315fc8dd92a8f8a944\", \"page\": 16, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2018-12-01\", \"clue_id\": 38743, \"file_sha256\": \"208eedc416efbcb7e5309ab5e18f56e58049060974b00b315fc8dd92a8f8a944\", \"page\": 18, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2018-12-01\", \"clue_id\": 38757, \"file_sha256\": \"208eedc416efbcb7e5309ab5e18f56e58049060974b00b315fc8dd92a8f8a944\", \"page\": 22, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2018-12-01\", \"clue_id\": 38767, \"file_sha256\": \"208eedc416efbcb7e5309ab5e18f56e58049060974b00b315fc8dd92a8f8a944\", \"page\": 25, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2018-12-01\", \"clue_id\": 38777, \"file_sha256\": \"208eedc416efbcb7e5309ab5e18f56e58049060974b00b315fc8dd92a8f8a944\", \"page\": 28, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2018-12-01\", \"clue_id\": 38787, \"file_sha256\": \"208eedc416efbcb7e5309ab5e18f56e58049060974b00b315fc8dd92a8f8a944\", \"page\": 31, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2018-12-01\", \"clue_id\": 38801, \"file_sha256\": \"208eedc416efbcb7e5309ab5e18f56e58049060974b00b315fc8dd92a8f8a944\", \"page\": 35, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2018-12-01\", \"clue_id\": 38811, \"file_sha256\": \"208eedc416efbcb7e5309ab5e18f56e58049060974b00b315fc8dd92a8f8a944\", \"page\": 39, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2018-12-01\", \"clue_id\": 38822, \"file_sha256\": \"208eedc416efbcb7e5309ab5e18f56e58049060974b00b315fc8dd92a8f8a944\", \"page\": 44, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2018-12-01\", \"clue_id\": 38827, \"file_sha256\": \"208eedc416efbcb7e5309ab5e18f56e58049060974b00b315fc8dd92a8f8a944\", \"page\": 46, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2018-12-01\", \"clue_id\": 38837, \"file_sha256\": \"208eedc416efbcb7e5309ab5e18f56e58049060974b00b315fc8dd92a8f8a944\", \"page\": 48, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2018-12-01\", \"clue_id\": 38847, \"file_sha256\": \"208eedc416efbcb7e5309ab5e18f56e58049060974b00b315fc8dd92a8f8a944\", \"page\": 50, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2018-12-01\", \"clue_id\": 38858, \"file_sha256\": \"208eedc416efbcb7e5309ab5e18f56e58049060974b00b315fc8dd92a8f8a944\", \"page\": 52, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2018-12-01\", \"clue_id\": 38868, \"file_sha256\": \"208eedc416efbcb7e5309ab5e18f56e58049060974b00b315fc8dd92a8f8a944\", \"page\": 54, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2018-12-01\", \"clue_id\": 38882, \"file_sha256\": \"208eedc416efbcb7e5309ab5e18f56e58049060974b00b315fc8dd92a8f8a944\", \"page\": 60, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2018-12-01\", \"clue_id\": 38892, \"file_sha256\": \"208eedc416efbcb7e5309ab5e18f56e58049060974b00b315fc8dd92a8f8a944\", \"page\": 65, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2018-12-01\", \"clue_id\": 38904, \"file_sha256\": \"208eedc416efbcb7e5309ab5e18f56e58049060974b00b315fc8dd92a8f8a944\", \"page\": 70, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2018-12-01\", \"clue_id\": 38914, \"file_sha256\": \"208eedc416efbcb7e5309ab5e18f56e58049060974b00b315fc8dd92a8f8a944\", \"page\": 72, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2018-12-01\", \"clue_id\": 38924, \"file_sha256\": \"208eedc416efbcb7e5309ab5e18f56e58049060974b00b315fc8dd92a8f8a944\", \"page\": 75, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2018-12-01\", \"clue_id\": 38930, \"file_sha256\": \"208eedc416efbcb7e5309ab5e18f56e58049060974b00b315fc8dd92a8f8a944\", \"page\": 76, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   },
+   {
+    "version_id": 5533,
+    "family_key": "nc-progress-leaf-801",
+    "stored": "2021-06-01",
+    "observed": "[{\"date\": \"2023-10-01\", \"clue_id\": 37799, \"file_sha256\": \"98b66ee585b8dafdfcae7488d10673536b4ba17e8dacac2af8f2073550522bd2\", \"page\": 1, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2023-10-01\", \"clue_id\": 37807, \"file_sha256\": \"98b66ee585b8dafdfcae7488d10673536b4ba17e8dacac2af8f2073550522bd2\", \"page\": 2, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2023-10-01\", \"clue_id\": 37815, \"file_sha256\": \"98b66ee585b8dafdfcae7488d10673536b4ba17e8dacac2af8f2073550522bd2\", \"page\": 3, \"role\": \"footer\", \"normalization\": \"exact\"}, {\"date\": \"2023-10-01\", \"clue_id\": 37823, \"file_sha256\": \"98b66ee585b8dafdfcae7488d10673536b4ba17e8dacac2af8f2073550522bd2\", \"page\": 4, \"role\": \"footer\", \"normalization\": \"exact\"}]"
+   }
+  ]
+ }
+}

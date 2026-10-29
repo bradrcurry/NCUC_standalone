@@ -1,0 +1,17 @@
+{
+  "attempts": 740,
+  "by_channel_outcome": [
+    {
+      "channel": "local",
+      "outcome": "hits",
+      "n": 243
+    },
+    {
+      "channel": "local",
+      "outcome": "no_results",
+      "n": 497
+    }
+  ],
+  "distinct_param_hashes": 740,
+  "by_stop_reason": []
+}
