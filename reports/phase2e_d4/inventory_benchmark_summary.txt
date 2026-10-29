@@ -1,0 +1,51 @@
+{
+  "baseline": {
+    "stop_reason": "inventory_first_page_only",
+    "pages_reached": 1,
+    "pages_total": 6,
+    "items_reported": null,
+    "result_count": 100,
+    "filter_requested": [],
+    "filter_verified": null,
+    "error": null
+  },
+  "final": {
+    "stop_reason": "inventory_complete",
+    "pages_reached": 6,
+    "pages_total": 6,
+    "items_reported": null,
+    "result_count": 568,
+    "filter_requested": [],
+    "filter_verified": null,
+    "error": null
+  },
+  "restricted_entries": 11,
+  "public_orders": 83,
+  "timing_s": {
+    "first_page_reader": {
+      "median": 0.06242760000168346,
+      "runs": [
+        0.06239040000946261,
+        0.06242760000168346,
+        0.06444440002087504,
+        0.06425930000841618,
+        0.06234720000065863
+      ]
+    },
+    "complete_inventory": {
+      "median": 0.9212480999995023,
+      "runs": [
+        0.9075275000068359,
+        0.9212480999995023,
+        0.9181344999815337,
+        0.9905786000017542,
+        0.930350799986627
+      ]
+    }
+  },
+  "candidate_count": 83,
+  "repeated_run": {
+    "queries_run": 0,
+    "repeated_searches_avoided": 1
+  }
+}

@@ -214,132 +214,55 @@ def _do_login(page: "Page", settings: Settings) -> None:
         logger.warning("Login state unclear, proceeding. title=%r url=%s", final_title, final_url[:80])
 
 
-def get_docket_documents(page: "Page", docket_id: str) -> list[dict]:
-    """
-    Fetch the Documents tab for a docket and return all document entries.
+def get_docket_documents(
+    page: "Page", docket_id: str, *, max_pages: int = 100,
+    checkpoint_dir: Path | None = None, first_page_only: bool = False,
+) -> list[dict]:
+    """Read a complete docket inventory, retaining the legacy list-of-dicts API.
 
-    Returns list of dicts with keys:
-        doc_type, description, date_filed, document_url, view_file_urls
+    Incomplete retrieval raises ``NcucSessionError`` carrying ``.outcome`` rather
+    than silently returning a partial list. A successful list also exposes its
+    ``.inventory_outcome``. Restricted listing entries never expose download URLs
+    through this compatibility list. Use the first-page loader below only when
+    another bounded inventory adapter owns traversal and completeness reporting.
     """
     import re
+
     from bs4 import BeautifulSoup
 
+    from duke_rates.historical.ncuc.docket_inventory import (
+        DocketDocumentList,
+        walk_docket_inventory,
+    )
+    from duke_rates.historical.ncuc.remote_discovery import parse_docket_inventory
+
+    if not 1 <= max_pages <= 1000:
+        raise ValueError("inventory page limit must be between 1 and 1000")
     url = f"{DOCKET_DOCS_URL}?DocketId={docket_id}"
     logger.info("Fetching docket documents: %s", url)
     resp = page.goto(url, wait_until="networkidle", timeout=30000)
     time.sleep(2)
-
     if resp and resp.status == 403:
-        raise NcucSessionError(f"403 Forbidden on docket docs — session may have expired")
-
+        raise NcucSessionError("403 Forbidden on docket docs - session may have expired")
     html = page.content()
-    soup = BeautifulSoup(html, "lxml")
+    if first_page_only:
+        return parse_docket_inventory(html)
+    visible = BeautifulSoup(html, "lxml").get_text(" ", strip=True)
+    match = re.search(r"\bDocket\s+([A-Z]+-\d+(?:\s+Sub\s+\d+)?)", visible, re.I)
+    label = match.group(1) if match else ""
+    outcome = walk_docket_inventory(page, docket_label=label, docket_id=docket_id,
+                                    max_pages=max_pages, checkpoint_dir=checkpoint_dir)
+    if not outcome.complete:
+        error = NcucSessionError(f"Incomplete docket inventory: {outcome.stop_reason}; "
+                                 f"verified {outcome.pages_reached} pages")
+        error.outcome = outcome
+        raise error
+    return DocketDocumentList(outcome)
 
-    documents = []
 
-    # Documents are in a grid table — rows alternate between header and data
-    # Each document row: Type | Description (with links) | Date Filed
-    grid_table = None
-    for table in soup.find_all("table"):
-        headers = [th.get_text(strip=True) for th in table.find_all("th")]
-        if "Document Type" in headers or "Description" in headers:
-            grid_table = table
-            break
-
-    # Fall back to scanning all tables for ViewFile links if no header-based table found
-    if not grid_table:
-        # Use the table that contains the most ViewFile links
-        best_table = None
-        best_count = 0
-        for table in soup.find_all("table"):
-            count = len(table.find_all("a", href=re.compile(r"ViewFile", re.I)))
-            if count > best_count:
-                best_count = count
-                best_table = table
-        grid_table = best_table
-
-    if not grid_table:
-        logger.warning("No document grid table found for docket %s", docket_id)
-        return documents
-
-    rows = grid_table.find_all("tr")
-    for row in rows:
-        cells = row.find_all("td")
-        # We need at least 2 cells with actual content; skip header/boilerplate rows
-        if len(cells) < 2:
-            continue
-
-        # Identify doc_type cell — a short cell (< 20 chars) with no links
-        # and description cell — a longer cell with links
-        view_file_urls = []
-        doc_detail_url = None
-        doc_type = ""
-        description = ""
-        date_filed = ""
-
-        for cell in cells:
-            cell_text = cell.get_text(" ", strip=True)
-            cell_links = cell.find_all("a", href=True)
-            vf_links = [a["href"] for a in cell_links if "ViewFile" in a["href"]]
-            doc_links = [a["href"] for a in cell_links if "PSCDocumentDetails" in a["href"]]
-
-            if vf_links:
-                view_file_urls.extend(vf_links)
-            if doc_links:
-                doc_detail_url = doc_links[0]
-
-            # Classify the cell role by content
-            if not vf_links and not doc_links and len(cell_text) < 25 and cell_text:
-                # Short plain cell — could be doc type or date
-                if re.match(r"\d{1,2}/\d{1,2}/\d{4}", cell_text):
-                    date_filed = cell_text
-                elif not doc_type:
-                    doc_type = cell_text
-            elif cell_text and len(cell_text) > 10 and not view_file_urls and not doc_detail_url:
-                # Longer text — likely description
-                clean = re.sub(r"\bFiles:\s*", "", cell_text).strip()
-                if clean and not description:
-                    description = clean[:300]
-
-        # If description still empty, try extracting from the description cell
-        if not description and doc_detail_url:
-            for cell in cells:
-                doc_links = [a for a in cell.find_all("a", href=True) if "PSCDocumentDetails" in a["href"]]
-                if doc_links:
-                    raw = cell.get_text(" ", strip=True)
-                    description = re.sub(r"\bFiles:\s*", "", raw).strip()[:300]
-                    break
-
-        if not view_file_urls and not doc_detail_url and not description:
-            continue
-        # Skip the big header/boilerplate row (contains entire grid as text)
-        if len(description) > 500:
-            continue
-        normalized_description = description.lower()
-        if (
-            "to view a document or form" in normalized_description
-            or normalized_description.startswith("details documents service list subscribe")
-            or normalized_description.startswith("docket documents")
-        ):
-            continue
-
-        documents.append({
-            "doc_type": doc_type,
-            "description": description,
-            "date_filed": date_filed,
-            "document_url": doc_detail_url,
-            "view_file_urls": view_file_urls,
-        })
-
-    # Deduplicate by doc_detail_url
-    seen = set()
-    deduped = []
-    for d in documents:
-        key = d["document_url"] or d["description"][:60]
-        if key and key not in seen:
-            seen.add(key)
-            deduped.append(d)
-    return deduped
+def get_docket_documents_first_page(page: "Page", docket_id: str) -> list[dict]:
+    """Open page 1 only; the caller must own traversal and report completeness."""
+    return get_docket_documents(page, docket_id, first_page_only=True)
 
 
 def download_view_file(page: "Page", view_file_url: str, dest_path: Path) -> int:

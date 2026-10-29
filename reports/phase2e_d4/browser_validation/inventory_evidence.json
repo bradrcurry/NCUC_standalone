@@ -1,0 +1,637 @@
+{
+  "pages": [
+    {
+      "page": 1,
+      "rows": 100,
+      "orders": 33,
+      "restricted": 0
+    },
+    {
+      "page": 2,
+      "rows": 100,
+      "orders": 21,
+      "restricted": 11
+    },
+    {
+      "page": 3,
+      "rows": 100,
+      "orders": 8,
+      "restricted": 0
+    },
+    {
+      "page": 4,
+      "rows": 100,
+      "orders": 10,
+      "restricted": 0
+    },
+    {
+      "page": 5,
+      "rows": 100,
+      "orders": 8,
+      "restricted": 0
+    },
+    {
+      "page": 6,
+      "rows": 68,
+      "orders": 5,
+      "restricted": 0
+    }
+  ],
+  "orders": [
+    {
+      "page": 1,
+      "description": "Order Approving Bulk Power Marketing (BPM) True-Up Rider and BPM Prospective Rider",
+      "date": "6/15/2026",
+      "document_id": "a5d0b256-b5b6-430f-bc34-c9afb01a5936",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Approving Riders",
+      "date": "6/16/2025",
+      "document_id": "e0de36f5-a44a-469d-916d-9f777f27e492",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Approving Riders",
+      "date": "6/13/2024",
+      "document_id": "27c1ad23-5c4a-4cad-9013-7afac5a3bcbc",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Approving EDPR Rider",
+      "date": "6/12/2024",
+      "document_id": "a36ec4dd-4dbe-4b6e-997d-45c8b70686c1",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Granting NCSEA\u2019S Motion for Withdrawal and Substitution of Counsel",
+      "date": "6/28/2023",
+      "document_id": "2618b749-04ee-4951-85a4-d9a154d8b289",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Approving EDPR Rider",
+      "date": "6/20/2023",
+      "document_id": "0fcd1530-2c2f-43fe-a39d-517dc9ec3ffe",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Approving Riders",
+      "date": "6/20/2023",
+      "document_id": "e7abc476-0051-468c-93f3-d41ad1ea0b47",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Granting NCSEA's Withdrawal of Counsel",
+      "date": "9/28/2022",
+      "document_id": "cb0ff6ca-72ea-4553-aa16-a99de31f3f9a",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Approving EDPR Rider",
+      "date": "6/28/2022",
+      "document_id": "2fad5f43-382e-4096-ad73-86e07adc3805",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Approving Riders",
+      "date": "6/28/2022",
+      "document_id": "4797ede8-fc3a-40aa-9765-4e946375e145",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Approving EDPR Rider",
+      "date": "6/23/2021",
+      "document_id": "92b38b85-676e-40ca-906b-1a1a8ac38dfd",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Approving Riders",
+      "date": "6/23/2021",
+      "document_id": "20fdb48a-76a2-496d-8d34-3d272d4c0695",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Approving EDPR Rider",
+      "date": "6/15/2020",
+      "document_id": "168a15f1-410f-4fac-88cc-f33069b461c2",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Approving Riders",
+      "date": "6/15/2020",
+      "document_id": "b84aa4fe-d3e8-4a21-ac74-814a5abf4b3a",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Approving EDPR Rider",
+      "date": "6/25/2019",
+      "document_id": "1facf957-728d-4416-856b-770bb32bcf4d",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Approving Riders",
+      "date": "6/25/2019",
+      "document_id": "16c835b9-6cec-4f0a-90c8-1c7196138707",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Errata Order",
+      "date": "6/27/2018",
+      "document_id": "0ef4bbc3-ee39-4d50-b753-f2aba36713c2",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Approving EDPR Rider",
+      "date": "6/26/2018",
+      "document_id": "c68a7bc6-0a9e-47e6-bc50-165c878f3ed5",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Approving Riders",
+      "date": "6/26/2018",
+      "document_id": "30276271-9ce8-4dd1-9cc1-b22fe974a193",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Granting Extension of Time to File Cost of Service Studies",
+      "date": "2/15/2018",
+      "document_id": "e627ba97-1ff6-47b1-ac7d-48879c6d1105",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Approving EDPR Rider",
+      "date": "6/20/2017",
+      "document_id": "63a2bde3-610d-4740-a141-84b68651cb4b",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Approving Riders",
+      "date": "6/20/2017",
+      "document_id": "fa481738-3bda-4274-8277-8f4d1ca3403f",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Waiving Cost of Service Studies Requirement",
+      "date": "5/11/2017",
+      "document_id": "e9de245d-12b4-4e20-8e39-4d212ae28acd",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Granting Petition to Intervene",
+      "date": "8/29/2016",
+      "document_id": "07986fcc-3044-491e-82fb-b274c2df229c",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Granting Extension of Time for Reply Comments",
+      "date": "8/29/2016",
+      "document_id": "92628ec5-9972-4390-9179-a8ec501f9065",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Granting Motion",
+      "date": "8/17/2016",
+      "document_id": "5d723cb5-9e6a-456e-a5a7-182b7a3dfddb",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Requesting Comments on Proposed Amendments to Plans for Distribution of Ratepayer Assistance Funds",
+      "date": "7/29/2016",
+      "document_id": "76ce5b1c-0dc8-4b23-a8e6-4feac615dcc1",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Approving EDPR Rider",
+      "date": "6/21/2016",
+      "document_id": "4dede1e2-7f5e-4eae-8237-418a01669292",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Approving Riders",
+      "date": "6/21/2016",
+      "document_id": "38480b93-047c-4c0f-b6d8-d58c16915fd4",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Approving Notice to Customers of Changes in Rates",
+      "date": "8/25/2015",
+      "document_id": "acafa985-4cc3-4e73-94be-dff95dd0fe7f",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Approving Revised Schedule HP",
+      "date": "7/21/2015",
+      "document_id": "e3c39ff9-408e-445e-a97a-714841542145",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Approving Rider",
+      "date": "6/23/2015",
+      "document_id": "4c3ea8eb-309b-40b7-81b6-4624f1da320e",
+      "availability": "public"
+    },
+    {
+      "page": 1,
+      "description": "Order Approving Pilot Peak Time Credit Program",
+      "date": "4/20/2015",
+      "document_id": "61a07745-a8d9-4b86-a600-f43480c287c0",
+      "availability": "public"
+    },
+    {
+      "page": 2,
+      "description": "Order Requesting Comments on Proposed Peak Time Credit Program",
+      "date": "11/26/2014",
+      "document_id": "77566158-22c8-4475-a27d-dec06004e3cc",
+      "availability": "public"
+    },
+    {
+      "page": 2,
+      "description": "Order Approving Closing of Transformation Discount Rider and Providing Clarification of Previous Order",
+      "date": "11/26/2014",
+      "document_id": "cdd52b4a-bd2f-4f10-b2af-01e1d1e890c3",
+      "availability": "public"
+    },
+    {
+      "page": 2,
+      "description": "Order Ending Reporting Requirement",
+      "date": "10/24/2014",
+      "document_id": "000d5fa6-d220-45a6-83fb-c7ddb6898704",
+      "availability": "public"
+    },
+    {
+      "page": 2,
+      "description": "Order Approving Revised Lighting Tariffs",
+      "date": "10/10/2014",
+      "document_id": "9cb5c2a8-6a5b-412d-aba2-7b5f4107883b",
+      "availability": "public"
+    },
+    {
+      "page": 2,
+      "description": "Order Approving Consolidation of Existing Rate Schedules OPT-G, OPT-H, and OPT-I into New Schedule OPT-V",
+      "date": "9/19/2014",
+      "document_id": "22fa0688-6a88-41a0-94b9-f95419762702",
+      "availability": "public"
+    },
+    {
+      "page": 2,
+      "description": "Order Approving Notice to Customers of Change in Rates",
+      "date": "8/29/2014",
+      "document_id": "07f4f1b1-7f2d-47de-9ca9-986e66dfd8f9",
+      "availability": "public"
+    },
+    {
+      "page": 2,
+      "description": "Order Approving Coal Inventory Rider True-Up Adjustment",
+      "date": "8/27/2014",
+      "document_id": "fcdfc7d1-34a1-44d3-84c0-d706d6eb2b8f",
+      "availability": "public"
+    },
+    {
+      "page": 2,
+      "description": "Order Granting Extension of Time to File Reply Comments",
+      "date": "7/14/2014",
+      "document_id": "3bb9a61a-ee3c-424f-88ce-7b3e6cff6506",
+      "availability": "public"
+    },
+    {
+      "page": 2,
+      "description": "Order Granting Extension of Time for Compliance Filing",
+      "date": "6/27/2014",
+      "document_id": "57a622fa-4d59-43cd-81b1-a90879e8c419",
+      "availability": "public"
+    },
+    {
+      "page": 2,
+      "description": "Order on Public Street Lighting Issues",
+      "date": "6/18/2014",
+      "document_id": "64c9796a-f375-4b75-98b9-5c58130bed68",
+      "availability": "public"
+    },
+    {
+      "page": 2,
+      "description": "Order Approving Rider",
+      "date": "6/16/2014",
+      "document_id": "25b239a1-4610-4800-86e9-81abf41ab448",
+      "availability": "public"
+    },
+    {
+      "page": 2,
+      "description": "Order Requesting Comments on OPT Rate Report and Proposal",
+      "date": "5/15/2014",
+      "document_id": "d9dbc01d-657a-4f0d-8da0-ed74af4d39ef",
+      "availability": "public"
+    },
+    {
+      "page": 2,
+      "description": "Order Granting Extension of Time",
+      "date": "3/24/2014",
+      "document_id": "a7461757-c6f7-4627-bab4-d0e4addaa0e0",
+      "availability": "public"
+    },
+    {
+      "page": 2,
+      "description": "Order Granting Extension of Time",
+      "date": "3/20/2014",
+      "document_id": "34047e2c-506b-4216-a3f2-5ecd44aff1e0",
+      "availability": "public"
+    },
+    {
+      "page": 2,
+      "description": "Order Approving Plan for Distribution of Ratepayer Assistance Funds",
+      "date": "2/27/2014",
+      "document_id": "723e575c-8e81-4626-a902-fb58b10a20c7",
+      "availability": "public"
+    },
+    {
+      "page": 2,
+      "description": "Order Approving Request and Authorizing Interested Parties to File Comments",
+      "date": "1/28/2014",
+      "document_id": "0d3db372-59e7-460e-9595-c0e694ab2b77",
+      "availability": "public"
+    },
+    {
+      "page": 2,
+      "description": "Order Granting Partial Waiver",
+      "date": "1/8/2014",
+      "document_id": "9cd71ef9-4f7e-4ada-961c-4b088b65cc52",
+      "availability": "public"
+    },
+    {
+      "page": 2,
+      "description": "Order Allowing Extension of Time to File Plan for Distribution of Ratepayer Assistance Funds and Comments on Distribution Plans",
+      "date": "11/25/2013",
+      "document_id": "",
+      "availability": "restricted"
+    },
+    {
+      "page": 2,
+      "description": "Order Allowing Comments on Proposals for Distribution of Ratepayer Assistance Fund",
+      "date": "11/20/2013",
+      "document_id": "",
+      "availability": "restricted"
+    },
+    {
+      "page": 2,
+      "description": "Order Approving Rate Schedules",
+      "date": "10/25/2013",
+      "document_id": "dfcd0894-add8-4504-9d42-b8e9d0cb26ee",
+      "availability": "public"
+    },
+    {
+      "page": 2,
+      "description": "Order Granting Extension of Time for Compliance Filing",
+      "date": "10/24/2013",
+      "document_id": "9798aa35-7609-4332-924a-2286cc70f5f7",
+      "availability": "public"
+    },
+    {
+      "page": 3,
+      "description": "Order Denying Motion for Clarification",
+      "date": "10/8/2013",
+      "document_id": "6103db83-c156-4169-8bbf-5d5a03d6c8eb",
+      "availability": "public"
+    },
+    {
+      "page": 3,
+      "description": "Order Approving Notice to Customers",
+      "date": "10/4/2013",
+      "document_id": "d734c72d-0ff4-4b91-a41e-3f53bdd9044d",
+      "availability": "public"
+    },
+    {
+      "page": 3,
+      "description": "Order Granting General Rate Increase",
+      "date": "9/24/2013",
+      "document_id": "413b681f-f9ba-4bfe-9b73-a410602aaffb",
+      "availability": "public"
+    },
+    {
+      "page": 3,
+      "description": "Order Granting in Part Motion for Extension of Time to File Briefs and Proposed Orders",
+      "date": "8/19/2013",
+      "document_id": "1ce40823-82ef-48c1-90af-87d2396437e3",
+      "availability": "public"
+    },
+    {
+      "page": 3,
+      "description": "Order Denying Motion to Allow Introduction of Additional Evidence",
+      "date": "7/30/2013",
+      "document_id": "bc75d245-0be4-4e7d-b7a8-3645a7870479",
+      "availability": "public"
+    },
+    {
+      "page": 3,
+      "description": "Order Granting Motions for Limited Appearance",
+      "date": "7/17/2013",
+      "document_id": "98605e83-e5bd-4fa2-9da2-ac68ad7bae0e",
+      "availability": "public"
+    },
+    {
+      "page": 3,
+      "description": "Order Granting in Part Motion for Date Certain for Witness",
+      "date": "7/8/2013",
+      "document_id": "4ecc245d-e8ee-4db8-b093-a6d7b1194291",
+      "availability": "public"
+    },
+    {
+      "page": 3,
+      "description": "Order Granting Motion to Excuse Witnesses from Attending Hearing",
+      "date": "7/5/2013",
+      "document_id": "7cc2dfa3-81e9-4f48-bae4-ffee2344639b",
+      "availability": "public"
+    },
+    {
+      "page": 4,
+      "description": "Order Granting in Part and Denying in Part Motion to Strike",
+      "date": "7/3/2013",
+      "document_id": "7d313b5b-17d8-4514-9ee8-251a401e9411",
+      "availability": "public"
+    },
+    {
+      "page": 4,
+      "description": "Order Granting Motion for Limited Appearance",
+      "date": "7/3/2013",
+      "document_id": "d805dfc4-0304-49e3-bdcd-321b5e6893bd",
+      "availability": "public"
+    },
+    {
+      "page": 4,
+      "description": "Order Changing Starting Time of Hearing",
+      "date": "7/1/2013",
+      "document_id": "5492320b-b638-417e-9f96-e62f9afd3ab8",
+      "availability": "public"
+    },
+    {
+      "page": 4,
+      "description": "Order Granting Extensions of Time",
+      "date": "6/28/2013",
+      "document_id": "41447bb6-ed60-465c-8a34-091b6d746be2",
+      "availability": "public"
+    },
+    {
+      "page": 4,
+      "description": "Order Granting Extension of Time to File Rebuttal Testimony",
+      "date": "6/28/2013",
+      "document_id": "cb74b2cd-65d2-4e2b-9dbd-b84fb35dc79b",
+      "availability": "public"
+    },
+    {
+      "page": 4,
+      "description": "Order Allowing Response to Motion to Strike",
+      "date": "6/24/2013",
+      "document_id": "3d2eb8c9-f53c-43b6-83d4-56bf8938d11b",
+      "availability": "public"
+    },
+    {
+      "page": 4,
+      "description": "Order Granting Petition to Intervene",
+      "date": "6/24/2013",
+      "document_id": "78851795-9d13-4c99-bee4-ea58bcf79a97",
+      "availability": "public"
+    },
+    {
+      "page": 4,
+      "description": "Order Granting Further Extension of Time to File Testimony and Intervene",
+      "date": "6/13/2013",
+      "document_id": "11430e80-1274-4788-93ce-18707da9b053",
+      "availability": "public"
+    },
+    {
+      "page": 4,
+      "description": "Order Allowing Withdrawal of Rider IER Proposal",
+      "date": "6/13/2013",
+      "document_id": "6f40a5e4-8431-4586-8ba9-8e8cf36b7cf4",
+      "availability": "public"
+    },
+    {
+      "page": 4,
+      "description": "Order Granting Petition to Intervene",
+      "date": "6/12/2013",
+      "document_id": "59b929f1-4260-4752-b64e-0fc045f241ff",
+      "availability": "public"
+    },
+    {
+      "page": 5,
+      "description": "Order Granting Petition to Intervene",
+      "date": "6/11/2013",
+      "document_id": "6afa5fc0-d4e2-4abf-be75-fea80a832a6c",
+      "availability": "public"
+    },
+    {
+      "page": 5,
+      "description": "Order Granting Extensions of Time to File Testimony",
+      "date": "6/7/2013",
+      "document_id": "fd47be42-ae1c-4fa7-9347-d84be5775ce0",
+      "availability": "public"
+    },
+    {
+      "page": 5,
+      "description": "Order Granting Petition to Intervene",
+      "date": "6/5/2013",
+      "document_id": "2aacc88d-be9e-43dc-b501-b3222c3eb049",
+      "availability": "public"
+    },
+    {
+      "page": 5,
+      "description": "Order Accepting Prefiled Testimony of Paul R. Newton",
+      "date": "4/22/2013",
+      "document_id": "5607e639-2754-4ef9-910c-16ad1815b583",
+      "availability": "public"
+    },
+    {
+      "page": 5,
+      "description": "Order Granting Petition to Intervene",
+      "date": "4/18/2013",
+      "document_id": "afca6ebc-e19b-4653-a2db-4e4bdad7eb33",
+      "availability": "public"
+    },
+    {
+      "page": 5,
+      "description": "Order Granting Petition to Intervene",
+      "date": "4/12/2013",
+      "document_id": "9973c7c5-4a3a-4e8c-9cd9-fef2e7c9e0b5",
+      "availability": "public"
+    },
+    {
+      "page": 5,
+      "description": "Order Granting Petition to Intervene",
+      "date": "4/1/2013",
+      "document_id": "91777498-520f-4fb4-9178-b2575c1fed30",
+      "availability": "public"
+    },
+    {
+      "page": 5,
+      "description": "Order Changing Location of Public Hearing and Requiring Publication of Revised Notice",
+      "date": "3/8/2013",
+      "document_id": "e2f97f93-6328-454d-b0f8-2d9a2ae5879c",
+      "availability": "public"
+    },
+    {
+      "page": 6,
+      "description": "Order Scheduling Investigation and Hearing, Suspending Proposed Rates, Establishing Intervention and",
+      "date": "3/4/2013",
+      "document_id": "efed4698-847f-4318-83cd-1f255fc81b3f",
+      "availability": "public"
+    },
+    {
+      "page": 6,
+      "description": "Order Granting Petition to Intervene and Motion for Limited Appearance",
+      "date": "3/4/2013",
+      "document_id": "34f5e984-deb4-414f-88da-7e73a977b664",
+      "availability": "public"
+    },
+    {
+      "page": 6,
+      "description": "Order Granting Petition to Intervene and Motion for Limited Appearance",
+      "date": "3/4/2013",
+      "document_id": "5b36fc20-f6f6-4c33-9ccc-844b862a5d4b",
+      "availability": "public"
+    },
+    {
+      "page": 6,
+      "description": "Order Granting Petition to Intervene",
+      "date": "1/28/2013",
+      "document_id": "0133381f-dfe8-4168-be77-cd206bf8cd13",
+      "availability": "public"
+    },
+    {
+      "page": 6,
+      "description": "Order Granting Petition to Intervene",
+      "date": "1/11/2013",
+      "document_id": "0cd2fc79-28ae-42d7-92c6-96ffe2f136d1",
+      "availability": "public"
+    }
+  ]
+}

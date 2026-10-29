@@ -16,14 +16,25 @@ and prove the entire portal flow is operational.
 
 ```powershell
 # 1. Static prerequisite check (no network calls). ~1s.
-python -m duke_rates run-continuous-loop-nc --dry-run --max-cycles 0 2>&1 | head -15
+python -c "import json; from duke_rates.document_intelligence.acquisition import check_acquisition_capabilities; print(json.dumps(check_acquisition_capabilities(), indent=2))"
 
 # 2. Live login + resolve + DocketDetails + inventory probe. ~30s.
 python -m duke_rates ncuc portal-smoke-test
 ```
 
-Expected output of (1): `NCID auth: YES`, `Real browser: YES (path)`, `Portal fetch: YES`.
+Expected output of (1): JSON booleans `ncid_auth`, `real_browser`, and
+`portal_fetch` are `true`, with the browser path under `details`.
 Expected output of (2): `Smoke test SUCCESS — authenticated portal workflow is healthy.`
+
+The static function checks configuration and installed software without opening
+the database.
+
+**2026-10-29 safety correction:** do not use `run-continuous-loop-nc --dry-run
+--max-cycles 0` as a read-only preflight. Its fetch inventory opens a connection
+that runs database migrations even with zero cycles. The replacement above
+avoids that path. Run CLI probes against an explicit scratch database whenever
+their database access has not been verified read-only. See
+`docs/reports/2026-10-29_d4_preflight_safety_incident.md`.
 
 If either fails, see the **Troubleshooting** section. Do NOT proceed to fetch
 work until both pass.

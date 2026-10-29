@@ -80,18 +80,21 @@ class Attempt:
     pages_total: int | None = None
     items_reported: int | None = None
     filter_verified: bool | None = None
+    error_detail: str | None = None
 
     def finish_outcome(self, outcome: Any, *, refs: list | None = None) -> None:
         """Record a ``DocParamSearchOutcome``: its own stop reason decides the outcome."""
         self.result_count = len(outcome.results)
         self.result_refs = list(refs if refs is not None else
-                                [r.document_id or r.document_detail_url for r in outcome.results])
+                                [r.document_id or r.document_detail_url
+                                 or getattr(r, "inventory_entry_id", "") for r in outcome.results])
         self.outcome = outcome.ledger_outcome
         self.stop_reason = outcome.stop_reason
         self.pages_reached = outcome.pages_reached
         self.pages_total = outcome.pages_total
         self.items_reported = outcome.items_reported
         self.filter_verified = outcome.filter_verified
+        self.error_detail = outcome.error
 
     def finish(self, results: list | None = None, *, refs: list | None = None, cap: int | None = None,
                pages_reached: int | None = None) -> None:
@@ -165,7 +168,7 @@ class SearchLedger:
             WHERE id = ?
             """,
             (_now(), outcome, attempt.result_count, json.dumps(attempt.result_refs or [], default=str),
-             attempt.pages_reached, error, attempt.id),
+             attempt.pages_reached, error or attempt.error_detail, attempt.id),
         )
         if self.records_stop_reason:
             self.conn.execute(

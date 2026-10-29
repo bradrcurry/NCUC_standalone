@@ -1,0 +1,46 @@
+{
+  "src/duke_rates/cli_commands/provenance.py": {
+    "changed_existing_symbols": [
+      "run_network_searches_cmd",
+      "run_network_searches_cmd.docket_inventory"
+    ],
+    "added_symbols": [],
+    "removed_symbols": []
+  },
+  "src/duke_rates/document_intelligence/acquisition.py": {
+    "changed_existing_symbols": [
+      "_inventory_fetch_eligible"
+    ],
+    "added_symbols": [],
+    "removed_symbols": []
+  },
+  "src/duke_rates/historical/ncuc/remote_discovery.py": {
+    "changed_existing_symbols": [
+      "docket_inventory_outcome",
+      "docket_inventory_search",
+      "execute_plan",
+      "parse_docket_inventory"
+    ],
+    "added_symbols": [],
+    "removed_symbols": []
+  },
+  "src/duke_rates/historical/ncuc/session.py": {
+    "changed_existing_symbols": [
+      "get_docket_documents"
+    ],
+    "added_symbols": [
+      "get_docket_documents_first_page"
+    ],
+    "removed_symbols": []
+  },
+  "src/duke_rates/historical/ncuc/search_ledger.py": {
+    "changed_existing_symbols": [
+      "Attempt",
+      "Attempt.finish_outcome",
+      "SearchLedger",
+      "SearchLedger._close"
+    ],
+    "added_symbols": [],
+    "removed_symbols": []
+  }
+}

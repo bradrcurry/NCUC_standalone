@@ -1,0 +1,25 @@
+=== Continuous Autonomous Loop (DRY RUN) ===
+Max runtime: 480m | Max cycles: 0 | Max dockets/cycle: 2
+Sleep between cycles: 300s | Report limit: 50
+Action batch limit: 200
+
+Capabilities:
+  NCID auth:     YES
+  Playwright:    YES
+  Real browser:  YES (C:\Program Files\Google\Chrome\Application\chrome.exe)
+  Portal fetch:  YES
+  Local import:  YES
+  Fetch backlog: 155 records across 71 dockets (pending=104, requires_browser=27, failed=24)
+  Top fetch dockets: E-2 Sub 1204:7, E-7 Sub 145:6, E-2 Sub 1354:5
+
+Dry run — no writes, no portal calls. Use --execute to run for real.
+
+2026-10-29 02:35:17,728 INFO duke_rates.document_intelligence.acquisition: Loaded loop state from data\state\loop_state.json (stuck={'family_lineage_gaps': 1, 'unknown_documents': 0, 'missing_versions': 0, 'docket_coverage': 2} cooldown={} yield={'low_quality_parses': 21.8, 'unknown_documents': 1.3} record_fetch_cooldown={'E-2, Sub 1252': 1, 'E-2, Sub 1250': 1, 'E-2, Sub 1145': 1, 'E-2, Sub 1146': 1, 'E-2, Sub 1175': 1, 'E-2': 2, 'E-2, Sub 1254': 2, 'E-2, Sub 1173': 2, 'E-2, Sub 1176': 2, 'E-2, Sub 1251': 2, 'E-2, Sub 1150': 3, 'E-2, Sub 1167': 3, 'E-7, Sub 1250': 3, 'E-2, Sub 1275': 3, 'E-2, Sub 1108': 3, 'E-7': 4, 'E-7, Sub 1104': 4, 'E-2, Sub 1253': 4})
+2026-10-29 02:35:17,773 INFO duke_rates.document_intelligence.acquisition: Fetch inventory: 155 records eligible (pending=104 failed=24 requires_browser=27) across 71 distinct dockets
+
+=== Continuous Loop Complete ===
+Cycles completed: 0
+Stopped reason:   max_cycles
+Total duration:   0.1s
+Resumed from:     data\state\loop_state.json
+Per-cycle log:    data\state\loop_history\loop_20261029T063517Z.jsonl

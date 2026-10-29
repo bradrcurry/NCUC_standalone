@@ -48,7 +48,7 @@ from typing import Any, Callable
 
 from duke_rates.historical.ncuc.search_ledger import SearchLedger, canonical_params
 
-PLANNER_VERSION = "remote_discovery@1.1.0"
+PLANNER_VERSION = "remote_discovery@1.2.0"
 #: D3: docket-scoped orders come from the docket's own document inventory (resolve the DocketId,
 #: list DocketDetails, keep order rows): channel ``portal_orders``, ``params["method"] ==
 #: "docket_inventory"``. The D2 form of that channel (DocumentParamSearch with an ORDER filter and
@@ -372,7 +372,12 @@ def execute_plan(
                 attempt.finish_outcome(outcome)
                 outcome_kind = outcome.ledger_outcome
                 stats["inventory_rows"] += len(outcome.results)
-                rows = [r for r in outcome.results if is_order_row(r)]
+                # A confidential listing is evidence of an entry, not permission
+                # to follow a file URL exposed beside its disabled detail link.
+                stats["restricted_inventory_rows"] += sum(
+                    getattr(r, "availability", None) == "restricted" for r in outcome.results)
+                rows = [r for r in outcome.results if is_order_row(r)
+                        and getattr(r, "availability", None) != "restricted"]
                 stats["order_rows"] += len(rows)
             else:
                 if portal_search is None:
@@ -431,12 +436,16 @@ def parse_docket_inventory(html: str) -> list[dict]:
         kind = tr.find("td", class_="text-middle")
         desc = tr.find("span", id=re.compile(r"docDescLabel$"))
         filed = tr.find("td", class_="DocSrchDateCol")
+        restricted = bool(detail and (detail.has_attr("disabled") or
+                                      "confidential" in detail.get("title", "").lower()))
         out.append({
             "doc_type": kind.get_text(strip=True) if kind else "",
             "description": desc.get_text(" ", strip=True) if desc else "",
             "date_filed": filed.get_text(strip=True) if filed else "",
-            "document_url": detail["href"] if detail else None,
+            "document_url": detail.get("href") if detail else None,
             "view_file_urls": [a["href"] for a in tr.find_all("a", href=re.compile(r"ViewFile", re.I))],
+            "availability": "restricted" if restricted else "public",
+            "restriction_reason": detail.get("title", "") if restricted else None,
         })
     return out
 
@@ -456,10 +465,24 @@ def docket_inventory_outcome(html: str, documents: list[dict], *, docket_label: 
     rows = []
     for d in documents:
         m = _DOC_ID.search(d.get("document_url") or "")
+        entry_id = m.group(1).lower() if m else ""
+        identity_basis = "portal_document_id" if m else "unavailable"
+        if not entry_id and d.get("availability") == "restricted":
+            # These are listed attachment identities, not a recovered DocumentId.
+            # Retain the distinction and never use them to bypass restricted access.
+            file_ids = sorted({match.group(1).lower() for url in d.get("view_file_urls", [])
+                               if (match := _DOC_ID.search(url))})
+            if file_ids:
+                entry_id = "restricted-files:" + hashlib.sha256(
+                    json.dumps(file_ids).encode()).hexdigest()
+                identity_basis = "restricted_file_references"
         rows.append(SimpleNamespace(doc_type=d.get("doc_type") or "", description=d.get("description") or "",
                                     date_filed=d.get("date_filed") or "", docket_number=docket_label,
                                     document_detail_url=d.get("document_url"), document_id=m.group(1) if m else "",
-                                    view_file_urls=list(d.get("view_file_urls") or [])))
+                                    view_file_urls=list(d.get("view_file_urls") or []),
+                                    inventory_entry_id=entry_id, identity_basis=identity_basis,
+                                    availability=d.get("availability", "public"),
+                                    restriction_reason=d.get("restriction_reason")))
     out = DocParamSearchOutcome(results=rows, stop_reason="inventory_complete", pages_reached=1, pages_total=1,
                                 items_reported=items_reported(html))
     # The DocketDetails grid pages with __doPostBack('...documentsGridView','Page$N'); the session
@@ -475,7 +498,8 @@ def docket_inventory_outcome(html: str, documents: list[dict], *, docket_label: 
 
 
 def docket_inventory_search(page: Any, params: dict, *, resolve: Callable, list_documents: Callable,
-                            capture: Callable[[str], None] | None = None):
+                            capture: Callable[[str], None] | None = None,
+                            checkpoint_dir: Path | None = None, max_pages: int = 100):
     """Resolve ``params['docket_number']`` to its DocketId and list its documents (read-only)."""
     from duke_rates.historical.ncuc.document_param_search import DocParamSearchOutcome, is_blocked_page
 
@@ -492,12 +516,33 @@ def docket_inventory_search(page: Any, params: dict, *, resolve: Callable, list_
         return DocParamSearchOutcome(results=[], stop_reason=reason, error=json.dumps(
             [{k: m.get(k) for k in ("docket_number", "docket_id", "match_type")} for m in matches[:5]]))
     match = next(iter(exact.values()))
-    documents = list_documents(page, match["docket_id"])
+    try:
+        documents = list_documents(page, match["docket_id"])
+    except Exception as exc:
+        # The shared list API refuses partial inventories and carries the
+        # verified partial outcome for callers that can persist it explicitly.
+        if getattr(exc, "outcome", None) is None:
+            raise
+        return exc.outcome
+    supplied_outcome = getattr(documents, "inventory_outcome", None)
+    if supplied_outcome is not None:
+        # Compatibility with providers using the complete shared list API.
+        # The canonical CLI supplies the first-page loader so this adapter
+        # controls its own page cap and checkpoint directory.
+        if capture:
+            capture(page.content())
+        return supplied_outcome
     html = page.content()
     if capture:
         capture(html)
     if is_blocked_page(page.title(), html):
         return DocParamSearchOutcome(results=[], stop_reason="blocked_pagination", error="challenge on DocketDetails")
+    if callable(getattr(page, "locator", None)):
+        from duke_rates.historical.ncuc.docket_inventory import walk_docket_inventory
+
+        return walk_docket_inventory(page, docket_label=match["docket_number"],
+                                     docket_id=match["docket_id"], capture=capture,
+                                     checkpoint_dir=checkpoint_dir, max_pages=max_pages)
     return docket_inventory_outcome(html, documents, docket_label=match["docket_number"])
 
 

@@ -704,7 +704,7 @@ def run_network_searches_cmd(
     from duke_rates.historical.ncuc.session import (
         close_authenticated_context,
         create_authenticated_context,
-        get_docket_documents,
+        get_docket_documents_first_page as get_docket_documents,
         resolve_docket_ids,
     )
     from duke_rates.models.ncuc import NcucSearchQuery
@@ -734,8 +734,11 @@ def run_network_searches_cmd(
         return outcome
 
     def docket_inventory(params: dict):
+        inventory_capture = (capture_dir / (hash_of.get(json.dumps(params, sort_keys=True), "unplanned")
+                                           + "_inventory")) if capture_dir else None
         outcome = rd.docket_inventory_search(page, params, resolve=resolve_docket_ids,
                                              list_documents=get_docket_documents,
+                                             checkpoint_dir=inventory_capture,
                                              capture=lambda html: _capture(params, html))
         _capture(params, page.content(), outcome)
         return outcome

@@ -1,0 +1,98 @@
+{
+  "caveat": "D1 is a migrated research copy, not an exact pre-command snapshot. Matching rows establish agreement with that reference only.",
+  "databases": {
+    "current": {
+      "schema_version": 456,
+      "tables": {
+        "tariff_charges": {
+          "count": 5198,
+          "sha256": "adde58f2e1e5c73e3e081c29cf55c9e5271cb800982290192854823637463ae3"
+        },
+        "tariff_versions": {
+          "count": 988,
+          "sha256": "d4df5e59734a82eb6890f9005a22a571cf9c99a4c6b90a62652ec0657cd5ef5a"
+        },
+        "historical_documents": {
+          "count": 682,
+          "sha256": "7148c6c763d9d3e46f4c847aed9083caab1247613d378fd56a187275d2c4bab3"
+        },
+        "rider_summary_blocks": {
+          "count": 365,
+          "sha256": "2f7bc5313935dc8c927cc98b23946b6fd1953897033356bd2402fe4cfc6f0608"
+        },
+        "rider_line_items": {
+          "count": 8003,
+          "sha256": "8fb0eb6fbe1957d809a1fe4b2ee6745d0f19159807b8ccb135b1b094b15b5690"
+        },
+        "rider_applicability": {
+          "count": 1798,
+          "sha256": "6e4d60e3e17cd926306bc1e902d254899b211af4a4d1fb5785e8e92560b4dea6"
+        },
+        "ncuc_discovery_records": {
+          "count": 4428,
+          "sha256": "cfb2a5a0090fbddd7cadc7445da0508460c29fae7562e9f8eefe1b07775d8051"
+        },
+        "documents": {
+          "count": 1709,
+          "sha256": "e04f97d0f2b50dbdba28530f9478ecd1448bef5cb6d1864646b60c6187d808cc"
+        },
+        "document_types": {
+          "count": 14,
+          "sha256": "faf7872c5cb47a9d6f9cc77553ff89dc8838b35c8bb06d856adb67635e6e425f"
+        }
+      }
+    },
+    "d1_reference": {
+      "schema_version": 592,
+      "tables": {
+        "tariff_charges": {
+          "count": 5198,
+          "sha256": "adde58f2e1e5c73e3e081c29cf55c9e5271cb800982290192854823637463ae3"
+        },
+        "tariff_versions": {
+          "count": 988,
+          "sha256": "d4df5e59734a82eb6890f9005a22a571cf9c99a4c6b90a62652ec0657cd5ef5a"
+        },
+        "historical_documents": {
+          "count": 682,
+          "sha256": "7148c6c763d9d3e46f4c847aed9083caab1247613d378fd56a187275d2c4bab3"
+        },
+        "rider_summary_blocks": {
+          "count": 365,
+          "sha256": "2f7bc5313935dc8c927cc98b23946b6fd1953897033356bd2402fe4cfc6f0608"
+        },
+        "rider_line_items": {
+          "count": 8003,
+          "sha256": "8fb0eb6fbe1957d809a1fe4b2ee6745d0f19159807b8ccb135b1b094b15b5690"
+        },
+        "rider_applicability": {
+          "count": 1798,
+          "sha256": "6e4d60e3e17cd926306bc1e902d254899b211af4a4d1fb5785e8e92560b4dea6"
+        },
+        "ncuc_discovery_records": {
+          "count": 4428,
+          "sha256": "cfb2a5a0090fbddd7cadc7445da0508460c29fae7562e9f8eefe1b07775d8051"
+        },
+        "documents": {
+          "count": 1709,
+          "sha256": "e04f97d0f2b50dbdba28530f9478ecd1448bef5cb6d1864646b60c6187d808cc"
+        },
+        "document_types": {
+          "count": 14,
+          "sha256": "faf7872c5cb47a9d6f9cc77553ff89dc8838b35c8bb06d856adb67635e6e425f"
+        }
+      }
+    }
+  },
+  "matching_tables": [
+    "tariff_charges",
+    "tariff_versions",
+    "historical_documents",
+    "rider_summary_blocks",
+    "rider_line_items",
+    "rider_applicability",
+    "ncuc_discovery_records",
+    "documents",
+    "document_types"
+  ]
+}
