@@ -1,0 +1,55 @@
+{
+  "production": {
+    "tariff_families": {
+      "rows": 756,
+      "sha256": "e81624b69a6953edcd947f34dfa294dc9b9729163739836215f1858219846fa5"
+    },
+    "tariff_versions": {
+      "rows": 988,
+      "sha256": "72513fdb9c518215868b433b025fe1fbef0ad076fa7daca6d0ae4f0df226c497"
+    },
+    "historical_documents": {
+      "rows": 682,
+      "sha256": "68982b952cbd4949257f25a33e37ef4a798e769624676a169969e2fdf4b251f1"
+    },
+    "tariff_charges": {
+      "rows": 5198,
+      "sha256": "1218d7805282306d56198fc7361dc419877429770f41a8551be29c6644e13a45"
+    },
+    "rider_summary_blocks": {
+      "rows": 365,
+      "sha256": "dc87ec4b53a42aec3ae29847cb68766a66644a9c9548c77d27b23cd05ce7481a"
+    },
+    "rider_line_items": {
+      "rows": 8003,
+      "sha256": "d2f80b80849c14a68b30695c54d309e661cd04fcf720c40760145b57b56aa9e0"
+    }
+  },
+  "scratch": {
+    "tariff_families": {
+      "rows": 756,
+      "sha256": "e81624b69a6953edcd947f34dfa294dc9b9729163739836215f1858219846fa5"
+    },
+    "tariff_versions": {
+      "rows": 988,
+      "sha256": "72513fdb9c518215868b433b025fe1fbef0ad076fa7daca6d0ae4f0df226c497"
+    },
+    "historical_documents": {
+      "rows": 682,
+      "sha256": "68982b952cbd4949257f25a33e37ef4a798e769624676a169969e2fdf4b251f1"
+    },
+    "tariff_charges": {
+      "rows": 5198,
+      "sha256": "1218d7805282306d56198fc7361dc419877429770f41a8551be29c6644e13a45"
+    },
+    "rider_summary_blocks": {
+      "rows": 365,
+      "sha256": "dc87ec4b53a42aec3ae29847cb68766a66644a9c9548c77d27b23cd05ce7481a"
+    },
+    "rider_line_items": {
+      "rows": 8003,
+      "sha256": "d2f80b80849c14a68b30695c54d309e661cd04fcf720c40760145b57b56aa9e0"
+    }
+  },
+  "all_six_tables_match": true
+}

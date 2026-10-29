@@ -1,0 +1,1 @@
+29/29 source hashes, fixture hashes, native text/spans, drawing geometry and annotations match

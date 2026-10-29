@@ -1,0 +1,121 @@
+{
+  "read_only_preparation": true,
+  "human_verified": false,
+  "original_flagged_versions": 65,
+  "current_flagged_versions": 57,
+  "union_of_prior_and_current": 66,
+  "strong_current_versions": 47,
+  "strong_current_charges": 1120,
+  "removed_flags": [
+    4570,
+    5239,
+    5382,
+    5457,
+    5691,
+    5702,
+    5717,
+    5728,
+    6814
+  ],
+  "new_flags": [
+    7000
+  ],
+  "insufficient_or_missing_versions": 80,
+  "unlinked_charge_rows": 116
+}
+{
+  "build": {
+    "updated": 118,
+    "inserted": 82,
+    "annotated": 11
+  },
+  "items": 248,
+  "by_type_priority": [
+    {
+      "problem_type": "billed_charges_on_redline_source",
+      "priority": 1,
+      "n": 54,
+      "charges": 1161
+    },
+    {
+      "problem_type": "bound_source_insufficient_evidence",
+      "priority": 1,
+      "n": 79,
+      "charges": 711
+    },
+    {
+      "problem_type": "charge_sign_conflict",
+      "priority": 1,
+      "n": 1,
+      "charges": 1
+    },
+    {
+      "problem_type": "effective_date_conflict",
+      "priority": 1,
+      "n": 28,
+      "charges": 422
+    },
+    {
+      "problem_type": "historical_source_missing",
+      "priority": 1,
+      "n": 1,
+      "charges": 6
+    },
+    {
+      "problem_type": "billed_charges_on_redline_source",
+      "priority": 2,
+      "n": 12,
+      "charges": 67
+    },
+    {
+      "problem_type": "document_bound_to_two_families",
+      "priority": 2,
+      "n": 1,
+      "charges": 0
+    },
+    {
+      "problem_type": "effective_date_conflict",
+      "priority": 2,
+      "n": 7,
+      "charges": 0
+    },
+    {
+      "problem_type": "local_candidate_on_redline_pages",
+      "priority": 2,
+      "n": 1,
+      "charges": null
+    },
+    {
+      "problem_type": "orphan_charge_version_reference",
+      "priority": 2,
+      "n": 1,
+      "charges": null
+    },
+    {
+      "problem_type": "verified_document_unbound",
+      "priority": 2,
+      "n": 17,
+      "charges": null
+    },
+    {
+      "problem_type": "local_candidate_on_redline_pages",
+      "priority": 3,
+      "n": 44,
+      "charges": null
+    },
+    {
+      "problem_type": "order_identified_for_version",
+      "priority": 3,
+      "n": 2,
+      "charges": 2
+    }
+  ],
+  "by_status": {
+    "open": 248
+  },
+  "scratch_database": "C:\\Python\\Duke\\Standalone\\scratch\\d5.db",
+  "production_database_written": false,
+  "authoritative_and_lineage_tables_unchanged": true,
+  "prior_review_decisions_preserved": true,
+  "human_review_items": 0
+}

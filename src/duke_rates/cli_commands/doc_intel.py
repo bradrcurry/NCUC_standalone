@@ -5915,7 +5915,7 @@ def promote_proposed_tariffs(
     docket_number: str = typer.Option(
         ...,
         "--docket-number",
-        help="Docket whose proposed_tariff_* rows should be promoted into accepted lineage.",
+        help="Docket whose proposed_tariff_* research rows should be compared with accepted lineage.",
     ),
     utility: str = typer.Option(
         "",
@@ -5936,38 +5936,41 @@ def promote_proposed_tariffs(
         False,
         "--create-new-families/--no-create-new-families",
         help=(
-            "Allow inserting brand-new tariff_families rows for proposed riders/schedules "
-            "with no existing accepted family (e.g., PC, PTC, BPM, RAL-3 on E-2 Sub 1380). "
-            "Opt-in because it changes the accepted lineage schema-wise."
+            "Include draft families for proposed riders/schedules with no accepted family. "
+            "Planning does not create accepted records."
         ),
     ),
     confirm: bool = typer.Option(
         False,
         "--confirm",
         help=(
-            "Required to actually write to tariff_versions/tariff_charges. "
-            "Without --confirm the command is a dry-run that only prints the plan."
+            "Retired direct-write option; refuses execution before opening a database. "
+            "Use the reviewed provenance workflow for accepted records."
         ),
     ),
     json_out: bool = typer.Option(False, "--json", help="Output the plan as JSON."),
 ) -> None:
-    """Promote approved proposed-tariff candidates into the accepted lineage.
+    """Plan proposed-rate research comparisons without modifying accepted rates.
 
-    Defaults to dry-run. Use this only on dockets that have a final order
-    from the commission — the command does not verify approval state on
-    its own. Each action writes one tariff_versions row plus one
-    tariff_charges row per captured proposed charge, with
-    promoted_from_proposed_block_ids recorded in notes for traceability.
+    Direct proposal-to-approved execution is retired. Bind reviewed source
+    evidence and extract candidates through the existing provenance workflow.
+    Absence of detected redline does not establish regulatory approval.
     """
-    from duke_rates.db.sqlite import connect
-    from duke_rates.document_intelligence.proposed_tariff_promoter import (
-        apply_promotion,
-        plan_promotion,
-    )
+    import sqlite3
 
-    settings, _ = _bootstrap()
-    conn = connect(settings.database_path)
+    from duke_rates.document_intelligence.proposed_tariff_promoter import plan_promotion
+
+    if confirm:
+        raise typer.BadParameter(
+            "Direct proposal-to-approved promotion is disabled. Use provenance propose-binding / "
+            "approve-proposal / apply-proposal, extract-candidate, and reviewed provenance promote. "
+            "Proposal research data is preserved.",
+            param_hint="--confirm",
+        )
+    settings = get_settings()
+    conn = sqlite3.connect(Path(settings.database_path).resolve().as_uri() + "?mode=ro", uri=True)
     try:
+        conn.execute("PRAGMA query_only=ON")
         plan = plan_promotion(
             conn,
             docket_number=docket_number,
@@ -5977,8 +5980,6 @@ def promote_proposed_tariffs(
             create_new_families=create_new_families,
         )
         applied: list[Any] = []
-        if confirm:
-            applied = apply_promotion(conn, plan)
     finally:
         conn.close()
 
@@ -5991,6 +5992,7 @@ def promote_proposed_tariffs(
                     "dry_run": not confirm,
                     "actions": plan_payload,
                     "applied_count": len(applied),
+                    "execution_enabled": False,
                 },
                 indent=2,
                 default=str,
@@ -6026,10 +6028,7 @@ def promote_proposed_tariffs(
         if action.skip_reason:
             typer.echo(f"        SKIP: {action.skip_reason}")
             continue
-        typer.echo(
-            f"        would write 1 tariff_versions + "
-            f"{len(action.charges)} tariff_charges"
-        )
+        typer.echo(f"        would write 1 tariff_versions + {len(action.charges)} tariff_charges")
         if action.created_version_id is not None:
             typer.echo(
                 f"        WROTE tariff_versions.id={action.created_version_id} "

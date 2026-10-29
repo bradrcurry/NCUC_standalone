@@ -1,0 +1,1046 @@
+{
+  "summary": {
+    "changed_count": 86,
+    "affected_count": 27,
+    "changed_files": 106,
+    "risk_level": "critical"
+  },
+  "changed_symbols": [
+    {
+      "id": "Section:bench/README.md:L1:Extraction benchmark v0",
+      "name": "Extraction benchmark v0",
+      "type": "Section",
+      "filePath": "bench/README.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:bench/README.md:L5:Contents",
+      "name": "Contents",
+      "type": "Section",
+      "filePath": "bench/README.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:bench/README.md:L35:Known limitations of v0",
+      "name": "Known limitations of v0",
+      "type": "Section",
+      "filePath": "bench/README.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:bench/billing_check.py:main",
+      "name": "main",
+      "type": "Function",
+      "filePath": "bench/billing_check.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:bench/redline_exposure.py:run",
+      "name": "run",
+      "type": "Function",
+      "filePath": "bench/redline_exposure.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:bench/redline_exposure.py:main",
+      "name": "main",
+      "type": "Function",
+      "filePath": "bench/redline_exposure.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Variable:bench/redline_native.py:ROOT",
+      "name": "ROOT",
+      "type": "Variable",
+      "filePath": "bench/redline_native.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:bench/redline_native.py:_score",
+      "name": "_score",
+      "type": "Function",
+      "filePath": "bench/redline_native.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:bench/redline_native.py:run",
+      "name": "run",
+      "type": "Function",
+      "filePath": "bench/redline_native.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:bench/redline_native.py:main",
+      "name": "main",
+      "type": "Function",
+      "filePath": "bench/redline_native.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/cli_command_reference.md:L1:CLI Command Reference",
+      "name": "CLI Command Reference",
+      "type": "Section",
+      "filePath": "docs/cli_command_reference.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/cli_command_reference.md:L643:15. Document Intelligence (Classification, Embeddings, LLM)",
+      "name": "15. Document Intelligence (Classification, Embeddings, LLM)",
+      "type": "Section",
+      "filePath": "docs/cli_command_reference.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/cli_command_reference.md:L706:15d. Embedding Generation (Phase 4)",
+      "name": "15d. Embedding Generation (Phase 4)",
+      "type": "Section",
+      "filePath": "docs/cli_command_reference.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/design/2026-10-29_phase2e_d5_plan.md:L1:D5 — native redline evidence and historical source integrity",
+      "name": "D5 — native redline evidence and historical source integrity",
+      "type": "Section",
+      "filePath": "docs/design/2026-10-29_phase2e_d5_plan.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/design/2026-10-29_phase2e_d5_plan.md:L7:Reproduced baseline",
+      "name": "Reproduced baseline",
+      "type": "Section",
+      "filePath": "docs/design/2026-10-29_phase2e_d5_plan.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/design/2026-10-29_phase2e_d5_plan.md:L24:Existing capabilities and gaps",
+      "name": "Existing capabilities and gaps",
+      "type": "Section",
+      "filePath": "docs/design/2026-10-29_phase2e_d5_plan.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/design/2026-10-29_phase2e_d5_plan.md:L47:Acceptance gates",
+      "name": "Acceptance gates",
+      "type": "Section",
+      "filePath": "docs/design/2026-10-29_phase2e_d5_plan.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/design/2026-10-29_phase2e_d5_plan.md:L78:Impact analysis before edits",
+      "name": "Impact analysis before edits",
+      "type": "Section",
+      "filePath": "docs/design/2026-10-29_phase2e_d5_plan.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/design/2026-10-29_phase2e_d5_plan.md:L91:Current step",
+      "name": "Current step",
+      "type": "Section",
+      "filePath": "docs/design/2026-10-29_phase2e_d5_plan.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/plans/ncuc_document_intelligence_roadmap.md:L1:NCUC document intelligence roadmap",
+      "name": "NCUC document intelligence roadmap",
+      "type": "Section",
+      "filePath": "docs/plans/ncuc_document_intelligence_roadmap.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/plans/ncuc_document_intelligence_roadmap.md:L28:Milestones and acceptance gates",
+      "name": "Milestones and acceptance gates",
+      "type": "Section",
+      "filePath": "docs/plans/ncuc_document_intelligence_roadmap.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/plans/ncuc_document_intelligence_roadmap.md:L133:Next action",
+      "name": "Next action",
+      "type": "Section",
+      "filePath": "docs/plans/ncuc_document_intelligence_roadmap.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/cli_commands/doc_intel.py:promote_proposed_tariffs",
+      "name": "promote_proposed_tariffs",
+      "type": "Function",
+      "filePath": "src/duke_rates/cli_commands/doc_intel.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Property:src/duke_rates/cli_commands/doc_intel.py:promote_proposed_tariffs.applied@5981:8",
+      "name": "applied",
+      "type": "Property",
+      "filePath": "src/duke_rates/cli_commands/doc_intel.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/document_intelligence/llm_charge_promotion.py:promote_llm_charge_proposals",
+      "name": "promote_llm_charge_proposals",
+      "type": "Function",
+      "filePath": "src/duke_rates/document_intelligence/llm_charge_promotion.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/document_intelligence/proposed_tariff_promoter.py:apply_promotion",
+      "name": "apply_promotion",
+      "type": "Function",
+      "filePath": "src/duke_rates/document_intelligence/proposed_tariff_promoter.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Class:src/duke_rates/document_intelligence/proposed_tariff_promoter.py:UnsafeProposalPromotionError",
+      "name": "UnsafeProposalPromotionError",
+      "type": "Class",
+      "filePath": "src/duke_rates/document_intelligence/proposed_tariff_promoter.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/document_intelligence/proposed_tariff_promoter.py:_lookup_block_ids",
+      "name": "_lookup_block_ids",
+      "type": "Function",
+      "filePath": "src/duke_rates/document_intelligence/proposed_tariff_promoter.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/metadata.py:_first_unique_match",
+      "name": "_first_unique_match",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/metadata.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/evidence_review.py:_items_from_source_audit",
+      "name": "_items_from_source_audit",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/evidence_review.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Variable:src/duke_rates/historical/ncuc/ingestion_validation.py:VALIDATOR_VERSION",
+      "name": "VALIDATOR_VERSION",
+      "type": "Variable",
+      "filePath": "src/duke_rates/historical/ncuc/ingestion_validation.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Variable:src/duke_rates/historical/ncuc/ingestion_validation.py:OVERRIDABLE",
+      "name": "OVERRIDABLE",
+      "type": "Variable",
+      "filePath": "src/duke_rates/historical/ncuc/ingestion_validation.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/ingestion_validation.py:_page_checks",
+      "name": "_page_checks",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/ingestion_validation.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/ingestion_validation.py:_version_checks",
+      "name": "_version_checks",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/ingestion_validation.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/ingestion_validation.py:version_source_integrity",
+      "name": "version_source_integrity",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/ingestion_validation.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Variable:src/duke_rates/parse/redline_detector.py:PAGE_EVIDENCE_VERSION",
+      "name": "PAGE_EVIDENCE_VERSION",
+      "type": "Variable",
+      "filePath": "src/duke_rates/parse/redline_detector.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Class:src/duke_rates/parse/redline_detector.py:PageRedlineEvidence",
+      "name": "PageRedlineEvidence",
+      "type": "Class",
+      "filePath": "src/duke_rates/parse/redline_detector.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Property:src/duke_rates/parse/redline_detector.py:PageRedlineEvidence.verdict",
+      "name": "verdict",
+      "type": "Property",
+      "filePath": "src/duke_rates/parse/redline_detector.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Property:src/duke_rates/parse/redline_detector.py:PageRedlineEvidence.struck_spans",
+      "name": "struck_spans",
+      "type": "Property",
+      "filePath": "src/duke_rates/parse/redline_detector.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Property:src/duke_rates/parse/redline_detector.py:PageRedlineEvidence.inserted_spans",
+      "name": "inserted_spans",
+      "type": "Property",
+      "filePath": "src/duke_rates/parse/redline_detector.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Property:src/duke_rates/parse/redline_detector.py:PageRedlineEvidence.observations",
+      "name": "observations",
+      "type": "Property",
+      "filePath": "src/duke_rates/parse/redline_detector.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Property:src/duke_rates/parse/redline_detector.py:PageRedlineEvidence.source_pdf",
+      "name": "source_pdf",
+      "type": "Property",
+      "filePath": "src/duke_rates/parse/redline_detector.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Property:src/duke_rates/parse/redline_detector.py:PageRedlineEvidence.image_coverage",
+      "name": "image_coverage",
+      "type": "Property",
+      "filePath": "src/duke_rates/parse/redline_detector.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Method:src/duke_rates/parse/redline_detector.py:PageRedlineEvidence.classification#0",
+      "name": "classification",
+      "type": "Method",
+      "filePath": "src/duke_rates/parse/redline_detector.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Method:src/duke_rates/parse/redline_detector.py:PageRedlineEvidence.signals#0",
+      "name": "signals",
+      "type": "Method",
+      "filePath": "src/duke_rates/parse/redline_detector.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Method:src/duke_rates/parse/redline_detector.py:PageRedlineEvidence.region_struck#2",
+      "name": "region_struck",
+      "type": "Method",
+      "filePath": "src/duke_rates/parse/redline_detector.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Variable:src/duke_rates/parse/redline_detector.py:_MATERIAL_VALUE_RE",
+      "name": "_MATERIAL_VALUE_RE",
+      "type": "Variable",
+      "filePath": "src/duke_rates/parse/redline_detector.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Variable:src/duke_rates/parse/redline_detector.py:_LINK_RE",
+      "name": "_LINK_RE",
+      "type": "Variable",
+      "filePath": "src/duke_rates/parse/redline_detector.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/parse/redline_detector.py:_observe",
+      "name": "_observe",
+      "type": "Function",
+      "filePath": "src/duke_rates/parse/redline_detector.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/parse/redline_detector.py:_native_bars",
+      "name": "_native_bars",
+      "type": "Function",
+      "filePath": "src/duke_rates/parse/redline_detector.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/parse/redline_detector.py:_numeric_regions",
+      "name": "_numeric_regions",
+      "type": "Function",
+      "filePath": "src/duke_rates/parse/redline_detector.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/parse/redline_detector.py:evaluate_redline_page",
+      "name": "evaluate_redline_page",
+      "type": "Function",
+      "filePath": "src/duke_rates/parse/redline_detector.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/parse/redline_detector.py:summarize_page_evidence",
+      "name": "summarize_page_evidence",
+      "type": "Function",
+      "filePath": "src/duke_rates/parse/redline_detector.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Variable:tests/test_d5_archived_redline.py:ROOT",
+      "name": "ROOT",
+      "type": "Variable",
+      "filePath": "tests/test_d5_archived_redline.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Variable:tests/test_d5_archived_redline.py:MANIFEST",
+      "name": "MANIFEST",
+      "type": "Variable",
+      "filePath": "tests/test_d5_archived_redline.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d5_archived_redline.py:test_original_archived_page_classification",
+      "name": "test_original_archived_page_classification",
+      "type": "Function",
+      "filePath": "tests/test_d5_archived_redline.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d5_metadata_first_match.py:test_first_value_matches_previous_unique_collection",
+      "name": "test_first_value_matches_previous_unique_collection",
+      "type": "Function",
+      "filePath": "tests/test_d5_metadata_first_match.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d5_metadata_first_match.py:test_metadata_does_not_scan_unneeded_large_whitespace_tail",
+      "name": "test_metadata_does_not_scan_unneeded_large_whitespace_tail",
+      "type": "Function",
+      "filePath": "tests/test_d5_metadata_first_match.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d5_native_redline.py:_page",
+      "name": "_page",
+      "type": "Function",
+      "filePath": "tests/test_d5_native_redline.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d5_native_redline.py:test_black_vector_strike_on_rate_preserves_exact_geometry",
+      "name": "test_black_vector_strike_on_rate_preserves_exact_geometry",
+      "type": "Function",
+      "filePath": "tests/test_d5_native_redline.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d5_native_redline.py:test_black_decoration_is_not_material_redline",
+      "name": "test_black_decoration_is_not_material_redline",
+      "type": "Function",
+      "filePath": "tests/test_d5_native_redline.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d5_native_redline.py:test_unrelated_logo_cannot_corroborate_heading_insertion",
+      "name": "test_unrelated_logo_cannot_corroborate_heading_insertion",
+      "type": "Function",
+      "filePath": "tests/test_d5_native_redline.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d5_native_redline.py:test_blue_email_underline_is_ambiguous_not_tariff_insertion",
+      "name": "test_blue_email_underline_is_ambiguous_not_tariff_insertion",
+      "type": "Function",
+      "filePath": "tests/test_d5_native_redline.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d5_native_redline.py:test_multiline_strike_annotation_preserves_individual_quads",
+      "name": "test_multiline_strike_annotation_preserves_individual_quads",
+      "type": "Function",
+      "filePath": "tests/test_d5_native_redline.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d5_native_redline.py:test_annotations_without_deletion_are_ambiguous",
+      "name": "test_annotations_without_deletion_are_ambiguous",
+      "type": "Function",
+      "filePath": "tests/test_d5_native_redline.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d5_native_redline.py:test_duplicate_strike_evidence_does_not_inflate_coverage",
+      "name": "test_duplicate_strike_evidence_does_not_inflate_coverage",
+      "type": "Function",
+      "filePath": "tests/test_d5_native_redline.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d5_native_redline.py:test_classification_is_machine_evidence_and_page_scoped",
+      "name": "test_classification_is_machine_evidence_and_page_scoped",
+      "type": "Function",
+      "filePath": "tests/test_d5_native_redline.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d5_native_redline.py:test_image_page_with_searchable_overlay_is_insufficient",
+      "name": "test_image_page_with_searchable_overlay_is_insufficient",
+      "type": "Function",
+      "filePath": "tests/test_d5_native_redline.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d5_native_redline.py:test_synthetic_colored_heading_is_not_sufficient_for_rate_insertion",
+      "name": "test_synthetic_colored_heading_is_not_sufficient_for_rate_insertion",
+      "type": "Function",
+      "filePath": "tests/test_d5_native_redline.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d5_native_redline.py:test_label_strike_does_not_claim_deletion_of_nearby_rate",
+      "name": "test_label_strike_does_not_claim_deletion_of_nearby_rate",
+      "type": "Function",
+      "filePath": "tests/test_d5_native_redline.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Variable:tests/test_d5_promotion_safety.py:FIXTURES",
+      "name": "FIXTURES",
+      "type": "Variable",
+      "filePath": "tests/test_d5_promotion_safety.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d5_promotion_safety.py:_llm_db",
+      "name": "_llm_db",
+      "type": "Function",
+      "filePath": "tests/test_d5_promotion_safety.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d5_promotion_safety.py:test_llm_unattended_write_refuses_incomplete_or_unsafe_source",
+      "name": "test_llm_unattended_write_refuses_incomplete_or_unsafe_source",
+      "type": "Function",
+      "filePath": "tests/test_d5_promotion_safety.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d5_promotion_safety.py:test_llm_valid_readable_source_preserves_promotion_audit",
+      "name": "test_llm_valid_readable_source_preserves_promotion_audit",
+      "type": "Function",
+      "filePath": "tests/test_d5_promotion_safety.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d5_promotion_safety.py:test_image_source_needs_explicit_reviewed_override",
+      "name": "test_image_source_needs_explicit_reviewed_override",
+      "type": "Function",
+      "filePath": "tests/test_d5_promotion_safety.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d5_promotion_safety.py:test_retired_proposal_confirmation_refuses_before_settings_or_database",
+      "name": "test_retired_proposal_confirmation_refuses_before_settings_or_database",
+      "type": "Function",
+      "filePath": "tests/test_d5_promotion_safety.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d5_promotion_safety.py:test_retired_proposal_confirmation_refuses_before_settings_or_database.forbidden@139:4",
+      "name": "forbidden",
+      "type": "Function",
+      "filePath": "tests/test_d5_promotion_safety.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d5_readonly_audit.py:test_shared_audit_wrapper_preserves_database_bytes",
+      "name": "test_shared_audit_wrapper_preserves_database_bytes",
+      "type": "Function",
+      "filePath": "tests/test_d5_readonly_audit.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d5_readonly_audit.py:test_missing_audit_database_is_not_created",
+      "name": "test_missing_audit_database_is_not_created",
+      "type": "Function",
+      "filePath": "tests/test_d5_readonly_audit.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d5_review_evidence.py:test_queue_keeps_actual_sha_separate_from_archive_identifier",
+      "name": "test_queue_keeps_actual_sha_separate_from_archive_identifier",
+      "type": "Function",
+      "filePath": "tests/test_d5_review_evidence.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_llm_charge_promotion.py:test_promote_llm_charge_proposals_dry_run_and_execute",
+      "name": "test_promote_llm_charge_proposals_dry_run_and_execute",
+      "type": "Function",
+      "filePath": "tests/test_llm_charge_promotion.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_llm_promotion_overnight.py:_init_db",
+      "name": "_init_db",
+      "type": "Function",
+      "filePath": "tests/test_llm_promotion_overnight.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_llm_promotion_overnight.py:_insert_validated_row",
+      "name": "_insert_validated_row",
+      "type": "Function",
+      "filePath": "tests/test_llm_promotion_overnight.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_proposed_tariff_promoter.py:test_apply_promotion_refuses_unguarded_existing_family",
+      "name": "test_apply_promotion_refuses_unguarded_existing_family",
+      "type": "Function",
+      "filePath": "tests/test_proposed_tariff_promoter.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_proposed_tariff_promoter.py:test_apply_promotion_refuses_unguarded_new_family",
+      "name": "test_apply_promotion_refuses_unguarded_new_family",
+      "type": "Function",
+      "filePath": "tests/test_proposed_tariff_promoter.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_proposed_tariff_promoter.py:test_rejected_proposal_remains_available_for_research",
+      "name": "test_rejected_proposal_remains_available_for_research",
+      "type": "Function",
+      "filePath": "tests/test_proposed_tariff_promoter.py",
+      "change_type": "touched"
+    }
+  ],
+  "affected_processes": [
+    {
+      "id": "proc_7_build_review_queue_c",
+      "name": "Build_review_queue_cmd → _is_colored",
+      "process_type": "cross_community",
+      "step_count": 10,
+      "changed_steps": [
+        {
+          "symbol": "evaluate_redline_page",
+          "step": 8
+        },
+        {
+          "symbol": "_native_bars",
+          "step": 9
+        },
+        {
+          "symbol": "_version_checks",
+          "step": 4
+        },
+        {
+          "symbol": "_page_checks",
+          "step": 5
+        }
+      ]
+    },
+    {
+      "id": "proc_8_build_review_queue_c",
+      "name": "Build_review_queue_cmd → _rgb",
+      "process_type": "cross_community",
+      "step_count": 10,
+      "changed_steps": [
+        {
+          "symbol": "evaluate_redline_page",
+          "step": 8
+        },
+        {
+          "symbol": "_native_bars",
+          "step": 9
+        },
+        {
+          "symbol": "_version_checks",
+          "step": 4
+        },
+        {
+          "symbol": "_page_checks",
+          "step": 5
+        }
+      ]
+    },
+    {
+      "id": "proc_21_build_review_queue_c",
+      "name": "Build_review_queue_cmd → _observe",
+      "process_type": "cross_community",
+      "step_count": 9,
+      "changed_steps": [
+        {
+          "symbol": "evaluate_redline_page",
+          "step": 8
+        },
+        {
+          "symbol": "_observe",
+          "step": 9
+        },
+        {
+          "symbol": "_version_checks",
+          "step": 4
+        },
+        {
+          "symbol": "_page_checks",
+          "step": 5
+        }
+      ]
+    },
+    {
+      "id": "proc_26_build_progress_nc_bi",
+      "name": "Build_progress_nc_bill_validation_summary → _first_unique_match",
+      "process_type": "cross_community",
+      "step_count": 8,
+      "changed_steps": [
+        {
+          "symbol": "_first_unique_match",
+          "step": 8
+        }
+      ]
+    },
+    {
+      "id": "proc_40_build_review_queue_c",
+      "name": "Build_review_queue_cmd → _doc",
+      "process_type": "cross_community",
+      "step_count": 8,
+      "changed_steps": [
+        {
+          "symbol": "_version_checks",
+          "step": 4
+        },
+        {
+          "symbol": "_page_checks",
+          "step": 5
+        }
+      ]
+    },
+    {
+      "id": "proc_60_build_review_queue_c",
+      "name": "Build_review_queue_cmd → _page_count",
+      "process_type": "cross_community",
+      "step_count": 7,
+      "changed_steps": [
+        {
+          "symbol": "_version_checks",
+          "step": 4
+        }
+      ]
+    },
+    {
+      "id": "proc_82_build_review_queue_c",
+      "name": "Build_review_queue_cmd → Close",
+      "process_type": "cross_community",
+      "step_count": 6,
+      "changed_steps": [
+        {
+          "symbol": "_version_checks",
+          "step": 4
+        },
+        {
+          "symbol": "_page_checks",
+          "step": 5
+        }
+      ]
+    },
+    {
+      "id": "proc_121_audit_version_source",
+      "name": "Audit_version_sources_cmd → _check",
+      "process_type": "cross_community",
+      "step_count": 5,
+      "changed_steps": [
+        {
+          "symbol": "_version_checks",
+          "step": 3
+        },
+        {
+          "symbol": "_page_checks",
+          "step": 4
+        }
+      ]
+    },
+    {
+      "id": "proc_122_audit_version_source",
+      "name": "Audit_version_sources_cmd → _table",
+      "process_type": "cross_community",
+      "step_count": 5,
+      "changed_steps": [
+        {
+          "symbol": "_version_checks",
+          "step": 3
+        },
+        {
+          "symbol": "_page_checks",
+          "step": 4
+        }
+      ]
+    },
+    {
+      "id": "proc_124_build_review_queue_c",
+      "name": "Build_review_queue_cmd → _archive_hash_matches",
+      "process_type": "cross_community",
+      "step_count": 5,
+      "changed_steps": [
+        {
+          "symbol": "_version_checks",
+          "step": 4
+        }
+      ]
+    },
+    {
+      "id": "proc_199_build_review_queue_c",
+      "name": "Build_review_queue_cmd → Summarize_page_evidence",
+      "process_type": "cross_community",
+      "step_count": 4,
+      "changed_steps": [
+        {
+          "symbol": "summarize_page_evidence",
+          "step": 4
+        }
+      ]
+    },
+    {
+      "id": "proc_364_propose_binding_cmd",
+      "name": "Propose_binding_cmd → _is_colored",
+      "process_type": "cross_community",
+      "step_count": 10,
+      "changed_steps": [
+        {
+          "symbol": "evaluate_redline_page",
+          "step": 8
+        },
+        {
+          "symbol": "_native_bars",
+          "step": 9
+        }
+      ]
+    },
+    {
+      "id": "proc_365_propose_binding_cmd",
+      "name": "Propose_binding_cmd → _rgb",
+      "process_type": "cross_community",
+      "step_count": 10,
+      "changed_steps": [
+        {
+          "symbol": "evaluate_redline_page",
+          "step": 8
+        },
+        {
+          "symbol": "_native_bars",
+          "step": 9
+        }
+      ]
+    },
+    {
+      "id": "proc_376_propose_binding_cmd",
+      "name": "Propose_binding_cmd → _observe",
+      "process_type": "cross_community",
+      "step_count": 9,
+      "changed_steps": [
+        {
+          "symbol": "evaluate_redline_page",
+          "step": 8
+        },
+        {
+          "symbol": "_observe",
+          "step": 9
+        }
+      ]
+    },
+    {
+      "id": "proc_381_estimate_history_bil",
+      "name": "Estimate_history_bill_progress_nc → _first_unique_match",
+      "process_type": "cross_community",
+      "step_count": 6,
+      "changed_steps": [
+        {
+          "symbol": "_first_unique_match",
+          "step": 6
+        }
+      ]
+    },
+    {
+      "id": "proc_425_audit_version_source",
+      "name": "Audit_version_sources_cmd → Close",
+      "process_type": "cross_community",
+      "step_count": 5,
+      "changed_steps": [
+        {
+          "symbol": "_version_checks",
+          "step": 3
+        },
+        {
+          "symbol": "_page_checks",
+          "step": 4
+        }
+      ]
+    },
+    {
+      "id": "proc_449_build_review_queue_c",
+      "name": "Build_review_queue_cmd → _check",
+      "process_type": "cross_community",
+      "step_count": 5,
+      "changed_steps": [
+        {
+          "symbol": "_version_checks",
+          "step": 4
+        }
+      ]
+    },
+    {
+      "id": "proc_451_audit_version_source",
+      "name": "Audit_version_sources_cmd → _archive_hash_matches",
+      "process_type": "cross_community",
+      "step_count": 4,
+      "changed_steps": [
+        {
+          "symbol": "_version_checks",
+          "step": 3
+        }
+      ]
+    },
+    {
+      "id": "proc_486_classify_date_confli",
+      "name": "Classify_date_conflicts_cmd → Summarize_page_evidence",
+      "process_type": "cross_community",
+      "step_count": 3,
+      "changed_steps": [
+        {
+          "symbol": "summarize_page_evidence",
+          "step": 3
+        }
+      ]
+    },
+    {
+      "id": "proc_518_audit_version_source",
+      "name": "Audit_version_sources_cmd → _is_colored",
+      "process_type": "cross_community",
+      "step_count": 9,
+      "changed_steps": [
+        {
+          "symbol": "evaluate_redline_page",
+          "step": 7
+        },
+        {
+          "symbol": "_native_bars",
+          "step": 8
+        },
+        {
+          "symbol": "_version_checks",
+          "step": 3
+        },
+        {
+          "symbol": "_page_checks",
+          "step": 4
+        }
+      ]
+    },
+    {
+      "id": "proc_519_audit_version_source",
+      "name": "Audit_version_sources_cmd → _rgb",
+      "process_type": "cross_community",
+      "step_count": 9,
+      "changed_steps": [
+        {
+          "symbol": "evaluate_redline_page",
+          "step": 7
+        },
+        {
+          "symbol": "_native_bars",
+          "step": 8
+        },
+        {
+          "symbol": "_version_checks",
+          "step": 3
+        },
+        {
+          "symbol": "_page_checks",
+          "step": 4
+        }
+      ]
+    },
+    {
+      "id": "proc_527_audit_version_source",
+      "name": "Audit_version_sources_cmd → _observe",
+      "process_type": "cross_community",
+      "step_count": 8,
+      "changed_steps": [
+        {
+          "symbol": "evaluate_redline_page",
+          "step": 7
+        },
+        {
+          "symbol": "_observe",
+          "step": 8
+        },
+        {
+          "symbol": "_version_checks",
+          "step": 3
+        },
+        {
+          "symbol": "_page_checks",
+          "step": 4
+        }
+      ]
+    },
+    {
+      "id": "proc_530_inspect_history_gaps",
+      "name": "Inspect_history_gaps_progress_nc → _first_unique_match",
+      "process_type": "cross_community",
+      "step_count": 6,
+      "changed_steps": [
+        {
+          "symbol": "_first_unique_match",
+          "step": 6
+        }
+      ]
+    },
+    {
+      "id": "proc_538_audit_version_source",
+      "name": "Audit_version_sources_cmd → _doc",
+      "process_type": "cross_community",
+      "step_count": 7,
+      "changed_steps": [
+        {
+          "symbol": "_version_checks",
+          "step": 3
+        },
+        {
+          "symbol": "_page_checks",
+          "step": 4
+        }
+      ]
+    },
+    {
+      "id": "proc_547_audit_version_source",
+      "name": "Audit_version_sources_cmd → _page_count",
+      "process_type": "cross_community",
+      "step_count": 6,
+      "changed_steps": [
+        {
+          "symbol": "_version_checks",
+          "step": 3
+        }
+      ]
+    },
+    {
+      "id": "proc_594_recover_history_gaps",
+      "name": "Recover_history_gaps_progress_nc → _first_unique_match",
+      "process_type": "cross_community",
+      "step_count": 6,
+      "changed_steps": [
+        {
+          "symbol": "_first_unique_match",
+          "step": 6
+        }
+      ]
+    },
+    {
+      "id": "proc_633_audit_local_raw_nc",
+      "name": "Audit_local_raw_nc → _first_unique_match",
+      "process_type": "cross_community",
+      "step_count": 5,
+      "changed_steps": [
+        {
+          "symbol": "_first_unique_match",
+          "step": 5
+        }
+      ]
+    }
+  ]
+}

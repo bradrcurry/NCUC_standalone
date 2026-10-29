@@ -13,7 +13,9 @@ This benchmark is a fixed corpus of 26 Duke tariff documents with ground truth v
 | `score.py` | Scores one or more runs. Reports value, unit, rate-class and effective-date accuracy, recall/precision, false positives on expected-zero documents, TOTAL reconciliation, snippet evidence, and time. |
 | `rider_summary_reparse.py` | Re-parses every rider-summary source PDF with the parser at a git ref and with the working tree, using both pdfplumber and PyMuPDF text. Reports merges, footer leaks, unit swaps and checksum pass rate. |
 | `docling_page_miner_coverage.py` | D1 check: the share of Docling table-cell decimals that appear in the mined page text. |
-| `billing_check.py` | Runs the 12-bill DEP reconciliation against a scratch DB, using a given code tree. |
+| `billing_check.py` | Runs the 12-bill DEP reconciliation against a scratch DB, using a given code tree. `--read-only` reuses one query-only connection on an already-migrated snapshot, avoiding repeated schema initialization. Production is refused in both modes. |
+| `redline_native.py` | D5 native structural regression: 29 original archived pages, source/fixture hashes, attributed assistant page-review labels, explicit abstentions, original page attribution, and detection time. No DB, network, rendering or OCR. |
+| `redline_exposure.py` | Read-only wrapper around the existing shared version-source audit. Opens with SQLite `mode=ro` and `query_only`; creates no DB, migration, catalog, queue or promotion. |
 
 ## Reproducing the Phase 0 numbers
 
@@ -31,6 +33,11 @@ python bench/docling_page_miner_coverage.py --db $SP/bench.db --baseline-src $SP
 The outputs are deterministic for a fixed DB snapshot: no LLM calls, and no Docling conversion (cached artifacts only).
 
 ## Known limitations of v0
+
+The D5 redline corpus has **assistant source-review labels**, not independently
+human-verified labels. Its precision/recall apply to that curated development
+set, with abstentions reported separately. They do not establish approval or
+archive-wide accuracy. See `tests/fixtures/d5_redline/README.md` and the D5 report.
 
 - **Line-level effective dates are not scored.** Profiles do not emit them. The document effective date is scored from the ingest heuristic.
 - **HP "Incremental" values are not scored.** Rider-summary profiles do not emit the HP Incremental ¢/kWh column as charges. Those expected records count as misses in both runs.

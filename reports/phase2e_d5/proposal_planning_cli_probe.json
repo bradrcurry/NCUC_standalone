@@ -1,0 +1,47 @@
+{
+  "scratch_database": "C:\\Python\\Duke\\Standalone\\scratch\\d5_planning_cli.db",
+  "production_database_opened": false,
+  "database_bytes_unchanged": true,
+  "sha256_before": "944cd7d1ed736a3745f1f583e579328b8328212929242bd0901a44f139efe500",
+  "sha256_after": "944cd7d1ed736a3745f1f583e579328b8328212929242bd0901a44f139efe500",
+  "cli_result": {
+    "docket_number": "E-2 Sub 1380",
+    "dry_run": true,
+    "actions": [
+      {
+        "docket_number": "E-2 Sub 1380",
+        "exhibit_key": "B",
+        "tariff_kind": "rider",
+        "schedule_code": "MROP",
+        "tariff_name": "RIDER MROP METER-RELATED OPTIONAL PROGRAMS",
+        "proposed_block_ids": [
+          10
+        ],
+        "effective_start": "2027-01-01",
+        "family_key": "nc-progress-leaf-661",
+        "family_to_create": null,
+        "matched_existing_family": true,
+        "charges": [
+          {
+            "charge_type": "fixed",
+            "charge_label": "MRM Monthly Rate",
+            "rate_value": 175.0,
+            "rate_unit": "$/month",
+            "notes": "promoted_from_proposed_raw_line: MRM Monthly Rate $175"
+          }
+        ],
+        "source_pdf": "dep-1380.pdf",
+        "historical_document_id": 7815,
+        "leaf_no": 661,
+        "pages": [
+          297
+        ],
+        "skip_reason": null,
+        "created_version_id": null,
+        "created_charge_ids": []
+      }
+    ],
+    "applied_count": 0,
+    "execution_enabled": false
+  }
+}

@@ -1,0 +1,147 @@
+{
+  "all_charges": 5198,
+  "unlinked_charges": 116,
+  "utility_web_versions": 27,
+  "unreadable_historical_sources": [
+    {
+      "version_id": 5052,
+      "hd_id": null,
+      "path": null
+    },
+    {
+      "version_id": 5055,
+      "hd_id": null,
+      "path": null
+    },
+    {
+      "version_id": 5061,
+      "hd_id": null,
+      "path": null
+    },
+    {
+      "version_id": 5065,
+      "hd_id": null,
+      "path": null
+    },
+    {
+      "version_id": 5066,
+      "hd_id": null,
+      "path": null
+    },
+    {
+      "version_id": 5070,
+      "hd_id": null,
+      "path": null
+    },
+    {
+      "version_id": 5074,
+      "hd_id": null,
+      "path": null
+    },
+    {
+      "version_id": 5075,
+      "hd_id": null,
+      "path": null
+    },
+    {
+      "version_id": 5077,
+      "hd_id": null,
+      "path": null
+    },
+    {
+      "version_id": 5080,
+      "hd_id": null,
+      "path": null
+    },
+    {
+      "version_id": 5081,
+      "hd_id": null,
+      "path": null
+    },
+    {
+      "version_id": 5083,
+      "hd_id": null,
+      "path": null
+    },
+    {
+      "version_id": 5084,
+      "hd_id": null,
+      "path": null
+    },
+    {
+      "version_id": 5085,
+      "hd_id": null,
+      "path": null
+    },
+    {
+      "version_id": 5086,
+      "hd_id": null,
+      "path": null
+    },
+    {
+      "version_id": 5087,
+      "hd_id": null,
+      "path": null
+    },
+    {
+      "version_id": 5088,
+      "hd_id": null,
+      "path": null
+    },
+    {
+      "version_id": 5091,
+      "hd_id": null,
+      "path": null
+    },
+    {
+      "version_id": 5092,
+      "hd_id": null,
+      "path": null
+    },
+    {
+      "version_id": 5096,
+      "hd_id": null,
+      "path": null
+    },
+    {
+      "version_id": 5097,
+      "hd_id": null,
+      "path": null
+    },
+    {
+      "version_id": 5098,
+      "hd_id": null,
+      "path": null
+    },
+    {
+      "version_id": 5099,
+      "hd_id": null,
+      "path": null
+    },
+    {
+      "version_id": 5100,
+      "hd_id": null,
+      "path": null
+    },
+    {
+      "version_id": 5132,
+      "hd_id": null,
+      "path": null
+    },
+    {
+      "version_id": 5133,
+      "hd_id": null,
+      "path": null
+    },
+    {
+      "version_id": 5139,
+      "hd_id": null,
+      "path": null
+    },
+    {
+      "version_id": 6159,
+      "hd_id": 3114,
+      "path": "C:\\Users\\bradr\\AppData\\Local\\Temp\\pytest-of-bradr\\pytest-1284\\test_add_historical_document_n0\\sub1023_2013_corrections.pdf"
+    }
+  ]
+}

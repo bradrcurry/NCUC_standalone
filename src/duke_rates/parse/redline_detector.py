@@ -4,7 +4,7 @@ Redline document detector for Duke Energy tariff PDFs.
 Redline filings show proposed changes to tariff sheets using:
   1. Red-colored text (most common in modern filings) — RGB values with
      high red channel and low green/blue, typically #c00000 or #ff0000.
-  2. Strikethrough text — PDF span flag bit 3 (value 8), or horizontal
+  2. Strikethrough text — PDF character flag bit 0, or horizontal
      line drawings overlapping text.
   3. Tracked-changes annotations — PDF annotation types like "StrikeOut",
      "Highlight", or "Underline" on regions of text.
@@ -21,7 +21,8 @@ in a rates section) vs. only in an index table.
 
 PyMuPDF (fitz) provides all signals we need:
   - ``span['color']`` — integer RGB for text color
-  - ``span['flags']`` — bitmask including strikethrough (bit 3)
+  - ``span['char_flags']`` — strikeout (bit 0) and underline (bit 1)
+  - ``span['flags']`` — font style only; bit 3 means monospaced
   - ``page.annots()`` — PDF annotation objects with type names
   - ``page.get_drawings()`` — vector paths (thin horizontal lines = strikethroughs)
 
@@ -292,7 +293,7 @@ def scan_documents_for_redlines(
 # it: no strikeout flag and no annotation, which ``detect_redline`` reads.
 # This evidence is computed from the pages themselves, every time it is needed.
 
-PAGE_EVIDENCE_VERSION = "page_redline_evidence@1.0.0"
+PAGE_EVIDENCE_VERSION = "page_redline_evidence@1.1.0"
 _BAR_MAX_HEIGHT = 2.6     # pt; strike/underline bars are hairline rectangles
 _STRIKE_BAND = (0.30, 0.78)  # bar centre, as a fraction of the span height from its top
 _UNDERLINE_BAND = (0.78, 1.20)
@@ -316,91 +317,288 @@ class PageRedlineEvidence:
     """Redline markup observed on one page. ``verdict`` is a machine reading."""
 
     page: int
-    verdict: str                      # 'redline' | 'suspect' | 'clean' | 'no_text_layer'
+    verdict: str  # 'redline' | 'suspect' | 'clean' | 'no_text_layer'
     colored_spans: int = 0
-    struck_spans: int = 0             # coloured bar through the middle of the span
-    inserted_spans: int = 0           # coloured bar under the span
+    struck_spans: int = 0  # coloured bar through the middle of the span
+    inserted_spans: int = 0  # coloured bar under the span
     char_flag_strikes: int = 0
     strike_annotations: int = 0
     glued_text: list[str] = field(default_factory=list)
     struck_samples: list[str] = field(default_factory=list)
     inserted_samples: list[str] = field(default_factory=list)
     strike_regions: list[tuple[float, float, float, float]] = field(default_factory=list)
+    observations: list[dict] = field(default_factory=list)
+    source_pdf: str = ""
+    image_coverage: float = 0.0
+
+    @property
+    def classification(self) -> str:
+        """Machine interpretation, never a regulatory approval or human review."""
+        if self.verdict == "redline":
+            if any(
+                o.get("material_value") and o["strength"] == "strong" for o in self.observations
+            ):
+                return "confirmed_material_redline"
+            return "likely_redline"
+        return {
+            "suspect": "ambiguous_markup",
+            "clean": "no_redline_evidence_detected",
+            "no_text_layer": "insufficient_evidence",
+        }.get(self.verdict, "insufficient_evidence")
 
     def signals(self) -> dict:
         return {
-            "page": self.page, "verdict": self.verdict, "colored_spans": self.colored_spans,
-            "struck_spans": self.struck_spans, "inserted_spans": self.inserted_spans,
-            "char_flag_strikes": self.char_flag_strikes, "strike_annotations": self.strike_annotations,
-            "glued_text": self.glued_text[:5], "struck_samples": self.struck_samples[:5],
+            "page": self.page,
+            "verdict": self.verdict,
+            "colored_spans": self.colored_spans,
+            "struck_spans": self.struck_spans,
+            "inserted_spans": self.inserted_spans,
+            "char_flag_strikes": self.char_flag_strikes,
+            "strike_annotations": self.strike_annotations,
+            "glued_text": self.glued_text[:5],
+            "struck_samples": self.struck_samples[:5],
             "inserted_samples": self.inserted_samples[:5],
+            "classification": self.classification,
+            "observations": self.observations,
+            "source_pdf": self.source_pdf,
+            "image_coverage": self.image_coverage,
+            "strike_regions": self.strike_regions,
             "label_source": f"machine:{PAGE_EVIDENCE_VERSION}",
+            "human_verified": False,
         }
 
-    def region_struck(self, rect: tuple[float, float, float, float], min_fraction: float = 0.5) -> bool:
+    def region_struck(
+        self, rect: tuple[float, float, float, float], min_fraction: float = 0.5
+    ) -> bool:
         """True when struck regions on the same line cover ``min_fraction`` of ``rect``'s width."""
         x0, y0, x1, y1 = rect
-        covered = sum(
-            max(0.0, min(x1, sx1) - max(x0, sx0))
+        intervals = sorted(
+            (max(x0, sx0), min(x1, sx1))
             for sx0, sy0, sx1, sy1 in self.strike_regions
-            if min(y1, sy1) > max(y0, sy0)
+            if min(y1, sy1) > max(y0, sy0) and min(x1, sx1) > max(x0, sx0)
         )
+        # Character flags, vector paths and annotations can describe the same mark.
+        # Count their union so duplicate evidence cannot manufacture coverage.
+        covered, right = 0.0, x0
+        for left, end in intervals:
+            covered += max(0.0, end - max(left, right))
+            right = max(right, end)
         return covered >= min_fraction * max(x1 - x0, 1e-6)
 
 
+_MATERIAL_VALUE_RE = re.compile(r"\d+[.,]\d+|\$\s*\d+")
+_LINK_RE = re.compile(r"\S+@\S+|https?://|www\.", re.I)
+
+
+def _observe(
+    ev: PageRedlineEvidence, method: str, strength: str, *, span=None, rect=None, **detail
+) -> None:
+    observation = {"method": method, "strength": strength, "page": ev.page, **detail}
+    if span is not None:
+        observation.update(
+            text=span["text"],
+            bbox=list(span["bbox"]),
+            color=span.get("color", 0),
+            font=span.get("font"),
+            font_size=span.get("size"),
+            font_flags=span.get("flags", 0),
+        )
+    if rect is not None:
+        observation["mark_bbox"] = list(rect)
+    ev.observations.append(observation)
+
+
+def _native_bars(page):
+    """Individual horizontal paths, including black marks; never a whole box's bbox."""
+    import fitz
+
+    seen = set()
+    bars = []
+    for drawing in page.get_drawings():
+        color = _rgb(drawing.get("fill") or drawing.get("color"))
+        if color is None or min(color) > 235:
+            continue
+        for item in drawing.get("items", ()):
+            rect = None
+            if item[0] == "re" and abs(item[1].height) < _BAR_MAX_HEIGHT:
+                rect = item[1]
+            elif (
+                item[0] == "l"
+                and abs(item[1].y - item[2].y) < 0.5
+                and drawing.get("color") is not None
+                and (drawing.get("width") or 0) < _BAR_MAX_HEIGHT
+            ):
+                rect = fitz.Rect(
+                    min(item[1].x, item[2].x),
+                    min(item[1].y, item[2].y),
+                    max(item[1].x, item[2].x),
+                    max(item[1].y, item[2].y),
+                )
+            if rect is not None and rect.width > 2:
+                key = (*tuple(rect), color)
+                if key not in seen:
+                    seen.add(key)
+                    bars.append((rect, _is_colored(color)))
+    return bars
+
+
+def _numeric_regions(page, span):
+    """Locate numerical tokens within this span, avoiding adjacent occurrences."""
+    import fitz
+
+    bounds = fitz.Rect(span["bbox"])
+    return [
+        rect
+        for match in _MATERIAL_VALUE_RE.finditer(span["text"])
+        for rect in page.search_for(match.group(0))
+        if (rect & bounds).get_area() >= 0.5 * max(rect.get_area(), 1e-6)
+    ]
+
+
 def evaluate_redline_page(page, page_number: int) -> PageRedlineEvidence:
-    """Read redline markup from one PyMuPDF page."""
+    """Read native page evidence without rendering or OCR. Absence never establishes approval."""
+    import fitz
+
     from duke_rates.parse.rider_summary import _REDLINE_TEXT_RE
 
     spans = [
-        s for block in page.get_text("dict")["blocks"] if block.get("type") == 0
-        for line in block["lines"] for s in line["spans"] if s["text"].strip()
+        s
+        for block in page.get_text("dict")["blocks"]
+        if block.get("type") == 0
+        for line in block["lines"]
+        for s in line["spans"]
+        if s["text"].strip()
     ]
+    ev = PageRedlineEvidence(
+        page=page_number, verdict="clean", source_pdf=str(page.parent.name or "")
+    )
+    ev.image_coverage = round(
+        max(
+            (
+                (fitz.Rect(i["bbox"]) & page.rect).get_area() / max(page.rect.get_area(), 1)
+                for i in page.get_image_info()
+            ),
+            default=0.0,
+        ),
+        4,
+    )
     if not spans:
-        return PageRedlineEvidence(page=page_number, verdict="no_text_layer")
-    ev = PageRedlineEvidence(page=page_number, verdict="clean")
-    bars = []
-    for drawing in page.get_drawings():
-        r = drawing["rect"]
-        color = _rgb(drawing.get("fill") or drawing.get("color"))
-        if abs(r.height) < _BAR_MAX_HEIGHT and r.width > 2 and _is_colored(color):
-            bars.append(r)
+        ev.verdict = "no_text_layer"
+        return ev
+    bars = _native_bars(page)
+    corroborated_insertions = 0
     for span in spans:
         x0, y0, x1, y1 = span["bbox"]
         height = max(y1 - y0, 1.0)
         text = span["text"].strip()
-        if _is_colored(_rgb(span.get("color", 0))):
+        colored = _is_colored(_rgb(span.get("color", 0)))
+        material = bool(_MATERIAL_VALUE_RE.search(text))
+        link = bool(_LINK_RE.search(text))
+        if colored:
             ev.colored_spans += 1
+            _observe(ev, "text_color", "weak", span=span)
         if int(span.get("char_flags") or 0) & 1:
             ev.char_flag_strikes += 1
             ev.strike_regions.append((x0, y0, x1, y1))
-        struck = inserted = False
-        for r in bars:
+            _observe(ev, "character_strikeout", "strong", span=span, material_value=material)
+        if int(span.get("char_flags") or 0) & 2:
+            _observe(ev, "character_underline", "weak", span=span, decorative_link=link)
+        struck = False
+        inserted = bool(int(span.get("char_flags") or 0) & 2)
+        value_rects = None
+        for r, chromatic in bars:
             overlap = min(x1, r.x1) - max(x0, r.x0)
             if overlap <= 0 or overlap < 0.5 * min(r.width, x1 - x0):
                 continue
             rel = ((r.y0 + r.y1) / 2 - y0) / height
             if _STRIKE_BAND[0] <= rel <= _STRIKE_BAND[1]:
+                # Black table rules / negative signs need local numeric coverage.
+                if value_rects is None:
+                    value_rects = _numeric_regions(page, span) if material else []
+                if not chromatic:
+                    if not any(
+                        r.width <= 1.5 * rect.width
+                        and min(rect.x1, r.x1) - max(rect.x0, r.x0) >= 0.6 * rect.width
+                        for rect in value_rects
+                    ):
+                        continue
                 struck = True
                 ev.strike_regions.append((max(x0, r.x0), y0, min(x1, r.x1), y1))
-            elif _UNDERLINE_BAND[0] < rel <= _UNDERLINE_BAND[1]:
+                _observe(
+                    ev,
+                    "vector_strikeout",
+                    "strong",
+                    span=span,
+                    rect=r,
+                    material_value=any(
+                        min(rect.x1, r.x1) - max(rect.x0, r.x0) >= 0.25 * rect.width
+                        for rect in value_rects
+                    ),
+                    chromatic=chromatic,
+                )
+            elif chromatic and _UNDERLINE_BAND[0] < rel <= _UNDERLINE_BAND[1]:
                 inserted = True
+                _observe(
+                    ev,
+                    "vector_underline",
+                    "weak" if link else "moderate",
+                    span=span,
+                    rect=r,
+                    decorative_link=link,
+                )
         if struck:
             ev.struck_spans += 1
             ev.struck_samples.append(text[:60])
         if inserted:
             ev.inserted_spans += 1
             ev.inserted_samples.append(text[:60])
+            revision_edit = bool(re.search(r"\b(?:Original|Revised)\b", text, re.I))
+            corroborated_insertions += int(colored and (material or revision_edit) and not link)
     for annot in page.annots() or ():
-        if annot.type and annot.type[1] == "StrikeOut":
+        kind = annot.type[1] if annot.type else "unknown"
+        if kind == "StrikeOut":
             ev.strike_annotations += 1
-            ev.strike_regions.append(tuple(annot.rect))
+        if kind not in ("StrikeOut", "Underline", "Highlight", "Squiggly"):
+            continue
+        vertices = annot.vertices or []
+        # Multi-line annotations have one quad per line, not one large text rectangle.
+        rects = (
+            [fitz.Quad(vertices[i : i + 4]).rect for i in range(0, len(vertices), 4)]
+            if vertices
+            else [annot.rect]
+        )
+        for rect in rects:
+            text = page.get_textbox(rect)
+            _observe(
+                ev,
+                f"annotation_{kind.lower()}",
+                "strong" if kind == "StrikeOut" else "weak",
+                rect=rect,
+                text=text,
+                bbox=list(rect),
+                material_value=(kind == "StrikeOut" and bool(_MATERIAL_VALUE_RE.search(text))),
+            )
+            if kind == "StrikeOut":
+                ev.strike_regions.append(tuple(rect))
     ev.glued_text = [m.group(0) for m in _REDLINE_TEXT_RE.finditer(page.get_text("text"))]
-    # An underline-band bar under black text alone is a table or box border as often as an insertion
-    # (D3 source audit: a DSM workpaper page, one blue box edge under a heading). It needs coloured text.
-    if ev.struck_spans or ev.char_flag_strikes or ev.strike_annotations or (ev.inserted_spans and ev.colored_spans):
+    for text in ev.glued_text:
+        for rect in page.search_for(text):
+            _observe(
+                ev, "adjacent_revision_text", "moderate", rect=rect, text=text, bbox=list(rect)
+            )
+    # An underline alone can be a box edge, heading or link. Require a chromatic
+    # numerical value or revision identity on that span; color elsewhere cannot corroborate it.
+    if ev.struck_spans or ev.char_flag_strikes or ev.strike_annotations or corroborated_insertions:
         ev.verdict = "redline"
-    elif ev.colored_spans or ev.glued_text or ev.inserted_spans:
+    elif ev.image_coverage >= 0.6:
+        # An OCR overlay cannot expose strikeouts flattened into the page image.
+        ev.verdict = "no_text_layer"
+    elif (
+        ev.colored_spans
+        or ev.glued_text
+        or ev.inserted_spans
+        or any(o["method"].startswith("annotation_") for o in ev.observations)
+    ):
         ev.verdict = "suspect"
     return ev
 
@@ -472,6 +670,8 @@ def summarize_page_evidence(evidence: list[PageRedlineEvidence]) -> dict:
         "verdict": verdict,
         "redline_pages": [e.page for e in evidence if e.verdict == "redline"],
         "suspect_pages": [e.page for e in evidence if e.verdict == "suspect"],
+        "insufficient_pages": [e.page for e in evidence if e.verdict == "no_text_layer"],
+        "evaluated_pages": [e.page for e in evidence],
         "pages": [e.signals() for e in evidence if e.verdict != "clean"],
         "label_source": f"machine:{PAGE_EVIDENCE_VERSION}",
     }

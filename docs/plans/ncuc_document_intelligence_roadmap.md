@@ -30,7 +30,7 @@ human verification. Incomplete inventories never count as verified negative evid
 | Milestone | Status | Acceptance gates |
 | --- | --- | --- |
 | D4 complete inventory retrieval | Engineering validated; production-preservation gate failed | Six verified live pages, 568 entries, 83 public orders; 1,894 tests passed; replay/ledger benchmark and report complete. Keep the preflight incident visible; no claim of complete acceptance. Local delivery on the D4 branch. |
-| D5 redline integrity | Pending | Extend native page evidence only after detector/pathway audit; measured precision/recall with explicit label provenance; prioritized exposure queue; close unattended authoritative promotion bypasses; preserve proposed research; extraction/billing checks as applicable; report and commit. |
+| D5 redline integrity | In progress: baseline and audit | Extend native page evidence only after detector/pathway audit; measured precision/recall with explicit label provenance; prioritized exposure queue; close unattended authoritative promotion bypasses; preserve proposed research; extraction/billing checks as applicable; report and commit. |
 | D6 evidence-driven discovery | Pending | Preserve clue and relationship evidence; local/inventory/order-first searches; multi-docket attribution; durable content-addressed retrieval; quantify candidates, gaps and requests avoided; tests, report and commit. |
 | D7 large-document intelligence | Pending | Independently source-reviewed boundaries for representative filings; reuse existing segmentation and bounded extraction; original page ownership; quantify boundary/recall/time/resource results; tests, report and commit. |
 | D8 Docling modernization | Pending | Inspect isolated existing environments; configurable layout/model cache identity; TableFormer v1 baseline; no adoption before numerical and resource gates; rollback; report and commit. |
@@ -132,7 +132,22 @@ human verification. Incomplete inventories never count as verified negative evid
 
 ## Next action
 
-Record the D4 local commit and begin independent D5 redline/promotion-safety work
-on a dedicated branch. Preserve the failed production-preservation gate and all
-incident evidence. No restoration, production charge promotion, push or merge
-is authorized. D5–D10 remain pending implementation.
+D4 source/evidence committed locally as `90be8be`; current branch is
+`codex/d5-redline-historical-integrity`. D5's read-only baseline reproduces
+65 flagged versions, 45 strong cases and 1,113 associated charges. D5 source,
+fixtures and safety changes are implemented. The 29-page native benchmark has
+11 true positives, no false positives and five abstentions against attributed
+assistant labels. Current audit: 57 exposed versions; 47 strong / 1,120 charges;
+79 insufficient-source versions; 248 open scratch review items and no human
+review labels. Refreshed full suite: 1,969 passed, 92 skipped, 4 xfailed in
+808.22 seconds. All 12 bill records and summaries match in the before/after
+read-only comparison. The D4 baseline carries the identical first-match
+metadata optimization, recorded explicitly. Final staged GitNexus review maps
+86 indexed symbols / 27 expected flows, CRITICAL aggregate risk, no tool
+error/partial result; AST and direct-caller checks corroborate the scope.
+Ready for the D5 local commit. Plan: `docs/design/2026-10-29_phase2e_d5_plan.md`;
+report: `docs/reports/2026-10-29_phase2e_d5_redline_historical_integrity.md`.
+Keep 116 unlinked charge rows and one unavailable historical source as D9
+findings; do not alter them automatically. Preserve all D4 incident evidence.
+No restoration, production promotion, push or merge is authorized. D6–D10 remain
+pending implementation.

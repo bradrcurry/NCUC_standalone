@@ -1,0 +1,206 @@
+{
+  "target": {
+    "id": "Function:src/duke_rates/historical/ncuc/evidence_review.py:_items_from_source_audit",
+    "name": "_items_from_source_audit",
+    "type": "Function",
+    "filePath": "src/duke_rates/historical/ncuc/evidence_review.py"
+  },
+  "direction": "upstream",
+  "impactedCount": 2,
+  "risk": "LOW",
+  "riskSharedAxes": "LOW",
+  "riskScale": {
+    "comparableAcrossKinds": true,
+    "unusedAxes": []
+  },
+  "epistemic": "exact",
+  "summary": {
+    "direct": 1,
+    "processes_affected": 1,
+    "modules_affected": 2
+  },
+  "byDepthCounts": {
+    "1": 1,
+    "2": 1
+  },
+  "affected_processes": [
+    {
+      "name": "build_review_queue_cmd",
+      "type": "Function",
+      "filePath": "src/duke_rates/cli_commands/provenance.py",
+      "affected_process_count": 11,
+      "total_hits": 22,
+      "earliest_broken_step": 1
+    }
+  ],
+  "affected_modules": [
+    {
+      "name": "Cli_commands",
+      "hits": 1,
+      "impact": "indirect"
+    },
+    {
+      "name": "Ncuc",
+      "hits": 1,
+      "impact": "direct"
+    }
+  ],
+  "byDepth": {
+    "1": [
+      {
+        "depth": 1,
+        "id": "Function:src/duke_rates/historical/ncuc/evidence_review.py:build_review_queue",
+        "name": "build_review_queue",
+        "filePath": "src/duke_rates/historical/ncuc/evidence_review.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_200_build_review_queue_c",
+            "label": "Build_review_queue_cmd → Summarize_page_evidence",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_60_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _page_count",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_201_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _version_row",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_83_build_review_queue_c",
+            "label": "Build_review_queue_cmd → Close",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_82_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _table",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_123_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _archive_hash_matches",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_199_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _days",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_22_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _rgb",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_42_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _doc",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_81_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _check",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_21_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _is_colored",
+            "processType": "cross_community",
+            "step": 2
+          }
+        ]
+      }
+    ],
+    "2": [
+      {
+        "depth": 2,
+        "id": "Function:src/duke_rates/cli_commands/provenance.py:build_review_queue_cmd",
+        "name": "build_review_queue_cmd",
+        "filePath": "src/duke_rates/cli_commands/provenance.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_200_build_review_queue_c",
+            "label": "Build_review_queue_cmd → Summarize_page_evidence",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_60_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _page_count",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_201_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _version_row",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_83_build_review_queue_c",
+            "label": "Build_review_queue_cmd → Close",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_82_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _table",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_123_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _archive_hash_matches",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_199_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _days",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_42_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _doc",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_22_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _rgb",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_81_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _check",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_21_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _is_colored",
+            "processType": "cross_community",
+            "step": 1
+          }
+        ]
+      }
+    ]
+  }
+}

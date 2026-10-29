@@ -1,0 +1,1154 @@
+{
+  "target": {
+    "id": "Function:src/duke_rates/parse/redline_detector.py:summarize_page_evidence",
+    "name": "summarize_page_evidence",
+    "type": "Function",
+    "filePath": "src/duke_rates/parse/redline_detector.py"
+  },
+  "direction": "upstream",
+  "impactedCount": 24,
+  "risk": "CRITICAL",
+  "riskSharedAxes": "MEDIUM",
+  "riskScale": {
+    "comparableAcrossKinds": true,
+    "unusedAxes": []
+  },
+  "epistemic": "exact",
+  "summary": {
+    "direct": 6,
+    "processes_affected": 6,
+    "modules_affected": 3
+  },
+  "byDepthCounts": {
+    "1": 6,
+    "2": 9,
+    "3": 9
+  },
+  "affected_processes": [
+    {
+      "name": "build_review_queue_cmd",
+      "type": "Function",
+      "filePath": "src/duke_rates/cli_commands/provenance.py",
+      "affected_process_count": 11,
+      "total_hits": 46,
+      "earliest_broken_step": 1
+    },
+    {
+      "name": "propose_binding_cmd",
+      "type": "Function",
+      "filePath": "src/duke_rates/cli_commands/provenance.py",
+      "affected_process_count": 10,
+      "total_hits": 39,
+      "earliest_broken_step": 2
+    },
+    {
+      "name": "audit_version_sources_cmd",
+      "type": "Function",
+      "filePath": "src/duke_rates/cli_commands/provenance.py",
+      "affected_process_count": 8,
+      "total_hits": 22,
+      "earliest_broken_step": 2
+    },
+    {
+      "name": "resolve_gaps_local_cmd",
+      "type": "Function",
+      "filePath": "src/duke_rates/cli_commands/provenance.py",
+      "affected_process_count": 7,
+      "total_hits": 12,
+      "earliest_broken_step": 1
+    },
+    {
+      "name": "apply",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/document_promotion.py",
+      "affected_process_count": 10,
+      "total_hits": 12,
+      "earliest_broken_step": 1
+    },
+    {
+      "name": "classify_date_conflicts_cmd",
+      "type": "Function",
+      "filePath": "src/duke_rates/cli_commands/provenance.py",
+      "affected_process_count": 4,
+      "total_hits": 6,
+      "earliest_broken_step": 1
+    }
+  ],
+  "affected_modules": [
+    {
+      "name": "Ncuc",
+      "hits": 20,
+      "impact": "direct"
+    },
+    {
+      "name": "Cli_commands",
+      "hits": 3,
+      "impact": "indirect"
+    },
+    {
+      "name": "Document_intelligence",
+      "hits": 1,
+      "impact": "indirect"
+    }
+  ],
+  "byDepth": {
+    "1": [
+      {
+        "depth": 1,
+        "id": "Function:src/duke_rates/historical/ncuc/document_binding.py:_choose_mode",
+        "name": "_choose_mode",
+        "filePath": "src/duke_rates/historical/ncuc/document_binding.py",
+        "relationType": "CALLS",
+        "confidence": 0.8,
+        "processes": []
+      },
+      {
+        "depth": 1,
+        "id": "Function:src/duke_rates/historical/ncuc/document_promotion.py:_identity_checks",
+        "name": "_identity_checks",
+        "filePath": "src/duke_rates/historical/ncuc/document_promotion.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_378_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _is_colored",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_84_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _check",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_7_propose_binding_cmd",
+            "label": "Propose_binding_cmd → Canonical_docket",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_8_propose_binding_cmd",
+            "label": "Propose_binding_cmd → Read_date",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_379_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _rgb",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_9_propose_binding_cmd",
+            "label": "Propose_binding_cmd → Parse_ordinals",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_412_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _page_count",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_23_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _inside",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_397_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _doc",
+            "processType": "cross_community",
+            "step": 5
+          }
+        ]
+      },
+      {
+        "depth": 1,
+        "id": "Function:src/duke_rates/historical/ncuc/document_promotion.py:redline_promotion_block",
+        "name": "redline_promotion_block",
+        "filePath": "src/duke_rates/historical/ncuc/document_promotion.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": []
+      },
+      {
+        "depth": 1,
+        "id": "Function:src/duke_rates/historical/ncuc/effective_date_reconciliation.py:classify_conflicts",
+        "name": "classify_conflicts",
+        "filePath": "src/duke_rates/historical/ncuc/effective_date_reconciliation.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_199_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _days",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_200_build_review_queue_c",
+            "label": "Build_review_queue_cmd → Summarize_page_evidence",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_494_classify_date_confli",
+            "label": "Classify_date_conflicts_cmd → Summarize_page_evidence",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_493_classify_date_confli",
+            "label": "Classify_date_conflicts_cmd → _days",
+            "processType": "cross_community",
+            "step": 2
+          }
+        ]
+      },
+      {
+        "depth": 1,
+        "id": "Function:src/duke_rates/historical/ncuc/ingestion_validation.py:_page_checks",
+        "name": "_page_checks",
+        "filePath": "src/duke_rates/historical/ncuc/ingestion_validation.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_21_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _is_colored",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_42_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _doc",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_81_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _check",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_535_audit_version_source",
+            "label": "Audit_version_sources_cmd → _rgb",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_22_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _rgb",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_428_audit_version_source",
+            "label": "Audit_version_sources_cmd → Close",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_427_audit_version_source",
+            "label": "Audit_version_sources_cmd → _table",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_426_audit_version_source",
+            "label": "Audit_version_sources_cmd → _check",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_83_build_review_queue_c",
+            "label": "Build_review_queue_cmd → Close",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_82_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _table",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_534_audit_version_source",
+            "label": "Audit_version_sources_cmd → _is_colored",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_547_audit_version_source",
+            "label": "Audit_version_sources_cmd → _doc",
+            "processType": "cross_community",
+            "step": 4
+          }
+        ]
+      },
+      {
+        "depth": 1,
+        "id": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:_search_pages",
+        "name": "_search_pages",
+        "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": []
+      }
+    ],
+    "2": [
+      {
+        "depth": 2,
+        "id": "Function:src/duke_rates/cli_commands/provenance.py:classify_date_conflicts_cmd",
+        "name": "classify_date_conflicts_cmd",
+        "filePath": "src/duke_rates/cli_commands/provenance.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_494_classify_date_confli",
+            "label": "Classify_date_conflicts_cmd → Summarize_page_evidence",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_841_classify_date_confli",
+            "label": "Classify_date_conflicts_cmd → _seed_document_types",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_493_classify_date_confli",
+            "label": "Classify_date_conflicts_cmd → _days",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_953_classify_date_confli",
+            "label": "Classify_date_conflicts_cmd → Ensure_directories",
+            "processType": "cross_community",
+            "step": 1
+          }
+        ]
+      },
+      {
+        "depth": 2,
+        "id": "Function:src/duke_rates/historical/ncuc/document_binding.py:evaluate",
+        "name": "evaluate",
+        "filePath": "src/duke_rates/historical/ncuc/document_binding.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_412_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _page_count",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_615_apply",
+            "label": "Apply → Close",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_7_propose_binding_cmd",
+            "label": "Propose_binding_cmd → Canonical_docket",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_560_propose_binding_cmd",
+            "label": "Propose_binding_cmd → Close",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_379_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _rgb",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_84_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _check",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_8_propose_binding_cmd",
+            "label": "Propose_binding_cmd → Read_date",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_397_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _doc",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_23_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _inside",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_378_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _is_colored",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_9_propose_binding_cmd",
+            "label": "Propose_binding_cmd → Parse_ordinals",
+            "processType": "cross_community",
+            "step": 4
+          }
+        ]
+      },
+      {
+        "depth": 2,
+        "id": "Function:src/duke_rates/historical/ncuc/document_promotion.py:_evaluate_duplicate",
+        "name": "_evaluate_duplicate",
+        "filePath": "src/duke_rates/historical/ncuc/document_promotion.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": []
+      },
+      {
+        "depth": 2,
+        "id": "Function:src/duke_rates/historical/ncuc/document_promotion.py:_evaluate_rebind",
+        "name": "_evaluate_rebind",
+        "filePath": "src/duke_rates/historical/ncuc/document_promotion.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": []
+      },
+      {
+        "depth": 2,
+        "id": "Function:src/duke_rates/historical/ncuc/evidence_review.py:build_review_queue",
+        "name": "build_review_queue",
+        "filePath": "src/duke_rates/historical/ncuc/evidence_review.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_200_build_review_queue_c",
+            "label": "Build_review_queue_cmd → Summarize_page_evidence",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_60_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _page_count",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_201_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _version_row",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_83_build_review_queue_c",
+            "label": "Build_review_queue_cmd → Close",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_82_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _table",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_123_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _archive_hash_matches",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_199_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _days",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_22_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _rgb",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_21_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _is_colored",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_42_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _doc",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_81_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _check",
+            "processType": "cross_community",
+            "step": 2
+          }
+        ]
+      },
+      {
+        "depth": 2,
+        "id": "Function:src/duke_rates/historical/ncuc/ingestion_validation.py:_rider_checks",
+        "name": "_rider_checks",
+        "filePath": "src/duke_rates/historical/ncuc/ingestion_validation.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": []
+      },
+      {
+        "depth": 2,
+        "id": "Function:src/duke_rates/historical/ncuc/ingestion_validation.py:_version_checks",
+        "name": "_version_checks",
+        "filePath": "src/duke_rates/historical/ncuc/ingestion_validation.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_22_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _rgb",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_428_audit_version_source",
+            "label": "Audit_version_sources_cmd → Close",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_427_audit_version_source",
+            "label": "Audit_version_sources_cmd → _table",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_455_audit_version_source",
+            "label": "Audit_version_sources_cmd → _archive_hash_matches",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_21_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _is_colored",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_42_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _doc",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_81_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _check",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_535_audit_version_source",
+            "label": "Audit_version_sources_cmd → _rgb",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_555_audit_version_source",
+            "label": "Audit_version_sources_cmd → _page_count",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_60_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _page_count",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_83_build_review_queue_c",
+            "label": "Build_review_queue_cmd → Close",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_123_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _archive_hash_matches",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_547_audit_version_source",
+            "label": "Audit_version_sources_cmd → _doc",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_534_audit_version_source",
+            "label": "Audit_version_sources_cmd → _is_colored",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_82_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _table",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_426_audit_version_source",
+            "label": "Audit_version_sources_cmd → _check",
+            "processType": "cross_community",
+            "step": 3
+          }
+        ]
+      },
+      {
+        "depth": 2,
+        "id": "Function:src/duke_rates/historical/ncuc/ingestion_validation.py:version_source_redline",
+        "name": "version_source_redline",
+        "filePath": "src/duke_rates/historical/ncuc/ingestion_validation.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": []
+      },
+      {
+        "depth": 2,
+        "id": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:resolve_gaps_locally",
+        "name": "resolve_gaps_locally",
+        "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_321_resolve_gaps_local_c",
+            "label": "Resolve_gaps_local_cmd → Close",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_212_resolve_gaps_local_c",
+            "label": "Resolve_gaps_local_cmd → Finish_outcome",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_652_resolve_gaps_local_c",
+            "label": "Resolve_gaps_local_cmd → Close",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_456_resolve_gaps_local_c",
+            "label": "Resolve_gaps_local_cmd → Norm",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_126_resolve_gaps_local_c",
+            "label": "Resolve_gaps_local_cmd → _now",
+            "processType": "cross_community",
+            "step": 2
+          }
+        ]
+      }
+    ],
+    "3": [
+      {
+        "depth": 3,
+        "id": "Function:src/duke_rates/cli_commands/provenance.py:build_review_queue_cmd",
+        "name": "build_review_queue_cmd",
+        "filePath": "src/duke_rates/cli_commands/provenance.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_83_build_review_queue_c",
+            "label": "Build_review_queue_cmd → Close",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_60_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _page_count",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_201_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _version_row",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_82_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _table",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_42_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _doc",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_81_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _check",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_200_build_review_queue_c",
+            "label": "Build_review_queue_cmd → Summarize_page_evidence",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_123_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _archive_hash_matches",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_199_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _days",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_22_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _rgb",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_21_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _is_colored",
+            "processType": "cross_community",
+            "step": 1
+          }
+        ]
+      },
+      {
+        "depth": 3,
+        "id": "Function:src/duke_rates/cli_commands/provenance.py:resolve_gaps_local_cmd",
+        "name": "resolve_gaps_local_cmd",
+        "filePath": "src/duke_rates/cli_commands/provenance.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_652_resolve_gaps_local_c",
+            "label": "Resolve_gaps_local_cmd → Close",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_456_resolve_gaps_local_c",
+            "label": "Resolve_gaps_local_cmd → Norm",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_817_resolve_gaps_local_c",
+            "label": "Resolve_gaps_local_cmd → _seed_document_types",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_212_resolve_gaps_local_c",
+            "label": "Resolve_gaps_local_cmd → Finish_outcome",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_711_resolve_gaps_local_c",
+            "label": "Resolve_gaps_local_cmd → Ensure_directories",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_126_resolve_gaps_local_c",
+            "label": "Resolve_gaps_local_cmd → _now",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_321_resolve_gaps_local_c",
+            "label": "Resolve_gaps_local_cmd → Close",
+            "processType": "cross_community",
+            "step": 1
+          }
+        ]
+      },
+      {
+        "depth": 3,
+        "id": "Function:src/duke_rates/document_intelligence/llm_charge_promotion.py:promote_llm_charge_proposals",
+        "name": "promote_llm_charge_proposals",
+        "filePath": "src/duke_rates/document_intelligence/llm_charge_promotion.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": []
+      },
+      {
+        "depth": 3,
+        "id": "Function:src/duke_rates/historical/ncuc/document_promotion.py:_evaluate_binding",
+        "name": "_evaluate_binding",
+        "filePath": "src/duke_rates/historical/ncuc/document_promotion.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_560_propose_binding_cmd",
+            "label": "Propose_binding_cmd → Close",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_378_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _is_colored",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_7_propose_binding_cmd",
+            "label": "Propose_binding_cmd → Canonical_docket",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_615_apply",
+            "label": "Apply → Close",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_8_propose_binding_cmd",
+            "label": "Propose_binding_cmd → Read_date",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_412_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _page_count",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_379_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _rgb",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_23_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _inside",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_9_propose_binding_cmd",
+            "label": "Propose_binding_cmd → Parse_ordinals",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_397_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _doc",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_84_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _check",
+            "processType": "cross_community",
+            "step": 3
+          }
+        ]
+      },
+      {
+        "depth": 3,
+        "id": "Function:src/duke_rates/historical/ncuc/document_promotion.py:apply",
+        "name": "apply",
+        "filePath": "src/duke_rates/historical/ncuc/document_promotion.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_556_apply",
+            "label": "Apply → Family_utility",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_230_apply",
+            "label": "Apply → _now",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_229_apply",
+            "label": "Apply → _display",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_24_apply",
+            "label": "Apply → _iso",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_367_apply",
+            "label": "Apply → Canonical_docket",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_380_apply",
+            "label": "Apply → _inside",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_25_apply",
+            "label": "Apply → _month_number",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_613_apply",
+            "label": "Apply → _page_count",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_615_apply",
+            "label": "Apply → Close",
+            "processType": "cross_community",
+            "step": 1
+          },
+          {
+            "id": "proc_368_apply",
+            "label": "Apply → Parse_ordinals",
+            "processType": "cross_community",
+            "step": 1
+          }
+        ]
+      },
+      {
+        "depth": 3,
+        "id": "Function:src/duke_rates/historical/ncuc/document_promotion.py:propose",
+        "name": "propose",
+        "filePath": "src/duke_rates/historical/ncuc/document_promotion.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_560_propose_binding_cmd",
+            "label": "Propose_binding_cmd → Close",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_8_propose_binding_cmd",
+            "label": "Propose_binding_cmd → Read_date",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_412_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _page_count",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_7_propose_binding_cmd",
+            "label": "Propose_binding_cmd → Canonical_docket",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_378_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _is_colored",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_23_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _inside",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_9_propose_binding_cmd",
+            "label": "Propose_binding_cmd → Parse_ordinals",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_84_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _check",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_397_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _doc",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_379_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _rgb",
+            "processType": "cross_community",
+            "step": 2
+          }
+        ]
+      },
+      {
+        "depth": 3,
+        "id": "Function:src/duke_rates/historical/ncuc/evidence_review.py:_items_from_candidates",
+        "name": "_items_from_candidates",
+        "filePath": "src/duke_rates/historical/ncuc/evidence_review.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": []
+      },
+      {
+        "depth": 3,
+        "id": "Function:src/duke_rates/historical/ncuc/ingestion_validation.py:audit_version_sources",
+        "name": "audit_version_sources",
+        "filePath": "src/duke_rates/historical/ncuc/ingestion_validation.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_123_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _archive_hash_matches",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_427_audit_version_source",
+            "label": "Audit_version_sources_cmd → _table",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_82_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _table",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_547_audit_version_source",
+            "label": "Audit_version_sources_cmd → _doc",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_83_build_review_queue_c",
+            "label": "Build_review_queue_cmd → Close",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_426_audit_version_source",
+            "label": "Audit_version_sources_cmd → _check",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_534_audit_version_source",
+            "label": "Audit_version_sources_cmd → _is_colored",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_60_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _page_count",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_42_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _doc",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_455_audit_version_source",
+            "label": "Audit_version_sources_cmd → _archive_hash_matches",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_21_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _is_colored",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_22_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _rgb",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_555_audit_version_source",
+            "label": "Audit_version_sources_cmd → _page_count",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_428_audit_version_source",
+            "label": "Audit_version_sources_cmd → Close",
+            "processType": "cross_community",
+            "step": 2
+          },
+          {
+            "id": "proc_81_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _check",
+            "processType": "cross_community",
+            "step": 3
+          },
+          {
+            "id": "proc_535_audit_version_source",
+            "label": "Audit_version_sources_cmd → _rgb",
+            "processType": "cross_community",
+            "step": 2
+          }
+        ]
+      },
+      {
+        "depth": 3,
+        "id": "Function:src/duke_rates/historical/ncuc/ingestion_validation.py:validate_run",
+        "name": "validate_run",
+        "filePath": "src/duke_rates/historical/ncuc/ingestion_validation.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": []
+      }
+    ]
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "seconds": 20.118976300000213,
+  "summary": {
+    "bill_count": 1,
+    "usage_xml_path": "data\\usage\\Energy Usage.xml",
+    "status_counts": {
+      "needs_review": 1
+    },
+    "good_match_count": 0,
+    "close_match_count": 0,
+    "tou_needs_work_count": 0,
+    "max_abs_total_delta": 0.01
+  },
+  "rows": [
+    {
+      "bill_id": 12,
+      "bill_date": "2026-03-20",
+      "service_start": "2026-02-17",
+      "service_end": "2026-03-17",
+      "rate_code": "R-TOU-CPP",
+      "bill_kwh": 1290.583,
+      "xml_kwh": 1291.18,
+      "xml_minus_bill_kwh": 0.597,
+      "actual_electric_total": null,
+      "actual_electric_total_fallback": 145.98,
+      "source_path": "..\\version_3\\Actual Duke Bills\\2026-03-20.pdf",
+      "estimated_electric_total": 145.99,
+      "total_delta": -0.01,
+      "summary_rider_actual": null,
+      "summary_rider_estimated": null,
+      "summary_rider_delta": null,
+      "storm_actual": null,
+      "storm_estimated": null,
+      "storm_delta": null,
+      "clean_energy_actual": 1.81,
+      "clean_energy_estimated": 1.81,
+      "clean_energy_delta": 0.0,
+      "energy_actual": 137.03,
+      "energy_estimated": 137.03,
+      "energy_delta": 0.0,
+      "bill_coverage_note": "TOU structure detected; current estimate does not allocate interval usage by period. | Formula-based rider calculations are not yet implemented. | Applied rider adjustments from parsed historical rider tables. | Used billed TOU period quantities to validate parsed TOU energy rates.",
+      "comparison_status": "needs_review"
+    }
+  ]
+}

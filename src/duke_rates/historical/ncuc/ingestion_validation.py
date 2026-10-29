@@ -18,6 +18,9 @@ Checks (each stored ok / blocking / detail):
   (``extraction_runs.document_sha256``) and the ones the archive recorded
   (``historical_documents.content_hash``).
 * ``bound_pages_in_file``: the version's page bounds exist in the file.
+* ``bound_pages_readable``: every requested page has sufficient native evidence.
+  Image-dominant pages remain insufficient even with a searchable OCR overlay;
+  they require an explicit named override on the reviewed pathway.
 * ``no_redline_duplicate_assertion``: no reviewed assertion says the span is a
   redline duplicate of another document.
 * ``bound_pages_not_redline``: page evidence (coloured strike/underline bars,
@@ -50,12 +53,12 @@ from typing import Any, Iterable, Sequence
 
 from duke_rates.db.provenance import ProvenanceError, atomic
 
-VALIDATOR_VERSION = "ingestion_validation@1.0.0"
+VALIDATOR_VERSION = "ingestion_validation@1.1.0"
 REVIEWED = "reviewed"
 #: Checks a named reviewer may override on the ``reviewed`` pathway.
 OVERRIDABLE = frozenset({
     "source_present", "source_hash_matches", "no_redline_duplicate_assertion",
-    "bound_pages_not_redline", "effective_date_printed",
+    "bound_pages_not_redline", "bound_pages_readable", "effective_date_printed",
 })
 #: Checks that are blocking only where nobody reviews the result.
 _UNATTENDED_ONLY = frozenset({"source_present"})
@@ -89,21 +92,38 @@ def _page_checks(conn: sqlite3.Connection, path: str, pages: list[int], hd_id: i
     if hd_id is not None and _table(conn, "document_assertions"):
         asserted = conn.execute(
             "SELECT id, target_historical_document_id FROM document_assertions WHERE historical_document_id = ? "
-            "AND assertion = 'redline_duplicate_of' AND retracted_at IS NULL", (hd_id,)).fetchall()
+            "AND assertion = 'redline_duplicate_of' AND retracted_at IS NULL",
+            (hd_id,),
+        ).fetchall()
         checks["no_redline_duplicate_assertion"] = _check(
-            not asserted, {"assertions": [{"id": a[0], "duplicate_of": a[1]} for a in asserted]})
+            not asserted, {"assertions": [{"id": a[0], "duplicate_of": a[1]} for a in asserted]}
+        )
     reader = PageRedlineReader()
     try:
-        evidence = summarize_page_evidence(
-            [p for start, end in _runs(pages) for p in reader.pages(path, start, end)])
+        page_evidence = [p for start, end in _runs(pages) for p in reader.pages(path, start, end)]
+        evidence = summarize_page_evidence(page_evidence)
     finally:
         reader.close()
     fingerprint = _redline_fingerprint(conn, path, min(pages), max(pages)) if pages else None
     checks["bound_pages_not_redline"] = _check(
         evidence["verdict"] != "redline" and fingerprint is None,
-        {"page_evidence": {k: evidence.get(k) for k in ("verdict", "redline_pages", "suspect_pages")},
-         "redline_fingerprint": fingerprint,
-         "note": "suspect / no_text_layer pages are reported, not blocking; the fingerprint covers scanned pages"})
+        {
+            "page_evidence": evidence,
+            "redline_fingerprint": fingerprint,
+            "note": "ambiguous markup is reported; "
+            "absence of detected edits does not establish approval",
+        },
+    )
+    checks["bound_pages_readable"] = _check(
+        set(evidence["evaluated_pages"]) == set(pages) and not evidence["insufficient_pages"],
+        {
+            "requested_pages": sorted(set(pages)),
+            "evaluated_pages": evidence["evaluated_pages"],
+            "insufficient_pages": evidence["insufficient_pages"],
+            "note": "image-dominant pages need reviewed visual evidence, "
+            "even with searchable OCR text",
+        },
+    )
     return checks
 
 
@@ -146,39 +166,76 @@ def _identity(path: str | None):
 def _version_checks(conn: sqlite3.Connection, run: sqlite3.Row) -> tuple[str, dict]:
     from duke_rates.historical.ncuc.document_promotion import effective_date_promotion_conflict
 
-    v = conn.execute("SELECT id, historical_document_id, document_id FROM tariff_versions WHERE id = ?",
-                     (run["target_id"],)).fetchone()
+    v = conn.execute(
+        "SELECT id, historical_document_id, document_id FROM tariff_versions WHERE id = ?",
+        (run["target_id"],),
+    ).fetchone()
     if v is None:
-        return "blocked", {"source_present": _check(False, {"error": f"tariff version {run['target_id']} missing"})}
+        return "blocked", {
+            "source_present": _check(False, {"error": f"tariff version {run['target_id']} missing"})
+        }
     if v["historical_document_id"] is None:
         if v["document_id"] is not None:
-            return "not_applicable", {"source_present": _check(None, {
-                "source": "utility web document", "document_id": v["document_id"],
-                "note": "no historical document: page-level checks do not apply"}, blocking=False)}
-        return "checked", {"source_present": _check(False, {"error": "version has no source document"})}
-    hd = conn.execute("SELECT id, local_path, content_hash, start_page, end_page FROM historical_documents "
-                      "WHERE id = ?", (v["historical_document_id"],)).fetchone()
+            return "not_applicable", {
+                "source_present": _check(
+                    None,
+                    {
+                        "source": "utility web document",
+                        "document_id": v["document_id"],
+                        "note": "no historical document: page-level checks do not apply",
+                    },
+                    blocking=False,
+                )
+            }
+        return "checked", {
+            "source_present": _check(False, {"error": "version has no source document"})
+        }
+    hd = conn.execute(
+        "SELECT id, local_path, content_hash, start_page, end_page FROM historical_documents "
+        "WHERE id = ?",
+        (v["historical_document_id"],),
+    ).fetchone()
+    if hd is None:
+        return "checked", {
+            "source_present": _check(False, {"error": "historical source binding is missing"})
+        }
     ident = _identity(hd["local_path"])
-    checks = {"source_present": _check(bool(ident and ident.sha256),
-                                       {"historical_document_id": hd["id"], "path": hd["local_path"]})}
+    checks = {
+        "source_present": _check(
+            bool(ident and ident.sha256),
+            {"historical_document_id": hd["id"], "path": hd["local_path"]},
+        )
+    }
     if not (ident and ident.sha256):
         return "checked", checks
     stored = (hd["content_hash"] or "").lower()
-    run_sha = (run["document_sha256"] or "").lower() if run["document_sha256_status"] == "computed" else ""
+    run_sha = (
+        (run["document_sha256"] or "").lower()
+        if run["document_sha256_status"] == "computed"
+        else ""
+    )
     archive_ok = _archive_hash_matches(stored, hd["local_path"], ident)
     checks["source_hash_matches"] = _check(
         archive_ok is not False and (not run_sha or run_sha == ident.sha256),
-        {"file_sha256": ident.sha256, "archive_content_hash": stored or None, "run_document_sha256": run_sha or None,
-         "archive_hash_comparable": archive_ok is not None})
+        {
+            "file_sha256": ident.sha256,
+            "archive_content_hash": stored or None,
+            "run_document_sha256": run_sha or None,
+            "archive_hash_comparable": archive_ok is not None,
+        },
+    )
     start, end = hd["start_page"] or 1, hd["end_page"] or hd["start_page"] or 1
-    checks["bound_pages_in_file"] = _check(1 <= start <= end <= (ident.page_count or 0),
-                                           {"pages": [start, end], "page_count": ident.page_count})
+    checks["bound_pages_in_file"] = _check(
+        1 <= start <= end <= (ident.page_count or 0),
+        {"pages": [start, end], "page_count": ident.page_count},
+    )
     if not checks["bound_pages_in_file"]["ok"]:
         return "checked", checks
     checks |= _page_checks(conn, hd["local_path"], list(range(start, end + 1)), hd["id"])
-    conflict = effective_date_promotion_conflict(conn, run["id"])
-    checks["effective_date_printed"] = _check(conflict is None, conflict or {
-        "run_interprets": run["interpreted_effective_start"]})
+    conflict = effective_date_promotion_conflict(conn, run["id"]) if run["id"] is not None else None
+    checks["effective_date_printed"] = _check(
+        conflict is None, conflict or {"run_interprets": run["interpreted_effective_start"]}
+    )
     return "checked", checks
 
 
@@ -327,3 +384,93 @@ def version_source_redline(conn: sqlite3.Connection, version_id: int | None) -> 
     checks = _page_checks(conn, hd[1], list(range(start, end + 1)), hd[0])
     failed = {n: c["detail"] for n, c in checks.items() if c["ok"] is not True}
     return {"version_id": version_id, "failed": failed, "validator": VALIDATOR_VERSION} if failed else None
+
+
+def version_source_integrity(
+    conn: sqlite3.Connection,
+    version_id: int | None,
+    *,
+    evidence_path: str | None,
+    evidence_document_id: int | None,
+) -> dict | None:
+    """Fail-closed source checks for the LLM writer, using the shared version rules.
+
+    The evidence PDF must be the bound source's bytes. Existing model validation
+    flags cannot stand in for a currently readable source. This establishes
+    source integrity, not regulatory approval or historical extraction-time hashes.
+    No database writes or provenance migration are performed here.
+    """
+    conn.row_factory = sqlite3.Row
+    if (
+        version_id is None
+        or not _table(conn, "historical_documents")
+        or not _table(conn, "document_fingerprints")
+        or not _has_column(conn, "tariff_versions", "document_id")
+    ):
+        return {
+            "version_id": version_id,
+            "validator": VALIDATOR_VERSION,
+            "failed": {"source_present": {"error": "complete version source metadata is required"}},
+        }
+    run = {
+        "id": None,
+        "target_id": version_id,
+        "document_sha256": None,
+        "document_sha256_status": None,
+        "interpreted_effective_start": None,
+    }
+    status, checks = _version_checks(conn, run)
+    if status == "not_applicable":
+        # This writer consumes historical NCUC model extractions; utility-web
+        # exceptions in the deterministic pipeline cannot authorize its inserts.
+        checks["source_present"] = _check(
+            False, {"error": "LLM promotion requires a bound historical PDF"}
+        )
+    source = conn.execute(
+        "SELECT hd.local_path, hd.id FROM tariff_versions tv JOIN historical_documents hd "
+        "ON hd.id = tv.historical_document_id WHERE tv.id = ?",
+        (version_id,),
+    ).fetchone()
+    checks["evidence_document_matches"] = _check(
+        bool(source and evidence_document_id is not None and source[1] == evidence_document_id),
+        {
+            "evidence_historical_document_id": evidence_document_id,
+            "bound_historical_document_id": source[1] if source else None,
+            "note": "matching file paths cannot substitute for matching the bound historical span",
+        },
+    )
+    hash_detail = checks.get("source_hash_matches", {}).get("detail", {})
+    checks["archive_hash_verifiable"] = _check(
+        hash_detail.get("archive_hash_comparable") is True,
+        {
+            "archive_content_hash": hash_detail.get("archive_content_hash"),
+            "note": "the LLM writer needs a verifiable archive hash; "
+            "legacy identifiers are insufficient",
+        },
+    )
+    evidence_identity = _identity(evidence_path)
+    bound_identity = _identity(source[0]) if source else None
+    checks["evidence_source_matches"] = _check(
+        bool(
+            evidence_identity
+            and bound_identity
+            and evidence_identity.sha256
+            and evidence_identity.sha256 == bound_identity.sha256
+        ),
+        {
+            "evidence_path": evidence_path,
+            "bound_path": source[0] if source else None,
+            "evidence_sha256": evidence_identity.sha256 if evidence_identity else None,
+            "bound_sha256": bound_identity.sha256 if bound_identity else None,
+        },
+    )
+    failed = {
+        name: check["detail"]
+        for name, check in checks.items()
+        if check["blocking"] and check["ok"] is not True
+    }
+    return (
+        {"version_id": version_id, "failed": failed, "validator": VALIDATOR_VERSION}
+        if failed
+        else None
+    )

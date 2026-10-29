@@ -96,6 +96,29 @@ def _init_db(path):
         """
     )
     ensure_promotion_tables(conn)
+    # Exercise successful overnight writes with an actual, hash-bound source.
+    import hashlib
+    import fitz
+
+    pdf_path = path.parent / "source.pdf"
+    with fitz.open() as doc:
+        page = doc.new_page()
+        page.insert_text((72, 100), "Energy Charge 6.0370 per on-peak kWh")
+        doc.save(pdf_path)
+    conn.execute("ALTER TABLE tariff_versions ADD COLUMN document_id INTEGER")
+    conn.execute(
+        "CREATE TABLE historical_documents (id INTEGER PRIMARY KEY, local_path TEXT, "
+        "content_hash TEXT, start_page INTEGER, end_page INTEGER)"
+    )
+    conn.execute(
+        "CREATE TABLE document_fingerprints (source_pdf TEXT, redline_confidence REAL, "
+        "redline_detector_version TEXT, is_redline_candidate INTEGER, red_is_index_only INTEGER, "
+        "page_start INTEGER, page_end INTEGER)"
+    )
+    conn.execute(
+        "INSERT INTO historical_documents VALUES (100, ?, ?, 1, 1)",
+        (str(pdf_path), hashlib.sha256(pdf_path.read_bytes()).hexdigest()),
+    )
     return conn
 
 
@@ -111,7 +134,7 @@ def _insert_validated_row(conn):
         """
         INSERT INTO llm_candidate_rate_extractions
         (id, historical_document_id, source_pdf, rate_rows_json)
-        VALUES (10, 100, 'doc.pdf', ?)
+        VALUES (10, 100, (SELECT local_path FROM historical_documents WHERE id = 100), ?)
         """,
         (
             json.dumps(
@@ -132,7 +155,8 @@ def _insert_validated_row(conn):
         INSERT INTO llm_candidate_rate_row_validations
         (id, extraction_id, row_index, historical_document_id, source_pdf,
          charge_type, value, unit, source_quote, recommended_status)
-        VALUES (1, 10, 0, 100, 'doc.pdf', 'Energy Charge', 6.037, '¢/kWh',
+        VALUES (1, 10, 0, 100, (SELECT local_path FROM historical_documents WHERE id = 100),
+                'Energy Charge', 6.037, '¢/kWh',
                 '6.0370 per on-peak kWh', 'validated')
         """
     )

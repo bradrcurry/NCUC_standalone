@@ -1,0 +1,17 @@
+{
+  "label_source": "machine:read-only-d5-strong-source-charge-review",
+  "human_verified": false,
+  "source_database": "scratch copy; six checked authoritative tables match production",
+  "version_count": 47,
+  "charge_count": 1120,
+  "snippet_quality_counts": {
+    "label_or_other_text_without_numeric_quote": 918,
+    "contains_numeric_text_not_independently_grounded": 202
+  },
+  "limitations": [
+    "A source span is not per-charge page provenance.",
+    "A numeric snippet is not proof of a correct value, unit, date, status or approval.",
+    "Stored clue/lineage verification metadata is preserved, not upgraded to independent human review.",
+    "No charge, status, date, binding or review decision is changed."
+  ]
+}

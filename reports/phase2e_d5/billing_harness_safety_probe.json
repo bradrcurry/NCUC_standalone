@@ -1,0 +1,9 @@
+{
+  "production_alias_refused_before_report": true,
+  "write_attempt_refused": true,
+  "query_only": true,
+  "scratch_database_bytes_unchanged": true,
+  "sha256_before": "20a8530a3b8039bf2d28586f6c2784805efbfb1273397d3c845e406791f790d9",
+  "sha256_after": "20a8530a3b8039bf2d28586f6c2784805efbfb1273397d3c845e406791f790d9",
+  "actual_production_database_opened": false
+}

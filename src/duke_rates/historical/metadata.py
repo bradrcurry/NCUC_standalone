@@ -54,14 +54,10 @@ def extract_historical_metadata(text: str) -> dict[str, str | None]:
 
 
 def _first_unique_match(pattern: re.Pattern[str], text: str) -> str | None:
-    values: list[str] = []
-    seen: set[str] = set()
-    for match in pattern.finditer(text):
-        value = " ".join(match.group(1).split())
-        if value not in seen:
-            seen.add(value)
-            values.append(value)
-    return values[0] if values else None
+    # Deduplicating later matches cannot change the first normalized value.
+    # Stop here: scanning large filing tails can trigger costly regex retries.
+    match = pattern.search(text)
+    return " ".join(match.group(1).split()) if match else None
 
 
 def _extract_leaf_no(label: str | None) -> str | None:

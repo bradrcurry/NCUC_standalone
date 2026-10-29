@@ -1,0 +1,365 @@
+{
+  "target": {
+    "id": "Function:src/duke_rates/parse/redline_detector.py:evaluate_redline_page",
+    "name": "evaluate_redline_page",
+    "type": "Function",
+    "filePath": "src/duke_rates/parse/redline_detector.py"
+  },
+  "direction": "upstream",
+  "impactedCount": 6,
+  "risk": "HIGH",
+  "riskSharedAxes": "LOW",
+  "riskScale": {
+    "comparableAcrossKinds": true,
+    "unusedAxes": []
+  },
+  "epistemic": "exact",
+  "summary": {
+    "direct": 1,
+    "processes_affected": 3,
+    "modules_affected": 2
+  },
+  "byDepthCounts": {
+    "1": 1,
+    "2": 2,
+    "3": 3
+  },
+  "affected_processes": [
+    {
+      "name": "propose_binding_cmd",
+      "type": "Function",
+      "filePath": "src/duke_rates/cli_commands/provenance.py",
+      "affected_process_count": 9,
+      "total_hits": 15,
+      "earliest_broken_step": 5
+    },
+    {
+      "name": "audit_version_sources_cmd",
+      "type": "Function",
+      "filePath": "src/duke_rates/cli_commands/provenance.py",
+      "affected_process_count": 6,
+      "total_hits": 12,
+      "earliest_broken_step": 4
+    },
+    {
+      "name": "build_review_queue_cmd",
+      "type": "Function",
+      "filePath": "src/duke_rates/cli_commands/provenance.py",
+      "affected_process_count": 6,
+      "total_hits": 12,
+      "earliest_broken_step": 5
+    }
+  ],
+  "affected_modules": [
+    {
+      "name": "Ncuc",
+      "hits": 4,
+      "impact": "indirect"
+    },
+    {
+      "name": "Parse",
+      "hits": 2,
+      "impact": "direct"
+    }
+  ],
+  "byDepth": {
+    "1": [
+      {
+        "depth": 1,
+        "id": "Method:src/duke_rates/parse/redline_detector.py:PageRedlineReader.page#2",
+        "name": "page",
+        "filePath": "src/duke_rates/parse/redline_detector.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_22_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _rgb",
+            "processType": "cross_community",
+            "step": 7
+          },
+          {
+            "id": "proc_534_audit_version_source",
+            "label": "Audit_version_sources_cmd → _is_colored",
+            "processType": "cross_community",
+            "step": 6
+          },
+          {
+            "id": "proc_547_audit_version_source",
+            "label": "Audit_version_sources_cmd → _doc",
+            "processType": "cross_community",
+            "step": 6
+          },
+          {
+            "id": "proc_378_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _is_colored",
+            "processType": "cross_community",
+            "step": 7
+          },
+          {
+            "id": "proc_21_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _is_colored",
+            "processType": "cross_community",
+            "step": 7
+          },
+          {
+            "id": "proc_535_audit_version_source",
+            "label": "Audit_version_sources_cmd → _rgb",
+            "processType": "cross_community",
+            "step": 6
+          },
+          {
+            "id": "proc_379_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _rgb",
+            "processType": "cross_community",
+            "step": 7
+          },
+          {
+            "id": "proc_397_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _doc",
+            "processType": "cross_community",
+            "step": 7
+          },
+          {
+            "id": "proc_42_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _doc",
+            "processType": "cross_community",
+            "step": 7
+          }
+        ]
+      }
+    ],
+    "2": [
+      {
+        "depth": 2,
+        "id": "Method:src/duke_rates/parse/redline_detector.py:PageRedlineReader.pages#3",
+        "name": "pages",
+        "filePath": "src/duke_rates/parse/redline_detector.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_378_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _is_colored",
+            "processType": "cross_community",
+            "step": 6
+          },
+          {
+            "id": "proc_547_audit_version_source",
+            "label": "Audit_version_sources_cmd → _doc",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_534_audit_version_source",
+            "label": "Audit_version_sources_cmd → _is_colored",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_379_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _rgb",
+            "processType": "cross_community",
+            "step": 6
+          },
+          {
+            "id": "proc_21_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _is_colored",
+            "processType": "cross_community",
+            "step": 6
+          },
+          {
+            "id": "proc_535_audit_version_source",
+            "label": "Audit_version_sources_cmd → _rgb",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_42_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _doc",
+            "processType": "cross_community",
+            "step": 6
+          },
+          {
+            "id": "proc_397_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _doc",
+            "processType": "cross_community",
+            "step": 6
+          },
+          {
+            "id": "proc_22_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _rgb",
+            "processType": "cross_community",
+            "step": 6
+          }
+        ]
+      },
+      {
+        "depth": 2,
+        "id": "Method:src/duke_rates/parse/redline_detector.py:PageRedlineReader.text_struck#3",
+        "name": "text_struck",
+        "filePath": "src/duke_rates/parse/redline_detector.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": []
+      }
+    ],
+    "3": [
+      {
+        "depth": 3,
+        "id": "Function:src/duke_rates/historical/ncuc/document_promotion.py:_identity_checks",
+        "name": "_identity_checks",
+        "filePath": "src/duke_rates/historical/ncuc/document_promotion.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_84_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _check",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_7_propose_binding_cmd",
+            "label": "Propose_binding_cmd → Canonical_docket",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_8_propose_binding_cmd",
+            "label": "Propose_binding_cmd → Read_date",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_378_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _is_colored",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_412_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _page_count",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_379_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _rgb",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_23_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _inside",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_9_propose_binding_cmd",
+            "label": "Propose_binding_cmd → Parse_ordinals",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_397_propose_binding_cmd",
+            "label": "Propose_binding_cmd → _doc",
+            "processType": "cross_community",
+            "step": 5
+          }
+        ]
+      },
+      {
+        "depth": 3,
+        "id": "Function:src/duke_rates/historical/ncuc/document_promotion.py:redline_promotion_block",
+        "name": "redline_promotion_block",
+        "filePath": "src/duke_rates/historical/ncuc/document_promotion.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": []
+      },
+      {
+        "depth": 3,
+        "id": "Function:src/duke_rates/historical/ncuc/ingestion_validation.py:_page_checks",
+        "name": "_page_checks",
+        "filePath": "src/duke_rates/historical/ncuc/ingestion_validation.py",
+        "relationType": "CALLS",
+        "confidence": 0.85,
+        "processes": [
+          {
+            "id": "proc_81_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _check",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_535_audit_version_source",
+            "label": "Audit_version_sources_cmd → _rgb",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_22_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _rgb",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_21_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _is_colored",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_42_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _doc",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_428_audit_version_source",
+            "label": "Audit_version_sources_cmd → Close",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_427_audit_version_source",
+            "label": "Audit_version_sources_cmd → _table",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_426_audit_version_source",
+            "label": "Audit_version_sources_cmd → _check",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_83_build_review_queue_c",
+            "label": "Build_review_queue_cmd → Close",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_82_build_review_queue_c",
+            "label": "Build_review_queue_cmd → _table",
+            "processType": "cross_community",
+            "step": 5
+          },
+          {
+            "id": "proc_534_audit_version_source",
+            "label": "Audit_version_sources_cmd → _is_colored",
+            "processType": "cross_community",
+            "step": 4
+          },
+          {
+            "id": "proc_547_audit_version_source",
+            "label": "Audit_version_sources_cmd → _doc",
+            "processType": "cross_community",
+            "step": 4
+          }
+        ]
+      }
+    ]
+  }
+}

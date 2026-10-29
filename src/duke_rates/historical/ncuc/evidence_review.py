@@ -114,29 +114,60 @@ def _items_from_source_audit(conn, audit: Iterable[dict], grades: dict[int, str]
         d = a["checks"]["bound_pages_not_redline"]["detail"]
         grade = grades.get(a["tariff_version_id"], "unknown")
         billed = v.get("status") == "approved"
-        out.append({
-            "item_uid": _uid("billed_charges_on_redline_source", a["tariff_version_id"], v.get("historical_document_id")),
-            "problem_type": "billed_charges_on_redline_source",
-            "priority": 1 if billed and not grade.startswith(("weak", "fingerprint")) else 2,
-            "family_key": a["family_key"], "tariff_version_id": a["tariff_version_id"],
-            "historical_document_id": v.get("historical_document_id"),
-            "source_documents": [{"path": v.get("local_path"), "sha256": v.get("content_hash"),
-                                  "pages": d["page_evidence"]["redline_pages"],
-                                  "bound_pages": [v.get("start_page"), v.get("end_page")]}],
-            "printed_evidence": {"page_evidence": d["page_evidence"], "redline_fingerprint": d["redline_fingerprint"],
-                                 "signal_grade": grade},
-            "db_values": {"charges": a["charges"], "status": v.get("status"),
-                          "effective_start": v.get("effective_start")},
-            "explanation": "the charges billing reads were extracted from pages with redline markup; struck "
-                           "values may be active (D1: hd 2275's redline produced 11 struck RAL-2 rows)",
-            "cause": "redline_source",
-            "proposed_correction": {"action": "find the clean sheet for this revision (bind or rebind it), or record "
-                                              "mark_redline_duplicate; then re-extract and promote through the "
-                                              "validated path"},
-            "evidence_level": "rule", "confidence": grade,
-            "downstream": {"charges_on_version": a["charges"], "billable": billed,
-                           "unattended_repromotion": "refused by ingestion validation until resolved"},
-        })
+        out.append(
+            {
+                "item_uid": _uid(
+                    "billed_charges_on_redline_source",
+                    a["tariff_version_id"],
+                    v.get("historical_document_id"),
+                ),
+                "problem_type": "billed_charges_on_redline_source",
+                "priority": 1 if billed and not grade.startswith(("weak", "fingerprint")) else 2,
+                "family_key": a["family_key"],
+                "tariff_version_id": a["tariff_version_id"],
+                "historical_document_id": v.get("historical_document_id"),
+                "source_documents": [
+                    {
+                        "path": v.get("local_path"),
+                        "sha256": a["checks"]
+                        .get("source_hash_matches", {})
+                        .get("detail", {})
+                        .get("file_sha256"),
+                        "archive_identifier": v.get("content_hash"),
+                        "pages": d["page_evidence"]["redline_pages"],
+                        "bound_pages": [v.get("start_page"), v.get("end_page")],
+                    }
+                ],
+                "printed_evidence": {
+                    "page_evidence": d["page_evidence"],
+                    "redline_fingerprint": d["redline_fingerprint"],
+                    "signal_grade": grade,
+                },
+                "db_values": {
+                    "charges": a["charges"],
+                    "status": v.get("status"),
+                    "effective_start": v.get("effective_start"),
+                },
+            "explanation": "a version carrying charges is bound to a source span "
+            "with redline evidence. "
+                "This is a source-exposure risk, not proof that a stored value is wrong or that "
+                "a particular bill used it. Review the charge evidence and clean counterpart.",
+                "cause": "redline_source",
+                "proposed_correction": {
+                    "action": "find the clean sheet for this revision (bind or rebind it), or record "
+                    "mark_redline_duplicate; then re-extract and promote through the "
+                    "validated path"
+                },
+                "evidence_level": "rule",
+                "confidence": grade,
+                "downstream": {
+                    "charges_on_version": a["charges"],
+                    "billable": billed,
+                    "billing_usage_verified": False,
+                    "unattended_repromotion": "refused by ingestion validation until resolved",
+                },
+            }
+        )
     return out
 
 
