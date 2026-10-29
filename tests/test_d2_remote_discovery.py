@@ -158,13 +158,15 @@ def test_order_candidate_lifecycle_requires_retrieval_and_named_review(unresolve
     order_gap = conn.execute("SELECT * FROM lineage_gaps_typed WHERE gap_type = 'missing_regulatory_order'").fetchone()
     assert order_gap["status"] == "searched_not_found" and order_gap["evidence_basis"] == "explicit"
     plan = rd.plan_network_searches(conn)
+    # D3: orders come from the docket's inventory (DocumentParamSearch by docket was empty live).
     orders = [q for q in plan["queries"] if q["channel"] == "portal_orders"]
-    assert orders and orders[0]["params"]["filing_types"] == ["ORDER"]
-    assert orders[0]["params"]["docket_number"] == "E-2 Sub 1350"
+    assert orders and all(q["params"].get("method") == rd.INVENTORY_METHOD for q in orders)
+    assert orders[0]["params"] == {"method": "docket_inventory", "docket_number": "E-2 Sub 1350"}
     # No printed order date: docket-only, never a window guessed from the effective date.
-    assert orders[0]["params"]["date_after"] == "" and orders[0]["targets"][0]["window_basis"] == "docket_only"
-    rows = [_row("ord-1", "Order Approving Compliance Tariffs", docket="E-2 Sub 1350")]
-    rd.execute_plan(conn, plan, created_by="t", portal_search=lambda p: _outcome(rows),
+    assert orders[0]["targets"][0]["order_window"] is None and orders[0]["targets"][0]["window_basis"] == "docket_only"
+    rows = [_row("ord-1", "Order Approving Compliance Tariffs", docket="E-2 Sub 1350"),
+            _row("fil-1", "Compliance Tariffs Pursuant to Order", docket="E-2 Sub 1350", doc_type="TARIFF")]
+    rd.execute_plan(conn, plan, created_by="t", docket_inventory=lambda p: _outcome(rows),
                     channels=("portal_orders",), max_queries=50)
     cands = conn.execute("SELECT * FROM remote_document_candidates WHERE kind = 'order'").fetchall()
     assert cands and all(c["status"] == "listed" for c in cands)  # a docket match is only a listing

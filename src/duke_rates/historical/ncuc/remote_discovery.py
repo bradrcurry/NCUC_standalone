@@ -5,9 +5,8 @@ resumable through the search ledger, and auditable.
 
 1. **Plan** (:func:`plan_network_searches`, read-only). Targets come from:
 
-   * ``missing_regulatory_order`` gaps (channel ``portal_orders``): docket,
-     plus a filed-date window around the anchor version's printed order date,
-     or else its effective date;
+   * ``missing_regulatory_order`` gaps (channel ``portal_orders``, method ``docket_inventory``): the
+     docket's document inventory; a printed order date's window only ranks rows;
    * blank order-date clues (``Order dated ____``) on bound sheets: the
      sheet's docket, around its effective date (``inferred``);
    * page-searchable gaps whose **local** search completed against the current
@@ -49,7 +48,14 @@ from typing import Any, Callable
 
 from duke_rates.historical.ncuc.search_ledger import SearchLedger, canonical_params
 
-PLANNER_VERSION = "remote_discovery@1.0.0"
+PLANNER_VERSION = "remote_discovery@1.1.0"
+#: D3: docket-scoped orders come from the docket's own document inventory (resolve the DocketId,
+#: list DocketDetails, keep order rows): channel ``portal_orders``, ``params["method"] ==
+#: "docket_inventory"``. The D2 form of that channel (DocumentParamSearch with an ORDER filter and
+#: a docket) returned "NO RESULTS FOUND" for 9/9 live dockets; it is no longer planned, and its
+#: empty results are not negative evidence (``docket_scoped_empty``).
+ORDER_CHANNEL = "portal_orders"
+INVENTORY_METHOD = "docket_inventory"
 COMPANY = {"DEP": "Duke Energy Progress", "DEC": "Duke Energy Carolinas"}
 NETWORK_GAP_TYPES = (
     "missing_official_clean_tariff",
@@ -189,11 +195,9 @@ def plan_network_searches(conn: sqlite3.Connection, *, include_blank_order_clues
                 skipped["order_gap_without_docket"] += 1
                 continue
             window = _order_window(conn, gap["anchor_version_id"])
-            params = {"docket_number": docket, "company_name": company_for(docket, gap["utility"]),
-                      "filing_types": ["ORDER"], "date_after": window[0] if window else "",
-                      "date_before": window[1] if window else ""}
-            _add(queries, "portal_orders", params, rank,
-                 target | {"docket": docket, "window_basis": window[2] if window else "docket_only"})
+            _add(queries, ORDER_CHANNEL, {"method": INVENTORY_METHOD, "docket_number": docket}, rank,
+                 target | {"docket": docket, "order_window": list(window[:2]) if window else None,
+                           "window_basis": window[2] if window else "docket_only"})
             continue
         if gap["gap_type"] not in NETWORK_GAP_TYPES:
             skipped["gap_type_not_network_searchable"] += 1
@@ -227,13 +231,10 @@ def plan_network_searches(conn: sqlite3.Connection, *, include_blank_order_clues
             """
         ):
             window = _order_window(conn, vid)
-            util = "DEP" if "progress" in (family or "") else "DEC" if "carolinas" in (family or "") else None
-            params = {"docket_number": docket, "company_name": company_for(docket, util),
-                      "filing_types": ["ORDER"], "date_after": window[0] if window else "",
-                      "date_before": window[1] if window else ""}
-            _add(queries, "portal_orders", params, (2, 0, vid),
+            _add(queries, ORDER_CHANNEL, {"method": INVENTORY_METHOD, "docket_number": docket}, (2, 0, vid),
                  {"tariff_version_id": vid, "family_key": family, "basis": "blank_order_date_clue",
-                  "docket": docket, "window_basis": window[2] if window else "docket_only"})
+                  "docket": docket, "order_window": list(window[:2]) if window else None,
+                  "window_basis": window[2] if window else "docket_only"})
 
     ledger = SearchLedger(conn, created_by="planner")
     completed = {ch: ledger.completed_hashes(ch) for ch in ("portal_orders", "portal_params", "zoom")}
@@ -271,11 +272,13 @@ def score_listing(row: Any, target: dict, params: dict) -> dict:
         "date_in_window": None,
     }
     filed = getattr(row, "date_filed", "")
-    if filed and (params.get("date_after") or params.get("date_before")):
+    # Docket inventories are not filtered by date; the printed order date's window only ranks rows.
+    after, before = target.get("order_window") or (params.get("date_after"), params.get("date_before"))
+    if filed and (after or before):
         try:
             d = datetime.strptime(filed, "%m/%d/%Y").date()
-            lo = datetime.strptime(params["date_after"], "%m/%d/%Y").date() if params.get("date_after") else None
-            hi = datetime.strptime(params["date_before"], "%m/%d/%Y").date() if params.get("date_before") else None
+            lo = datetime.strptime(after, "%m/%d/%Y").date() if after else None
+            hi = datetime.strptime(before, "%m/%d/%Y").date() if before else None
             s["date_in_window"] = (lo is None or d >= lo) and (hi is None or d <= hi)
         except ValueError:
             pass
@@ -330,12 +333,17 @@ def execute_plan(
     plan: dict,
     *,
     created_by: str,
-    portal_search: Callable[[dict], Any] | None,
+    portal_search: Callable[[dict], Any] | None = None,
     public_search: Callable[[dict], list] | None = None,
+    docket_inventory: Callable[[dict], Any] | None = None,
     max_queries: int = 10,
     channels: tuple[str, ...] = ("portal_orders", "portal_params", "zoom"),
 ) -> dict:
-    """Run up to ``max_queries`` planned queries. ``portal_search(params)`` returns a ``DocParamSearchOutcome``."""
+    """Run up to ``max_queries`` planned queries.
+
+    ``portal_search(params)`` and ``docket_inventory(params)`` return a ``DocParamSearchOutcome``.
+    An inventory lists every document in the docket; only its order rows become candidates.
+    """
     ledger = SearchLedger(conn, created_by=created_by)
     stats: dict[str, int] = defaultdict(int)
     for query in plan["queries"]:
@@ -357,6 +365,15 @@ def execute_plan(
                 rows = public_search(query["params"])
                 attempt.finish(rows, refs=[getattr(r, "url", None) for r in rows])
                 outcome_kind = attempt.outcome
+            elif query["params"].get("method") == INVENTORY_METHOD:
+                if docket_inventory is None:
+                    raise RuntimeError("docket inventory not configured")
+                outcome = docket_inventory(query["params"])
+                attempt.finish_outcome(outcome)
+                outcome_kind = outcome.ledger_outcome
+                stats["inventory_rows"] += len(outcome.results)
+                rows = [r for r in outcome.results if is_order_row(r)]
+                stats["order_rows"] += len(rows)
             else:
                 if portal_search is None:
                     raise RuntimeError("portal search not configured")
@@ -378,6 +395,110 @@ def execute_plan(
             stats["stopped_on_block"] = 1  # back off: never loop against a challenge
             break
     return dict(stats)
+
+
+# ---------------------------------------------------------------------------
+# Docket inventory (D3)
+# ---------------------------------------------------------------------------
+
+_ORDER_DESCRIPTION = re.compile(r"^\s*(?:(?:final|errata|amended|corrected|recommended)\s+)?order\b", re.I)
+_DOC_ID = re.compile(r"(?:DocumentId|Id)=([a-f0-9-]{36})", re.I)
+
+
+def is_order_row(row: Any) -> bool:
+    """An inventory row the Commission issued as an order (its type, or a description starting "Order ...").
+
+    "Compliance Tariffs Pursuant to ... Order" is a filing *about* an order, not one.
+    """
+    if "ORDER" in (getattr(row, "doc_type", "") or "").upper():
+        return True
+    return bool(_ORDER_DESCRIPTION.match(getattr(row, "description", "") or ""))
+
+
+def parse_docket_inventory(html: str) -> list[dict]:
+    """Rows of a DocketDetails ``documentsGridView`` page (type, description, date, links).
+
+    ``session.get_docket_documents`` scans cells generically and returned an empty description for
+    every row of the live E-7 Sub 1026 page; this reads the grid's own labelled cells.
+    """
+    from bs4 import BeautifulSoup
+
+    soup = BeautifulSoup(html or "", "lxml")
+    grid = soup.find(id=re.compile(r"documentsGridView$"))
+    out = []
+    for tr in grid.find_all("tr", class_=re.compile(r"^searchResults(?:Alternating)?Item$")) if grid else []:
+        detail = tr.find("a", id=re.compile(r"documentDetailsLink$"))
+        kind = tr.find("td", class_="text-middle")
+        desc = tr.find("span", id=re.compile(r"docDescLabel$"))
+        filed = tr.find("td", class_="DocSrchDateCol")
+        out.append({
+            "doc_type": kind.get_text(strip=True) if kind else "",
+            "description": desc.get_text(" ", strip=True) if desc else "",
+            "date_filed": filed.get_text(strip=True) if filed else "",
+            "document_url": detail["href"] if detail else None,
+            "view_file_urls": [a["href"] for a in tr.find_all("a", href=re.compile(r"ViewFile", re.I))],
+        })
+    return out
+
+
+def docket_inventory_outcome(html: str, documents: list[dict], *, docket_label: str):
+    """Classify a DocketDetails documents page and its parsed rows.
+
+    Rows come from the grid itself when it is recognised, else from ``documents`` (the session
+    helper's parse). ``inventory_complete`` only when the grid shows no further pages.
+    A real docket always holds at least one document, so zero rows is ``unrecognized_page``.
+    """
+    from types import SimpleNamespace
+
+    from duke_rates.historical.ncuc.document_param_search import DocParamSearchOutcome, items_reported
+
+    documents = parse_docket_inventory(html) or documents
+    rows = []
+    for d in documents:
+        m = _DOC_ID.search(d.get("document_url") or "")
+        rows.append(SimpleNamespace(doc_type=d.get("doc_type") or "", description=d.get("description") or "",
+                                    date_filed=d.get("date_filed") or "", docket_number=docket_label,
+                                    document_detail_url=d.get("document_url"), document_id=m.group(1) if m else "",
+                                    view_file_urls=list(d.get("view_file_urls") or [])))
+    out = DocParamSearchOutcome(results=rows, stop_reason="inventory_complete", pages_reached=1, pages_total=1,
+                                items_reported=items_reported(html))
+    # The DocketDetails grid pages with __doPostBack('...documentsGridView','Page$N'); the session
+    # helper reads only the page it lands on (E-7 Sub 1026: 101 rows on page 1 of 6, D3 pilot).
+    pages = [int(n) for n in re.findall(r"documentsGridView[^)]*?Page\$(\d+)", html or "", re.I)]
+    if not rows:
+        out.stop_reason, out.error = "unrecognized_page", "no document rows on the docket inventory page"
+    elif out.items_reported is not None and out.items_reported > len(rows):
+        out.stop_reason = "item_count_mismatch"
+    elif pages and max(pages) > 1:
+        out.stop_reason, out.pages_total = "inventory_first_page_only", max(pages)
+    return out
+
+
+def docket_inventory_search(page: Any, params: dict, *, resolve: Callable, list_documents: Callable,
+                            capture: Callable[[str], None] | None = None):
+    """Resolve ``params['docket_number']`` to its DocketId and list its documents (read-only)."""
+    from duke_rates.historical.ncuc.document_param_search import DocParamSearchOutcome, is_blocked_page
+
+    docket = params["docket_number"]
+    matches = resolve(page, docket)
+    exact = {m["docket_id"]: m for m in matches if m.get("match_type") in ("exact", "normalized_exact")}
+    html = page.content()
+    if is_blocked_page(page.title(), html):
+        return DocParamSearchOutcome(results=[], stop_reason="blocked_initial", error="challenge on docket search")
+    if len(exact) != 1:
+        if capture:
+            capture(html)
+        reason = "docket_not_resolved" if not exact else "docket_ambiguous"
+        return DocParamSearchOutcome(results=[], stop_reason=reason, error=json.dumps(
+            [{k: m.get(k) for k in ("docket_number", "docket_id", "match_type")} for m in matches[:5]]))
+    match = next(iter(exact.values()))
+    documents = list_documents(page, match["docket_id"])
+    html = page.content()
+    if capture:
+        capture(html)
+    if is_blocked_page(page.title(), html):
+        return DocParamSearchOutcome(results=[], stop_reason="blocked_pagination", error="challenge on DocketDetails")
+    return docket_inventory_outcome(html, documents, docket_label=match["docket_number"])
 
 
 # ---------------------------------------------------------------------------

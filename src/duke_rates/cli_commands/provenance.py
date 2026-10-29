@@ -675,6 +675,10 @@ def run_network_searches_cmd(
     channel: list[str] = typer.Option(["portal_orders", "portal_params", "zoom"], "--channel"),
     explicit_only: bool = typer.Option(False, "--explicit-only"),
     live: bool = typer.Option(False, "--live", help="Required: this logs in to the NCUC portal and sends requests."),
+    query_hash: list[str] = typer.Option(
+        [], "--query-hash", help="Run only planned queries whose params_hash starts with this (repeatable)."),
+    capture_dir: Path | None = typer.Option(
+        None, "--capture-dir", help="Save the portal page each search ended on (<params_hash>.html), as fixtures."),
     json_out: Path | None = typer.Option(None, "--json"),
 ) -> None:
     """Run planned searches against the NCUC portal / public search (bounded, ledgered, stops when blocked)."""
@@ -682,6 +686,8 @@ def run_network_searches_cmd(
 
     conn = _ledger_conn(db, allow_production)
     plan = rd.plan_network_searches(conn, include_inferred=not explicit_only)
+    if query_hash:
+        plan["queries"] = [q for q in plan["queries"] if any(q["params_hash"].startswith(h) for h in query_hash)]
     pending = [q for q in plan["queries"] if q["status"] == "planned" and q["channel"] in channel][:max_queries]
     if not live:
         _echo({"dry_run": True, "would_run": len(pending), "queries": [
@@ -690,7 +696,12 @@ def run_network_searches_cmd(
 
     from duke_rates.historical.ncuc.discovery import NcucDiscoveryService
     from duke_rates.historical.ncuc.document_param_search import DocumentParamSearcher
-    from duke_rates.historical.ncuc.session import close_authenticated_context, create_authenticated_context
+    from duke_rates.historical.ncuc.session import (
+        close_authenticated_context,
+        create_authenticated_context,
+        get_docket_documents,
+        resolve_docket_ids,
+    )
     from duke_rates.models.ncuc import NcucSearchQuery
 
     settings = get_settings()
@@ -699,10 +710,35 @@ def run_network_searches_cmd(
         pw, ctx, page = create_authenticated_context(settings)
     searcher = DocumentParamSearcher(settings)
     discovery = NcucDiscoveryService(settings)
+
+    hash_of = {json.dumps(q["params"], sort_keys=True): q["params_hash"] for q in pending}
+
+    def _capture(params: dict, html: str, outcome=None) -> None:
+        if capture_dir is None:
+            return
+        capture_dir.mkdir(parents=True, exist_ok=True)
+        name = hash_of.get(json.dumps(params, sort_keys=True), "unplanned")
+        (capture_dir / f"{name}.html").write_text(html, encoding="utf-8")
+        if outcome is not None:
+            (capture_dir / f"{name}.outcome.json").write_text(
+                json.dumps(outcome.summary() | {"params": params}, indent=2, default=str), encoding="utf-8")
+
+    def portal_search(params: dict):
+        outcome = searcher.search_with_outcome(page, **params, max_results=500)
+        _capture(params, page.content(), outcome)
+        return outcome
+
+    def docket_inventory(params: dict):
+        outcome = rd.docket_inventory_search(page, params, resolve=resolve_docket_ids,
+                                             list_documents=get_docket_documents,
+                                             capture=lambda html: _capture(params, html))
+        _capture(params, page.content(), outcome)
+        return outcome
+
     try:
         stats = rd.execute_plan(
             conn, plan, created_by=by, max_queries=max_queries, channels=tuple(channel),
-            portal_search=lambda p: searcher.search_with_outcome(page, **p, max_results=500),
+            portal_search=portal_search, docket_inventory=docket_inventory,
             public_search=lambda p: list(discovery.search_public_site(
                 NcucSearchQuery(query_text=p["query_text"], docket_hint=p.get("docket_hint")), max_results=50)),
         )

@@ -52,7 +52,7 @@ from duke_rates.parse.redline_detector import PageRedlineReader, summarize_page_
 
 # 1.1.0: redline fingerprints block a full match
 # 1.2.0: page-level redline evidence; struck identity text; reconciled date window
-RESOLVER_VERSION = "local_gap_resolution@1.2.0"
+RESOLVER_VERSION = "local_gap_resolution@1.3.0"
 #: Gap types whose target can be recognised on a page.
 PAGE_SEARCHABLE = (
     "missing_predecessor_revision",
@@ -214,10 +214,13 @@ def resolve_gaps_locally(
     bound = _bound_documents_by_pdf(conn)
     locator = BboxLocator()
     redline_reader = PageRedlineReader()
+    captions: dict | None = None
     try:
         for gap in gaps:
             if gap["gap_type"] == "missing_regulatory_order":
-                _resolve_order_gap(conn, ledger, gap, index.state, force, stats)
+                if captions is None:
+                    captions = order_caption_index(conn)
+                _resolve_order_gap(conn, ledger, gap, index.state, force, stats, captions)
                 continue
             if gap["gap_type"] not in PAGE_SEARCHABLE:
                 stats["gaps_not_locally_searchable"] += 1
@@ -369,25 +372,57 @@ def _row_token(r: sqlite3.Row):
     return None
 
 
-def _resolve_order_gap(conn, ledger, gap, state, force, stats) -> None:
+_CAPTION_DOCKET = re.compile(r"DOCKET\s+NO\.?\s*([A-Z]+-\d+)\s*,?\s*SUB\s+(\d+)", re.I)
+
+
+def order_caption_index(conn: sqlite3.Connection, *, pages: int = 2) -> dict[str, list[int]]:
+    """Docket -> local order discovery-record ids whose own caption prints that docket.
+
+    A Commission order is often captioned in several dockets but filed (and recorded) under one:
+    the 2024 DEC EDPR order prints E-7 Subs 487, 828, 1026, 1146, 1214 and 1276 and is in the
+    archive only as an E-7 Sub 1214 record (D3 pilot). Reads the first ``pages`` pages of each
+    distinct file once (text layer; no conversion).
+    """
+    import fitz
+
+    by_file: dict[str, list[int]] = defaultdict(list)
+    for rid, path in conn.execute("SELECT id, local_path FROM ncuc_discovery_records "
+                                  "WHERE filing_classification = 'order' AND local_path IS NOT NULL"):
+        by_file[path].append(rid)
+    out: dict[str, list[int]] = defaultdict(list)
+    for path, ids in by_file.items():
+        try:
+            with fitz.open(path) as doc:
+                text = " ".join(doc[i].get_text("text") for i in range(min(pages, len(doc))))
+        except Exception:  # missing or unreadable file: no caption evidence
+            continue
+        for d in sorted({f"{a.upper()} Sub {b}" for a, b in _CAPTION_DOCKET.findall(text)}):
+            out[d].extend(ids)
+    return dict(out)
+
+
+def _resolve_order_gap(conn, ledger, gap, state, force, stats, captions: dict | None = None) -> None:
     docket = json.loads(gap["expected_json"] or "{}").get("docket")
     m = re.match(r"([A-Z]+-\d+) Sub (\d+)$", docket or "")
     if not m:
         stats["gaps_without_searchable_target"] += 1
         return
     params = {"gap_uid": gap["gap_uid"], "docket": docket, "archive_state": state,
-              "source": "ncuc_discovery_records", "resolver": RESOLVER_VERSION}
+              "source": "ncuc_discovery_records+order_captions", "resolver": RESOLVER_VERSION}
     if not force and ledger.prior_completed("local", params):
         stats["repeated_searches_avoided"] += 1
         return
     with ledger.attempt("local", params, caller=RESOLVER_VERSION, gap_id=gap["id"]) as attempt:
+        caption_ids = (captions or {}).get(docket, [])
         rows = conn.execute(
-            """
+            f"""
             SELECT id, local_path, filing_title, filing_date, fetch_status FROM ncuc_discovery_records
-            WHERE REPLACE(UPPER(COALESCE(docket_number, '')), ',', '') = ?
-              AND filing_classification = 'order'
+            WHERE filing_classification = 'order'
+              AND (REPLACE(UPPER(COALESCE(docket_number, '')), ',', '') = ?
+                   OR id IN ({','.join('?' * len(caption_ids)) or 'NULL'}))
+            ORDER BY id
             """,
-            (f"{m.group(1)} SUB {m.group(2)}",),
+            (f"{m.group(1)} SUB {m.group(2)}", *caption_ids),
         ).fetchall()
         refs = []
         for r in rows:
@@ -406,10 +441,14 @@ def _resolve_order_gap(conn, ledger, gap, state, force, stats) -> None:
                 """,
                 (uid, gap["id"], attempt.id, r[1], identity.sha256, identity.page_count or 1, gap["family_key"],
                  json.dumps({"discovery_record_id": r[0], "filing_title": r[2], "filing_date": r[3],
-                             "fetch_status": r[4]}),
-                 f"discovery record {r[0]} is classified 'order' in {docket}; order content not yet read", _now()),
+                             "fetch_status": r[4], "caption_prints_docket": r[0] in caption_ids}),
+                 f"discovery record {r[0]} is classified 'order'"
+                 + (f" and its caption prints {docket}" if r[0] in caption_ids else f" in {docket}")
+                 + "; which order this version cites is not established", _now()),
             )
-            refs.append(conn.execute("SELECT id FROM gap_candidates WHERE candidate_uid = ?", (uid,)).fetchone()[0])
+            cid = conn.execute("SELECT id FROM gap_candidates WHERE candidate_uid = ?", (uid,)).fetchone()[0]
+            if cid not in refs:  # several discovery records can share one file (one candidate per file)
+                refs.append(cid)
         attempt.finish(refs=refs)
     stats["local_searches_run"] += 1
     stats["candidates_partial"] += len(refs)

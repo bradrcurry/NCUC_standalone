@@ -168,14 +168,20 @@ class DocParamSearchResult:
 # ---------------------------------------------------------------------------
 
 #: The search walked every result page the portal offered, or the portal said 0 items.
-COMPLETE_STOP_REASONS = ("last_page", "single_page", "empty_result")
+COMPLETE_STOP_REASONS = ("last_page", "single_page", "empty_result", "inventory_complete")
 #: Results were returned but more may exist. Never negative evidence.
 INCOMPLETE_STOP_REASONS = (
     "max_results_cap", "page_cap", "pagination_error", "stale_grid", "item_count_mismatch",
+    # D3 live pilot: "NO RESULTS FOUND" for a docket-filtered query is not evidence the docket
+    # has no such filing: 9/9 docket-scoped ORDER queries came back empty, including the E-7 Sub 1026
+    # rate case (docs/NCUC_PORTAL_WORKING_METHOD.md records the same for TARIFF queries).
+    "docket_scoped_empty",
+    "inventory_first_page_only",
 )
 BLOCKED_STOP_REASONS = ("blocked_initial", "blocked_pagination")
 #: The query did not run as requested (or its result page was not recognised).
-ERROR_STOP_REASONS = ("form_unavailable", "filter_not_applied", "submit_error", "unrecognized_page")
+ERROR_STOP_REASONS = ("form_unavailable", "filter_not_applied", "submit_error", "unrecognized_page",
+                      "docket_not_resolved", "docket_ambiguous")
 
 
 class PortalSearchError(RuntimeError):
@@ -478,7 +484,8 @@ class DocumentParamSearcher:
             return outcome
         outcome.items_reported = items_reported(html)
         if explicit_empty_result(html):
-            outcome.stop_reason, outcome.pages_reached = "empty_result", 1
+            outcome.stop_reason = "docket_scoped_empty" if docket_number.strip() else "empty_result"
+            outcome.pages_reached = 1
             return outcome
         if not results_grid_present(html):
             outcome.stop_reason = "unrecognized_page"
