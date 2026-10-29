@@ -1,0 +1,211 @@
+[
+  {
+    "operation": {
+      "tool": "context",
+      "params": {
+        "name": "_build_context_blocks",
+        "file_path": "src/duke_rates/document_intelligence/rag_generator.py",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "status": "found",
+      "symbol": {
+        "uid": "Function:src/duke_rates/document_intelligence/rag_generator.py:_build_context_blocks",
+        "name": "_build_context_blocks",
+        "kind": "Function",
+        "filePath": "src/duke_rates/document_intelligence/rag_generator.py",
+        "startLine": 105,
+        "endLine": 129
+      },
+      "epistemic": "exact",
+      "incoming": {
+        "calls": [
+          {
+            "uid": "Function:src/duke_rates/document_intelligence/rag_generator.py:build_prompt",
+            "name": "build_prompt",
+            "filePath": "src/duke_rates/document_intelligence/rag_generator.py"
+          }
+        ]
+      },
+      "outgoing": {
+        "calls": [
+          {
+            "uid": "Method:src/duke_rates/document_intelligence/rag_retriever.py:RetrievalHit.citation#0",
+            "name": "citation",
+            "filePath": "src/duke_rates/document_intelligence/rag_retriever.py"
+          }
+        ]
+      },
+      "processes": [
+        {
+          "id": "proc_112_rag_answer",
+          "name": "Rag_answer → Citation",
+          "step_index": 4,
+          "step_count": 5
+        }
+      ]
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "_build_context_blocks",
+        "file_path": "src/duke_rates/document_intelligence/rag_generator.py",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Function:src/duke_rates/document_intelligence/rag_generator.py:_build_context_blocks",
+        "name": "_build_context_blocks",
+        "type": "Function",
+        "filePath": "src/duke_rates/document_intelligence/rag_generator.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 4,
+      "risk": "LOW",
+      "riskSharedAxes": "LOW",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "epistemic": "exact",
+      "summary": {
+        "direct": 1,
+        "processes_affected": 1,
+        "modules_affected": 2
+      },
+      "byDepthCounts": {
+        "1": 1,
+        "2": 1,
+        "3": 2
+      },
+      "affected_processes": [
+        {
+          "name": "rag_answer",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/doc_intel.py",
+          "affected_process_count": 4,
+          "total_hits": 9,
+          "earliest_broken_step": 1
+        }
+      ],
+      "affected_modules": [
+        {
+          "name": "Document_intelligence",
+          "hits": 3,
+          "impact": "direct"
+        },
+        {
+          "name": "Tests",
+          "hits": 1,
+          "impact": "indirect"
+        }
+      ],
+      "byDepth": {
+        "1": [
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/document_intelligence/rag_generator.py:build_prompt",
+            "name": "build_prompt",
+            "filePath": "src/duke_rates/document_intelligence/rag_generator.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_112_rag_answer",
+                "label": "Rag_answer → Citation",
+                "processType": "cross_community",
+                "step": 3
+              }
+            ]
+          }
+        ],
+        "2": [
+          {
+            "depth": 2,
+            "id": "Method:src/duke_rates/document_intelligence/rag_generator.py:RagGenerator.answer#6",
+            "name": "answer",
+            "filePath": "src/duke_rates/document_intelligence/rag_generator.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_169_rag_answer",
+                "label": "Rag_answer → Fetch_section_text",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_113_rag_answer",
+                "label": "Rag_answer → _parse_json_list",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_293_rag_answer",
+                "label": "Rag_answer → _parse_citations",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_112_rag_answer",
+                "label": "Rag_answer → Citation",
+                "processType": "cross_community",
+                "step": 2
+              }
+            ]
+          }
+        ],
+        "3": [
+          {
+            "depth": 3,
+            "id": "Function:src/duke_rates/cli_commands/doc_intel.py:rag_answer",
+            "name": "rag_answer",
+            "filePath": "src/duke_rates/cli_commands/doc_intel.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_113_rag_answer",
+                "label": "Rag_answer → _parse_json_list",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_293_rag_answer",
+                "label": "Rag_answer → _parse_citations",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_112_rag_answer",
+                "label": "Rag_answer → Citation",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_169_rag_answer",
+                "label": "Rag_answer → Fetch_section_text",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          },
+          {
+            "depth": 3,
+            "id": "Function:src/duke_rates/document_intelligence/rag_eval.py:run_full_eval",
+            "name": "run_full_eval",
+            "filePath": "src/duke_rates/document_intelligence/rag_eval.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": []
+          }
+        ]
+      }
+    }
+  }
+]

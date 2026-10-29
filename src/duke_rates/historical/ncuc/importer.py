@@ -649,6 +649,9 @@ class NcucPipelineImporter:
 
         created_ids = []
         for span in spans:
+            if span.doc_type != "tariff":
+                # Related exhibits/orders remain research sections.
+                continue
             self._apply_record_matching_hints(span, record)
             legacy_hint = self._apply_legacy_attachment_matching_hints(span, record)
             # Stage D: Match family
@@ -920,6 +923,9 @@ class NcucPipelineImporter:
 
         created_ids = []
         for span in spans:
+            if span.doc_type != "tariff":
+                # Related exhibits/orders remain research sections.
+                continue
             self._apply_record_matching_hints(span, record)
             legacy_hint = self._apply_legacy_attachment_matching_hints(span, record)
             classification = classify_span_against_families(span, supported_families)

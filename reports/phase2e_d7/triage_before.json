@@ -1,0 +1,154 @@
+[
+  {
+    "source": "jaa",
+    "seconds": 0.07853870000690222,
+    "triage": {
+      "file_path": "data\\historical\\ncuc\\e-2-sub-1207\\32b7c724-edef-4a3a-bb45-85058c2ec503.pdf",
+      "file_hash": "3e8067d223d94eabe1a7f34fb02a47156775ac4403f7cf06e85e6892bd430b05",
+      "file_size_bytes": 3480525,
+      "page_count": 110,
+      "text_char_count_first_pages": 1626,
+      "text_char_count_sampled": 5288,
+      "is_likely_scanned": false,
+      "is_likely_tariff_related": false,
+      "likely_document_class": null,
+      "document_archetype_candidate": "large_unknown",
+      "ocr_confidence_score": 0.0,
+      "native_text_quality_score": 1.0,
+      "structure_complexity_score": 0.501875,
+      "reading_order_risk_score": 0.0005208333333333333,
+      "sampled_chars_per_page": 1057.6,
+      "gpu_ocr_candidate": false,
+      "table_mode_candidate": "native_text",
+      "native_text_backend": "pymupdf",
+      "keyword_hits": {
+        "tariff": 2,
+        "procedural": 1,
+        "table_like_lines": 0,
+        "sampled_chars_per_page": 1057
+      },
+      "has_leaf_phrases": false,
+      "triage_flags": [
+        "mixed_tariff_procedural_content",
+        "large_document"
+      ],
+      "route_recommendation": "manual_review",
+      "confidence_score": 0.4755
+    }
+  },
+  {
+    "source": "tariff_book",
+    "seconds": 0.049543999979505315,
+    "triage": {
+      "file_path": "C:\\Python\\Duke\\Standalone\\data\\historical\\ncuc\\e-2-sub-1300-sept2023\\3f92be50-2f10-4d4c-8952-2bccaa339aba.pdf",
+      "file_hash": "7a5cbdce496e1dbafd60af074cc80a786dd9087fcd121c65d7e13981bf3c41a0",
+      "file_size_bytes": 15732561,
+      "page_count": 316,
+      "text_char_count_first_pages": 9443,
+      "text_char_count_sampled": 11972,
+      "is_likely_scanned": false,
+      "is_likely_tariff_related": true,
+      "likely_document_class": "compliance_book",
+      "document_archetype_candidate": "compliance_bundle",
+      "ocr_confidence_score": 0.0,
+      "native_text_quality_score": 1.0,
+      "structure_complexity_score": 0.5042187499999999,
+      "reading_order_risk_score": 0.021875,
+      "sampled_chars_per_page": 2394.4,
+      "gpu_ocr_candidate": false,
+      "table_mode_candidate": "native_text",
+      "native_text_backend": "pymupdf",
+      "keyword_hits": {
+        "tariff": 7,
+        "procedural": 1,
+        "table_like_lines": 0,
+        "sampled_chars_per_page": 2394
+      },
+      "has_leaf_phrases": true,
+      "triage_flags": [
+        "mixed_tariff_procedural_content",
+        "large_document"
+      ],
+      "route_recommendation": "page_segment",
+      "confidence_score": 0.8761
+    }
+  },
+  {
+    "source": "appeal",
+    "seconds": 0.04251030000159517,
+    "triage": {
+      "file_path": "data\\historical\\ncuc\\e-2-sub-1300\\32d25655-7a4c-4141-acc0-d675a507e369.pdf",
+      "file_hash": "60276868e964b0e3b5e6270760cddb8895b22dc7fd19863262c73522e718ecbf",
+      "file_size_bytes": 13673060,
+      "page_count": 598,
+      "text_char_count_first_pages": 2882,
+      "text_char_count_sampled": 9247,
+      "is_likely_scanned": true,
+      "is_likely_tariff_related": false,
+      "likely_document_class": null,
+      "document_archetype_candidate": "scanned_bundle",
+      "ocr_confidence_score": 0.8,
+      "native_text_quality_score": 1.0,
+      "structure_complexity_score": 0.5073170731707317,
+      "reading_order_risk_score": 0.0,
+      "sampled_chars_per_page": 1849.4,
+      "gpu_ocr_candidate": true,
+      "table_mode_candidate": "scanned_text",
+      "native_text_backend": "pymupdf",
+      "keyword_hits": {
+        "tariff": 1,
+        "procedural": 3,
+        "table_like_lines": 1,
+        "sampled_chars_per_page": 1849
+      },
+      "has_leaf_phrases": false,
+      "triage_flags": [
+        "mixed_tariff_procedural_content",
+        "large_document",
+        "ocr_required_high_confidence",
+        "gpu_ocr_candidate"
+      ],
+      "route_recommendation": "ocr_required",
+      "confidence_score": 0.8115
+    }
+  },
+  {
+    "source": "dsm_ee",
+    "seconds": 0.11594970000442117,
+    "triage": {
+      "file_path": "data\\historical\\ncuc\\e-7-sub-1285\\543b80be-7672-4b7c-9897-da915455f6da.pdf",
+      "file_hash": "77a0da9636cd9f283d87b0e8102be79ab221427054a8f8d7452cf9318b43ee28",
+      "file_size_bytes": 54098545,
+      "page_count": 1097,
+      "text_char_count_first_pages": 2552,
+      "text_char_count_sampled": 7248,
+      "is_likely_scanned": true,
+      "is_likely_tariff_related": false,
+      "likely_document_class": null,
+      "document_archetype_candidate": "scanned_bundle",
+      "ocr_confidence_score": 0.8,
+      "native_text_quality_score": 1.0,
+      "structure_complexity_score": 0.5421182266009852,
+      "reading_order_risk_score": 0.001477832512315271,
+      "sampled_chars_per_page": 1449.6,
+      "gpu_ocr_candidate": true,
+      "table_mode_candidate": "scanned_text",
+      "native_text_backend": "pymupdf",
+      "keyword_hits": {
+        "tariff": 2,
+        "procedural": 1,
+        "table_like_lines": 9,
+        "sampled_chars_per_page": 1449
+      },
+      "has_leaf_phrases": false,
+      "triage_flags": [
+        "mixed_tariff_procedural_content",
+        "large_document",
+        "ocr_required_high_confidence",
+        "gpu_ocr_candidate"
+      ],
+      "route_recommendation": "ocr_required",
+      "confidence_score": 0.8184
+    }
+  }
+]

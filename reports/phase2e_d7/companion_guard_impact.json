@@ -1,0 +1,143 @@
+[
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "mine_discovery_record_spans_with_pages",
+        "file_path": "src/duke_rates/historical/ncuc/importer.py",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Method:src/duke_rates/historical/ncuc/importer.py:NcucPipelineImporter.mine_discovery_record_spans_with_pages#4",
+        "name": "mine_discovery_record_spans_with_pages",
+        "type": "Method",
+        "filePath": "src/duke_rates/historical/ncuc/importer.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 1,
+      "risk": "LOW",
+      "riskSharedAxes": "LOW",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "epistemic": "exact",
+      "summary": {
+        "direct": 1,
+        "processes_affected": 1,
+        "modules_affected": 1
+      },
+      "byDepthCounts": {
+        "1": 1
+      },
+      "affected_processes": [
+        {
+          "name": "mine_docling_nc",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/doc_intel.py",
+          "affected_process_count": 6,
+          "total_hits": 6,
+          "earliest_broken_step": 1
+        }
+      ],
+      "affected_modules": [
+        {
+          "name": "Cli_commands",
+          "hits": 1,
+          "impact": "direct"
+        }
+      ],
+      "byDepth": {
+        "1": [
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/cli_commands/doc_intel.py:mine_docling_nc",
+            "name": "mine_docling_nc",
+            "filePath": "src/duke_rates/cli_commands/doc_intel.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_799_mine_docling_nc",
+                "label": "Mine_docling_nc → _seed_document_types",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_404_mine_docling_nc",
+                "label": "Mine_docling_nc → Infer_duke_company_from_context",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_663_mine_docling_nc",
+                "label": "Mine_docling_nc → _get_connection",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_466_mine_docling_nc",
+                "label": "Mine_docling_nc → Provenance_schema_installed",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_465_mine_docling_nc",
+                "label": "Mine_docling_nc → _in_mode",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_540_mine_docling_nc",
+                "label": "Mine_docling_nc → Detect_duke_company",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "test_importer_never_binds_non_tariff_span_even_with_a_strong_family_match",
+        "file_path": "tests/test_d7_segmentation_checkpoint.py",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Function:tests/test_d7_segmentation_checkpoint.py:test_importer_never_binds_non_tariff_span_even_with_a_strong_family_match",
+        "name": "test_importer_never_binds_non_tariff_span_even_with_a_strong_family_match",
+        "type": "Function",
+        "filePath": "tests/test_d7_segmentation_checkpoint.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 0,
+      "risk": "UNKNOWN",
+      "riskSharedAxes": "UNKNOWN",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "riskNote": "No callers resolved. Absence of edges is not evidence the symbol is unused: a caller reaching it through a reference class this index does not record — plain-object property access, a bare-identifier read of a module-scope const — produces no edge to find. Confirm with a text search before treating the change as safe.",
+      "epistemic": "exact",
+      "summary": {
+        "direct": 0,
+        "processes_affected": 0,
+        "modules_affected": 0
+      },
+      "byDepthCounts": {},
+      "affected_processes": [],
+      "affected_modules": [],
+      "byDepth": {}
+    }
+  }
+]

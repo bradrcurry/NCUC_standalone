@@ -1,0 +1,35 @@
+{
+  "read_only_comparison": true,
+  "reference": "committed D6 final benchmark",
+  "matches_d6": true,
+  "tables": {
+    "historical_documents": {
+      "rows": 682,
+      "sha256": "60517538be2936195f7f2b09d8bbd4742dde607ef3ddd7c53c23a097150c386f"
+    },
+    "tariff_versions": {
+      "rows": 988,
+      "sha256": "9bf86b9b6f0e4527ddf58e0247f4da8716b64f25468cbcefd54cd1b7388d19f3"
+    },
+    "tariff_families": {
+      "rows": 756,
+      "sha256": "22e88b24c8f300cd5c435cf868c447cb3f76be20ad118a13a831cb7b4407f065"
+    },
+    "tariff_charges": {
+      "rows": 5198,
+      "sha256": "a37f23f99f8ffffb5a2b8bdbef2d11b54418eaf0193219edf5823d8e3b6c2555"
+    },
+    "rider_summary_sources": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "rider_summary_blocks": {
+      "rows": 365,
+      "sha256": "d67d453b87cf364fbba42541638a362e5eb7695d713e06b6d9fa9edae8bfc001"
+    },
+    "rider_line_items": {
+      "rows": 8003,
+      "sha256": "0f6609476ad7b4b0c40f689e09dddc215f4b536387494c83ac6d905d7a4677a8"
+    }
+  }
+}

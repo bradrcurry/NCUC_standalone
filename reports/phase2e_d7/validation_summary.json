@@ -1,0 +1,15 @@
+{
+  "checkpoint": "D7A segmentation/routing; D7B and D8-D10 unfinished",
+  "base_commit": "2555e98",
+  "full_suite": {"passed": 1998, "skipped": 92, "xfailed": 4, "warnings": 135, "seconds": 606.04},
+  "new_checkpoint_cases": {"passed": 13, "seconds": 1.28},
+  "version_fixture_and_checkpoint_cases": {"passed": 14, "seconds": 1.80},
+  "initial_full_run": "1997 passed, one fixture failed because it hardcoded segmentation_v8 as current; corrected to the version constant, then the complete suite rerun passed",
+  "ruff_new_benchmark_and_tests": "passed",
+  "billing_12_records_and_summary": "exactly equal to D6",
+  "seven_canonical_snapshot_table_fingerprints": "exactly equal to D6",
+  "production_hash_and_mtime": "equal to post-D4-incident state",
+  "original_production_preservation_gate": "FAILED due to recorded D4 incident",
+  "ast_scope": {"production_functions_or_methods_changed": 9, "existing_test_functions_changed": 1, "data_model_fields_added": 1, "numerical_or_billing_files_changed": false},
+  "rag_pr25": {"head": "d317800b76f20ed26c4ffc00253058c7dc1f415f", "merge_preview": "clean", "compatibility_tests_passed": 76, "live_quality_evaluation_reproduced": false, "decision": "hold for documented citation-grounding regression; no independently validated cherry-pick hunk"}
+}

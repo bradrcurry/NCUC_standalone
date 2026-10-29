@@ -1,0 +1,303 @@
+[
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "Method:src/duke_rates/historical/ncuc/importer.py:NcucPipelineImporter.mine_discovery_record_spans#1",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Method:src/duke_rates/historical/ncuc/importer.py:NcucPipelineImporter.mine_discovery_record_spans#1",
+        "name": "mine_discovery_record_spans",
+        "type": "Method",
+        "filePath": "src/duke_rates/historical/ncuc/importer.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 6,
+      "risk": "LOW",
+      "riskSharedAxes": "LOW",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "epistemic": "exact",
+      "summary": {
+        "direct": 3,
+        "processes_affected": 2,
+        "modules_affected": 2
+      },
+      "byDepthCounts": {
+        "1": 3,
+        "2": 2,
+        "3": 1
+      },
+      "affected_processes": [
+        {
+          "name": "mine_ncuc_pipeline",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli.py",
+          "affected_process_count": 7,
+          "total_hits": 20,
+          "earliest_broken_step": 1
+        },
+        {
+          "name": "ncuc_import_pipeline",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/ncuc.py",
+          "affected_process_count": 8,
+          "total_hits": 8,
+          "earliest_broken_step": 1
+        }
+      ],
+      "affected_modules": [
+        {
+          "name": "Ncuc",
+          "hits": 4,
+          "impact": "direct"
+        },
+        {
+          "name": "Tests",
+          "hits": 1,
+          "impact": "direct"
+        }
+      ],
+      "byDepth": {
+        "1": [
+          {
+            "depth": 1,
+            "id": "Function:scripts/maintenance/repair_ncuc_company_mismatches.py:main",
+            "name": "main",
+            "filePath": "scripts/maintenance/repair_ncuc_company_mismatches.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": []
+          },
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/cli.py:mine_ncuc_pipeline",
+            "name": "mine_ncuc_pipeline",
+            "filePath": "src/duke_rates/cli.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_17_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _normalize_historical_leaf",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_3_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _connect",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_98_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _decode_provenance_notes",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_30_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _row_to_document",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_727_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _seed_document_types",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_363_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → Migrate",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_4_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _row_to_historical_document",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          },
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/historical/ncuc/importer.py:NcucPipelineImporter.import_all_pending_downloads._process_record@363:8#1",
+            "name": "_process_record",
+            "filePath": "src/duke_rates/historical/ncuc/importer.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_4_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _row_to_historical_document",
+                "processType": "cross_community",
+                "step": 3
+              },
+              {
+                "id": "proc_363_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → Migrate",
+                "processType": "cross_community",
+                "step": 3
+              },
+              {
+                "id": "proc_17_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _normalize_historical_leaf",
+                "processType": "cross_community",
+                "step": 3
+              },
+              {
+                "id": "proc_3_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _connect",
+                "processType": "cross_community",
+                "step": 3
+              },
+              {
+                "id": "proc_727_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _seed_document_types",
+                "processType": "cross_community",
+                "step": 3
+              },
+              {
+                "id": "proc_30_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _row_to_document",
+                "processType": "cross_community",
+                "step": 3
+              }
+            ]
+          }
+        ],
+        "2": [
+          {
+            "depth": 2,
+            "id": "File:scripts/maintenance/repair_ncuc_company_mismatches.py",
+            "name": "repair_ncuc_company_mismatches.py",
+            "filePath": "scripts/maintenance/repair_ncuc_company_mismatches.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": []
+          },
+          {
+            "depth": 2,
+            "id": "Method:src/duke_rates/historical/ncuc/importer.py:NcucPipelineImporter.import_all_pending_downloads#3",
+            "name": "import_all_pending_downloads",
+            "filePath": "src/duke_rates/historical/ncuc/importer.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_363_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → Migrate",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_4_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _row_to_historical_document",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_3_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _connect",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_17_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _normalize_historical_leaf",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_30_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _row_to_document",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_727_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _seed_document_types",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_98_mine_ncuc_pipeline",
+                "label": "Mine_ncuc_pipeline → _decode_provenance_notes",
+                "processType": "cross_community",
+                "step": 2
+              }
+            ]
+          }
+        ],
+        "3": [
+          {
+            "depth": 3,
+            "id": "Function:src/duke_rates/cli_commands/ncuc.py:ncuc_import_pipeline",
+            "name": "ncuc_import_pipeline",
+            "filePath": "src/duke_rates/cli_commands/ncuc.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_397_ncuc_import_pipeline",
+                "label": "Ncuc_import_pipeline → _leaf_from_family_key",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_520_ncuc_import_pipeline",
+                "label": "Ncuc_import_pipeline → _normalize_historical_leaf",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_592_ncuc_import_pipeline",
+                "label": "Ncuc_import_pipeline → _row_to_document",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_362_ncuc_import_pipeline",
+                "label": "Ncuc_import_pipeline → _seed_document_types",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_513_ncuc_import_pipeline",
+                "label": "Ncuc_import_pipeline → Migrate",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_518_ncuc_import_pipeline",
+                "label": "Ncuc_import_pipeline → _coerce_optional_int",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_396_ncuc_import_pipeline",
+                "label": "Ncuc_import_pipeline → _historical_primary_code",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_57_ncuc_import_pipeline",
+                "label": "Ncuc_import_pipeline → _row_to_bill_component_observation",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+]

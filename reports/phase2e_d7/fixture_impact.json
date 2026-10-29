@@ -1,0 +1,40 @@
+[
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "test_build_ocr_benchmark_nc_report_groups_backend_and_outcomes",
+        "file_path": "tests/test_ocr_benchmark_report.py",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Function:tests/test_ocr_benchmark_report.py:test_build_ocr_benchmark_nc_report_groups_backend_and_outcomes",
+        "name": "test_build_ocr_benchmark_nc_report_groups_backend_and_outcomes",
+        "type": "Function",
+        "filePath": "tests/test_ocr_benchmark_report.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 0,
+      "risk": "UNKNOWN",
+      "riskSharedAxes": "UNKNOWN",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "riskNote": "No callers resolved. Absence of edges is not evidence the symbol is unused: a caller reaching it through a reference class this index does not record — plain-object property access, a bare-identifier read of a module-scope const — produces no edge to find. Confirm with a text search before treating the change as safe.",
+      "epistemic": "exact",
+      "summary": {
+        "direct": 0,
+        "processes_affected": 0,
+        "modules_affected": 0
+      },
+      "byDepthCounts": {},
+      "affected_processes": [],
+      "affected_modules": [],
+      "byDepth": {}
+    }
+  }
+]

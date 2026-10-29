@@ -1,0 +1,776 @@
+version: 1.0.0
+references:
+- label: jaa
+  source_pdf: data\historical\ncuc\e-2-sub-1207\32b7c724-edef-4a3a-bb45-85058c2ec503.pdf
+  source_aliases:
+  - data\historical\ncuc\e-2-sub-1207\32b7c724-edef-4a3a-bb45-85058c2ec503.pdf
+  sha256: 3e8067d223d94eabe1a7f34fb02a47156775ac4403f7cf06e85e6892bd430b05
+  page_count: 110
+  label_source: assistant_original_pdf_source_review
+  human_verified: false
+  independent_of_segmenter_outputs: true
+  held_out: false
+  review_method: Original per-page native text inspected; rendered component-start
+    headers and representative boundaries checked. No stored spans or document_sections
+    used.
+  boundary_scoring_scope: formal_tariff_components_only
+  exhaustive_fine_grained_legal_boundaries: false
+  regions:
+  - start: 1
+    end: 4
+    kind: hearing_front_matter
+  - start: 5
+    end: 9
+    kind: appearance_slips
+  - start: 10
+    end: 16
+    kind: application
+  - start: 17
+    end: 21
+    kind: exhibit_index
+  - start: 22
+    end: 110
+    kind: supporting_calculation_workbook
+  tariff_components: []
+  supporting_rate_calculation_ranges:
+  - - 14
+    - 14
+  - - 22
+    - 110
+  visual_review: Rendered pp.1,4,10,14,16,17,21,22,23,59,60,110. Entire native page-header
+    index reviewed. Exhibits contain rates/calculations but are not formal tariff
+    leaves.
+- label: tariff_book
+  source_pdf: C:\Python\Duke\Standalone\data\historical\ncuc\e-2-sub-1300-sept2023\3f92be50-2f10-4d4c-8952-2bccaa339aba.pdf
+  source_aliases:
+  - C:\Python\Duke\Standalone\data\historical\ncuc\e-2-sub-1300-sept2023\3f92be50-2f10-4d4c-8952-2bccaa339aba.pdf
+  sha256: 7a5cbdce496e1dbafd60af074cc80a786dd9087fcd121c65d7e13981bf3c41a0
+  page_count: 316
+  label_source: assistant_original_pdf_source_review
+  human_verified: false
+  independent_of_segmenter_outputs: true
+  held_out: false
+  review_method: Original per-page native text inspected; rendered component-start
+    headers and representative boundaries checked. No stored spans or document_sections
+    used.
+  boundary_scoring_scope: formal_tariff_components_only
+  exhaustive_fine_grained_legal_boundaries: false
+  regions:
+  - start: 1
+    end: 2
+    kind: index
+  - start: 3
+    end: 316
+    kind: tariff_section
+  tariff_components:
+  - start: 3
+    end: 5
+    leaf: '500'
+    header: NC Original Leaf No. 500
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 6
+    end: 9
+    leaf: '501'
+    header: NC Original Leaf No. 501
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 10
+    end: 12
+    leaf: '502'
+    header: NC Original Leaf No. 502
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 13
+    end: 16
+    leaf: '503'
+    header: NC Original Leaf No. 503
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 17
+    end: 18
+    leaf: '520'
+    header: NC Original Leaf No. 520
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 19
+    end: 21
+    leaf: '521'
+    header: NC Original Leaf No. 521
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 22
+    end: 23
+    leaf: '522'
+    header: NC Original Leaf No. 522
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 24
+    end: 27
+    leaf: '523'
+    header: NC Original Leaf No. 523
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 28
+    end: 29
+    leaf: '524'
+    header: NC Original Leaf No. 524
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 30
+    end: 33
+    leaf: '525'
+    header: NC Original Leaf No. 525
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 34
+    end: 36
+    leaf: '526'
+    header: NC Original Leaf No. 526
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 37
+    end: 39
+    leaf: '527'
+    header: NC Original Leaf No. 527
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 40
+    end: 43
+    leaf: '528'
+    header: NC Original Leaf No. 528
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 44
+    end: 47
+    leaf: '529'
+    header: NC Original Leaf No. 529
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 48
+    end: 48
+    leaf: '530'
+    header: NC Original Leaf No. 530
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 49
+    end: 49
+    leaf: '531'
+    header: NC Original Leaf No. 531
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 50
+    end: 53
+    leaf: '532'
+    header: NC Original Leaf No. 532
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 54
+    end: 58
+    leaf: '533'
+    header: NC Original Leaf No. 533
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 59
+    end: 63
+    leaf: '534'
+    header: NC Original Leaf No. 534
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 64
+    end: 68
+    leaf: '535'
+    header: NC Original Leaf No. 535
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 69
+    end: 72
+    leaf: '536'
+    header: NC Original Leaf No. 536
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 73
+    end: 77
+    leaf: '570'
+    header: NC Original Leaf No. 570
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 78
+    end: 82
+    leaf: '571'
+    header: NC Original Leaf No. 571
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 83
+    end: 88
+    leaf: '572'
+    header: NC Original Leaf No. 572
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 89
+    end: 91
+    leaf: '573'
+    header: NC Original Leaf No. 573
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 92
+    end: 94
+    leaf: '574'
+    header: NC Original Leaf No. 574
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 95
+    end: 96
+    leaf: '575'
+    header: NC Original Leaf No. 575
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 97
+    end: 103
+    leaf: '590'
+    header: NC Original Leaf No. 590
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 104
+    end: 116
+    leaf: '591'
+    header: NC Original Leaf No. 591
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 117
+    end: 125
+    leaf: '592'
+    header: NC Original Leaf No. 592
+    continuation_evidence: 'Original source pp.120-122: SCHEDULE PPBE APPENDIX A,
+      pp.123-125 APPENDIX B; each printed 1-3 of 3.'
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 126
+    end: 131
+    leaf: '600'
+    header: NC Original Leaf No. 600
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 132
+    end: 134
+    leaf: '601'
+    header: NC Original Leaf No. 601
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 135
+    end: 135
+    leaf: '602'
+    header: NC Original Leaf No. 602
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 136
+    end: 136
+    leaf: '604'
+    header: NC Original Leaf No. 604
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 137
+    end: 138
+    leaf: '605'
+    header: NC Original Leaf No. 605
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 139
+    end: 139
+    leaf: '607'
+    header: NC Original Leaf No. 607
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 140
+    end: 140
+    leaf: '608'
+    header: NC Original Leaf No. 608
+    source_header_variant: Top header prints Leaf No. RDM 608; footer prints 608.
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 141
+    end: 141
+    leaf: '609'
+    header: NC Original Leaf No. 609
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 142
+    end: 142
+    leaf: '610'
+    header: NC Original Leaf No. 610
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 143
+    end: 143
+    leaf: '611'
+    header: NC Original Leaf No. 611
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 144
+    end: 144
+    leaf: '612'
+    header: NC Original Leaf No. 612
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 145
+    end: 146
+    leaf: '640'
+    header: NC Original Leaf No. 640
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 147
+    end: 149
+    leaf: '641'
+    header: NC Original Leaf No. 641
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 150
+    end: 150
+    leaf: '642'
+    header: NC Original Leaf No. 642
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 151
+    end: 152
+    leaf: '643'
+    header: NC Original Leaf No. 643
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 153
+    end: 154
+    leaf: '644'
+    header: NC Original Leaf No. 644
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 155
+    end: 155
+    leaf: '645'
+    header: NC Original Leaf No. 645
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 156
+    end: 156
+    leaf: '646'
+    header: NC Original Leaf No. 646
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 157
+    end: 157
+    leaf: '647'
+    header: NC Original Leaf No. 647
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 158
+    end: 158
+    leaf: '648'
+    header: NC Original Leaf No. 648
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 159
+    end: 159
+    leaf: '649'
+    header: NC Original Leaf No. 649
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 160
+    end: 160
+    leaf: '650'
+    header: NC Original Leaf No. 650
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 161
+    end: 165
+    leaf: '651'
+    header: NC Original Leaf No. 651
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 166
+    end: 169
+    leaf: '652'
+    header: NC Original Leaf No. 652
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 170
+    end: 172
+    leaf: '653'
+    header: NC Original Leaf No. 653
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 173
+    end: 176
+    leaf: '654'
+    header: NC Original Leaf No. 654
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 177
+    end: 180
+    leaf: '655'
+    header: NC Original Leaf No. 655
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 181
+    end: 184
+    leaf: '656'
+    header: NC Original Leaf No. 656
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 185
+    end: 187
+    leaf: '657'
+    header: NC Original Leaf No. 657
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 188
+    end: 190
+    leaf: '658'
+    header: NC Original Leaf No. 658
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 191
+    end: 193
+    leaf: '659'
+    header: NC Original Leaf No. 659
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 194
+    end: 198
+    leaf: '660'
+    header: NC Original Leaf No. 660
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 199
+    end: 200
+    leaf: '661'
+    header: NC Original Leaf No. 661
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 201
+    end: 202
+    leaf: '662'
+    header: NC Original Leaf No. 662
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 203
+    end: 206
+    leaf: '663'
+    header: NC Original Leaf No. 663
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 207
+    end: 208
+    leaf: '664'
+    header: NC Original Leaf No. 664
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 209
+    end: 212
+    leaf: '665'
+    header: NC Original Leaf No. 665
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 213
+    end: 214
+    leaf: '666'
+    header: NC Original Leaf No. 666
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 215
+    end: 218
+    leaf: '667'
+    header: NC Original Leaf No. 667
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 219
+    end: 221
+    leaf: '668'
+    header: NC Original Leaf No. 668
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 222
+    end: 225
+    leaf: '605'
+    header: NC Original Leaf No. 605
+    identity_conflict: Source prints Leaf 605 for Net Metering Bridge Rider NMB; separate
+      from CPRE Leaf 605 at pp.137-138. Do not repair or merge the identities.
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 226
+    end: 228
+    leaf: '670'
+    header: NC Original Leaf No. 670
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 229
+    end: 231
+    leaf: '700'
+    header: NC Original Leaf No. 700
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 232
+    end: 234
+    leaf: '701'
+    header: NC Original Leaf No. 701
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 235
+    end: 236
+    leaf: '702'
+    header: NC Original Leaf No. 702
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 237
+    end: 238
+    leaf: '703'
+    header: NC Original Leaf No. 703
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 239
+    end: 240
+    leaf: '704'
+    header: NC Original Leaf No. 704
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 241
+    end: 241
+    leaf: '705'
+    header: NC Original Leaf No. 705
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 242
+    end: 245
+    leaf: '706'
+    header: NC Original Leaf No. 706
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 246
+    end: 246
+    leaf: '707'
+    header: NC Original Leaf No. 707
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 247
+    end: 249
+    leaf: '708'
+    header: NC Original Leaf No. 708
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 250
+    end: 250
+    leaf: '709'
+    header: NC Original Leaf No. 709
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 251
+    end: 251
+    leaf: '710'
+    header: NC Original Leaf No. 710
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 252
+    end: 252
+    leaf: '711'
+    header: NC Original Leaf No. 711
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 253
+    end: 253
+    leaf: '712'
+    header: NC Original Leaf No. 712
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 254
+    end: 255
+    leaf: '713'
+    header: NC Original Leaf No. 713
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 256
+    end: 258
+    leaf: '714'
+    header: NC Original Leaf No. 714
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 259
+    end: 261
+    leaf: '715'
+    header: NC Original Leaf No. 715
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 262
+    end: 263
+    leaf: '716'
+    header: NC Original Leaf No. 716
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 264
+    end: 267
+    leaf: '717'
+    header: NC Original Leaf No. 717
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 268
+    end: 268
+    leaf: '718'
+    header: NC Original Leaf No. 718
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 269
+    end: 270
+    leaf: '719'
+    header: NC Original Leaf No. 719
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 271
+    end: 272
+    leaf: '720'
+    header: NC Original Leaf No. 720
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 273
+    end: 274
+    leaf: '740'
+    header: NC Original Leaf No. 740
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 275
+    end: 275
+    leaf: '741'
+    header: NC Original Leaf No. 741
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 276
+    end: 276
+    leaf: '742'
+    header: NC Original Leaf No. 742
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 277
+    end: 277
+    leaf: '743'
+    header: NC Original Leaf No. 743
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 278
+    end: 283
+    leaf: '744'
+    header: NC Original Leaf No. 744
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 284
+    end: 287
+    leaf: '745'
+    header: NC Original Leaf No. 745
+    kind: tariff_sheet
+    authority: not_evaluated
+  - start: 288
+    end: 298
+    leaf: '800'
+    header: NC Original Leaf No. 800
+    kind: tariff_terms
+    authority: not_evaluated
+  - start: 299
+    end: 303
+    leaf: '801'
+    header: NC Original Leaf No. 801
+    kind: tariff_terms
+    authority: not_evaluated
+  - start: 304
+    end: 313
+    leaf: '802'
+    header: NC Original Leaf No. 802
+    kind: tariff_terms
+    authority: not_evaluated
+  - start: 314
+    end: 316
+    leaf: '803'
+    header: NC Original Leaf No. 803
+    kind: tariff_terms
+    authority: not_evaluated
+  children:
+  - start: 120
+    end: 122
+    parent_start: 117
+    kind: tariff_appendix
+    title: PPBE Appendix A
+  - start: 123
+    end: 125
+    parent_start: 117
+    kind: tariff_appendix
+    title: PPBE Appendix B
+  visual_review: All 103 component starts in six rendered header sheets; overview
+    pages; full pp.119,120,125; native continuation/footer text for all pages.
+- label: appeal
+  source_pdf: data\historical\ncuc\e-2-sub-1300\32d25655-7a4c-4141-acc0-d675a507e369.pdf
+  source_aliases:
+  - data\historical\ncuc\e-2-sub-1300\32d25655-7a4c-4141-acc0-d675a507e369.pdf
+  - data\historical\ncuc\e-7-sub-1276\32d25655-7a4c-4141-acc0-d675a507e369.pdf
+  sha256: 60276868e964b0e3b5e6270760cddb8895b22dc7fd19863262c73522e718ecbf
+  page_count: 598
+  label_source: assistant_original_pdf_source_review
+  human_verified: false
+  independent_of_segmenter_outputs: true
+  held_out: false
+  review_method: Original per-page native text inspected; rendered component-start
+    headers and representative boundaries checked. No stored spans or document_sections
+    used.
+  boundary_scoring_scope: formal_tariff_components_only
+  exhaustive_fine_grained_legal_boundaries: false
+  regions:
+  - start: 1
+    end: 598
+    kind: non_tariff_appeal_record
+  tariff_components: []
+  visual_review: Rendered pp.1-4,90,120,254,255,393,394,500,598; entire native source
+    indexed and checked for formal tariff headers. Includes briefs, testimony, regulatory
+    conditions and orders; internal legal appendix boundaries are outside the gold
+    scope.
+- label: dsm_ee
+  source_pdf: data\historical\ncuc\e-7-sub-1285\543b80be-7672-4b7c-9897-da915455f6da.pdf
+  source_aliases:
+  - data\historical\ncuc\e-7-sub-1285\543b80be-7672-4b7c-9897-da915455f6da.pdf
+  sha256: 77a0da9636cd9f283d87b0e8102be79ab221427054a8f8d7452cf9318b43ee28
+  page_count: 1097
+  label_source: assistant_original_pdf_source_review
+  human_verified: false
+  independent_of_segmenter_outputs: true
+  held_out: false
+  review_method: Original per-page native text inspected; rendered component-start
+    headers and representative boundaries checked. No stored spans or document_sections
+    used.
+  boundary_scoring_scope: formal_tariff_components_only
+  exhaustive_fine_grained_legal_boundaries: false
+  regions:
+  - start: 1
+    end: 1059
+    kind: non_tariff_supporting_record
+  - start: 1060
+    end: 1062
+    kind: tariff_sheet
+  - start: 1063
+    end: 1097
+    kind: supporting_exhibits
+  tariff_components:
+  - start: 1060
+    end: 1062
+    leaf: '62'
+    kind: tariff_sheet
+    authority: not_evaluated
+    source_context: Miller Exhibit 7; effective Jan-Dec 2024; printed order date blank.
+      Clean-looking form does not establish approval; no visible numeric strikes in
+      reviewed pages.
+  visual_review: 'Rendered all six textless pages 7-12: appearance slips; full tariff
+    pp.1060-1062; surrounding pages native text. Other pages assessed by source text
+    for formal headers, not an exhaustive exhibit-boundary study.'
+  textless_pages_source_review:
+  - page: 7
+    kind: appearance_slip
+  - page: 8
+    kind: appearance_slip
+  - page: 9
+    kind: appearance_slip
+  - page: 10
+    kind: appearance_slip
+  - page: 11
+    kind: appearance_slip
+  - page: 12
+    kind: appearance_slip
