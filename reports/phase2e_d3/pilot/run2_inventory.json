@@ -1,0 +1,105 @@
+{
+ "stats": {
+  "queries_run": 1,
+  "inventory_rows": 101,
+  "order_rows": 33,
+  "outcome_incomplete": 1,
+  "candidates_listed": 1419
+ },
+ "summary": {
+  "remote_candidates": [
+   {
+    "kind": "order",
+    "status": "listed",
+    "n": 1419
+   }
+  ],
+  "gap_status": [
+   {
+    "gap_type": "missing_intermediate_revision",
+    "status": "candidate_found",
+    "n": 3
+   },
+   {
+    "gap_type": "missing_intermediate_revision",
+    "status": "searched_not_found",
+    "n": 102
+   },
+   {
+    "gap_type": "missing_intermediate_revision",
+    "status": "verification_required",
+    "n": 15
+   },
+   {
+    "gap_type": "missing_intermediate_revision",
+    "status": "verified",
+    "n": 1
+   },
+   {
+    "gap_type": "missing_official_clean_tariff",
+    "status": "candidate_found",
+    "n": 5
+   },
+   {
+    "gap_type": "missing_official_clean_tariff",
+    "status": "open",
+    "n": 42
+   },
+   {
+    "gap_type": "missing_official_clean_tariff",
+    "status": "searched_not_found",
+    "n": 5
+   },
+   {
+    "gap_type": "missing_official_clean_tariff",
+    "status": "verification_required",
+    "n": 10
+   },
+   {
+    "gap_type": "missing_official_clean_tariff",
+    "status": "verified",
+    "n": 3
+   },
+   {
+    "gap_type": "missing_predecessor_revision",
+    "status": "candidate_found",
+    "n": 38
+   },
+   {
+    "gap_type": "missing_predecessor_revision",
+    "status": "searched_not_found",
+    "n": 29
+   },
+   {
+    "gap_type": "missing_predecessor_revision",
+    "status": "verification_required",
+    "n": 32
+   },
+   {
+    "gap_type": "missing_predecessor_revision",
+    "status": "verified",
+    "n": 12
+   },
+   {
+    "gap_type": "missing_regulatory_order",
+    "status": "searched_not_found",
+    "n": 113
+   },
+   {
+    "gap_type": "missing_successor_document",
+    "status": "candidate_found",
+    "n": 1
+   },
+   {
+    "gap_type": "missing_successor_document",
+    "status": "open",
+    "n": 1
+   },
+   {
+    "gap_type": "missing_successor_document",
+    "status": "verification_required",
+    "n": 1
+   }
+  ]
+ }
+}

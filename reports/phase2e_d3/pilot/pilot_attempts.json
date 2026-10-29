@@ -1,0 +1,307 @@
+{
+ "attempts": [
+  {
+   "id": 1478,
+   "channel": "portal_orders",
+   "params_hash": "6fc0d20058ec20befb3a3ed92df270237465ce9a4611110b4a1ac1bf4ca8a465",
+   "started_at": "2026-10-29T00:55:37.288307Z",
+   "finished_at": "2026-10-29T00:55:49.987970Z",
+   "outcome": "no_results",
+   "stop_reason": "empty_result",
+   "pages_reached": 1,
+   "pages_total": null,
+   "items_reported": null,
+   "result_count": 0,
+   "filter_verified": 1,
+   "error_detail": null,
+   "created_by": "bradrcurry-supervised-pilot",
+   "gap_id": 1361,
+   "params": {
+    "channel": "portal_orders",
+    "params": {
+     "company_name": "duke energy carolinas",
+     "docket_number": "e-7 sub 1026",
+     "filing_types": [
+      "order"
+     ]
+    }
+   }
+  },
+  {
+   "id": 1479,
+   "channel": "portal_orders",
+   "params_hash": "c98dd02925038212e0a8a5a663efb4fb7de6c1ded5d976e79b4a1a1c149f9300",
+   "started_at": "2026-10-29T00:55:49.989474Z",
+   "finished_at": "2026-10-29T00:56:02.836036Z",
+   "outcome": "no_results",
+   "stop_reason": "empty_result",
+   "pages_reached": 1,
+   "pages_total": null,
+   "items_reported": null,
+   "result_count": 0,
+   "filter_verified": 1,
+   "error_detail": null,
+   "created_by": "bradrcurry-supervised-pilot",
+   "gap_id": 1420,
+   "params": {
+    "channel": "portal_orders",
+    "params": {
+     "company_name": "duke energy carolinas",
+     "docket_number": "e-7 sub 487",
+     "filing_types": [
+      "order"
+     ]
+    }
+   }
+  },
+  {
+   "id": 1480,
+   "channel": "portal_orders",
+   "params_hash": "37e01609079cf6f0fd00546fb0af9b00660b3e438cc3bb4f85030b5aac93b09c",
+   "started_at": "2026-10-29T00:56:02.837035Z",
+   "finished_at": "2026-10-29T00:56:15.411423Z",
+   "outcome": "no_results",
+   "stop_reason": "empty_result",
+   "pages_reached": 1,
+   "pages_total": null,
+   "items_reported": null,
+   "result_count": 0,
+   "filter_verified": 1,
+   "error_detail": null,
+   "created_by": "bradrcurry-supervised-pilot",
+   "gap_id": 1422,
+   "params": {
+    "channel": "portal_orders",
+    "params": {
+     "company_name": "duke energy carolinas",
+     "docket_number": "e-7 sub 989",
+     "filing_types": [
+      "order"
+     ]
+    }
+   }
+  },
+  {
+   "id": 1481,
+   "channel": "portal_orders",
+   "params_hash": "b9643025fa43867fa6d190d873cb561c06224c306956b3524f18797701906957",
+   "started_at": "2026-10-29T00:56:15.411423Z",
+   "finished_at": "2026-10-29T00:56:28.047567Z",
+   "outcome": "no_results",
+   "stop_reason": "empty_result",
+   "pages_reached": 1,
+   "pages_total": null,
+   "items_reported": null,
+   "result_count": 0,
+   "filter_verified": 1,
+   "error_detail": null,
+   "created_by": "bradrcurry-supervised-pilot",
+   "gap_id": 1437,
+   "params": {
+    "channel": "portal_orders",
+    "params": {
+     "company_name": "duke energy carolinas",
+     "docket_number": "e-7 sub 831",
+     "filing_types": [
+      "order"
+     ]
+    }
+   }
+  },
+  {
+   "id": 1482,
+   "channel": "portal_orders",
+   "params_hash": "eeb5b8aa2a3ad90444fc532d13f716b7e5d38c5855a658b0e47ccdf420ec2b3c",
+   "started_at": "2026-10-29T00:56:28.047567Z",
+   "finished_at": "2026-10-29T00:56:39.973672Z",
+   "outcome": "no_results",
+   "stop_reason": "empty_result",
+   "pages_reached": 1,
+   "pages_total": null,
+   "items_reported": null,
+   "result_count": 0,
+   "filter_verified": 1,
+   "error_detail": null,
+   "created_by": "bradrcurry-supervised-pilot",
+   "gap_id": 1505,
+   "params": {
+    "channel": "portal_orders",
+    "params": {
+     "company_name": "duke energy carolinas",
+     "date_after": "09/14/1981",
+     "date_before": "09/28/1981",
+     "docket_number": "e-100 sub 211",
+     "filing_types": [
+      "order"
+     ]
+    }
+   }
+  },
+  {
+   "id": 1483,
+   "channel": "portal_orders",
+   "params_hash": "0a9a79d92cea2ece55f3d7028ad573ad6332601f5f56c7b8ad90498fad835742",
+   "started_at": "2026-10-29T00:56:39.973672Z",
+   "finished_at": "2026-10-29T00:56:53.168206Z",
+   "outcome": "no_results",
+   "stop_reason": "empty_result",
+   "pages_reached": 1,
+   "pages_total": null,
+   "items_reported": null,
+   "result_count": 0,
+   "filter_verified": 1,
+   "error_detail": null,
+   "created_by": "bradrcurry-supervised-pilot",
+   "gap_id": 1407,
+   "params": {
+    "channel": "portal_orders",
+    "params": {
+     "docket_number": "m-100 sub 138",
+     "filing_types": [
+      "order"
+     ]
+    }
+   }
+  },
+  {
+   "id": 1484,
+   "channel": "portal_orders",
+   "params_hash": "48a6e4561e0da211310e0335c312ad1531b7f71f7c216fdb20adc98c84bb9c72",
+   "started_at": "2026-10-29T00:56:53.168206Z",
+   "finished_at": "2026-10-29T00:57:05.943145Z",
+   "outcome": "no_results",
+   "stop_reason": "empty_result",
+   "pages_reached": 1,
+   "pages_total": null,
+   "items_reported": null,
+   "result_count": 0,
+   "filter_verified": 1,
+   "error_detail": null,
+   "created_by": "bradrcurry-supervised-pilot",
+   "gap_id": 1409,
+   "params": {
+    "channel": "portal_orders",
+    "params": {
+     "company_name": "duke energy progress",
+     "docket_number": "e-2 sub 1023",
+     "filing_types": [
+      "order"
+     ]
+    }
+   }
+  },
+  {
+   "id": 1485,
+   "channel": "portal_orders",
+   "params_hash": "f8ca4c4eb5b8684ccb022c56e0226e4d03571e507d9692d7b8fffe93671aad40",
+   "started_at": "2026-10-29T00:57:05.944145Z",
+   "finished_at": "2026-10-29T00:57:18.916766Z",
+   "outcome": "no_results",
+   "stop_reason": "empty_result",
+   "pages_reached": 1,
+   "pages_total": null,
+   "items_reported": null,
+   "result_count": 0,
+   "filter_verified": 1,
+   "error_detail": null,
+   "created_by": "bradrcurry-supervised-pilot",
+   "gap_id": 1513,
+   "params": {
+    "channel": "portal_orders",
+    "params": {
+     "company_name": "duke energy progress",
+     "date_after": "12/10/2020",
+     "date_before": "12/24/2020",
+     "docket_number": "e-2 sub 1153",
+     "filing_types": [
+      "order"
+     ]
+    }
+   }
+  },
+  {
+   "id": 1486,
+   "channel": "portal_orders",
+   "params_hash": "1ff2c823781cb79905c1e6a73aa0f77424e0c9771e8508346c0f01a6fb844a91",
+   "started_at": "2026-10-29T00:57:18.916766Z",
+   "finished_at": "2026-10-29T00:57:31.709677Z",
+   "outcome": "no_results",
+   "stop_reason": "empty_result",
+   "pages_reached": 1,
+   "pages_total": null,
+   "items_reported": null,
+   "result_count": 0,
+   "filter_verified": 1,
+   "error_detail": null,
+   "created_by": "bradrcurry-supervised-pilot",
+   "gap_id": 1796,
+   "params": {
+    "channel": "portal_orders",
+    "params": {
+     "company_name": "duke energy progress",
+     "docket_number": "e-2 sub 1304",
+     "filing_types": [
+      "order"
+     ]
+    }
+   }
+  },
+  {
+   "id": 1487,
+   "channel": "portal_orders",
+   "params_hash": "37dd39d95aa1c2a9e6d9691ebaf207537dd1de5e1e6fff7207c943f74125d75b",
+   "started_at": "2026-10-29T01:03:50.759204Z",
+   "finished_at": "2026-10-29T01:04:02.303329Z",
+   "outcome": "incomplete",
+   "stop_reason": "inventory_first_page_only",
+   "pages_reached": 1,
+   "pages_total": null,
+   "items_reported": null,
+   "result_count": 101,
+   "filter_verified": null,
+   "error_detail": null,
+   "created_by": "bradrcurry-supervised-pilot",
+   "gap_id": 1361,
+   "params": {
+    "channel": "portal_orders",
+    "params": {
+     "docket_number": "e-7 sub 1026",
+     "method": "docket_inventory"
+    }
+   }
+  }
+ ],
+ "summary": {
+  "live_queries": 10,
+  "by_outcome": {
+   "no_results/empty_result": 9,
+   "incomplete/inventory_first_page_only": 1
+  },
+  "distinct_order_documents_listed": 33,
+  "candidate_rows": 1419,
+  "retrieved": [
+   {
+    "id": 103,
+    "kind": "order",
+    "portal_document_id": "a36ec4dd-4dbe-4b6e-997d-45c8b70686c1",
+    "description": "Order Approving EDPR Rider",
+    "date_filed": "6/12/2024",
+    "status": "needs_review",
+    "file_sha256": "a5f445bba43e655d5da54970b98f907d6fc820857342b21be8a584a7548b78f0",
+    "retrieval_json": "{\"url\": \"https://starw1.ncuc.gov/NCUC/ViewFile.aspx?Id=221b328c-14ef-4dd0-ad1a-c7f795a6c8bc\", \"bytes\": 69276, \"dedupe\": \"same_sha256_as_archive:data\\\\historical\\\\ncuc\\\\e-7-sub-1214\\\\53b40659-ee45-4e22-a842-916f46590adc.pdf\"}",
+    "identity_json": "{\"checks\": {\"pages\": 2, \"docket_printed\": true, \"order_wording_printed\": true}, \"observed\": {\"docket\": [{\"page\": 1, \"printed\": \"Docket No. E-7, Sub 828\", \"value\": \"E-7 Sub 828\"}, {\"page\": 1, \"printed\": \"Docket No. E-7, Sub 1276\", \"value\": \"E-7 Sub 1276\"}, {\"page\": 1, \"printed\": \"DOCKET NO. E-7, SUB 487\", \"value\": \"E-7 Sub 487\"}, {\"page\": 1, \"printed\": \"DOCKET NO. E-7, SUB 828\", \"value\": \"E-7 Sub 828\"}, {\"page\": 1, \"printed\": \"DOCKET NO. E-7, SUB 1026\", \"value\": \"E-7 Sub 1026\"}, {\"page\": 1, \"printed\": \"DOCKET NO. E-7, SUB 1146\", \"value\": \"E-7 Sub 1146\"}, {\"page\": 1, \"printed\": \"DOCKET NO. E-7, SUB 1214\", \"value\": \"E-7 Sub 1214\"}, {\"page\": 1, \"printed\": \"DOCKET NO. E-7, SUB 1276\", \"value\": \"E-7 Sub 1276\"}, {\"page\": 1, \"printed\": \"Docket No. E-7, Sub 828\", \"value\": \"E-7 Sub 828\"}, {\"page\": 1, \"printed\": \"Docket No. E-7, Sub 1276\", \"value\": \"E-7 Sub 1276\"}], \"order_title\": [\"ORDER APPROVING\", \"An EDPR was first approved in the December 20, 2007 Order Approving\", \"Order), and the Commission has continued to approve the EDPR mechanism in DEC\\u2019s\"]}, \"label_source\": \"machine:remote_discovery@1.1.0\"}"
+   },
+   {
+    "id": 1374,
+    "kind": "order",
+    "portal_document_id": "63a2bde3-610d-4740-a141-84b68651cb4b",
+    "description": "Order Approving EDPR Rider",
+    "date_filed": "6/20/2017",
+    "status": "needs_review",
+    "file_sha256": "2974f7d2c640b9dde0e9135b268a1f7680f5c63a466d4a5a85c2467a8d0a1d63",
+    "retrieval_json": "{\"url\": \"https://starw1.ncuc.gov/NCUC/ViewFile.aspx?Id=afbb23f4-536c-4a19-b08f-ba1c1e74c383\", \"bytes\": 118405}",
+    "identity_json": "{\"checks\": {\"pages\": 2, \"docket_printed\": true, \"order_wording_printed\": true}, \"observed\": {\"docket\": [{\"page\": 1, \"printed\": \"Docket No. E-7, Sub 795\", \"value\": \"E-7 Sub 795\"}, {\"page\": 1, \"printed\": \"Docket No. E-7, Sub 828\", \"value\": \"E-7 Sub 828\"}, {\"page\": 1, \"printed\": \"Docket \\nNo. E-7, Sub 1026\", \"value\": \"E-7 Sub 1026\"}, {\"page\": 1, \"printed\": \"DOCKET NO. E-7, SUB 487\", \"value\": \"E-7 Sub 487\"}, {\"page\": 1, \"printed\": \"DOCKET NO. E-7, SUB 828\", \"value\": \"E-7 Sub 828\"}, {\"page\": 1, \"printed\": \"DOCKET NO. E-7, SUB 1026\", \"value\": \"E-7 Sub 1026\"}, {\"page\": 1, \"printed\": \"Docket No. E-7, Sub 795\", \"value\": \"E-7 Sub 795\"}, {\"page\": 1, \"printed\": \"Docket No. E-7, Sub 828\", \"value\": \"E-7 Sub 828\"}, {\"page\": 1, \"printed\": \"Docket \\nNo. E-7, Sub 1026\", \"value\": \"E-7 Sub 1026\"}], \"order_title\": [\"ORDER APPROVING\", \"Regulatory Conditions Approved by Order Issued\", \"in its December 20, 2007, Order Approving Stipulation and Deciding Non-Settled Issues\"]}, \"label_source\": \"machine:remote_discovery@1.1.0\"}"
+   }
+  ]
+ }
+}

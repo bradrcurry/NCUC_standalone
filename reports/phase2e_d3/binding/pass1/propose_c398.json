@@ -1,0 +1,49 @@
+{
+  "proposal_id": 9,
+  "state": "blocked",
+  "blocking_failures": [
+    "pages_not_already_bound_to_family"
+  ],
+  "checks": {
+    "file_present": true,
+    "file_matches_stored_hash": true,
+    "pages_in_file": true,
+    "first_page_prints_family_leaf": true,
+    "no_other_leaf_in_run": true,
+    "utility_matches_family": true,
+    "single_revision_identity": true,
+    "pages_not_redline": true,
+    "file_is_the_reviewed_file": true,
+    "printed_revision_is_expected": true,
+    "single_printed_effective_date": true,
+    "page_range_complete": true,
+    "supersession_predecessor_on_file": false,
+    "pages_not_already_bound_to_family": false,
+    "source_provenance_known": true,
+    "binding_mode_allowed": true
+  },
+  "plan": {
+    "mode": "replace_redline_source",
+    "target_version_id": 5997,
+    "revision_value": "NC:leaf-99:rev-61",
+    "effective_start": "2024-07-01",
+    "printed_dates": [
+      "2024-07-01"
+    ],
+    "same_revision_versions": [
+      5997
+    ],
+    "same_date_versions": [
+      5997
+    ],
+    "provenance": [
+      {
+        "id": 1744,
+        "docket_number": "E-7",
+        "filing_title": "DEC Compliance Tariff for Existing DSM Program Rider EDPR",
+        "filing_date": "July 1, 2024",
+        "discovered_url": "https://starw1.ncuc.gov/NCUC/PSC/PSCDocumentDetailsPageNCUC.aspx?DocumentId=8435bbd6-9c1c-4402-83bb-ec525bce0043&Class=Filing"
+      }
+    ]
+  }
+}

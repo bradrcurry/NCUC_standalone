@@ -1,0 +1,47 @@
+{
+  "proposal_id": 4,
+  "state": "proposed",
+  "blocking_failures": [],
+  "checks": {
+    "file_present": true,
+    "file_matches_stored_hash": true,
+    "pages_in_file": true,
+    "first_page_prints_family_leaf": true,
+    "no_other_leaf_in_run": true,
+    "utility_matches_family": true,
+    "single_revision_identity": true,
+    "pages_not_redline": true,
+    "file_is_the_reviewed_file": true,
+    "printed_revision_is_expected": true,
+    "single_printed_effective_date": true,
+    "page_range_complete": true,
+    "supersession_predecessor_on_file": true,
+    "pages_not_already_bound_to_family": true,
+    "source_provenance_known": true,
+    "binding_mode_allowed": true
+  },
+  "plan": {
+    "mode": "replace_redline_source",
+    "target_version_id": 6737,
+    "revision_value": "NC:leaf-99:rev-62",
+    "effective_start": "2024-09-01",
+    "printed_dates": [
+      "2024-09-01"
+    ],
+    "same_revision_versions": [
+      6737
+    ],
+    "same_date_versions": [
+      6737
+    ],
+    "provenance": [
+      {
+        "id": 3467,
+        "docket_number": "E-7 Sub 1304",
+        "filing_title": "RIDER FCAR",
+        "filing_date": "January 15, 2024",
+        "discovered_url": "https://starw1.ncuc.gov/NCUC/PSC/PSCDocumentDetailsPageNCUC.aspx?DocumentId=aa12318b-5e30-4d06-b2ed-65eb7a11e338&Class=Filing"
+      }
+    ]
+  }
+}

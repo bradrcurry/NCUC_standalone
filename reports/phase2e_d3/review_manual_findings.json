@@ -1,0 +1,94 @@
+[
+ {
+  "problem_type": "charge_sign_conflict",
+  "priority": 1,
+  "key": "edpr-2017-sign",
+  "family_key": "nc-carolinas-rider-EDPR",
+  "tariff_version_id": 6469,
+  "historical_document_id": 4348,
+  "source_documents": [
+   {"path": "data/raw/historical/ncuc/e-7/e-7-nodate-duke-energy-carolinas-llc-s-existing-dsm-program-rider.pdf",
+    "pages": [2, 3], "role": "bound tariff sheet (NC Twelfth Revised Leaf No. 64, effective July 1, 2017)"},
+   {"path": "remote candidate 1374 (NCUC ViewFile afbb23f4-536c-4a19-b08f-ba1c1e74c383, filed 6/20/2017)",
+    "sha256": "2974f7d2c640b9dde0e9135b268a1f7680f5c63a466d4a5a85c2467a8d0a1d63", "pages": [1],
+    "role": "Order Approving EDPR Rider, Dockets E-7 Subs 487, 828, 1026"}
+  ],
+  "printed_evidence": {
+   "order_p1": "proposed to replace the existing EDPR decrement rider amount of (0.0050) cents per kWh ... with a new decrement rider amount of (0.0058) cents per kWh ... effective on and after July 1, 2017",
+   "sheet_p2": "Change in Existing DSM Costs 0.0058 c/kWh; Change in Rates 0.0058 c/kWh (no sign, no parentheses)",
+   "sheet_p3": "(0.0058)"
+  },
+  "db_values": {"tariff_charges.rate_value": 5.8e-05, "rate_unit": "$/kWh", "charge_label": "Existing DSM Program Rider"},
+  "explanation": "the stored charge is +0.0058 c/kWh, matching the sheet's p.2 literally; the sheet's p.3 and the Commission's order both make it a decrement (0.0058). The 2024 EDPR version (5239) is stored negative (-0.0027), as its order prints.",
+  "cause": "sign_lost_or_sheet_inconsistent",
+  "proposed_correction": {"table": "tariff_charges", "version_id": 6469, "column": "rate_value", "from": 5.8e-05, "to": -5.8e-05,
+                          "via": "reviewed candidate run + provenance promote (pathway reviewed), after a person reads p.2-3 and the order"},
+  "evidence_level": "assistant_page_review",
+  "confidence": "order and sheet p.3 agree; sheet p.2 differs",
+  "downstream": {"charges_on_version": 1, "billable": true, "bill_effect": "+0.0116 c/kWh error on July 2017 - June 2018 DEC bills if the decrement is right"}
+ },
+ {
+  "problem_type": "order_identified_for_version",
+  "priority": 3,
+  "key": "edpr-2024-order",
+  "family_key": "nc-carolinas-rider-EDPR",
+  "tariff_version_id": 5239,
+  "historical_document_id": 467,
+  "source_documents": [
+   {"path": "data/historical/ncuc/e-7-sub-1214/53b40659-ee45-4e22-a842-916f46590adc.pdf",
+    "sha256": "a5f445bba43e655d5da54970b98f907d6fc820857342b21be8a584a7548b78f0", "pages": [1],
+    "role": "Order Approving EDPR Rider (already archived as an E-7 Sub 1214 order record, ncuc_discovery_records 1745); retrieved again by the live pilot from the E-7 Sub 1026 inventory"}
+  ],
+  "printed_evidence": {"order_p1": "captioned in E-7 Subs 487, 828, 1026, 1146, 1214, 1276; new decrement rider amount of (0.0027) cents per kWh, effective on and after July 1, 2024"},
+  "db_values": {"tariff_versions.order_date": null, "tariff_charges.rate_value": -2.7e-05},
+  "explanation": "the order that set this version's rate is identified; the stored rate matches it. The version's sheet prints 'Order dated ___'.",
+  "cause": "order_date_missing",
+  "proposed_correction": {"table": "tariff_versions", "row_id": 5239, "column": "order_date", "to": "issue date printed on the order's signature page (listing filed 6/12/2024)",
+                          "via": "provenance revise-metadata after the signature page is read"},
+  "evidence_level": "assistant_page_review",
+  "downstream": {"charges_on_version": 1, "billable": true, "bill_effect": "none (metadata)"}
+ },
+ {
+  "problem_type": "order_identified_for_version",
+  "priority": 3,
+  "key": "edpr-2017-order",
+  "family_key": "nc-carolinas-rider-EDPR",
+  "tariff_version_id": 6469,
+  "historical_document_id": 4348,
+  "source_documents": [
+   {"path": "remote candidate 1374 (NCUC ViewFile afbb23f4-536c-4a19-b08f-ba1c1e74c383, filed 6/20/2017)",
+    "sha256": "2974f7d2c640b9dde0e9135b268a1f7680f5c63a466d4a5a85c2467a8d0a1d63", "pages": [1]}
+  ],
+  "printed_evidence": {"order_p1": "Order Approving EDPR Rider; rider effective July 1, 2017 through June 30, 2018; also prints the September 24, 2013 E-7 Sub 1026 general rate case order date"},
+  "db_values": {"tariff_versions.order_date": null},
+  "explanation": "the order that set this version's rate is identified (new to the archive). It also prints the date of the 2013 rate-case order that 18 DEC schedules effective 2013-11-01 leave blank ('Order dated ___').",
+  "cause": "order_date_missing",
+  "proposed_correction": {"table": "tariff_versions", "row_id": 6469, "column": "order_date", "to": "issue date on the order's signature page",
+                          "also": "archive the order (it is in the scratch download folder only)"},
+  "evidence_level": "assistant_page_review",
+  "downstream": {"charges_on_version": 1, "billable": true, "bill_effect": "none (metadata)"}
+ },
+ {
+  "problem_type": "document_bound_to_two_families",
+  "priority": 2,
+  "key": "hd1592",
+  "family_key": "nc-progress-leaf-704",
+  "tariff_version_id": 6110,
+  "historical_document_id": 1592,
+  "source_documents": [{"path": "data/historical/ncuc/e-2-sub-1174/61cb9753-923f-402d-b1f1-b60deecb34ef.pdf", "pages": [3, 6]}],
+  "printed_evidence": {"binding_proposal": "verified candidate 540 (First Revised Leaf 704, printed effective 2023-01-01) lies inside this span"},
+  "db_values": {"versions_on_hd_1592": [{"id": 6110, "family_key": "nc-progress-leaf-704", "effective_start": "2019-02-27"},
+                                        {"id": 6156, "family_key": "ncuc-dep-704", "effective_start": "February 27, 2019"}]},
+  "explanation": "one historical document is the source of two versions in two families (one a legacy 'ncuc-dep-704' family with a free-text date). The binding workflow refuses to bind candidate 540 until this is resolved.",
+  "cause": "duplicate_registration",
+  "proposed_correction": {"action": "retire the ncuc-dep-704 duplicate (retire_tariff_version after review), then re-propose candidate 540"},
+  "evidence_level": "rule",
+  "downstream": {"charges_on_version": 0, "billable": false}
+ },
+ {"annotate": true, "problem_type": "effective_date_conflict", "tariff_version_id": 5990, "evidence_level": "assistant_page_review",
+  "note": "p.10 footer image read: 'North Carolina Eleventh Revised Leaf No. 54 / Effective October 13, 2009 / NCUC Docket No. E-7, Sub 831 / Order Dated February 26, 2009'"},
+ {"annotate": true, "problem_type": "effective_date_conflict", "tariff_version_id": 6052, "evidence_level": "assistant_page_review",
+  "note": "p.52 text layer read: 'Supersedes Schedule TSS-63 / Effective for service rendered on and after January 1, 2021 / NCUC Docket No. E-2, Subs 1252 and 1153' (Schedule TSS-65)"},
+ {"annotate": true, "problem_type": "effective_date_conflict", "tariff_version_id": 5231, "evidence_level": "assistant_page_review",
+  "note": "p.5 footer image read: 'North Carolina Sixth (Proposed) Revised Leaf No. 64 / Effective ... July 1, 2012 / Order dated' (blank): a proposal, so no date correction is proposed"}
+]

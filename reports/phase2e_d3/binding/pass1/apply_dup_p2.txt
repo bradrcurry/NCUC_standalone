@@ -1,0 +1,6 @@
+Usage: duke-rates provenance apply-proposal [OPTIONS]
+Try 'duke-rates provenance apply-proposal --help' for help.
++- Error ---------------------------------------------------------------------+
+| Invalid value: proposal 2: blocking checks failed at apply time:            |
+| ['binding_mode_allowed']                                                    |
++-----------------------------------------------------------------------------+

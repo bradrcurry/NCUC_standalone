@@ -1,0 +1,13 @@
+=== cache_legacy
+VERDICT: IDENTICAL
+=== cache_docling
+VERDICT: IDENTICAL
+=== cache_native
+VERDICT: IDENTICAL
+=== cache_hybrid
+VERDICT: IDENTICAL
+=== db_hybrid
+VERDICT: IDENTICAL
+=== db_docling
+VERDICT: IDENTICAL
+BENCH_DONE

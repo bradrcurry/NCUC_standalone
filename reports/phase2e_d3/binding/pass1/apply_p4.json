@@ -1,0 +1,34 @@
+{
+  "mode": "replace_redline_source",
+  "historical_document_id": 7822,
+  "charges_created": 0,
+  "charges_deleted": 0,
+  "tariff_version_id": 6737,
+  "created_version": false,
+  "previous_historical_document_id": 7212,
+  "post_apply_validation": {
+    "ok": true,
+    "pages_read": 2,
+    "printed_revisions": [
+      "NC:leaf-99:rev-62"
+    ]
+  },
+  "gap_before": {
+    "id": 1455,
+    "status": "verified",
+    "status_reason": "candidate identity verified against the page image (not bound; not resolved)"
+  },
+  "snapshot_before": {
+    "historical_documents": 1,
+    "tariff_versions": 1,
+    "tariff_charges": 46,
+    "document_assertions": 0
+  },
+  "snapshot_after": {
+    "historical_documents": 1,
+    "tariff_versions": 1,
+    "tariff_charges": 46,
+    "document_assertions": 0
+  },
+  "next": "provenance extract-candidate on the bound pages, review, then provenance promote"
+}

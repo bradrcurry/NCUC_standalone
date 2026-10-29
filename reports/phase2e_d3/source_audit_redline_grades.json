@@ -1,0 +1,1001 @@
+[
+ {
+  "tariff_version_id": 4570,
+  "family_key": "ncuc-dep-640",
+  "charges": 5,
+  "pages": [
+   2
+  ],
+  "struck": 0,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "weak (coloured insertion only)"
+ },
+ {
+  "tariff_version_id": 5237,
+  "family_key": "nc-carolinas-rider-EDPR",
+  "charges": 1,
+  "pages": [],
+  "struck": 0,
+  "glued": 0,
+  "fingerprint": true,
+  "grade": "fingerprint only (stored detector verdict)"
+ },
+ {
+  "tariff_version_id": 5239,
+  "family_key": "nc-carolinas-rider-EDPR",
+  "charges": 1,
+  "pages": [
+   7
+  ],
+  "struck": 0,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "weak (coloured insertion only)"
+ },
+ {
+  "tariff_version_id": 5255,
+  "family_key": "nc-carolinas-rider-RSC",
+  "charges": 7,
+  "pages": [
+   37,
+   38,
+   39,
+   40
+  ],
+  "struck": 9,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 5258,
+  "family_key": "nc-carolinas-rider-STS",
+  "charges": 4,
+  "pages": [],
+  "struck": 0,
+  "glued": 0,
+  "fingerprint": true,
+  "grade": "fingerprint only (stored detector verdict)"
+ },
+ {
+  "tariff_version_id": 5317,
+  "family_key": "nc-progress-leaf-504",
+  "charges": 5,
+  "pages": [
+   12
+  ],
+  "struck": 0,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "weak (coloured insertion only)"
+ },
+ {
+  "tariff_version_id": 5382,
+  "family_key": "nc-progress-leaf-602",
+  "charges": 8,
+  "pages": [
+   75
+  ],
+  "struck": 0,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "weak (coloured insertion only)"
+ },
+ {
+  "tariff_version_id": 5457,
+  "family_key": "nc-progress-leaf-654",
+  "charges": 5,
+  "pages": [
+   3
+  ],
+  "struck": 0,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "weak (coloured insertion only)"
+ },
+ {
+  "tariff_version_id": 5474,
+  "family_key": "nc-progress-leaf-670",
+  "charges": 7,
+  "pages": [
+   4,
+   11
+  ],
+  "struck": 4,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 5691,
+  "family_key": "nc-carolinas-schedule-ES",
+  "charges": 3,
+  "pages": [
+   7
+  ],
+  "struck": 0,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "weak (coloured insertion only)"
+ },
+ {
+  "tariff_version_id": 5702,
+  "family_key": "nc-carolinas-schedule-ES",
+  "charges": 3,
+  "pages": [
+   4
+  ],
+  "struck": 0,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "weak (coloured insertion only)"
+ },
+ {
+  "tariff_version_id": 5714,
+  "family_key": "nc-progress-leaf-610",
+  "charges": 1,
+  "pages": [
+   15
+  ],
+  "struck": 7,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 5716,
+  "family_key": "nc-progress-leaf-605",
+  "charges": 8,
+  "pages": [
+   4,
+   5
+  ],
+  "struck": 25,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 5717,
+  "family_key": "nc-progress-leaf-605",
+  "charges": 21,
+  "pages": [
+   3
+  ],
+  "struck": 0,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "weak (coloured insertion only)"
+ },
+ {
+  "tariff_version_id": 5728,
+  "family_key": "nc-carolinas-schedule-ES",
+  "charges": 4,
+  "pages": [
+   1
+  ],
+  "struck": 0,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "weak (coloured insertion only)"
+ },
+ {
+  "tariff_version_id": 5902,
+  "family_key": "nc-carolinas-rider-EB",
+  "charges": 5,
+  "pages": [
+   7,
+   8,
+   9,
+   10
+  ],
+  "struck": 68,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 5976,
+  "family_key": "nc-carolinas-rider-STS",
+  "charges": 4,
+  "pages": [],
+  "struck": 0,
+  "glued": 0,
+  "fingerprint": true,
+  "grade": "fingerprint only (stored detector verdict)"
+ },
+ {
+  "tariff_version_id": 5997,
+  "family_key": "nc-carolinas-rider-SUMMARY",
+  "charges": 88,
+  "pages": [
+   9,
+   10
+  ],
+  "struck": 56,
+  "glued": 4,
+  "fingerprint": true,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 6053,
+  "family_key": "nc-progress-leaf-590",
+  "charges": 3,
+  "pages": [
+   8,
+   9,
+   10,
+   11
+  ],
+  "struck": 26,
+  "glued": 12,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 6057,
+  "family_key": "nc-progress-leaf-600",
+  "charges": 136,
+  "pages": [
+   3,
+   4,
+   5,
+   6,
+   7
+  ],
+  "struck": 114,
+  "glued": 25,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 6058,
+  "family_key": "nc-progress-leaf-601",
+  "charges": 9,
+  "pages": [
+   5,
+   6,
+   7
+  ],
+  "struck": 30,
+  "glued": 0,
+  "fingerprint": true,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 6059,
+  "family_key": "nc-progress-leaf-601",
+  "charges": 10,
+  "pages": [
+   2,
+   3,
+   4,
+   8,
+   9,
+   10,
+   11,
+   12,
+   18
+  ],
+  "struck": 154,
+  "glued": 28,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 6079,
+  "family_key": "nc-progress-leaf-613",
+  "charges": 2,
+  "pages": [
+   89,
+   90,
+   91,
+   92,
+   93
+  ],
+  "struck": 23,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 6082,
+  "family_key": "nc-progress-leaf-642",
+  "charges": 1,
+  "pages": [
+   7,
+   8,
+   9
+  ],
+  "struck": 52,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 6428,
+  "family_key": "nc-progress-leaf-602",
+  "charges": 8,
+  "pages": [
+   154
+  ],
+  "struck": 14,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 6548,
+  "family_key": "nc-progress-leaf-600",
+  "charges": 137,
+  "pages": [
+   2,
+   4,
+   5,
+   6,
+   7,
+   8,
+   14
+  ],
+  "struck": 116,
+  "glued": 20,
+  "fingerprint": true,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 6607,
+  "family_key": "nc-progress-leaf-610",
+  "charges": 3,
+  "pages": [
+   29
+  ],
+  "struck": 2,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "moderate (1-2 struck spans / strike flags)"
+ },
+ {
+  "tariff_version_id": 6614,
+  "family_key": "nc-progress-leaf-532",
+  "charges": 5,
+  "pages": [
+   118,
+   119,
+   120,
+   121
+  ],
+  "struck": 23,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 6734,
+  "family_key": "nc-carolinas-rider-RIDERCPRE",
+  "charges": 12,
+  "pages": [
+   3
+  ],
+  "struck": 29,
+  "glued": 3,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 6737,
+  "family_key": "nc-carolinas-rider-SUMMARY",
+  "charges": 46,
+  "pages": [
+   6,
+   7,
+   8
+  ],
+  "struck": 55,
+  "glued": 6,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 6738,
+  "family_key": "nc-carolinas-schedule-OL",
+  "charges": 86,
+  "pages": [
+   1,
+   2,
+   3,
+   4
+  ],
+  "struck": 30,
+  "glued": 12,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 6744,
+  "family_key": "nc-progress-leaf-574",
+  "charges": 5,
+  "pages": [
+   71,
+   72,
+   73,
+   74,
+   75,
+   76,
+   77,
+   78,
+   79,
+   80,
+   81,
+   82,
+   83,
+   84,
+   85,
+   86,
+   87,
+   88,
+   89,
+   90,
+   91,
+   92,
+   93,
+   94,
+   95,
+   96,
+   97,
+   98
+  ],
+  "struck": 314,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 6749,
+  "family_key": "nc-progress-leaf-663",
+  "charges": 3,
+  "pages": [
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   17,
+   18,
+   19,
+   20,
+   21,
+   22
+  ],
+  "struck": 37,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 6751,
+  "family_key": "nc-progress-leaf-674",
+  "charges": 1,
+  "pages": [
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   18,
+   19,
+   20,
+   21,
+   22,
+   23,
+   24,
+   25,
+   26,
+   27
+  ],
+  "struck": 111,
+  "glued": 26,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 6814,
+  "family_key": "nc-progress-leaf-602",
+  "charges": 8,
+  "pages": [
+   249,
+   253
+  ],
+  "struck": 0,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "weak (coloured insertion only)"
+ },
+ {
+  "tariff_version_id": 6824,
+  "family_key": "nc-progress-leaf-528",
+  "charges": 32,
+  "pages": [
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   20,
+   21,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47,
+   48,
+   49,
+   50
+  ],
+  "struck": 363,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 6826,
+  "family_key": "nc-progress-leaf-532",
+  "charges": 2,
+  "pages": [
+   52,
+   53,
+   54,
+   55
+  ],
+  "struck": 31,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 6827,
+  "family_key": "nc-progress-leaf-532",
+  "charges": 1,
+  "pages": [
+   53,
+   54,
+   55,
+   56
+  ],
+  "struck": 32,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 6831,
+  "family_key": "nc-progress-leaf-535",
+  "charges": 17,
+  "pages": [
+   56,
+   57,
+   58,
+   59,
+   60,
+   61,
+   62,
+   63,
+   64,
+   65,
+   66,
+   67,
+   68,
+   69,
+   70
+  ],
+  "struck": 96,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 6924,
+  "family_key": "nc-progress-leaf-663",
+  "charges": 4,
+  "pages": [
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   18,
+   19,
+   20,
+   21,
+   22,
+   23
+  ],
+  "struck": 73,
+  "glued": 9,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 6927,
+  "family_key": "nc-progress-leaf-600",
+  "charges": 136,
+  "pages": [
+   1,
+   2,
+   3,
+   4,
+   5
+  ],
+  "struck": 115,
+  "glued": 25,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 6930,
+  "family_key": "nc-progress-leaf-605",
+  "charges": 4,
+  "pages": [
+   10,
+   11,
+   12,
+   13
+  ],
+  "struck": 19,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 7198,
+  "family_key": "nc-progress-leaf-532",
+  "charges": 4,
+  "pages": [
+   11
+  ],
+  "struck": 2,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "moderate (1-2 struck spans / strike flags)"
+ },
+ {
+  "tariff_version_id": 7199,
+  "family_key": "nc-progress-leaf-533",
+  "charges": 9,
+  "pages": [
+   19
+  ],
+  "struck": 1,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "moderate (1-2 struck spans / strike flags)"
+ },
+ {
+  "tariff_version_id": 7200,
+  "family_key": "nc-progress-leaf-536",
+  "charges": 6,
+  "pages": [
+   29
+  ],
+  "struck": 2,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "moderate (1-2 struck spans / strike flags)"
+ },
+ {
+  "tariff_version_id": 7206,
+  "family_key": "nc-progress-leaf-536",
+  "charges": 6,
+  "pages": [
+   29
+  ],
+  "struck": 2,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "moderate (1-2 struck spans / strike flags)"
+ },
+ {
+  "tariff_version_id": 7207,
+  "family_key": "nc-progress-leaf-533",
+  "charges": 9,
+  "pages": [
+   19
+  ],
+  "struck": 1,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "moderate (1-2 struck spans / strike flags)"
+ },
+ {
+  "tariff_version_id": 7208,
+  "family_key": "nc-progress-leaf-532",
+  "charges": 4,
+  "pages": [
+   11
+  ],
+  "struck": 2,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "moderate (1-2 struck spans / strike flags)"
+ },
+ {
+  "tariff_version_id": 7235,
+  "family_key": "nc-carolinas-rider-EDIT4",
+  "charges": 4,
+  "pages": [
+   7
+  ],
+  "struck": 10,
+  "glued": 0,
+  "fingerprint": true,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 7241,
+  "family_key": "nc-carolinas-rider-RIDEREDIT3",
+  "charges": 4,
+  "pages": [
+   5
+  ],
+  "struck": 10,
+  "glued": 0,
+  "fingerprint": true,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 7242,
+  "family_key": "nc-carolinas-rider-RIDERLC",
+  "charges": 12,
+  "pages": [
+   20,
+   21,
+   22,
+   23,
+   24
+  ],
+  "struck": 102,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 7244,
+  "family_key": "nc-carolinas-rider-SUMMARY",
+  "charges": 104,
+  "pages": [
+   10,
+   11
+  ],
+  "struck": 25,
+  "glued": 2,
+  "fingerprint": true,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 7245,
+  "family_key": "nc-carolinas-schedule-BC",
+  "charges": 3,
+  "pages": [
+   1,
+   2
+  ],
+  "struck": 16,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 7246,
+  "family_key": "nc-carolinas-schedule-HLF",
+  "charges": 2,
+  "pages": [
+   1,
+   2,
+   3
+  ],
+  "struck": 22,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 7248,
+  "family_key": "nc-carolinas-schedule-I",
+  "charges": 7,
+  "pages": [
+   1,
+   2,
+   3
+  ],
+  "struck": 25,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 7249,
+  "family_key": "nc-carolinas-schedule-LGS",
+  "charges": 7,
+  "pages": [
+   1,
+   2,
+   3
+  ],
+  "struck": 25,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 7250,
+  "family_key": "nc-carolinas-schedule-PL",
+  "charges": 34,
+  "pages": [
+   1,
+   2,
+   3,
+   4
+  ],
+  "struck": 30,
+  "glued": 4,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 7253,
+  "family_key": "nc-carolinas-schedule-SGS",
+  "charges": 5,
+  "pages": [
+   1,
+   2,
+   3
+  ],
+  "struck": 25,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 7265,
+  "family_key": "nc-progress-leaf-600",
+  "charges": 123,
+  "pages": [
+   11,
+   12,
+   13,
+   14,
+   15
+  ],
+  "struck": 131,
+  "glued": 5,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 7267,
+  "family_key": "nc-progress-leaf-601",
+  "charges": 7,
+  "pages": [
+   2,
+   3,
+   4,
+   8
+  ],
+  "struck": 63,
+  "glued": 8,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 7276,
+  "family_key": "nc-progress-leaf-607",
+  "charges": 13,
+  "pages": [
+   7,
+   8,
+   9
+  ],
+  "struck": 15,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 7284,
+  "family_key": "nc-progress-leaf-654",
+  "charges": 1,
+  "pages": [
+   174,
+   175,
+   176,
+   177,
+   178,
+   179,
+   180,
+   181
+  ],
+  "struck": 35,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 7285,
+  "family_key": "nc-progress-leaf-668",
+  "charges": 2,
+  "pages": [
+   21,
+   22,
+   23
+  ],
+  "struck": 22,
+  "glued": 3,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 7287,
+  "family_key": "nc-progress-leaf-669",
+  "charges": 2,
+  "pages": [
+   3,
+   4,
+   5
+  ],
+  "struck": 30,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ },
+ {
+  "tariff_version_id": 7289,
+  "family_key": "nc-progress-leaf-670",
+  "charges": 7,
+  "pages": [
+   35,
+   36,
+   37
+  ],
+  "struck": 10,
+  "glued": 0,
+  "fingerprint": false,
+  "grade": "strong (glued revision text or >=3 struck spans)"
+ }
+]
