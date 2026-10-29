@@ -1,0 +1,28 @@
+{
+  "new": 185,
+  "gaps": 70,
+  "strength_changes": [
+    [
+      387,
+      "full",
+      "partial",
+      true,
+      "no_text_layer"
+    ],
+    [
+      389,
+      "full",
+      "partial",
+      true,
+      "no_text_layer"
+    ],
+    [
+      527,
+      "full",
+      "partial",
+      true,
+      "no_text_layer"
+    ]
+  ],
+  "existing_verified_links": 45
+}

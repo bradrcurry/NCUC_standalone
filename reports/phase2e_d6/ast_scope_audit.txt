@@ -1,0 +1,142 @@
+{
+  "base": "7dc5caa",
+  "staged_files": 55,
+  "python_symbols": [
+    {
+      "file": "bench/ncuc_discovery_evidence.py",
+      "new": [
+        "open_snapshot",
+        "table_fingerprints",
+        "main"
+      ],
+      "existing_changed": [],
+      "removed": [],
+      "sha256": "d36f3cca53792fc6b0f9bf03f90aab24c1f9f04ec21907b73a2c64849a4d38ca"
+    },
+    {
+      "file": "src/duke_rates/db/document_relationship_schema.py",
+      "new": [
+        "document_relationship_usage"
+      ],
+      "existing_changed": [],
+      "removed": [],
+      "sha256": "6665eff8e1363dacf150508bde6e072c60dc249a9c9bb85194aef9b7babd9216"
+    },
+    {
+      "file": "src/duke_rates/db/provenance_schema.py",
+      "new": [],
+      "existing_changed": [
+        "ensure_provenance_schema",
+        "provenance_usage"
+      ],
+      "removed": [],
+      "sha256": "f4c963bcc612c1580198c67fad82c31242714a402084380ec8c5a9a159960a87"
+    },
+    {
+      "file": "src/duke_rates/download/storage.py",
+      "new": [
+        "verified_pdf_sha256",
+        "preserve_pdf_blob"
+      ],
+      "existing_changed": [],
+      "removed": [],
+      "sha256": "4421033ab4318e3af9edddf586e0c6f497c6c3ff6a28495de2e834101f950f37"
+    },
+    {
+      "file": "src/duke_rates/historical/ncuc/clue_ledger.py",
+      "new": [],
+      "existing_changed": [
+        "clue_uid",
+        "write_page_clues"
+      ],
+      "removed": [],
+      "sha256": "47e7c199d88d06f52b58403ccefb1c562ca86c33396cf9b4dfe58fa3e0ac575c"
+    },
+    {
+      "file": "src/duke_rates/historical/ncuc/clue_lineage.py",
+      "new": [],
+      "existing_changed": [
+        "_evaluate_target",
+        "_local_order_exists",
+        "rebuild_lineage"
+      ],
+      "removed": [],
+      "sha256": "d79f9007ed14462341ab16759b406404cb8a8720d11c34c994aeb2448ff97c19"
+    },
+    {
+      "file": "src/duke_rates/historical/ncuc/document_references.py",
+      "new": [
+        "extract_document_references",
+        "order_reference_index"
+      ],
+      "existing_changed": [],
+      "removed": [],
+      "sha256": "56650a469d937a861ad31559fc31a877e86cfac00c627e0f6d9a6539ac0639d3"
+    },
+    {
+      "file": "src/duke_rates/historical/ncuc/document_relationships.py",
+      "new": [
+        "build_document_relationships"
+      ],
+      "existing_changed": [],
+      "removed": [],
+      "sha256": "44baebfde70fcc259b336a24866da2bd1b98fe6dfb22e7a87b6bd9bef5e5ef35"
+    },
+    {
+      "file": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+      "new": [
+        "_prior_local_attempt"
+      ],
+      "existing_changed": [
+        "archive_state",
+        "build_archive_index",
+        "resolve_gaps_locally",
+        "_search_pages",
+        "_resolve_order_gap",
+        "_update_status"
+      ],
+      "removed": [],
+      "sha256": "a1ad1626295f3e462a3c0c94bdd520c80825acd260dfaf0719cbd98ef5e724d9"
+    },
+    {
+      "file": "src/duke_rates/historical/ncuc/remote_discovery.py",
+      "new": [],
+      "existing_changed": [
+        "local_search_complete",
+        "plan_network_searches",
+        "check_identity",
+        "retrieve_and_check",
+        "review_candidate"
+      ],
+      "removed": [],
+      "sha256": "a71f0f3d800a7d28319cec781d8a03d449b0f891da16474eaf43d7add2943e18"
+    },
+    {
+      "file": "tests/test_d6_evidence_discovery.py",
+      "new": [
+        "test_cache_invalidates_in_place_text_catalog_and_source_changes",
+        "test_unavailable_candidate_is_incomplete_and_retried",
+        "test_multi_docket_exact_evidence_preserves_filing_identity_and_reviews",
+        "test_blob_preserves_bytes_deduplicates_and_refuses_conflict",
+        "test_relationship_reviews_survive_rebuild_and_block_drop",
+        "test_schema_upgrade_is_additive_and_idempotent",
+        "test_proposed_header_cannot_verify_actual_supersession",
+        "test_incomplete_local_attempt_can_plan_targeted_fallback",
+        "test_order_negative_cache_does_not_cross_connections_or_catalog_updates",
+        "test_explicit_implements_statement_retains_quote_without_approval",
+        "test_retrieval_rechecks_cached_bytes_and_archives_originals",
+        "test_stale_higher_artifact_version_cannot_hide_current_file_identity",
+        "test_unchanged_repeat_does_not_build_page_index",
+        "test_proposed_revision_relationship_is_retained_without_actual_supersession",
+        "test_research_benchmark_refuses_production_and_hardlink_alias_before_open",
+        "test_blank_order_page_is_incomplete_coverage"
+      ],
+      "existing_changed": [],
+      "removed": [],
+      "sha256": "e2932be01cc6a2e153b4c1ab3637ac4284d8db6d5c66e5551f380b4ce46b5fab"
+    }
+  ],
+  "numerical_parser_or_billing_files_changed": false,
+  "database_or_archive_bytes_staged": [],
+  "existing_functions_changed": 18
+}

@@ -1,0 +1,155 @@
+{
+  "read_only_comparison": true,
+  "canonical_and_review_queue": {
+    "historical_documents": {
+      "before": {
+        "rows": 682,
+        "sha256": "60517538be2936195f7f2b09d8bbd4742dde607ef3ddd7c53c23a097150c386f"
+      },
+      "after": {
+        "rows": 682,
+        "sha256": "60517538be2936195f7f2b09d8bbd4742dde607ef3ddd7c53c23a097150c386f"
+      }
+    },
+    "tariff_versions": {
+      "before": {
+        "rows": 988,
+        "sha256": "9bf86b9b6f0e4527ddf58e0247f4da8716b64f25468cbcefd54cd1b7388d19f3"
+      },
+      "after": {
+        "rows": 988,
+        "sha256": "9bf86b9b6f0e4527ddf58e0247f4da8716b64f25468cbcefd54cd1b7388d19f3"
+      }
+    },
+    "tariff_families": {
+      "before": {
+        "rows": 756,
+        "sha256": "22e88b24c8f300cd5c435cf868c447cb3f76be20ad118a13a831cb7b4407f065"
+      },
+      "after": {
+        "rows": 756,
+        "sha256": "22e88b24c8f300cd5c435cf868c447cb3f76be20ad118a13a831cb7b4407f065"
+      }
+    },
+    "tariff_charges": {
+      "before": {
+        "rows": 5198,
+        "sha256": "a37f23f99f8ffffb5a2b8bdbef2d11b54418eaf0193219edf5823d8e3b6c2555"
+      },
+      "after": {
+        "rows": 5198,
+        "sha256": "a37f23f99f8ffffb5a2b8bdbef2d11b54418eaf0193219edf5823d8e3b6c2555"
+      }
+    },
+    "rider_summary_blocks": {
+      "before": {
+        "rows": 365,
+        "sha256": "d67d453b87cf364fbba42541638a362e5eb7695d713e06b6d9fa9edae8bfc001"
+      },
+      "after": {
+        "rows": 365,
+        "sha256": "d67d453b87cf364fbba42541638a362e5eb7695d713e06b6d9fa9edae8bfc001"
+      }
+    },
+    "rider_line_items": {
+      "before": {
+        "rows": 8003,
+        "sha256": "0f6609476ad7b4b0c40f689e09dddc215f4b536387494c83ac6d905d7a4677a8"
+      },
+      "after": {
+        "rows": 8003,
+        "sha256": "0f6609476ad7b4b0c40f689e09dddc215f4b536387494c83ac6d905d7a4677a8"
+      }
+    },
+    "evidence_review_items": {
+      "before": {
+        "rows": 248,
+        "sha256": "951db5322a9f3f30a119f1b844dddef722d40e9b1769fd5ab3470b4760900222"
+      },
+      "after": {
+        "rows": 248,
+        "sha256": "951db5322a9f3f30a119f1b844dddef722d40e9b1769fd5ab3470b4760900222"
+      }
+    }
+  },
+  "prior_review_decisions": {
+    "regulatory_clues": {
+      "columns": [
+        "clue_uid",
+        "verification_status",
+        "verified_by",
+        "verified_at",
+        "verification_ref"
+      ],
+      "prior_rows_checked": 30027,
+      "missing_or_changed_ids": []
+    },
+    "lineage_links": {
+      "columns": [
+        "link_uid",
+        "human_review",
+        "reviewed_by",
+        "reviewed_at",
+        "review_note"
+      ],
+      "prior_rows_checked": 201,
+      "missing_or_changed_ids": []
+    },
+    "gap_candidates": {
+      "columns": [
+        "candidate_uid",
+        "verification_status"
+      ],
+      "prior_rows_checked": 628,
+      "missing_or_changed_ids": []
+    },
+    "lineage_gaps_typed": {
+      "columns": [
+        "gap_uid",
+        "status",
+        "status_reason"
+      ],
+      "prior_rows_checked": 16,
+      "missing_or_changed_ids": []
+    }
+  },
+  "all_tables_equal": true,
+  "reviews_preserved": true,
+  "final_repeat": {
+    "stats": {
+      "repeated_searches_avoided": 370,
+      "gaps_not_locally_searchable": 278,
+      "gaps_without_searchable_target": 43
+    },
+    "archive_state": {
+      "native_page_artifacts": 153911,
+      "max_page_artifact_id": 362970,
+      "evidence_sha256": "d726e928bd3b6b64ec74d45289d3e89e61e4059f844f1211827fefad0be773e4",
+      "extractor": "1.1.0",
+      "page_evidence": "page_redline_evidence@1.1.0",
+      "document_references": "1.0.0"
+    },
+    "pages_indexed": 0
+  },
+  "repeat_seconds": 12.131830600003013,
+  "relationships": {
+    "active": 4087,
+    "counts": [
+      {
+        "kind": "approved_by",
+        "status": "candidate",
+        "n": 339
+      },
+      {
+        "kind": "clean_counterpart_of",
+        "status": "candidate",
+        "n": 27
+      },
+      {
+        "kind": "references",
+        "status": "candidate",
+        "n": 3721
+      }
+    ]
+  }
+}

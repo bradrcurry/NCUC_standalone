@@ -1,0 +1,11 @@
+{
+  "current_candidates": 813,
+  "new_candidates": 185,
+  "canonical_preserved": true,
+  "canonical_matches_baseline": true,
+  "timings": {
+    "local_resolution": 205.60251260001678,
+    "unchanged_repeat": 11.698044799995841,
+    "network_planning": 9.465047299978323
+  }
+}

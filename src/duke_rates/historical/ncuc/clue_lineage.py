@@ -36,7 +36,7 @@ from datetime import UTC, date, datetime, timedelta
 
 from duke_rates.historical.ncuc.regulatory_clues import revision_display
 
-BUILDER_VERSION = "clue_lineage@1.0.0"
+BUILDER_VERSION = "clue_lineage@1.1.0"
 VERIFICATION_RULE = "same_family+printed_revision_match+utility+effective_order+ordinal_order@1"
 _LEAF_FAMILY_RE = re.compile(r"-leaf-([0-9]+[a-z]?(?:-[0-9]+)?)$", re.I)
 
@@ -356,6 +356,11 @@ def build_lineage_links(conn: sqlite3.Connection, versions: dict[int, VersionEvi
 
 def _evaluate_target(ev, key, family, by_token, multiple_targets):
     checks: dict = {"multiple_supersedes_targets_on_sheet": multiple_targets}
+    if any(m.get("marker") == "proposed_header" for m in ev.redline_markers):
+        checks.update(
+            {"proposed_header": True, "reason": "proposed revision is not actual supersession"}
+        )
+        return "candidate", None, None, checks
     if key[0] == "unresolvable":
         checks["reason"] = "printed reference is a redline glue or not a leaf/schedule identifier"
         return "explicit_unresolved", None, None, checks
@@ -369,7 +374,9 @@ def _evaluate_target(ev, key, family, by_token, multiple_targets):
     checks["successor_effective"] = [successor_date, successor_date_source]
     in_family = [p for p in family if p.id != ev.id and key in p.identities]
     checks["predecessors_in_family"] = [p.id for p in in_family]
-    other_families = sorted({p.family_key for p in by_token.get(key, []) if p.family_key != ev.family_key})
+    other_families = sorted(
+        {p.family_key for p in by_token.get(key, []) if p.family_key != ev.family_key}
+    )
     if other_families:
         checks["revision_found_in_other_families"] = other_families
     if multiple_targets:
@@ -383,22 +390,43 @@ def _evaluate_target(ev, key, family, by_token, multiple_targets):
         pred_date, pred_source = p.effective()
         date_order = None if not (pred_date and successor_date) else pred_date < successor_date
         utility_ok = not (p.utilities and ev.utilities) or bool(p.utilities & ev.utilities)
-        evaluated.append({"version_id": p.id, "effective": [pred_date, pred_source], "date_order": date_order,
-                          "utility_match": utility_ok, "revision_clue_ids": p.identities[key]})
+        evaluated.append(
+            {
+                "version_id": p.id,
+                "effective": [pred_date, pred_source],
+                "date_order": date_order,
+                "utility_match": utility_ok,
+                "revision_clue_ids": p.identities[key],
+                "proposed_header": any(
+                    m.get("marker") == "proposed_header" for m in p.redline_markers
+                ),
+            }
+        )
     checks["evaluated"] = evaluated
-    full = [e for e in evaluated if e["date_order"] is True and e["utility_match"]
-            and checks.get("successor_ordinal_after_target", True)]
+    full = [
+        e
+        for e in evaluated
+        if e["date_order"] is True
+        and e["utility_match"]
+        and checks.get("successor_ordinal_after_target", True)
+        and not e["proposed_header"]
+    ]
     if any(e["date_order"] is False for e in evaluated) and not full:
-        checks["reason"] = "the version carrying the printed predecessor revision is not dated earlier"
+        checks["reason"] = (
+            "the version carrying the printed predecessor revision is not dated earlier"
+        )
         return "conflict", None, None, checks
     if len(full) == 1:
         return "verified", full[0]["version_id"], full[0]["revision_clue_ids"][0], checks
     if len(full) > 1:
         dates = {e["effective"][0] for e in full}
-        checks["reason"] = ("several versions carry the printed predecessor revision"
-                            + ("" if len(dates) == 1 else " with different effective dates"))
+        checks["reason"] = "several versions carry the printed predecessor revision" + (
+            "" if len(dates) == 1 else " with different effective dates"
+        )
         return "candidate", None, None, checks
-    checks["reason"] = "predecessor revision present but an order/utility check could not be satisfied"
+    checks["reason"] = (
+        "predecessor revision present but an order/utility check could not be satisfied"
+    )
     return "candidate", None, None, checks
 
 
@@ -612,17 +640,13 @@ def _sheet_text_present(ev: VersionEvidence) -> bool:
                if c.role != "index")
 
 
-_ORDER_CACHE: dict[str, bool] = {}
-
-
 def _local_order_exists(conn: sqlite3.Connection, docket: str) -> bool:
-    if docket in _ORDER_CACHE:
-        return _ORDER_CACHE[docket]
     m = re.match(r"([A-Z]+-\d+) Sub (\d+)", docket)
     found = False
     if m:
-        found = conn.execute(
-            """
+        found = (
+            conn.execute(
+                """
             SELECT 1 FROM ncuc_discovery_records
             WHERE REPLACE(REPLACE(UPPER(COALESCE(docket_number, '')), ' ', ''), ',', '') IN (?, ?)
               AND (COALESCE(sub_number, '') = ? OR UPPER(COALESCE(docket_number, '')) LIKE ?)
@@ -631,9 +655,10 @@ def _local_order_exists(conn: sqlite3.Connection, docket: str) -> bool:
               AND fetch_status IN ('fetched', 'downloaded', 'success', 'ok')
             LIMIT 1
             """,
-            (m.group(1), f"{m.group(1)}SUB{m.group(2)}", m.group(2), f"%SUB%{m.group(2)}"),
-        ).fetchone() is not None
-    _ORDER_CACHE[docket] = found
+                (m.group(1), f"{m.group(1)}SUB{m.group(2)}", m.group(2), f"%SUB%{m.group(2)}"),
+            ).fetchone()
+            is not None
+        )
     return found
 
 
@@ -685,7 +710,11 @@ def rebuild_lineage(conn: sqlite3.Connection) -> dict:
     links = build_lineage_links(conn, versions)
     versions = load_version_evidence(conn)
     gaps = build_typed_gaps(conn, versions)
+    from duke_rates.historical.ncuc.document_relationships import build_document_relationships
+
+    relationships = build_document_relationships(conn)
     return {
+        "document_relationships": relationships,
         "versions_with_scanned_pages": len(with_pages),
         "identity_status": dict(identity),
         "links": links,

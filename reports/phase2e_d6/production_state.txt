@@ -1,0 +1,9 @@
+{
+  "read_only_file_hash": true,
+  "size_bytes": 5845692416,
+  "mtime_ns": 1793255717771976700,
+  "sha256": "0f6f8f3551f21908533019c5f568d49e254fdd0149fa65ceedef9aa37031b6ca",
+  "unchanged_during_hash": true,
+  "matches_post_d4_incident": true,
+  "overall_production_preservation_gate": "FAILED: D4 preflight incident; matching the post-incident state does not undo it"
+}

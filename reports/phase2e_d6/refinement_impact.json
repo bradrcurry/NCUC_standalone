@@ -1,0 +1,250 @@
+[
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "test_unavailable_candidate_is_incomplete_and_retried",
+        "direction": "upstream",
+        "repo": "duke-standalone",
+        "file_path": "tests/test_d6_evidence_discovery.py"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Function:tests/test_d6_evidence_discovery.py:test_unavailable_candidate_is_incomplete_and_retried",
+        "name": "test_unavailable_candidate_is_incomplete_and_retried",
+        "type": "Function",
+        "filePath": "tests/test_d6_evidence_discovery.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 0,
+      "risk": "UNKNOWN",
+      "riskSharedAxes": "UNKNOWN",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "riskNote": "No callers resolved. Absence of edges is not evidence the symbol is unused: a caller reaching it through a reference class this index does not record — plain-object property access, a bare-identifier read of a module-scope const — produces no edge to find. Confirm with a text search before treating the change as safe.",
+      "epistemic": "exact",
+      "summary": {
+        "direct": 0,
+        "processes_affected": 0,
+        "modules_affected": 0
+      },
+      "byDepthCounts": {},
+      "affected_processes": [],
+      "affected_modules": [],
+      "byDepth": {}
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "test_schema_upgrade_is_additive_and_idempotent",
+        "direction": "upstream",
+        "repo": "duke-standalone",
+        "file_path": "tests/test_d6_evidence_discovery.py"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Function:tests/test_d6_evidence_discovery.py:test_schema_upgrade_is_additive_and_idempotent",
+        "name": "test_schema_upgrade_is_additive_and_idempotent",
+        "type": "Function",
+        "filePath": "tests/test_d6_evidence_discovery.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 0,
+      "risk": "UNKNOWN",
+      "riskSharedAxes": "UNKNOWN",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "riskNote": "No callers resolved. Absence of edges is not evidence the symbol is unused: a caller reaching it through a reference class this index does not record — plain-object property access, a bare-identifier read of a module-scope const — produces no edge to find. Confirm with a text search before treating the change as safe.",
+      "epistemic": "exact",
+      "summary": {
+        "direct": 0,
+        "processes_affected": 0,
+        "modules_affected": 0
+      },
+      "byDepthCounts": {},
+      "affected_processes": [],
+      "affected_modules": [],
+      "byDepth": {}
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "test_multi_docket_exact_evidence_preserves_filing_identity_and_reviews",
+        "direction": "upstream",
+        "repo": "duke-standalone",
+        "file_path": "tests/test_d6_evidence_discovery.py"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Function:tests/test_d6_evidence_discovery.py:test_multi_docket_exact_evidence_preserves_filing_identity_and_reviews",
+        "name": "test_multi_docket_exact_evidence_preserves_filing_identity_and_reviews",
+        "type": "Function",
+        "filePath": "tests/test_d6_evidence_discovery.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 0,
+      "risk": "UNKNOWN",
+      "riskSharedAxes": "UNKNOWN",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "riskNote": "No callers resolved. Absence of edges is not evidence the symbol is unused: a caller reaching it through a reference class this index does not record — plain-object property access, a bare-identifier read of a module-scope const — produces no edge to find. Confirm with a text search before treating the change as safe.",
+      "epistemic": "exact",
+      "summary": {
+        "direct": 0,
+        "processes_affected": 0,
+        "modules_affected": 0
+      },
+      "byDepthCounts": {},
+      "affected_processes": [],
+      "affected_modules": [],
+      "byDepth": {}
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "test_retrieval_rechecks_cached_bytes_and_archives_originals",
+        "direction": "upstream",
+        "repo": "duke-standalone",
+        "file_path": "tests/test_d6_evidence_discovery.py"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Function:tests/test_d6_evidence_discovery.py:test_retrieval_rechecks_cached_bytes_and_archives_originals",
+        "name": "test_retrieval_rechecks_cached_bytes_and_archives_originals",
+        "type": "Function",
+        "filePath": "tests/test_d6_evidence_discovery.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 0,
+      "risk": "UNKNOWN",
+      "riskSharedAxes": "UNKNOWN",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "riskNote": "No callers resolved. Absence of edges is not evidence the symbol is unused: a caller reaching it through a reference class this index does not record — plain-object property access, a bare-identifier read of a module-scope const — produces no edge to find. Confirm with a text search before treating the change as safe.",
+      "epistemic": "exact",
+      "summary": {
+        "direct": 0,
+        "processes_affected": 0,
+        "modules_affected": 0
+      },
+      "byDepthCounts": {},
+      "affected_processes": [],
+      "affected_modules": [],
+      "byDepth": {}
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "_prior_local_attempt",
+        "direction": "upstream",
+        "repo": "duke-standalone",
+        "file_path": "src/duke_rates/historical/ncuc/local_gap_resolution.py"
+      }
+    },
+    "result": {
+      "error": "Target '_prior_local_attempt' not found",
+      "target": {
+        "name": "_prior_local_attempt"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "BUILDER_VERSION",
+        "direction": "upstream",
+        "repo": "duke-standalone",
+        "file_path": "src/duke_rates/historical/ncuc/clue_lineage.py"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Variable:src/duke_rates/historical/ncuc/clue_lineage.py:BUILDER_VERSION",
+        "name": "BUILDER_VERSION",
+        "type": "Variable",
+        "filePath": "src/duke_rates/historical/ncuc/clue_lineage.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 0,
+      "risk": "UNKNOWN",
+      "riskSharedAxes": "UNKNOWN",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "riskNote": "No callers resolved. Absence of edges is not evidence the symbol is unused: a caller reaching it through a reference class this index does not record — plain-object property access, a bare-identifier read of a module-scope const — produces no edge to find. Confirm with a text search before treating the change as safe.",
+      "epistemic": "exact",
+      "summary": {
+        "direct": 0,
+        "processes_affected": 0,
+        "modules_affected": 0
+      },
+      "byDepthCounts": {},
+      "affected_processes": [],
+      "affected_modules": [],
+      "byDepth": {}
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "_ORDER_CACHE",
+        "direction": "upstream",
+        "repo": "duke-standalone",
+        "file_path": "src/duke_rates/historical/ncuc/clue_lineage.py"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Property:src/duke_rates/historical/ncuc/clue_lineage.py:_ORDER_CACHE",
+        "name": "_ORDER_CACHE",
+        "type": "",
+        "filePath": "src/duke_rates/historical/ncuc/clue_lineage.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 0,
+      "risk": "UNKNOWN",
+      "riskSharedAxes": "UNKNOWN",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "riskNote": "No callers resolved. Absence of edges is not evidence the symbol is unused: a caller reaching it through a reference class this index does not record — plain-object property access, a bare-identifier read of a module-scope const — produces no edge to find. Confirm with a text search before treating the change as safe.",
+      "epistemic": "exact",
+      "summary": {
+        "direct": 0,
+        "processes_affected": 0,
+        "modules_affected": 0
+      },
+      "byDepthCounts": {},
+      "affected_processes": [],
+      "affected_modules": [],
+      "byDepth": {}
+    }
+  }
+]

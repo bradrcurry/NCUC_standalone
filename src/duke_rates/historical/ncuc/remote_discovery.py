@@ -48,7 +48,7 @@ from typing import Any, Callable
 
 from duke_rates.historical.ncuc.search_ledger import SearchLedger, canonical_params
 
-PLANNER_VERSION = "remote_discovery@1.2.0"
+PLANNER_VERSION = "remote_discovery@1.3.0"
 #: D3: docket-scoped orders come from the docket's own document inventory (resolve the DocketId,
 #: list DocketDetails, keep order rows): channel ``portal_orders``, ``params["method"] ==
 #: "docket_inventory"``. The D2 form of that channel (DocumentParamSearch with an ORDER filter and
@@ -112,14 +112,21 @@ class PlannedQuery:
                 "priority": list(self.priority), "status": self.status, "targets": self.targets}
 
 
-def local_search_complete(conn: sqlite3.Connection, gap_id: int) -> bool:
+def local_search_complete(
+    conn: sqlite3.Connection,
+    gap_id: int,
+    *,
+    state: dict | None = None,
+    allow_incomplete: bool = False,
+) -> bool:
     """A completed ``local`` attempt for this gap against the current archive state and resolver."""
     from duke_rates.historical.ncuc.local_gap_resolution import RESOLVER_VERSION, archive_state
 
-    state = archive_state(conn)
+    state = archive_state(conn) if state is None else state
     for (params_json,) in conn.execute(
         "SELECT params_json FROM search_attempts WHERE gap_id = ? AND channel = 'local' "
-        "AND outcome IN ('hits', 'no_results')", (gap_id,)
+        "AND (outcome IN ('hits', 'no_results') OR (? AND outcome='incomplete'))",
+        (gap_id, allow_incomplete),
     ):
         params = json.loads(params_json)["params"]
         if params.get("resolver") == RESOLVER_VERSION.lower() and params.get("archive_state") == {
@@ -167,37 +174,65 @@ def _add(queries: dict, channel: str, params: dict, priority: tuple, target: dic
     q.targets.append(target)
 
 
-def plan_network_searches(conn: sqlite3.Connection, *, include_blank_order_clues: bool = True,
-                          include_inferred: bool = True) -> dict:
+def plan_network_searches(
+    conn: sqlite3.Connection,
+    *,
+    include_blank_order_clues: bool = True,
+    include_inferred: bool = True,
+) -> dict:
     """Plan every network query the gap inventory justifies. Read-only."""
-    from duke_rates.historical.ncuc.local_gap_resolution import reconciled_window
+    from duke_rates.historical.ncuc.local_gap_resolution import archive_state, reconciled_window
 
+    state = archive_state(conn)
     queries: dict[str, PlannedQuery] = {}
     skipped: dict[str, int] = defaultdict(int)
     gaps = conn.execute(
-        "SELECT * FROM lineage_gaps_typed WHERE active = 1 AND status = 'searched_not_found' ORDER BY id"
+        "SELECT * FROM lineage_gaps_typed WHERE active = 1 AND status IN ('searched_not_found','open') ORDER BY id"
     ).fetchall()
     for gap in gaps:
         if gap["evidence_basis"] == "inferred" and not include_inferred:
             skipped["inferred_excluded"] += 1
             continue
-        if not local_search_complete(conn, gap["id"]):
+        if not local_search_complete(conn, gap["id"], state=state, allow_incomplete=True):
             skipped["local_search_not_complete"] += 1
             continue
-        rank = (0 if gap["evidence_basis"] == "explicit" else 1, _TYPE_RANK.get(gap["gap_type"], 9), gap["id"])
-        target = {"gap_id": gap["id"], "gap_uid": gap["gap_uid"], "gap_type": gap["gap_type"],
-                  "basis": gap["evidence_basis"], "family_key": gap["family_key"], "utility": gap["utility"],
-                  "expected_revision": gap["expected_revision"]}
+        rank = (
+            0 if gap["evidence_basis"] == "explicit" else 1,
+            _TYPE_RANK.get(gap["gap_type"], 9),
+            gap["id"],
+        )
+        target = {
+            "gap_id": gap["id"],
+            "gap_uid": gap["gap_uid"],
+            "gap_type": gap["gap_type"],
+            "basis": gap["evidence_basis"],
+            "family_key": gap["family_key"],
+            "utility": gap["utility"],
+            "expected_revision": gap["expected_revision"],
+            "local_search_complete": local_search_complete(conn, gap["id"], state=state),
+            "local_search_limits": "see recorded local attempt; incomplete is not negative evidence",
+        }
         dockets = json.loads(gap["docket_candidates_json"] or "[]")
         if gap["gap_type"] == "missing_regulatory_order":
-            docket = json.loads(gap["expected_json"] or "{}").get("docket") or (dockets[0] if dockets else None)
+            docket = json.loads(gap["expected_json"] or "{}").get("docket") or (
+                dockets[0] if dockets else None
+            )
             if not docket:
                 skipped["order_gap_without_docket"] += 1
                 continue
             window = _order_window(conn, gap["anchor_version_id"])
-            _add(queries, ORDER_CHANNEL, {"method": INVENTORY_METHOD, "docket_number": docket}, rank,
-                 target | {"docket": docket, "order_window": list(window[:2]) if window else None,
-                           "window_basis": window[2] if window else "docket_only"})
+            _add(
+                queries,
+                ORDER_CHANNEL,
+                {"method": INVENTORY_METHOD, "docket_number": docket},
+                rank,
+                target
+                | {
+                    "docket": docket,
+                    "order_window": list(window[:2]) if window else None,
+                    "window_basis": window[2] if window else "docket_only",
+                },
+            )
             continue
         if gap["gap_type"] not in NETWORK_GAP_TYPES:
             skipped["gap_type_not_network_searchable"] += 1
@@ -207,14 +242,26 @@ def plan_network_searches(conn: sqlite3.Connection, *, include_blank_order_clues
         before = _mdy(_shift(w[1], 31)) if w[1] else ""
         planned = False
         for docket in dockets[:3]:
-            params = {"docket_number": docket, "company_name": company_for(docket, gap["utility"]),
-                      "filing_types": [], "date_after": after, "date_before": before}
+            params = {
+                "docket_number": docket,
+                "company_name": company_for(docket, gap["utility"]),
+                "filing_types": [],
+                "date_after": after,
+                "date_before": before,
+            }
             _add(queries, "portal_params", params, rank, target | {"docket": docket, "window": w})
             planned = True
         if gap["expected_revision"] and (after or before or dockets):
-            query_text = f'"{gap["expected_revision"]}" {COMPANY.get(gap["utility"] or "", "Duke Energy")}'
-            _add(queries, "zoom", {"query_text": query_text, "docket_hint": dockets[0] if dockets else None},
-                 rank, target | {"window": w})
+            query_text = (
+                f'"{gap["expected_revision"]}" {COMPANY.get(gap["utility"] or "", "Duke Energy")}'
+            )
+            _add(
+                queries,
+                "zoom",
+                {"query_text": query_text, "docket_hint": dockets[0] if dockets else None},
+                rank,
+                target | {"window": w},
+            )
             planned = True
         if not planned:
             skipped["no_docket_window_or_revision"] += 1
@@ -231,13 +278,25 @@ def plan_network_searches(conn: sqlite3.Connection, *, include_blank_order_clues
             """
         ):
             window = _order_window(conn, vid)
-            _add(queries, ORDER_CHANNEL, {"method": INVENTORY_METHOD, "docket_number": docket}, (2, 0, vid),
-                 {"tariff_version_id": vid, "family_key": family, "basis": "blank_order_date_clue",
-                  "docket": docket, "order_window": list(window[:2]) if window else None,
-                  "window_basis": window[2] if window else "docket_only"})
+            _add(
+                queries,
+                ORDER_CHANNEL,
+                {"method": INVENTORY_METHOD, "docket_number": docket},
+                (2, 0, vid),
+                {
+                    "tariff_version_id": vid,
+                    "family_key": family,
+                    "basis": "blank_order_date_clue",
+                    "docket": docket,
+                    "order_window": list(window[:2]) if window else None,
+                    "window_basis": window[2] if window else "docket_only",
+                },
+            )
 
     ledger = SearchLedger(conn, created_by="planner")
-    completed = {ch: ledger.completed_hashes(ch) for ch in ("portal_orders", "portal_params", "zoom")}
+    completed = {
+        ch: ledger.completed_hashes(ch) for ch in ("portal_orders", "portal_params", "zoom")
+    }
     ordered = sorted(queries.values(), key=lambda q: q.priority)
     for q in ordered:
         if q.params_hash in completed[q.channel]:
@@ -566,6 +625,7 @@ def check_identity(pdf_path: str, kind: str, target: dict, *, max_pages: int = 6
     """Read the candidate's first pages: what they print about docket, order, dates, revision."""
     import fitz
 
+    from duke_rates.historical.ncuc.document_references import extract_document_references
     from duke_rates.historical.ncuc.regulatory_clues import extract_page_clues
 
     found: dict[str, list] = defaultdict(list)
@@ -573,22 +633,52 @@ def check_identity(pdf_path: str, kind: str, target: dict, *, max_pages: int = 6
         pages = len(doc)
         for i in range(min(max_pages, pages)):
             text = doc[i].get_text("text")
-            for c in extract_page_clues(text):
-                if c.kind in ("docket", "order_date", "effective_date", "revision") and c.normalized_value:
-                    found[c.kind].append({"page": i + 1, "printed": c.printed_text, "value": c.normalized_value})
-            for m in _CAPTION_DOCKET.finditer(text):
-                found["docket"].append({"page": i + 1, "printed": m.group(0),
-                                        "value": f"{m.group(1).upper()} Sub {m.group(2)}"})
+            clues = [c for c in extract_page_clues(text) if c.kind != "docket"]
+            clues += extract_document_references(text, i + 1)
+            for c in clues:
+                if (
+                    c.kind in ("docket", "order_date", "effective_date", "revision")
+                    and c.normalized_value
+                ):
+                    rects = doc[i].search_for(" ".join(c.printed_text.split()))
+                    found[c.kind].append(
+                        {
+                            "page": i + 1,
+                            "printed": c.printed_text,
+                            "value": c.normalized_value,
+                            "role": c.role,
+                            "char_start": c.char_start,
+                            "char_end": c.char_end,
+                            "bbox": list(rects[0]) if len(rects) == 1 else None,
+                            "bbox_status": "located"
+                            if len(rects) == 1
+                            else "ambiguous_or_unavailable",
+                            "authority_scope_established": False,
+                        }
+                    )
             if kind == "order" and i == 0:
-                found["order_title"] = [ln.strip() for ln in text.splitlines()[:40] if _ORDER_WORDS.search(ln)][:3]
+                found["order_title"] = [
+                    ln.strip() for ln in text.splitlines()[:40] if _ORDER_WORDS.search(ln)
+                ][:3]
     docket = (target.get("docket") or "").upper()
     dockets = {d["value"].upper() for d in found["docket"]}
-    checks = {"pages": pages, "docket_printed": (docket in dockets) if docket else None,
-              "order_wording_printed": bool(found.get("order_title")) if kind == "order" else None}
+    checks = {
+        "pages": pages,
+        "docket_printed": (docket in dockets) if docket else None,
+        "order_wording_printed": bool(found.get("order_title")) if kind == "order" else None,
+    }
     if kind == "tariff_document" and target.get("expected_revision"):
         checks["expected_revision_printed"] = any(
-            target["expected_revision"].lower() in r["printed"].lower() for r in found["revision"])
-    return {"checks": checks, "observed": dict(found), "label_source": f"machine:{PLANNER_VERSION}"}
+            target["expected_revision"].lower() in r["printed"].lower() for r in found["revision"]
+        )
+    return {
+        "checks": checks,
+        "observed": dict(found),
+        "label_source": f"machine:{PLANNER_VERSION}",
+        "file_sha256": hashlib.sha256(Path(pdf_path).read_bytes()).hexdigest(),
+        "pages_scanned": list(range(1, min(max_pages, pages) + 1)),
+        "authority_scope_established": False,
+    }
 
 
 def retrieve_and_check(
@@ -599,32 +689,64 @@ def retrieve_and_check(
     dest_dir: Path,
 ) -> dict:
     """Download candidates once (dedup by URL and SHA-256), then read their own pages."""
+    import tempfile
+
+    from duke_rates.download.storage import preserve_pdf_blob, verified_pdf_sha256
+
     stats: dict[str, int] = defaultdict(int)
     known = _archive_hashes(conn)
-    by_url = {u: (p, s) for u, p, s in conn.execute(
-        "SELECT retrieved_from, local_path, file_sha256 FROM remote_document_candidates WHERE file_sha256 IS NOT NULL")}
+    by_url = {
+        u: (p, s)
+        for u, p, s in conn.execute(
+            "SELECT retrieved_from, local_path, file_sha256 FROM remote_document_candidates WHERE file_sha256 IS NOT NULL"
+        )
+    }
     dest_dir.mkdir(parents=True, exist_ok=True)
     for cid in candidate_ids:
-        row = conn.execute("SELECT * FROM remote_document_candidates WHERE id = ?", (cid,)).fetchone()
+        row = conn.execute(
+            "SELECT * FROM remote_document_candidates WHERE id = ?", (cid,)
+        ).fetchone()
         urls = json.loads(row["view_file_urls_json"] or "[]")
         if row["status"] not in ("listed", "retrieved") or not urls:
             stats["skipped_no_file_or_status"] += 1
             continue
         url = urls[0]
         retrieval: dict = {"url": url}
-        if url in by_url:
-            path, sha = by_url[url]
+        cached = by_url.get(url)
+        if cached:
+            try:
+                verified_pdf_sha256(Path(cached[0]), cached[1])
+            except (OSError, ValueError, RuntimeError):
+                cached = None
+                stats["invalid_cached_files"] += 1
+        if cached:
+            path, sha, existed = preserve_pdf_blob(Path(cached[0]), dest_dir)
             retrieval["dedupe"] = "same_url_already_retrieved"
             stats["download_avoided_same_url"] += 1
         else:
-            path = dest_dir / f"{row['portal_document_id'] or row['candidate_uid'][:16]}.pdf"
-            retrieval["bytes"] = download(url, path)
-            sha = hashlib.sha256(path.read_bytes()).hexdigest()
+            incoming_dir = dest_dir / "incoming"
+            incoming_dir.mkdir(parents=True, exist_ok=True)
+            with tempfile.NamedTemporaryFile(
+                prefix="candidate-", suffix=".pdf", dir=incoming_dir, delete=False
+            ) as incoming:
+                incoming_path = Path(incoming.name)
+            # An interrupted or invalid download stays in incoming for diagnosis.
+            retrieval["bytes"] = download(url, incoming_path)
+            path, sha, existed = preserve_pdf_blob(incoming_path, dest_dir)
+            incoming_path.unlink()
             stats["downloaded"] += 1
             if sha in known:
                 retrieval["dedupe"] = f"same_sha256_as_archive:{known[sha]}"
                 stats["already_in_archive"] += 1
-            by_url[url] = (str(path), sha)
+        if existed:
+            stats["content_addressed_blobs_reused"] += 1
+        conn.execute(
+            "INSERT OR IGNORE INTO document_blobs(sha256, size_bytes, first_seen_path, first_seen_at) "
+            "VALUES (?, ?, ?, ?)",
+            (sha, path.stat().st_size, str(path), _now()),
+        )
+        by_url[url] = (str(path), sha)
+        retrieval["archive_method"] = "sha256_exact_pdf@1.0.0"
         identity = check_identity(str(path), row["kind"], json.loads(row["target_json"]))
         conn.execute(
             "UPDATE remote_document_candidates SET local_path = ?, file_sha256 = ?, retrieved_from = ?, retrieved_at = ?, "
@@ -636,22 +758,48 @@ def retrieve_and_check(
     return dict(stats)
 
 
-def review_candidate(conn: sqlite3.Connection, candidate_id: int, *, decision: str, reviewer: str,
-                     note: str = "", version_id: int | None = None) -> None:
+def review_candidate(
+    conn: sqlite3.Connection,
+    candidate_id: int,
+    *,
+    decision: str,
+    reviewer: str,
+    note: str = "",
+    version_id: int | None = None,
+) -> None:
     """The only path to ``linked`` / ``rejected``. Linking needs a read file and a named version."""
     if decision not in ("linked", "rejected"):
         raise ValueError("decision must be 'linked' or 'rejected'")
     if not reviewer.strip():
         raise ValueError("a reviewer name is required")
-    row = conn.execute("SELECT status, file_sha256 FROM remote_document_candidates WHERE id = ?", (candidate_id,)).fetchone()
+    row = conn.execute(
+        "SELECT status, file_sha256, local_path FROM remote_document_candidates WHERE id = ?",
+        (candidate_id,),
+    ).fetchone()
     if row is None:
         raise ValueError(f"no remote candidate {candidate_id}")
-    if decision == "linked" and (row["status"] != "needs_review" or not row["file_sha256"] or version_id is None):
-        raise ValueError("only a retrieved, identity-checked candidate can be linked, to a named tariff version")
+    if decision == "linked" and (
+        row["status"] != "needs_review" or not row["file_sha256"] or version_id is None
+    ):
+        raise ValueError(
+            "only a retrieved, identity-checked candidate can be linked, to a named tariff version"
+        )
+    if decision == "linked":
+        from duke_rates.download.storage import verified_pdf_sha256
+
+        verified_pdf_sha256(Path(row["local_path"]), row["file_sha256"])
     conn.execute(
         "UPDATE remote_document_candidates SET status = ?, linked_version_id = ?, reviewed_by = ?, reviewed_at = ?, "
         "review_note = ?, updated_at = ? WHERE id = ?",
-        (decision, version_id if decision == "linked" else None, reviewer, _now(), note, _now(), candidate_id),
+        (
+            decision,
+            version_id if decision == "linked" else None,
+            reviewer,
+            _now(),
+            note,
+            _now(),
+            candidate_id,
+        ),
     )
     conn.commit()
 

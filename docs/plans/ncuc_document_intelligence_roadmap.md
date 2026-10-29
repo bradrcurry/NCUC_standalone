@@ -30,8 +30,8 @@ human verification. Incomplete inventories never count as verified negative evid
 | Milestone | Status | Acceptance gates |
 | --- | --- | --- |
 | D4 complete inventory retrieval | Engineering validated; production-preservation gate failed | Six verified live pages, 568 entries, 83 public orders; 1,894 tests passed; replay/ledger benchmark and report complete. Keep the preflight incident visible; no claim of complete acceptance. Local delivery on the D4 branch. |
-| D5 redline integrity | In progress: baseline and audit | Extend native page evidence only after detector/pathway audit; measured precision/recall with explicit label provenance; prioritized exposure queue; close unattended authoritative promotion bypasses; preserve proposed research; extraction/billing checks as applicable; report and commit. |
-| D6 evidence-driven discovery | Pending | Preserve clue and relationship evidence; local/inventory/order-first searches; multi-docket attribution; durable content-addressed retrieval; quantify candidates, gaps and requests avoided; tests, report and commit. |
+| D5 redline integrity | Completed locally: `7dc5caa` | Extend native page evidence only after detector/pathway audit; measured precision/recall with explicit label provenance; prioritized exposure queue; close unattended authoritative promotion bypasses; preserve proposed research; extraction/billing checks as applicable; report and commit. |
+| D6 evidence-driven discovery | Completed locally; commit pending | Preserve clue and relationship evidence; local/inventory/order-first searches; multi-docket attribution; durable content-addressed retrieval; quantify candidates, gaps and requests avoided; tests, report and commit. |
 | D7 large-document intelligence | Pending | Independently source-reviewed boundaries for representative filings; reuse existing segmentation and bounded extraction; original page ownership; quantify boundary/recall/time/resource results; tests, report and commit. |
 | D8 Docling modernization | Pending | Inspect isolated existing environments; configurable layout/model cache identity; TableFormer v1 baseline; no adoption before numerical and resource gates; rollback; report and commit. |
 | D9 historical extraction | Pending | Recompute gap taxonomy; targeted structured profiles; numerical/unit/page/TOTAL validation; candidate-only remediation including Leaf 600; extraction and billing benchmarks; report and commit. |
@@ -132,22 +132,18 @@ human verification. Incomplete inventories never count as verified negative evid
 
 ## Next action
 
-D4 source/evidence committed locally as `90be8be`; current branch is
-`codex/d5-redline-historical-integrity`. D5's read-only baseline reproduces
-65 flagged versions, 45 strong cases and 1,113 associated charges. D5 source,
-fixtures and safety changes are implemented. The 29-page native benchmark has
-11 true positives, no false positives and five abstentions against attributed
-assistant labels. Current audit: 57 exposed versions; 47 strong / 1,120 charges;
-79 insufficient-source versions; 248 open scratch review items and no human
-review labels. Refreshed full suite: 1,969 passed, 92 skipped, 4 xfailed in
-808.22 seconds. All 12 bill records and summaries match in the before/after
-read-only comparison. The D4 baseline carries the identical first-match
-metadata optimization, recorded explicitly. Final staged GitNexus review maps
-86 indexed symbols / 27 expected flows, CRITICAL aggregate risk, no tool
-error/partial result; AST and direct-caller checks corroborate the scope.
-Ready for the D5 local commit. Plan: `docs/design/2026-10-29_phase2e_d5_plan.md`;
-report: `docs/reports/2026-10-29_phase2e_d5_redline_historical_integrity.md`.
-Keep 116 unlinked charge rows and one unavailable historical source as D9
-findings; do not alter them automatically. Preserve all D4 incident evidence.
-No restoration, production promotion, push or merge is authorized. D6–D10 remain
-pending implementation.
+D4 source/evidence: local commit `90be8be`; production-preservation gate failed
+and remains failed. D5 source/evidence: local commit `7dc5caa`, 1,969 tests passed,
+92 skipped, four xfailed; 12 bill results unchanged. Reports remain authoritative
+for the detailed limitations and attributed benchmark labels.
+
+Current branch: `codex/d6-evidence-driven-discovery`. D6 extends existing research
+ledgers, multi-docket references, relationship storage, safe hash-addressed
+retrieval and evidence-sensitive search caching. The scratch audit has 185 new
+partial candidates across 70 gaps, 45 prior machine-verified version links,
+unchanged canonical/review states and billing, and no live requests or accepted
+rate writes. Final validation: 1,983 full-suite passes, 92 skips, four xfails, plus 78 final
+focused passes including all 16 D6 cases. Clue scores and all 12 bill records are
+unchanged. Staged GitNexus scope: 67 symbols, 30 expected flows, CRITICAL aggregate
+risk; AST review confirms 18 existing functions and no numerical/billing changes.
+Commit D6 locally, then begin D7 large-document intelligence.

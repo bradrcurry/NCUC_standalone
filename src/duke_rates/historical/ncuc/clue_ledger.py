@@ -49,10 +49,26 @@ def _sha256_text(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-def clue_uid(file_sha256: str, page: int, page_text_sha256: str, clue: PageClue) -> str:
+def clue_uid(
+    file_sha256: str,
+    page: int,
+    page_text_sha256: str,
+    clue: PageClue,
+    *,
+    producer: str = EXTRACTOR_NAME,
+    version: str = EXTRACTOR_VERSION,
+) -> str:
     key = json.dumps(
-        [file_sha256, page, page_text_sha256, clue.kind, clue.char_start, clue.char_end,
-         clue.normalized_value, EXTRACTOR_VERSION]
+        [
+            file_sha256,
+            page,
+            page_text_sha256,
+            clue.kind,
+            clue.char_start,
+            clue.char_end,
+            clue.normalized_value,
+            version if producer == EXTRACTOR_NAME else f"{producer}@{version}",
+        ]
     )
     return hashlib.sha256(key.encode("utf-8")).hexdigest()
 
@@ -234,11 +250,14 @@ def write_page_clues(
     page: PageText,
     scan_reason: str,
     locator: BboxLocator | None,
+    page_clues: list[PageClue] | None = None,
+    producer: str = EXTRACTOR_NAME,
+    version: str = EXTRACTOR_VERSION,
 ) -> list[int]:
     """Extract and persist one page's clues (idempotent). Returns clue ids."""
     text = page.text
     text_sha = _sha256_text(text)
-    clues = extract_page_clues(text)
+    clues = extract_page_clues(text) if page_clues is None else page_clues
     index_page = is_index_page(text)
     if index_page:
         # A tariff index lists other sheets' names; nothing on it identifies this page.
@@ -247,12 +266,22 @@ def write_page_clues(
     now = _now()
     ids: list[int] = []
     for clue in clues:
-        if text[clue.char_start:clue.char_end] == clue.printed_text:
-            label = "source_observed" if page.text_layer == "native_text" else "ocr_observed"
+        if text[clue.char_start : clue.char_end] == clue.printed_text:
+            label = (
+                "source_observed"
+                if page.text_layer == "native_text"
+                else "ocr_observed"
+                if page.text_layer == "ocr"
+                else f"machine:{producer}@{version}"
+            )
         else:  # pragma: no cover - extract_page_clues always slices the page text
             label = f"machine:{LEDGER_EXTRACTOR}"
-        uid = clue_uid(identity.sha256, page.page, text_sha, clue)
-        existing = conn.execute("SELECT id FROM regulatory_clues WHERE clue_uid = ?", (uid,)).fetchone()
+        uid = clue_uid(
+            identity.sha256, page.page, text_sha, clue, producer=producer, version=version
+        )
+        existing = conn.execute(
+            "SELECT id FROM regulatory_clues WHERE clue_uid = ?", (uid,)
+        ).fetchone()
         if existing:
             ids.append(existing[0])
             continue
@@ -268,10 +297,31 @@ def write_page_clues(
                 normalization, label_source, extractor, extractor_version, created_at
             ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
             """,
-            (uid, source_pdf, identity.sha256, identity.status, page.page, page.artifact_id,
-             page.artifact_version, page.text_layer, text_sha, clue.char_start, clue.char_end, bbox,
-             bbox_status, clue.kind, clue.role, clue.printed_text, clue.normalized_value,
-             clue.normalized_json(), clue.normalization, label, EXTRACTOR_NAME, EXTRACTOR_VERSION, now),
+            (
+                uid,
+                source_pdf,
+                identity.sha256,
+                identity.status,
+                page.page,
+                page.artifact_id,
+                page.artifact_version,
+                page.text_layer,
+                text_sha,
+                clue.char_start,
+                clue.char_end,
+                bbox,
+                bbox_status,
+                clue.kind,
+                clue.role,
+                clue.printed_text,
+                clue.normalized_value,
+                clue.normalized_json(),
+                clue.normalization,
+                label,
+                producer,
+                version,
+                now,
+            ),
         )
         ids.append(cur.lastrowid)
     conn.execute(
@@ -281,8 +331,20 @@ def write_page_clues(
             page_text_sha256, clue_count, is_index_page, extractor_version, scan_reason, scanned_at
         ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
         """,
-        (identity.sha256, page.page, source_pdf, page.artifact_id, page.artifact_version,
-         page.text_layer, text_sha, len(clues), int(index_page), EXTRACTOR_VERSION, scan_reason, now),
+        (
+            identity.sha256,
+            page.page,
+            source_pdf,
+            page.artifact_id,
+            page.artifact_version,
+            page.text_layer,
+            text_sha,
+            len(clues),
+            int(index_page),
+            version if producer == EXTRACTOR_NAME else f"{producer}@{version}",
+            scan_reason,
+            now,
+        ),
     )
     return ids
 

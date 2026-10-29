@@ -1,0 +1,18 @@
+{
+  "base_commit": "7dc5caa",
+  "full_suite": {"passed": 1983, "skipped": 92, "xfailed": 4, "warnings": 135, "seconds": 718.51},
+  "final_targeted_suite": {"passed": 78, "warnings": 44, "seconds": 11.69},
+  "collection_note": "Full suite collection preceded the final two edge-case tests and reference-coverage/version/wording polish. The final 78-test targeted suite validates those additions and final source; no numerical calculation changes occurred.",
+  "d6_specific_tests": 16,
+  "new_files_and_benchmark_ruff": "passed",
+  "clue_benchmark_exactly_unchanged": true,
+  "billing_12_records_and_summary_exactly_unchanged": true,
+  "seven_canonical_table_fingerprints_match_d5": true,
+  "prior_review_states_preserved": true,
+  "production_matches_post_d4_incident_state": true,
+  "overall_production_preservation_gate": "FAILED due to recorded D4 incident",
+  "gitnexus": {"changed_symbols": 67, "affected_flows": 30, "risk": "critical", "error_or_partial_tool_result": false},
+  "ast_existing_functions_changed": 18,
+  "push_or_merge": false,
+  "live_requests_or_downloads": 0
+}

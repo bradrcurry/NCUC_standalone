@@ -50,7 +50,9 @@ from duke_rates.db.discovery_review_schema import (
     widen_proposal_kinds,
 )
 
-PROVENANCE_SCHEMA_VERSION = 5  # 2: rider-summary runs (2C); 3: clue ledger (2E D1); 4: review/promotion (2E D2);
+from duke_rates.db.document_relationship_schema import DOCUMENT_RELATIONSHIP_DDL, document_relationship_usage
+
+PROVENANCE_SCHEMA_VERSION = 6  # 2: rider-summary runs (2C); 3: clue ledger (2E D1); 4: review/promotion (2E D2);
 # 5: ingestion validation, review queue, bind_unbound_document proposals (2E D3)
 
 # Columns whose changes are audited, per legacy table.
@@ -131,7 +133,7 @@ PROVENANCE_TABLES: tuple[str, ...] = (
     "metadata_revisions",
     "document_payload_revisions",
     "tariff_charge_revisions",
-) + CLUE_LEDGER_TABLES + DISCOVERY_REVIEW_TABLES
+) + CLUE_LEDGER_TABLES + DISCOVERY_REVIEW_TABLES + ("document_relationships",)
 
 _ACTOR = "COALESCE((SELECT actor FROM provenance_write_context WHERE id = 1), 'unattributed')"
 _OPERATION = "(SELECT operation_id FROM provenance_write_context WHERE id = 1)"
@@ -783,6 +785,7 @@ def ensure_provenance_schema(conn: sqlite3.Connection) -> None:
     conn.executescript(PROVENANCE_DDL)
     conn.executescript(CLUE_LEDGER_DDL)
     conn.executescript(DISCOVERY_REVIEW_DDL)
+    conn.executescript(DOCUMENT_RELATIONSHIP_DDL)
     for table, column, typedef in _ADDED_COLUMNS:
         present = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
         if column not in present:
@@ -826,6 +829,7 @@ def provenance_usage(conn: sqlite3.Connection) -> dict[str, int]:
         "overrides": q("SELECT COUNT(*) FROM charge_overrides").fetchone()[0],
         **clue_ledger_usage(conn),
         **discovery_review_usage(conn),
+        **document_relationship_usage(conn),
     }
 
 

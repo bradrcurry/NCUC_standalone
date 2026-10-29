@@ -1,0 +1,873 @@
+{
+  "summary": {
+    "changed_count": 67,
+    "affected_count": 30,
+    "changed_files": 60,
+    "risk_level": "critical"
+  },
+  "changed_symbols": [
+    {
+      "id": "Variable:bench/ncuc_discovery_evidence.py:CANONICAL_TABLES",
+      "name": "CANONICAL_TABLES",
+      "type": "Variable",
+      "filePath": "bench/ncuc_discovery_evidence.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:bench/ncuc_discovery_evidence.py:open_snapshot",
+      "name": "open_snapshot",
+      "type": "Function",
+      "filePath": "bench/ncuc_discovery_evidence.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:bench/ncuc_discovery_evidence.py:table_fingerprints",
+      "name": "table_fingerprints",
+      "type": "Function",
+      "filePath": "bench/ncuc_discovery_evidence.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:bench/ncuc_discovery_evidence.py:main",
+      "name": "main",
+      "type": "Function",
+      "filePath": "bench/ncuc_discovery_evidence.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/design/2026-10-29_phase2e_d6_plan.md:L1:D6 — Evidence-driven discovery plan",
+      "name": "D6 — Evidence-driven discovery plan",
+      "type": "Section",
+      "filePath": "docs/design/2026-10-29_phase2e_d6_plan.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/plans/ncuc_document_intelligence_roadmap.md:L1:NCUC document intelligence roadmap",
+      "name": "NCUC document intelligence roadmap",
+      "type": "Section",
+      "filePath": "docs/plans/ncuc_document_intelligence_roadmap.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/plans/ncuc_document_intelligence_roadmap.md:L28:Milestones and acceptance gates",
+      "name": "Milestones and acceptance gates",
+      "type": "Section",
+      "filePath": "docs/plans/ncuc_document_intelligence_roadmap.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Section:docs/plans/ncuc_document_intelligence_roadmap.md:L133:Next action",
+      "name": "Next action",
+      "type": "Section",
+      "filePath": "docs/plans/ncuc_document_intelligence_roadmap.md",
+      "change_type": "touched"
+    },
+    {
+      "id": "Variable:src/duke_rates/db/document_relationship_schema.py:DOCUMENT_RELATIONSHIP_DDL",
+      "name": "DOCUMENT_RELATIONSHIP_DDL",
+      "type": "Variable",
+      "filePath": "src/duke_rates/db/document_relationship_schema.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/db/document_relationship_schema.py:document_relationship_usage",
+      "name": "document_relationship_usage",
+      "type": "Function",
+      "filePath": "src/duke_rates/db/document_relationship_schema.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Variable:src/duke_rates/db/provenance_schema.py:PROVENANCE_SCHEMA_VERSION",
+      "name": "PROVENANCE_SCHEMA_VERSION",
+      "type": "Variable",
+      "filePath": "src/duke_rates/db/provenance_schema.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Property:src/duke_rates/db/provenance_schema.py:PROVENANCE_TABLES",
+      "name": "PROVENANCE_TABLES",
+      "type": "Property",
+      "filePath": "src/duke_rates/db/provenance_schema.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/db/provenance_schema.py:ensure_provenance_schema",
+      "name": "ensure_provenance_schema",
+      "type": "Function",
+      "filePath": "src/duke_rates/db/provenance_schema.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/db/provenance_schema.py:provenance_usage",
+      "name": "provenance_usage",
+      "type": "Function",
+      "filePath": "src/duke_rates/db/provenance_schema.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/download/storage.py:verified_pdf_sha256",
+      "name": "verified_pdf_sha256",
+      "type": "Function",
+      "filePath": "src/duke_rates/download/storage.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/download/storage.py:preserve_pdf_blob",
+      "name": "preserve_pdf_blob",
+      "type": "Function",
+      "filePath": "src/duke_rates/download/storage.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/clue_ledger.py:clue_uid",
+      "name": "clue_uid",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/clue_ledger.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/clue_ledger.py:write_page_clues",
+      "name": "write_page_clues",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/clue_ledger.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Variable:src/duke_rates/historical/ncuc/clue_lineage.py:BUILDER_VERSION",
+      "name": "BUILDER_VERSION",
+      "type": "Variable",
+      "filePath": "src/duke_rates/historical/ncuc/clue_lineage.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/clue_lineage.py:_evaluate_target",
+      "name": "_evaluate_target",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/clue_lineage.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/clue_lineage.py:_local_order_exists",
+      "name": "_local_order_exists",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/clue_lineage.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/clue_lineage.py:rebuild_lineage",
+      "name": "rebuild_lineage",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/clue_lineage.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Variable:src/duke_rates/historical/ncuc/document_references.py:PRODUCER",
+      "name": "PRODUCER",
+      "type": "Variable",
+      "filePath": "src/duke_rates/historical/ncuc/document_references.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Variable:src/duke_rates/historical/ncuc/document_references.py:VERSION",
+      "name": "VERSION",
+      "type": "Variable",
+      "filePath": "src/duke_rates/historical/ncuc/document_references.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Variable:src/duke_rates/historical/ncuc/document_references.py:COVERAGE_VERSION",
+      "name": "COVERAGE_VERSION",
+      "type": "Variable",
+      "filePath": "src/duke_rates/historical/ncuc/document_references.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Variable:src/duke_rates/historical/ncuc/document_references.py:_DOCKET",
+      "name": "_DOCKET",
+      "type": "Variable",
+      "filePath": "src/duke_rates/historical/ncuc/document_references.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/document_references.py:extract_document_references",
+      "name": "extract_document_references",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/document_references.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/document_references.py:order_reference_index",
+      "name": "order_reference_index",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/document_references.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Variable:src/duke_rates/historical/ncuc/document_relationships.py:BUILDER_VERSION",
+      "name": "BUILDER_VERSION",
+      "type": "Variable",
+      "filePath": "src/duke_rates/historical/ncuc/document_relationships.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/document_relationships.py:build_document_relationships",
+      "name": "build_document_relationships",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/document_relationships.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/document_relationships.py:build_document_relationships.put@23:4",
+      "name": "put",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/document_relationships.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Variable:src/duke_rates/historical/ncuc/local_gap_resolution.py:RESOLVER_VERSION",
+      "name": "RESOLVER_VERSION",
+      "type": "Variable",
+      "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:archive_state",
+      "name": "archive_state",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:build_archive_index",
+      "name": "build_archive_index",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Property:src/duke_rates/historical/ncuc/local_gap_resolution.py:build_archive_index.best@134:4",
+      "name": "best",
+      "type": "Property",
+      "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:resolve_gaps_locally",
+      "name": "resolve_gaps_locally",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Property:src/duke_rates/historical/ncuc/local_gap_resolution.py:resolve_gaps_locally.references@264:4",
+      "name": "references",
+      "type": "Property",
+      "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:_search_pages",
+      "name": "_search_pages",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:_resolve_order_gap",
+      "name": "_resolve_order_gap",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:_update_status",
+      "name": "_update_status",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:_prior_local_attempt",
+      "name": "_prior_local_attempt",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Variable:src/duke_rates/historical/ncuc/remote_discovery.py:PLANNER_VERSION",
+      "name": "PLANNER_VERSION",
+      "type": "Variable",
+      "filePath": "src/duke_rates/historical/ncuc/remote_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/remote_discovery.py:local_search_complete",
+      "name": "local_search_complete",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/remote_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/remote_discovery.py:plan_network_searches",
+      "name": "plan_network_searches",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/remote_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/remote_discovery.py:check_identity",
+      "name": "check_identity",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/remote_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/remote_discovery.py:retrieve_and_check",
+      "name": "retrieve_and_check",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/remote_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:src/duke_rates/historical/ncuc/remote_discovery.py:review_candidate",
+      "name": "review_candidate",
+      "type": "Function",
+      "filePath": "src/duke_rates/historical/ncuc/remote_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d6_evidence_discovery.py:test_cache_invalidates_in_place_text_catalog_and_source_changes",
+      "name": "test_cache_invalidates_in_place_text_catalog_and_source_changes",
+      "type": "Function",
+      "filePath": "tests/test_d6_evidence_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d6_evidence_discovery.py:test_unavailable_candidate_is_incomplete_and_retried",
+      "name": "test_unavailable_candidate_is_incomplete_and_retried",
+      "type": "Function",
+      "filePath": "tests/test_d6_evidence_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d6_evidence_discovery.py:test_multi_docket_exact_evidence_preserves_filing_identity_and_reviews",
+      "name": "test_multi_docket_exact_evidence_preserves_filing_identity_and_reviews",
+      "type": "Function",
+      "filePath": "tests/test_d6_evidence_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d6_evidence_discovery.py:test_blob_preserves_bytes_deduplicates_and_refuses_conflict",
+      "name": "test_blob_preserves_bytes_deduplicates_and_refuses_conflict",
+      "type": "Function",
+      "filePath": "tests/test_d6_evidence_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d6_evidence_discovery.py:test_relationship_reviews_survive_rebuild_and_block_drop",
+      "name": "test_relationship_reviews_survive_rebuild_and_block_drop",
+      "type": "Function",
+      "filePath": "tests/test_d6_evidence_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d6_evidence_discovery.py:test_schema_upgrade_is_additive_and_idempotent",
+      "name": "test_schema_upgrade_is_additive_and_idempotent",
+      "type": "Function",
+      "filePath": "tests/test_d6_evidence_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d6_evidence_discovery.py:test_proposed_header_cannot_verify_actual_supersession",
+      "name": "test_proposed_header_cannot_verify_actual_supersession",
+      "type": "Function",
+      "filePath": "tests/test_d6_evidence_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d6_evidence_discovery.py:test_incomplete_local_attempt_can_plan_targeted_fallback",
+      "name": "test_incomplete_local_attempt_can_plan_targeted_fallback",
+      "type": "Function",
+      "filePath": "tests/test_d6_evidence_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d6_evidence_discovery.py:test_order_negative_cache_does_not_cross_connections_or_catalog_updates",
+      "name": "test_order_negative_cache_does_not_cross_connections_or_catalog_updates",
+      "type": "Function",
+      "filePath": "tests/test_d6_evidence_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d6_evidence_discovery.py:test_explicit_implements_statement_retains_quote_without_approval",
+      "name": "test_explicit_implements_statement_retains_quote_without_approval",
+      "type": "Function",
+      "filePath": "tests/test_d6_evidence_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d6_evidence_discovery.py:test_retrieval_rechecks_cached_bytes_and_archives_originals",
+      "name": "test_retrieval_rechecks_cached_bytes_and_archives_originals",
+      "type": "Function",
+      "filePath": "tests/test_d6_evidence_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d6_evidence_discovery.py:test_retrieval_rechecks_cached_bytes_and_archives_originals.candidate@263:4",
+      "name": "candidate",
+      "type": "Function",
+      "filePath": "tests/test_d6_evidence_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d6_evidence_discovery.py:test_retrieval_rechecks_cached_bytes_and_archives_originals.download@289:4",
+      "name": "download",
+      "type": "Function",
+      "filePath": "tests/test_d6_evidence_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d6_evidence_discovery.py:test_stale_higher_artifact_version_cannot_hide_current_file_identity",
+      "name": "test_stale_higher_artifact_version_cannot_hide_current_file_identity",
+      "type": "Function",
+      "filePath": "tests/test_d6_evidence_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d6_evidence_discovery.py:test_unchanged_repeat_does_not_build_page_index",
+      "name": "test_unchanged_repeat_does_not_build_page_index",
+      "type": "Function",
+      "filePath": "tests/test_d6_evidence_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d6_evidence_discovery.py:test_unchanged_repeat_does_not_build_page_index.unexpected@335:4",
+      "name": "unexpected",
+      "type": "Function",
+      "filePath": "tests/test_d6_evidence_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d6_evidence_discovery.py:test_proposed_revision_relationship_is_retained_without_actual_supersession",
+      "name": "test_proposed_revision_relationship_is_retained_without_actual_supersession",
+      "type": "Function",
+      "filePath": "tests/test_d6_evidence_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d6_evidence_discovery.py:test_research_benchmark_refuses_production_and_hardlink_alias_before_open",
+      "name": "test_research_benchmark_refuses_production_and_hardlink_alias_before_open",
+      "type": "Function",
+      "filePath": "tests/test_d6_evidence_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d6_evidence_discovery.py:test_research_benchmark_refuses_production_and_hardlink_alias_before_open.unexpected@403:4",
+      "name": "unexpected",
+      "type": "Function",
+      "filePath": "tests/test_d6_evidence_discovery.py",
+      "change_type": "touched"
+    },
+    {
+      "id": "Function:tests/test_d6_evidence_discovery.py:test_blank_order_page_is_incomplete_coverage",
+      "name": "test_blank_order_page_is_incomplete_coverage",
+      "type": "Function",
+      "filePath": "tests/test_d6_evidence_discovery.py",
+      "change_type": "touched"
+    }
+  ],
+  "affected_processes": [
+    {
+      "id": "proc_126_resolve_gaps_local_c",
+      "name": "Resolve_gaps_local_cmd → _now",
+      "process_type": "cross_community",
+      "step_count": 5,
+      "changed_steps": [
+        {
+          "symbol": "resolve_gaps_locally",
+          "step": 2
+        }
+      ]
+    },
+    {
+      "id": "proc_200_drop_schema_cmd",
+      "name": "Drop_schema_cmd → Clue_ledger_usage",
+      "process_type": "intra_community",
+      "step_count": 4,
+      "changed_steps": [
+        {
+          "symbol": "provenance_usage",
+          "step": 3
+        }
+      ]
+    },
+    {
+      "id": "proc_201_drop_schema_cmd",
+      "name": "Drop_schema_cmd → Discovery_review_usage",
+      "process_type": "intra_community",
+      "step_count": 4,
+      "changed_steps": [
+        {
+          "symbol": "provenance_usage",
+          "step": 3
+        }
+      ]
+    },
+    {
+      "id": "proc_202_drop_schema_cmd",
+      "name": "Drop_schema_cmd → Document_relationship_usage",
+      "process_type": "intra_community",
+      "step_count": 4,
+      "changed_steps": [
+        {
+          "symbol": "document_relationship_usage",
+          "step": 4
+        },
+        {
+          "symbol": "provenance_usage",
+          "step": 3
+        }
+      ]
+    },
+    {
+      "id": "proc_205_migrate_cmd",
+      "name": "Migrate_cmd → _row_json",
+      "process_type": "intra_community",
+      "step_count": 4,
+      "changed_steps": [
+        {
+          "symbol": "ensure_provenance_schema",
+          "step": 2
+        }
+      ]
+    },
+    {
+      "id": "proc_206_plan_network_searche",
+      "name": "Plan_network_searches_cmd → _mdy",
+      "process_type": "cross_community",
+      "step_count": 4,
+      "changed_steps": [
+        {
+          "symbol": "plan_network_searches",
+          "step": 2
+        }
+      ]
+    },
+    {
+      "id": "proc_207_plan_network_searche",
+      "name": "Plan_network_searches_cmd → _shift",
+      "process_type": "cross_community",
+      "step_count": 4,
+      "changed_steps": [
+        {
+          "symbol": "plan_network_searches",
+          "step": 2
+        }
+      ]
+    },
+    {
+      "id": "proc_208_plan_network_searche",
+      "name": "Plan_network_searches_cmd → _version_clue_dates",
+      "process_type": "cross_community",
+      "step_count": 4,
+      "changed_steps": [
+        {
+          "symbol": "plan_network_searches",
+          "step": 2
+        }
+      ]
+    },
+    {
+      "id": "proc_209_plan_network_searche",
+      "name": "Plan_network_searches_cmd → Archive_state",
+      "process_type": "cross_community",
+      "step_count": 4,
+      "changed_steps": [
+        {
+          "symbol": "plan_network_searches",
+          "step": 2
+        },
+        {
+          "symbol": "local_search_complete",
+          "step": 3
+        },
+        {
+          "symbol": "archive_state",
+          "step": 4
+        }
+      ]
+    },
+    {
+      "id": "proc_211_resolve_gaps_local_c",
+      "name": "Resolve_gaps_local_cmd → Finish_outcome",
+      "process_type": "cross_community",
+      "step_count": 4,
+      "changed_steps": [
+        {
+          "symbol": "resolve_gaps_locally",
+          "step": 2
+        }
+      ]
+    },
+    {
+      "id": "proc_212_retrieve_remote_cand",
+      "name": "Retrieve_remote_candidates_cmd → Verified_pdf_sha256",
+      "process_type": "cross_community",
+      "step_count": 4,
+      "changed_steps": [
+        {
+          "symbol": "preserve_pdf_blob",
+          "step": 3
+        },
+        {
+          "symbol": "verified_pdf_sha256",
+          "step": 4
+        },
+        {
+          "symbol": "retrieve_and_check",
+          "step": 2
+        }
+      ]
+    },
+    {
+      "id": "proc_316_migrate_cmd",
+      "name": "Migrate_cmd → Widen_proposal_kinds",
+      "process_type": "intra_community",
+      "step_count": 3,
+      "changed_steps": [
+        {
+          "symbol": "ensure_provenance_schema",
+          "step": 2
+        }
+      ]
+    },
+    {
+      "id": "proc_317_migrate_cmd",
+      "name": "Migrate_cmd → _immutability_triggers",
+      "process_type": "intra_community",
+      "step_count": 3,
+      "changed_steps": [
+        {
+          "symbol": "ensure_provenance_schema",
+          "step": 2
+        }
+      ]
+    },
+    {
+      "id": "proc_318_migrate_cmd",
+      "name": "Migrate_cmd → _widen_target_kinds",
+      "process_type": "intra_community",
+      "step_count": 3,
+      "changed_steps": [
+        {
+          "symbol": "ensure_provenance_schema",
+          "step": 2
+        }
+      ]
+    },
+    {
+      "id": "proc_319_plan_network_searche",
+      "name": "Plan_network_searches_cmd → Completed_hashes",
+      "process_type": "cross_community",
+      "step_count": 3,
+      "changed_steps": [
+        {
+          "symbol": "plan_network_searches",
+          "step": 2
+        }
+      ]
+    },
+    {
+      "id": "proc_320_resolve_gaps_local_c",
+      "name": "Resolve_gaps_local_cmd → Close",
+      "process_type": "cross_community",
+      "step_count": 3,
+      "changed_steps": [
+        {
+          "symbol": "resolve_gaps_locally",
+          "step": 2
+        }
+      ]
+    },
+    {
+      "id": "proc_321_retrieve_remote_cand",
+      "name": "Retrieve_remote_candidates_cmd → _archive_hashes",
+      "process_type": "cross_community",
+      "step_count": 3,
+      "changed_steps": [
+        {
+          "symbol": "retrieve_and_check",
+          "step": 2
+        }
+      ]
+    },
+    {
+      "id": "proc_322_retrieve_remote_cand",
+      "name": "Retrieve_remote_candidates_cmd → _now",
+      "process_type": "cross_community",
+      "step_count": 3,
+      "changed_steps": [
+        {
+          "symbol": "retrieve_and_check",
+          "step": 2
+        }
+      ]
+    },
+    {
+      "id": "proc_410_typed_gaps_cmd",
+      "name": "Typed_gaps_cmd → Family_utility",
+      "process_type": "cross_community",
+      "step_count": 7,
+      "changed_steps": [
+        {
+          "symbol": "rebuild_lineage",
+          "step": 2
+        }
+      ]
+    },
+    {
+      "id": "proc_411_typed_gaps_cmd",
+      "name": "Typed_gaps_cmd → Page_leaves",
+      "process_type": "cross_community",
+      "step_count": 7,
+      "changed_steps": [
+        {
+          "symbol": "rebuild_lineage",
+          "step": 2
+        }
+      ]
+    },
+    {
+      "id": "proc_451_typed_gaps_cmd",
+      "name": "Typed_gaps_cmd → Family_leaf",
+      "process_type": "cross_community",
+      "step_count": 5,
+      "changed_steps": [
+        {
+          "symbol": "rebuild_lineage",
+          "step": 2
+        }
+      ]
+    },
+    {
+      "id": "proc_487_run_network_searches",
+      "name": "Run_network_searches_cmd → _mdy",
+      "process_type": "cross_community",
+      "step_count": 4,
+      "changed_steps": [
+        {
+          "symbol": "plan_network_searches",
+          "step": 2
+        }
+      ]
+    },
+    {
+      "id": "proc_488_run_network_searches",
+      "name": "Run_network_searches_cmd → _shift",
+      "process_type": "cross_community",
+      "step_count": 4,
+      "changed_steps": [
+        {
+          "symbol": "plan_network_searches",
+          "step": 2
+        }
+      ]
+    },
+    {
+      "id": "proc_489_run_network_searches",
+      "name": "Run_network_searches_cmd → _version_clue_dates",
+      "process_type": "cross_community",
+      "step_count": 4,
+      "changed_steps": [
+        {
+          "symbol": "plan_network_searches",
+          "step": 2
+        }
+      ]
+    },
+    {
+      "id": "proc_490_run_network_searches",
+      "name": "Run_network_searches_cmd → Archive_state",
+      "process_type": "cross_community",
+      "step_count": 4,
+      "changed_steps": [
+        {
+          "symbol": "plan_network_searches",
+          "step": 2
+        },
+        {
+          "symbol": "local_search_complete",
+          "step": 3
+        },
+        {
+          "symbol": "archive_state",
+          "step": 4
+        }
+      ]
+    },
+    {
+      "id": "proc_491_typed_gaps_cmd",
+      "name": "Typed_gaps_cmd → Printed_schedule_base",
+      "process_type": "cross_community",
+      "step_count": 4,
+      "changed_steps": [
+        {
+          "symbol": "rebuild_lineage",
+          "step": 2
+        }
+      ]
+    },
+    {
+      "id": "proc_509_run_network_searches",
+      "name": "Run_network_searches_cmd → Completed_hashes",
+      "process_type": "cross_community",
+      "step_count": 3,
+      "changed_steps": [
+        {
+          "symbol": "plan_network_searches",
+          "step": 2
+        }
+      ]
+    },
+    {
+      "id": "proc_579_resolve_gaps_local_c",
+      "name": "Resolve_gaps_local_cmd → Archive_state",
+      "process_type": "cross_community",
+      "step_count": 3,
+      "changed_steps": [
+        {
+          "symbol": "resolve_gaps_locally",
+          "step": 2
+        },
+        {
+          "symbol": "archive_state",
+          "step": 3
+        }
+      ]
+    },
+    {
+      "id": "proc_614_drop_schema_cmd",
+      "name": "Drop_schema_cmd → Provenance_schema_installed",
+      "process_type": "intra_community",
+      "step_count": 4,
+      "changed_steps": [
+        {
+          "symbol": "provenance_usage",
+          "step": 3
+        }
+      ]
+    },
+    {
+      "id": "proc_641_resolve_gaps_local_c",
+      "name": "Resolve_gaps_local_cmd → Close",
+      "process_type": "cross_community",
+      "step_count": 3,
+      "changed_steps": [
+        {
+          "symbol": "resolve_gaps_locally",
+          "step": 2
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+[
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "test_retrieval_rechecks_cached_bytes_and_archives_originals",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target 'test_retrieval_rechecks_cached_bytes_and_archives_originals' not found",
+      "target": {
+        "name": "test_retrieval_rechecks_cached_bytes_and_archives_originals"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "target": "test_multi_docket_exact_evidence_preserves_filing_identity_and_reviews",
+        "direction": "upstream",
+        "repo": "duke-standalone"
+      }
+    },
+    "result": {
+      "error": "Target 'test_multi_docket_exact_evidence_preserves_filing_identity_and_reviews' not found",
+      "target": {
+        "name": "test_multi_docket_exact_evidence_preserves_filing_identity_and_reviews"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  }
+]

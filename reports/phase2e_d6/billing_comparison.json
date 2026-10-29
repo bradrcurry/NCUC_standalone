@@ -1,0 +1,18 @@
+{
+  "baseline": "D5 committed read-only billing result",
+  "bills_equal": true,
+  "summary_equal": true,
+  "bills": 12,
+  "summary": {
+    "bill_count": 12,
+    "usage_xml_path": "C:\\Python\\Duke\\Standalone\\data\\usage\\Energy Usage.xml",
+    "status_counts": {
+      "good_match": 11,
+      "needs_review": 1
+    },
+    "good_match_count": 11,
+    "close_match_count": 0,
+    "tou_needs_work_count": 0,
+    "max_abs_total_delta": 0.45
+  }
+}

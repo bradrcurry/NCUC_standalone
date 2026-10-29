@@ -1,0 +1,3908 @@
+[
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "repo": "duke-standalone",
+        "target": "archive_state",
+        "file_path": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+        "direction": "upstream"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:archive_state",
+        "name": "archive_state",
+        "type": "Function",
+        "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 7,
+      "risk": "HIGH",
+      "riskSharedAxes": "LOW",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "epistemic": "exact",
+      "summary": {
+        "direct": 2,
+        "processes_affected": 3,
+        "modules_affected": 2
+      },
+      "byDepthCounts": {
+        "1": 2,
+        "2": 2,
+        "3": 3
+      },
+      "affected_processes": [
+        {
+          "name": "plan_network_searches_cmd",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/provenance.py",
+          "affected_process_count": 8,
+          "total_hits": 15,
+          "earliest_broken_step": 1
+        },
+        {
+          "name": "run_network_searches_cmd",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/provenance.py",
+          "affected_process_count": 9,
+          "total_hits": 15,
+          "earliest_broken_step": 1
+        },
+        {
+          "name": "resolve_gaps_local_cmd",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/provenance.py",
+          "affected_process_count": 7,
+          "total_hits": 12,
+          "earliest_broken_step": 1
+        }
+      ],
+      "affected_modules": [
+        {
+          "name": "Ncuc",
+          "hits": 4,
+          "impact": "direct"
+        },
+        {
+          "name": "Cli_commands",
+          "hits": 3,
+          "impact": "indirect"
+        }
+      ],
+      "byDepth": {
+        "1": [
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:build_archive_index",
+            "name": "build_archive_index",
+            "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": []
+          },
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/historical/ncuc/remote_discovery.py:local_search_complete",
+            "name": "local_search_complete",
+            "filePath": "src/duke_rates/historical/ncuc/remote_discovery.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_208_plan_network_searche",
+                "label": "Plan_network_searches_cmd → Archive_state",
+                "processType": "cross_community",
+                "step": 3
+              },
+              {
+                "id": "proc_492_run_network_searches",
+                "label": "Run_network_searches_cmd → Archive_state",
+                "processType": "cross_community",
+                "step": 3
+              }
+            ]
+          }
+        ],
+        "2": [
+          {
+            "depth": 2,
+            "id": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:resolve_gaps_locally",
+            "name": "resolve_gaps_locally",
+            "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_452_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Norm",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_318_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_645_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_127_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → _now",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_210_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Finish_outcome",
+                "processType": "cross_community",
+                "step": 2
+              }
+            ]
+          },
+          {
+            "depth": 2,
+            "id": "Function:src/duke_rates/historical/ncuc/remote_discovery.py:plan_network_searches",
+            "name": "plan_network_searches",
+            "filePath": "src/duke_rates/historical/ncuc/remote_discovery.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_205_plan_network_searche",
+                "label": "Plan_network_searches_cmd → _mdy",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_511_run_network_searches",
+                "label": "Run_network_searches_cmd → Completed_hashes",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_207_plan_network_searche",
+                "label": "Plan_network_searches_cmd → _version_clue_dates",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_208_plan_network_searche",
+                "label": "Plan_network_searches_cmd → Archive_state",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_490_run_network_searches",
+                "label": "Run_network_searches_cmd → _shift",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_206_plan_network_searche",
+                "label": "Plan_network_searches_cmd → _shift",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_317_plan_network_searche",
+                "label": "Plan_network_searches_cmd → Completed_hashes",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_491_run_network_searches",
+                "label": "Run_network_searches_cmd → _version_clue_dates",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_125_plan_network_searche",
+                "label": "Plan_network_searches_cmd → Norm",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_492_run_network_searches",
+                "label": "Run_network_searches_cmd → Archive_state",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_489_run_network_searches",
+                "label": "Run_network_searches_cmd → _mdy",
+                "processType": "cross_community",
+                "step": 2
+              }
+            ]
+          }
+        ],
+        "3": [
+          {
+            "depth": 3,
+            "id": "Function:src/duke_rates/cli_commands/provenance.py:plan_network_searches_cmd",
+            "name": "plan_network_searches_cmd",
+            "filePath": "src/duke_rates/cli_commands/provenance.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_811_plan_network_searche",
+                "label": "Plan_network_searches_cmd → _seed_document_types",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_206_plan_network_searche",
+                "label": "Plan_network_searches_cmd → _shift",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_317_plan_network_searche",
+                "label": "Plan_network_searches_cmd → Completed_hashes",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_125_plan_network_searche",
+                "label": "Plan_network_searches_cmd → Norm",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_684_plan_network_searche",
+                "label": "Plan_network_searches_cmd → Ensure_directories",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_207_plan_network_searche",
+                "label": "Plan_network_searches_cmd → _version_clue_dates",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_208_plan_network_searche",
+                "label": "Plan_network_searches_cmd → Archive_state",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_205_plan_network_searche",
+                "label": "Plan_network_searches_cmd → _mdy",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          },
+          {
+            "depth": 3,
+            "id": "Function:src/duke_rates/cli_commands/provenance.py:resolve_gaps_local_cmd",
+            "name": "resolve_gaps_local_cmd",
+            "filePath": "src/duke_rates/cli_commands/provenance.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_318_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_645_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_814_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → _seed_document_types",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_127_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → _now",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_210_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Finish_outcome",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_704_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Ensure_directories",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_452_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Norm",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          },
+          {
+            "depth": 3,
+            "id": "Function:src/duke_rates/cli_commands/provenance.py:run_network_searches_cmd",
+            "name": "run_network_searches_cmd",
+            "filePath": "src/duke_rates/cli_commands/provenance.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_489_run_network_searches",
+                "label": "Run_network_searches_cmd → _mdy",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_321_run_network_searches",
+                "label": "Run_network_searches_cmd → Is_order_row",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_454_run_network_searches",
+                "label": "Run_network_searches_cmd → _now",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_492_run_network_searches",
+                "label": "Run_network_searches_cmd → Archive_state",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_491_run_network_searches",
+                "label": "Run_network_searches_cmd → _version_clue_dates",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_494_run_network_searches",
+                "label": "Run_network_searches_cmd → Finish_outcome",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_511_run_network_searches",
+                "label": "Run_network_searches_cmd → Completed_hashes",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_490_run_network_searches",
+                "label": "Run_network_searches_cmd → _shift",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_564_run_network_searches",
+                "label": "Run_network_searches_cmd → Norm",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "repo": "duke-standalone",
+        "target": "build_archive_index",
+        "file_path": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+        "direction": "upstream"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:build_archive_index",
+        "name": "build_archive_index",
+        "type": "Function",
+        "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 2,
+      "risk": "LOW",
+      "riskSharedAxes": "LOW",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "epistemic": "exact",
+      "summary": {
+        "direct": 1,
+        "processes_affected": 1,
+        "modules_affected": 2
+      },
+      "byDepthCounts": {
+        "1": 1,
+        "2": 1
+      },
+      "affected_processes": [
+        {
+          "name": "resolve_gaps_local_cmd",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/provenance.py",
+          "affected_process_count": 7,
+          "total_hits": 12,
+          "earliest_broken_step": 1
+        }
+      ],
+      "affected_modules": [
+        {
+          "name": "Cli_commands",
+          "hits": 1,
+          "impact": "indirect"
+        },
+        {
+          "name": "Ncuc",
+          "hits": 1,
+          "impact": "direct"
+        }
+      ],
+      "byDepth": {
+        "1": [
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:resolve_gaps_locally",
+            "name": "resolve_gaps_locally",
+            "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_452_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Norm",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_318_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_645_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_127_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → _now",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_210_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Finish_outcome",
+                "processType": "cross_community",
+                "step": 2
+              }
+            ]
+          }
+        ],
+        "2": [
+          {
+            "depth": 2,
+            "id": "Function:src/duke_rates/cli_commands/provenance.py:resolve_gaps_local_cmd",
+            "name": "resolve_gaps_local_cmd",
+            "filePath": "src/duke_rates/cli_commands/provenance.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_645_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_814_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → _seed_document_types",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_318_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_127_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → _now",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_210_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Finish_outcome",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_704_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Ensure_directories",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_452_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Norm",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "repo": "duke-standalone",
+        "target": "resolve_gaps_locally",
+        "file_path": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+        "direction": "upstream"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:resolve_gaps_locally",
+        "name": "resolve_gaps_locally",
+        "type": "Function",
+        "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 1,
+      "risk": "LOW",
+      "riskSharedAxes": "LOW",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "epistemic": "exact",
+      "summary": {
+        "direct": 1,
+        "processes_affected": 1,
+        "modules_affected": 1
+      },
+      "byDepthCounts": {
+        "1": 1
+      },
+      "affected_processes": [
+        {
+          "name": "resolve_gaps_local_cmd",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/provenance.py",
+          "affected_process_count": 7,
+          "total_hits": 7,
+          "earliest_broken_step": 1
+        }
+      ],
+      "affected_modules": [
+        {
+          "name": "Cli_commands",
+          "hits": 1,
+          "impact": "direct"
+        }
+      ],
+      "byDepth": {
+        "1": [
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/cli_commands/provenance.py:resolve_gaps_local_cmd",
+            "name": "resolve_gaps_local_cmd",
+            "filePath": "src/duke_rates/cli_commands/provenance.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_704_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Ensure_directories",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_645_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_814_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → _seed_document_types",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_318_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_127_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → _now",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_210_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Finish_outcome",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_452_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Norm",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "repo": "duke-standalone",
+        "target": "_search_pages",
+        "file_path": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+        "direction": "upstream"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:_search_pages",
+        "name": "_search_pages",
+        "type": "Function",
+        "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 2,
+      "risk": "LOW",
+      "riskSharedAxes": "LOW",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "epistemic": "exact",
+      "summary": {
+        "direct": 1,
+        "processes_affected": 1,
+        "modules_affected": 2
+      },
+      "byDepthCounts": {
+        "1": 1,
+        "2": 1
+      },
+      "affected_processes": [
+        {
+          "name": "resolve_gaps_local_cmd",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/provenance.py",
+          "affected_process_count": 7,
+          "total_hits": 12,
+          "earliest_broken_step": 1
+        }
+      ],
+      "affected_modules": [
+        {
+          "name": "Cli_commands",
+          "hits": 1,
+          "impact": "indirect"
+        },
+        {
+          "name": "Ncuc",
+          "hits": 1,
+          "impact": "direct"
+        }
+      ],
+      "byDepth": {
+        "1": [
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:resolve_gaps_locally",
+            "name": "resolve_gaps_locally",
+            "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_318_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_452_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Norm",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_645_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_127_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → _now",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_210_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Finish_outcome",
+                "processType": "cross_community",
+                "step": 2
+              }
+            ]
+          }
+        ],
+        "2": [
+          {
+            "depth": 2,
+            "id": "Function:src/duke_rates/cli_commands/provenance.py:resolve_gaps_local_cmd",
+            "name": "resolve_gaps_local_cmd",
+            "filePath": "src/duke_rates/cli_commands/provenance.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_645_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_814_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → _seed_document_types",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_318_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_127_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → _now",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_210_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Finish_outcome",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_704_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Ensure_directories",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_452_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Norm",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operation": {
+      "tool": "context",
+      "params": {
+        "repo": "duke-standalone",
+        "name": "_search_pages",
+        "file_path": "src/duke_rates/historical/ncuc/local_gap_resolution.py"
+      }
+    },
+    "result": {
+      "status": "found",
+      "symbol": {
+        "uid": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:_search_pages",
+        "name": "_search_pages",
+        "kind": "Function",
+        "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+        "startLine": 251,
+        "endLine": 347
+      },
+      "epistemic": "exact",
+      "incoming": {
+        "calls": [
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:resolve_gaps_locally",
+            "name": "resolve_gaps_locally",
+            "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py"
+          }
+        ]
+      },
+      "outgoing": {
+        "calls": [
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/clue_ledger.py:file_identity",
+            "name": "file_identity",
+            "filePath": "src/duke_rates/historical/ncuc/clue_ledger.py"
+          },
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/clue_ledger.py:load_pdf_pages",
+            "name": "load_pdf_pages",
+            "filePath": "src/duke_rates/historical/ncuc/clue_ledger.py"
+          },
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/clue_ledger.py:write_page_clues",
+            "name": "write_page_clues",
+            "filePath": "src/duke_rates/historical/ncuc/clue_ledger.py"
+          },
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:_contiguous",
+            "name": "_contiguous",
+            "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py"
+          },
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:_evaluate",
+            "name": "_evaluate",
+            "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py"
+          },
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:_now",
+            "name": "_now",
+            "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py"
+          },
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:_redline_fingerprint",
+            "name": "_redline_fingerprint",
+            "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py"
+          },
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:_row_token",
+            "name": "_row_token",
+            "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py"
+          },
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:reconciled_window",
+            "name": "reconciled_window",
+            "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py"
+          },
+          {
+            "uid": "Function:src/duke_rates/parse/redline_detector.py:summarize_page_evidence",
+            "name": "summarize_page_evidence",
+            "filePath": "src/duke_rates/parse/redline_detector.py"
+          }
+        ]
+      },
+      "processes": []
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "repo": "duke-standalone",
+        "target": "order_caption_index",
+        "file_path": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+        "direction": "upstream"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:order_caption_index",
+        "name": "order_caption_index",
+        "type": "Function",
+        "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 2,
+      "risk": "LOW",
+      "riskSharedAxes": "LOW",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "epistemic": "exact",
+      "summary": {
+        "direct": 1,
+        "processes_affected": 1,
+        "modules_affected": 2
+      },
+      "byDepthCounts": {
+        "1": 1,
+        "2": 1
+      },
+      "affected_processes": [
+        {
+          "name": "resolve_gaps_local_cmd",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/provenance.py",
+          "affected_process_count": 7,
+          "total_hits": 12,
+          "earliest_broken_step": 1
+        }
+      ],
+      "affected_modules": [
+        {
+          "name": "Cli_commands",
+          "hits": 1,
+          "impact": "indirect"
+        },
+        {
+          "name": "Ncuc",
+          "hits": 1,
+          "impact": "direct"
+        }
+      ],
+      "byDepth": {
+        "1": [
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:resolve_gaps_locally",
+            "name": "resolve_gaps_locally",
+            "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_452_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Norm",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_318_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_645_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_127_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → _now",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_210_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Finish_outcome",
+                "processType": "cross_community",
+                "step": 2
+              }
+            ]
+          }
+        ],
+        "2": [
+          {
+            "depth": 2,
+            "id": "Function:src/duke_rates/cli_commands/provenance.py:resolve_gaps_local_cmd",
+            "name": "resolve_gaps_local_cmd",
+            "filePath": "src/duke_rates/cli_commands/provenance.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_318_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_645_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_814_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → _seed_document_types",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_127_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → _now",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_210_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Finish_outcome",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_704_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Ensure_directories",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_452_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Norm",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "repo": "duke-standalone",
+        "target": "_resolve_order_gap",
+        "file_path": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+        "direction": "upstream"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:_resolve_order_gap",
+        "name": "_resolve_order_gap",
+        "type": "Function",
+        "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 2,
+      "risk": "LOW",
+      "riskSharedAxes": "LOW",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "epistemic": "exact",
+      "summary": {
+        "direct": 1,
+        "processes_affected": 1,
+        "modules_affected": 2
+      },
+      "byDepthCounts": {
+        "1": 1,
+        "2": 1
+      },
+      "affected_processes": [
+        {
+          "name": "resolve_gaps_local_cmd",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/provenance.py",
+          "affected_process_count": 7,
+          "total_hits": 12,
+          "earliest_broken_step": 1
+        }
+      ],
+      "affected_modules": [
+        {
+          "name": "Cli_commands",
+          "hits": 1,
+          "impact": "indirect"
+        },
+        {
+          "name": "Ncuc",
+          "hits": 1,
+          "impact": "direct"
+        }
+      ],
+      "byDepth": {
+        "1": [
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:resolve_gaps_locally",
+            "name": "resolve_gaps_locally",
+            "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_452_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Norm",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_318_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_645_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_127_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → _now",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_210_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Finish_outcome",
+                "processType": "cross_community",
+                "step": 2
+              }
+            ]
+          }
+        ],
+        "2": [
+          {
+            "depth": 2,
+            "id": "Function:src/duke_rates/cli_commands/provenance.py:resolve_gaps_local_cmd",
+            "name": "resolve_gaps_local_cmd",
+            "filePath": "src/duke_rates/cli_commands/provenance.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_318_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_645_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_814_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → _seed_document_types",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_127_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → _now",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_210_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Finish_outcome",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_704_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Ensure_directories",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_452_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Norm",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "repo": "duke-standalone",
+        "target": "_update_status",
+        "file_path": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+        "direction": "upstream"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:_update_status",
+        "name": "_update_status",
+        "type": "Function",
+        "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 3,
+      "risk": "LOW",
+      "riskSharedAxes": "LOW",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "epistemic": "exact",
+      "summary": {
+        "direct": 2,
+        "processes_affected": 1,
+        "modules_affected": 2
+      },
+      "byDepthCounts": {
+        "1": 2,
+        "2": 1
+      },
+      "affected_processes": [
+        {
+          "name": "resolve_gaps_local_cmd",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/provenance.py",
+          "affected_process_count": 7,
+          "total_hits": 12,
+          "earliest_broken_step": 1
+        }
+      ],
+      "affected_modules": [
+        {
+          "name": "Ncuc",
+          "hits": 2,
+          "impact": "direct"
+        },
+        {
+          "name": "Cli_commands",
+          "hits": 1,
+          "impact": "indirect"
+        }
+      ],
+      "byDepth": {
+        "1": [
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:_resolve_order_gap",
+            "name": "_resolve_order_gap",
+            "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": []
+          },
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:resolve_gaps_locally",
+            "name": "resolve_gaps_locally",
+            "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_452_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Norm",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_318_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_645_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_127_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → _now",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_210_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Finish_outcome",
+                "processType": "cross_community",
+                "step": 2
+              }
+            ]
+          }
+        ],
+        "2": [
+          {
+            "depth": 2,
+            "id": "Function:src/duke_rates/cli_commands/provenance.py:resolve_gaps_local_cmd",
+            "name": "resolve_gaps_local_cmd",
+            "filePath": "src/duke_rates/cli_commands/provenance.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_645_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_814_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → _seed_document_types",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_127_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → _now",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_210_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Finish_outcome",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_704_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Ensure_directories",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_452_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Norm",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_318_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "repo": "duke-standalone",
+        "target": "local_search_complete",
+        "file_path": "src/duke_rates/historical/ncuc/remote_discovery.py",
+        "direction": "upstream"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Function:src/duke_rates/historical/ncuc/remote_discovery.py:local_search_complete",
+        "name": "local_search_complete",
+        "type": "Function",
+        "filePath": "src/duke_rates/historical/ncuc/remote_discovery.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 3,
+      "risk": "LOW",
+      "riskSharedAxes": "LOW",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "epistemic": "exact",
+      "summary": {
+        "direct": 1,
+        "processes_affected": 2,
+        "modules_affected": 2
+      },
+      "byDepthCounts": {
+        "1": 1,
+        "2": 2
+      },
+      "affected_processes": [
+        {
+          "name": "plan_network_searches_cmd",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/provenance.py",
+          "affected_process_count": 8,
+          "total_hits": 14,
+          "earliest_broken_step": 1
+        },
+        {
+          "name": "run_network_searches_cmd",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/provenance.py",
+          "affected_process_count": 9,
+          "total_hits": 14,
+          "earliest_broken_step": 1
+        }
+      ],
+      "affected_modules": [
+        {
+          "name": "Cli_commands",
+          "hits": 2,
+          "impact": "indirect"
+        },
+        {
+          "name": "Ncuc",
+          "hits": 1,
+          "impact": "direct"
+        }
+      ],
+      "byDepth": {
+        "1": [
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/historical/ncuc/remote_discovery.py:plan_network_searches",
+            "name": "plan_network_searches",
+            "filePath": "src/duke_rates/historical/ncuc/remote_discovery.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_125_plan_network_searche",
+                "label": "Plan_network_searches_cmd → Norm",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_492_run_network_searches",
+                "label": "Run_network_searches_cmd → Archive_state",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_207_plan_network_searche",
+                "label": "Plan_network_searches_cmd → _version_clue_dates",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_208_plan_network_searche",
+                "label": "Plan_network_searches_cmd → Archive_state",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_490_run_network_searches",
+                "label": "Run_network_searches_cmd → _shift",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_205_plan_network_searche",
+                "label": "Plan_network_searches_cmd → _mdy",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_511_run_network_searches",
+                "label": "Run_network_searches_cmd → Completed_hashes",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_206_plan_network_searche",
+                "label": "Plan_network_searches_cmd → _shift",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_317_plan_network_searche",
+                "label": "Plan_network_searches_cmd → Completed_hashes",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_491_run_network_searches",
+                "label": "Run_network_searches_cmd → _version_clue_dates",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_489_run_network_searches",
+                "label": "Run_network_searches_cmd → _mdy",
+                "processType": "cross_community",
+                "step": 2
+              }
+            ]
+          }
+        ],
+        "2": [
+          {
+            "depth": 2,
+            "id": "Function:src/duke_rates/cli_commands/provenance.py:plan_network_searches_cmd",
+            "name": "plan_network_searches_cmd",
+            "filePath": "src/duke_rates/cli_commands/provenance.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_811_plan_network_searche",
+                "label": "Plan_network_searches_cmd → _seed_document_types",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_206_plan_network_searche",
+                "label": "Plan_network_searches_cmd → _shift",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_317_plan_network_searche",
+                "label": "Plan_network_searches_cmd → Completed_hashes",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_125_plan_network_searche",
+                "label": "Plan_network_searches_cmd → Norm",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_684_plan_network_searche",
+                "label": "Plan_network_searches_cmd → Ensure_directories",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_207_plan_network_searche",
+                "label": "Plan_network_searches_cmd → _version_clue_dates",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_208_plan_network_searche",
+                "label": "Plan_network_searches_cmd → Archive_state",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_205_plan_network_searche",
+                "label": "Plan_network_searches_cmd → _mdy",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          },
+          {
+            "depth": 2,
+            "id": "Function:src/duke_rates/cli_commands/provenance.py:run_network_searches_cmd",
+            "name": "run_network_searches_cmd",
+            "filePath": "src/duke_rates/cli_commands/provenance.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_489_run_network_searches",
+                "label": "Run_network_searches_cmd → _mdy",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_321_run_network_searches",
+                "label": "Run_network_searches_cmd → Is_order_row",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_454_run_network_searches",
+                "label": "Run_network_searches_cmd → _now",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_492_run_network_searches",
+                "label": "Run_network_searches_cmd → Archive_state",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_491_run_network_searches",
+                "label": "Run_network_searches_cmd → _version_clue_dates",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_494_run_network_searches",
+                "label": "Run_network_searches_cmd → Finish_outcome",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_511_run_network_searches",
+                "label": "Run_network_searches_cmd → Completed_hashes",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_490_run_network_searches",
+                "label": "Run_network_searches_cmd → _shift",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_564_run_network_searches",
+                "label": "Run_network_searches_cmd → Norm",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "repo": "duke-standalone",
+        "target": "plan_network_searches",
+        "file_path": "src/duke_rates/historical/ncuc/remote_discovery.py",
+        "direction": "upstream"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Function:src/duke_rates/historical/ncuc/remote_discovery.py:plan_network_searches",
+        "name": "plan_network_searches",
+        "type": "Function",
+        "filePath": "src/duke_rates/historical/ncuc/remote_discovery.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 2,
+      "risk": "LOW",
+      "riskSharedAxes": "LOW",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "epistemic": "exact",
+      "summary": {
+        "direct": 2,
+        "processes_affected": 2,
+        "modules_affected": 1
+      },
+      "byDepthCounts": {
+        "1": 2
+      },
+      "affected_processes": [
+        {
+          "name": "run_network_searches_cmd",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/provenance.py",
+          "affected_process_count": 9,
+          "total_hits": 9,
+          "earliest_broken_step": 1
+        },
+        {
+          "name": "plan_network_searches_cmd",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/provenance.py",
+          "affected_process_count": 8,
+          "total_hits": 8,
+          "earliest_broken_step": 1
+        }
+      ],
+      "affected_modules": [
+        {
+          "name": "Cli_commands",
+          "hits": 2,
+          "impact": "direct"
+        }
+      ],
+      "byDepth": {
+        "1": [
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/cli_commands/provenance.py:plan_network_searches_cmd",
+            "name": "plan_network_searches_cmd",
+            "filePath": "src/duke_rates/cli_commands/provenance.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_125_plan_network_searche",
+                "label": "Plan_network_searches_cmd → Norm",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_206_plan_network_searche",
+                "label": "Plan_network_searches_cmd → _shift",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_317_plan_network_searche",
+                "label": "Plan_network_searches_cmd → Completed_hashes",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_811_plan_network_searche",
+                "label": "Plan_network_searches_cmd → _seed_document_types",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_684_plan_network_searche",
+                "label": "Plan_network_searches_cmd → Ensure_directories",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_207_plan_network_searche",
+                "label": "Plan_network_searches_cmd → _version_clue_dates",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_208_plan_network_searche",
+                "label": "Plan_network_searches_cmd → Archive_state",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_205_plan_network_searche",
+                "label": "Plan_network_searches_cmd → _mdy",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          },
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/cli_commands/provenance.py:run_network_searches_cmd",
+            "name": "run_network_searches_cmd",
+            "filePath": "src/duke_rates/cli_commands/provenance.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_321_run_network_searches",
+                "label": "Run_network_searches_cmd → Is_order_row",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_454_run_network_searches",
+                "label": "Run_network_searches_cmd → _now",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_489_run_network_searches",
+                "label": "Run_network_searches_cmd → _mdy",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_492_run_network_searches",
+                "label": "Run_network_searches_cmd → Archive_state",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_491_run_network_searches",
+                "label": "Run_network_searches_cmd → _version_clue_dates",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_494_run_network_searches",
+                "label": "Run_network_searches_cmd → Finish_outcome",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_511_run_network_searches",
+                "label": "Run_network_searches_cmd → Completed_hashes",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_490_run_network_searches",
+                "label": "Run_network_searches_cmd → _shift",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_564_run_network_searches",
+                "label": "Run_network_searches_cmd → Norm",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "repo": "duke-standalone",
+        "target": "check_identity",
+        "file_path": "src/duke_rates/historical/ncuc/remote_discovery.py",
+        "direction": "upstream"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Function:src/duke_rates/historical/ncuc/remote_discovery.py:check_identity",
+        "name": "check_identity",
+        "type": "Function",
+        "filePath": "src/duke_rates/historical/ncuc/remote_discovery.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 2,
+      "risk": "LOW",
+      "riskSharedAxes": "LOW",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "epistemic": "exact",
+      "summary": {
+        "direct": 1,
+        "processes_affected": 1,
+        "modules_affected": 1
+      },
+      "byDepthCounts": {
+        "1": 1,
+        "2": 1
+      },
+      "affected_processes": [
+        {
+          "name": "retrieve_remote_candidates_cmd",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/provenance.py",
+          "affected_process_count": 10,
+          "total_hits": 17,
+          "earliest_broken_step": 1
+        }
+      ],
+      "affected_modules": [
+        {
+          "name": "Ncuc",
+          "hits": 2,
+          "impact": "direct"
+        }
+      ],
+      "byDepth": {
+        "1": [
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/historical/ncuc/remote_discovery.py:retrieve_and_check",
+            "name": "retrieve_and_check",
+            "filePath": "src/duke_rates/historical/ncuc/remote_discovery.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_377_retrieve_remote_cand",
+                "label": "Retrieve_remote_candidates_cmd → _iso",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_319_retrieve_remote_cand",
+                "label": "Retrieve_remote_candidates_cmd → _archive_hashes",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_396_retrieve_remote_cand",
+                "label": "Retrieve_remote_candidates_cmd → Canonical_docket",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_539_retrieve_remote_cand",
+                "label": "Retrieve_remote_candidates_cmd → _inside",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_520_retrieve_remote_cand",
+                "label": "Retrieve_remote_candidates_cmd → Parse_ordinals",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_320_retrieve_remote_cand",
+                "label": "Retrieve_remote_candidates_cmd → _now",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_378_retrieve_remote_cand",
+                "label": "Retrieve_remote_candidates_cmd → _month_number",
+                "processType": "cross_community",
+                "step": 2
+              }
+            ]
+          }
+        ],
+        "2": [
+          {
+            "depth": 2,
+            "id": "Function:src/duke_rates/cli_commands/provenance.py:retrieve_remote_candidates_cmd",
+            "name": "retrieve_remote_candidates_cmd",
+            "filePath": "src/duke_rates/cli_commands/provenance.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_520_retrieve_remote_cand",
+                "label": "Retrieve_remote_candidates_cmd → Parse_ordinals",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_711_retrieve_remote_cand",
+                "label": "Retrieve_remote_candidates_cmd → _find_chrome",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_719_retrieve_remote_cand",
+                "label": "Retrieve_remote_candidates_cmd → Ensure_directories",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_817_retrieve_remote_cand",
+                "label": "Retrieve_remote_candidates_cmd → _seed_document_types",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_319_retrieve_remote_cand",
+                "label": "Retrieve_remote_candidates_cmd → _archive_hashes",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_396_retrieve_remote_cand",
+                "label": "Retrieve_remote_candidates_cmd → Canonical_docket",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_377_retrieve_remote_cand",
+                "label": "Retrieve_remote_candidates_cmd → _iso",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_539_retrieve_remote_cand",
+                "label": "Retrieve_remote_candidates_cmd → _inside",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_320_retrieve_remote_cand",
+                "label": "Retrieve_remote_candidates_cmd → _now",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_378_retrieve_remote_cand",
+                "label": "Retrieve_remote_candidates_cmd → _month_number",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "repo": "duke-standalone",
+        "target": "retrieve_and_check",
+        "file_path": "src/duke_rates/historical/ncuc/remote_discovery.py",
+        "direction": "upstream"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Function:src/duke_rates/historical/ncuc/remote_discovery.py:retrieve_and_check",
+        "name": "retrieve_and_check",
+        "type": "Function",
+        "filePath": "src/duke_rates/historical/ncuc/remote_discovery.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 1,
+      "risk": "LOW",
+      "riskSharedAxes": "LOW",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "epistemic": "exact",
+      "summary": {
+        "direct": 1,
+        "processes_affected": 1,
+        "modules_affected": 1
+      },
+      "byDepthCounts": {
+        "1": 1
+      },
+      "affected_processes": [
+        {
+          "name": "retrieve_remote_candidates_cmd",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/provenance.py",
+          "affected_process_count": 10,
+          "total_hits": 10,
+          "earliest_broken_step": 1
+        }
+      ],
+      "affected_modules": [
+        {
+          "name": "Ncuc",
+          "hits": 1,
+          "impact": "direct"
+        }
+      ],
+      "byDepth": {
+        "1": [
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/cli_commands/provenance.py:retrieve_remote_candidates_cmd",
+            "name": "retrieve_remote_candidates_cmd",
+            "filePath": "src/duke_rates/cli_commands/provenance.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_520_retrieve_remote_cand",
+                "label": "Retrieve_remote_candidates_cmd → Parse_ordinals",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_719_retrieve_remote_cand",
+                "label": "Retrieve_remote_candidates_cmd → Ensure_directories",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_817_retrieve_remote_cand",
+                "label": "Retrieve_remote_candidates_cmd → _seed_document_types",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_377_retrieve_remote_cand",
+                "label": "Retrieve_remote_candidates_cmd → _iso",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_320_retrieve_remote_cand",
+                "label": "Retrieve_remote_candidates_cmd → _now",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_378_retrieve_remote_cand",
+                "label": "Retrieve_remote_candidates_cmd → _month_number",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_711_retrieve_remote_cand",
+                "label": "Retrieve_remote_candidates_cmd → _find_chrome",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_319_retrieve_remote_cand",
+                "label": "Retrieve_remote_candidates_cmd → _archive_hashes",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_396_retrieve_remote_cand",
+                "label": "Retrieve_remote_candidates_cmd → Canonical_docket",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_539_retrieve_remote_cand",
+                "label": "Retrieve_remote_candidates_cmd → _inside",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operation": {
+      "tool": "context",
+      "params": {
+        "repo": "duke-standalone",
+        "name": "retrieve_and_check",
+        "file_path": "src/duke_rates/historical/ncuc/remote_discovery.py"
+      }
+    },
+    "result": {
+      "status": "found",
+      "symbol": {
+        "uid": "Function:src/duke_rates/historical/ncuc/remote_discovery.py:retrieve_and_check",
+        "name": "retrieve_and_check",
+        "kind": "Function",
+        "filePath": "src/duke_rates/historical/ncuc/remote_discovery.py",
+        "startLine": 594,
+        "endLine": 636
+      },
+      "epistemic": "exact",
+      "incoming": {
+        "calls": [
+          {
+            "uid": "Function:src/duke_rates/cli_commands/provenance.py:retrieve_remote_candidates_cmd",
+            "name": "retrieve_remote_candidates_cmd",
+            "filePath": "src/duke_rates/cli_commands/provenance.py"
+          }
+        ]
+      },
+      "outgoing": {
+        "calls": [
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/remote_discovery.py:_archive_hashes",
+            "name": "_archive_hashes",
+            "filePath": "src/duke_rates/historical/ncuc/remote_discovery.py"
+          },
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/remote_discovery.py:_now",
+            "name": "_now",
+            "filePath": "src/duke_rates/historical/ncuc/remote_discovery.py"
+          },
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/remote_discovery.py:check_identity",
+            "name": "check_identity",
+            "filePath": "src/duke_rates/historical/ncuc/remote_discovery.py"
+          }
+        ]
+      },
+      "processes": [
+        {
+          "id": "proc_319_retrieve_remote_cand",
+          "name": "Retrieve_remote_candidates_cmd → _archive_hashes",
+          "step_index": 2,
+          "step_count": 3
+        },
+        {
+          "id": "proc_320_retrieve_remote_cand",
+          "name": "Retrieve_remote_candidates_cmd → _now",
+          "step_index": 2,
+          "step_count": 3
+        },
+        {
+          "id": "proc_377_retrieve_remote_cand",
+          "name": "Retrieve_remote_candidates_cmd → _iso",
+          "step_index": 2,
+          "step_count": 8
+        },
+        {
+          "id": "proc_378_retrieve_remote_cand",
+          "name": "Retrieve_remote_candidates_cmd → _month_number",
+          "step_index": 2,
+          "step_count": 8
+        },
+        {
+          "id": "proc_396_retrieve_remote_cand",
+          "name": "Retrieve_remote_candidates_cmd → Canonical_docket",
+          "step_index": 2,
+          "step_count": 7
+        },
+        {
+          "id": "proc_520_retrieve_remote_cand",
+          "name": "Retrieve_remote_candidates_cmd → Parse_ordinals",
+          "step_index": 2,
+          "step_count": 7
+        },
+        {
+          "id": "proc_539_retrieve_remote_cand",
+          "name": "Retrieve_remote_candidates_cmd → _inside",
+          "step_index": 2,
+          "step_count": 6
+        }
+      ]
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "repo": "duke-standalone",
+        "target": "review_candidate",
+        "file_path": "src/duke_rates/historical/ncuc/remote_discovery.py",
+        "direction": "upstream"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Function:src/duke_rates/historical/ncuc/remote_discovery.py:review_candidate",
+        "name": "review_candidate",
+        "type": "Function",
+        "filePath": "src/duke_rates/historical/ncuc/remote_discovery.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 1,
+      "risk": "LOW",
+      "riskSharedAxes": "LOW",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "epistemic": "exact",
+      "summary": {
+        "direct": 1,
+        "processes_affected": 0,
+        "modules_affected": 1
+      },
+      "byDepthCounts": {
+        "1": 1
+      },
+      "affected_processes": [],
+      "affected_modules": [
+        {
+          "name": "Cli_commands",
+          "hits": 1,
+          "impact": "direct"
+        }
+      ],
+      "byDepth": {
+        "1": [
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/cli_commands/provenance.py:review_remote_candidate_cmd",
+            "name": "review_remote_candidate_cmd",
+            "filePath": "src/duke_rates/cli_commands/provenance.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": []
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "repo": "duke-standalone",
+        "target": "clue_uid",
+        "file_path": "src/duke_rates/historical/ncuc/clue_ledger.py",
+        "direction": "upstream"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Function:src/duke_rates/historical/ncuc/clue_ledger.py:clue_uid",
+        "name": "clue_uid",
+        "type": "Function",
+        "filePath": "src/duke_rates/historical/ncuc/clue_ledger.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 7,
+      "risk": "HIGH",
+      "riskSharedAxes": "LOW",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "epistemic": "exact",
+      "summary": {
+        "direct": 1,
+        "processes_affected": 3,
+        "modules_affected": 2
+      },
+      "byDepthCounts": {
+        "1": 1,
+        "2": 3,
+        "3": 3
+      },
+      "affected_processes": [
+        {
+          "name": "binding_check_cmd",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/provenance.py",
+          "affected_process_count": 7,
+          "total_hits": 11,
+          "earliest_broken_step": 1
+        },
+        {
+          "name": "build_clue_ledger_cmd",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/provenance.py",
+          "affected_process_count": 7,
+          "total_hits": 11,
+          "earliest_broken_step": 1
+        },
+        {
+          "name": "resolve_gaps_local_cmd",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/provenance.py",
+          "affected_process_count": 5,
+          "total_hits": 5,
+          "earliest_broken_step": 2
+        }
+      ],
+      "affected_modules": [
+        {
+          "name": "Ncuc",
+          "hits": 5,
+          "impact": "direct"
+        },
+        {
+          "name": "Cli_commands",
+          "hits": 2,
+          "impact": "indirect"
+        }
+      ],
+      "byDepth": {
+        "1": [
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/historical/ncuc/clue_ledger.py:write_page_clues",
+            "name": "write_page_clues",
+            "filePath": "src/duke_rates/historical/ncuc/clue_ledger.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": []
+          }
+        ],
+        "2": [
+          {
+            "depth": 2,
+            "id": "Function:src/duke_rates/historical/ncuc/clue_ledger.py:build_clue_ledger",
+            "name": "build_clue_ledger",
+            "filePath": "src/duke_rates/historical/ncuc/clue_ledger.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_510_build_clue_ledger_cm",
+                "label": "Build_clue_ledger_cmd → Load_pdf_pages",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_672_build_clue_ledger_cm",
+                "label": "Build_clue_ledger_cmd → _page_count",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_311_build_clue_ledger_cm",
+                "label": "Build_clue_ledger_cmd → _now",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_509_build_clue_ledger_cm",
+                "label": "Build_clue_ledger_cmd → _bound_documents",
+                "processType": "cross_community",
+                "step": 2
+              }
+            ]
+          },
+          {
+            "depth": 2,
+            "id": "Function:src/duke_rates/historical/ncuc/clue_ledger.py:check_bound_spans",
+            "name": "check_bound_spans",
+            "filePath": "src/duke_rates/historical/ncuc/clue_ledger.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_308_binding_check_cmd",
+                "label": "Binding_check_cmd → _bound_documents",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_310_binding_check_cmd",
+                "label": "Binding_check_cmd → Covers",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_309_binding_check_cmd",
+                "label": "Binding_check_cmd → Load_pdf_pages",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_643_binding_check_cmd",
+                "label": "Binding_check_cmd → _page_count",
+                "processType": "cross_community",
+                "step": 2
+              }
+            ]
+          },
+          {
+            "depth": 2,
+            "id": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:_search_pages",
+            "name": "_search_pages",
+            "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": []
+          }
+        ],
+        "3": [
+          {
+            "depth": 3,
+            "id": "Function:src/duke_rates/cli_commands/provenance.py:binding_check_cmd",
+            "name": "binding_check_cmd",
+            "filePath": "src/duke_rates/cli_commands/provenance.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_310_binding_check_cmd",
+                "label": "Binding_check_cmd → Covers",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_805_binding_check_cmd",
+                "label": "Binding_check_cmd → _seed_document_types",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_643_binding_check_cmd",
+                "label": "Binding_check_cmd → _page_count",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_308_binding_check_cmd",
+                "label": "Binding_check_cmd → _bound_documents",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_309_binding_check_cmd",
+                "label": "Binding_check_cmd → Load_pdf_pages",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_565_binding_check_cmd",
+                "label": "Binding_check_cmd → Family_leaf",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_629_binding_check_cmd",
+                "label": "Binding_check_cmd → Ensure_directories",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          },
+          {
+            "depth": 3,
+            "id": "Function:src/duke_rates/cli_commands/provenance.py:build_clue_ledger_cmd",
+            "name": "build_clue_ledger_cmd",
+            "filePath": "src/duke_rates/cli_commands/provenance.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_510_build_clue_ledger_cm",
+                "label": "Build_clue_ledger_cmd → Load_pdf_pages",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_672_build_clue_ledger_cm",
+                "label": "Build_clue_ledger_cmd → _page_count",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_312_build_clue_ledger_cm",
+                "label": "Build_clue_ledger_cmd → _sha256_text",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_660_build_clue_ledger_cm",
+                "label": "Build_clue_ledger_cmd → Ensure_directories",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_311_build_clue_ledger_cm",
+                "label": "Build_clue_ledger_cmd → _now",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_509_build_clue_ledger_cm",
+                "label": "Build_clue_ledger_cmd → _bound_documents",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_808_build_clue_ledger_cm",
+                "label": "Build_clue_ledger_cmd → _seed_document_types",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          },
+          {
+            "depth": 3,
+            "id": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:resolve_gaps_locally",
+            "name": "resolve_gaps_locally",
+            "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_452_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Norm",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_318_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_645_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_127_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → _now",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_210_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Finish_outcome",
+                "processType": "cross_community",
+                "step": 2
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "repo": "duke-standalone",
+        "target": "write_page_clues",
+        "file_path": "src/duke_rates/historical/ncuc/clue_ledger.py",
+        "direction": "upstream"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Function:src/duke_rates/historical/ncuc/clue_ledger.py:write_page_clues",
+        "name": "write_page_clues",
+        "type": "Function",
+        "filePath": "src/duke_rates/historical/ncuc/clue_ledger.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 7,
+      "risk": "HIGH",
+      "riskSharedAxes": "LOW",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "epistemic": "exact",
+      "summary": {
+        "direct": 3,
+        "processes_affected": 3,
+        "modules_affected": 2
+      },
+      "byDepthCounts": {
+        "1": 3,
+        "2": 3,
+        "3": 1
+      },
+      "affected_processes": [
+        {
+          "name": "resolve_gaps_local_cmd",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/provenance.py",
+          "affected_process_count": 7,
+          "total_hits": 12,
+          "earliest_broken_step": 1
+        },
+        {
+          "name": "binding_check_cmd",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/provenance.py",
+          "affected_process_count": 7,
+          "total_hits": 11,
+          "earliest_broken_step": 1
+        },
+        {
+          "name": "build_clue_ledger_cmd",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/provenance.py",
+          "affected_process_count": 7,
+          "total_hits": 11,
+          "earliest_broken_step": 1
+        }
+      ],
+      "affected_modules": [
+        {
+          "name": "Ncuc",
+          "hits": 4,
+          "impact": "direct"
+        },
+        {
+          "name": "Cli_commands",
+          "hits": 3,
+          "impact": "indirect"
+        }
+      ],
+      "byDepth": {
+        "1": [
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/historical/ncuc/clue_ledger.py:build_clue_ledger",
+            "name": "build_clue_ledger",
+            "filePath": "src/duke_rates/historical/ncuc/clue_ledger.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_510_build_clue_ledger_cm",
+                "label": "Build_clue_ledger_cmd → Load_pdf_pages",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_672_build_clue_ledger_cm",
+                "label": "Build_clue_ledger_cmd → _page_count",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_311_build_clue_ledger_cm",
+                "label": "Build_clue_ledger_cmd → _now",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_509_build_clue_ledger_cm",
+                "label": "Build_clue_ledger_cmd → _bound_documents",
+                "processType": "cross_community",
+                "step": 2
+              }
+            ]
+          },
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/historical/ncuc/clue_ledger.py:check_bound_spans",
+            "name": "check_bound_spans",
+            "filePath": "src/duke_rates/historical/ncuc/clue_ledger.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_308_binding_check_cmd",
+                "label": "Binding_check_cmd → _bound_documents",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_310_binding_check_cmd",
+                "label": "Binding_check_cmd → Covers",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_309_binding_check_cmd",
+                "label": "Binding_check_cmd → Load_pdf_pages",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_643_binding_check_cmd",
+                "label": "Binding_check_cmd → _page_count",
+                "processType": "cross_community",
+                "step": 2
+              }
+            ]
+          },
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:_search_pages",
+            "name": "_search_pages",
+            "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": []
+          }
+        ],
+        "2": [
+          {
+            "depth": 2,
+            "id": "Function:src/duke_rates/cli_commands/provenance.py:binding_check_cmd",
+            "name": "binding_check_cmd",
+            "filePath": "src/duke_rates/cli_commands/provenance.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_643_binding_check_cmd",
+                "label": "Binding_check_cmd → _page_count",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_308_binding_check_cmd",
+                "label": "Binding_check_cmd → _bound_documents",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_310_binding_check_cmd",
+                "label": "Binding_check_cmd → Covers",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_805_binding_check_cmd",
+                "label": "Binding_check_cmd → _seed_document_types",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_309_binding_check_cmd",
+                "label": "Binding_check_cmd → Load_pdf_pages",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_629_binding_check_cmd",
+                "label": "Binding_check_cmd → Ensure_directories",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_565_binding_check_cmd",
+                "label": "Binding_check_cmd → Family_leaf",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          },
+          {
+            "depth": 2,
+            "id": "Function:src/duke_rates/cli_commands/provenance.py:build_clue_ledger_cmd",
+            "name": "build_clue_ledger_cmd",
+            "filePath": "src/duke_rates/cli_commands/provenance.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_312_build_clue_ledger_cm",
+                "label": "Build_clue_ledger_cmd → _sha256_text",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_660_build_clue_ledger_cm",
+                "label": "Build_clue_ledger_cmd → Ensure_directories",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_311_build_clue_ledger_cm",
+                "label": "Build_clue_ledger_cmd → _now",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_509_build_clue_ledger_cm",
+                "label": "Build_clue_ledger_cmd → _bound_documents",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_808_build_clue_ledger_cm",
+                "label": "Build_clue_ledger_cmd → _seed_document_types",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_510_build_clue_ledger_cm",
+                "label": "Build_clue_ledger_cmd → Load_pdf_pages",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_672_build_clue_ledger_cm",
+                "label": "Build_clue_ledger_cmd → _page_count",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          },
+          {
+            "depth": 2,
+            "id": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:resolve_gaps_locally",
+            "name": "resolve_gaps_locally",
+            "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_452_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Norm",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_318_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_645_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_127_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → _now",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_210_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Finish_outcome",
+                "processType": "cross_community",
+                "step": 2
+              }
+            ]
+          }
+        ],
+        "3": [
+          {
+            "depth": 3,
+            "id": "Function:src/duke_rates/cli_commands/provenance.py:resolve_gaps_local_cmd",
+            "name": "resolve_gaps_local_cmd",
+            "filePath": "src/duke_rates/cli_commands/provenance.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_645_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_814_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → _seed_document_types",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_127_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → _now",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_704_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Ensure_directories",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_318_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Close",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_210_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Finish_outcome",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_452_resolve_gaps_local_c",
+                "label": "Resolve_gaps_local_cmd → Norm",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operation": {
+      "tool": "context",
+      "params": {
+        "repo": "duke-standalone",
+        "name": "write_page_clues",
+        "file_path": "src/duke_rates/historical/ncuc/clue_ledger.py"
+      }
+    },
+    "result": {
+      "status": "found",
+      "symbol": {
+        "uid": "Function:src/duke_rates/historical/ncuc/clue_ledger.py:write_page_clues",
+        "name": "write_page_clues",
+        "kind": "Function",
+        "filePath": "src/duke_rates/historical/ncuc/clue_ledger.py",
+        "startLine": 229,
+        "endLine": 287
+      },
+      "epistemic": "exact",
+      "incoming": {
+        "calls": [
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/clue_ledger.py:build_clue_ledger",
+            "name": "build_clue_ledger",
+            "filePath": "src/duke_rates/historical/ncuc/clue_ledger.py"
+          },
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/clue_ledger.py:check_bound_spans",
+            "name": "check_bound_spans",
+            "filePath": "src/duke_rates/historical/ncuc/clue_ledger.py"
+          },
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/local_gap_resolution.py:_search_pages",
+            "name": "_search_pages",
+            "filePath": "src/duke_rates/historical/ncuc/local_gap_resolution.py"
+          }
+        ]
+      },
+      "outgoing": {
+        "calls": [
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/clue_ledger.py:_now",
+            "name": "_now",
+            "filePath": "src/duke_rates/historical/ncuc/clue_ledger.py"
+          },
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/clue_ledger.py:_sha256_text",
+            "name": "_sha256_text",
+            "filePath": "src/duke_rates/historical/ncuc/clue_ledger.py"
+          },
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/clue_ledger.py:clue_uid",
+            "name": "clue_uid",
+            "filePath": "src/duke_rates/historical/ncuc/clue_ledger.py"
+          },
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/clue_ledger.py:is_index_page",
+            "name": "is_index_page",
+            "filePath": "src/duke_rates/historical/ncuc/clue_ledger.py"
+          },
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/regulatory_clues.py:extract_page_clues",
+            "name": "extract_page_clues",
+            "filePath": "src/duke_rates/historical/ncuc/regulatory_clues.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/historical/ncuc/clue_ledger.py:BboxLocator.locate#5",
+            "name": "locate",
+            "filePath": "src/duke_rates/historical/ncuc/clue_ledger.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/historical/ncuc/regulatory_clues.py:PageClue.normalized_json#0",
+            "name": "normalized_json",
+            "filePath": "src/duke_rates/historical/ncuc/regulatory_clues.py"
+          }
+        ]
+      },
+      "processes": []
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "repo": "duke-standalone",
+        "target": "build_clue_ledger",
+        "file_path": "src/duke_rates/historical/ncuc/clue_ledger.py",
+        "direction": "upstream"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Function:src/duke_rates/historical/ncuc/clue_ledger.py:build_clue_ledger",
+        "name": "build_clue_ledger",
+        "type": "Function",
+        "filePath": "src/duke_rates/historical/ncuc/clue_ledger.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 1,
+      "risk": "LOW",
+      "riskSharedAxes": "LOW",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "epistemic": "exact",
+      "summary": {
+        "direct": 1,
+        "processes_affected": 1,
+        "modules_affected": 1
+      },
+      "byDepthCounts": {
+        "1": 1
+      },
+      "affected_processes": [
+        {
+          "name": "build_clue_ledger_cmd",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/provenance.py",
+          "affected_process_count": 7,
+          "total_hits": 7,
+          "earliest_broken_step": 1
+        }
+      ],
+      "affected_modules": [
+        {
+          "name": "Cli_commands",
+          "hits": 1,
+          "impact": "direct"
+        }
+      ],
+      "byDepth": {
+        "1": [
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/cli_commands/provenance.py:build_clue_ledger_cmd",
+            "name": "build_clue_ledger_cmd",
+            "filePath": "src/duke_rates/cli_commands/provenance.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_660_build_clue_ledger_cm",
+                "label": "Build_clue_ledger_cmd → Ensure_directories",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_312_build_clue_ledger_cm",
+                "label": "Build_clue_ledger_cmd → _sha256_text",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_311_build_clue_ledger_cm",
+                "label": "Build_clue_ledger_cmd → _now",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_509_build_clue_ledger_cm",
+                "label": "Build_clue_ledger_cmd → _bound_documents",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_808_build_clue_ledger_cm",
+                "label": "Build_clue_ledger_cmd → _seed_document_types",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_510_build_clue_ledger_cm",
+                "label": "Build_clue_ledger_cmd → Load_pdf_pages",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_672_build_clue_ledger_cm",
+                "label": "Build_clue_ledger_cmd → _page_count",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "repo": "duke-standalone",
+        "target": "build_lineage_links",
+        "file_path": "src/duke_rates/historical/ncuc/clue_lineage.py",
+        "direction": "upstream"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Function:src/duke_rates/historical/ncuc/clue_lineage.py:build_lineage_links",
+        "name": "build_lineage_links",
+        "type": "Function",
+        "filePath": "src/duke_rates/historical/ncuc/clue_lineage.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 2,
+      "risk": "LOW",
+      "riskSharedAxes": "LOW",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "epistemic": "exact",
+      "summary": {
+        "direct": 1,
+        "processes_affected": 1,
+        "modules_affected": 2
+      },
+      "byDepthCounts": {
+        "1": 1,
+        "2": 1
+      },
+      "affected_processes": [
+        {
+          "name": "typed_gaps_cmd",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/provenance.py",
+          "affected_process_count": 4,
+          "total_hits": 8,
+          "earliest_broken_step": 1
+        }
+      ],
+      "affected_modules": [
+        {
+          "name": "Cli_commands",
+          "hits": 1,
+          "impact": "indirect"
+        },
+        {
+          "name": "Ncuc",
+          "hits": 1,
+          "impact": "direct"
+        }
+      ],
+      "byDepth": {
+        "1": [
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/historical/ncuc/clue_lineage.py:rebuild_lineage",
+            "name": "rebuild_lineage",
+            "filePath": "src/duke_rates/historical/ncuc/clue_lineage.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_411_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Family_utility",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_412_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Page_leaves",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_493_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Printed_schedule_base",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_453_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Family_leaf",
+                "processType": "cross_community",
+                "step": 2
+              }
+            ]
+          }
+        ],
+        "2": [
+          {
+            "depth": 2,
+            "id": "Function:src/duke_rates/cli_commands/provenance.py:typed_gaps_cmd",
+            "name": "typed_gaps_cmd",
+            "filePath": "src/duke_rates/cli_commands/provenance.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_493_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Printed_schedule_base",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_453_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Family_leaf",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_411_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Family_utility",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_412_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Page_leaves",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operation": {
+      "tool": "context",
+      "params": {
+        "repo": "duke-standalone",
+        "name": "build_lineage_links",
+        "file_path": "src/duke_rates/historical/ncuc/clue_lineage.py"
+      }
+    },
+    "result": {
+      "status": "found",
+      "symbol": {
+        "uid": "Function:src/duke_rates/historical/ncuc/clue_lineage.py:build_lineage_links",
+        "name": "build_lineage_links",
+        "kind": "Function",
+        "filePath": "src/duke_rates/historical/ncuc/clue_lineage.py",
+        "startLine": 296,
+        "endLine": 354
+      },
+      "epistemic": "exact",
+      "incoming": {
+        "calls": [
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/clue_lineage.py:rebuild_lineage",
+            "name": "rebuild_lineage",
+            "filePath": "src/duke_rates/historical/ncuc/clue_lineage.py"
+          }
+        ]
+      },
+      "outgoing": {
+        "calls": [
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/clue_lineage.py:_evaluate_target",
+            "name": "_evaluate_target",
+            "filePath": "src/duke_rates/historical/ncuc/clue_lineage.py"
+          },
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/clue_lineage.py:_now",
+            "name": "_now",
+            "filePath": "src/duke_rates/historical/ncuc/clue_lineage.py"
+          },
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/clue_lineage.py:_target_token",
+            "name": "_target_token",
+            "filePath": "src/duke_rates/historical/ncuc/clue_lineage.py"
+          },
+          {
+            "uid": "Function:src/duke_rates/historical/ncuc/clue_lineage.py:_uid",
+            "name": "_uid",
+            "filePath": "src/duke_rates/historical/ncuc/clue_lineage.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/historical/ncuc/clue_lineage.py:VersionEvidence.family_clues#1",
+            "name": "family_clues",
+            "filePath": "src/duke_rates/historical/ncuc/clue_lineage.py"
+          },
+          {
+            "uid": "Method:src/duke_rates/historical/ncuc/clue_lineage.py:VersionEvidence.owns_supersedes#1",
+            "name": "owns_supersedes",
+            "filePath": "src/duke_rates/historical/ncuc/clue_lineage.py"
+          }
+        ]
+      },
+      "processes": []
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "repo": "duke-standalone",
+        "target": "build_typed_gaps",
+        "file_path": "src/duke_rates/historical/ncuc/clue_lineage.py",
+        "direction": "upstream"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Function:src/duke_rates/historical/ncuc/clue_lineage.py:build_typed_gaps",
+        "name": "build_typed_gaps",
+        "type": "Function",
+        "filePath": "src/duke_rates/historical/ncuc/clue_lineage.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 2,
+      "risk": "LOW",
+      "riskSharedAxes": "LOW",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "epistemic": "exact",
+      "summary": {
+        "direct": 1,
+        "processes_affected": 1,
+        "modules_affected": 2
+      },
+      "byDepthCounts": {
+        "1": 1,
+        "2": 1
+      },
+      "affected_processes": [
+        {
+          "name": "typed_gaps_cmd",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/provenance.py",
+          "affected_process_count": 4,
+          "total_hits": 8,
+          "earliest_broken_step": 1
+        }
+      ],
+      "affected_modules": [
+        {
+          "name": "Cli_commands",
+          "hits": 1,
+          "impact": "indirect"
+        },
+        {
+          "name": "Ncuc",
+          "hits": 1,
+          "impact": "direct"
+        }
+      ],
+      "byDepth": {
+        "1": [
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/historical/ncuc/clue_lineage.py:rebuild_lineage",
+            "name": "rebuild_lineage",
+            "filePath": "src/duke_rates/historical/ncuc/clue_lineage.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_412_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Page_leaves",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_493_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Printed_schedule_base",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_411_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Family_utility",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_453_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Family_leaf",
+                "processType": "cross_community",
+                "step": 2
+              }
+            ]
+          }
+        ],
+        "2": [
+          {
+            "depth": 2,
+            "id": "Function:src/duke_rates/cli_commands/provenance.py:typed_gaps_cmd",
+            "name": "typed_gaps_cmd",
+            "filePath": "src/duke_rates/cli_commands/provenance.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_453_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Family_leaf",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_493_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Printed_schedule_base",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_411_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Family_utility",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_412_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Page_leaves",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "repo": "duke-standalone",
+        "target": "_docket_clue_values",
+        "file_path": "src/duke_rates/historical/ncuc/clue_lineage.py",
+        "direction": "upstream"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Function:src/duke_rates/historical/ncuc/clue_lineage.py:_docket_clue_values",
+        "name": "_docket_clue_values",
+        "type": "Function",
+        "filePath": "src/duke_rates/historical/ncuc/clue_lineage.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 3,
+      "risk": "LOW",
+      "riskSharedAxes": "LOW",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "epistemic": "exact",
+      "summary": {
+        "direct": 1,
+        "processes_affected": 1,
+        "modules_affected": 2
+      },
+      "byDepthCounts": {
+        "1": 1,
+        "2": 1,
+        "3": 1
+      },
+      "affected_processes": [
+        {
+          "name": "typed_gaps_cmd",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/provenance.py",
+          "affected_process_count": 4,
+          "total_hits": 8,
+          "earliest_broken_step": 1
+        }
+      ],
+      "affected_modules": [
+        {
+          "name": "Ncuc",
+          "hits": 2,
+          "impact": "direct"
+        },
+        {
+          "name": "Cli_commands",
+          "hits": 1,
+          "impact": "indirect"
+        }
+      ],
+      "byDepth": {
+        "1": [
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/historical/ncuc/clue_lineage.py:build_typed_gaps",
+            "name": "build_typed_gaps",
+            "filePath": "src/duke_rates/historical/ncuc/clue_lineage.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": []
+          }
+        ],
+        "2": [
+          {
+            "depth": 2,
+            "id": "Function:src/duke_rates/historical/ncuc/clue_lineage.py:rebuild_lineage",
+            "name": "rebuild_lineage",
+            "filePath": "src/duke_rates/historical/ncuc/clue_lineage.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_493_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Printed_schedule_base",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_411_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Family_utility",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_453_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Family_leaf",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_412_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Page_leaves",
+                "processType": "cross_community",
+                "step": 2
+              }
+            ]
+          }
+        ],
+        "3": [
+          {
+            "depth": 3,
+            "id": "Function:src/duke_rates/cli_commands/provenance.py:typed_gaps_cmd",
+            "name": "typed_gaps_cmd",
+            "filePath": "src/duke_rates/cli_commands/provenance.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_411_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Family_utility",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_493_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Printed_schedule_base",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_412_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Page_leaves",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_453_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Family_leaf",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "repo": "duke-standalone",
+        "target": "_local_order_exists",
+        "file_path": "src/duke_rates/historical/ncuc/clue_lineage.py",
+        "direction": "upstream"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Function:src/duke_rates/historical/ncuc/clue_lineage.py:_local_order_exists",
+        "name": "_local_order_exists",
+        "type": "Function",
+        "filePath": "src/duke_rates/historical/ncuc/clue_lineage.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 3,
+      "risk": "LOW",
+      "riskSharedAxes": "LOW",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "epistemic": "exact",
+      "summary": {
+        "direct": 1,
+        "processes_affected": 1,
+        "modules_affected": 2
+      },
+      "byDepthCounts": {
+        "1": 1,
+        "2": 1,
+        "3": 1
+      },
+      "affected_processes": [
+        {
+          "name": "typed_gaps_cmd",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/provenance.py",
+          "affected_process_count": 4,
+          "total_hits": 8,
+          "earliest_broken_step": 1
+        }
+      ],
+      "affected_modules": [
+        {
+          "name": "Ncuc",
+          "hits": 2,
+          "impact": "direct"
+        },
+        {
+          "name": "Cli_commands",
+          "hits": 1,
+          "impact": "indirect"
+        }
+      ],
+      "byDepth": {
+        "1": [
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/historical/ncuc/clue_lineage.py:build_typed_gaps",
+            "name": "build_typed_gaps",
+            "filePath": "src/duke_rates/historical/ncuc/clue_lineage.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": []
+          }
+        ],
+        "2": [
+          {
+            "depth": 2,
+            "id": "Function:src/duke_rates/historical/ncuc/clue_lineage.py:rebuild_lineage",
+            "name": "rebuild_lineage",
+            "filePath": "src/duke_rates/historical/ncuc/clue_lineage.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_453_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Family_leaf",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_411_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Family_utility",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_493_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Printed_schedule_base",
+                "processType": "cross_community",
+                "step": 2
+              },
+              {
+                "id": "proc_412_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Page_leaves",
+                "processType": "cross_community",
+                "step": 2
+              }
+            ]
+          }
+        ],
+        "3": [
+          {
+            "depth": 3,
+            "id": "Function:src/duke_rates/cli_commands/provenance.py:typed_gaps_cmd",
+            "name": "typed_gaps_cmd",
+            "filePath": "src/duke_rates/cli_commands/provenance.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_412_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Page_leaves",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_411_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Family_utility",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_493_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Printed_schedule_base",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_453_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Family_leaf",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "repo": "duke-standalone",
+        "target": "rebuild_lineage",
+        "file_path": "src/duke_rates/historical/ncuc/clue_lineage.py",
+        "direction": "upstream"
+      }
+    },
+    "result": {
+      "target": {
+        "id": "Function:src/duke_rates/historical/ncuc/clue_lineage.py:rebuild_lineage",
+        "name": "rebuild_lineage",
+        "type": "Function",
+        "filePath": "src/duke_rates/historical/ncuc/clue_lineage.py"
+      },
+      "direction": "upstream",
+      "impactedCount": 1,
+      "risk": "LOW",
+      "riskSharedAxes": "LOW",
+      "riskScale": {
+        "comparableAcrossKinds": true,
+        "unusedAxes": []
+      },
+      "epistemic": "exact",
+      "summary": {
+        "direct": 1,
+        "processes_affected": 1,
+        "modules_affected": 1
+      },
+      "byDepthCounts": {
+        "1": 1
+      },
+      "affected_processes": [
+        {
+          "name": "typed_gaps_cmd",
+          "type": "Function",
+          "filePath": "src/duke_rates/cli_commands/provenance.py",
+          "affected_process_count": 4,
+          "total_hits": 4,
+          "earliest_broken_step": 1
+        }
+      ],
+      "affected_modules": [
+        {
+          "name": "Cli_commands",
+          "hits": 1,
+          "impact": "direct"
+        }
+      ],
+      "byDepth": {
+        "1": [
+          {
+            "depth": 1,
+            "id": "Function:src/duke_rates/cli_commands/provenance.py:typed_gaps_cmd",
+            "name": "typed_gaps_cmd",
+            "filePath": "src/duke_rates/cli_commands/provenance.py",
+            "relationType": "CALLS",
+            "confidence": 0.85,
+            "processes": [
+              {
+                "id": "proc_493_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Printed_schedule_base",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_411_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Family_utility",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_412_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Page_leaves",
+                "processType": "cross_community",
+                "step": 1
+              },
+              {
+                "id": "proc_453_typed_gaps_cmd",
+                "label": "Typed_gaps_cmd → Family_leaf",
+                "processType": "cross_community",
+                "step": 1
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operation": {
+      "tool": "impact",
+      "params": {
+        "repo": "duke-standalone",
+        "target": "create_run",
+        "file_path": "src/duke_rates/db/provenance.py",
+        "direction": "upstream"
+      }
+    },
+    "result": {
+      "error": "Target 'create_run' not found",
+      "target": {
+        "name": "create_run"
+      },
+      "direction": "upstream",
+      "impactedCount": null,
+      "risk": "UNKNOWN"
+    }
+  }
+]
