@@ -3116,6 +3116,7 @@ class BulkExtractor:
                 reason=f"legacy_replace (bulk_extractor, doc {result.doc_id})",
                 allow_empty=force_clear,
                 acknowledge_review=True,
+                pathway="automated:bulk_extractor.legacy_replace",
             )
             result.inserted = int(result.promotion.get("inserted", 0))
         except ProvenanceError as exc:

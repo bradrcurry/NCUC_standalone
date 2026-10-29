@@ -250,6 +250,7 @@ propose-llm-charge-promotions-nc
 provenance apply-proposal
 provenance approve-proposal
 provenance audit-docling-coverage
+provenance audit-version-sources
 provenance backfill
 provenance binding-check
 provenance build-clue-ledger

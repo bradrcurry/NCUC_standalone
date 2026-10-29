@@ -47,9 +47,11 @@ from duke_rates.db.discovery_review_schema import (
     DISCOVERY_REVIEW_TABLES,
     SEARCH_ATTEMPT_COLUMNS,
     discovery_review_usage,
+    widen_proposal_kinds,
 )
 
-PROVENANCE_SCHEMA_VERSION = 4  # 2: rider-summary runs (2C); 3: clue ledger (2E D1); 4: review/promotion (2E D2)
+PROVENANCE_SCHEMA_VERSION = 5  # 2: rider-summary runs (2C); 3: clue ledger (2E D1); 4: review/promotion (2E D2);
+# 5: ingestion validation, review queue, bind_unbound_document proposals (2E D3)
 
 # Columns whose changes are audited, per legacy table.
 AUDITED_METADATA_COLUMNS: dict[str, tuple[str, ...]] = {
@@ -777,6 +779,7 @@ def ensure_provenance_schema(conn: sqlite3.Connection) -> None:
     CHECK (rows and ids unchanged); everything else is added.
     """
     _widen_target_kinds(conn)
+    widen_proposal_kinds(conn)
     conn.executescript(PROVENANCE_DDL)
     conn.executescript(CLUE_LEDGER_DDL)
     conn.executescript(DISCOVERY_REVIEW_DDL)

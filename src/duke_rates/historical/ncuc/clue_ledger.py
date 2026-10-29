@@ -75,14 +75,19 @@ class FileIdentity:
     page_count: int | None
 
 
-_IDENTITY_CACHE: dict[str, FileIdentity] = {}
+_IDENTITY_CACHE: dict[tuple, FileIdentity] = {}
 
 
 def file_identity(path: str, stored_sha256: str | None = None) -> FileIdentity:
-    cached = _IDENTITY_CACHE.get(path)
+    p = Path(path)
+    try:
+        st = p.stat()
+        key: tuple = (str(path), st.st_size, st.st_mtime_ns)  # a file rewritten in place is hashed again
+    except OSError:
+        key = (str(path), None, None)
+    cached = _IDENTITY_CACHE.get(key)
     if cached is not None:
         return cached
-    p = Path(path)
     if p.is_file():
         sha, md5 = hashlib.sha256(), hashlib.md5()
         with p.open("rb") as fh:
@@ -94,7 +99,7 @@ def file_identity(path: str, stored_sha256: str | None = None) -> FileIdentity:
         identity = FileIdentity(path, stored_sha256, None, "stored_unverified", None)
     else:
         identity = FileIdentity(path, None, None, "unavailable", None)
-    _IDENTITY_CACHE[path] = identity
+    _IDENTITY_CACHE[key] = identity
     return identity
 
 

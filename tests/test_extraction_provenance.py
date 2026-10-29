@@ -5,6 +5,7 @@ Every test builds its own scratch database; nothing here touches production.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import sqlite3
 from pathlib import Path
@@ -40,8 +41,8 @@ def _seed(conn: sqlite3.Connection, pdf: Path) -> dict[str, int]:
     hd = conn.execute(
         "INSERT INTO historical_documents (family_key, title, category, kind, canonical_url, archived_url, "
         "snapshot_timestamp, local_path, content_hash, effective_start, retrieved_at, parsed_result_json) "
-        "VALUES ('nc-progress-leaf-500', 'RES', 'rate', 'pdf', 'u', 'a1', 's', ?, 'abc', '2024-10-01', ?, ?)",
-        (str(pdf), NOW, json.dumps({"schedule": {"bcc": 14.0}})),
+        "VALUES ('nc-progress-leaf-500', 'RES', 'rate', 'pdf', 'u', 'a1', 's', ?, ?, '2024-10-01', ?, ?)",
+        (str(pdf), hashlib.sha256(pdf.read_bytes()).hexdigest(), NOW, json.dumps({"schedule": {"bcc": 14.0}})),
     ).lastrowid
     vid = conn.execute(
         "INSERT INTO tariff_versions (family_key, historical_document_id, effective_start, source_type, created_at) "
@@ -87,10 +88,21 @@ def _seed(conn: sqlite3.Connection, pdf: Path) -> dict[str, int]:
     }
 
 
+def write_clean_sheet(pdf: Path, text: str = "NC First Revised Leaf No. 500\nResidential Service\n"
+                      "Effective for service rendered on and after October 1, 2024") -> None:
+    """A real one-page PDF: the D3 source validation reads the pages a promotion rests on."""
+    import fitz
+
+    doc = fitz.open()
+    doc.new_page().insert_text((72, 72), text, fontsize=10)
+    doc.save(pdf)
+    doc.close()
+
+
 @pytest.fixture
 def db(tmp_path: Path):
     pdf = tmp_path / "leaf-500.pdf"
-    pdf.write_bytes(b"%PDF-1.4 test leaf 500")
+    write_clean_sheet(pdf)
     path = tmp_path / "scratch.db"
     conn = connect(path)
     ids = _seed(conn, pdf)

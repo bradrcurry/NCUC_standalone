@@ -103,3 +103,11 @@ def legacy_replace_persistence(monkeypatch):
 
     monkeypatch.setattr(BulkExtractor, "require_provenance_schema", install_schema)
     monkeypatch.setenv("DUKE_RATES_LEGACY_REPLACE", "1")
+    # Phase 2E D3: these parser tests bind documents to placeholder paths (no source pages exist), so the
+    # shared source validation inside provenance.promote would refuse every unattended promotion. It is
+    # bypassed here, visibly, for this scaffold only; tests/test_d3_ingestion_validation.py covers it on
+    # real files.
+    from duke_rates.historical.ncuc import ingestion_validation
+
+    monkeypatch.setattr(ingestion_validation, "enforce", lambda conn, run_id, **kw: {
+        "verdict": "not_applicable", "failed": [], "overrides": [], "note": "legacy_replace_persistence scaffold"})

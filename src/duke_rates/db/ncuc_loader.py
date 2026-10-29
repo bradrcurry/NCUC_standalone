@@ -274,6 +274,7 @@ def _replace_through_runs(
             reason="legacy_replace (persist_rider_summary_records)",
             allow_empty=True,
             acknowledge_review=True,
+            pathway="automated:ncuc_loader.legacy_replace",
         )
         blocks += result["inserted_blocks"]
     return blocks, skipped

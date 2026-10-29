@@ -349,33 +349,27 @@ def promote_cmd(
         False, "--acknowledge-date-conflict",
         help="Promote although the run reads an effective date the version's bound pages do not print.",
     ),
+    override_check: list[str] = typer.Option(
+        [], "--override-check",
+        help="Override another named source-validation check after review (repeatable; recorded).",
+    ),
 ) -> None:
-    """Make a reviewed candidate run the active result."""
-    conn = _open(db, write=not dry_run, allow_production=allow_production)
-    target = conn.execute("SELECT target_kind, target_id FROM extraction_runs WHERE id = ?", (run_id,)).fetchone()
-    if not dry_run and target and target[0] == "tariff_version" \
-            and conn.execute("SELECT 1 FROM sqlite_master WHERE name = 'document_assertions'").fetchone():
-        from duke_rates.historical.ncuc.document_promotion import (
-            effective_date_promotion_conflict,
-            redline_promotion_block,
-        )
+    """Make a reviewed candidate run the active result.
 
-        block = None if acknowledge_redline else redline_promotion_block(conn, target[1])
-        if block:
-            raise typer.BadParameter(
-                f"run {run_id} targets version {target[1]}, whose source is a redline ({block['reason']}); "
-                "struck values would become active charges. Pass --acknowledge-redline only after reviewing them."
-            )
-        conflict = None if acknowledge_date_conflict else effective_date_promotion_conflict(conn, run_id)
-        if conflict:
-            raise typer.BadParameter(
-                f"run {run_id} reads version {conflict['version_id']}'s effective date as "
-                f"{conflict['run_interprets']!r} (from historical_documents.effective_start; version stores "
-                f"{conflict['stored']!r}), but its bound pages print {conflict['printed_on_bound_pages']}. "
-                "Correct the source metadata, or pass --acknowledge-date-conflict after review."
-            )
-    _echo(
-        pv.promote(
+    The shared source validation (redline pages, redline-duplicate assertion, printed effective
+    date, source bytes) runs inside ``provenance.promote``; this command is its reviewed pathway,
+    the only one that accepts overrides. Each override is recorded in ``promotion_validations``.
+    """
+    from duke_rates.historical.ncuc.ingestion_validation import IngestionValidationError
+
+    conn = _open(db, write=not dry_run, allow_production=allow_production)
+    overrides = list(override_check)
+    if acknowledge_redline:
+        overrides += ["bound_pages_not_redline", "no_redline_duplicate_assertion"]
+    if acknowledge_date_conflict:
+        overrides.append("effective_date_printed")
+    try:
+        result = pv.promote(
             conn,
             run_id,
             promoted_by=by,
@@ -385,8 +379,19 @@ def promote_cmd(
             allow_empty=allow_empty,
             dry_run=dry_run,
             acknowledge_review=acknowledge_review,
+            pathway="reviewed",
+            validation_overrides=overrides,
         )
-    )
+    except IngestionValidationError as exc:
+        hints = {"bound_pages_not_redline": "--acknowledge-redline (struck values would become active charges)",
+                 "no_redline_duplicate_assertion": "--acknowledge-redline",
+                 "effective_date_printed": "--acknowledge-date-conflict (correct the source metadata instead)"}
+        failed = [f for f in exc.result["failed"] if f not in exc.result["overrides"]]
+        detail = {f: exc.result["checks"][f]["detail"] for f in failed}
+        raise typer.BadParameter(
+            f"{exc}. Details: {json.dumps(detail, default=str)[:1500]}. After review: "
+            + "; ".join(hints.get(f, f"--override-check {f}") for f in failed)) from exc
+    _echo(result)
 
 
 @provenance_app.command("rollback")
@@ -829,6 +834,19 @@ def propose_rebind_cmd(
     conn = _promotion_conn(db, allow_production)
     _echo(dp.propose(conn, "rebind_page_range", historical_document_id, proposed_by=by,
                      params={"start_page": start_page, "end_page": end_page}, evidence=json.loads(evidence)))
+
+
+@provenance_app.command("audit-version-sources")
+def audit_version_sources_cmd(
+    db: Path = _DB_OPTION,
+    json_out: Path | None = typer.Option(None, "--json"),
+) -> None:
+    """Shadow-run the promotion source validation over versions that already hold charges (read-only)."""
+    from duke_rates.historical.ncuc.ingestion_validation import audit_version_sources
+
+    rows = audit_version_sources(_open(db, write=False))
+    _write_json(json_out, {"versions": rows})
+    _echo({"versions": len(rows), "by_failed": dict(Counter(",".join(r["failed"]) or "pass" for r in rows))})
 
 
 @provenance_app.command("propose-redline-duplicate")

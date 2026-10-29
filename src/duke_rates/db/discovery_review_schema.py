@@ -1,6 +1,6 @@
-"""Phase 2E D2 schema: remote candidates, effective-date assessments, reviewed promotion.
+"""Phase 2E D2/D3 schema: remote candidates, effective-date assessments, reviewed promotion.
 
-Installed with the rest of the provenance schema (version 4) by
+Installed with the rest of the provenance schema (version 4; D3 tables: version 5) by
 :func:`duke_rates.db.provenance_schema.ensure_provenance_schema`. No legacy table
 is altered by the DDL. The only legacy writes are made by an *applied*,
 *approved* promotion proposal, inside one transaction, after its snapshot.
@@ -17,6 +17,11 @@ Lifecycles keep machine findings and human decisions apart:
   back to ``tariff_versions`` in D2.
 * ``promotion_proposals.state``: ``proposed`` → ``approved`` (named reviewer) →
   ``applied`` → ``rolled_back``, or ``rejected`` / ``blocked`` (checks failed).
+* ``promotion_validations`` (D3): one row per ``provenance.promote`` call on a
+  tariff-version or rider-summary run: the shared source-evidence checks, the
+  pathway that called it, and any named override. Append-only.
+* ``evidence_review_items`` (D3): the prioritized review queue. ``review_status``
+  changes only with a named reviewer; nothing here writes a legacy table.
 """
 
 from __future__ import annotations
@@ -28,10 +33,12 @@ REMOTE_CANDIDATE_STATUSES: tuple[str, ...] = (
 DATE_ASSESSMENT_STATUSES: tuple[str, ...] = (
     "agree", "conflict", "ambiguous", "stored_only", "observed_only", "none", "reviewed",
 )
-PROPOSAL_KINDS: tuple[str, ...] = ("rebind_page_range", "mark_redline_duplicate")
+PROPOSAL_KINDS: tuple[str, ...] = ("rebind_page_range", "mark_redline_duplicate", "bind_unbound_document")
 PROPOSAL_STATES: tuple[str, ...] = (
     "proposed", "blocked", "approved", "applied", "rolled_back", "rejected",
 )
+VALIDATION_VERDICTS: tuple[str, ...] = ("pass", "blocked", "overridden", "not_applicable")
+REVIEW_ITEM_STATUSES: tuple[str, ...] = ("open", "accepted", "rejected", "deferred")
 
 #: ``search_attempts`` columns added in schema v4: (table, column, type).
 SEARCH_ATTEMPT_COLUMNS: tuple[tuple[str, str, str], ...] = (
@@ -48,6 +55,8 @@ DISCOVERY_REVIEW_TABLES: tuple[str, ...] = (
     "promotion_proposals",
     "promotion_snapshots",
     "document_assertions",
+    "promotion_validations",
+    "evidence_review_items",
 )
 
 
@@ -63,6 +72,10 @@ def discovery_review_usage(conn) -> dict[str, int]:
         ).fetchone()[0],
         "promotion_proposals": q("SELECT COUNT(*) FROM promotion_proposals").fetchone()[0],
         "document_assertions": q("SELECT COUNT(*) FROM document_assertions").fetchone()[0],
+        **({"promotion_validations": q("SELECT COUNT(*) FROM promotion_validations").fetchone()[0],
+            "reviewed_review_items": q("SELECT COUNT(*) FROM evidence_review_items "
+                                       "WHERE reviewed_by IS NOT NULL").fetchone()[0]}
+           if q("SELECT 1 FROM sqlite_master WHERE name='evidence_review_items'").fetchone() else {}),
     }
 
 
@@ -132,7 +145,7 @@ CREATE TABLE IF NOT EXISTS effective_date_assessments (
 CREATE TABLE IF NOT EXISTS promotion_proposals (
     id                  INTEGER PRIMARY KEY AUTOINCREMENT,
     kind                TEXT NOT NULL CHECK (kind IN ({_in(PROPOSAL_KINDS)})),
-    historical_document_id INTEGER NOT NULL,
+    historical_document_id INTEGER,          -- bind_unbound_document: set when applied
     tariff_version_id   INTEGER,
     params_json         TEXT NOT NULL,           -- e.g. {{start_page, end_page}} or {{duplicate_of_hd}}
     evidence_json       TEXT NOT NULL DEFAULT '{{}}',  -- gap/candidate/clue ids the proposal rests on
@@ -177,4 +190,79 @@ CREATE TABLE IF NOT EXISTS document_assertions (
     retracted_at        TEXT,
     UNIQUE(historical_document_id, assertion, target_historical_document_id)
 );
+
+-- D3: what the shared ingestion validation found for each charge/rider promotion.
+CREATE TABLE IF NOT EXISTS promotion_validations (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    run_id              INTEGER NOT NULL,
+    target_kind         TEXT NOT NULL,
+    target_id           INTEGER NOT NULL,
+    pathway             TEXT NOT NULL,           -- reviewed | automated:<caller>
+    validator_version   TEXT NOT NULL,
+    verdict             TEXT NOT NULL CHECK (verdict IN ({_in(VALIDATION_VERDICTS)})),
+    checks_json         TEXT NOT NULL,           -- every check: ok / blocking / detail
+    failed_json         TEXT NOT NULL DEFAULT '[]',
+    overrides_json      TEXT NOT NULL DEFAULT '[]',
+    requested_by        TEXT NOT NULL,
+    reason              TEXT,
+    validated_at        TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_promotion_validations_run ON promotion_validations(run_id);
+
+-- D3: prioritized evidence review queue (date conflicts, redline candidates, verified bindings, ...).
+CREATE TABLE IF NOT EXISTS evidence_review_items (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    item_uid            TEXT NOT NULL UNIQUE,
+    problem_type        TEXT NOT NULL,
+    priority            INTEGER NOT NULL,        -- 1 = may change a billed charge
+    family_key          TEXT,
+    tariff_version_id   INTEGER,
+    historical_document_id INTEGER,
+    source_documents_json TEXT NOT NULL DEFAULT '[]',  -- [{{path, sha256, pages}}]
+    printed_evidence_json TEXT NOT NULL DEFAULT '{{}}',
+    db_values_json      TEXT NOT NULL DEFAULT '{{}}',
+    explanation         TEXT NOT NULL,
+    cause               TEXT,                    -- classification, when evidence supports one
+    proposed_correction_json TEXT,
+    evidence_level      TEXT NOT NULL,           -- rule | assistant_page_review | human_review
+    downstream_json     TEXT NOT NULL DEFAULT '{{}}',
+    review_status       TEXT NOT NULL DEFAULT 'open' CHECK (review_status IN ({_in(REVIEW_ITEM_STATUSES)})),
+    reviewed_by         TEXT,
+    reviewed_at         TEXT,
+    review_note         TEXT,
+    builder_version     TEXT NOT NULL,
+    created_at          TEXT NOT NULL,
+    updated_at          TEXT NOT NULL
+);
 """
+
+
+def widen_proposal_kinds(conn) -> None:
+    """Rebuild a v4 ``promotion_proposals`` so its CHECK admits every proposal kind (rows and ids kept)."""
+    row = conn.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='promotion_proposals'").fetchone()
+    if row is None or all(f"'{k}'" in row[0] for k in PROPOSAL_KINDS):
+        return
+    start = DISCOVERY_REVIEW_DDL.index("CREATE TABLE IF NOT EXISTS promotion_proposals (")
+    ddl = DISCOVERY_REVIEW_DDL[start: DISCOVERY_REVIEW_DDL.index(");", start) + 2]
+    ddl = ddl.replace("IF NOT EXISTS promotion_proposals (", "promotion_proposals__v5 (")
+    cols = ", ".join(r[1] for r in conn.execute("PRAGMA table_info(promotion_proposals)"))
+    conn.commit()
+    conn.execute("PRAGMA foreign_keys=OFF")
+    conn.execute("PRAGMA legacy_alter_table=ON")  # snapshots/assertions keep REFERENCES promotion_proposals
+    try:
+        conn.execute("BEGIN IMMEDIATE")
+        before = conn.execute("SELECT COUNT(*), COALESCE(MAX(id), 0) FROM promotion_proposals").fetchone()
+        conn.execute(ddl)
+        conn.execute(f"INSERT INTO promotion_proposals__v5 ({cols}) SELECT {cols} FROM promotion_proposals")
+        conn.execute("DROP TABLE promotion_proposals")
+        conn.execute("ALTER TABLE promotion_proposals__v5 RENAME TO promotion_proposals")
+        after = conn.execute("SELECT COUNT(*), COALESCE(MAX(id), 0) FROM promotion_proposals").fetchone()
+        if tuple(before) != tuple(after):
+            raise RuntimeError(f"promotion_proposals rebuild lost rows: {tuple(before)} -> {tuple(after)}")
+        conn.execute("COMMIT")
+    except BaseException:
+        conn.execute("ROLLBACK")
+        raise
+    finally:
+        conn.execute("PRAGMA legacy_alter_table=OFF")
+        conn.execute("PRAGMA foreign_keys=ON")

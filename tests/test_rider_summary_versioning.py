@@ -32,6 +32,7 @@ def _record(bcc_ba=0.500, storm=0.250, total=0.750, eff="2025-12-01", extra_clas
             "applicable_schedules": ["RES", "R-TOUD"],
             "total_cents_per_kwh": total,
             "checksum_ok": True,
+            "evidence": {"page": 1},
             "line_items": [
                 {"label": "Fuel BA", "rider_code": "BA", "cents_per_kwh": bcc_ba, "effective_date": "12/1/25"},
                 {"label": "Storm Recovery", "rider_code": "STS", "cents_per_kwh": storm, "effective_date": "12/1/25"},
@@ -49,6 +50,16 @@ def _record(bcc_ba=0.500, storm=0.250, total=0.750, eff="2025-12-01", extra_clas
         )
     rate_classes.append({"rate_class": "?", "ambiguous_rate_class": True, "line_items": []})
     return {"source_pdf": PDF, "leaf_no": "600", "effective_date": eff, "rate_classes": rate_classes}
+
+
+@pytest.fixture(autouse=True)
+def source_pdf(tmp_path: Path, monkeypatch):
+    """The source sheet exists: the D3 source validation reads its evidence pages before a promotion."""
+    from test_extraction_provenance import write_clean_sheet
+
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / PDF).parent.mkdir(parents=True)
+    write_clean_sheet(tmp_path / PDF, "NC Leaf No. 600 Summary of Rider Adjustments")
 
 
 @pytest.fixture

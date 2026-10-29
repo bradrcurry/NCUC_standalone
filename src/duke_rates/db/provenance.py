@@ -1244,6 +1244,8 @@ def promote(
     allow_empty: bool = False,
     dry_run: bool = False,
     acknowledge_review: bool = False,
+    pathway: str = "automated:direct",
+    validation_overrides: Sequence[str] = (),
 ) -> dict[str, Any]:
     """Make ``run_id`` the active result and materialise it into the read model.
 
@@ -1252,6 +1254,14 @@ def promote(
     runs, empty runs (unless ``allow_empty``), runs with findings that need
     a person (unless ``acknowledge_review``) and a stale
     ``expected_active_run_id``.
+
+    Phase 2E D3: ``tariff_version`` and rider-summary runs must also pass the
+    shared source-evidence validation
+    (:mod:`duke_rates.historical.ncuc.ingestion_validation`): redline markup or
+    a redline-duplicate assertion on the source pages, an effective date the
+    pages do not print, changed source bytes. ``pathway`` names the caller.
+    Unattended pathways (the default) fail closed; only ``pathway="reviewed"``
+    accepts ``validation_overrides`` (named checks), and each is recorded.
     """
     _require_schema(conn)
     if not promoted_by.strip() or not reason.strip():
@@ -1284,9 +1294,15 @@ def promote(
         )
     if current_run_id == run_id:
         raise ProvenanceError(f"run {run_id} is already active")
+    validation = None
+    if target_kind in ("tariff_version", RIDER_TARGET):
+        from duke_rates.historical.ncuc.ingestion_validation import enforce
+
+        validation = enforce(conn, run_id, pathway=pathway, requested_by=promoted_by, reason=reason,
+                             overrides=validation_overrides, dry_run=dry_run)
     diff = compare_run(conn, run_id)
     if dry_run:
-        return {"dry_run": True, "diff": diff}
+        return {"dry_run": True, "diff": diff} | ({"validation": validation} if validation else {})
 
     operation = uuid.uuid4().hex
     with (
@@ -1316,6 +1332,8 @@ def promote(
                 operation,
                 supersede_protected_ids,
             )
+    if validation is not None:
+        result["validation"] = {k: validation.get(k) for k in ("validation_id", "verdict", "failed", "overrides")}
     return result
 
 

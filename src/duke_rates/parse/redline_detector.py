@@ -396,9 +396,11 @@ def evaluate_redline_page(page, page_number: int) -> PageRedlineEvidence:
             ev.strike_annotations += 1
             ev.strike_regions.append(tuple(annot.rect))
     ev.glued_text = [m.group(0) for m in _REDLINE_TEXT_RE.finditer(page.get_text("text"))]
-    if ev.struck_spans or ev.inserted_spans or ev.char_flag_strikes or ev.strike_annotations:
+    # An underline-band bar under black text alone is a table or box border as often as an insertion
+    # (D3 source audit: a DSM workpaper page, one blue box edge under a heading). It needs coloured text.
+    if ev.struck_spans or ev.char_flag_strikes or ev.strike_annotations or (ev.inserted_spans and ev.colored_spans):
         ev.verdict = "redline"
-    elif ev.colored_spans or ev.glued_text:
+    elif ev.colored_spans or ev.glued_text or ev.inserted_spans:
         ev.verdict = "suspect"
     return ev
 

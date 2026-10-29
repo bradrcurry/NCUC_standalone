@@ -10,6 +10,8 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+from duke_rates.historical.ncuc.ingestion_validation import version_source_redline
+
 
 @dataclass
 class PromotionProposal:
@@ -131,6 +133,14 @@ def promote_llm_charge_proposals(
                         """,
                         (int(proposal["id"]),),
                     )
+                continue
+            redline = version_source_redline(conn, proposal["version_id"])
+            if redline:  # Phase 2E D3 shared source validation: no charges from struck pages
+                skipped.append({"proposal_id": int(proposal["id"]), "reason": "source_redline",
+                                "failed": sorted(redline["failed"])})
+                if execute:
+                    conn.execute("UPDATE llm_rate_charge_promotion_proposals SET promotion_status = "
+                                 "'skipped_source_redline' WHERE id = ?", (int(proposal["id"]),))
                 continue
             if not execute:
                 promoted.append({"proposal_id": int(proposal["id"]), "mode": "dry_run"})
